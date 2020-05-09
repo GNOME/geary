@@ -58,7 +58,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
-        ExpectedCall update_call = this.store.expect_call("update_contacts");
+        ValaUnit.ExpectedCall update_call = this.store.expect_call("update_contacts");
         this.email.set_receivers(
             new RFC822.MailboxAddresses.single(this.test_address), null, null
         );
@@ -70,13 +70,13 @@ class Geary.ContactHarvesterImplTest : TestCase {
         this.store.assert_expectations();
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
-        assert_int(1, contacts.size, "contacts length");
+        assert_collection(contacts).size(1);
         Contact? created = Collection.first(contacts) as Contact;
         assert_non_null(created, "contacts contents");
 
-        assert_string("Test", created.real_name);
-        assert_string("test@example.com", created.email);
-        assert_string("test@example.com", created.normalized_email);
+        assert_equal(created.real_name, "Test");
+        assert_equal(created.email, "test@example.com");
+        assert_equal(created.normalized_email, "test@example.com");
     }
 
     public void blacklisted_folder_type() throws GLib.Error {
@@ -103,7 +103,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
-        ExpectedCall update_call = this.store.expect_call("update_contacts");
+        ValaUnit.ExpectedCall update_call = this.store.expect_call("update_contacts");
         this.email.set_receivers(
             new RFC822.MailboxAddresses.single(this.test_address), null, null
         );
@@ -116,9 +116,9 @@ class Geary.ContactHarvesterImplTest : TestCase {
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
         Contact? created = Collection.first(contacts) as Contact;
-        assert_int(
-            Contact.Importance.SEEN,
+        assert_equal<int?>(
             created.highest_importance,
+            Contact.Importance.SEEN,
             "call contact importance"
         );
     }
@@ -130,7 +130,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
-        ExpectedCall update_call = this.store.expect_call("update_contacts");
+        ValaUnit.ExpectedCall update_call = this.store.expect_call("update_contacts");
         this.email.set_receivers(
             new RFC822.MailboxAddresses.single(this.test_address), null, null
         );
@@ -143,9 +143,9 @@ class Geary.ContactHarvesterImplTest : TestCase {
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
         Contact? created = Collection.first(contacts) as Contact;
-        assert_int(
-            Contact.Importance.SENT_TO,
+        assert_equal<int?>(
             created.highest_importance,
+            Contact.Importance.SENT_TO,
             "call contact importance"
         );
     }
@@ -157,7 +157,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
             this.senders
         );
         this.store.expect_call("get_by_rfc822");
-        ExpectedCall update_call = this.store.expect_call("update_contacts");
+        ValaUnit.ExpectedCall update_call = this.store.expect_call("update_contacts");
         this.email.set_receivers(
             new RFC822.MailboxAddresses.single(this.sender_address), null, null
         );
@@ -170,9 +170,9 @@ class Geary.ContactHarvesterImplTest : TestCase {
 
         Gee.Collection<Contact> contacts = update_call.called_arg<Gee.Collection<Contact>>(0);
         Contact? created = Collection.first(contacts) as Contact;
-        assert_int(
-            Contact.Importance.RECEIVED_FROM,
+        assert_equal<int?>(
             created.highest_importance,
+            Contact.Importance.RECEIVED_FROM,
             "call contact importance"
         );
     }

@@ -26,19 +26,17 @@ class Geary.ImapDB.AttachmentTest : TestCase {
         Attachment test = new Attachment.from_part(
             1, new Geary.RFC822.Part(part)
         );
-        assert_string(
-            Geary.Mime.ContentType.ATTACHMENT_DEFAULT.to_string(),
-            test.content_type.to_string()
+        assert_equal(
+            test.content_type.to_string(),
+            Geary.Mime.ContentType.ATTACHMENT_DEFAULT.to_string()
         );
-        assert_null_string(test.content_id, "content_id");
-        assert_null_string(test.content_description, "content_description");
-        assert_int(
-            Geary.Mime.DispositionType.UNSPECIFIED,
-            test.content_disposition.disposition_type,
-            "content disposition type"
+        assert_null(test.content_id, "content_id");
+        assert_null(test.content_description, "content_description");
+        assert_equal<Geary.Mime.DispositionType?>(
+            test.content_disposition.disposition_type, UNSPECIFIED
         );
         assert_false(test.has_content_filename, "has_content_filename");
-        assert_null_string(test.content_filename, "content_filename");
+        assert_null(test.content_filename, "content_filename");
     }
 
     public void new_from_complete_mime_part() throws Error {
@@ -61,15 +59,14 @@ class Geary.ImapDB.AttachmentTest : TestCase {
             1, new Geary.RFC822.Part(part)
         );
 
-        assert_string(TYPE, test.content_type.to_string());
-        assert_string(ID, test.content_id);
-        assert_string(DESC, test.content_description);
-        assert_int(
-            Geary.Mime.DispositionType.ATTACHMENT,
-            test.content_disposition.disposition_type
+        assert_equal(test.content_type.to_string(), TYPE);
+        assert_equal(test.content_id, ID);
+        assert_equal(test.content_description, DESC);
+        assert_equal<Geary.Mime.DispositionType?>(
+            test.content_disposition.disposition_type, ATTACHMENT
         );
         assert_true(test.has_content_filename, "has_content_filename");
-        assert_string(test.content_filename, NAME, "content_filename");
+        assert_equal(NAME, test.content_filename, "content_filename");
     }
 
     public void new_from_inline_mime_part() throws Error {
@@ -85,9 +82,8 @@ class Geary.ImapDB.AttachmentTest : TestCase {
             1, new Geary.RFC822.Part(part)
         );
 
-        assert_int(
-            Geary.Mime.DispositionType.INLINE,
-            test.content_disposition.disposition_type
+        assert_equal<Geary.Mime.DispositionType?>(
+            test.content_disposition.disposition_type, INLINE
         );
     }
 
@@ -169,29 +165,29 @@ CREATE TABLE MessageAttachmentTable (
             null
         );
 
-        assert_int(1, attachments.size, "No attachment provided");
+        assert_equal<int?>(attachments.size, 1, "No attachment provided");
 
         Geary.Attachment attachment = attachments[0];
         assert_non_null(attachment.file, "Attachment file");
-        assert_int(
+        assert_equal<int64?>(
+            attachment.filesize,
             DECODED_BODY.data.length,
-            (int) attachment.filesize,
             "Attachment file size"
         );
 
         uint8[] buf = new uint8[4096];
         size_t len = 0;
         attachments[0].file.read().read_all(buf, out len);
-        assert_string(DECODED_BODY, (string) buf[0:len]);
+        assert_equal((string) buf[0:len], DECODED_BODY);
 
         Geary.Db.Result result = this.db.query(
             "SELECT * FROM MessageAttachmentTable;"
         );
         assert_false(result.finished, "Row not inserted");
-        assert_int(1, result.int_for("message_id"), "Row message id");
-        assert_int(
-            DECODED_BODY.data.length,
+        assert_equal<int64?>(result.int_for("message_id"), 1, "Row message id");
+        assert_equal<int64?>(
             result.int_for("filesize"),
+            DECODED_BODY.data.length,
             "Row file size"
         );
         assert_false(result.next(), "Multiple rows inserted");
@@ -201,8 +197,7 @@ CREATE TABLE MessageAttachmentTable (
         const string TYPE = "text/plain";
         const string ID = "test-id";
         const string DESCRIPTION = "test description";
-        const Geary.Mime.DispositionType DISPOSITION_TYPE =
-            Geary.Mime.DispositionType.INLINE;
+        const Geary.Mime.DispositionType DISPOSITION_TYPE = INLINE;
         const string FILENAME = "test.txt";
 
         GMime.Part part = new_part(TYPE, ENCODED_BODY.data);
@@ -224,38 +219,38 @@ CREATE TABLE MessageAttachmentTable (
             null
         );
 
-        assert_int(1, attachments.size, "No attachment provided");
+        assert_equal<int?>(attachments.size, 1, "No attachment provided");
 
         Geary.Attachment attachment = attachments[0];
-        assert_string(TYPE, attachment.content_type.to_string());
-        assert_string(ID, attachment.content_id);
-        assert_string(DESCRIPTION, attachment.content_description);
-        assert_string(FILENAME, attachment.content_filename);
-        assert_int(
-            DISPOSITION_TYPE,
+        assert_equal(attachment.content_type.to_string(), TYPE);
+        assert_equal(attachment.content_id, ID);
+        assert_equal(attachment.content_description, DESCRIPTION);
+        assert_equal(attachment.content_filename, FILENAME);
+        assert_equal<Geary.Mime.DispositionType?>(
             attachment.content_disposition.disposition_type,
+            DISPOSITION_TYPE,
             "Attachment disposition type"
         );
 
         uint8[] buf = new uint8[4096];
         size_t len = 0;
         attachment.file.read().read_all(buf, out len);
-        assert_string(DECODED_BODY, (string) buf[0:len]);
+        assert_equal((string) buf[0:len], DECODED_BODY);
 
         Geary.Db.Result result = this.db.query(
             "SELECT * FROM MessageAttachmentTable;"
         );
         assert_false(result.finished, "Row not inserted");
-        assert_int(1, result.int_for("message_id"), "Row message id");
-        assert_string(TYPE, result.string_for("mime_type"));
-        assert_string(ID, result.string_for("content_id"));
-        assert_string(DESCRIPTION, result.string_for("description"));
-        assert_int(
+        assert_equal<int64?>(result.int_for("message_id"), 1, "Row message id");
+        assert_equal(result.string_for("mime_type"), TYPE);
+        assert_equal(result.string_for("content_id"), ID);
+        assert_equal(result.string_for("description"), DESCRIPTION);
+        assert_equal<Geary.Mime.DispositionType?>(
+            (Geary.Mime.DispositionType) result.int_for("disposition"),
             DISPOSITION_TYPE,
-            result.int_for("disposition"),
             "Row disposition type"
         );
-        assert_string(FILENAME, result.string_for("filename"));
+        assert_equal(result.string_for("filename"), FILENAME);
         assert_false(result.next(), "Multiple rows inserted");
     }
 
@@ -285,12 +280,12 @@ abriquent pour te la vendre une =C3=A2me vulgaire.""";
             null
         );
 
-        assert_int(1, attachments.size, "No attachment provided");
+        assert_equal<int?>(attachments.size, 1, "No attachment provided");
 
         uint8[] buf = new uint8[4096];
         size_t len = 0;
         attachments[0].file.read().read_all(buf, out len);
-        assert_string(QP_DECODED, (string) buf[0:len]);
+        assert_equal((string) buf[0:len], QP_DECODED);
     }
 
     public void list_attachments() throws Error {
@@ -310,8 +305,8 @@ VALUES (2, 'text/plain');
             null
         );
 
-        assert_int(1, loaded.size, "Expected one row loaded");
-        assert_int(1, (int) loaded[0].message_id, "Unexpected message id");
+        assert_equal<int?>(loaded.size, 1, "Expected one row loaded");
+        assert_equal<int64?>(loaded[0].message_id, 1, "Unexpected message id");
     }
 
     public void delete_attachments() throws Error {
@@ -343,7 +338,9 @@ VALUES (2, 'text/plain');
             "SELECT * FROM MessageAttachmentTable;"
         );
         assert_false(result.finished);
-        assert_int(2, result.int_for("message_id"), "Unexpected message_id");
+        assert_equal<int64?>(
+            result.int_for("message_id"), 2, "Unexpected message_id"
+        );
         assert_false(result.next(), "Attachment not deleted from db");
 
         assert_false(attachments[0].file.query_exists(null),

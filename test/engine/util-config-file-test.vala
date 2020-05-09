@@ -42,8 +42,12 @@ class Geary.ConfigFileTest : TestCase {
 
     public void test_string() throws Error {
         this.test_group.set_string(TEST_KEY, "a string");
-        assert_string("a string", this.test_group.get_string(TEST_KEY));
-        assert_string("default", this.test_group.get_string(TEST_KEY_MISSING, "default"));
+        assert_equal(
+            this.test_group.get_string(TEST_KEY), "a string"
+        );
+        assert_equal(
+            this.test_group.get_string(TEST_KEY_MISSING, "default"), "default"
+        );
     }
 
     public void test_string_fallback() throws Error {
@@ -51,7 +55,7 @@ class Geary.ConfigFileTest : TestCase {
         fallback.set_string("fallback-test-key", "a string");
 
         this.test_group.set_fallback("fallback", "fallback-");
-        assert_string("a string", this.test_group.get_string(TEST_KEY));
+        assert_equal(this.test_group.get_string(TEST_KEY), "a string");
     }
 
     public void test_string_list() throws Error {
@@ -60,12 +64,12 @@ class Geary.ConfigFileTest : TestCase {
         );
 
         Gee.List<string> saved = this.test_group.get_string_list(TEST_KEY);
-        assert_int(2, saved.size, "Saved string list");
-        assert_string("a", saved[0]);
-        assert_string("b", saved[1]);
+        assert_collection(
+            saved, "Saved string list"
+        ).first_is("a").at_index_is(1, "b");
 
         Gee.List<string> def = this.test_group.get_string_list(TEST_KEY_MISSING);
-        assert_int(0, def.size, "Default string list");
+        assert_collection(def, "Default string list").is_empty();
     }
 
     public void test_bool() throws Error {
@@ -77,14 +81,14 @@ class Geary.ConfigFileTest : TestCase {
 
     public void test_int() throws Error {
         this.test_group.set_int(TEST_KEY, 42);
-        assert_int(42, this.test_group.get_int(TEST_KEY));
-        assert_int(42, this.test_group.get_int(TEST_KEY_MISSING, 42));
+        assert_equal<int?>(this.test_group.get_int(TEST_KEY), 42);
+        assert_equal<int?>(this.test_group.get_int(TEST_KEY_MISSING, 42), 42);
     }
 
     public void test_uint16() throws Error {
         this.test_group.set_uint16(TEST_KEY, 42);
-        assert_int(42, this.test_group.get_uint16(TEST_KEY));
-        assert_int(42, this.test_group.get_uint16(TEST_KEY_MISSING, 42));
+        assert_equal<int?>(this.test_group.get_uint16(TEST_KEY), 42);
+        assert_equal<int?>(this.test_group.get_uint16(TEST_KEY_MISSING, 42), 42);
     }
 
     public void test_has_key() throws Error {

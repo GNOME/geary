@@ -36,13 +36,13 @@ class Application.ClientTest : TestCase {
         int status;
         this.test_article.local_command_line(ref unowned_args, out status);
 
-        assert_string(
-            _INSTALL_PREFIX + "/share/geary",
-            this.test_article.get_resource_directory().get_path()
+        assert_equal(
+            this.test_article.get_resource_directory().get_path(),
+            _INSTALL_PREFIX + "/share/geary"
         );
-        assert_string(
-            _INSTALL_PREFIX + "/share/applications",
-            this.test_article.get_desktop_directory().get_path()
+        assert_equal(
+            this.test_article.get_desktop_directory().get_path(),
+            _INSTALL_PREFIX + "/share/applications"
         );
     }
 

@@ -56,7 +56,7 @@ public class Composer.WebViewTest : ClientWebViewTestCase<Composer.WebView> {
         load_body_fixture(BODY);
         this.test_view.get_html.begin(this.async_completion);
         string html = this.test_view.get_html.end(async_result());
-        assert_string(PageStateTest.CLEAN_BODY_TEMPLATE.printf(BODY), html);
+        assert_equal(html, PageStateTest.CLEAN_BODY_TEMPLATE.printf(BODY));
     }
 
     public void get_html_for_draft() throws GLib.Error {
@@ -64,7 +64,7 @@ public class Composer.WebViewTest : ClientWebViewTestCase<Composer.WebView> {
         load_body_fixture(BODY);
         this.test_view.get_html_for_draft.begin(this.async_completion);
         string html = this.test_view.get_html.end(async_result());
-        assert_string(PageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY), html);
+        assert_equal(html, PageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY));
     }
 
     public void get_text() throws Error {

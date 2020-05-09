@@ -22,32 +22,32 @@ public class Util.Cache.Test : TestCase {
         Lru<string> test_article = new Lru<string>(2);
 
         assert_true(test_article.is_empty);
-        assert_uint(0, test_article.size);
+        assert_equal(test_article.size, 0);
 
         assert_true(test_article.get_entry(A) == null);
         test_article.set_entry(A, A);
-        assert_string(A, test_article.get_entry(A));
+        assert_equal(test_article.get_entry(A), A);
 
         assert_false(test_article.is_empty);
-        assert_uint(1, test_article.size);
+        assert_equal<uint?>(test_article.size, 1);
 
         test_article.set_entry(B, B);
-        assert_string(B, test_article.get_entry(B));
-        assert_uint(2, test_article.size);
+        assert_equal(test_article.get_entry(B), B);
+        assert_equal<uint?>(test_article.size, 2);
 
         test_article.set_entry(C, C);
-        assert_string(C, test_article.get_entry(C));
-        assert_uint(2, test_article.size);
+        assert_equal(test_article.get_entry(C), C);
+        assert_equal<uint?>(test_article.size, 2);
         assert_true(test_article.get_entry(A) == null);
 
         test_article.set_entry(D, D);
-        assert_string(D, test_article.get_entry(D));
-        assert_uint(2, test_article.size);
+        assert_equal(test_article.get_entry(D), D);
+        assert_equal<uint?>(test_article.size, 2);
         assert_true(test_article.get_entry(B) == null);
 
         test_article.clear();
         assert_true(test_article.is_empty);
-        assert_uint(0, test_article.size);
+        assert_equal<uint?>(test_article.size, 0);
     }
 
     public void lru_eviction() throws GLib.Error {
@@ -63,8 +63,8 @@ public class Util.Cache.Test : TestCase {
         test_article.get_entry(A);
         test_article.set_entry(C, C);
 
-        assert_string(C, test_article.get_entry(C));
-        assert_string(A, test_article.get_entry(A));
+        assert_equal(test_article.get_entry(C), C);
+        assert_equal(test_article.get_entry(A), A);
         assert_true(test_article.get_entry(B) == null);
     }
 

@@ -33,64 +33,64 @@ int main(string[] args) {
 
     TestSuite engine = new TestSuite("engine");
 
-    engine.add_suite(new Geary.AccountInformationTest().get_suite());
-    engine.add_suite(new Geary.AttachmentTest().get_suite());
-    engine.add_suite(new Geary.ContactHarvesterImplTest().get_suite());
-    engine.add_suite(new Geary.EngineTest().get_suite());
-    engine.add_suite(new Geary.FolderPathTest().get_suite());
-    engine.add_suite(new Geary.IdleManagerTest().get_suite());
-    engine.add_suite(new Geary.TimeoutManagerTest().get_suite());
-    engine.add_suite(new Geary.TlsNegotiationMethodTest().get_suite());
-    engine.add_suite(new Geary.App.ConversationTest().get_suite());
-    engine.add_suite(new Geary.App.ConversationSetTest().get_suite());
+    engine.add_suite(new Geary.AccountInformationTest().suite);
+    engine.add_suite(new Geary.AttachmentTest().suite);
+    engine.add_suite(new Geary.ContactHarvesterImplTest().suite);
+    engine.add_suite(new Geary.EngineTest().suite);
+    engine.add_suite(new Geary.FolderPathTest().suite);
+    engine.add_suite(new Geary.IdleManagerTest().suite);
+    engine.add_suite(new Geary.TimeoutManagerTest().suite);
+    engine.add_suite(new Geary.TlsNegotiationMethodTest().suite);
+    engine.add_suite(new Geary.App.ConversationTest().suite);
+    engine.add_suite(new Geary.App.ConversationSetTest().suite);
     // Depends on ConversationTest and ConversationSetTest passing
-    engine.add_suite(new Geary.App.ConversationMonitorTest().get_suite());
-    engine.add_suite(new Geary.Ascii.Test().get_suite());
-    engine.add_suite(new Geary.ConfigFileTest().get_suite());
-    engine.add_suite(new Geary.Db.DatabaseTest().get_suite());
-    engine.add_suite(new Geary.Db.VersionedDatabaseTest().get_suite());
-    engine.add_suite(new Geary.HTML.UtilTest().get_suite());
+    engine.add_suite(new Geary.App.ConversationMonitorTest().suite);
+    engine.add_suite(new Geary.Ascii.Test().suite);
+    engine.add_suite(new Geary.ConfigFileTest().suite);
+    engine.add_suite(new Geary.Db.DatabaseTest().suite);
+    engine.add_suite(new Geary.Db.VersionedDatabaseTest().suite);
+    engine.add_suite(new Geary.HTML.UtilTest().suite);
 
     // Other IMAP tests rely on these working, so test them first
-    engine.add_suite(new Geary.Imap.DataFormatTest().get_suite());
+    engine.add_suite(new Geary.Imap.DataFormatTest().suite);
 
-    engine.add_suite(new Geary.Imap.CreateCommandTest().get_suite());
-    engine.add_suite(new Geary.Imap.FetchCommandTest().get_suite());
-    engine.add_suite(new Geary.Imap.ListParameterTest().get_suite());
-    engine.add_suite(new Geary.Imap.MailboxSpecifierTest().get_suite());
-    engine.add_suite(new Geary.Imap.NamespaceResponseTest().get_suite());
+    engine.add_suite(new Geary.Imap.CreateCommandTest().suite);
+    engine.add_suite(new Geary.Imap.FetchCommandTest().suite);
+    engine.add_suite(new Geary.Imap.ListParameterTest().suite);
+    engine.add_suite(new Geary.Imap.MailboxSpecifierTest().suite);
+    engine.add_suite(new Geary.Imap.NamespaceResponseTest().suite);
 
     // Depends on IMAP commands working
-    engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
-    engine.add_suite(new Geary.Imap.ClientConnectionTest().get_suite());
-    engine.add_suite(new Geary.Imap.ClientSessionTest().get_suite());
+    engine.add_suite(new Geary.Imap.DeserializerTest().suite);
+    engine.add_suite(new Geary.Imap.ClientConnectionTest().suite);
+    engine.add_suite(new Geary.Imap.ClientSessionTest().suite);
 
-    engine.add_suite(new Geary.ImapDB.AccountTest().get_suite());
-    engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
-    engine.add_suite(new Geary.ImapDB.AttachmentIoTest().get_suite());
-    engine.add_suite(new Geary.ImapDB.DatabaseTest().get_suite());
-    engine.add_suite(new Geary.ImapDB.EmailIdentifierTest().get_suite());
-    engine.add_suite(new Geary.ImapDB.FolderTest().get_suite());
+    engine.add_suite(new Geary.ImapDB.AccountTest().suite);
+    engine.add_suite(new Geary.ImapDB.AttachmentTest().suite);
+    engine.add_suite(new Geary.ImapDB.AttachmentIoTest().suite);
+    engine.add_suite(new Geary.ImapDB.DatabaseTest().suite);
+    engine.add_suite(new Geary.ImapDB.EmailIdentifierTest().suite);
+    engine.add_suite(new Geary.ImapDB.FolderTest().suite);
 
-    engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().get_suite());
-    engine.add_suite(new Geary.ImapEngine.GenericAccountTest().get_suite());
+    engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().suite);
+    engine.add_suite(new Geary.ImapEngine.GenericAccountTest().suite);
 
     // Depends on ImapDb.Database working correctly
-    engine.add_suite(new Geary.ContactStoreImplTest().get_suite());
+    engine.add_suite(new Geary.ContactStoreImplTest().suite);
 
-    engine.add_suite(new Geary.Inet.Test().get_suite());
-    engine.add_suite(new Geary.Mime.ContentTypeTest().get_suite());
-    engine.add_suite(new Geary.Outbox.EmailIdentifierTest().get_suite());
-    engine.add_suite(new Geary.RFC822.MailboxAddressTest().get_suite());
-    engine.add_suite(new Geary.RFC822.MailboxAddressesTest().get_suite());
-    engine.add_suite(new Geary.RFC822.MessageDataTest().get_suite());
-    engine.add_suite(new Geary.RFC822.PartTest().get_suite());
-    engine.add_suite(new Geary.RFC822.Utils.Test().get_suite());
+    engine.add_suite(new Geary.Inet.Test().suite);
+    engine.add_suite(new Geary.Mime.ContentTypeTest().suite);
+    engine.add_suite(new Geary.Outbox.EmailIdentifierTest().suite);
+    engine.add_suite(new Geary.RFC822.MailboxAddressTest().suite);
+    engine.add_suite(new Geary.RFC822.MailboxAddressesTest().suite);
+    engine.add_suite(new Geary.RFC822.MessageDataTest().suite);
+    engine.add_suite(new Geary.RFC822.PartTest().suite);
+    engine.add_suite(new Geary.RFC822.Utils.Test().suite);
     // Message requires all of the rest of the package working, so put
     // last
-    engine.add_suite(new Geary.RFC822.MessageTest().get_suite());
-    engine.add_suite(new Geary.String.Test().get_suite());
-    engine.add_suite(new Geary.ComposedEmailTest().get_suite());
+    engine.add_suite(new Geary.RFC822.MessageTest().suite);
+    engine.add_suite(new Geary.String.Test().suite);
+    engine.add_suite(new Geary.ComposedEmailTest().suite);
 
     /*
      * Run the tests

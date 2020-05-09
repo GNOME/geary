@@ -65,9 +65,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(message.get(1) is UnquotedStringParameter, "Not parsed as atom");
-        assert_string(bytes, message.get(1).to_string());
+        assert_equal(message.get(1).to_string(), bytes);
     }
 
     public void parse_quoted() throws Error {
@@ -79,9 +79,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(message.get(1) is QuotedStringParameter, "Not parsed as quoted");
-        assert_string(bytes, message.get(1).to_string());
+        assert_equal(message.get(1).to_string(), bytes);
     }
 
     public void parse_number() throws Error {
@@ -93,9 +93,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(message.get(1) is NumberParameter, "Not parsed as number");
-        assert_string(bytes, message.get(1).to_string());
+        assert_equal(message.get(1).to_string(), bytes);
     }
 
     public void parse_list() throws Error {
@@ -107,9 +107,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(message.get(1) is ListParameter, "Not parsed as list");
-        assert_string(bytes, message.get(1).to_string());
+        assert_equal(message.get(1).to_string(), bytes);
     }
 
     public void parse_response_code() throws Error {
@@ -121,9 +121,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(message.get(1) is ResponseCode, "Not parsed as response code");
-        assert_string(bytes, message.get(1).to_string());
+        assert_equal(message.get(1).to_string(), bytes);
     }
 
     public void parse_bad_list() throws Error {
@@ -278,7 +278,7 @@ class Geary.Imap.DeserializerTest : TestCase {
         assert(this.deser.is_halted());
     }
 
-    protected async RootParameters? process(Expect expected) {
+    protected async RootParameters? process(Expect expected) throws GLib.Error {
         RootParameters? message = null;
         bool eos = false;
         bool deserialize_failure = false;
@@ -321,6 +321,7 @@ class Geary.Imap.DeserializerTest : TestCase {
 
         default:
             assert_not_reached();
+            break;
         }
 
         return message;

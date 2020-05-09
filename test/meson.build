@@ -1,8 +1,9 @@
 subdir('data')
 
 geary_test_engine_sources = [
-  'test-engine.vala',
+  'test-case.vala',
   'test-server.vala',
+  'test-engine.vala',
 
   # These should be included in the test lib sources, but we can't
   # since that would make the test lib depend on geary-engine.vapi,
@@ -67,6 +68,7 @@ geary_test_engine_sources = [
 ]
 
 geary_test_client_sources = [
+  'test-case.vala',
   'test-client.vala',
 
   # These should be included in the test lib sources, but we can't
@@ -98,6 +100,7 @@ geary_test_client_sources = [
 ]
 
 geary_test_integration_sources = [
+  'test-case.vala',
   'test-integration.vala',
 
   'integration/imap/client-session.vala',

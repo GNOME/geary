@@ -5,10 +5,11 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-internal class Geary.ContactStoreMock : ContactStore, MockObject, GLib.Object {
+internal class Geary.ContactStoreMock : GLib.Object,
+    ContactStore, ValaUnit.TestAssertions, ValaUnit.MockObject {
 
-    protected Gee.Queue<ExpectedCall> expected {
-        get; set; default = new Gee.LinkedList<ExpectedCall>();
+    protected Gee.Queue<ValaUnit.ExpectedCall> expected {
+        get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
 
     public async Contact? get_by_rfc822(Geary.RFC822.MailboxAddress address,

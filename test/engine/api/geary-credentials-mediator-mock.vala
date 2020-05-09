@@ -6,11 +6,14 @@
  */
 
 public class Geary.MockCredentialsMediator :
-    GLib.Object, CredentialsMediator, MockObject {
+    GLib.Object,
+    CredentialsMediator,
+    ValaUnit.TestAssertions,
+    ValaUnit.MockObject {
 
 
-    protected Gee.Queue<ExpectedCall> expected {
-        get; set; default = new Gee.LinkedList<ExpectedCall>();
+    protected Gee.Queue<ValaUnit.ExpectedCall> expected {
+        get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
 
     public virtual async bool load_token(AccountInformation account,

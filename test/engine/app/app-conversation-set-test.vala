@@ -469,11 +469,11 @@ class Geary.App.ConversationSetTest : TestCase {
             this.base_folder.path, ids, removed, trimmed
         );
 
-        assert_int(0, this.test.size, "ConversationSet size");
-        assert_int(0, this.test.get_email_count(), "ConversationSet email size");
+        assert_equal(this.test.size, 0, "ConversationSet size");
+        assert_equal(this.test.get_email_count(), 0, "ConversationSet email size");
 
-        assert_int(1, removed.size, "Removed size");
-        assert_int(0, trimmed.size, "Trimmed size");
+        assert_collection(removed, "Removed size").size(1);
+        assert_equal(trimmed.size, 0, "Trimmed size");
     }
 
     private Email setup_email(int id, Email? references = null) {

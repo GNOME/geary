@@ -31,7 +31,7 @@ class Geary.TimeoutManagerTest : TestCase {
 
         private void do_stuff(string arg) {
             // This should never get called
-            assert(false);
+            GLib.assert(false);
         }
 
     }
@@ -87,7 +87,7 @@ class Geary.TimeoutManagerTest : TestCase {
             this.main_loop.iteration(true);
         }
 
-        assert_double(timer.elapsed(), 1.0, SECONDS_EPSILON);
+        assert_within(timer.elapsed(), 1.0, SECONDS_EPSILON);
     }
 
     public void milliseconds() throws Error {
@@ -101,7 +101,7 @@ class Geary.TimeoutManagerTest : TestCase {
             this.main_loop.iteration(true);
         }
 
-        assert_double(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
+        assert_within(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
     }
 
     public void repeat_forever() throws Error {
@@ -118,7 +118,7 @@ class Geary.TimeoutManagerTest : TestCase {
         }
         timer.stop();
 
-        assert_double(timer.elapsed(), 2.0, SECONDS_EPSILON * 2);
+        assert_within(timer.elapsed(), 2.0, SECONDS_EPSILON * 2);
     }
 
 }

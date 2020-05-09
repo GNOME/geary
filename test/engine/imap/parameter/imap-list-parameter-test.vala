@@ -23,8 +23,8 @@ class Geary.Imap.ListParameterTest : TestCase {
         parent_1.add(child);
         parent_2.add(child);
 
-        assert_int(1, parent_1.size, "Parent 1 does not contain child");
-        assert_int(1, parent_2.size, "Parent 2 does not contain child");
+        assert_equal<int?>(parent_1.size, 1, "Parent 1 does not contain child");
+        assert_equal<int?>(parent_2.size, 1, "Parent 2 does not contain child");
     }
 
 }

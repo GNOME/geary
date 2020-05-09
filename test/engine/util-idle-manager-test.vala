@@ -26,7 +26,8 @@ class Geary.IdleManagerTest : TestCase {
         }
 
         private void do_stuff(string arg) {
-            assert(false);
+            // This should never get called
+            GLib.assert(false);
         }
 
     }

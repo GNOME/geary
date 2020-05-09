@@ -80,8 +80,8 @@ class Accounts.ManagerTest : TestCase {
         );
         this.test.create_account.end(async_result());
 
-        assert_int(1, this.test.size, "Account manager size");
-        assert_equal(account, this.test.get_account(TEST_ID), "Is not contained");
+        assert_equal<int?>(this.test.size, 1, "Account manager size");
+        assert_equal(this.test.get_account(TEST_ID), account, "Is not contained");
         assert_true(was_added, "Was not added");
         assert_true(was_enabled, "Was not enabled");
     }

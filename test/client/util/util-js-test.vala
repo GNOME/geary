@@ -12,7 +12,7 @@ public class Util.JS.Test : TestCase {
         add_test("escape_string", escape_string);
     }
 
-    public void escape_string() throws Error {
+    public void escape_string() throws GLib.Error {
         assert(Util.JS.escape_string("\n") == """\n""");
         assert(Util.JS.escape_string("\r") == """\r""");
         assert(Util.JS.escape_string("\t") == """\t""");

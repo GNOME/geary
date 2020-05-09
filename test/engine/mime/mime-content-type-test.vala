@@ -17,20 +17,20 @@ class Geary.Mime.ContentTypeTest : TestCase {
     }
 
     public void static_defaults() throws Error {
-        assert_string(
-            "text/plain; charset=us-ascii",
-            ContentType.DISPLAY_DEFAULT.to_string()
+        assert_equal(
+            ContentType.DISPLAY_DEFAULT.to_string(),
+            "text/plain; charset=us-ascii"
         );
-        assert_string(
-            "application/octet-stream",
-            ContentType.ATTACHMENT_DEFAULT.to_string()
+        assert_equal(
+            ContentType.ATTACHMENT_DEFAULT.to_string(),
+            "application/octet-stream"
         );
     }
 
     public void parse() throws GLib.Error {
         var test_article = ContentType.parse("text/plain");
-        assert_string("text", test_article.media_type);
-        assert_string("plain", test_article.media_subtype);
+        assert_equal(test_article.media_type, "text");
+        assert_equal(test_article.media_subtype, "plain");
 
         try {
             ContentType.parse("");

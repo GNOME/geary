@@ -83,10 +83,10 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         Contact? existing = test_article.get_by_rfc822.end(async_result());
         assert_non_null(existing, "Existing contact");
-        assert_string("Test@example.com", existing.email, "Existing email");
-        assert_string("test@example.com", existing.normalized_email, "Existing normalized_email");
-        assert_string("Test Name", existing.real_name, "Existing real_name");
-        assert_int(50, existing.highest_importance, "Existing highest_importance");
+        assert_equal(existing.email, "Test@example.com", "Existing email");
+        assert_equal(existing.normalized_email, "test@example.com", "Existing normalized_email");
+        assert_equal(existing.real_name, "Test Name", "Existing real_name");
+        assert_equal<int?>(existing.highest_importance, 50, "Existing highest_importance");
         assert_false(existing.flags.always_load_remote_images(), "Existing flags");
 
         test_article.get_by_rfc822.begin(
@@ -109,7 +109,7 @@ class Geary.ContactStoreImplTest : TestCase {
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
         );
-        assert_int(0, results.size);
+        assert_equal(results.size, 0);
     }
 
     public void search_email_match() throws GLib.Error {
@@ -123,13 +123,13 @@ class Geary.ContactStoreImplTest : TestCase {
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
         );
-        assert_int(1, results.size, "results.size");
+        assert_equal<int?>(results.size, 1, "results.size");
 
         Contact search_hit = Collection.first(results);
-        assert_string("Test@example.com", search_hit.email, "Existing email");
-        assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
-        assert_string("Test Name", search_hit.real_name, "Existing real_name");
-        assert_int(50, search_hit.highest_importance, "Existing highest_importance");
+        assert_equal(search_hit.email, "Test@example.com", "Existing email");
+        assert_equal(search_hit.normalized_email, "test@example.com", "Existing normalized_email");
+        assert_equal(search_hit.real_name, "Test Name", "Existing real_name");
+        assert_equal<int?>(search_hit.highest_importance, 50, "Existing highest_importance");
         assert_false(search_hit.flags.always_load_remote_images(), "Existing flags");
     }
 
@@ -144,13 +144,13 @@ class Geary.ContactStoreImplTest : TestCase {
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
         );
-        assert_int(1, results.size, "results.size");
+        assert_equal<int?>(results.size, 1, "results.size");
 
         Contact search_hit = Collection.first(results);
-        assert_string("Test@example.com", search_hit.email, "Existing email");
-        assert_string("test@example.com", search_hit.normalized_email, "Existing normalized_email");
-        assert_string("Test Name", search_hit.real_name, "Existing real_name");
-        assert_int(50, search_hit.highest_importance, "Existing highest_importance");
+        assert_equal(search_hit.email, "Test@example.com", "Existing email");
+        assert_equal(search_hit.normalized_email, "test@example.com", "Existing normalized_email");
+        assert_equal(search_hit.real_name, "Test Name", "Existing real_name");
+        assert_equal<int?>(search_hit.highest_importance, 50, "Existing highest_importance");
         assert_false(search_hit.flags.always_load_remote_images(), "Existing flags");
     }
 
@@ -178,10 +178,10 @@ class Geary.ContactStoreImplTest : TestCase {
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
         );
-        assert_int(1, results.size, "results.size");
+        assert_equal<int?>(results.size, 1, "results.size");
 
         Contact search_hit = Collection.first(results);
-        assert_string("Germán", search_hit.real_name, "Existing real_name");
+        assert_equal(search_hit.real_name, "Germán", "Existing real_name");
     }
 
     public void search_utf8_multi_byte_names() throws GLib.Error {
@@ -209,10 +209,10 @@ class Geary.ContactStoreImplTest : TestCase {
         Gee.Collection<Contact> results = test_article.search.end(
             async_result()
         );
-        assert_int(1, results.size, "results.size");
+        assert_equal<int?>(results.size, 1, "results.size");
 
         Contact search_hit = Collection.first(results);
-        assert_string("年収1億円目指せ", search_hit.real_name, "Existing real_name");
+        assert_equal(search_hit.real_name, "年収1億円目指せ", "Existing real_name");
     }
 
     public void update_new_contact() throws GLib.Error {
@@ -237,10 +237,10 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         Contact? persisted = test_article.get_by_rfc822.end(async_result());
         assert_non_null(persisted, "persisted");
-        assert_string("New@example.com", persisted.email, "Persisted email");
-        assert_string("new@example.com", persisted.normalized_email, "Persisted normalized_email");
-        assert_string("New", persisted.real_name, "Persisted real_name");
-        assert_int(0, persisted.highest_importance, "Persisted highest_importance");
+        assert_equal(persisted.email, "New@example.com", "Persisted email");
+        assert_equal(persisted.normalized_email, "new@example.com", "Persisted normalized_email");
+        assert_equal(persisted.real_name, "New", "Persisted real_name");
+        assert_equal<int?>(persisted.highest_importance, 0, "Persisted highest_importance");
         assert_true(persisted.flags.always_load_remote_images(), "Persisted real_name");
     }
 
@@ -265,10 +265,10 @@ class Geary.ContactStoreImplTest : TestCase {
         );
         Contact? updated = test_article.get_by_rfc822.end(async_result());
         assert_non_null(updated, "updated");
-        assert_string("Test@example.com", updated.email, "Updated email");
-        assert_string("test@example.com", updated.normalized_email, "Updated normalized_email");
-        assert_string("Updated", updated.real_name, "Updated real_name");
-        assert_int(100, updated.highest_importance, "Updated highest_importance");
+        assert_equal(updated.email, "Test@example.com", "Updated email");
+        assert_equal(updated.normalized_email, "test@example.com", "Updated normalized_email");
+        assert_equal(updated.real_name, "Updated", "Updated real_name");
+        assert_equal<int?>(updated.highest_importance, 100, "Updated highest_importance");
         assert_true(updated.flags.always_load_remote_images(), "Added flags");
 
         // Now try removing the flag and ensure it sticks

@@ -13,24 +13,32 @@ public class Util.Avatar.Test : TestCase {
     }
 
     public void extract_initials() throws GLib.Error {
-        assert_string("A", extract_initials_from_name("aardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark baardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark  baardvark"));
-        assert_string("AC", extract_initials_from_name("aardvark baardvark caardvark"));
+        assert_equal(extract_initials_from_name("aardvark"), "A");
+        assert_equal(extract_initials_from_name("aardvark baardvark"), "AB");
+        assert_equal(extract_initials_from_name("aardvark  baardvark"), "AB");
+        assert_equal(
+            extract_initials_from_name("aardvark baardvark caardvark"), "AC"
+        );
 
-        assert_string("A", extract_initials_from_name("!aardvark"));
-        assert_string("AB", extract_initials_from_name("aardvark !baardvark"));
-        assert_string("AC", extract_initials_from_name("aardvark baardvark !caardvark"));
+        assert_equal(
+            extract_initials_from_name("!aardvark"), "A"
+        );
+        assert_equal(
+            extract_initials_from_name("aardvark !baardvark"), "AB"
+        );
+        assert_equal(
+            extract_initials_from_name("aardvark baardvark !caardvark"), "AC"
+        );
 
-        assert_string("Ó", extract_initials_from_name("óvári"));
+        assert_equal(extract_initials_from_name("óvári"), "Ó");
 
-        assert_true(extract_initials_from_name("") == null);
-        assert_true(extract_initials_from_name(" ") == null);
-        assert_true(extract_initials_from_name("  ") == null);
-        assert_true(extract_initials_from_name("!") == null);
-        assert_true(extract_initials_from_name("!!") == null);
-        assert_true(extract_initials_from_name("! !") == null);
-        assert_true(extract_initials_from_name("! !!") == null);
+        assert_null(extract_initials_from_name(""));
+        assert_null(extract_initials_from_name(" "));
+        assert_null(extract_initials_from_name("  "));
+        assert_null(extract_initials_from_name("!"));
+        assert_null(extract_initials_from_name("!!"));
+        assert_null(extract_initials_from_name("! !"));
+        assert_null(extract_initials_from_name("! !!"));
     }
 
 }

@@ -35,8 +35,8 @@ public class Util.Email.Test : TestCase {
         );
 
         assert_non_null(originator);
-        assert_string("from", originator.name);
-        assert_string("from@example.com", originator.address);
+        assert_equal(originator.name, "from");
+        assert_equal(originator.address, "from@example.com");
     }
 
     public void sender_originator() throws GLib.Error {
@@ -49,8 +49,8 @@ public class Util.Email.Test : TestCase {
         );
 
         assert_non_null(originator);
-        assert_string("sender", originator.name);
-        assert_string("sender@example.com", originator.address);
+        assert_equal(originator.name, "sender");
+        assert_equal(originator.address, "sender@example.com");
     }
 
     public void reply_to_originator() throws GLib.Error {
@@ -63,8 +63,8 @@ public class Util.Email.Test : TestCase {
         );
 
         assert_non_null(originator);
-        assert_string("reply-to", originator.name);
-        assert_string("reply-to@example.com", originator.address);
+        assert_equal(originator.name, "reply-to");
+        assert_equal(originator.address, "reply-to@example.com");
     }
 
     public void reply_to_via_originator() throws GLib.Error {
@@ -77,8 +77,8 @@ public class Util.Email.Test : TestCase {
         );
 
         assert_non_null(originator);
-        assert_string("test", originator.name);
-        assert_string("test@example.com", originator.address);
+        assert_equal(originator.name, "test");
+        assert_equal(originator.address, "test@example.com");
     }
 
     public void plain_via_originator() throws GLib.Error {
@@ -91,8 +91,8 @@ public class Util.Email.Test : TestCase {
         );
 
         assert_non_null(originator);
-        assert_string("test", originator.name);
-        assert_string("bot@example.com", originator.address);
+        assert_equal(originator.name, "test");
+        assert_equal(originator.address, "bot@example.com");
     }
 
     private Geary.Email new_email(Geary.RFC822.MailboxAddress? from,

@@ -21,60 +21,60 @@ class Geary.HTML.UtilTest : TestCase {
     }
 
     public void preserve_whitespace() throws GLib.Error {
-        assert_string("some text", Geary.HTML.smart_escape("some text"));
-        assert_string("some &nbsp;text", Geary.HTML.smart_escape("some  text"));
-        assert_string("some &nbsp;&nbsp;text", Geary.HTML.smart_escape("some   text"));
-        assert_string("some &nbsp;&nbsp;&nbsp;text", Geary.HTML.smart_escape("some\ttext"));
+        assert_equal(smart_escape("some text"), "some text");
+        assert_equal(smart_escape("some  text"), "some &nbsp;text");
+        assert_equal(smart_escape("some   text"), "some &nbsp;&nbsp;text");
+        assert_equal(smart_escape("some\ttext"), "some &nbsp;&nbsp;&nbsp;text");
 
-        assert_string("some<br>text", Geary.HTML.smart_escape("some\ntext"));
-        assert_string("some<br>text", Geary.HTML.smart_escape("some\rtext"));
-        assert_string("some<br>text", Geary.HTML.smart_escape("some\r\ntext"));
+        assert_equal(smart_escape("some\ntext"), "some<br>text");
+        assert_equal(smart_escape("some\rtext"), "some<br>text");
+        assert_equal(smart_escape("some\r\ntext"), "some<br>text");
 
-        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\n\ntext"));
-        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\r\rtext"));
-        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\n\rtext"));
-        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\r\n\r\ntext"));
+        assert_equal(smart_escape("some\n\ntext"), "some<br><br>text");
+        assert_equal(smart_escape("some\r\rtext"), "some<br><br>text");
+        assert_equal(smart_escape("some\n\rtext"), "some<br><br>text");
+        assert_equal(smart_escape("some\r\n\r\ntext"), "some<br><br>text");
     }
 
     public void smart_escape_div() throws Error {
         string html = "<div>ohhai</div>";
-        assert(Geary.HTML.smart_escape(html) == html);
+        assert_equal(smart_escape(html), html);
     }
 
     public void smart_escape_no_closing_tag() throws Error {
         string html = "<div>ohhai";
-        assert(Geary.HTML.smart_escape(html) == html);
+        assert_equal(smart_escape(html), html);
     }
 
     public void smart_escape_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\">";
-        assert(Geary.HTML.smart_escape(html) == html);
+        assert_equal(smart_escape(html), html);
     }
 
     public void smart_escape_xhtml_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\"/>";
-        assert(Geary.HTML.smart_escape(html) == html);
+        assert_equal(smart_escape(html), html);
     }
 
     public void smart_escape_mixed() throws Error {
         string html = "mixed <div>ohhai</div> text";
-        assert(Geary.HTML.smart_escape(html) == html);
+        assert_equal(smart_escape(html), html);
     }
 
     public void smart_escape_text() throws GLib.Error {
-        assert_string("some text", Geary.HTML.smart_escape("some text"));
-        assert_string("&lt;some text", Geary.HTML.smart_escape("<some text"));
-        assert_string("some text&gt;", Geary.HTML.smart_escape("some text>"));
+        assert_equal(smart_escape("some text"), "some text");
+        assert_equal(smart_escape("<some text"), "&lt;some text");
+        assert_equal(smart_escape("some text>"), "some text&gt;");
     }
 
     public void smart_escape_text_url() throws GLib.Error {
-        assert_string(
-            "&lt;http://example.com&gt;",
-            Geary.HTML.smart_escape("<http://example.com>")
+        assert_equal(
+            smart_escape("<http://example.com>"),
+            "&lt;http://example.com&gt;"
         );
-        assert_string(
-            "&lt;http://example.com&gt;",
-            Geary.HTML.smart_escape("<http://example.com>")
+        assert_equal(
+            smart_escape("<http://example.com>"),
+            "&lt;http://example.com&gt;"
         );
     }
 
@@ -94,13 +94,13 @@ px; }
 <style>
 .bodyblack { font-family: Verdana, """;
 
-        assert(Geary.HTML.html_to_text(HTML_BODY_COMPLETE) == HTML_BODY_COMPLETE_EXPECTED);
-        assert(Geary.HTML.html_to_text(blockquote_body) == "hello\n there\n");
-        assert(Geary.HTML.html_to_text(blockquote_body, false) == " there\n");
-        assert(Geary.HTML.html_to_text(HTML_ENTITIES_BODY) == HTML_ENTITIES_EXPECTED);
-        assert(Geary.HTML.html_to_text(style_complete) == "");
-        assert(Geary.HTML.html_to_text(style_complete) == "");
-        assert(Geary.HTML.html_to_text(style_truncated) == "");
+        assert_equal(html_to_text(HTML_BODY_COMPLETE), HTML_BODY_COMPLETE_EXPECTED);
+        assert_equal(html_to_text(blockquote_body), "hello\n there\n");
+        assert_equal(html_to_text(blockquote_body, false), " there\n");
+        assert_equal(html_to_text(HTML_ENTITIES_BODY), HTML_ENTITIES_EXPECTED);
+        assert_string(html_to_text(style_complete)).is_empty();
+        assert_string(html_to_text(style_complete)).is_empty();
+        assert_string(html_to_text(style_truncated)).is_empty();
     }
 
     private static string HTML_BODY_COMPLETE = """<html><head>

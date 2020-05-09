@@ -52,22 +52,22 @@ int main(string[] args) {
 
     // Keep this before other ClientWebView based tests since it tests
     // WebContext init
-    client.add_suite(new Accounts.ManagerTest().get_suite());
-    client.add_suite(new Application.ClientTest().get_suite());
-    client.add_suite(new Application.ConfigurationTest().get_suite());
-    client.add_suite(new ClientWebViewTest().get_suite());
-    client.add_suite(new Composer.WebViewTest().get_suite());
-    client.add_suite(new Components.ValidatorTest().get_suite());
-    client.add_suite(new Util.Avatar.Test().get_suite());
-    client.add_suite(new Util.Cache.Test().get_suite());
-    client.add_suite(new Util.Email.Test().get_suite());
-    client.add_suite(new Util.JS.Test().get_suite());
+    client.add_suite(new Accounts.ManagerTest().suite);
+    client.add_suite(new Application.ClientTest().suite);
+    client.add_suite(new Application.ConfigurationTest().suite);
+    client.add_suite(new ClientWebViewTest().suite);
+    client.add_suite(new Composer.WebViewTest().suite);
+    client.add_suite(new Components.ValidatorTest().suite);
+    client.add_suite(new Util.Avatar.Test().suite);
+    client.add_suite(new Util.Cache.Test().suite);
+    client.add_suite(new Util.Email.Test().suite);
+    client.add_suite(new Util.JS.Test().suite);
 
     TestSuite js = new TestSuite("js");
 
-    js.add_suite(new ClientPageStateTest().get_suite());
-    js.add_suite(new Composer.PageStateTest().get_suite());
-    js.add_suite(new ConversationPageStateTest().get_suite());
+    js.add_suite(new ClientPageStateTest().suite);
+    js.add_suite(new Composer.PageStateTest().suite);
+    js.add_suite(new ConversationPageStateTest().suite);
 
     /*
      * Run the tests

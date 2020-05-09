@@ -86,7 +86,7 @@ This is the second line.
         Message enc = string_to_message(ENCODED_TO);
 
         // Courtesy Mailsploit https://www.mailsploit.com
-        assert_string("potus@whitehouse.gov <test>", enc.to[0].name);
+        assert_equal(enc.to[0].name, "potus@whitehouse.gov <test>");
     }
 
     public void duplicate_mailbox() throws GLib.Error {
@@ -112,7 +112,7 @@ This is the second line.
 
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_false(test.has_html_body(), "Expected non-html body");
-        assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
+        assert_equal(test.get_plain_body(false, null), BASIC_PLAIN_BODY);
     }
 
     public void text_plain_as_html() throws GLib.Error {
@@ -120,9 +120,9 @@ This is the second line.
 
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_false(test.has_html_body(), "Expected non-html body");
-        assert_string(
-            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY),
-            test.get_plain_body(true, null)
+        assert_equal(
+            test.get_plain_body(true, null),
+            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY)
         );
     }
 
@@ -131,7 +131,7 @@ This is the second line.
 
         assert_true(test.has_html_body(), "Expected html body");
         assert_false(test.has_plain_body(), "Expected non-plain body");
-        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+        assert_equal(test.get_html_body(null), BASIC_HTML_BODY);
     }
 
     public void text_html_as_plain() throws GLib.Error {
@@ -139,7 +139,7 @@ This is the second line.
 
         assert_true(test.has_html_body(), "Expected html body");
         assert_false(test.has_plain_body(), "Expected non-plain body");
-        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+        assert_equal(test.get_html_body(null), BASIC_HTML_BODY);
     }
 
     public void tnef_extract_attachments() throws GLib.Error {
@@ -155,7 +155,7 @@ This is the second line.
 
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_true(test.has_html_body(), "Expected html body");
-        assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
+        assert_equal(test.get_plain_body(false, null), BASIC_PLAIN_BODY);
     }
 
     public void multipart_alternative_as_converted_html() throws GLib.Error {
@@ -163,9 +163,9 @@ This is the second line.
 
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_true(test.has_html_body(), "Expected html body");
-        assert_string(
-            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY),
-            test.get_plain_body(true, null)
+        assert_equal(
+            test.get_plain_body(true, null),
+            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY)
         );
     }
 
@@ -174,7 +174,7 @@ This is the second line.
 
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_true(test.has_html_body(), "Expected html body");
-        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+        assert_equal(test.get_html_body(null), BASIC_HTML_BODY);
     }
 
     public void get_preview() throws GLib.Error {
@@ -434,21 +434,21 @@ This is the second line.
                              string expected)
         throws GLib.Error {
         assert_non_null(actual, expected);
-        assert_string(expected, actual.to_string());
+        assert_equal(actual.to_string(), expected);
     }
 
     private void assert_address(Geary.RFC822.MailboxAddress? address,
                                 string expected)
         throws GLib.Error {
         assert_non_null(address, expected);
-        assert_string(expected, address.to_rfc822_string());
+        assert_equal(address.to_rfc822_string(), expected);
     }
 
     private void assert_addresses(Geary.RFC822.MailboxAddresses? addresses,
                                   string expected)
         throws GLib.Error {
         assert_non_null(addresses, expected);
-        assert_string(expected, addresses.to_rfc822_string());
+        assert_equal(addresses.to_rfc822_string(), expected);
     }
 
     private void assert_addresses_list(Gee.List<RFC822.MailboxAddress>? addresses,
@@ -466,7 +466,7 @@ This is the second line.
                                         string expected)
         throws GLib.Error {
         assert_non_null(ids, "ids are null");
-        assert_string(expected, ids.to_rfc822_string());
+        assert_equal(ids.to_rfc822_string(), expected);
     }
 
     // Courtesy Mailsploit https://www.mailsploit.com

@@ -99,7 +99,7 @@ class Geary.ImapDB.AccountTest : TestCase {
             "SELECT * FROM FolderTable;"
         );
         assert_false(result.finished, "Folder not created");
-        assert_string("test", result.string_for("name"), "Folder name");
+        assert_equal(result.string_for("name"), "test", "Folder name");
         assert_true(result.is_null_for("parent_id"), "Folder parent");
         assert_false(result.next(), "Multiple rows inserted");
     }
@@ -138,8 +138,8 @@ class Geary.ImapDB.AccountTest : TestCase {
             "SELECT * FROM FolderTable WHERE id != 1;"
         );
         assert_false(result.finished, "Folder not created");
-        assert_string("child", result.string_for("name"), "Folder name");
-        assert_int(1, result.int_for("parent_id"), "Folder parent");
+        assert_equal(result.string_for("name"), "child", "Folder name");
+        assert_equal<int?>(result.int_for("parent_id"), 1, "Folder parent");
         assert_false(result.next(), "Multiple rows inserted");
     }
 
@@ -161,8 +161,8 @@ class Geary.ImapDB.AccountTest : TestCase {
             this.account.list_folders_async.end(async_result());
 
         Folder test1 = traverse(result).first();
-        assert_int(1, result.size, "Base folder not listed");
-        assert_string("test1", test1.get_path().name, "Base folder name");
+        assert_equal<int?>(result.size, 1, "Base folder not listed");
+        assert_equal(test1.get_path().name, "test1", "Base folder name");
 
         this.account.list_folders_async.begin(
             test1.get_path(),
@@ -172,8 +172,8 @@ class Geary.ImapDB.AccountTest : TestCase {
         result = this.account.list_folders_async.end(async_result());
 
         Folder test2 = traverse(result).first();
-        assert_int(1, result.size, "Child folder not listed");
-        assert_string("test2", test2.get_path().name, "Child folder name");
+        assert_equal<int?>(result.size, 1, "Child folder not listed");
+        assert_equal(test2.get_path().name, "test2", "Child folder name");
 
         this.account.list_folders_async.begin(
             test2.get_path(),
@@ -183,8 +183,8 @@ class Geary.ImapDB.AccountTest : TestCase {
         result = this.account.list_folders_async.end(async_result());
 
         Folder test3 = traverse(result).first();
-        assert_int(1, result.size, "Grandchild folder not listed");
-        assert_string("test3", test3.get_path().name, "Grandchild folder name");
+        assert_equal<int?>(result.size, 1, "Grandchild folder not listed");
+        assert_equal(test3.get_path().name, "test3", "Grandchild folder name");
     }
 
     public void delete_folder() throws GLib.Error {
@@ -268,7 +268,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_string("test1", result.get_path().name);
+        assert_equal(result.get_path().name, "test1");
     }
 
     public void fetch_child_folder() throws GLib.Error {
@@ -287,7 +287,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_string("test2", result.get_path().name);
+        assert_equal(result.get_path().name, "test2");
     }
 
     public void fetch_nonexistent_folder() throws GLib.Error {
@@ -336,7 +336,7 @@ class Geary.ImapDB.AccountTest : TestCase {
             async_result()
         );
 
-        assert_int(2, result.size, "Not enough email listed");
+        assert_equal<int?>(result.size, 2, "Not enough email listed");
         assert_true(new EmailIdentifier(1, null).equal_to(result[0].id));
         assert_true(new EmailIdentifier(2, null).equal_to(result[1].id));
 
