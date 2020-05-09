@@ -13,18 +13,14 @@ public class FormattedConversationData : Geary.BaseObject {
         bool was_widget_selected;
     }
 
-    public const int LINE_SPACING = 6;
+    public const int SPACING = 6;
 
     private const string ME = _("Me");
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
-    private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
+    private const int TEXT_LEFT = SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
     private const double DIM_TEXT_AMOUNT = 0.05;
     private const double DIM_PREVIEW_TEXT_AMOUNT = 0.25;
 
-    private const int FONT_SIZE_DATE = 10;
-    private const int FONT_SIZE_SUBJECT = 9;
-    private const int FONT_SIZE_FROM = 11;
-    private const int FONT_SIZE_PREVIEW = 8;
 
     private class ParticipantDisplay : Geary.BaseObject, Gee.Hashable<ParticipantDisplay> {
         public Geary.RFC822.MailboxAddress address;
@@ -104,6 +100,7 @@ public class FormattedConversationData : Geary.BaseObject {
     public Geary.Email? preview { get; private set; default = null; }
 
     private Application.Configuration config;
+    private Pango.FontDescription font;
 
     private Geary.App.Conversation? conversation = null;
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
@@ -116,12 +113,15 @@ public class FormattedConversationData : Geary.BaseObject {
     public FormattedConversationData(Application.Configuration config,
                                      Geary.App.Conversation conversation,
                                      Geary.Email preview,
-                                     Geary.Folder folder,
                                      Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
         this.config = config;
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
-        use_to = (folder != null) && folder.used_as.is_outgoing();
+        this.use_to = conversation.base_folder.used_as.is_outgoing();
+
+        this.font = Pango.FontDescription.from_string(
+            this.config.gnome_interface.get_string("font-name")
+        );
 
         // Load preview-related data.
         update_date_string();
@@ -139,6 +139,21 @@ public class FormattedConversationData : Geary.BaseObject {
         this.conversation.appended.connect(clear_participants_cache);
         this.conversation.trimmed.connect(clear_participants_cache);
         this.conversation.email_flags_changed.connect(clear_participants_cache);
+    }
+
+    // Creates an example message (used internally for styling calculations.)
+    public FormattedConversationData.create_example(Application.Configuration config) {
+        this.config = config;
+        this.is_unread = false;
+        this.is_flagged = false;
+        this.date = STYLE_EXAMPLE;
+        this.subject_html_escaped = STYLE_EXAMPLE;
+        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
+        this.num_emails = 1;
+
+        this.font = Pango.FontDescription.from_string(
+            this.config.gnome_interface.get_string("font-name")
+        );
     }
 
     private void clear_participants_cache(Geary.Email email) {
@@ -163,17 +178,6 @@ public class FormattedConversationData : Geary.BaseObject {
         date = new_date;
 
         return true;
-    }
-
-    // Creates an example message (used internally for styling calculations.)
-    public FormattedConversationData.create_example(Application.Configuration config) {
-        this.config = config;
-        this.is_unread = false;
-        this.is_flagged = false;
-        this.date = STYLE_EXAMPLE;
-        this.subject_html_escaped = STYLE_EXAMPLE;
-        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
-        this.num_emails = 1;
     }
 
     private uint8 gdk_to_rgb(double gdk) {
@@ -294,7 +298,7 @@ public class FormattedConversationData : Geary.BaseObject {
         Cairo.Context? ctx, Gtk.CellRendererState flags, bool recalc_dims,
         bool hover_select) {
         bool display_preview = this.config.display_preview;
-        int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
+        int y = SPACING + (cell_area != null ? cell_area.y : 0);
 
         bool selected = (flags & Gtk.CellRendererState.SELECTED) != 0;
         bool hover = (flags & Gtk.CellRendererState.PRELIT) != 0 || (selected && hover_select);
@@ -304,7 +308,7 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // From field.
         ink_rect = render_from(widget, cell_area, ctx, y, selected, ink_rect);
-        y += ink_rect.height + ink_rect.y + LINE_SPACING;
+        y += ink_rect.height + ink_rect.y + SPACING;
 
         // If we are displaying a preview then the message counter goes on the same line as the
         // preview, otherwise it is with the subject.
@@ -312,28 +316,28 @@ public class FormattedConversationData : Geary.BaseObject {
 
         // Setup counter badge.
         count_badge.count = num_emails;
-        int counter_width = count_badge.get_width(widget) + LINE_SPACING;
+        int counter_width = count_badge.get_width(widget) + SPACING;
         int counter_x = cell_area != null ? cell_area.width - cell_area.x - counter_width +
-            (LINE_SPACING / 2) : 0;
+            (SPACING / 2) : 0;
 
         if (display_preview) {
             // Subject field.
             render_subject(widget, cell_area, ctx, y, selected);
-            y += ink_rect.height + ink_rect.y + LINE_SPACING;
+            y += ink_rect.height + ink_rect.y + (SPACING / 2);
 
             // Number of e-mails field.
-            count_badge.render(widget, ctx, counter_x, y, selected);
+            count_badge.render(widget, ctx, counter_x, y + (SPACING / 2), selected);
 
             // Body preview.
             ink_rect = render_preview(widget, cell_area, ctx, y, selected, counter_width);
-            preview_height = ink_rect.height + ink_rect.y + LINE_SPACING;
+            preview_height = ink_rect.height + ink_rect.y + (int) (SPACING * 1.2);
         } else {
             // Number of e-mails field.
             count_badge.render(widget, ctx, counter_x, y, selected);
 
             // Subject field.
             render_subject(widget, cell_area, ctx, y, selected, counter_width);
-            y += ink_rect.height + ink_rect.y + LINE_SPACING;
+            y += ink_rect.height + ink_rect.y + (int) (SPACING * 1.2);
         }
 
         // Draw separator line.
@@ -349,25 +353,25 @@ public class FormattedConversationData : Geary.BaseObject {
             FormattedConversationData.preview_height = preview_height;
             FormattedConversationData.cell_height = y + preview_height;
         } else {
-            int unread_y = display_preview ? cell_area.y + LINE_SPACING * 2 : cell_area.y +
-                LINE_SPACING;
+            int unread_y = display_preview ? cell_area.y + SPACING * 2 : cell_area.y +
+                SPACING;
 
             // Unread indicator.
             if (is_unread || hover) {
                 Gdk.Pixbuf read_icon = IconFactory.instance.load_symbolic(
                     is_unread ? "mail-unread-symbolic" : "mail-read-symbolic",
                     IconFactory.UNREAD_ICON_SIZE, widget.get_style_context());
-                Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + LINE_SPACING, unread_y);
+                Gdk.cairo_set_source_pixbuf(ctx, read_icon, cell_area.x + SPACING, unread_y);
                 ctx.paint();
             }
 
             // Starred indicator.
             if (is_flagged || hover) {
-                int star_y = cell_area.y + (cell_area.height / 2) + (display_preview ? LINE_SPACING : 0);
+                int star_y = cell_area.y + (cell_area.height / 2) + (display_preview ? SPACING : 0);
                 Gdk.Pixbuf starred_icon = IconFactory.instance.load_symbolic(
                     is_flagged ? "starred-symbolic" : "non-starred-symbolic",
                     IconFactory.STAR_ICON_SIZE, widget.get_style_context());
-                Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + LINE_SPACING, star_y);
+                Gdk.cairo_set_source_pixbuf(ctx, starred_icon, cell_area.x + SPACING, star_y);
                 ctx.paint();
             }
         }
@@ -375,21 +379,19 @@ public class FormattedConversationData : Geary.BaseObject {
 
     private Pango.Rectangle render_date(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected) {
-        string date_markup = "<span foreground='%s'>%s</span>".printf(
+        string date_markup = "<span size='smaller' foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
             Geary.HTML.escape_markup(date));
 
         Pango.Rectangle? ink_rect;
         Pango.Rectangle? logical_rect;
-        Pango.FontDescription font_date = new Pango.FontDescription();
-        font_date.set_size(FONT_SIZE_DATE * Pango.SCALE);
         Pango.Layout layout_date = widget.create_pango_layout(null);
-        layout_date.set_font_description(font_date);
+        layout_date.set_font_description(this.font);
         layout_date.set_markup(date_markup, -1);
         layout_date.set_alignment(Pango.Alignment.RIGHT);
         layout_date.get_pixel_extents(out ink_rect, out logical_rect);
         if (ctx != null && cell_area != null) {
-            ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - LINE_SPACING, y);
+            ctx.move_to(cell_area.width - cell_area.x - ink_rect.width - ink_rect.x - SPACING, y);
             Pango.cairo_show_layout(ctx, layout_date);
         }
         return ink_rect;
@@ -399,14 +401,17 @@ public class FormattedConversationData : Geary.BaseObject {
         Cairo.Context? ctx, int y, bool selected, Pango.Rectangle ink_rect) {
         string from_markup = (conversation != null) ? get_participants_markup(widget, selected) : STYLE_EXAMPLE;
 
-        Pango.FontDescription font_from = new Pango.FontDescription();
-        font_from.set_size(FONT_SIZE_FROM * Pango.SCALE);
+        Pango.FontDescription font = this.font;
+        if (is_unread) {
+            font = font.copy();
+            font.set_weight(Pango.Weight.BOLD);
+        }
         Pango.Layout layout_from = widget.create_pango_layout(null);
-        layout_from.set_font_description(font_from);
+        layout_from.set_font_description(font);
         layout_from.set_markup(from_markup, -1);
         layout_from.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
-            layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - (LINE_SPACING * 3) -
+            layout_from.set_width((cell_area.width - ink_rect.width - ink_rect.x - (SPACING * 3) -
                 TEXT_LEFT)
             * Pango.SCALE);
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
@@ -417,16 +422,17 @@ public class FormattedConversationData : Geary.BaseObject {
 
     private void render_subject(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
         int y, bool selected, int counter_width = 0) {
-        string subject_markup = "<span foreground='%s'>%s</span>".printf(
+        string subject_markup = "<span size='smaller' foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), DIM_TEXT_AMOUNT)),
             subject_html_escaped);
 
-        Pango.FontDescription font_subject = new Pango.FontDescription();
-        font_subject.set_size(FONT_SIZE_SUBJECT * Pango.SCALE);
-        if (is_unread)
-            font_subject.set_weight(Pango.Weight.BOLD);
+        Pango.FontDescription font = this.font;
+        if (is_unread) {
+            font = font.copy();
+            font.set_weight(Pango.Weight.BOLD);
+        }
         Pango.Layout layout_subject = widget.create_pango_layout(null);
-        layout_subject.set_font_description(font_subject);
+        layout_subject.set_font_description(font);
         layout_subject.set_markup(subject_markup, -1);
         if (cell_area != null)
             layout_subject.set_width((cell_area.width - TEXT_LEFT - counter_width) * Pango.SCALE);
@@ -440,21 +446,17 @@ public class FormattedConversationData : Geary.BaseObject {
     private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
         double dim = selected ? DIM_TEXT_AMOUNT : DIM_PREVIEW_TEXT_AMOUNT;
-        string preview_markup = "<span foreground='%s'>%s</span>".printf(
+        string preview_markup = "<span size='smaller' foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), dim)),
             Geary.String.is_empty(body) ? "" : Geary.HTML.escape_markup(body));
 
-        Pango.FontDescription font_preview = new Pango.FontDescription();
-        font_preview.set_size(FONT_SIZE_PREVIEW * Pango.SCALE);
-
         Pango.Layout layout_preview = widget.create_pango_layout(null);
-        layout_preview.set_font_description(font_preview);
-
+        layout_preview.set_font_description(this.font);
         layout_preview.set_markup(preview_markup, -1);
         layout_preview.set_wrap(Pango.WrapMode.WORD);
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
-            layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width - LINE_SPACING) * Pango.SCALE);
+            layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width - SPACING) * Pango.SCALE);
             layout_preview.set_height(preview_height * Pango.SCALE);
 
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
