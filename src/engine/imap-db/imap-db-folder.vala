@@ -886,7 +886,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Collection<Geary.EmailIdentifier>? detach_emails_before_timestamp(DateTime cutoff,
         GLib.Cancellable? cancellable) throws Error {
         debug("Detaching emails before %s for folder ID %", cutoff.to_string(), this.folder_id.to_string());
-        Gee.Collection<Geary.EmailIdentifier>? deleted_email_ids = null;
+        Gee.ArrayList<ImapDB.EmailIdentifier>? deleted_email_ids = null;
         Gee.ArrayList<string> deleted_primary_keys = null;
 
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -913,7 +913,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             while (!results.finished) {
                 if (deleted_email_ids == null) {
-                    deleted_email_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+                    deleted_email_ids = new Gee.ArrayList<ImapDB.EmailIdentifier>();
                     deleted_primary_keys = new Gee.ArrayList<string>();
                 }
 
@@ -935,25 +935,50 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             while (delete_index < deleted_primary_keys.size) {
                 int batch_counter = 0;
 
-                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
-                    StringBuilder ids_sql_sublist = new StringBuilder();
-                    while (delete_index < deleted_primary_keys.size
-                           && batch_counter < OLD_MSG_DETACH_BATCH_SIZE) {
-                        if (batch_counter > 0)
-                            ids_sql_sublist.append(",");
-                        ids_sql_sublist.append(
-                            deleted_primary_keys.get(delete_index)
-                        );
-                        delete_index++;
-                        batch_counter++;
+                StringBuilder message_location_ids_sql_sublist = new StringBuilder();
+                StringBuilder message_ids_sql_sublist = new StringBuilder();
+                while (delete_index < deleted_primary_keys.size
+                       && batch_counter < OLD_MSG_DETACH_BATCH_SIZE) {
+                    if (batch_counter > 0) {
+                        message_location_ids_sql_sublist.append(",");
+                        message_ids_sql_sublist.append(",");
                     }
+                    message_location_ids_sql_sublist.append(
+                        deleted_primary_keys.get(delete_index)
+                    );
+                    message_ids_sql_sublist.append(
+                        deleted_email_ids.get(delete_index).message_id.to_string()
+                    );
+                    delete_index++;
+                    batch_counter++;
+                }
+
+                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+
 
                     StringBuilder sql = new StringBuilder();
                     sql.append("""
                         DELETE FROM MessageLocationTable
                         WHERE id IN (
                     """);
-                    sql.append(ids_sql_sublist.str);
+                    sql.append(message_location_ids_sql_sublist.str);
+                    sql.append(")");
+                    Db.Statement stmt = cx.prepare(sql.str);
+
+                    stmt.exec(cancellable);
+
+                    return Db.TransactionOutcome.COMMIT;
+
+                }, cancellable);
+
+                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+
+                    StringBuilder sql = new StringBuilder();
+                    sql.append("""
+                        DELETE FROM MessageSearchTable
+                        WHERE docid IN (
+                    """);
+                    sql.append(message_ids_sql_sublist.str);
                     sql.append(")");
                     Db.Statement stmt = cx.prepare(sql.str);
 
