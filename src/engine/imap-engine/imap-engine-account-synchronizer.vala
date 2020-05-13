@@ -16,6 +16,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private DateTime max_epoch = new DateTime(
         new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0
     );
+    private SyncDetachMonitor sync_detach_monitor = null;
 
 
     public AccountSynchronizer(GenericAccount account) {
@@ -99,13 +100,15 @@ private class Geary.ImapEngine.AccountSynchronizer :
     }
 
     private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
-        if (this.account.is_open()) {
-            SyncDetachMonitor monitor = new SyncDetachMonitor();
-            send_all(this.account.list_folders(), false, true, monitor);
-            monitor.initialised = true;
-            monitor.completed.connect((messages_detached) => {
-                if (cancellable != null && cancellable.is_cancelled())
+        if (this.account.is_open() && this.sync_detach_monitor == null) {
+            this.sync_detach_monitor = new SyncDetachMonitor();
+            send_all(this.account.list_folders(), false, true, this.sync_detach_monitor);
+            this.sync_detach_monitor.initialised = true;
+            this.sync_detach_monitor.completed.connect((messages_detached) => {
+                if (cancellable != null && cancellable.is_cancelled()) {
+                    this.sync_detach_monitor = null;
                     return;
+                }
 
                 // Run GC. Reap is forced if messages were detached. Vacuum
                 // is allowed as we're running in the background.
@@ -116,6 +119,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
                 account.local.db.run_gc.begin(options,
                                               {account.imap, account.smtp},
                                               cancellable);
+                this.sync_detach_monitor = null;
             });
         }
     }
@@ -483,8 +487,8 @@ private class SyncDetachMonitor: Geary.BaseObject {
         operation.old_message_detached.connect(() => {
             this.messages_detached = true;
         });
-        operation.completed.connect(() => {
-            this.operations.remove(operation);
+        operation.completed.connect((op) => {
+            operations.remove((Geary.ImapEngine.CheckFolderSync) op);
             if (initialised && operations.length() == 0) {
                 this.completed(this.messages_detached);
             }
