@@ -77,9 +77,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private GC? gc = null;
     private Cancellable gc_cancellable = new Cancellable();
 
-
-
-
     public Database(GLib.File db_file,
                     GLib.File schema_dir,
                     GLib.File attachments_path,
