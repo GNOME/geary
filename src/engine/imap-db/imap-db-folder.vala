@@ -954,8 +954,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 }
 
                 yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
-
-
                     StringBuilder sql = new StringBuilder();
                     sql.append("""
                         DELETE FROM MessageLocationTable
@@ -967,25 +965,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
                     stmt.exec(cancellable);
 
-                    return Db.TransactionOutcome.COMMIT;
-
-                }, cancellable);
-
-                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
-
-                    StringBuilder sql = new StringBuilder();
+                    sql = new StringBuilder();
                     sql.append("""
                         DELETE FROM MessageSearchTable
                         WHERE docid IN (
                     """);
                     sql.append(message_ids_sql_sublist.str);
                     sql.append(")");
-                    Db.Statement stmt = cx.prepare(sql.str);
+                    stmt = cx.prepare(sql.str);
 
                     stmt.exec(cancellable);
 
                     return Db.TransactionOutcome.COMMIT;
-
                 }, cancellable);
             }
         }
