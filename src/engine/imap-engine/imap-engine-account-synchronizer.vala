@@ -16,7 +16,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private DateTime max_epoch = new DateTime(
         new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0
     );
-    private SyncDetachMonitor sync_detach_monitor = null;
+    private SyncDetachMonitor? sync_detach_monitor = null;
 
 
     public AccountSynchronizer(GenericAccount account) {
