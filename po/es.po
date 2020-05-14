@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-04-25 12:36+0000\n"
-"PO-Revision-Date: 2020-04-30 11:48+0200\n"
+"POT-Creation-Date: 2020-05-08 12:54+0000\n"
+"PO-Revision-Date: 2020-05-14 16:25+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -876,7 +876,6 @@ msgstr "Registrar la normalización de carpetas"
 
 #. / Command line option
 #: src/client/application/application-client.vala:115
-#| msgid "Log network activity"
 msgid "Log IMAP network activity"
 msgstr "Registrar actividad IMAP de la red"
 
@@ -889,7 +888,6 @@ msgstr "Registrar la cola de eventos IMAP"
 
 #. / Command line option
 #: src/client/application/application-client.vala:123
-#| msgid "Log network activity"
 msgid "Log SMTP network activity"
 msgstr "Registrar actividad SMTP de la red"
 
@@ -1240,7 +1238,11 @@ msgstr "Compruebe los detalles de seguridad de la conexión"
 msgid "%s — %s"
 msgstr "%s — %s"
 
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
 #: src/client/application/application-main-window.vala:972
+#: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etiquetas"
 
@@ -1293,7 +1295,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1918
+#: src/client/composer/composer-widget.vala:1920
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1392,7 +1394,7 @@ msgid "Preferences"
 msgstr "Preferencias"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:179
+#: src/client/components/components-preferences-window.vala:180
 msgid "Plugins"
 msgstr "Complementos"
 
@@ -1697,63 +1699,63 @@ msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1904
+#: src/client/composer/composer-widget.vala:1906
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
 
-#: src/client/composer/composer-widget.vala:1940
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:1942
+#: src/client/composer/composer-widget.vala:1992
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1978
+#: src/client/composer/composer-widget.vala:1980
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1986
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:2003
+#: src/client/composer/composer-widget.vala:2005
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:2011
+#: src/client/composer/composer-widget.vala:2013
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2071
+#: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:236 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Para:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2077
+#: src/client/composer/composer-widget.vala:2079
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:241 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2083
+#: src/client/composer/composer-widget.vala:2085
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2089
+#: src/client/composer/composer-widget.vala:2091
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:2341
+#: src/client/composer/composer-widget.vala:2343
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1762,14 +1764,14 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2530
+#: src/client/composer/composer-widget.vala:2532
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2887
+#: src/client/composer/composer-widget.vala:2889
 msgid "Images"
 msgstr "Imágenes"
 
@@ -2168,7 +2170,6 @@ msgstr[0] "Mensaje nuevo"
 msgstr[1] "Mensajes nuevos"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
-#| msgid "Email address"
 msgid "Email Templates"
 msgstr "Plantillas de de corre-e"
 
@@ -2181,7 +2182,6 @@ msgstr "Crear plantillas reutilizables para enviar correo"
 #. the front for the default. English names do not need to be
 #. included.
 #: src/client/plugin/email-templates/email-templates.vala:29
-#| msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
 msgstr ""
 "Plantillas | Plantilla de correo | Plantillas correo-e | Plantillas mensajes"
@@ -2195,21 +2195,17 @@ msgstr "Plantillas"
 #. Translators: Info bar button label for creating a
 #. new email template
 #: src/client/plugin/email-templates/email-templates.vala:276
-#| msgid "Now"
 msgid "New"
 msgstr "Nueva"
 
 #. Translators: Infobar status label for an email template
 #: src/client/plugin/email-templates/email-templates.vala:287
-#| msgid "Message not saved"
 msgid "Message template"
 msgstr "Plantilla de mensaje"
 
 #. Translators: Info bar button label for sending an
 #. email template
 #: src/client/plugin/email-templates/email-templates.vala:291
-#| msgctxt "shortcut window"
-#| msgid "Send"
 msgid "Send"
 msgstr "Enviar"
 
@@ -2723,18 +2719,18 @@ msgstr "Elementos eliminados"
 msgid "Archive | Archives"
 msgstr "Archivo | Archivos"
 
-#: src/engine/rfc822/rfc822-message.vala:461
+#: src/engine/rfc822/rfc822-message.vala:531
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "No se pudo determinar el tipo MIME de «%s»"
 
-#: src/engine/rfc822/rfc822-message.vala:472
+#: src/engine/rfc822/rfc822-message.vala:542
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "No se pudo determinar el tipo de contenido para el tipo MIME «%s» en «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:1003
+#: src/engine/rfc822/rfc822-message.vala:1001
 msgid "(no subject)"
 msgstr "(sin asunto)"
 
@@ -2743,14 +2739,15 @@ msgid "Add an account"
 msgstr "Añadir una cuenta"
 
 #: ui/accounts_editor_add_pane.ui:53
-msgid "Create"
-msgstr "Crear"
+#| msgid "Create"
+msgid "_Create"
+msgstr "_Crear"
 
-#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
 msgstr "Recibiendo"
 
-#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
 msgstr "Enviando"
 
@@ -3142,7 +3139,6 @@ msgstr "Copiar al portapapeles"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:121
-#| msgid "Search for matching log entries"
 msgid "Clears all log entries"
 msgstr "Limpiar todas las entradas del registro"
 
@@ -3346,7 +3342,7 @@ msgstr "etiqueta"
 msgid "Conversation Shortcuts"
 msgstr "Atajos de conversaciones"
 
-#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:355
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:377
 msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Acciones"
@@ -3361,37 +3357,37 @@ msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Responder al remitente "
 
-#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:269
+#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:281
 msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Responder a todos"
 
-#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:276
+#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:288
 msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Reenviar"
 
-#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:283
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:295
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
 msgstr "Desmarcar/marcar como leído"
 
-#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:290
+#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:302
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
 msgstr "Marcar/desmarcar como favorito"
 
-#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
+#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:309
 msgctxt "shortcut window"
 msgid "Archive conversations"
 msgstr "Archivar conversaciones"
 
-#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
+#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:326
 msgctxt "shortcut window"
 msgid "Move conversations"
 msgstr "Mover conversaciones"
 
-#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
+#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:333
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Etiquetar conversaciones"
@@ -3401,12 +3397,12 @@ msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Eliminar conversaciones"
 
-#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
+#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Marcar conversaciones"
 
-#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
 msgctxt "shortcut window"
 msgid "Delete conversations"
 msgstr "Eliminar conversaciones"
@@ -3421,7 +3417,7 @@ msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Buscar conversaciones"
 
-#: ui/gtk/help-overlay.ui:115
+#: ui/gtk/help-overlay.ui:115 ui/gtk/help-overlay.ui:354
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Buscar en la conversación actual"
@@ -3461,7 +3457,7 @@ msgctxt "shortcut window"
 msgid "Reset zoom"
 msgstr "Restablecer ampliación"
 
-#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:375
+#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:397
 msgctxt "shortcut window"
 msgid "General"
 msgstr "General"
@@ -3511,121 +3507,124 @@ msgctxt "shortcut window"
 msgid "Focus next/previous message"
 msgstr "Mover el foco al mensaje siguiente/anterior"
 
-#: ui/gtk/help-overlay.ui:258
-msgctxt "shortcut window"
-msgid "Single-key shortcuts"
+#: ui/gtk/help-overlay.ui:260
+#| msgctxt "shortcut window"
+#| msgid "Single-key shortcuts"
+msgid "Single-key Shortcuts"
 msgstr "Atajos de una sola tecla"
 
-#: ui/gtk/help-overlay.ui:262
+#: ui/gtk/help-overlay.ui:265
+#| msgctxt "shortcut window"
+#| msgid "Single-key shortcuts"
+msgctxt "shortcut window"
+msgid "Single-key shortcuts (if enabled)"
+msgstr "Atajos de una sola tecla (si están activados)"
+
+#: ui/gtk/help-overlay.ui:274
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Responder al remitente "
 
-#: ui/gtk/help-overlay.ui:332
-msgctxt "shortcut window"
-msgid "Find in current conversations"
-msgstr "Buscar en las conversaciones actual"
-
-#: ui/gtk/help-overlay.ui:339
+#: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Seleccionar conversaciones siguientes/anteriores"
 
-#: ui/gtk/help-overlay.ui:351
+#: ui/gtk/help-overlay.ui:373
 msgid "Composer Shortcuts"
 msgstr "Atajos del editor"
 
-#: ui/gtk/help-overlay.ui:359
+#: ui/gtk/help-overlay.ui:381
 msgctxt "shortcut window"
 msgid "Send"
 msgstr "Enviar"
 
-#: ui/gtk/help-overlay.ui:366
+#: ui/gtk/help-overlay.ui:388
 msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Añadir un adjunto"
 
-#: ui/gtk/help-overlay.ui:379
+#: ui/gtk/help-overlay.ui:401
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Cerrar la ventana del editor"
 
-#: ui/gtk/help-overlay.ui:386
+#: ui/gtk/help-overlay.ui:408
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Desacoplar la ventana del editor"
 
-#: ui/gtk/help-overlay.ui:393
+#: ui/gtk/help-overlay.ui:415
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Edición"
 
-#: ui/gtk/help-overlay.ui:398
+#: ui/gtk/help-overlay.ui:420
 msgctxt "shortcut window"
 msgid "Move selection to the clipboard"
 msgstr "Mover la selección al portapapeles"
 
-#: ui/gtk/help-overlay.ui:405
+#: ui/gtk/help-overlay.ui:427
 msgctxt "shortcut window"
 msgid "Copy selection to clipboard"
 msgstr "Copiar selección a portapapeles"
 
-#: ui/gtk/help-overlay.ui:412
+#: ui/gtk/help-overlay.ui:434
 msgctxt "shortcut window"
 msgid "Paste from the clipboard"
 msgstr "Pegar desde el portapapeles"
 
-#: ui/gtk/help-overlay.ui:419
+#: ui/gtk/help-overlay.ui:441
 msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Citar el texto"
 
-#: ui/gtk/help-overlay.ui:426
+#: ui/gtk/help-overlay.ui:448
 msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Eliminar cita del texto"
 
-#: ui/gtk/help-overlay.ui:435
+#: ui/gtk/help-overlay.ui:457
 msgctxt "shortcut window"
 msgid "Rich text editing"
 msgstr "Edición de texto enriquecido"
 
-#: ui/gtk/help-overlay.ui:439
+#: ui/gtk/help-overlay.ui:461
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Pegar sin formato"
 
-#: ui/gtk/help-overlay.ui:446
+#: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
 msgid "Bold text"
 msgstr "Texto en negrita"
 
-#: ui/gtk/help-overlay.ui:453
+#: ui/gtk/help-overlay.ui:475
 msgctxt "shortcut window"
 msgid "Italicize text"
 msgstr "Texto en cursiva"
 
-#: ui/gtk/help-overlay.ui:460
+#: ui/gtk/help-overlay.ui:482
 msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Subrayar el texto"
 
-#: ui/gtk/help-overlay.ui:467
+#: ui/gtk/help-overlay.ui:489
 msgctxt "shortcut window"
 msgid "Strike text"
 msgstr "Tachar el texto"
 
-#: ui/gtk/help-overlay.ui:474
+#: ui/gtk/help-overlay.ui:496
 msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Eliminar el formato"
 
-#: ui/gtk/help-overlay.ui:481
+#: ui/gtk/help-overlay.ui:503
 msgctxt "shortcut window"
 msgid "Insert an image"
 msgstr "Insertar una imagen"
 
-#: ui/gtk/help-overlay.ui:488
+#: ui/gtk/help-overlay.ui:510
 msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Insertar un enlace"
@@ -3694,6 +3693,10 @@ msgstr "_Autenticar"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Actualización de Geary en proceso…"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Find in current conversations"
+#~ msgstr "Buscar en las conversaciones actual"
 
 #~ msgid "Log periodic activity"
 #~ msgstr "Registrar la actividad periódica"
