@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "POT-Creation-Date: 2020-05-14 15:06+0000\n"
-"PO-Revision-Date: 2020-05-16 20:37+0300\n"
+"PO-Revision-Date: 2020-05-16 23:51+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "MIME-Version: 1.0\n"
@@ -982,7 +982,7 @@ msgstr "<input>cc:<var>отримувач</var></input>"
 msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
 "Шукає повідомлення, у яких <var>отримувач</var> збігається із вмістом полів"
-" CC."
+" «Копія»."
 
 #. (itstool) path: td/p
 #: C/search.page:43
@@ -1058,6 +1058,11 @@ msgid ""
 "argument, which searches for the account's email address in the appropriate "
 "context."
 msgstr ""
+"Особливим випадком для операторів <input>bcc</input>, <input>cc</input>, <"
+"input>from</"
+"input> і <input>to</input> є значення аргументу <input>me</input>,"
+" використання якого надає змогу шукати адресу електронної пошти облікового"
+" запису у відповідному контексті."
 
 #. (itstool) path: page/title
 #: C/shortcuts.page:10
@@ -1072,6 +1077,12 @@ msgid ""
 "style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
 "main window's toolbar, or using the keyboard shortcuts listed below."
 msgstr ""
+"У Geary передбачено клавіатурні скорочення для типових операцій."
+" Скористайтеся вбудованою довідкою для ознайомлення із повним списком. Щоб"
+" відкрити довідку з клавіатурних скорочень, виберіть пункт <gui"
+" style=\"menuitem\">Клавіатурні скорочення</gui> у меню програми на панелі"
+" інструментів головного вікна або скористайтеся клавіатурними скороченнями із"
+" наведеного нижче списку."
 
 #. (itstool) path: section/p
 #: C/shortcuts.page:20
@@ -1125,6 +1136,9 @@ msgid ""
 "The full list of single key shortcuts enabled by this preference can be "
 "found via the keyboard shortcuts help, above."
 msgstr ""
+"Із повним списком одноклавішних скорочень, які вмикаються цим пунктом, можна"
+" ознайомитися у довідці з клавіатурних скорочень, доступ до якої можна"
+" отримати в описаний вище спосіб."
 
 #. (itstool) path: page/title
 #: C/star.page:10
@@ -1146,6 +1160,11 @@ msgid ""
 "can star an individual message by clicking the star at the upper right of "
 "the message itself."
 msgstr ""
+"Ви можете позначити повідомлення зірочкою, щоб вказати важливість"
+" повідомлення для вас. Щоб позначити спілкування зірочкою, клацніть на"
+" піктограмі із зірочкою у списку спілкувань. Ви можете позначити зірочкою"
+" окреме повідомлення, натиснувши кнопку із зірочкою у верхньому правому куті"
+" повідомлення."
 
 #. (itstool) path: section/p
 #: C/star.page:15
@@ -1153,6 +1172,8 @@ msgid ""
 "With Gmail accounts, starred messages appear in the Starred folder in the "
 "folder list."
 msgstr ""
+"На облікових записах Gmail повідомлення із зірочкою потрапляють до теки"
+" «Зірочки» у списку тек."
 
 #. (itstool) path: section/title
 #: C/star.page:18
@@ -1166,6 +1187,9 @@ msgid ""
 "toggle a conversation as read or unread, click the circle icon in the "
 "conversation list."
 msgstr ""
+"Geary автоматично позначає повідомлення як прочитані, якщо ви їх читаєте. Щоб"
+" вказати спілкування як прочитане або непрочитане вручну, натисніть"
+" піктограму з колом у списку спілкувань."
 
 #. (itstool) path: section/p
 #: C/star.page:22
@@ -1174,6 +1198,9 @@ msgid ""
 "the toolbar can be used to toggle the read status of the selected "
 "conversation(s)."
 msgstr ""
+"Крім того, ви можете скористатися пунктом <gui>Позначити як непрочитане</gui>"
+" у меню <gui>Позначення</gui> на панелі інструментів для перемикання стану"
+" позначеного спілкування."
 
 #. (itstool) path: section/p
 #: C/star.page:25
@@ -1181,6 +1208,8 @@ msgid ""
 "To mark an individual message as read, select <gui>Mark as Read</gui> from "
 "the dropdown menu."
 msgstr ""
+"Щоб позначити окреме повідомлення як прочитане, виберіть пункт <gui>Позначити"
+" як прочитане</gui> у спадному меню."
 
 #. (itstool) path: page/title
 #: C/write.page:7
@@ -1203,6 +1232,15 @@ msgid ""
 "click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
 "key><key>Enter</key></keyseq> to send the message."
 msgstr ""
+"Щоб розпочати нове спілкування електронною поштою, натисніть кнопку <gui"
+" style=\"button\">Нове повідомлення</gui> на панелі інструментів. Введіть"
+" адресу електронної пошти отримувача повідомлення у поле <gui style=\"input\""
+">Кому</gui> і тему повідомлення у поле <gui style=\"input\">Тема</gui>. Далі,"
+" ви можете ввести повідомлення до текстового поля, яке розташовано під цими"
+" двома полями. Коли повідомлення буде готове до надсилання, натисніть кнопку"
+" <gui style=\"button\">Надіслати</gui> або натисніть комбінацію клавіш <"
+"keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq>, щоб його надіслати."
 
 #. (itstool) path: note/title
 #: C/write.page:23
@@ -1218,6 +1256,12 @@ msgid ""
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
 "more changes to it."
 msgstr ""
+"При надсиланні повідомлення електронної пошти Geary очікує 5 секунд перед"
+" відправлення повідомлення. Протягом цього часу ви зможете натиснути кнопку <"
+"gui style=\"button\">Скасувати</gui> на контекстній панелі сповіщення, яку"
+" буде показано, або натиснути комбінацію клавіш <keyseq><key>Ctrl</key><key"
+">Z</key></keyseq> для повторного відкриття повідомлення для внесення до нього"
+" додаткових змін."
 
 #. (itstool) path: section/p
 #: C/write.page:32
@@ -1230,6 +1274,14 @@ msgid ""
 "be shown by selecting <gui style=\"menu\">Show extended fields</gui> from "
 "the formatting toolbar menu."
 msgstr ""
+"При введення адреси електронної пошти у поля <gui style=\"input\">Кому</gui>"
+" і <gui style=\"input\">Копія</gui> Geary надаватиме пропозиції із адресної"
+" книги вашого стільничного середовища та адрес у раніше надісланих і"
+" отриманих повідомленнях електронної пошти. Щоб вибрати одну з пропозицій,"
+" просто клацніть на ній. Крім того, може бути показано поля <gui "
+"style=\"input\">Потайна копія</gui> і <gui style=\"input\">Відповідати</gui>."
+" Для цього слід вибрати пункт <gui style=\"menu\">Показувати додаткові поля<"
+"/gui> з меню форматування на панелі інструментів."
 
 #. (itstool) path: section/p
 #: C/write.page:41
@@ -1239,6 +1291,11 @@ msgid ""
 "\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
 "forwarded email composer for the latest message in the conversation."
 msgstr ""
+"Щоб відповісти до поточного позначеного спілкування, натисніть на панелі"
+" інструментів одну з таких кнопок: <gui style=\"button\">Відповісти</gui>, <"
+"gui style=\"button\">Відповісти всім</gui> або <gui style=\"button\""
+">Переспрямувати</gui>. У відповідь буде відкритого вікно редактора відповіді"
+" або переспрямованого повідомлення для останнього повідомлення у спілкуванні."
 
 #. (itstool) path: section/p
 #: C/write.page:47
@@ -1250,6 +1307,13 @@ msgid ""
 "\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
 "text will be quoted."
 msgstr ""
+"При відповіді на повідомлення початкове повідомлення буде процитовано і"
+" скопійовано у нижню частину відповіді. Цю частину повідомлення можна"
+" вилучити до введення відповіді натисканням клавіші <key>Backspace</key>."
+" Крім того, текст можна вибірково процитувати позначенням бажаного фрагмента"
+" тексту у повідомленні із наступним натисканням кнопки <gui style=\"button\""
+">Відповісти</gui> або <gui style=\"button\">Відповісти усім</gui> —"
+" процитовано буде лише позначений фрагмент тексту."
 
 #. (itstool) path: section/p
 #: C/write.page:55
@@ -1258,6 +1322,9 @@ msgid ""
 "corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
 "<gui>Forward</gui>."
 msgstr ""
+"Щоб відповісти на певне повідомлення електронної пошти, відкрийте меню"
+" повідомлення у верхньому куті повідомлення і виберіть пункт <gui>Відповісти<"
+"/gui>, <gui>Відповісти усім</gui> або <gui>Переспрямувати</gui>."
 
 #. (itstool) path: section/title
 #: C/write.page:61
@@ -1271,6 +1338,10 @@ msgid ""
 "<em>italic</em>, indent text to quote it and links to web pages. Simply "
 "select the text and click the appropriate button on the formatting toolbar."
 msgstr ""
+"У редакторі повідомлень Geary ви можете скористатися стилями тексту, зокрема"
+" <em>напівжирним</em> та <em>курсивом</em>, відступами тексту для цитування"
+" та посиланнями на вебсторінки. Просто позначте фрагмент тексту і натисніть"
+" відповідну кнопку на панелі інструментів форматування."
 
 #. (itstool) path: section/p
 #: C/write.page:68
@@ -1281,6 +1352,14 @@ msgid ""
 "list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
 "<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
 msgstr ""
+"Неупорядковані та упорядковані списки можна вставити або вилучити за"
+" допомогою натискання кнопок <gui "
+"style=\"button\">Вставити неупорядкований список</gui> та <gui"
+" style=\"button\">Вставити упорядкований список</gui> на панелі інструментів"
+" форматування. Рівень відступів у списку можна скоригувати за допомогою"
+" кнопок панелі інструментів форматування <gui style=\"button\">Додати"
+" відступи або цитування тексту</gui> та <gui style=\"button\">Скасувати"
+" відступи або цитування тексту</gui>."
 
 #. (itstool) path: section/p
 #: C/write.page:75
@@ -1291,6 +1370,12 @@ msgid ""
 "application into the email body and then dropping it, or by pasting an image "
 "that has been copied to the clipboard from another application."
 msgstr ""
+"Зображення можна вставити до повідомлення із форматуванням натисканням кнопки"
+" <gui style=\"button\">Вставити зображення</gui> на панелі інструментів"
+" форматування із наступним вибором зображення для долучення, перетягуванням"
+" пункту зображення з вікна програми <gui>Файли</gui> до вмісту повідомлення"
+" електронної пошти із наступним його скиданням або вставленням зображення,"
+" яке було скопійовано до буфера обміну даних з іншої програми."
 
 #. (itstool) path: section/p
 #: C/write.page:82
@@ -1309,6 +1394,9 @@ msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts\"/> for details."
 msgstr ""
+"У редакторі повідомлень можна скористатися декількома клавіатурними"
+" скороченнями. Докладніший опис можна знайти у розділі <link"
+" xref=\"shortcuts\"/>."
 
 #. (itstool) path: section/p
 #: C/write.page:93
