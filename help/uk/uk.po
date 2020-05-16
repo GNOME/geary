@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "POT-Creation-Date: 2020-05-14 15:06+0000\n"
-"PO-Revision-Date: 2020-05-16 23:51+0300\n"
+"PO-Revision-Date: 2020-05-17 00:55+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "MIME-Version: 1.0\n"
@@ -1387,6 +1387,13 @@ msgid ""
 "dropping it either on the text fields at the top of the window or on the "
 "toolbar at the bottom."
 msgstr ""
+"Документи, звукові файли, відео та інші файли можна долучити до повідомлення"
+" електронної пошти натисканням кнопки <gui style=\"button\">Долучити файл<"
+"/gui> у верхній частині вікна редактора повідомлень із наступним вибором"
+" документа, який слід долучити, або перетягуванням пункту файла з вікна"
+" програми <gui>Файли</gui> до вікна редактора повідомлень із наступним"
+" скиданням його або на текстові поля у верхній частині вікна, або на панель"
+" інструментів у нижній частині вікна."
 
 #. (itstool) path: section/p
 #: C/write.page:90
@@ -1404,6 +1411,9 @@ msgid ""
 "You may specify a signature to be inserted into the footer of email in the "
 "composer via the <link xref=\"accounts\"/> dialog."
 msgstr ""
+"Ви можете вказати підпис, який слід вставити у нижню частину повідомлення"
+" електронної пошти у редакторі повідомлень, за допомогою діалогового вікна <"
+"link xref=\"accounts\"/>."
 
 #. (itstool) path: section/title
 #: C/write.page:98
@@ -1418,6 +1428,11 @@ msgid ""
 "check dictionaries installed for the desired languages. Consult your "
 "computer's help to determine how to install dictionaries if not present."
 msgstr ""
+"У Geary передбачено підтримку перевірки правопису безпосередньо під час"
+" введення редагованого повідомлення однією або декількома мовами. Щоб"
+" увімкнути перевірку правопису, спочатку встановіть у вашій системі словники"
+" перевірки правопису бажаними мовами. Зверніться до довідки з операційної"
+" системи, щоб визначити спосіб встановлення словників, яких не вистачає."
 
 #. (itstool) path: section/p
 #: C/write.page:106
@@ -1430,6 +1445,14 @@ msgid ""
 "typing its name in the search box, then click the <gui style=\"button\">+</"
 "gui> button to add it."
 msgstr ""
+"Щоб вибрати мови для перевірки правопису, натисніть кнопку <gui"
+" style=\"button\">Перевірка правопису</gui> на панелі інструментів"
+" форматування. У відповідь буде відкрито контекстну панель вибору мови."
+" Натисніть пункт мови у списку, щоб увімкнути або вимкнути перевірку"
+" правопису цією мовою. Натисніть кнопку <gui style=\"button\">-</gui>, щоб"
+" вилучити мову зі списку. Якщо пункту мови немає у списку, пошукайте пункт за"
+" допомогою смужки пошуку, потім натисніть кнопку <gui style=\"button\">+</gui"
+">, щоб додати пункт мови."
 
 #. (itstool) path: section/title
 #: C/write.page:117
@@ -1442,6 +1465,9 @@ msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type on the server after a short delay."
 msgstr ""
+"Якщо ви працюєте із поштовим сервером, на якому передбачено підтримку"
+" чернеток, Geary автоматично зберігатиме повідомлення на сервері під час"
+" введення з невеликою затримкою."
 
 #. (itstool) path: section/p
 #: C/write.page:123
@@ -1450,6 +1476,9 @@ msgid ""
 "list, select the message, and click \"Edit Draft\" in the conversation "
 "viewer."
 msgstr ""
+"Щоб змінити наявну чернетку, виберіть теку <gui>Чернетки</gui> у списку тек,"
+" виберіть повідомлення і натисніть кнопку «Редагувати чернетку» на панелі"
+" перегляду спілкування."
 
 #. (itstool) path: section/p
 #: C/write.page:127
@@ -1466,6 +1495,14 @@ msgid ""
 "that you will need to re-open the message via the <gui>Drafts</gui> folder, "
 "if present."
 msgstr ""
+"Якщо ви зберегли або відкинули створене повідомлення електронної пошти, ви"
+" можете повторно його відкрити натисканням кнопки <gui style=\"button\""
+">Скасувати</gui> на контекстній панелі сповіщення, яку буде показано, або"
+" натисканням комбінації клавіш <keyseq><key>Ctrl</key><key>Z</key></keyseq>."
+" Можливість відновити збережене або відкинуте повідомлення зберігатиметься"
+" протягом періоду до 30 хвилин. Після завершення цього періоду вам доведеться"
+" повторно відкрити повідомлення з теки <gui>Чернетки</gui>, якщо його було"
+" там збережено."
 
 #. (itstool) path: section/title
 #: C/write.page:141
@@ -1481,6 +1518,13 @@ msgid ""
 "lists that prohibit rich text (HTML) messages, or when sending email to "
 "people that do no use modern clients like Geary."
 msgstr ""
+"Крім того, Geary може надсилати звичайні текстові повідомлення. У спадному"
+" меню позначте або зніміть позначення з пункту <gui style=\"menu\""
+">Форматований текст</gui>, щоб перемкнутися між режимом звичайного тексту і"
+" режимом форматованого тексту. Звичайний текстовий режим є корисним для"
+" надсилання повідомлень до списків листування, які забороняють надсилання"
+" повідомлень із форматованим текстом (HTML), або до тих користувачів, які не"
+" можуть користуватися сучасними клієнтами електронної пошти, подібними Geary."
 
 #. (itstool) path: section/p
 #: C/write.page:150
@@ -1490,3 +1534,7 @@ msgid ""
 "will be wrapped and quoted using a “&gt;” character for each level of "
 "quoting."
 msgstr ""
+"У режимі звичайного тексту програма автоматично переноситиме рядки тексту з"
+" використанням м'яких переносів так, щоб довжина рядків не перевищувала 74"
+" символів, а текст із відступами буде перенесено із додаванням позначок"
+" цитування, «&gt;», для кожного з рівнів цитування."
