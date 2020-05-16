@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-05-07 01:10+0000\n"
-"PO-Revision-Date: 2020-05-07 08:50+0300\n"
+"POT-Creation-Date: 2020-05-14 15:06+0000\n"
+"PO-Revision-Date: 2020-05-16 17:48+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -793,7 +793,7 @@ msgstr "Зберігати чернетки пошти на сервері"
 #. preference.
 #: src/client/accounts/accounts-editor-servers-pane.vala:666
 msgid "Save sent email on server"
-msgstr "Зберігати надіслано пошту на сервері"
+msgstr "Зберігати надіслану пошту на сервері"
 
 #. Add a suffix for OAuth2 auth so people know they
 #. shouldn't expect to be prompted for a password
@@ -1330,7 +1330,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1918
+#: src/client/composer/composer-widget.vala:1920
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1748,63 +1748,63 @@ msgstr "Надіслати лист без тексту?"
 msgid "Send message without an attachment?"
 msgstr "Надіслати лист без долучень?"
 
-#: src/client/composer/composer-widget.vala:1904
+#: src/client/composer/composer-widget.vala:1906
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "«%s» уже долучено для доставлення."
 
-#: src/client/composer/composer-widget.vala:1940
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:1942
+#: src/client/composer/composer-widget.vala:1992
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» — порожній файл."
 
-#: src/client/composer/composer-widget.vala:1978
+#: src/client/composer/composer-widget.vala:1980
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Не вдалося знайти «%s»."
 
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1986
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» — тека."
 
-#: src/client/composer/composer-widget.vala:2003
+#: src/client/composer/composer-widget.vala:2005
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Не вдалося відкрити «%s» для читання."
 
-#: src/client/composer/composer-widget.vala:2011
+#: src/client/composer/composer-widget.vala:2013
 msgid "Cannot add attachment"
 msgstr "Неможливо додати долучення"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2071
+#: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:236 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2077
+#: src/client/composer/composer-widget.vala:2079
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:241 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Копія:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2083
+#: src/client/composer/composer-widget.vala:2085
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Потайна копія:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2089
+#: src/client/composer/composer-widget.vala:2091
 msgid "Reply-To: "
 msgstr "Відповісти:"
 
-#: src/client/composer/composer-widget.vala:2341
+#: src/client/composer/composer-widget.vala:2343
 msgid "Select Color"
 msgstr "Вибрати колір"
 
@@ -1813,14 +1813,14 @@ msgstr "Вибрати колір"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2530
+#: src/client/composer/composer-widget.vala:2532
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s через %2$s"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2887
+#: src/client/composer/composer-widget.vala:2889
 msgid "Images"
 msgstr "Зображення"
 
@@ -2792,17 +2792,17 @@ msgstr "Вилучені записи"
 msgid "Archive | Archives"
 msgstr "Архів | Архіви | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:461
+#: src/engine/rfc822/rfc822-message.vala:531
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Не вдалося визначити тип MIME для «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:472
+#: src/engine/rfc822/rfc822-message.vala:542
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Не вдалося визначити тип даних для типу MIME «%s» у «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:1003
+#: src/engine/rfc822/rfc822-message.vala:1001
 msgid "(no subject)"
 msgstr "(без теми)"
 
@@ -3586,14 +3586,10 @@ msgid "Focus next/previous message"
 msgstr "Фокусувати наступне або попереднє повідомлення"
 
 #: ui/gtk/help-overlay.ui:260
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgid "Single-key Shortcuts"
 msgstr "Одноклавішні скорочення"
 
 #: ui/gtk/help-overlay.ui:265
-#| msgctxt "shortcut window"
-#| msgid "Single-key shortcuts"
 msgctxt "shortcut window"
 msgid "Single-key shortcuts (if enabled)"
 msgstr "Одноклавішні скорочення (якщо увімкнено)"
@@ -3771,7 +3767,3 @@ msgstr "_Засвідчення"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Виконується оновлення…"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Find in current conversations"
-#~ msgstr "Знайти у поточних спілкуваннях"
