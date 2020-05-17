@@ -106,7 +106,7 @@ private class Geary.ImapDB.MessageRow {
         if (fields.is_all_set(Geary.Email.Field.DATE)) {
             try {
                 email.set_send_date(
-                    !String.is_empty(date) ? new RFC822.Date(date) : null
+                    !String.is_empty(date) ? new RFC822.Date.from_rfc822_string(date) : null
                 );
             } catch (GLib.Error err) {
                 debug("Error loading message date from db: %s", err.message);
@@ -133,7 +133,7 @@ private class Geary.ImapDB.MessageRow {
         }
 
         if (fields.is_all_set(Geary.Email.Field.SUBJECT))
-            email.set_message_subject(new RFC822.Subject.decode(subject ?? ""));
+            email.set_message_subject(new RFC822.Subject.from_rfc822_string(subject ?? ""));
 
         if (fields.is_all_set(Geary.Email.Field.HEADER))
             email.set_message_header(new RFC822.Header(header ?? Memory.EmptyBuffer.instance));
@@ -171,7 +171,9 @@ private class Geary.ImapDB.MessageRow {
             return null;
         }
 
-        return new Geary.Imap.EmailProperties(constructed, new RFC822.Size(rfc822_size));
+        return new Imap.EmailProperties(
+            constructed, new Imap.RFC822Size(this.rfc822_size)
+        );
     }
 
     public Geary.EmailFlags? get_generic_email_flags() {
@@ -189,7 +191,7 @@ private class Geary.ImapDB.MessageRow {
         // null if empty
 
         if (email.fields.is_all_set(Geary.Email.Field.DATE)) {
-            date = (email.date != null) ? email.date.original : null;
+            date = (email.date != null) ? email.date.to_rfc822_string() : null;
             date_time_t = (email.date != null) ? email.date.value.to_unix() : -1;
 
             fields = fields.set(Geary.Email.Field.DATE);
@@ -220,7 +222,7 @@ private class Geary.ImapDB.MessageRow {
         }
 
         if (email.fields.is_all_set(Geary.Email.Field.SUBJECT)) {
-            subject = (email.subject != null) ? email.subject.original : null;
+            subject = (email.subject != null) ? email.subject.to_rfc822_string() : null;
 
             fields = fields.set(Geary.Email.Field.SUBJECT);
         }
@@ -272,20 +274,22 @@ private class Geary.ImapDB.MessageRow {
         return (addrs == null || addrs.size == 0) ? null : addrs.to_rfc822_string();
     }
 
-    private RFC822.MailboxAddress? unflatten_address(string? str) {
-        RFC822.MailboxAddress? addr = null;
-        if (str != null) {
-            try {
-                addr = new RFC822.MailboxAddress.from_rfc822_string(str);
-            } catch (RFC822Error e) {
-                // oh well
-            }
-        }
-        return addr;
+    private RFC822.MailboxAddress? unflatten_address(string? str)
+        throws RFC822.Error {
+        return (
+            String.is_empty_or_whitespace(str)
+            ? null
+            : new RFC822.MailboxAddress.from_rfc822_string(str)
+        );
     }
 
-    private RFC822.MailboxAddresses? unflatten_addresses(string? str) {
-        return String.is_empty(str) ? null : new RFC822.MailboxAddresses.from_rfc822_string(str);
+    private RFC822.MailboxAddresses? unflatten_addresses(string? str)
+        throws RFC822.Error {
+        return (
+            String.is_empty_or_whitespace(str)
+            ? null
+            : new RFC822.MailboxAddresses.from_rfc822_string(str)
+        );
     }
+
 }
-

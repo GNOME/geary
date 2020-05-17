@@ -46,7 +46,7 @@
     </key>
 
     <key name="formatting-toolbar-visible" type="b">
-        <default>true</default>
+        <default>false</default>
         <summary>Show/hide formatting toolbar</summary>
         <description>True if the formatting toolbar in the composer is shown.</description>
     </key>

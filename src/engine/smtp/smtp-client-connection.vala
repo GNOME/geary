@@ -119,47 +119,28 @@ internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
      * Returns the final Response of the transaction.  If the ResponseCode is not a successful
      * completion, the message should not be considered sent.
      */
-    public async Response send_data_async(Memory.Buffer data, bool already_dotstuffed,
-        Cancellable? cancellable = null) throws Error {
+    public async Response send_data_async(Memory.Buffer data,
+                                          GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_connected();
 
         // In the case of DATA, want to receive an intermediate response code, specifically 354
         Response response = yield transaction_async(new Request(Command.DATA), cancellable);
-        if (!response.code.is_start_data())
-            return response;
+        if (response.code.is_start_data()) {
+            debug("SMTP Data: <%z>", data.size);
 
-        debug("SMTP Data: <%z>", data.size);
-
-        if (!already_dotstuffed) {
-            // By using DataStreamNewlineType.ANY, we're assured to get each line and convert to
-            // a proper line terminator for SMTP
-            DataInputStream dins = new DataInputStream(data.get_input_stream());
-            dins.set_newline_type(DataStreamNewlineType.ANY);
-
-            // Read each line and dot-stuff if necessary
-            for (;;) {
-                size_t length;
-                string? line = yield dins.read_line_async(Priority.DEFAULT, cancellable, out length);
-                if (line == null)
-                    break;
-
-                // stuffing
-                if (line[0] == '.')
-                    yield Stream.write_string_async(douts, ".", cancellable);
-
-                yield Stream.write_string_async(douts, line, cancellable);
-                yield Stream.write_string_async(douts, DataFormat.LINE_TERMINATOR, cancellable);
-            }
-        } else {
             // ready to go, send and commit
-            yield Stream.write_all_async(douts, data, cancellable);
+            yield Stream.write_all_async(this.douts, data, cancellable);
+
+            // terminate buffer and flush to server
+            yield Stream.write_string_async(
+                this.douts, DataFormat.DATA_TERMINATOR, cancellable
+            );
+            yield this.douts.flush_async(Priority.DEFAULT, cancellable);
+
+            response = yield recv_response_async(cancellable);
         }
-
-        // terminate buffer and flush to server
-        yield Stream.write_string_async(douts, DataFormat.DATA_TERMINATOR, cancellable);
-        yield douts.flush_async(Priority.DEFAULT, cancellable);
-
-        return yield recv_response_async(cancellable);
+        return response;
     }
 
     public async void send_request_async(Request request, Cancellable? cancellable = null) throws Error {

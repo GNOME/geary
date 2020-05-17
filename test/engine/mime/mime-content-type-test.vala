@@ -10,6 +10,7 @@ class Geary.Mime.ContentTypeTest : TestCase {
     public ContentTypeTest() {
         base("Geary.Mime.ContentTypeTest");
         add_test("static_defaults", static_defaults);
+        add_test("parse", parse);
         add_test("get_file_name_extension", get_file_name_extension);
         add_test("guess_type_from_name", guess_type_from_name);
         add_test("guess_type_from_buf", guess_type_from_buf);
@@ -24,6 +25,26 @@ class Geary.Mime.ContentTypeTest : TestCase {
             "application/octet-stream",
             ContentType.ATTACHMENT_DEFAULT.to_string()
         );
+    }
+
+    public void parse() throws GLib.Error {
+        var test_article = ContentType.parse("text/plain");
+        assert_string("text", test_article.media_type);
+        assert_string("plain", test_article.media_subtype);
+
+        try {
+            ContentType.parse("");
+            assert_not_reached();
+        } catch (MimeError.PARSE error) {
+            // All good
+        }
+
+        try {
+            ContentType.parse("textplain");
+            assert_not_reached();
+        } catch (MimeError.PARSE error) {
+            // All good
+        }
     }
 
     public void get_file_name_extension() throws Error {

@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-05-03 07:30+0000\n"
-"PO-Revision-Date: 2020-05-04 10:21+0200\n"
+"POT-Creation-Date: 2020-05-04 08:24+0000\n"
+"PO-Revision-Date: 2020-05-08 14:50+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak <gnome-sk-list@gnome.org>\n"
 "Language: sk\n"
@@ -256,7 +256,6 @@ msgid "Notify of new mail at startup"
 msgstr "Oznámiť novú poštu po spustení"
 
 #: desktop/org.gnome.Geary.gschema.xml:97
-#| msgid "Desktop notification of new mail"
 msgid "True to notify of new mail at startup."
 msgstr "Nastavením na True, bude oznamovaná nová pošta po spustení."
 
@@ -265,7 +264,6 @@ msgid "Ask when opening an attachment"
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:103
-#| msgid "To add them as attachments"
 msgid "True to ask when opening an attachment."
 msgstr "Nastavením na True, bude zobrazená výzva pri otváraní prílohy."
 
@@ -708,7 +706,7 @@ msgstr "TLS"
 #: src/client/accounts/accounts-editor-row.vala:534
 #: ui/application-main-window.ui:346
 msgid "Login"
-msgstr "Prihlasovacie meno"
+msgstr "Prihlásenie"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
@@ -892,7 +890,6 @@ msgstr "Otvorí nové okno"
 
 #. / Command line option
 #: src/client/application/application-client.vala:137
-#| msgid "Revoke all server certificates with TLS warnings"
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Odvolá všetky certifikáty pripnutých serverov TLS"
 
@@ -981,7 +978,6 @@ msgstr "Nerozpoznaný parameter programu: „%s“"
 #. / Notification title.
 #: src/client/application/application-controller.vala:458
 #, c-format
-#| msgid "A problem occurred sending mail for %s"
 msgid "A problem occurred sending email for %s"
 msgstr "Vyskytol sa problém pri odosielaní emailu z účtu %s"
 
@@ -1000,7 +996,6 @@ msgstr[2] "Rozhovory boli označené"
 
 #. / Translators: Label for in-app notification
 #: src/client/application/application-controller.vala:574
-#| msgid "No conversations found"
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Rozhovorom bolo zrušené označenie"
@@ -2515,11 +2510,11 @@ msgstr "Vytvoriť"
 
 #: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
-msgstr "Prijíma sa"
+msgstr "Prijímanie"
 
 #: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
-msgstr "Odosiela sa"
+msgstr "Odosielanie"
 
 #: ui/accounts_editor_edit_pane.ui:8
 msgid "Edit Account"
@@ -2640,7 +2635,6 @@ msgstr "Účet nahlásil nedôveryhodný server."
 
 #. Button tooltip for retrying when a login error has occurred
 #: ui/application-main-window.ui:350
-#| msgid "Retry receiving email, you will be prompted for a password"
 msgid "Retry login, you will be prompted for your password"
 msgstr "Znovu sa pokúsi o prihlásenie, budete vyzvaný na zadanie hesla"
 
@@ -2816,27 +2810,21 @@ msgstr "Preškrtnutý text"
 
 # tooltip
 #: ui/composer-widget.ui:707
-#| msgid "Insert unordered list"
 msgid "Insert bulleted list"
 msgstr "Vloží zoznam s odrážkami"
 
 # tooltip
 #: ui/composer-widget.ui:731
-#| msgid "Insert unordered list"
 msgid "Insert numbered list"
 msgstr "Vloží číslovaný zoznam"
 
 # tooltip
 #: ui/composer-widget.ui:764
-#| msgctxt "shortcut window"
-#| msgid "Unquote text"
 msgid "Indent or quote text"
 msgstr "Odsadí alebo cituje text"
 
 # tooltip
 #: ui/composer-widget.ui:788
-#| msgctxt "shortcut window"
-#| msgid "Unquote text"
 msgid "Un-indent or unquote text"
 msgstr "Zruší odsadenie alebo citáciu textu"
 
@@ -2991,7 +2979,6 @@ msgstr "Prepne pridávanie nových položiek záznamu"
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:37 ui/problem-details-dialog.ui:19
-#| msgid "Search for more languages"
 msgid "Search for matching log entries"
 msgstr "Vyhľadá zhodné položky záznamu"
 
@@ -3041,7 +3028,6 @@ msgstr "Odstráni emailové adresy"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
-#| msgid "Email address:"
 msgid "This email address is:"
 msgstr "Táto emailová adresa je:"
 
@@ -3407,8 +3393,6 @@ msgid "Go to next/previous pane"
 msgstr "Prejdenie na nasledovný/predošlý panel"
 
 #: ui/gtk/help-overlay.ui:241
-#| msgctxt "shortcut window"
-#| msgid "Find next/previous in current conversation"
 msgctxt "shortcut window"
 msgid "Select next/previous conversation"
 msgstr "Výber nasledovného/predošlého rozhovoru"
@@ -3419,8 +3403,6 @@ msgid "Focus next/previous message"
 msgstr "Zameranie na nasledovnú/predošlú správu"
 
 #: ui/gtk/help-overlay.ui:258
-#| msgctxt "shortcut window"
-#| msgid "Show keyboard shortcuts"
 msgctxt "shortcut window"
 msgid "Single-key shortcuts"
 msgstr "Klávesové skratky o jednom klávese"
@@ -3575,8 +3557,6 @@ msgid "_Archive"
 msgstr "_Archivovať"
 
 #: ui/main-toolbar-menus.ui:21
-#| msgctxt "shortcut window"
-#| msgid "Toggle spam"
 msgid "Toggle as S_pam"
 msgstr "Prepnúť ako _nevyžiadanú poštu"
 

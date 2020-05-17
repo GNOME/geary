@@ -1051,7 +1051,7 @@ public class Accounts.AccountConfigV1 : AccountConfig, GLib.Object {
                 senders.add(
                     new Geary.RFC822.MailboxAddress.from_rfc822_string(sender)
                 );
-            } catch (Geary.RFC822Error err) {
+            } catch (Geary.RFC822.Error err) {
                 throw new ConfigError.SYNTAX(
                     "%s: Invalid sender address: %s", id, sender
                 );
@@ -1274,10 +1274,15 @@ public class Accounts.AccountConfigLegacy : AccountConfig, GLib.Object {
             ALTERNATE_EMAILS_KEY
         );
         foreach (string alt_email in alt_email_list) {
-            Geary.RFC822.MailboxAddresses mailboxes =
-                new Geary.RFC822.MailboxAddresses.from_rfc822_string(alt_email);
-            foreach (Geary.RFC822.MailboxAddress mailbox in mailboxes.get_all()) {
-                info.append_sender(mailbox);
+            try {
+                var mailboxes = new Geary.RFC822.MailboxAddresses.from_rfc822_string(alt_email);
+                foreach (Geary.RFC822.MailboxAddress mailbox in mailboxes.get_all()) {
+                    info.append_sender(mailbox);
+                }
+            } catch (Geary.RFC822.Error error) {
+                throw new ConfigError.SYNTAX(
+                    "Invalid alternate email: %s", error.message
+                );
             }
         }
 

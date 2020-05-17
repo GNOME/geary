@@ -59,12 +59,13 @@ This is the second line.
         add_test("get_searchable_recipients", get_searchable_recipients);
         add_test("from_composed_email", from_composed_email);
         add_test("from_composed_email_inline_attachments", from_composed_email_inline_attachments);
-        add_test("get_network_buffer", get_network_buffer);
-        add_test("get_network_buffer_dot_stuff", get_network_buffer_dot_stuff);
-        add_test("get_network_buffer_long_ascii_line", get_network_buffer_long_ascii_line);
+        add_test("get_rfc822_buffer", get_rfc822_buffer);
+        add_test("get_rfc822_buffer_dot_stuff", get_rfc822_buffer_dot_stuff);
+        add_test("get_rfc822_buffer_no_bcc", get_rfc822_buffer_no_bcc);
+        add_test("get_rfc822_buffer_long_ascii_line", get_rfc822_buffer_long_ascii_line);
     }
 
-    public void basic_message_from_buffer() throws Error {
+    public void basic_message_from_buffer() throws GLib.Error {
         Message basic = resource_to_message(BASIC_TEXT_PLAIN);
 
         assert_data(basic.subject, "Re: Basic text/plain message");
@@ -74,21 +75,21 @@ This is the second line.
         assert_addresses(basic.to, "Charlie <charlie@example.net>");
         assert_addresses(basic.cc, "Dave <dave@example.net>");
         assert_addresses(basic.bcc, "Eve <eve@example.net>");
-        //assert_data(basic.message_id, "<3456@example.net>");
+        assert_data(basic.message_id, "3456@example.net");
         assert_message_id_list(basic.in_reply_to, "<1234@local.machine.example>");
         assert_message_id_list(basic.references, "<1234@local.machine.example>");
-        assert_data(basic.date, "Fri, 21 Nov 1997 10:01:10 -0600");
+        assert_data(basic.date, "1997-11-21T10:01:10-0600");
         assert(basic.mailer == "Geary Test Suite 1.0");
     }
 
-    public void encoded_recipient() throws Error {
+    public void encoded_recipient() throws GLib.Error {
         Message enc = string_to_message(ENCODED_TO);
 
         // Courtesy Mailsploit https://www.mailsploit.com
-        assert(enc.to[0].name == "potus@whitehouse.gov <test>");
+        assert_string("potus@whitehouse.gov <test>", enc.to[0].name);
     }
 
-    public void duplicate_mailbox() throws Error {
+    public void duplicate_mailbox() throws GLib.Error {
         Message dup = string_to_message(DUPLICATE_TO);
 
         assert(dup.to.size == 2);
@@ -97,16 +98,16 @@ This is the second line.
         );
     }
 
-    public void duplicate_message_id() throws Error {
+    public void duplicate_message_id() throws GLib.Error {
         Message dup = string_to_message(DUPLICATE_REFERENCES);
 
-        assert(dup.references.list.size == 2);
+        assert(dup.references.size == 2);
         assert_message_id_list(
             dup.references, "<1234@local.machine.example> <5678@local.machine.example>"
         );
     }
 
-    public void text_plain_as_plain() throws Error {
+    public void text_plain_as_plain() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_PLAIN);
 
         assert_true(test.has_plain_body(), "Expected plain body");
@@ -114,7 +115,7 @@ This is the second line.
         assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
     }
 
-    public void text_plain_as_html() throws Error {
+    public void text_plain_as_html() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_PLAIN);
 
         assert_true(test.has_plain_body(), "Expected plain body");
@@ -125,7 +126,7 @@ This is the second line.
         );
     }
 
-    public void text_html_as_html() throws Error {
+    public void text_html_as_html() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_HTML);
 
         assert_true(test.has_html_body(), "Expected html body");
@@ -133,7 +134,7 @@ This is the second line.
         assert_string(BASIC_HTML_BODY, test.get_html_body(null));
     }
 
-    public void text_html_as_plain() throws Error {
+    public void text_html_as_plain() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_HTML);
 
         assert_true(test.has_html_body(), "Expected html body");
@@ -141,7 +142,7 @@ This is the second line.
         assert_string(BASIC_HTML_BODY, test.get_html_body(null));
     }
 
-    public void tnef_extract_attachments() throws Error {
+    public void tnef_extract_attachments() throws GLib.Error {
         Message test = resource_to_message(BASIC_MULTIPART_TNEF);
         Gee.List<Part> attachments = test.get_attachments();
         assert_true(attachments.size == 2);
@@ -149,7 +150,7 @@ This is the second line.
         assert_true(attachments[1].get_clean_filename() == "bookmark.htm");
     }
 
-    public void multipart_alternative_as_plain() throws Error {
+    public void multipart_alternative_as_plain() throws GLib.Error {
         Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
 
         assert_true(test.has_plain_body(), "Expected plain body");
@@ -157,7 +158,7 @@ This is the second line.
         assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
     }
 
-    public void multipart_alternative_as_converted_html() throws Error {
+    public void multipart_alternative_as_converted_html() throws GLib.Error {
         Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
 
         assert_true(test.has_plain_body(), "Expected plain body");
@@ -168,7 +169,7 @@ This is the second line.
         );
     }
 
-    public void multipart_alternative_as_html() throws Error {
+    public void multipart_alternative_as_html() throws GLib.Error {
         Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
 
         assert_true(test.has_plain_body(), "Expected plain body");
@@ -176,13 +177,13 @@ This is the second line.
         assert_string(BASIC_HTML_BODY, test.get_html_body(null));
     }
 
-    public void get_preview() throws Error {
+    public void get_preview() throws GLib.Error {
         Message multipart_signed = string_to_message(MULTIPART_SIGNED_MESSAGE_TEXT);
 
         assert(multipart_signed.get_preview() == MULTIPART_SIGNED_MESSAGE_PREVIEW);
     }
 
-    public void get_recipients() throws Error {
+    public void get_recipients() throws GLib.Error {
         Message test = string_to_message(SIMPLE_MULTIRECIPIENT_TO_CC_BCC);
 
         Gee.List<RFC822.MailboxAddress>? addresses = test.get_recipients();
@@ -195,14 +196,14 @@ This is the second line.
         assert_addresses_list(addresses, verify_list, "get_recipients");
     }
 
-    public void get_searchable_body() throws Error {
+    public void get_searchable_body() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_HTML);
         string searchable = test.get_searchable_body();
         assert_true(searchable.contains("This is the first line"), "Expected body text");
         assert_false(searchable.contains("<P>"), "Expected html removed");
     }
 
-    public void get_searchable_recipients() throws Error {
+    public void get_searchable_recipients() throws GLib.Error {
         Message test = string_to_message(SIMPLE_MULTIRECIPIENT_TO_CC_BCC);
         string searchable = test.get_searchable_recipients();
         assert_true(searchable.contains("Jane Doe <jdoe@somewhere.tld>"), "Expected to address");
@@ -210,13 +211,13 @@ This is the second line.
         assert_true(searchable.contains("Jane Doe BCC <jdoe_bcc@somewhere.tld>"), "Expected bcc address");
     }
 
-    public void get_network_buffer() throws Error {
+    public void get_rfc822_buffer() throws GLib.Error {
         Message test = resource_to_message(BASIC_TEXT_PLAIN);
-        Memory.Buffer buffer = test.get_network_buffer(true);
+        Memory.Buffer buffer = test.get_rfc822_buffer(NONE);
         assert_true(buffer.to_string() == NETWORK_BUFFER_EXPECTED, "Network buffer differs");
     }
 
-    public void get_network_buffer_dot_stuff() throws GLib.Error {
+    public void get_rfc822_buffer_dot_stuff() throws GLib.Error {
         RFC822.MailboxAddress to = new RFC822.MailboxAddress(
             "Test", "test@example.com"
         );
@@ -235,11 +236,42 @@ This is the second line.
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
-        string message_data = message.get_network_buffer(true).to_string();
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
         assert_true(message_data.has_suffix("..newline\r\n..\r\n"));
     }
 
-    public void get_network_buffer_long_ascii_line() throws GLib.Error {
+    public void get_rfc822_buffer_no_bcc() throws GLib.Error {
+        RFC822.MailboxAddress to = new RFC822.MailboxAddress(
+            "Test", "test@example.com"
+        );
+        RFC822.MailboxAddress bcc = new RFC822.MailboxAddress(
+            "BCC", "bcc@example.com"
+        );
+        RFC822.MailboxAddress from = new RFC822.MailboxAddress(
+            "Sender", "sender@example.com"
+        );
+        Geary.ComposedEmail composed = new Geary.ComposedEmail(
+            new GLib.DateTime.now_local(),
+            new Geary.RFC822.MailboxAddresses.single(from)
+        ).set_to(
+            new Geary.RFC822.MailboxAddresses.single(to)
+        ).set_bcc(
+            new Geary.RFC822.MailboxAddresses.single(bcc)
+        );
+        composed.body_text = "\nbody\n";
+
+        this.message_from_composed_email.begin(
+            composed,
+            this.async_completion
+        );
+        Geary.RFC822.Message message = message_from_composed_email.end(async_result());
+
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
+        assert_true("To: Test <test@example.com>\r\n" in message_data);
+        assert_false("bcc" in message_data.down());
+    }
+
+    public void get_rfc822_buffer_long_ascii_line() throws GLib.Error {
         RFC822.MailboxAddress to = new RFC822.MailboxAddress(
             "Test", "test@example.com"
         );
@@ -265,7 +297,7 @@ This is the second line.
         );
         Geary.RFC822.Message message = message_from_composed_email.end(async_result());
 
-        string message_data = message.get_network_buffer(true).to_string();
+        string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
         foreach (var line in message_data.split("\n")) {
             assert_true(line.length < 1000, line);
         }
@@ -318,7 +350,7 @@ This is the second line.
         );
     }
 
-    public void from_composed_email_inline_attachments() throws Error {
+    public void from_composed_email_inline_attachments() throws GLib.Error {
         RFC822.MailboxAddress to = new RFC822.MailboxAddress(
             "Test", "test@example.com"
         );
@@ -371,7 +403,8 @@ This is the second line.
         assert_true(out_buffer.size > (buffer.size+buffer2.size), "Expected sizeable message");
     }
 
-    private async Geary.RFC822.Message message_from_composed_email(Geary.ComposedEmail composed) {
+    private async Message message_from_composed_email(ComposedEmail composed)
+        throws GLib.Error {
         return yield new Geary.RFC822.Message.from_composed_email(
             composed,
             GMime.utils_generate_message_id(composed.from.get(0).domain),
@@ -379,7 +412,7 @@ This is the second line.
         );
     }
 
-    private Message resource_to_message(string path) throws Error {
+    private Message resource_to_message(string path) throws GLib.Error {
         GLib.File resource =
             GLib.File.new_for_uri(RESOURCE_URI).resolve_relative_path(path);
 
@@ -391,7 +424,7 @@ This is the second line.
         );
     }
 
-    private Message string_to_message(string message_text) throws Error {
+    private Message string_to_message(string message_text) throws GLib.Error {
         return new Message.from_buffer(
             new Geary.Memory.StringBuffer(message_text)
         );
@@ -399,21 +432,21 @@ This is the second line.
 
     private void assert_data(Geary.MessageData.AbstractMessageData? actual,
                              string expected)
-        throws Error {
+        throws GLib.Error {
         assert_non_null(actual, expected);
         assert_string(expected, actual.to_string());
     }
 
     private void assert_address(Geary.RFC822.MailboxAddress? address,
                                 string expected)
-        throws Error {
+        throws GLib.Error {
         assert_non_null(address, expected);
         assert_string(expected, address.to_rfc822_string());
     }
 
     private void assert_addresses(Geary.RFC822.MailboxAddresses? addresses,
                                   string expected)
-        throws Error {
+        throws GLib.Error {
         assert_non_null(addresses, expected);
         assert_string(expected, addresses.to_rfc822_string());
     }
@@ -421,7 +454,7 @@ This is the second line.
     private void assert_addresses_list(Gee.List<RFC822.MailboxAddress>? addresses,
                                   Gee.List<string> expected,
                                   string context)
-        throws Error {
+        throws GLib.Error {
         assert_non_null(addresses, context + " not null");
         assert_true(addresses.size == expected.size, context + " size");
         foreach (RFC822.MailboxAddress address in addresses) {
@@ -431,9 +464,9 @@ This is the second line.
 
     private void assert_message_id_list(Geary.RFC822.MessageIDList? ids,
                                         string expected)
-        throws Error {
-        assert_non_null(ids, expected);
-        assert(ids.to_rfc822_string() == expected);
+        throws GLib.Error {
+        assert_non_null(ids, "ids are null");
+        assert_string(expected, ids.to_rfc822_string());
     }
 
     // Courtesy Mailsploit https://www.mailsploit.com

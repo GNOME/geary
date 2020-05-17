@@ -118,7 +118,8 @@ class Integration.Smtp.ClientSession : TestCase {
     }
 
     private async Geary.RFC822.Message new_message(Geary.RFC822.MailboxAddress from,
-                                                   Geary.RFC822.MailboxAddress to) {
+                                                   Geary.RFC822.MailboxAddress to)
+        throws Geary.RFC822.Error {
         Geary.ComposedEmail composed = new Geary.ComposedEmail(
             new GLib.DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.single(from)

@@ -15,7 +15,7 @@ class Geary.RFC822.Utils.Test : TestCase {
         add_test("best_encoding_binary", best_encoding_binary);
     }
 
-    public void to_preview_text() throws Error {
+    public void to_preview_text() throws GLib.Error {
         assert(Geary.RFC822.Utils.to_preview_text(PLAIN_BODY_ENCODED, Geary.RFC822.TextFormat.PLAIN) ==
                PLAIN_BODY_EXPECTED);
         assert(Geary.RFC822.Utils.to_preview_text(HTML_BODY_ENCODED, Geary.RFC822.TextFormat.HTML) ==

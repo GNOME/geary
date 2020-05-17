@@ -23,7 +23,7 @@ public class SidebarCountCellRenderer : Gtk.CellRenderer {
 
     public override void get_preferred_width(Gtk.Widget widget, out int minimum_size, out int natural_size) {
         unread_count.count = counter;
-        minimum_size = unread_count.get_width(widget) + FormattedConversationData.LINE_SPACING;
+        minimum_size = unread_count.get_width(widget) + FormattedConversationData.SPACING;
         natural_size = minimum_size;
     }
 

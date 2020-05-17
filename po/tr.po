@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-04-23 04:13+0000\n"
-"PO-Revision-Date: 2020-04-25 15:34+0300\n"
+"POT-Creation-Date: 2020-05-14 15:06+0000\n"
+"PO-Revision-Date: 2020-05-16 15:14+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -1218,7 +1218,11 @@ msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 msgid "%s — %s"
 msgstr "%s — %s"
 
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
 #: src/client/application/application-main-window.vala:972
+#: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etiketler"
 
@@ -1268,7 +1272,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1918
+#: src/client/composer/composer-widget.vala:1920
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1367,7 +1371,7 @@ msgid "Preferences"
 msgstr "Tercihler"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:179
+#: src/client/components/components-preferences-window.vala:180
 msgid "Plugins"
 msgstr "Eklentiler"
 
@@ -1666,63 +1670,63 @@ msgstr "İleti, ileti gövdesi olmadan gönderilsin mi?"
 msgid "Send message without an attachment?"
 msgstr "İleti eki olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1904
+#: src/client/composer/composer-widget.vala:1906
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” gönderim için zaten eklendi."
 
-#: src/client/composer/composer-widget.vala:1940
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:1942
+#: src/client/composer/composer-widget.vala:1992
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” boş bir dosya."
 
-#: src/client/composer/composer-widget.vala:1978
+#: src/client/composer/composer-widget.vala:1980
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” bulunamadı."
 
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1986
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” bir klasör."
 
-#: src/client/composer/composer-widget.vala:2003
+#: src/client/composer/composer-widget.vala:2005
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” okuma için açılamadı."
 
-#: src/client/composer/composer-widget.vala:2011
+#: src/client/composer/composer-widget.vala:2013
 msgid "Cannot add attachment"
 msgstr "Eklenti eklenemiyor"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2071
+#: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:236 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Kime:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2077
+#: src/client/composer/composer-widget.vala:2079
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:241 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2083
+#: src/client/composer/composer-widget.vala:2085
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2089
+#: src/client/composer/composer-widget.vala:2091
 msgid "Reply-To: "
 msgstr "Şuna Yanıtla: "
 
-#: src/client/composer/composer-widget.vala:2341
+#: src/client/composer/composer-widget.vala:2343
 msgid "Select Color"
 msgstr "Renk Seç"
 
@@ -1731,14 +1735,14 @@ msgstr "Renk Seç"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2530
+#: src/client/composer/composer-widget.vala:2532
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%2$s aracılığıyla %1$s"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2887
+#: src/client/composer/composer-widget.vala:2889
 msgid "Images"
 msgstr "Resimler"
 
@@ -2660,17 +2664,17 @@ msgstr "Silinen Ögeler"
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
-#: src/engine/rfc822/rfc822-message.vala:461
+#: src/engine/rfc822/rfc822-message.vala:531
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s” için mime türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:472
+#: src/engine/rfc822/rfc822-message.vala:542
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%2$s” üstündeki “%1$s” mime türü için içerik türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:1003
+#: src/engine/rfc822/rfc822-message.vala:1001
 msgid "(no subject)"
 msgstr "(konu yok)"
 
@@ -2679,14 +2683,14 @@ msgid "Add an account"
 msgstr "Hesap ekle"
 
 #: ui/accounts_editor_add_pane.ui:53
-msgid "Create"
-msgstr "Oluştur"
+msgid "_Create"
+msgstr "_Oluştur"
 
-#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
 msgstr "Alım"
 
-#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
 msgstr "Gönderiliyor"
 
@@ -3281,7 +3285,7 @@ msgstr "etiket"
 msgid "Conversation Shortcuts"
 msgstr "Konuşma Kısayolları"
 
-#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:355
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:377
 msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Eylemler"
@@ -3296,37 +3300,37 @@ msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Göndereni yanıtla"
 
-#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:269
+#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:281
 msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Tümünü yanıtla"
 
-#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:276
+#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:288
 msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Yönlendir"
 
-#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:283
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:295
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
 msgstr "Okundu olarak imle/imi kaldır"
 
-#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:290
+#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:302
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
 msgstr "Yıldızla/Yıldızı kaldır"
 
-#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
+#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:309
 msgctxt "shortcut window"
 msgid "Archive conversations"
 msgstr "Konuşmaları arşivle"
 
-#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
+#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:326
 msgctxt "shortcut window"
 msgid "Move conversations"
 msgstr "Konuşmaları taşı"
 
-#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
+#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:333
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Konuşmaları etiketle"
@@ -3336,12 +3340,12 @@ msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Konuşmaları çöpe at"
 
-#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
+#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Konuşmaları gereksize taşı"
 
-#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
 msgctxt "shortcut window"
 msgid "Delete conversations"
 msgstr "Konuşmaları sil"
@@ -3356,7 +3360,7 @@ msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Konuşmaları ara"
 
-#: ui/gtk/help-overlay.ui:115
+#: ui/gtk/help-overlay.ui:115 ui/gtk/help-overlay.ui:354
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Şimdiki konuşmada bul"
@@ -3396,7 +3400,7 @@ msgctxt "shortcut window"
 msgid "Reset zoom"
 msgstr "Yakınlaştırmayı sıfırla"
 
-#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:375
+#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:397
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Genel"
@@ -3446,121 +3450,120 @@ msgctxt "shortcut window"
 msgid "Focus next/previous message"
 msgstr "Önceki/sonraki iletiye odaklan"
 
-#: ui/gtk/help-overlay.ui:258
-msgctxt "shortcut window"
-msgid "Single-key shortcuts"
-msgstr "Tek tuşlu kısayollar"
+#: ui/gtk/help-overlay.ui:260
+msgid "Single-key Shortcuts"
+msgstr "Tek Tuşlu Kısayollar"
 
-#: ui/gtk/help-overlay.ui:262
+#: ui/gtk/help-overlay.ui:265
+msgctxt "shortcut window"
+msgid "Single-key shortcuts (if enabled)"
+msgstr "Tek tuşlu kısayollar (etkinse)"
+
+#: ui/gtk/help-overlay.ui:274
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Göndereni yanıtla "
 
-#: ui/gtk/help-overlay.ui:332
-msgctxt "shortcut window"
-msgid "Find in current conversations"
-msgstr "Geçerli konuşmalarda bul"
-
-#: ui/gtk/help-overlay.ui:339
+#: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Sonraki/önceki konuşmaları seç"
 
-#: ui/gtk/help-overlay.ui:351
+#: ui/gtk/help-overlay.ui:373
 msgid "Composer Shortcuts"
 msgstr "Oluşturucu Kısayolları"
 
-#: ui/gtk/help-overlay.ui:359
+#: ui/gtk/help-overlay.ui:381
 msgctxt "shortcut window"
 msgid "Send"
 msgstr "Gönder"
 
-#: ui/gtk/help-overlay.ui:366
+#: ui/gtk/help-overlay.ui:388
 msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Ek ekle"
 
-#: ui/gtk/help-overlay.ui:379
+#: ui/gtk/help-overlay.ui:401
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Oluşturucu penceresini kapat"
 
-#: ui/gtk/help-overlay.ui:386
+#: ui/gtk/help-overlay.ui:408
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Oluşturucu penceresini ayır"
 
-#: ui/gtk/help-overlay.ui:393
+#: ui/gtk/help-overlay.ui:415
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Düzenleme"
 
-#: ui/gtk/help-overlay.ui:398
+#: ui/gtk/help-overlay.ui:420
 msgctxt "shortcut window"
 msgid "Move selection to the clipboard"
 msgstr "Seçimi panoya taşı"
 
-#: ui/gtk/help-overlay.ui:405
+#: ui/gtk/help-overlay.ui:427
 msgctxt "shortcut window"
 msgid "Copy selection to clipboard"
 msgstr "Seçimi panoya kopyala"
 
-#: ui/gtk/help-overlay.ui:412
+#: ui/gtk/help-overlay.ui:434
 msgctxt "shortcut window"
 msgid "Paste from the clipboard"
 msgstr "Panodan yapıştır"
 
-#: ui/gtk/help-overlay.ui:419
+#: ui/gtk/help-overlay.ui:441
 msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Metni alıntıla"
 
-#: ui/gtk/help-overlay.ui:426
+#: ui/gtk/help-overlay.ui:448
 msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Metni alıntılama"
 
-#: ui/gtk/help-overlay.ui:435
+#: ui/gtk/help-overlay.ui:457
 msgctxt "shortcut window"
 msgid "Rich text editing"
 msgstr "Zengin metin düzenleme"
 
-#: ui/gtk/help-overlay.ui:439
+#: ui/gtk/help-overlay.ui:461
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Biçimlendirmeden yapıştır"
 
-#: ui/gtk/help-overlay.ui:446
+#: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
 msgid "Bold text"
 msgstr "Kalın yazı"
 
-#: ui/gtk/help-overlay.ui:453
+#: ui/gtk/help-overlay.ui:475
 msgctxt "shortcut window"
 msgid "Italicize text"
 msgstr "Eğik metin"
 
-#: ui/gtk/help-overlay.ui:460
+#: ui/gtk/help-overlay.ui:482
 msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Metnin altını çiz"
 
-#: ui/gtk/help-overlay.ui:467
+#: ui/gtk/help-overlay.ui:489
 msgctxt "shortcut window"
 msgid "Strike text"
 msgstr "Çizgili metin"
 
-#: ui/gtk/help-overlay.ui:474
+#: ui/gtk/help-overlay.ui:496
 msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Biçimlendirmeyi kaldır"
 
-#: ui/gtk/help-overlay.ui:481
+#: ui/gtk/help-overlay.ui:503
 msgctxt "shortcut window"
 msgid "Insert an image"
 msgstr "Resim yerleştir"
 
-#: ui/gtk/help-overlay.ui:488
+#: ui/gtk/help-overlay.ui:510
 msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Bağlantı yerleştir"
@@ -3629,6 +3632,10 @@ msgstr "_Kimlik Doğrula"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi sürüyor…"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Find in current conversations"
+#~ msgstr "Geçerli konuşmalarda bul"
 
 #~ msgid "Log periodic activity"
 #~ msgstr "Dönemsel etkinliği kayda al"

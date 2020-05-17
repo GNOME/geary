@@ -23,7 +23,7 @@ class Geary.RFC822.PartTest : TestCase {
         add_test("write_to_buffer_plain_utf8", write_to_buffer_plain_utf8);
     }
 
-    public void new_from_minimal_mime_part() throws Error {
+    public void new_from_minimal_mime_part() throws GLib.Error {
         Part test = new Part(new_part("test/plain", CR_BODY.data));
 
         assert_null_string(test.content_id, "content_id");
@@ -31,7 +31,7 @@ class Geary.RFC822.PartTest : TestCase {
         assert_null(test.content_disposition, "content_disposition");
     }
 
-    public void new_from_complete_mime_part() throws Error {
+    public void new_from_complete_mime_part() throws GLib.Error {
         const string TYPE = "text/plain";
         const string ID = "test-id";
         const string DESC = "test description";
@@ -58,7 +58,7 @@ class Geary.RFC822.PartTest : TestCase {
         );
     }
 
-    public void write_to_buffer_plain() throws Error {
+    public void write_to_buffer_plain() throws GLib.Error {
         Part test = new Part(new_part("text/plain", CR_BODY.data));
 
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
@@ -66,7 +66,7 @@ class Geary.RFC822.PartTest : TestCase {
         assert_string(CR_BODY, buf.to_string());
     }
 
-    public void write_to_buffer_plain_crlf() throws Error {
+    public void write_to_buffer_plain_crlf() throws GLib.Error {
         Part test = new Part(new_part("text/plain", CRLF_BODY.data));
 
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
@@ -75,7 +75,7 @@ class Geary.RFC822.PartTest : TestCase {
         assert_string(CR_BODY, buf.to_string());
     }
 
-    public void write_to_buffer_plain_ical() throws Error {
+    public void write_to_buffer_plain_ical() throws GLib.Error {
         Part test = new Part(new_part("text/calendar", ICAL_BODY.data));
 
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);

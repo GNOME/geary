@@ -808,7 +808,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         // accumulate these to submit Imap.EmailProperties all at once
         InternalDate? internaldate = null;
-        RFC822.Size? rfc822_size = null;
+        RFC822Size? rfc822_size = null;
 
         // accumulate these to submit References all at once
         RFC822.MessageID? message_id = null;
@@ -848,7 +848,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 break;
 
                 case FetchDataSpecifier.RFC822_SIZE:
-                    rfc822_size = (RFC822.Size) data;
+                    rfc822_size = (RFC822Size) data;
                 break;
 
                 case FetchDataSpecifier.FLAGS:
@@ -901,7 +901,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 RFC822.Date? date = null;
                 if (!String.is_empty(value)) {
                     try {
-                        date = new RFC822.Date(value);
+                        date = new RFC822.Date.from_rfc822_string(value);
                     } catch (GLib.Error err) {
                         warning(
                             "Error parsing date from FETCH response: %s",
@@ -979,7 +979,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
                 string? value = headers.get("Subject");
                 if (value != null)
-                    email.set_message_subject(new RFC822.Subject.decode(value));
+                    email.set_message_subject(new RFC822.Subject.from_rfc822_string(value));
                 else
                     email.set_message_subject(null);
             }
@@ -1069,7 +1069,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         MailboxSpecifier mailbox = session.get_mailbox_for_path(this.folder.path);
         AppendCommand cmd = new AppendCommand(
-            mailbox, msg_flags, internaldate, message.get_network_buffer(false)
+            mailbox, msg_flags, internaldate, message.get_rfc822_buffer()
         );
 
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(

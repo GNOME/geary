@@ -145,7 +145,7 @@ public class Geary.RFC822.Part : Object {
 
     public Memory.Buffer write_to_buffer(EncodingConversion conversion,
                                          BodyFormatting format = BodyFormatting.NONE)
-        throws RFC822Error {
+        throws Error {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
@@ -158,11 +158,11 @@ public class Geary.RFC822.Part : Object {
     internal void write_to_stream(GMime.Stream destination,
                                   EncodingConversion conversion,
                                   BodyFormatting format = BodyFormatting.NONE)
-        throws RFC822Error {
+        throws Error {
         GMime.DataWrapper? wrapper = (this.source_part != null)
             ? this.source_part.get_content() : null;
         if (wrapper == null) {
-            throw new RFC822Error.INVALID(
+            throw new Error.INVALID(
                 "Could not get the content wrapper for content-type %s",
                 content_type.to_string()
             );
@@ -227,17 +227,17 @@ public class Geary.RFC822.Part : Object {
             }
 
             if (wrapper.write_to_stream(filter) < 0)
-                throw new RFC822Error.FAILED("Unable to write textual RFC822 part to filter stream");
+                throw new Error.FAILED("Unable to write textual RFC822 part to filter stream");
             if (filter.flush() != 0)
-                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination stream");
+                throw new Error.FAILED("Unable to flush textual RFC822 part to destination stream");
             if (destination.flush() != 0)
-                throw new RFC822Error.FAILED("Unable to flush textual RFC822 part to destination");
+                throw new Error.FAILED("Unable to flush textual RFC822 part to destination");
         } else {
             // Keep as binary
             if (wrapper.write_to_stream(destination) < 0)
-                throw new RFC822Error.FAILED("Unable to write binary RFC822 part to destination stream");
+                throw new Error.FAILED("Unable to write binary RFC822 part to destination stream");
             if (destination.flush() != 0)
-                throw new RFC822Error.FAILED("Unable to flush binary RFC822 part to destination");
+                throw new Error.FAILED("Unable to flush binary RFC822 part to destination");
         }
     }
 

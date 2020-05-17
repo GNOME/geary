@@ -63,7 +63,7 @@ public class CountBadge : Geary.BaseObject {
         Pango.Rectangle? logical_rect;
         layout_num.get_pixel_extents(out ink_rect, out logical_rect);
         if (ctx != null) {
-            double bg_width = logical_rect.width + FormattedConversationData.LINE_SPACING;
+            double bg_width = logical_rect.width + FormattedConversationData.SPACING;
             double bg_height = logical_rect.height;
             double radius = bg_height / 2.0;
             double degrees = Math.PI / 180.0;
@@ -87,7 +87,7 @@ public class CountBadge : Geary.BaseObject {
             Pango.cairo_show_layout(ctx, layout_num);
         }
 
-        width = logical_rect.width + FormattedConversationData.LINE_SPACING;
+        width = logical_rect.width + FormattedConversationData.SPACING;
         height = logical_rect.height;
     }
 }

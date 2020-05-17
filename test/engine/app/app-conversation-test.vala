@@ -289,7 +289,7 @@ class Geary.App.ConversationTest : TestCase {
         );
         email.set_full_references(mid, null, null);
         email.set_email_properties(new MockEmailProperties(now));
-        email.set_send_date(new Geary.RFC822.Date.from_date_time(now));
+        email.set_send_date(new RFC822.Date(now));
         return email;
     }
 
