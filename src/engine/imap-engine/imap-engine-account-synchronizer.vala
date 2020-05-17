@@ -16,7 +16,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private DateTime max_epoch = new DateTime(
         new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0
     );
-    private SyncDetachMonitor? sync_detach_monitor = null;
+    private bool background_idle_gc_scheduled = false;
 
 
     public AccountSynchronizer(GenericAccount account) {
@@ -49,8 +49,9 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private void send_all(Gee.Collection<Folder> folders,
                                             bool became_available,
                                             bool for_storage_clean=false,
-                                            SyncDetachMonitor? monitor=null) {
+                                            GarbageCollectPostIdleMessageDetach? post_idle_detach_op=null) {
 
+        bool add_post_idle_detach_op = false;
         foreach (Folder folder in folders) {
             // Only sync folders that:
             // 1. Can actually be opened (i.e. are selectable)
@@ -72,11 +73,13 @@ private class Geary.ImapEngine.AccountSynchronizer :
                         this.account,
                         imap_folder,
                         this.max_epoch,
-                        for_storage_clean
+                        for_storage_clean,
+                        post_idle_detach_op
                     );
-                    if (monitor != null)
-                        monitor.add(check_op);
                     op = check_op;
+                    if (post_idle_detach_op != null) {
+                        add_post_idle_detach_op = true;
+                    }
                 } else {
                     op = new RefreshFolderSync(this.account, imap_folder);
                 }
@@ -86,6 +89,15 @@ private class Geary.ImapEngine.AccountSynchronizer :
                 } catch (Error err) {
                     warning("Failed to queue sync operation: %s", err.message);
                 }
+            }
+        }
+
+        // Add GC operation after message removal during background cleanup
+        if (add_post_idle_detach_op) {
+            try {
+                this.account.queue_operation(post_idle_detach_op);
+            } catch (Error err) {
+                warning("Failed to queue sync operation: %s", err.message);
             }
         }
     }
@@ -100,27 +112,18 @@ private class Geary.ImapEngine.AccountSynchronizer :
     }
 
     private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
-        if (this.account.is_open() && this.sync_detach_monitor == null) {
-            this.sync_detach_monitor = new SyncDetachMonitor();
-            send_all(this.account.list_folders(), false, true, this.sync_detach_monitor);
-            this.sync_detach_monitor.initialised = true;
-            this.sync_detach_monitor.completed.connect((messages_detached) => {
-                if (cancellable != null && cancellable.is_cancelled()) {
-                    this.sync_detach_monitor = null;
-                    return;
-                }
 
-                // Run GC. Reap is forced if messages were detached. Vacuum
-                // is allowed as we're running in the background.
-                Geary.ImapDB.Database.GarbageCollectionOptions options = ALLOW_VACUUM;
-                if (messages_detached) {
-                    options |= FORCE_REAP;
-                }
-                account.local.db.run_gc.begin(options,
-                                              {account.imap, account.smtp},
-                                              cancellable);
-                this.sync_detach_monitor = null;
+        if (this.account.is_open() && !this.background_idle_gc_scheduled) {
+            this.background_idle_gc_scheduled = true;
+            GarbageCollectPostIdleMessageDetach op =
+                new GarbageCollectPostIdleMessageDetach(account);
+            op.completed.connect(() => {
+                this.background_idle_gc_scheduled = false;
             });
+            cancellable.cancelled.connect(() => {
+                this.background_idle_gc_scheduled = false;
+            });
+            send_all(this.account.list_folders(), false, true, op);
         }
     }
 
@@ -254,19 +257,20 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
  */
 private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
-    public signal void old_message_detached(GLib.Cancellable cancellable);
-
     private DateTime sync_max_epoch;
     private bool for_storage_clean;
+    private GarbageCollectPostIdleMessageDetach? post_idle_detach_op;
 
 
     internal CheckFolderSync(GenericAccount account,
                              MinimalFolder folder,
                              DateTime sync_max_epoch,
-                             bool for_storage_clean) {
+                             bool for_storage_clean,
+                             GarbageCollectPostIdleMessageDetach? post_idle_detach_op) {
         base(account, folder);
         this.sync_max_epoch = sync_max_epoch;
         this.for_storage_clean = for_storage_clean;
+        this.post_idle_detach_op = post_idle_detach_op;
     }
 
     protected override async void sync_folder(Cancellable cancellable)
@@ -291,7 +295,9 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                                                                   cancellable);
             if (detached_ids != null) {
                 this.folder.email_locally_removed(detached_ids);
-                old_message_detached(cancellable);
+                if (post_idle_detach_op != null) {
+                    post_idle_detach_op.messages_detached();
+                }
 
                 if (!for_storage_clean) {
                     GenericAccount imap_account = (GenericAccount) account;
@@ -439,7 +445,8 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
  *
  * Queues a basic GC run which will run if old messages were detached
  * after a folder became available. Not used for backgrounded account
- * storage operations, which are handled instead by the {@link SyncDetachMonitor}.
+ * storage operations, which are handled instead by the
+ * {@link GarbageCollectPostIdleMessageDetach}.
  */
 private class Geary.ImapEngine.GarbageCollectPostMessageDetach: AccountOperation {
 
@@ -467,31 +474,35 @@ private class Geary.ImapEngine.GarbageCollectPostMessageDetach: AccountOperation
 }
 
 /**
- * Monitor account sync operations until completion.
+ * Performs garbage collection after old messages have been removed during
+ * backgrounded idle cleanup.
  *
- * Monitors added {@link CheckFolderSync} operations until completed
- * and signals whether messages were detached.
+ * Queues a GC run after a cleanup of messages has occurred while the
+ * app is idle in the background. Vacuuming will be permitted and if
+ * messages have been removed a reap will be forced.
  */
-private class SyncDetachMonitor: Geary.BaseObject {
+private class Geary.ImapEngine.GarbageCollectPostIdleMessageDetach: AccountOperation {
 
-    public bool messages_detached { get; private set; default = false; }
-    public bool initialised { get; set; default = false; }
+    // Vacuum is allowed as we're running in the background
+    private Geary.ImapDB.Database.GarbageCollectionOptions options = ALLOW_VACUUM;
 
-    private List<Geary.ImapEngine.CheckFolderSync> operations =
-        new List<Geary.ImapEngine.CheckFolderSync>();
+    internal GarbageCollectPostIdleMessageDetach(GenericAccount account) {
+        base(account);
+    }
 
-    public signal void completed(bool messages_detached);
+    public override async void execute(GLib.Cancellable cancellable)
+        throws Error {
+        if (cancellable.is_cancelled())
+            return;
 
-    public void add(Geary.ImapEngine.CheckFolderSync operation) {
-        this.operations.append(operation);
-        operation.old_message_detached.connect(() => {
-            this.messages_detached = true;
-        });
-        operation.completed.connect((op) => {
-            operations.remove((Geary.ImapEngine.CheckFolderSync) op);
-            if (initialised && operations.length() == 0) {
-                this.completed(this.messages_detached);
-            }
-        });
+        GenericAccount generic_account = (GenericAccount) this.account;
+        generic_account.local.db.run_gc.begin(this.options,
+                                              {generic_account.imap, generic_account.smtp},
+                                              cancellable);
+    }
+
+    public void messages_detached() {
+        // Reap is forced if messages were detached
+        this.options |= FORCE_REAP;
     }
 }
