@@ -173,6 +173,9 @@ public class CollectionAssertions : ValaUnit.TestCase {
     }
 
     public void int_gee_collection() throws GLib.Error {
+#if !VALA_0_50
+        skip("Collections containing non-pointer values not currently supported. See GNOME/vala#992");
+#endif
         var intv = new int[] { 42, 1337 };
         assert_collection(new_gee_collection(intv))
             .is_non_empty()
