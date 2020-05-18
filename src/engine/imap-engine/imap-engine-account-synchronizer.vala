@@ -51,7 +51,6 @@ private class Geary.ImapEngine.AccountSynchronizer :
                                             bool for_storage_clean=false,
                                             GarbageCollectPostIdleMessageDetach? post_idle_detach_op=null) {
 
-        bool add_post_idle_detach_op = false;
         foreach (Folder folder in folders) {
             // Only sync folders that:
             // 1. Can actually be opened (i.e. are selectable)
@@ -77,9 +76,6 @@ private class Geary.ImapEngine.AccountSynchronizer :
                         post_idle_detach_op
                     );
                     op = check_op;
-                    if (post_idle_detach_op != null) {
-                        add_post_idle_detach_op = true;
-                    }
                 } else {
                     op = new RefreshFolderSync(this.account, imap_folder);
                 }
@@ -89,15 +85,6 @@ private class Geary.ImapEngine.AccountSynchronizer :
                 } catch (Error err) {
                     warning("Failed to queue sync operation: %s", err.message);
                 }
-            }
-        }
-
-        // Add GC operation after message removal during background cleanup
-        if (add_post_idle_detach_op) {
-            try {
-                this.account.queue_operation(post_idle_detach_op);
-            } catch (Error err) {
-                warning("Failed to queue sync operation: %s", err.message);
             }
         }
     }
@@ -117,13 +104,22 @@ private class Geary.ImapEngine.AccountSynchronizer :
             this.background_idle_gc_scheduled = true;
             GarbageCollectPostIdleMessageDetach op =
                 new GarbageCollectPostIdleMessageDetach(account);
+
             op.completed.connect(() => {
                 this.background_idle_gc_scheduled = false;
             });
             cancellable.cancelled.connect(() => {
                 this.background_idle_gc_scheduled = false;
             });
+
             send_all(this.account.list_folders(), false, true, op);
+
+            // Add GC operation after message removal during background cleanup
+            try {
+                this.account.queue_operation(op);
+            } catch (Error err) {
+                warning("Failed to queue sync operation: %s", err.message);
+            }
         }
     }
 
