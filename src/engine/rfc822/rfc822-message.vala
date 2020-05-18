@@ -1022,8 +1022,8 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                     GMime.StreamMem stream = new GMime.StreamMem();
                     ((GMime.Part) root).get_content().write_to_stream(stream);
                     ByteArray tnef_data = stream.get_byte_array();
-                    Ytnef.TNEFStruct tn;
-                    if (Ytnef.ParseMemory(tnef_data.data, out tn) == 0) {
+                    Ytnef.TNEFStruct tn = Ytnef.TNEFStruct();
+                    if (Ytnef.ParseMemory(tnef_data.data, ref tn) == 0) {
                         for (unowned Ytnef.Attachment? a = tn.starting_attach.next; a != null; a = a.next) {
                             attachments.add(new Part(tnef_attachment_to_gmime_part(a)));
                         }

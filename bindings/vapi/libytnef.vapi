@@ -44,11 +44,13 @@ namespace Ytnef {
 
 	[CCode (cname = "TNEFStruct", destroy_function="TNEFFree", has_type_id = false)]
 	public struct TNEFStruct {
+		[CCode (cname = "TNEFInitialize")]
+		public TNEFStruct();
 		Attachment starting_attach;
 	}
 
 	[CCode (cname = "TNEFParseMemory", has_type_id = false)]
-	public static int ParseMemory(uint8[] data, out TNEFStruct tnef);
+	public static int ParseMemory(uint8[] data, ref TNEFStruct tnef);
 
 	[CCode (cname = "MAPIFindProperty")]
 	public static unowned VariableLength* MAPIFindProperty(MAPIProps MAPI, uint tag);
