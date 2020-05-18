@@ -14,7 +14,7 @@
     address of the people to receive the message in the <gui
     style="input">To</gui> text field, and a subject line in the <gui
     style="input">Subject</gui> field. You can then type your message
-    in the text area below these. Once the message is read to send,
+    in the text area below these. Once the message is ready to send,
     click <gui style="button">Send</gui> or type
     <keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the
     message.</p>
