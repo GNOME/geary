@@ -49,7 +49,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private void send_all(Gee.Collection<Folder> folders,
                                             bool became_available,
                                             bool for_storage_clean=false,
-                                            GarbageCollectPostIdleMessageDetach? post_idle_detach_op=null) {
+                                            IdleGarbageCollection? post_idle_detach_op=null) {
 
         foreach (Folder folder in folders) {
             // Only sync folders that:
@@ -102,8 +102,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
 
         if (this.account.is_open() && !this.background_idle_gc_scheduled) {
             this.background_idle_gc_scheduled = true;
-            GarbageCollectPostIdleMessageDetach op =
-                new GarbageCollectPostIdleMessageDetach(account);
+            IdleGarbageCollection op = new IdleGarbageCollection(account);
 
             op.completed.connect(() => {
                 this.background_idle_gc_scheduled = false;
@@ -255,14 +254,14 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
     private DateTime sync_max_epoch;
     private bool for_storage_clean;
-    private GarbageCollectPostIdleMessageDetach? post_idle_detach_op;
+    private IdleGarbageCollection? post_idle_detach_op;
 
 
     internal CheckFolderSync(GenericAccount account,
                              MinimalFolder folder,
                              DateTime sync_max_epoch,
                              bool for_storage_clean,
-                             GarbageCollectPostIdleMessageDetach? post_idle_detach_op) {
+                             IdleGarbageCollection? post_idle_detach_op) {
         base(account, folder);
         this.sync_max_epoch = sync_max_epoch;
         this.for_storage_clean = for_storage_clean;
@@ -297,8 +296,8 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
                 if (!for_storage_clean) {
                     GenericAccount imap_account = (GenericAccount) account;
-                    GarbageCollectPostMessageDetach op =
-                        new GarbageCollectPostMessageDetach(imap_account);
+                    ForegroundGarbageCollection op =
+                        new ForegroundGarbageCollection(imap_account);
                     try {
                         imap_account.queue_operation(op);
                     } catch (Error err) {
@@ -442,11 +441,11 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
  * Queues a basic GC run which will run if old messages were detached
  * after a folder became available. Not used for backgrounded account
  * storage operations, which are handled instead by the
- * {@link GarbageCollectPostIdleMessageDetach}.
+ * {@link IdleGarbageCollection}.
  */
-private class Geary.ImapEngine.GarbageCollectPostMessageDetach: AccountOperation {
+private class Geary.ImapEngine.ForegroundGarbageCollection: AccountOperation {
 
-    internal GarbageCollectPostMessageDetach(GenericAccount account) {
+    internal ForegroundGarbageCollection(GenericAccount account) {
         base(account);
     }
 
@@ -477,12 +476,12 @@ private class Geary.ImapEngine.GarbageCollectPostMessageDetach: AccountOperation
  * app is idle in the background. Vacuuming will be permitted and if
  * messages have been removed a reap will be forced.
  */
-private class Geary.ImapEngine.GarbageCollectPostIdleMessageDetach: AccountOperation {
+private class Geary.ImapEngine.IdleGarbageCollection: AccountOperation {
 
     // Vacuum is allowed as we're running in the background
     private Geary.ImapDB.Database.GarbageCollectionOptions options = ALLOW_VACUUM;
 
-    internal GarbageCollectPostIdleMessageDetach(GenericAccount account) {
+    internal IdleGarbageCollection(GenericAccount account) {
         base(account);
     }
 
