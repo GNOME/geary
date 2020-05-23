@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-tour master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
-"POT-Creation-Date: 2020-04-29 16:12+0000\n"
+"POT-Creation-Date: 2020-04-04 09:45+0000\n"
 "PO-Revision-Date: 2020-05-06 00:25+0200\n"
 "Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
@@ -98,7 +98,8 @@ msgstr "Suche"
 
 #: src/widgets/window.rs:102
 msgid "In the Activities Overview, just start typing to search"
-msgstr "Fangen Sie zur Suche in der Aktivitäten-Übersicht einfach an zu tippen"
+msgstr ""
+"Fangen Sie zur Suche in der Aktivitäten-Übersicht einfach an zu tippen"
 
 #: src/widgets/window.rs:103
 msgid ""
