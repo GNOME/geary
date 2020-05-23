@@ -1,0 +1,167 @@
+# German translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Joerg Schachner <jschachner@mailbox.org>, 2020.
+# Christian Kirbach <christian.kirbach@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-04-29 16:12+0000\n"
+"PO-Revision-Date: 2020-05-06 00:25+0200\n"
+"Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
+"Language-Team: German <gnome-de@gnome.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "GNOME Tour"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "GNOME Tour und Begrüßer."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "Eine Führung und Begrüßung für GNOME."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Hauptfenster"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "Das GNOME-Projekt"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Tour"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Tour und Begrüßer"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome; GTK;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Hallo! Wenn Sie GNOME noch nicht kennen, können Sie auf der Führung einige "
+"wichtige Funktionen kennenlernen."
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr "Die Tour starten"
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Nein Danke"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "Schließen"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "Weiter"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr "Begrüßungstour"
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Aktivitäten-Übersicht"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr "Aktivitäten öffnen, um Apps zu starten"
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"Sie können auch geöffnete Fenster sehen, suchen und Arbeitsflächen nutzen."
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Suche"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr "Fangen Sie zur Suche in der Aktivitäten-Übersicht einfach an zu tippen"
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"Die Suche kann dazu genutzt werden, um Apps zu starten, Einstellungen zu "
+"finden, Berechnungen auszuführen und vieles mehr."
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Datum und Uhrzeit"
+
+# Verstehe den Sinn auch im Original nicht
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr "Klicken Sie auf die Uhrzeit, um Ihr Jetzt und das Nächste anzuzeigen"
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"Dies umfasst Benachrichtigungen, Mediensteuerungen, Kalenderereignisse, das "
+"Wetter und Weltuhren."
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Systemmenü"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Systeminformationen und Einstellungen anzeigen"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+"Verschaffen Sie sich einen Überblick über den Systemstatus und ändern Sie "
+"schnell die Einstellungen."
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Software"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Apps suchen und installieren"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr ""
+"Mit der Software-App können Sie alle benötigten Apps leicht finden und "
+"installieren."
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Mehr erfahren"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr "Das war's! Weitere Informationen erhalten Sie in der Hilfe"
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr "Die Hilfe-Anwendung enthält Informationen, Tipps und Tricks."
