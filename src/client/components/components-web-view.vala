@@ -79,6 +79,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
+        // Enable WebProcess sandboxing
+        context.set_sandbox_enabled(true);
         // Use the doc viewer model since each web view instance only
         // ever shows a single HTML document.
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
