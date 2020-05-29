@@ -16,7 +16,6 @@ private class Geary.ImapEngine.AccountSynchronizer :
     private DateTime max_epoch = new DateTime(
         new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0
     );
-    private bool background_idle_gc_scheduled = false;
 
 
     public AccountSynchronizer(GenericAccount account) {
@@ -100,16 +99,8 @@ private class Geary.ImapEngine.AccountSynchronizer :
 
     private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
 
-        if (this.account.is_open() && !this.background_idle_gc_scheduled) {
-            this.background_idle_gc_scheduled = true;
+        if (this.account.is_open()) {
             IdleGarbageCollection op = new IdleGarbageCollection(account);
-
-            op.completed.connect(() => {
-                this.background_idle_gc_scheduled = false;
-            });
-            cancellable.cancelled.connect(() => {
-                this.background_idle_gc_scheduled = false;
-            });
 
             send_all(this.account.list_folders(), false, true, op);
 
