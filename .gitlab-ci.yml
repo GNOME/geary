@@ -3,7 +3,7 @@ include:
     file: 'flatpak/flatpak-ci-initiative-sdk-extensions.yml'
 
 flatpak:
-  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/rust_bundle:master'
+  image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/rust_bundle:3.36'
   variables:
     BUNDLE: "org.gnome.TourDevel.flatpak"
     MANIFEST_PATH: "build-aux/org.gnome.TourDevel.json"
