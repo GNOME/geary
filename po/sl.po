@@ -1,0 +1,157 @@
+# Slovenian translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+#
+# Matej Urbančič <mateju@svn.gnome.org>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-05-30 11:31+0000\n"
+"PO-Revision-Date: 2020-06-05 08:43+0200\n"
+"Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
+"Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
+"Language: sl_SI\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
+"%100==4 ? 3 : 0);\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Poedit 2.3\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "Vodič GNOME"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr ""
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr ""
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Glavno okno"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "Projekt GNOME"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr ""
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr ""
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;Vodnik;vodič;pozdrav;"
+
+#: src/widgets/pages/welcome.rs:34
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+
+#: src/widgets/pages/welcome.rs:44
+msgid "Take the Tour"
+msgstr ""
+
+#: src/widgets/pages/welcome.rs:51
+msgid "No Thanks"
+msgstr "Ne, hvala"
+
+#: src/widgets/headerbar.rs:30
+msgid "Close"
+msgstr "Zapri"
+
+#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
+msgid "Next"
+msgstr "Naprej"
+
+#: src/widgets/headerbar.rs:57
+msgid "Welcome Tour"
+msgstr ""
+
+#: src/widgets/window.rs:94
+msgid "Activities Overview"
+msgstr "Pregled dejavnosti"
+
+#: src/widgets/window.rs:95
+msgid "Open Activities to start apps"
+msgstr ""
+
+#: src/widgets/window.rs:96
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+
+#: src/widgets/window.rs:101
+msgid "Search"
+msgstr "Iskanje"
+
+#: src/widgets/window.rs:102
+msgid "In the Activities Overview, just start typing to search"
+msgstr ""
+
+#: src/widgets/window.rs:103
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+
+#: src/widgets/window.rs:108
+msgid "Date & Time"
+msgstr "Datum in čas"
+
+#: src/widgets/window.rs:109
+msgid "Click the time to see your now and next"
+msgstr ""
+
+#: src/widgets/window.rs:110
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+
+#: src/widgets/window.rs:115
+msgid "System Menu"
+msgstr "Sistemski meni"
+
+#: src/widgets/window.rs:116
+msgid "View system information and settings"
+msgstr "Pregled sistemskih podrobnosti in nastavitev"
+
+#: src/widgets/window.rs:117
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+
+#: src/widgets/window.rs:121
+msgid "Software"
+msgstr "Programska oprema"
+
+#: src/widgets/window.rs:122
+msgid "Find and install apps"
+msgstr "Iskanje in nameščanje programov"
+
+#: src/widgets/window.rs:123
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr "Program poenostavi iskanje in nameščanje različne programske opreme"
+
+#: src/widgets/window.rs:128
+msgid "Learn More"
+msgstr "Več podrobnosti"
+
+#: src/widgets/window.rs:129
+msgid "That's it! To learn more, see the Help"
+msgstr ""
+
+#: src/widgets/window.rs:130
+msgid "The help app contains information, tips and tricks."
+msgstr ""
