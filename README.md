@@ -26,16 +26,15 @@ for more information.
 Getting in Touch
 ----------------
 
- * Geary wiki:   https://wiki.gnome.org/Apps/Geary
- * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
- * IRC Channel:  [#geary on irc.gimp.org](irc://irc.gimp.org/%23geary)
+ * Geary wiki: https://wiki.gnome.org/Apps/Geary
+ * Support and discussion: See the `geary` tag on [GNOME Discourse](https://discourse.gnome.org/tags/c/applications/7/geary)
  * Matrix channel: [#_gimpnet_#geary:gnome.org](https://riot.im/app/#/room/#_gimpnet_#geary:gnome.org)
 
 **Code Of Conduct**
 
 We follow the [Contributor Covenant](./code-of-conduct.md) as our
 Code of Conduct. All communications in project spaces are expected to
-follow it.
+adhere to it.
 
 Contributing to Geary
 ---------------------
@@ -43,10 +42,10 @@ Contributing to Geary
 Want to help improve Geary? Here are some ways to contribute:
 
  * Bug reporting: https://wiki.gnome.org/Apps/Geary/ReportingABug
- * Development:   https://wiki.gnome.org/Apps/Geary/Development
  * Translating:   https://wiki.gnome.org/Apps/Geary/Translating
- * Join the mailing list or IRC channel and join in the discussion
+ * Development:   https://wiki.gnome.org/Apps/Geary/Development
+ * Donate:        https://wiki.gnome.org/Apps/Geary/Donate
 
 ---
 Copyright 2016 Software Freedom Conservancy Inc.  
-Copyright 2017 Michael Gratton <mike@vee.net>
+Copyright 2017-2020 Michael Gratton <mike@vee.net>
