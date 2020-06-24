@@ -16,11 +16,11 @@
     <item><p><link
     href="https://wiki.gnome.org/Apps/Geary/ReportingABug">Bug
     reporting</link>—report new bugs or request new features</p></item>
-    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Design">User Experience Design</link>—research and develop Geary’s user experience</p></item>
-    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Development">Development</link>—fix bugs and add new features</p></item>
     <item><p><link href="https://wiki.gnome.org/Apps/Geary/Translating">Translating</link>—translate Geary’s user interface and user manual into new languages</p></item>
-    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Contact">Join the discussion</link>—on the mailing list or IRC channel</p></item>
+    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Development">Development</link>—fix bugs and add new features</p></item>
   </list>
 
-  <p>Thanks for your help making Geary better!</p>
+  <p>See <link href="https://wiki.gnome.org/Apps/Geary/Contribute">the
+  wiki</link> for more information and options for contributing
+  financially to Geary's development.</p>
 </page>

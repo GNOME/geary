@@ -7,27 +7,44 @@
     <link type="next" xref="limits"/>
   </info>
 
-  <title>Found a bug?</title>
+  <title>Need help with Geary?</title>
 
-  <p>If you suspect you've found a bug in Geary, please <link
-  href="https://wiki.gnome.org/Apps/Geary/Contact">get in touch</link>
-  about it so it can be fixed.</p>
+  <section id="folder-list">
+    <title>Getting support</title>
 
-  <p>To help diagnose the problem as fast as possible, please include
-  the following information:</p>
+    <p>If you are having trouble using Geary, please <link
+    href="https://wiki.gnome.org/Apps/Geary/Contact">get in
+    touch</link> with the Geary community about the problem.</p>
+  </section>
 
-  <list>
-    <item><p>Geary version and installation method (Package? Flathub?
-    Source code?)</p></item>
-    <item><p>Your desktop (GNOME? KDE? Something else?)</p></item>
-    <item><p>Your operating system and version (Ubuntu 16.04? Fedora
-    28? Rolled your own?)</p></item>
-    <item><p>Email provider (Gmail, Yahoo!, Outlook.com, or someone
-    else?)</p></item>
-    <item><p>Steps to reproduce the bug</p></item>
-    <item><p>What happened?</p></item>
-    <item><p>What did you expect to happen?</p></item>
-  </list>
+  <section id="folder-list">
+    <title>Reporting bugs</title>
 
-  <p>Thanks for your help!</p>
+    <p>If you suspect you have found a bug in Geary, please follow the
+    <link href="https://wiki.gnome.org/Apps/Geary/ReportingABug">bug
+    reporting guidelines</link> so the problem can be diagnosed and
+    fixed.</p>
+
+    <p>To help diagnose the problem as fast as possible, please
+    include the following information:</p>
+
+    <list>
+      <item><p>Geary version and installation method (Package?
+      Flathub?  Source code?)</p></item>
+      <item><p>Your desktop (GNOME? KDE? Something else?)</p></item>
+      <item><p>Your operating system and version (Ubuntu 16.04? Fedora
+      28? Rolled your own?)</p></item>
+      <item><p>Email provider (Gmail, Yahoo!, Outlook.com, or someone
+      else?)</p></item>
+      <item><p>Steps to reproduce the bug</p></item>
+      <item><p>What happened?</p></item>
+      <item><p>What did you expect to happen?</p></item>
+    </list>
+
+    <p>Log files can be accessed via the Geary Inspector, press
+    <keyseq><key>Alt</key><key>I</key></keyseq> to open it, select and
+    save any relevant log files, and attach them to the bug
+    report.</p>
+  </section>
+
 </page>
