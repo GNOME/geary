@@ -538,12 +538,14 @@ public interface Geary.Logging.Source : GLib.Object {
                                        va_list args) {
         Context context = Context(this.logging_domain, levels, fmt, args);
 
-        // Don't attempt to this object if it is in the middle of
-        // being destructed, which can happen when logging from
-        // the destructor.
-        Source? decorated = (this.ref_count > 0) ? this : this.logging_parent;
+        weak Source? decorated = this;
         while (decorated != null) {
-            context.append_source(decorated);
+            // Check ref counts of logged objects and don't log them
+            // if they are or have been being destroyed, which can
+            // happen when e.g. logging from the destructor.
+            if (decorated.ref_count > 0) {
+                context.append_source(decorated);
+            }
             decorated = decorated.logging_parent;
         }
 
