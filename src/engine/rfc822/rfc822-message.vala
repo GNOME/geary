@@ -519,7 +519,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private async GMime.Part? get_buffer_part(Memory.Buffer buffer,
                                               string basename,
                                               Geary.Mime.DispositionType disposition,
-                                              GLib.Cancellable cancellable)
+                                              GLib.Cancellable? cancellable)
         throws GLib.Error {
         Mime.ContentType? mime_type = Mime.ContentType.guess_type(
             basename,
@@ -559,7 +559,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private async GMime.Part finalise_attachment_part(GMime.Stream stream,
                                                       GMime.Part part,
                                                       GMime.ContentType content_type,
-                                                      GLib.Cancellable cancellable)
+                                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
 
         // Text parts should be scanned fully to determine best
