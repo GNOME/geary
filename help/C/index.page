@@ -1,9 +1,10 @@
 <page xmlns="http://projectmallard.org/1.0/"
+      xmlns:its="http://www.w3.org/2005/11/its"
       type="guide"
       id="index">
 
   <title>
-    <media type="image" src="figures/geary.svg" width="64" height="64"></media>
+    <media type="image" its:translate="no" src="figures/geary.svg" width="64" height="64"></media>
     <span>Geary</span>
   </title>
 
