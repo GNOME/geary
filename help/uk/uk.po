@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
-"POT-Creation-Date: 2020-05-22 03:56+0000\n"
-"PO-Revision-Date: 2020-05-26 21:51+0300\n"
+"POT-Creation-Date: 2020-06-25 02:39+0000\n"
+"PO-Revision-Date: 2020-06-25 09:10+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -300,22 +300,54 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
-msgid "Found a bug?"
-msgstr "Знайшли ваду?"
+msgid "Need help with Geary?"
+msgstr "Потрібна допомога з Geary?"
 
-#. (itstool) path: page/p
-#: C/bugs.page:12
+#. (itstool) path: section/title
+#: C/bugs.page:13
+msgid "Getting support"
+msgstr "Отримання підтримки"
+
+#. (itstool) path: section/p
+#: C/bugs.page:15
+#| msgid ""
+#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
+#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
+#| "can be fixed."
 msgid ""
-"If you suspect you've found a bug in Geary, please <link href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
-"fixed."
+"If you are having trouble using Geary, please <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
+"about the problem."
 msgstr ""
-"Якщо вам здається, що вами виявлено ваду у Geary, будь ласка, <link href="
-"\"https://wiki.gnome.org/Apps/Geary/Contact\">зв'яжіться із нами</link> щодо "
-"вади, щоб ми могли її виправити."
+"Якщо у вас виникають проблеми у користуванні Geary, будь ласка, <link"
+" href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">зв'яжіться</link> зі спільнотою користувачів"
+" Geary щодо вашої проблеми."
 
-#. (itstool) path: page/p
-#: C/bugs.page:16
+#. (itstool) path: section/title
+#: C/bugs.page:21
+msgid "Reporting bugs"
+msgstr "Як повідомити про вади"
+
+#. (itstool) path: section/p
+#: C/bugs.page:23
+#| msgid ""
+#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
+#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
+#| "can be fixed."
+msgid ""
+"If you suspect you have found a bug in Geary, please follow the <link href="
+"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"guidelines</link> so the problem can be diagnosed and fixed."
+msgstr ""
+"Якщо ви вважаєте, що виявили ваду у Geary, будь ласка, скористайтеся <link"
+" href="
+"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">настановами щодо"
+" звітування про вади</link>, щоб розробники могли виконати діагностику та"
+" виправлення вади."
+
+#. (itstool) path: section/p
+#: C/bugs.page:28
 msgid ""
 "To help diagnose the problem as fast as possible, please include the "
 "following information:"
@@ -324,18 +356,18 @@ msgstr ""
 "такі дані:"
 
 #. (itstool) path: item/p
-#: C/bugs.page:20
+#: C/bugs.page:32
 msgid "Geary version and installation method (Package? Flathub? Source code?)"
 msgstr ""
 "Версія Geary та спосіб встановлення (Пакунок? Flathub? Початковий код?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:22
+#: C/bugs.page:34
 msgid "Your desktop (GNOME? KDE? Something else?)"
 msgstr "Стільничне середовища (GNOME? KDE? Щось інше?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:23
+#: C/bugs.page:35
 msgid ""
 "Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
 msgstr ""
@@ -343,31 +375,38 @@ msgstr ""
 "власноруч?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:25
+#: C/bugs.page:37
 msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
 msgstr ""
 "Надавач послуг електронної пошти (Gmail, Yahoo!, Outlook.com чи якийсь "
 "інший?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:27
+#: C/bugs.page:39
 msgid "Steps to reproduce the bug"
 msgstr "Кроки для відтворення вади"
 
 #. (itstool) path: item/p
-#: C/bugs.page:28
+#: C/bugs.page:40
 msgid "What happened?"
 msgstr "Що трапилося?"
 
 #. (itstool) path: item/p
-#: C/bugs.page:29
+#: C/bugs.page:41
 msgid "What did you expect to happen?"
 msgstr "На які наслідки ви сподівалися?"
 
-#. (itstool) path: page/p
-#: C/bugs.page:32
-msgid "Thanks for your help!"
-msgstr "Дякуємо за вашу допомогу!"
+#. (itstool) path: section/p
+#: C/bugs.page:44
+msgid ""
+"Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
+"key><key>I</key></keyseq> to open it, select and save any relevant log "
+"files, and attach them to the bug report."
+msgstr ""
+"Доступ до файлів журналу можна отримати за допомогою Інспектора Geary:"
+" натисніть комбінацію клавіш <keyseq><key>Alt</key><key>I</key></keyseq>, щоб"
+" відкрити його вікно, виберіть і збережіть потрібні вам файли журналу, а"
+" потім долучіть їх до звіту щодо вади."
 
 #. (itstool) path: page/title
 #: C/contributing.page:10
@@ -395,12 +434,11 @@ msgstr ""
 #. (itstool) path: item/p
 #: C/contributing.page:19
 msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
-"Design</link>—research and develop Geary’s user experience"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Дизайн та вивчення "
-"проблем у користуванні</link> — вивчення проблем у користуванні Geary та "
-"розробка дизайну програми"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Переклад</link> "
+"— переклад інтерфейсу та підручника Geary різними мовами"
 
 #. (itstool) path: item/p
 #: C/contributing.page:20
@@ -411,63 +449,40 @@ msgstr ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Написання "
 "програмного коду</link> — виправлення вад та додавання нових можливостей"
 
-#. (itstool) path: item/p
-#: C/contributing.page:21
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
-"link>—translate Geary’s user interface and user manual into new languages"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Переклад</link> "
-"— переклад інтерфейсу та підручника Geary різними мовами"
-
-#. (itstool) path: item/p
-#: C/contributing.page:22
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
-"discussion</link>—on the mailing list or IRC channel"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Долучення до "
-"обговорень</link> у списку листування або на каналі IRC"
-
 #. (itstool) path: page/p
-#: C/contributing.page:25
-msgid "Thanks for your help making Geary better!"
-msgstr "Дякуємо вам за допомогою в удосконаленні Geary!"
-
-#. (itstool) path: title/media
-#. This is a reference to an external file such as an image or video. When
-#. the file changes, the md5 hash will change to let you know you need to
-#. update your localized copy. The msgstr is not used at all. Set it to
-#. whatever you like once you have updated your copy of the file.
-#: C/index.page:6
-msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+#: C/contributing.page:23
+#| msgid ""
+#| "<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
+#| "discussion</link>—on the mailing list or IRC channel"
+msgid ""
+"See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
+"link> for more information and options for contributing financially to "
+"Geary's development."
 msgstr ""
-"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+"Щоб дізнатися більше про можливості та варіанти фінансової підтримки розробки"
+" Geary, ознайомтеся зі <link href=\"https://wiki.gnome.org/Apps/Geary/Contribu"
+"te\">сторінкою нашої вікі</link>."
 
 #. (itstool) path: page/title
-#: C/index.page:5
-msgid ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
-msgstr ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
+#: C/index.page:6
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:11
+#: C/index.page:12
 msgid "Introduction"
 msgstr "Вступ"
 
 #. (itstool) path: section/title
-#: C/index.page:15
+#: C/index.page:16
 msgid "Using Geary"
 msgstr "Користування Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:19
-msgid "Contributing and bug reporting"
-msgstr "Участь у розробці та звітування щодо вад"
+#: C/index.page:20
+#| msgid "Contributing and bug reporting"
+msgid "Contributing and getting support"
+msgstr "Участь у розробці та отримання підтримки"
 
 #. (itstool) path: page/title
 #: C/label.page:10
@@ -1224,14 +1239,6 @@ msgstr "Редагування повідомлень та відповідей"
 
 #. (itstool) path: section/p
 #: C/write.page:12
-#| msgid ""
-#| "To start a new email conversation, click the <gui style=\"button"
-#| "\">Compose</gui> button on the toolbar. Type the email address of the "
-#| "people to receive the message in the <gui style=\"input\">To</gui> text "
-#| "field, and a subject line in the <gui style=\"input\">Subject</gui> "
-#| "field. You can then type your message in the text area below these. Once "
-#| "the message is read to send, click <gui style=\"button\">Send</gui> or "
-#| "type <keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the message."
 msgid ""
 "To start a new email conversation, click the <gui style=\"button\">Compose</"
 "gui> button on the toolbar. Type the email address of the people to receive "
@@ -1282,38 +1289,28 @@ msgid ""
 "Reply-To field specifies an email address to reply to, if recipients should "
 "reply to a different email address than the sender's."
 msgstr ""
-"Щоб програма показала поля <gui style=\"input\">Копія</gui>, <gui"
-" style=\"input\">Потайна копія</gui> та <gui style=\"input\">Відповідати</gui"
-">, натисніть кнопку <gui style=\"input"
-"\">Додаткові параметри</gui> у кінці поля <gui style=\"input\">Кому</gui>. За"
-" допомогою поля «Копія» ви можете надіслати копію повідомлення іншим,"
-" вторинним адресатам. Поле «Потайна копія» надає змогу зробити те саме, але"
-" із приховуванням адрес додаткових кореспондентів. У полі «Відповідати» можна"
-" вказати адресу, на яку слід надсилати відповіді на повідомлення, якщо"
-" отримувачі мають відповідати на адресу, яка відрізняється від адреси"
-" електронної пошти відправника."
+"Щоб програма показала поля <gui style=\"input\">Копія</gui>, <gui style="
+"\"input\">Потайна копія</gui> та <gui style=\"input\">Відповідати</gui>, "
+"натисніть кнопку <gui style=\"input\">Додаткові параметри</gui> у кінці поля "
+"<gui style=\"input\">Кому</gui>. За допомогою поля «Копія» ви можете "
+"надіслати копію повідомлення іншим, вторинним адресатам. Поле «Потайна "
+"копія» надає змогу зробити те саме, але із приховуванням адрес додаткових "
+"кореспондентів. У полі «Відповідати» можна вказати адресу, на яку слід "
+"надсилати відповіді на повідомлення, якщо отримувачі мають відповідати на "
+"адресу, яка відрізняється від адреси електронної пошти відправника."
 
 #. (itstool) path: section/p
 #: C/write.page:41
-#| msgid ""
-#| "When entering an email address in the <gui style=\"input\">To</gui> and "
-#| "<gui style=\"input\">Cc</gui> fields, Geary will provide suggestions from "
-#| "your desktop address book and from previously sent and received email "
-#| "messages. To choose one of these suggestions, simply click on it. In "
-#| "addition, <gui style=\"input\">Bcc</gui> and <gui style=\"input\">Reply-"
-#| "to</gui> fields can be shown by selecting <gui style=\"menu\">Show "
-#| "extended fields</gui> from the formatting toolbar menu."
 msgid ""
 "When entering an email address into any of these fields, Geary will provide "
 "suggestions from your desktop address book and from previously sent and "
 "received email messages. To choose one of these suggestions, simply click on "
 "it."
 msgstr ""
-"При введення адреси електронної пошти у будь-яке з цих полів Geary надаватиме"
-" пропозиції із адресної "
-"книги вашого стільничного середовища та адрес у раніше надісланих і "
-"отриманих повідомленнях електронної пошти. Щоб вибрати одну з пропозицій, "
-"просто клацніть на ній."
+"При введення адреси електронної пошти у будь-яке з цих полів Geary "
+"надаватиме пропозиції із адресної книги вашого стільничного середовища та "
+"адрес у раніше надісланих і отриманих повідомленнях електронної пошти. Щоб "
+"вибрати одну з пропозицій, просто клацніть на ній."
 
 #. (itstool) path: section/p
 #: C/write.page:46
@@ -1366,11 +1363,6 @@ msgstr "Форматування тексту, зображення і долу�
 
 #. (itstool) path: section/p
 #: C/write.page:68
-#| msgid ""
-#| "Geary's email composer lets you use text styles such as <em>bold</em> and "
-#| "<em>italic</em>, indent text to quote it and links to web pages. Simply "
-#| "select the text and click the appropriate button on the formatting "
-#| "toolbar."
 msgid ""
 "Geary's email composer lets you use text styles such as <em>bold</em> and "
 "<em>italic</em>, indent text to quote it, and links to web pages. Simply "
@@ -1380,8 +1372,8 @@ msgstr ""
 "У редакторі повідомлень Geary ви можете скористатися стилями тексту, зокрема "
 "<em>напівжирним</em> та <em>курсивом</em>, відступами тексту для цитування "
 "та посиланнями на вебсторінки. Просто позначте фрагмент тексту і натисніть "
-"відповідну кнопку на панелі інструментів форматування у нижній частині панелі"
-" редактора."
+"відповідну кнопку на панелі інструментів форматування у нижній частині "
+"панелі редактора."
 
 #. (itstool) path: section/p
 #: C/write.page:74
@@ -1418,13 +1410,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:88
-#| msgid ""
-#| "Documents, music, videos, and other files can be attached to the email by "
-#| "clicking the <gui style=\"button\">Attach File</gui> button at the top of "
-#| "the composer window and selecting the document to attach, or by dragging "
-#| "a file from the <gui>Files</gui> application to the composer window, and "
-#| "dropping it either on the text fields at the top of the window or on the "
-#| "toolbar at the bottom."
 msgid ""
 "Documents, music, videos, and other files can be attached to the email by "
 "clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
@@ -1532,13 +1517,6 @@ msgstr "Geary вилучить чернетку, коли ви надішлет�
 
 #. (itstool) path: note/p
 #: C/write.page:136
-#| msgid ""
-#| "If you save or discard a composed email, you can re-open it by clicking "
-#| "<gui style=\"button\">Undo</gui> on the pop-up notification that appears "
-#| "or by typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to "
-#| "restore a saved or discarded composer will be remain for up to 30 "
-#| "minutes. After that you will need to re-open the message via the "
-#| "<gui>Drafts</gui> folder, if present."
 msgid ""
 "If you save or discard a composed email, you can re-open it by clicking <gui "
 "style=\"button\">Undo</gui> on the pop-up notification that appears or by "
@@ -1550,10 +1528,10 @@ msgstr ""
 "можете повторно його відкрити натисканням кнопки <gui style=\"button"
 "\">Скасувати</gui> на контекстній панелі сповіщення, яку буде показано, або "
 "натисканням комбінації клавіш <keyseq><key>Ctrl</key><key>Z</key></keyseq>. "
-"Вікна редагування можна повторно відкрити протягом періоду до 30 хвилин з"
-" моменту закриття. Після завершення цього періоду вам доведеться "
-"повторно відкрити повідомлення з теки <gui>Чернетки</gui>, якщо його було "
-"там збережено."
+"Вікна редагування можна повторно відкрити протягом періоду до 30 хвилин з "
+"моменту закриття. Після завершення цього періоду вам доведеться повторно "
+"відкрити повідомлення з теки <gui>Чернетки</gui>, якщо його було там "
+"збережено."
 
 #. (itstool) path: section/title
 #: C/write.page:146
@@ -1562,12 +1540,6 @@ msgstr "Звичайні текстові повідомлення"
 
 #. (itstool) path: section/p
 #: C/write.page:148
-#| msgid ""
-#| "Geary can also send plain text messages. In the drop-down menu, check or "
-#| "uncheck <gui style=\"menu\">Rich Text</gui> to toggle between plain text "
-#| "and rich text mode. Plain text mode is useful when sending email to "
-#| "mailing lists that prohibit rich text (HTML) messages, or when sending "
-#| "email to people that do no use modern clients like Geary."
 msgid ""
 "Geary can also send plain text messages. Press the <gui style=\"button"
 "\">More options</gui> button at the end of the bottom toolbar, then choose "
@@ -1575,13 +1547,13 @@ msgid ""
 "email to mailing lists that prohibit rich text (HTML) messages, or when "
 "sending email to people that do no use modern clients like Geary."
 msgstr ""
-"Крім того, Geary може надсилати звичайні текстові повідомлення. Натисніть"
-" кнопку <gui style=\"button\">Додаткові параметри</gui> у кінці нижньої"
-" панелі інструментів, потім виберіть пункт «Форматований текст» або"
-" «Звичайний текст». Звичайний текстовий режим є корисним для "
-"надсилання повідомлень до списків листування, які забороняють надсилання "
-"повідомлень із форматованим текстом (HTML), або до тих користувачів, які не "
-"можуть користуватися сучасними клієнтами електронної пошти, подібними Geary."
+"Крім того, Geary може надсилати звичайні текстові повідомлення. Натисніть "
+"кнопку <gui style=\"button\">Додаткові параметри</gui> у кінці нижньої "
+"панелі інструментів, потім виберіть пункт «Форматований текст» або "
+"«Звичайний текст». Звичайний текстовий режим є корисним для надсилання "
+"повідомлень до списків листування, які забороняють надсилання повідомлень із "
+"форматованим текстом (HTML), або до тих користувачів, які не можуть "
+"користуватися сучасними клієнтами електронної пошти, подібними Geary."
 
 #. (itstool) path: section/p
 #: C/write.page:155
@@ -1595,3 +1567,33 @@ msgstr ""
 "використанням м'яких переносів так, щоб довжина рядків не перевищувала 74 "
 "символів, а текст із відступами буде перенесено із додаванням позначок "
 "цитування, «&gt;», для кожного з рівнів цитування."
+
+#~ msgid "Found a bug?"
+#~ msgstr "Знайшли ваду?"
+
+#~ msgid "Thanks for your help!"
+#~ msgstr "Дякуємо за вашу допомогу!"
+
+#~ msgid ""
+#~ "<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
+#~ "Design</link>—research and develop Geary’s user experience"
+#~ msgstr ""
+#~ "<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Дизайн та "
+#~ "вивчення проблем у користуванні</link> — вивчення проблем у користуванні "
+#~ "Geary та розробка дизайну програми"
+
+#~ msgid "Thanks for your help making Geary better!"
+#~ msgstr "Дякуємо вам за допомогою в удосконаленні Geary!"
+
+#~ msgctxt "_"
+#~ msgid ""
+#~ "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+#~ msgstr ""
+#~ "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+
+#~ msgid ""
+#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
+#~ "\"64\"/> <span>Geary</span>"
+#~ msgstr ""
+#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
+#~ "\"64\"/> <span>Geary</span>"
