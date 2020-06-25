@@ -993,13 +993,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // if preview was requested, get it now ... both identifiers
         // must be supplied if one is
         if (preview_specifier != null || preview_charset_specifier != null) {
-            assert(preview_specifier != null && preview_charset_specifier != null);
+            Memory.Buffer? preview_headers = fetched_data.body_data_map.get(
+                preview_charset_specifier
+            );
+            Memory.Buffer? preview_body = fetched_data.body_data_map.get(
+                preview_specifier
+            );
 
-            if (fetched_data.body_data_map.has_key(preview_specifier)
-                && fetched_data.body_data_map.has_key(preview_charset_specifier)) {
-                email.set_message_preview(new RFC822.PreviewText.with_header(
-                    fetched_data.body_data_map.get(preview_charset_specifier),
-                    fetched_data.body_data_map.get(preview_specifier)));
+            if (preview_headers != null && preview_headers.size > 0 &&
+                preview_body != null && preview_body.size > 0) {
+                email.set_message_preview(
+                    new RFC822.PreviewText.with_header(
+                        preview_headers, preview_body
+                    )
+                );
             } else {
                 warning("No preview specifiers \"%s\" and \"%s\" found",
                     preview_specifier.to_string(), preview_charset_specifier.to_string());
