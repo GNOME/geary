@@ -54,6 +54,7 @@ namespace Geary.Logging {
     private GLib.Mutex writer_lock;
     private unowned FileStream? stream = null;
 
+    private GLib.LogLevelFlags set_breakpoint_on = 0;
     private Gee.Set<string> suppressed_domains;
 
 
@@ -71,6 +72,18 @@ namespace Geary.Logging {
             Logging.record_lock = GLib.Mutex();
             Logging.writer_lock = GLib.Mutex();
             Logging.max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
+
+            var debug_var = GLib.Environment.get_variable("G_DEBUG");
+            if (debug_var != null) {
+                var parts = debug_var.split(",");
+                if ("fatal-warnings" in parts) {
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
+                }
+                if ("fatal-criticals" in parts) {
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_CRITICAL;
+                }
+            }
         }
     }
 
@@ -299,6 +312,10 @@ namespace Geary.Logging {
             out.puts(record.format());
             out.putc('\n');
             Logging.writer_lock.unlock();
+
+            if (levels in Logging.set_breakpoint_on) {
+                GLib.breakpoint();
+            }
         }
     }
 
