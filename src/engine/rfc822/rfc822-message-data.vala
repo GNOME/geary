@@ -285,7 +285,7 @@ public class Geary.RFC822.Subject :
     }
 
     public Subject.from_rfc822_string(string rfc822) {
-        base(GMime.utils_header_decode_text(get_parser_options(), rfc822));
+        base(GMime.utils_header_decode_text(get_parser_options(), rfc822).strip());
         this.rfc822 = rfc822;
     }
 
@@ -387,6 +387,15 @@ public class Geary.RFC822.Header :
         var header = this.message.get_header_list().get_header(name);
         if (header != null) {
             value = header.get_value();
+        }
+        return value;
+    }
+
+    public string? get_raw_header(string name) {
+        string? value = null;
+        var header = this.message.get_header_list().get_header(name);
+        if (header != null) {
+            value = header.get_raw_value();
         }
         return value;
     }
