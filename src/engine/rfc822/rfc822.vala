@@ -24,7 +24,9 @@ namespace Geary.RFC822 {
      */
     public const string ASCII_CHARSET = "US-ASCII";
 
-    internal Regex? invalid_filename_character_re = null;
+    internal GMime.ParserOptions gmime_parser_options;
+
+    internal Regex? invalid_filename_character_re;
 
     private int init_count = 0;
 
@@ -34,7 +36,12 @@ namespace Geary.RFC822 {
             return;
 
         GMime.init();
-        GMime.ParserOptions.get_default().set_allow_addresses_without_domain(true);
+
+        gmime_parser_options = GMime.ParserOptions.get_default();
+        gmime_parser_options.set_allow_addresses_without_domain(true);
+        gmime_parser_options.set_address_compliance_mode(LOOSE);
+        gmime_parser_options.set_parameter_compliance_mode(LOOSE);
+        gmime_parser_options.set_rfc2047_compliance_mode(LOOSE);
 
         try {
             invalid_filename_character_re = new Regex("[/\\0]");
@@ -44,11 +51,11 @@ namespace Geary.RFC822 {
     }
 
     public GMime.FormatOptions get_format_options() {
-        return GMime.FormatOptions.get_default().clone();
+        return GMime.FormatOptions.get_default();
     }
 
     public GMime.ParserOptions get_parser_options() {
-        return GMime.ParserOptions.get_default().clone();
+        return Geary.RFC822.gmime_parser_options;
     }
 
     public string? get_charset() {
