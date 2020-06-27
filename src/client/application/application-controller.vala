@@ -427,13 +427,18 @@ internal class Application.Controller : Geary.BaseObject {
                 save_to
             );
             register_composer(composer);
-            show_composer(composer);
 
             try {
                 yield composer.load_context(type, context, quote);
             } catch (GLib.Error err) {
                 report_problem(new Geary.ProblemReport(err));
             }
+
+            // Have to load the body before showing the composer
+            // because we need to know what other messages the context
+            // message refers to, so it can be displayed as an inline
+            // composer if appropriate.
+            show_composer(composer);
         }
         return composer;
     }

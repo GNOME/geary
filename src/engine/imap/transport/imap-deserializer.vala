@@ -463,7 +463,11 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     }
 
     private void save_literal_parameter() {
-        save_parameter(new LiteralParameter(block_buffer));
+        var literal = new LiteralParameter(block_buffer);
+        if (!Logging.is_suppressed_domain(this.logging_domain)) {
+            debug(literal.coerce_to_string_parameter().to_string());
+        }
+        save_parameter(literal);
         block_buffer = null;
     }
 
