@@ -83,7 +83,10 @@ public class Geary.RFC822.MailboxAddresses :
 
     public MailboxAddresses.from_rfc822_string(string rfc822)
         throws Error {
-        var list = GMime.InternetAddressList.parse(null, rfc822);
+        var list = GMime.InternetAddressList.parse(
+            Geary.RFC822.get_parser_options(),
+            rfc822
+        );
         if (list == null) {
             throw new Error.INVALID("Not a RFC822 mailbox address list");
         }

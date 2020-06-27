@@ -541,12 +541,15 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     public void select_conversations(Gee.Collection<Geary.App.Conversation> new_selection) {
         if (this.selected.size != new_selection.size ||
             !this.selected.contains_all(new_selection)) {
-            Gtk.TreeSelection selection = get_selection();
+            var selection = get_selection();
             selection.unselect_all();
-            foreach (var conversation in new_selection) {
-                Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
-                if (path != null) {
-                    selection.select_path(path);
+            var model = get_model();
+            if (model != null) {
+                foreach (var conversation in new_selection) {
+                    var path = model.get_path_for_conversation(conversation);
+                    if (path != null) {
+                        selection.select_path(path);
+                    }
                 }
             }
         }

@@ -54,6 +54,7 @@ namespace Geary.Logging {
     private GLib.Mutex writer_lock;
     private unowned FileStream? stream = null;
 
+    private GLib.LogLevelFlags set_breakpoint_on = 0;
     private Gee.Set<string> suppressed_domains;
 
 
@@ -71,6 +72,18 @@ namespace Geary.Logging {
             Logging.record_lock = GLib.Mutex();
             Logging.writer_lock = GLib.Mutex();
             Logging.max_log_length = DEFAULT_MAX_LOG_BUFFER_LENGTH;
+
+            var debug_var = GLib.Environment.get_variable("G_DEBUG");
+            if (debug_var != null) {
+                var parts = debug_var.split(",");
+                if ("fatal-warnings" in parts) {
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
+                }
+                if ("fatal-criticals" in parts) {
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_CRITICAL;
+                }
+            }
         }
     }
 
@@ -299,6 +312,10 @@ namespace Geary.Logging {
             out.puts(record.format());
             out.putc('\n');
             Logging.writer_lock.unlock();
+
+            if (levels in Logging.set_breakpoint_on) {
+                GLib.breakpoint();
+            }
         }
     }
 
@@ -538,12 +555,14 @@ public interface Geary.Logging.Source : GLib.Object {
                                        va_list args) {
         Context context = Context(this.logging_domain, levels, fmt, args);
 
-        // Don't attempt to this object if it is in the middle of
-        // being destructed, which can happen when logging from
-        // the destructor.
-        Source? decorated = (this.ref_count > 0) ? this : this.logging_parent;
+        weak Source? decorated = this;
         while (decorated != null) {
-            context.append_source(decorated);
+            // Check ref counts of logged objects and don't log them
+            // if they are or have been being destroyed, which can
+            // happen when e.g. logging from the destructor.
+            if (decorated.ref_count > 0) {
+                context.append_source(decorated);
+            }
             decorated = decorated.logging_parent;
         }
 

@@ -121,7 +121,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
     }
 
     ~RefreshFolderSync() {
-        Geary.Folder? folder = this.folder;
+        weak Geary.Folder? folder = this.folder;
         if (folder != null) {
             this.folder.closed.disconnect(on_folder_close);
         }

@@ -104,13 +104,7 @@ private class Geary.ImapDB.MessageRow {
         Geary.Email email = new Geary.Email(id);
 
         if (fields.is_all_set(Geary.Email.Field.DATE)) {
-            try {
-                email.set_send_date(
-                    !String.is_empty(date) ? new RFC822.Date.from_rfc822_string(date) : null
-                );
-            } catch (GLib.Error err) {
-                debug("Error loading message date from db: %s", err.message);
-            }
+            email.set_send_date(unflatten_date(date));
         }
 
         if (fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
@@ -127,9 +121,10 @@ private class Geary.ImapDB.MessageRow {
 
         if (fields.is_all_set(Geary.Email.Field.REFERENCES)) {
             email.set_full_references(
-                (message_id != null) ? new RFC822.MessageID(message_id) : null,
-                (in_reply_to != null) ? new RFC822.MessageIDList.from_rfc822_string(in_reply_to) : null,
-                (references != null) ? new RFC822.MessageIDList.from_rfc822_string(references) : null);
+                unflatten_message_id(message_id),
+                unflatten_message_id_list(in_reply_to),
+                unflatten_message_id_list(references)
+            );
         }
 
         if (fields.is_all_set(Geary.Email.Field.SUBJECT))
@@ -274,22 +269,79 @@ private class Geary.ImapDB.MessageRow {
         return (addrs == null || addrs.size == 0) ? null : addrs.to_rfc822_string();
     }
 
-    private RFC822.MailboxAddress? unflatten_address(string? str)
-        throws RFC822.Error {
-        return (
-            String.is_empty_or_whitespace(str)
-            ? null
-            : new RFC822.MailboxAddress.from_rfc822_string(str)
-        );
+    private RFC822.Date? unflatten_date(string? str) {
+        RFC822.Date? date = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                date = new RFC822.Date.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 date \"%s\": %s", str, err.message);
+            }
+        }
+        return date;
     }
 
-    private RFC822.MailboxAddresses? unflatten_addresses(string? str)
-        throws RFC822.Error {
-        return (
-            String.is_empty_or_whitespace(str)
-            ? null
-            : new RFC822.MailboxAddresses.from_rfc822_string(str)
-        );
+    private RFC822.MailboxAddress? unflatten_address(string? str) {
+        RFC822.MailboxAddress? address = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                address = new RFC822.MailboxAddress.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 mailbox address \"%s\": %s", str, err.message);
+            }
+        }
+        return address;
+    }
+
+    private RFC822.MailboxAddresses? unflatten_addresses(string? str) {
+        RFC822.MailboxAddresses? addresses = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                addresses = new RFC822.MailboxAddresses.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 mailbox addresses \"%s\": %s", str, err.message);
+            }
+        }
+        return addresses;
+    }
+
+    private RFC822.MessageID? unflatten_message_id(string? str) {
+        RFC822.MessageID? id = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                id = new RFC822.MessageID.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 message id \"%s\": %s", str, err.message);
+            }
+        }
+        return id;
+    }
+
+    private RFC822.MessageIDList? unflatten_message_id_list(string? str) {
+        RFC822.MessageIDList? ids = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                ids = new RFC822.MessageIDList.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 message id \"%s\": %s", str, err.message);
+            }
+        }
+        return ids;
     }
 
 }

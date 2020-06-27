@@ -1,9 +1,9 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>.
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018, 2020 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 
@@ -873,6 +873,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         if (header_specifiers != null) {
             // Header fields are case insensitive, so use a
             // case-insensitive map.
+            //
+            // XXX this is bogus because it doesn't take into the
+            // presence of multiple headers. It's not common, but it's
+            // possible for there to be two To headers, for example
             Gee.Map<string,string> headers = new Gee.HashMap<string,string>(
                 String.stri_hash, String.stri_equal
             );
@@ -882,7 +886,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 if (fetched_headers != null) {
                     RFC822.Header parsed_headers = new RFC822.Header(fetched_headers);
                     foreach (string name in parsed_headers.get_header_names()) {
-                        headers.set(name, parsed_headers.get_header(name));
+                        headers.set(name, parsed_headers.get_raw_header(name));
                     }
                 } else {
                     warning(
@@ -896,60 +900,34 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             }
 
             // DATE
-            if (required_but_not_set(Geary.Email.Field.DATE, required_fields, email)) {
-                string? value = headers.get("Date");
-                RFC822.Date? date = null;
-                if (!String.is_empty(value)) {
-                    try {
-                        date = new RFC822.Date.from_rfc822_string(value);
-                    } catch (GLib.Error err) {
-                        warning(
-                            "Error parsing date from FETCH response: %s",
-                            err.message
-                        );
-                    }
+            if (required_but_not_set(DATE, required_fields, email)) {
+                RFC822.Date? date = unflatten_date(headers.get("Date"));
+                if (date != null) {
+                    email.set_send_date(date);
                 }
-                email.set_send_date(date);
             }
 
             // ORIGINATORS
-            if (required_but_not_set(Geary.Email.Field.ORIGINATORS, required_fields, email)) {
-                RFC822.MailboxAddresses? from = null;
-                string? value = headers.get("From");
-                if (!String.is_empty(value))
-                    from = new RFC822.MailboxAddresses.from_rfc822_string(value);
-
-                RFC822.MailboxAddress? sender = null;
-                value = headers.get("Sender");
-                if (!String.is_empty(value))
-                    sender = new RFC822.MailboxAddress.from_rfc822_string(value);
-
-                RFC822.MailboxAddresses? reply_to = null;
-                value = headers.get("Reply-To");
-                if (!String.is_empty(value))
-                    reply_to = new RFC822.MailboxAddresses.from_rfc822_string(value);
-
-                email.set_originators(from, sender, reply_to);
+            if (required_but_not_set(ORIGINATORS, required_fields, email)) {
+                // Allow sender to be a list (contra to the RFC), but
+                // only take the first from it
+                RFC822.MailboxAddresses? sender = unflatten_addresses(
+                    headers.get("Sender")
+                );
+                email.set_originators(
+                    unflatten_addresses(headers.get("From")),
+                    (sender != null && !sender.is_empty) ? sender.get(0) : null,
+                    unflatten_addresses(headers.get("Reply-To"))
+                );
             }
 
             // RECEIVERS
-            if (required_but_not_set(Geary.Email.Field.RECEIVERS, required_fields, email)) {
-                RFC822.MailboxAddresses? to = null;
-                string? value = headers.get("To");
-                if (!String.is_empty(value))
-                    to = new RFC822.MailboxAddresses.from_rfc822_string(value);
-
-                RFC822.MailboxAddresses? cc = null;
-                value = headers.get("Cc");
-                if (!String.is_empty(value))
-                    cc = new RFC822.MailboxAddresses.from_rfc822_string(value);
-
-                RFC822.MailboxAddresses? bcc = null;
-                value = headers.get("Bcc");
-                if (!String.is_empty(value))
-                    bcc = new RFC822.MailboxAddresses.from_rfc822_string(value);
-
-                email.set_receivers(to, cc, bcc);
+            if (required_but_not_set(RECEIVERS, required_fields, email)) {
+                email.set_receivers(
+                    unflatten_addresses(headers.get("To")),
+                    unflatten_addresses(headers.get("Cc")),
+                    unflatten_addresses(headers.get("Bcc"))
+                );
             }
 
             // REFERENCES
@@ -957,21 +935,17 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // References header will be present if REFERENCES were required, which is why
             // REFERENCES is set at the bottom of the method, when all information has been gathered
             if (message_id == null) {
-                string? value = headers.get("Message-ID");
-                if (!String.is_empty(value))
-                    message_id = new RFC822.MessageID(value);
+                message_id = unflatten_message_id(headers.get("Message-ID"));
             }
-
             if (in_reply_to == null) {
-                string? value = headers.get("In-Reply-To");
-                if (!String.is_empty(value))
-                    in_reply_to = new RFC822.MessageIDList.from_rfc822_string(value);
+                in_reply_to = unflatten_message_id_list(
+                    headers.get("In-Reply-To")
+                );
             }
-
             if (references == null) {
-                string? value = headers.get("References");
-                if (!String.is_empty(value))
-                    references = new RFC822.MessageIDList.from_rfc822_string(value);
+                references = unflatten_message_id_list(
+                    headers.get("References")
+                );
             }
 
             // SUBJECT
@@ -993,13 +967,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // if preview was requested, get it now ... both identifiers
         // must be supplied if one is
         if (preview_specifier != null || preview_charset_specifier != null) {
-            assert(preview_specifier != null && preview_charset_specifier != null);
+            Memory.Buffer? preview_headers = fetched_data.body_data_map.get(
+                preview_charset_specifier
+            );
+            Memory.Buffer? preview_body = fetched_data.body_data_map.get(
+                preview_specifier
+            );
 
-            if (fetched_data.body_data_map.has_key(preview_specifier)
-                && fetched_data.body_data_map.has_key(preview_charset_specifier)) {
-                email.set_message_preview(new RFC822.PreviewText.with_header(
-                    fetched_data.body_data_map.get(preview_charset_specifier),
-                    fetched_data.body_data_map.get(preview_specifier)));
+            if (preview_headers != null && preview_headers.size > 0 &&
+                preview_body != null && preview_body.size > 0) {
+                email.set_message_preview(
+                    new RFC822.PreviewText.with_header(
+                        preview_headers, preview_body
+                    )
+                );
             } else {
                 warning("No preview specifiers \"%s\" and \"%s\" found",
                     preview_specifier.to_string(), preview_charset_specifier.to_string());
@@ -1152,6 +1133,66 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
     private static bool required_but_not_set(Geary.Email.Field check, Geary.Email.Field users_fields, Geary.Email email) {
         return users_fields.require(check) ? !email.fields.is_all_set(check) : false;
+    }
+
+    private RFC822.Date? unflatten_date(string? str) {
+        RFC822.Date? date = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                date = new RFC822.Date.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 date \"%s\": %s", str, err.message);
+            }
+        }
+        return date;
+    }
+
+    private RFC822.MailboxAddresses? unflatten_addresses(string? str) {
+        RFC822.MailboxAddresses? addresses = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                addresses = new RFC822.MailboxAddresses.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 mailbox addresses \"%s\": %s", str, err.message);
+            }
+        }
+        return addresses;
+    }
+
+    private RFC822.MessageID? unflatten_message_id(string? str) {
+        RFC822.MessageID? id = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                id = new RFC822.MessageID.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 message id \"%s\": %s", str, err.message);
+            }
+        }
+        return id;
+    }
+
+    private RFC822.MessageIDList? unflatten_message_id_list(string? str) {
+        RFC822.MessageIDList? ids = null;
+        if (!String.is_empty_or_whitespace(str)) {
+            try {
+                ids = new RFC822.MessageIDList.from_rfc822_string(str);
+            } catch (RFC822.Error err) {
+                // There's not much we can do here aside from logging
+                // the error, since a lot of email just contain
+                // invalid addresses
+                debug("Invalid RFC822 message id \"%s\": %s", str, err.message);
+            }
+        }
+        return ids;
     }
 
 }
