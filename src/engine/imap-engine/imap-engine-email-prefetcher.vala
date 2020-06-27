@@ -25,7 +25,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     );
 
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
-    private const int PREFETCH_CHUNK_BYTES = 32 * 1024;
+    private const int PREFETCH_CHUNK_BYTES = 512 * 1024;
 
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
