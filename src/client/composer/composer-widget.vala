@@ -24,7 +24,11 @@ private extern Type components_reflow_box_get_type();
 public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
 
-    /** The email fields the composer requires for referred email. */
+    /**
+     * The email fields the composer requires for context email.
+     *
+     * @see load_context
+     */
     public const Geary.Email.Field REQUIRED_FIELDS = ENVELOPE | HEADER | BODY;
 
     /// Translators: Title for an empty composer window
@@ -667,6 +671,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         base_unref();
     }
 
+    /** Loads an empty message into the composer. */
     public async void load_empty_body(Geary.RFC822.MailboxAddress? to = null)
         throws GLib.Error {
         if (to != null) {
@@ -675,6 +680,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         yield finish_loading("", "", false);
     }
 
+    /** Loads a mailto: URL into the composer. */
     public async void load_mailto(string mailto)
         throws GLib.Error {
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
@@ -734,7 +740,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     /**
-     * Loads the message into the composer editor.
+     * Loads a draft, reply, or forwarded message into the composer.
+     *
+     * If the given context email does not contain the fields
+     * specified by {@link REQUIRED_FIELDS}, it will be loaded from
+     * the current account context's store with those.
      */
     public async void load_context(ContextType type,
                                    Geary.Email context,
