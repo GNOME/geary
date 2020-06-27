@@ -542,6 +542,7 @@ public class Application.MainWindow :
         );
         // Translators: An info bar button label
         var auth_retry = new Gtk.Button.with_label(_("Login"));
+        auth_retry.show();
         // Translators: An info bar button tool-tip
         auth_retry.tooltip_text = _(
             "Retry login, you will be prompted for your password"
@@ -557,6 +558,7 @@ public class Application.MainWindow :
         );
         // Translators: An info bar button label
         var cert_retry = new Gtk.Button.with_label(_("Check"));
+        cert_retry.show();
         // Translators: An info bar button tool-tip
         cert_retry.tooltip_text = _(
             "Check the security details for the connection"
