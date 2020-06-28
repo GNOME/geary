@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2019-11-25 10:55+0000\n"
+"POT-Creation-Date: 2020-06-27 07:31+0000\n"
 "PO-Revision-Date: 2019-12-28 16:19+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
@@ -416,38 +416,23 @@ msgstr ""
 msgid "Thanks for your help making Geary better!"
 msgstr "Dziękujemy za pomoc w ulepszaniu programu Geary!"
 
-#. (itstool) path: title/media
-#. This is a reference to an external file such as an image or video. When
-#. the file changes, the md5 hash will change to let you know you need to
-#. update your localized copy. The msgstr is not used at all. Set it to
-#. whatever you like once you have updated your copy of the file.
-#: C/index.page:6
-msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
-msgstr ""
-"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
-
 #. (itstool) path: page/title
-#: C/index.page:5
-msgid ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
-msgstr ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
+#: C/index.page:6
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:11
+#: C/index.page:12
 msgid "Introduction"
 msgstr "Wprowadzenie"
 
 #. (itstool) path: section/title
-#: C/index.page:15
+#: C/index.page:16
 msgid "Using Geary"
 msgstr "Używanie programu Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:19
+#: C/index.page:20
 msgid "Contributing and bug reporting"
 msgstr "Pomoc w tworzeniu programu i zgłaszanie błędów"
 
@@ -560,7 +545,8 @@ msgstr ""
 "Geary zawiera więcej informacji o dodawanych i planowanych funkcjach."
 
 #. (itstool) path: page/title
-#: C/overview.page:9
+#. (itstool) path: section/title
+#: C/overview.page:9 C/shortcuts.page:13
 msgid "Overview"
 msgstr "Przegląd"
 
@@ -1031,7 +1017,7 @@ msgid "Keyboard shortcuts"
 msgstr "Skróty klawiszowe"
 
 #. (itstool) path: section/p
-#: C/shortcuts.page:13
+#: C/shortcuts.page:14
 msgid ""
 "Geary has keyboard shortcuts for most common operations. Use the built-in "
 "help to discover the full list. To open the shortcuts help, select <gui "
@@ -1044,7 +1030,7 @@ msgstr ""
 "głównego okna lub użyj poniższych skrótów."
 
 #. (itstool) path: section/p
-#: C/shortcuts.page:19
+#: C/shortcuts.page:20
 msgid ""
 "The following keyboard shortcuts can be used to access on-line help from "
 "Geary:"
@@ -1053,32 +1039,32 @@ msgstr ""
 "Geary:"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:23
+#: C/shortcuts.page:24
 msgid "Display this online help manual"
 msgstr "Wyświetlenie tego podręcznika użytkownika online"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:24
+#: C/shortcuts.page:25
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:27
+#: C/shortcuts.page:28
 msgid "Display all keyboard shortcuts"
 msgstr "Wyświetlenie wszystkich skrótów klawiszowych"
 
 #. (itstool) path: td/p
-#: C/shortcuts.page:28
+#: C/shortcuts.page:29
 msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
 msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
 
 #. (itstool) path: section/title
-#: C/shortcuts.page:36
+#: C/shortcuts.page:37
 msgid "Single key shortcuts"
 msgstr "Skróty jednoklawiszowe"
 
 #. (itstool) path: section/p
-#: C/shortcuts.page:38
+#: C/shortcuts.page:39
 msgid ""
 "You can enable keyboard shortcuts for email actions that do not require "
 "pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
@@ -1089,7 +1075,7 @@ msgstr ""
 "w serwisie Gmail. <link xref=\"preferences\"/> zawiera więcej informacji."
 
 #. (itstool) path: section/p
-#: C/shortcuts.page:42
+#: C/shortcuts.page:43
 msgid ""
 "The full list of single key shortcuts enabled by this preference can be "
 "found via the keyboard shortcuts help, above."
