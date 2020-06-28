@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2020-05-22 03:56+0000\n"
-"PO-Revision-Date: 2020-05-24 12:32+0200\n"
+"POT-Creation-Date: 2020-06-25 02:39+0000\n"
+"PO-Revision-Date: 2020-06-28 12:50+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -287,22 +287,43 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
-msgid "Found a bug?"
-msgstr "Wystąpił błąd?"
+msgid "Need help with Geary?"
+msgstr "Potrzebujesz pomocy?"
 
-#. (itstool) path: page/p
-#: C/bugs.page:12
+#. (itstool) path: section/title
+#: C/bugs.page:13
+msgid "Getting support"
+msgstr "Wsparcie"
+
+#. (itstool) path: section/p
+#: C/bugs.page:15
 msgid ""
-"If you suspect you've found a bug in Geary, please <link href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
-"fixed."
+"If you are having trouble using Geary, please <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
+"about the problem."
 msgstr ""
-"Jeśli w programie Geary wystąpił błąd, to prosimy <link href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">skontaktować się z nami</link>, abyśmy mogli "
-"go naprawić."
+"Jeśli używanie programu Geary sprawia problemy, to prosimy <link href="
+"\"https://wiki.gnome.org/Apps/Geary/Contact\">skontaktować się</link> ze "
+"społecznością Geary w tej sprawie."
 
-#. (itstool) path: page/p
-#: C/bugs.page:16
+#. (itstool) path: section/title
+#: C/bugs.page:21
+msgid "Reporting bugs"
+msgstr "Zgłaszanie błędów"
+
+#. (itstool) path: section/p
+#: C/bugs.page:23
+msgid ""
+"If you suspect you have found a bug in Geary, please follow the <link href="
+"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"guidelines</link> so the problem can be diagnosed and fixed."
+msgstr ""
+"Jeśli w programie Geary wystąpił błąd, to prosimy postępować zgodnie z <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">wytycznymi "
+"zgłaszania błędów</link>, abyśmy mogli go zdiagnozować i naprawić."
+
+#. (itstool) path: section/p
+#: C/bugs.page:28
 msgid ""
 "To help diagnose the problem as fast as possible, please include the "
 "following information:"
@@ -311,18 +332,18 @@ msgstr ""
 "informacje (w języku angielskim):"
 
 #. (itstool) path: item/p
-#: C/bugs.page:20
+#: C/bugs.page:32
 msgid "Geary version and installation method (Package? Flathub? Source code?)"
 msgstr ""
 "Wersja programu Geary i metoda instalacji (pakiet? Flathub? kod źródłowy?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:22
+#: C/bugs.page:34
 msgid "Your desktop (GNOME? KDE? Something else?)"
 msgstr "Używane środowisko (GNOME? KDE? inne?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:23
+#: C/bugs.page:35
 msgid ""
 "Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
 msgstr ""
@@ -330,29 +351,36 @@ msgstr ""
 "autorstwa?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:25
+#: C/bugs.page:37
 msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
 msgstr "Dostawca poczty (Gmail, Yahoo!, Outlook.com czy jakiś inny?)"
 
 #. (itstool) path: item/p
-#: C/bugs.page:27
+#: C/bugs.page:39
 msgid "Steps to reproduce the bug"
 msgstr "Kroki potrzebne, aby powtórzyć błąd"
 
 #. (itstool) path: item/p
-#: C/bugs.page:28
+#: C/bugs.page:40
 msgid "What happened?"
 msgstr "Co się stało?"
 
 #. (itstool) path: item/p
-#: C/bugs.page:29
+#: C/bugs.page:41
 msgid "What did you expect to happen?"
 msgstr "Co powinno było się stać?"
 
-#. (itstool) path: page/p
-#: C/bugs.page:32
-msgid "Thanks for your help!"
-msgstr "Dziękujemy za pomoc!"
+#. (itstool) path: section/p
+#: C/bugs.page:44
+msgid ""
+"Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
+"key><key>I</key></keyseq> to open it, select and save any relevant log "
+"files, and attach them to the bug report."
+msgstr ""
+"Pliki dziennika można zobaczyć za pomocą Inspektora programu Geary. Naciśnij "
+"klawisze <keyseq><key>Alt</key><key>I</key></keyseq>, aby go otworzyć, "
+"zaznacz i zapisz odpowiednie pliki, a następnie dołącz je do zgłoszenia "
+"błędu."
 
 #. (itstool) path: page/title
 #: C/contributing.page:10
@@ -377,12 +405,11 @@ msgstr ""
 #. (itstool) path: item/p
 #: C/contributing.page:19
 msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
-"Design</link>—research and develop Geary’s user experience"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Projektowanie "
-"interfejsu użytkownika</link> — badanie i tworzenie interfejsu użytkownika "
-"programu Geary"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Tłumaczenie</"
+"link> — tłumaczenie interfejsu i podręcznika programu Geary na nowe języki"
 
 #. (itstool) path: item/p
 #: C/contributing.page:20
@@ -393,63 +420,36 @@ msgstr ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Programowanie</"
 "link> — naprawianie błędów i dodawanie nowych funkcji"
 
-#. (itstool) path: item/p
-#: C/contributing.page:21
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
-"link>—translate Geary’s user interface and user manual into new languages"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Tłumaczenie</"
-"link> — tłumaczenie interfejsu i podręcznika programu Geary na nowe języki"
-
-#. (itstool) path: item/p
-#: C/contributing.page:22
-msgid ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
-"discussion</link>—on the mailing list or IRC channel"
-msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Dyskusje</link> — "
-"na liście dyskusyjnej i kanale IRC (w języku angielskim)"
-
 #. (itstool) path: page/p
-#: C/contributing.page:25
-msgid "Thanks for your help making Geary better!"
-msgstr "Dziękujemy za pomoc w ulepszaniu programu Geary!"
-
-#. (itstool) path: title/media
-#. This is a reference to an external file such as an image or video. When
-#. the file changes, the md5 hash will change to let you know you need to
-#. update your localized copy. The msgstr is not used at all. Set it to
-#. whatever you like once you have updated your copy of the file.
-#: C/index.page:6
-msgctxt "_"
-msgid "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+#: C/contributing.page:23
+msgid ""
+"See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
+"link> for more information and options for contributing financially to "
+"Geary's development."
 msgstr ""
-"external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">Strona wiki</"
+"link> zawiera więcej informacji oraz sposoby finansowego wsparcia rozwoju "
+"programu Geary."
 
 #. (itstool) path: page/title
-#: C/index.page:5
-msgid ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
-msgstr ""
-"<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height=\"64\"/> "
-"<span>Geary</span>"
+#: C/index.page:6
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:11
+#: C/index.page:12
 msgid "Introduction"
 msgstr "Wprowadzenie"
 
 #. (itstool) path: section/title
-#: C/index.page:15
+#: C/index.page:16
 msgid "Using Geary"
 msgstr "Używanie programu Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:19
-msgid "Contributing and bug reporting"
-msgstr "Pomoc w tworzeniu programu i zgłaszanie błędów"
+#: C/index.page:20
+msgid "Contributing and getting support"
+msgstr "Pomoc w tworzeniu programu i wsparcie"
 
 #. (itstool) path: page/title
 #: C/label.page:10
