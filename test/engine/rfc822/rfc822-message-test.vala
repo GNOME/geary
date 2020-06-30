@@ -53,6 +53,8 @@ This is the second line.
                  multipart_alternative_as_converted_html);
         add_test("multipart_alternative_as_html",
                  multipart_alternative_as_html);
+        add_test("get_header", get_header);
+        add_test("get_body", get_body);
         add_test("get_preview", get_preview);
         add_test("get_recipients", get_recipients);
         add_test("get_searchable_body", get_searchable_body);
@@ -175,6 +177,18 @@ This is the second line.
         assert_true(test.has_plain_body(), "Expected plain body");
         assert_true(test.has_html_body(), "Expected html body");
         assert_equal(test.get_html_body(null), BASIC_HTML_BODY);
+    }
+
+    public void get_header() throws GLib.Error {
+        Message message = resource_to_message(BASIC_TEXT_PLAIN);
+        Header header = message.get_header();
+        assert(header.get_header("From") == "Alice <alice@example.net>");
+    }
+
+    public void get_body() throws GLib.Error {
+        Message message = resource_to_message(BASIC_TEXT_PLAIN);
+        Text body = message.get_body();
+        assert(body.buffer.to_string().replace("\r", "") == BASIC_PLAIN_BODY);
     }
 
     public void get_preview() throws GLib.Error {

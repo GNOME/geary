@@ -659,6 +659,21 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     /**
+     * Returns the header of the message.
+     */
+    public Header get_header() {
+        return new Header.from_gmime(this.message);
+    }
+
+    /**
+     * Returns the possibly body of the message.
+     */
+    public Text get_body() {
+        GMime.Part part = (GMime.Part) this.message.get_mime_part();
+        return new Text.from_gmime(part.get_content().get_stream());
+    }
+
+    /**
      * Serialises the message using native (i.e. LF) line endings.
      */
     public Memory.Buffer get_native_buffer() throws Error {
