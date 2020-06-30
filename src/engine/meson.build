@@ -226,7 +226,6 @@ geary_engine_vala_sources = files(
   'memory/memory-empty-buffer.vala',
   'memory/memory-file-buffer.vala',
   'memory/memory-growable-buffer.vala',
-  'memory/memory-offset-buffer.vala',
   'memory/memory-string-buffer.vala',
   'memory/memory-unowned-byte-array-buffer.vala',
   'memory/memory-unowned-bytes-buffer.vala',
