@@ -387,7 +387,7 @@ public class Geary.Outbox.Folder :
             email = new Email(row.outbox_id);
         } else {
             RFC822.Message message = new RFC822.Message.from_buffer(row.message);
-            email = message.get_email(row.outbox_id);
+            email = new Geary.Email.from_message(row.outbox_id, message);
 
             // TODO: Determine message's total size (header + body) to
             // store in Properties.
