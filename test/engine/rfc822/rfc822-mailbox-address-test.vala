@@ -223,9 +223,9 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("Test", "example@example@example.com").to_full_display() ==
                "example@example@example.com");
 
-        assert_string(
-            "\"Testerson, Test\" <test@example.com>",
-            new MailboxAddress("Testerson, Test", "test@example.com").to_full_display()
+        assert_equal(
+            new MailboxAddress("Testerson, Test", "test@example.com").to_full_display(),
+            "\"Testerson, Test\" <test@example.com>"
         );
     }
 
@@ -241,13 +241,13 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
     }
 
     public void to_rfc822_address() throws GLib.Error {
-        assert_string(
-            "example@example.com",
-            new MailboxAddress(null, "example@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "example@example.com").to_rfc822_address(),
+            "example@example.com"
         );
-        assert_string(
-            "test.account@example.com",
-            new MailboxAddress(null, "test.account@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "test.account@example.com").to_rfc822_address(),
+            "test.account@example.com"
         );
         //assert(new MailboxAddress(null, "test test@example.com").to_rfc822_address() ==
         //       "\"test test\"@example.com");
@@ -256,34 +256,34 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         //assert(new MailboxAddress(null, "test\"test@example.com").to_rfc822_address() ==
         //       "\"test\"test\"@example.com");
 
-        assert_string(
-            "$test@example.com",
-            new MailboxAddress(null, "$test@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "$test@example.com").to_rfc822_address(),
+            "$test@example.com"
         );
-        assert_string(
-            "\"test@test\"@example.com",
-            new MailboxAddress(null, "test@test@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "test@test@example.com").to_rfc822_address(),
+            "\"test@test\"@example.com"
         );
 
         // RFC 2047 reserved words in the local-part must be used
         // as-is, and in particular not encoded per that RFC. See RFC
         // 2047 §5 and GNOME/geary#336
         string RFC_2074 = "libc-alpha-sc.1553427554.ndgdflaalknmibgfkpak-hi-angel=yandex.ru@sourceware.org";
-        assert_string(
-            RFC_2074,
-            new MailboxAddress(null, RFC_2074).to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, RFC_2074).to_rfc822_address(),
+            RFC_2074
         );
 
         // Likewise, Unicode chars should be passed through. Note that
         // these can only be sent if a UTF8 connection is negotiated
         // with the SMTP server
-        assert_string(
-            "©@example.com",
-            new MailboxAddress(null, "©@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "©@example.com").to_rfc822_address(),
+            "©@example.com"
         );
-        assert_string(
-            "😸@example.com",
-            new MailboxAddress(null, "😸@example.com").to_rfc822_address()
+        assert_equal(
+            new MailboxAddress(null, "😸@example.com").to_rfc822_address(),
+            "😸@example.com"
         );
 
     }
@@ -310,15 +310,15 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("😸", "example@example.com").to_rfc822_string() ==
                "=?UTF-8?b?8J+YuA==?= <example@example.com>");
 
-        assert_string(
-            "\"Surname, Name\" <example@example.com>",
-            new MailboxAddress("Surname, Name", "example@example.com").to_rfc822_string()
+        assert_equal(
+            new MailboxAddress("Surname, Name", "example@example.com").to_rfc822_string(),
+            "\"Surname, Name\" <example@example.com>"
         );
-        assert_string(
-            "\"Surname, Name\" <example@example.com>",
+        assert_equal(
             new MailboxAddress
             .from_rfc822_string("\"Surname, Name\" <example@example.com>")
-            .to_rfc822_string()
+            .to_rfc822_string(),
+            "\"Surname, Name\" <example@example.com>"
         );
     }
 

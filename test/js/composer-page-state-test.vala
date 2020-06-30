@@ -36,7 +36,7 @@ class Composer.PageStateTest : ClientWebViewTestCase<Composer.WebView> {
         try {
             WebView.load_resources();
         } catch (Error err) {
-            assert_not_reached();
+            GLib.assert_not_reached();
         }
     }
 

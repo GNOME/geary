@@ -15,18 +15,18 @@ class Geary.TlsNegotiationMethodTest : TestCase {
     }
 
     public void to_value() throws GLib.Error {
-        assert_string("start-tls", TlsNegotiationMethod.START_TLS.to_value());
+        assert_equal(TlsNegotiationMethod.START_TLS.to_value(), "start-tls");
     }
 
     public void for_value() throws GLib.Error {
-        assert_int(
-            TlsNegotiationMethod.START_TLS,
-            TlsNegotiationMethod.for_value("start-tls"),
+        assert_equal(
+            TlsNegotiationMethod.for_value("start-tls").to_string(),
+            TlsNegotiationMethod.START_TLS.to_string(),
             "start-tls"
         );
-        assert_int(
-            TlsNegotiationMethod.START_TLS,
-            TlsNegotiationMethod.for_value("Start-TLS"),
+        assert_equal(
+            TlsNegotiationMethod.for_value("Start-TLS").to_string(),
+            TlsNegotiationMethod.START_TLS.to_string(),
             "Start-TLS"
         );
     }

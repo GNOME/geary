@@ -23,7 +23,7 @@ public abstract class ClientWebViewTestCase<V> : TestCase {
         try {
             ClientWebView.load_resources(GLib.File.new_for_path("/tmp"));
         } catch (GLib.Error err) {
-            assert_not_reached();
+            GLib.assert_not_reached();
         }
     }
 

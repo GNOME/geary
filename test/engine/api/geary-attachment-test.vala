@@ -59,17 +59,13 @@ class Geary.AttachmentTest : TestCase {
                  get_safe_file_name_with_unknown_content_type);
     }
 
-    public override void set_up() {
-        try {
-            this.content_type = Mime.ContentType.parse(CONTENT_TYPE);
-            this.default_type = Mime.ContentType.ATTACHMENT_DEFAULT;
-            this.content_disposition = new Mime.ContentDisposition("attachment", null);
+    public override void set_up() throws GLib.Error {
+        this.content_type = Mime.ContentType.parse(CONTENT_TYPE);
+        this.default_type = Mime.ContentType.ATTACHMENT_DEFAULT;
+        this.content_disposition = new Mime.ContentDisposition("attachment", null);
 
-            File source = File.new_for_path(_SOURCE_ROOT_DIR);
-            this.file = source.get_child(FILE_PATH);
-        } catch (Error err) {
-            assert_not_reached();
-        }
+        File source = File.new_for_path(_SOURCE_ROOT_DIR);
+        this.file = source.get_child(FILE_PATH);
     }
 
     public void get_safe_file_name_with_content_name() throws Error {
@@ -219,7 +215,7 @@ class Geary.AttachmentTest : TestCase {
 
         test.get_safe_file_name.begin(null, this.async_completion);
 
-        assert_string(TEST_FILENAME, test.get_safe_file_name.end(async_result()));
+        assert_equal(test.get_safe_file_name.end(async_result()), TEST_FILENAME);
     }
 
 }

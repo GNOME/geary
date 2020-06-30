@@ -17,13 +17,13 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
     }
 
     public void to_parameter() throws Error {
-        assert_string(
-            "test",
-            new MailboxSpecifier("test").to_parameter().to_string()
+        assert_equal(
+            new MailboxSpecifier("test").to_parameter().to_string(),
+            "test"
         );
-        assert_string(
-            "foo/bar",
-            new MailboxSpecifier("foo/bar").to_parameter().to_string()
+        assert_equal(
+            new MailboxSpecifier("foo/bar").to_parameter().to_string(),
+            "foo/bar"
         );
 
         // The param won't be quoted or escaped since
@@ -32,55 +32,58 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
         Parameter quoted = new MailboxSpecifier("""foo\bar""").to_parameter();
         assert_true(quoted is QuotedStringParameter, "Backslash was not quoted");
 
-        assert_string(
-            "ol&AOk-",
-            new MailboxSpecifier("olé").to_parameter().to_string()
+        assert_equal(
+            new MailboxSpecifier("olé").to_parameter().to_string(),
+            "ol&AOk-"
         );
     }
 
     public void from_parameter() throws Error {
-        assert_string(
-            "test",
+        assert_equal(
             new MailboxSpecifier.from_parameter(
-                new UnquotedStringParameter("test")).name
+                new UnquotedStringParameter("test")
+            ).name,
+            "test"
         );
 
         // This won't be quoted or escaped since QuotedStringParameter
         // doesn't actually handle that.
-        assert_string(
-            "foo\\bar",
+        assert_equal(
             new MailboxSpecifier.from_parameter(
-                new QuotedStringParameter("""foo\bar""")).name
+                new QuotedStringParameter("""foo\bar""")
+            ).name,
+            "foo\\bar"
         );
-        assert_string(
-            "olé",
+        assert_equal(
             new MailboxSpecifier.from_parameter(
-                new UnquotedStringParameter("ol&AOk-")).name
+                new UnquotedStringParameter("ol&AOk-")
+            ).name,
+            "olé"
         );
     }
 
     public void from_folder_path() throws Error {
         FolderRoot root = new FolderRoot("#test");
         MailboxSpecifier inbox = new MailboxSpecifier("Inbox");
-        assert_string(
-            "Foo",
+        assert_equal(
             new MailboxSpecifier.from_folder_path(
                 root.get_child("Foo"), inbox, "$"
-            ).name
+            ).name,
+            "Foo"
         );
-        assert_string(
-            "Foo$Bar",
+        assert_equal(
             new MailboxSpecifier.from_folder_path(
                 root.get_child("Foo").get_child("Bar"), inbox, "$"
-            ).name
+            ).name,
+            "Foo$Bar"
         );
-        assert_string(
-            "Inbox",
+        assert_equal(
             new MailboxSpecifier.from_folder_path(
                 root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
                 inbox,
                 "$"
-            ).name
+            ).name,
+            "Inbox"
         );
 
         try {

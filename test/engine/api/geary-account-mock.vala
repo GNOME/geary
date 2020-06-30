@@ -5,7 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockAccount : Account, MockObject {
+public class Geary.MockAccount : Account,
+    ValaUnit.TestAssertions,
+    ValaUnit.MockObject {
 
 
     public class MockSearchQuery : SearchQuery {
@@ -47,8 +49,8 @@ public class Geary.MockAccount : Account, MockObject {
     }
 
 
-    protected Gee.Queue<ExpectedCall> expected {
-        get; set; default = new Gee.LinkedList<ExpectedCall>();
+    protected Gee.Queue<ValaUnit.ExpectedCall> expected {
+        get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
 
 

@@ -14,31 +14,31 @@ class Geary.Ascii.Test : TestCase {
     }
 
     public void index_of() throws Error {
-        assert_int(-1, Ascii.index_of("", 'a'));
-        assert_int(0, Ascii.index_of("a", 'a'));
-        assert_int(0, Ascii.index_of("aa", 'a'));
+        assert_equal<int?>(Ascii.index_of("", 'a'), -1);
+        assert_equal<int?>(Ascii.index_of("a", 'a'), 0);
+        assert_equal<int?>(Ascii.index_of("aa", 'a'), 0);
 
-        assert_int(0, Ascii.index_of("abcabc", 'a'));
-        assert_int(1, Ascii.index_of("abcabc", 'b'));
-        assert_int(2, Ascii.index_of("abcabc", 'c'));
+        assert_equal<int?>(Ascii.index_of("abcabc", 'a'), 0);
+        assert_equal<int?>(Ascii.index_of("abcabc", 'b'), 1);
+        assert_equal<int?>(Ascii.index_of("abcabc", 'c'), 2);
 
-        assert_int(0, Ascii.index_of("@", '@'));
+        assert_equal<int?>(Ascii.index_of("@", '@'), 0);
 
-        assert_int(-1, Ascii.index_of("abc", 'd'));
+        assert_equal<int?>(Ascii.index_of("abc", 'd'), -1);
     }
 
     public void last_index_of() throws Error {
-        assert_int(-1, Ascii.last_index_of("", 'a'));
-        assert_int(0, Ascii.last_index_of("a", 'a'));
-        assert_int(1, Ascii.last_index_of("aa", 'a'));
+        assert_equal<int?>(Ascii.last_index_of("", 'a'), -1);
+        assert_equal<int?>(Ascii.last_index_of("a", 'a'), 0);
+        assert_equal<int?>(Ascii.last_index_of("aa", 'a'), 1);
 
-        assert_int(3, Ascii.last_index_of("abcabc", 'a'));
-        assert_int(4, Ascii.last_index_of("abcabc", 'b'));
-        assert_int(5, Ascii.last_index_of("abcabc", 'c'));
+        assert_equal<int?>(Ascii.last_index_of("abcabc", 'a'), 3);
+        assert_equal<int?>(Ascii.last_index_of("abcabc", 'b'), 4);
+        assert_equal<int?>(Ascii.last_index_of("abcabc", 'c'), 5);
 
-        assert_int(0, Ascii.last_index_of("@", '@'));
+        assert_equal<int?>(Ascii.last_index_of("@", '@'), 0);
 
-        assert_int(-1, Ascii.last_index_of("abc", 'd'));
+        assert_equal<int?>(Ascii.last_index_of("abc", 'd'), -1);
     }
 
 }

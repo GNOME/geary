@@ -48,15 +48,11 @@ int main(string[] args) {
 
     switch (config.type) {
     case IMAP:
-        integration.add_suite(
-            new Integration.Imap.ClientSession(config).get_suite()
-        );
+        integration.add_suite(new Integration.Imap.ClientSession(config).suite);
         break;
 
     case SMTP:
-        integration.add_suite(
-            new Integration.Smtp.ClientSession(config).get_suite()
-        );
+        integration.add_suite(new Integration.Smtp.ClientSession(config).suite);
         break;
     }
 

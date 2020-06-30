@@ -5,7 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockFolder : Folder, MockObject {
+public class Geary.MockFolder : Folder,
+    ValaUnit.TestAssertions,
+    ValaUnit.MockObject {
 
 
     public override Account account {
@@ -28,8 +30,8 @@ public class Geary.MockFolder : Folder, MockObject {
         get { return this._opening_monitor; }
     }
 
-    protected Gee.Queue<ExpectedCall> expected {
-        get; set; default = new Gee.LinkedList<ExpectedCall>();
+    protected Gee.Queue<ValaUnit.ExpectedCall> expected {
+        get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
 
 

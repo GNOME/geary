@@ -160,9 +160,9 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
-        assert_int(
-            2, this.test.get_emails(Conversation.Ordering.NONE).size
-        );
+        assert_collection(
+            this.test.get_emails(Conversation.Ordering.NONE)
+        ).size(2);
     }
 
     public void get_emails_by_location() throws GLib.Error {
@@ -173,31 +173,15 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
-        assert_int(
-            1, this.test.get_emails(Conversation.Ordering.NONE,
-                                    Conversation.Location.IN_FOLDER).size,
-            "Unexpected in-folder size"
-        );
-        assert_equal(
-            e1,
-            traverse(this.test.get_emails(Conversation.Ordering.NONE,
-                                          Conversation.Location.IN_FOLDER))
-            .first(),
+        assert_collection(
+            this.test.get_emails(NONE, IN_FOLDER),
             "Unexpected in-folder element"
-        );
+        ).size(1).contains(e1);
 
-        assert_int(
-            1, this.test.get_emails(Conversation.Ordering.NONE,
-                                    Conversation.Location.OUT_OF_FOLDER).size,
-            "Unexpected out-of-folder size"
-        );
-        assert_equal(
-            e2,
-            traverse(this.test.get_emails(Conversation.Ordering.NONE,
-                                          Conversation.Location.OUT_OF_FOLDER))
-            .first(),
+        assert_collection(
+            this.test.get_emails(NONE, OUT_OF_FOLDER),
             "Unexpected out-of-folder element"
-        );
+        ).size(1).contains(e2);
     }
 
     public void get_emails_blacklist() throws GLib.Error {
@@ -211,39 +195,17 @@ class Geary.App.ConversationTest : TestCase {
         Gee.Collection<FolderPath> blacklist = new Gee.ArrayList<FolderPath>();
 
         blacklist.add(other_path);
-        assert_int(
-            1, this.test.get_emails(Conversation.Ordering.NONE,
-                                    Conversation.Location.ANYWHERE,
-                                    blacklist
-            ).size,
-            "Unexpected other blacklist size"
-        );
-        assert_equal(
-            e1,
-            traverse(this.test.get_emails(Conversation.Ordering.NONE,
-                                          Conversation.Location.ANYWHERE,
-                                          blacklist)
-            ).first(),
+        assert_collection(
+            this.test.get_emails(NONE, ANYWHERE, blacklist),
             "Unexpected other blacklist element"
-        );
+        ).size(1).contains(e1);
 
         blacklist.clear();
         blacklist.add(this.base_folder.path);
-        assert_int(
-            1, this.test.get_emails(Conversation.Ordering.NONE,
-                                    Conversation.Location.ANYWHERE,
-                                    blacklist
-            ).size,
-            "Unexpected other blacklist size"
-        );
-        assert_equal(
-            e2,
-            traverse(this.test.get_emails(Conversation.Ordering.NONE,
-                                          Conversation.Location.ANYWHERE,
-                                          blacklist)
-            ).first(),
+        assert_collection(
+            this.test.get_emails(NONE, ANYWHERE, blacklist),
             "Unexpected other blacklist element"
-        );
+        ).size(1).contains(e2);
     }
 
     public void get_emails_marked_for_deletion() throws GLib.Error {
@@ -251,25 +213,24 @@ class Geary.App.ConversationTest : TestCase {
         e1.set_flags(new Geary.EmailFlags.with(Geary.EmailFlags.DELETED));
         this.test.add(e1, singleton(this.base_folder.path));
 
-        assert_int(
-            0, this.test.get_emails(Conversation.Ordering.NONE,
-                                    Conversation.Location.ANYWHERE
-            ).size,
+        assert_collection(
+            this.test.get_emails(NONE, ANYWHERE),
             "Message marked for deletion still present in conversation"
-        );
+        ).is_empty();
     }
 
     public void count_email_in_folder() throws GLib.Error {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        assert_uint(
-            1, this.test.get_count_in_folder(this.base_folder.path),
+        assert_equal<uint?>(
+            this.test.get_count_in_folder(this.base_folder.path),
+            1,
             "In-folder count"
         );
-        assert_uint(
-            0,
+        assert_equal<uint?>(
             this.test.get_count_in_folder(this.folder_root.get_child("other")),
+            0,
             "Out-folder count"
         );
     }

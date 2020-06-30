@@ -98,7 +98,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
             test_article.connect_async.end(async_result());
             assert_not_reached();
         } catch (GLib.IOError.TIMED_OUT err) {
-            assert_double(timer.elapsed(), CONNECT_TIMEOUT, CONNECT_TIMEOUT * 0.5);
+            assert_within(timer.elapsed(), CONNECT_TIMEOUT, CONNECT_TIMEOUT * 0.5);
         }
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
@@ -278,9 +278,9 @@ class Geary.Imap.ClientSessionTest : TestCase {
 
         assert_true(test_article.capabilities.supports_imap4rev1());
         assert_false(test_article.capabilities.has_capability("AUTH"));
-        assert_int(2, test_article.capabilities.revision);
+        assert_equal<int?>(test_article.capabilities.revision, 2);
 
-        assert_string("Inbox", test_article.inbox.mailbox.name);
+        assert_equal(test_article.inbox.mailbox.name, "Inbox");
         assert_true(test_article.inbox.mailbox.is_inbox);
 
         test_article.disconnect_async.begin(null, this.async_completion);
@@ -322,9 +322,9 @@ class Geary.Imap.ClientSessionTest : TestCase {
 
         assert_true(test_article.capabilities.supports_imap4rev1());
         assert_false(test_article.capabilities.has_capability("AUTH"));
-        assert_int(2, test_article.capabilities.revision);
+        assert_equal<int?>(test_article.capabilities.revision, 2);
 
-        assert_string("Inbox", test_article.inbox.mailbox.name);
+        assert_equal(test_article.inbox.mailbox.name, "Inbox");
         assert_true(test_article.inbox.mailbox.is_inbox);
 
         test_article.disconnect_async.begin(null, this.async_completion);
@@ -383,19 +383,22 @@ class Geary.Imap.ClientSessionTest : TestCase {
         );
         test_article.initiate_session_async.end(async_result());
 
-        assert_int(1, test_article.get_personal_namespaces().size);
-        assert_string(
-            "INBOX.", test_article.get_personal_namespaces()[0].prefix
+        assert_equal<int?>(test_article.get_personal_namespaces().size, 1);
+        assert_equal(
+            test_article.get_personal_namespaces()[0].prefix,
+            "INBOX."
         );
 
-        assert_int(1, test_article.get_shared_namespaces().size);
-        assert_string(
-            "shared.", test_article.get_shared_namespaces()[0].prefix
+        assert_equal<int?>(test_article.get_shared_namespaces().size, 1);
+        assert_equal(
+            test_article.get_shared_namespaces()[0].prefix,
+            "shared."
         );
 
-        assert_int(1, test_article.get_other_users_namespaces().size);
-        assert_string(
-            "user.", test_article.get_other_users_namespaces()[0].prefix
+        assert_equal<int?>(test_article.get_other_users_namespaces().size, 1);
+        assert_equal(
+            test_article.get_other_users_namespaces()[0].prefix,
+            "user."
         );
 
         test_article.disconnect_async.begin(null, this.async_completion);

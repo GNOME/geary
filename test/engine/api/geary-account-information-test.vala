@@ -88,39 +88,35 @@ class Geary.AccountInformationTest : TestCase {
 
     public void test_service_label() throws GLib.Error {
         AccountInformation test = new_information();
-        assert_string("", test.service_label);
+        assert_equal(test.service_label, "");
 
         test = new_information();
         test.incoming.host = "example.com";
-        assert_string(
-            "example.com", test.service_label, "Email domain equals host name"
-        );
+        assert_equal(test.service_label, "example.com");
 
         test = new_information();
         test.incoming.host = "test.example.com";
-        assert_string(
-            "example.com", test.service_label, "Email domain host name suffix"
-        );
+        assert_equal(test.service_label, "example.com");
 
         test = new_information();
         test.incoming.host = "other.com";
         test.outgoing.host = "other.com";
-        assert_string("other.com", test.service_label);
+        assert_equal(test.service_label, "other.com");
 
         test = new_information();
         test.incoming.host = "mail.other.com";
         test.outgoing.host = "mail.other.com";
-        assert_string("other.com", test.service_label);
+        assert_equal(test.service_label, "other.com");
 
         test = new_information();
         test.incoming.host = "imap.other.com";
         test.outgoing.host = "smtp.other.com";
-        assert_string("other.com", test.service_label);
+        assert_equal(test.service_label, "other.com");
 
         test = new_information();
         test.incoming.host = "not-mail.other.com";
         test.outgoing.host = "not-mail.other.com";
-        assert_string("other.com", test.service_label);
+        assert_equal(test.service_label, "other.com");
     }
 
     private AccountInformation new_information(ServiceProvider provider =

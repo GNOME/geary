@@ -22,13 +22,13 @@ class Geary.RFC822.MessageDataTest : TestCase {
             new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS),
             new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED)
         );
-        assert_string(PLAIN_BODY1_EXPECTED, plain_preview1.buffer.to_string());
+        assert_equal(plain_preview1.buffer.to_string(), PLAIN_BODY1_EXPECTED);
 
         PreviewText base64_preview = new PreviewText.with_header(
             new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS),
             new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED)
         );
-        assert_string(BASE64_BODY_EXPECTED, base64_preview.buffer.to_string());
+        assert_equal(base64_preview.buffer.to_string(), BASE64_BODY_EXPECTED);
 
         string html_part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
 
@@ -36,76 +36,76 @@ class Geary.RFC822.MessageDataTest : TestCase {
             new Geary.Memory.StringBuffer(html_part_headers),
             new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED)
         );
-        assert_string(HTML_BODY1_EXPECTED, html_preview1.buffer.to_string());
+        assert_equal(html_preview1.buffer.to_string(), HTML_BODY1_EXPECTED);
 
         PreviewText html_preview2 = new PreviewText.with_header(
             new Geary.Memory.StringBuffer(html_part_headers),
             new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED)
         );
-        assert_string(HTML_BODY2_EXPECTED, html_preview2.buffer.to_string());
+        assert_equal(html_preview2.buffer.to_string(), HTML_BODY2_EXPECTED);
     }
 
     public void header_from_rfc822() throws GLib.Error {
         Header test_article = new Header(new Memory.StringBuffer(HEADER_FIXTURE));
-        assert_string("Test <test@example.com>", test_article.get_header("From"));
-        assert_string("test", test_article.get_header("Subject"));
-        assert_null_string(test_article.get_header("Blah"));
+        assert_equal(test_article.get_header("From"), "Test <test@example.com>");
+        assert_equal(test_article.get_header("Subject"), "test");
+        assert_null(test_article.get_header("Blah"));
     }
 
     public void header_names_from_rfc822() throws GLib.Error {
         Header test_article = new Header(new Memory.StringBuffer(HEADER_FIXTURE));
-        assert_int(2, test_article.get_header_names().length);
-        assert_string("From", test_article.get_header_names()[0]);
-        assert_string("Subject", test_article.get_header_names()[1]);
+        assert_equal<int?>(test_article.get_header_names().length, 2);
+        assert_equal(test_article.get_header_names()[0], "From");
+        assert_equal(test_article.get_header_names()[1], "Subject");
     }
 
     public void date_from_rfc822() throws GLib.Error {
         const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
         Date full_hour_tz = new Date.from_rfc822_string(FULL_HOUR_TZ);
-        assert_int64(
-            ((int64) (-1 * 3600)) * 1000 * 1000,
+        assert_equal<int64?>(
             full_hour_tz.value.get_utc_offset(),
+            ((int64) (-1 * 3600)) * 1000 * 1000,
             "full_hour_tz.value.get_utc_offset"
         );
-        assert_int(0, full_hour_tz.value.get_hour(), "full_hour_tz hour");
-        assert_int(0, full_hour_tz.value.get_minute(), "full_hour_tz minute");
-        assert_int(0, full_hour_tz.value.get_second(), "full_hour_tz second");
-        assert_int(28, full_hour_tz.value.get_day_of_month(), "full_hour_tz day");
-        assert_int(2, full_hour_tz.value.get_month(), "full_hour_tz month");
-        assert_int(2019, full_hour_tz.value.get_year(), "full_hour_tz year");
+        assert_equal<int?>(full_hour_tz.value.get_hour(), 0, "full_hour_tz hour");
+        assert_equal<int?>(full_hour_tz.value.get_minute(), 0, "full_hour_tz minute");
+        assert_equal<int?>(full_hour_tz.value.get_second(), 0, "full_hour_tz second");
+        assert_equal<int?>(full_hour_tz.value.get_day_of_month(), 28, "full_hour_tz day");
+        assert_equal<int?>(full_hour_tz.value.get_month(), 2, "full_hour_tz month");
+        assert_equal<int?>(full_hour_tz.value.get_year(), 2019, "full_hour_tz year");
 
-        assert_int64(
-            full_hour_tz.value.to_utc().to_unix(),
+        assert_equal<int64?>(
             full_hour_tz.value.to_unix(),
+            full_hour_tz.value.to_utc().to_unix(),
             "to_unix not UTC"
         );
 
         const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
         Date half_hour_tz = new Date.from_rfc822_string(HALF_HOUR_TZ);
-        assert_int64(
-            ((int64) (10.5 * 3600)) * 1000 * 1000,
-            half_hour_tz.value.get_utc_offset()
+        assert_equal<int64?>(
+            half_hour_tz.value.get_utc_offset(),
+            ((int64) (10.5 * 3600)) * 1000 * 1000
         );
-        assert_int(0, half_hour_tz.value.get_hour());
-        assert_int(0, half_hour_tz.value.get_minute());
-        assert_int(0, half_hour_tz.value.get_second());
-        assert_int(28, half_hour_tz.value.get_day_of_month());
-        assert_int(2, half_hour_tz.value.get_month());
-        assert_int(2019, half_hour_tz.value.get_year());
+        assert_equal<int?>(half_hour_tz.value.get_hour(), 0);
+        assert_equal<int?>(half_hour_tz.value.get_minute(), 0);
+        assert_equal<int?>(half_hour_tz.value.get_second(), 0);
+        assert_equal<int?>(half_hour_tz.value.get_day_of_month(), 28);
+        assert_equal<int?>(half_hour_tz.value.get_month(), 2);
+        assert_equal<int?>(half_hour_tz.value.get_year(), 2019);
     }
 
     public void date_to_rfc822() throws GLib.Error {
         const string FULL_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -0100";
         Date full_hour_tz = new Date.from_rfc822_string(FULL_HOUR_TZ);
-        assert_string(FULL_HOUR_TZ, full_hour_tz.to_rfc822_string());
+        assert_equal(full_hour_tz.to_rfc822_string(), FULL_HOUR_TZ);
 
         const string HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 +1030";
         Date half_hour_tz = new Date.from_rfc822_string(HALF_HOUR_TZ);
-        assert_string(HALF_HOUR_TZ, half_hour_tz.to_rfc822_string());
+        assert_equal(half_hour_tz.to_rfc822_string(), HALF_HOUR_TZ);
 
         const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
         Date neg_half_hour_tz = new Date.from_rfc822_string(NEG_HALF_HOUR_TZ);
-        assert_string(NEG_HALF_HOUR_TZ, neg_half_hour_tz.to_rfc822_string());
+        assert_equal(neg_half_hour_tz.to_rfc822_string(), NEG_HALF_HOUR_TZ);
     }
 
 

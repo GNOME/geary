@@ -55,15 +55,11 @@ class Geary.EngineTest : TestCase {
         this.account.set_account_directories(this.tmp, this.tmp);
     }
 
-    public override void tear_down () {
+    public override void tear_down() throws GLib.Error {
         this.account = null;
-        try {
-            this.res.delete();
-            this.tmp.delete();
-            this.tmp = null;
-        } catch (Error err) {
-            assert_not_reached();
-        }
+        this.res.delete();
+        this.tmp.delete();
+        this.tmp = null;
     }
 
     public void add_account() throws GLib.Error {

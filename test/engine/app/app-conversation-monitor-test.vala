@@ -105,7 +105,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.base_folder, Email.Field.NONE, 10
         );
 
-        ExpectedCall open = this.base_folder
+        ValaUnit.ExpectedCall open = this.base_folder
             .expect_call("open_async")
             .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
 
@@ -129,7 +129,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.base_folder, Email.Field.NONE, 10
         );
 
-        ExpectedCall open = this.base_folder
+        ValaUnit.ExpectedCall open = this.base_folder
             .expect_call("open_async")
             .async_call(PAUSE)
             .throws(new GLib.IOError.CANCELLED("Mock error"));
@@ -137,10 +137,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
             .expect_call("close_async")
             .throws(new EngineError.ALREADY_CLOSED("Mock error"));
 
-        var start_waiter = new AsyncResultWaiter(this.main_loop);
+        var start_waiter = new ValaUnit.AsyncResultWaiter(this.main_loop);
         monitor.start_monitoring.begin(NONE, null, start_waiter.async_completion);
 
-        var stop_waiter = new AsyncResultWaiter(this.main_loop);
+        var stop_waiter = new ValaUnit.AsyncResultWaiter(this.main_loop);
         monitor.stop_monitoring.begin(null, stop_waiter.async_completion);
 
         open.async_resume();
@@ -161,7 +161,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.base_folder, Email.Field.NONE, 10
         );
 
-        ExpectedCall open = this.base_folder
+        ValaUnit.ExpectedCall open = this.base_folder
             .expect_call("open_async")
             .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
         this.base_folder
@@ -191,9 +191,9 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         ConversationMonitor monitor = setup_monitor({e1}, paths);
 
-        assert_int(1, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
         assert_non_null(monitor.window_lowest, "Lowest window id");
-        assert_equal(e1.id, monitor.window_lowest, "Lowest window id");
+        assert_equal(monitor.window_lowest, e1.id, "Lowest window id");
 
         Conversation c1 = Collection.first(monitor.read_only_view);
         assert_equal(e1, c1.get_email_by_id(e1.id), "Email not present in conversation");
@@ -212,9 +212,9 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         ConversationMonitor monitor = setup_monitor({e3, e2, e1}, paths);
 
-        assert_int(3, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 3, "Conversation count");
         assert_non_null(monitor.window_lowest, "Lowest window id");
-        assert_equal(e1.id, monitor.window_lowest, "Lowest window id");
+        assert_equal(monitor.window_lowest, e1.id, "Lowest window id");
     }
 
     public void load_related_message() throws Error {
@@ -233,13 +233,13 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         ConversationMonitor monitor = setup_monitor({e2}, paths, {related_paths});
 
-        assert_int(1, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
         assert_non_null(monitor.window_lowest, "Lowest window id");
-        assert_equal(e2.id, monitor.window_lowest, "Lowest window id");
+        assert_equal(monitor.window_lowest, e2.id, "Lowest window id");
 
         Conversation c1 = Collection.first(monitor.read_only_view);
-        assert_equal(e1, c1.get_email_by_id(e1.id), "Related email not present in conversation");
-        assert_equal(e2, c1.get_email_by_id(e2.id), "In folder not present in conversation");
+        assert_equal(c1.get_email_by_id(e1.id), e1, "Related email not present in conversation");
+        assert_equal(c1.get_email_by_id(e2.id), e2, "In folder not present in conversation");
     }
 
     public void base_folder_message_appended() throws Error {
@@ -250,7 +250,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         paths.set(e1.id, this.base_folder.path);
 
         ConversationMonitor monitor = setup_monitor();
-        assert_int(0, monitor.size, "Initial conversation count");
+        assert_equal<int?>(monitor.size, 0, "Initial conversation count");
 
         this.base_folder.expect_call("list_email_by_sparse_id_async")
             .returns_object(new Gee.ArrayList<Email>.wrap({e1}));
@@ -269,7 +269,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.base_folder.assert_expectations();
         this.account.assert_expectations();
 
-        assert_int(1, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
     }
 
     public void base_folder_message_removed() throws Error {
@@ -291,17 +291,17 @@ class Geary.App.ConversationMonitorTest : TestCase {
         ConversationMonitor monitor = setup_monitor(
             {e3, e2}, paths, {null, e2_related_paths}
         );
-        assert_int(2, monitor.size, "Initial conversation count");
-        assert_equal(e2.id, monitor.window_lowest, "Lowest window id");
+        assert_equal<int?>(monitor.size, 2, "Initial conversation count");
+        assert_equal(monitor.window_lowest, e2.id, "Lowest window id");
 
         this.base_folder.email_removed(new Gee.ArrayList<EmailIdentifier>.wrap({e2.id}));
         wait_for_signal(monitor, "conversations-removed");
-        assert_int(1, monitor.size, "Conversation count");
-        assert_equal(e3.id, monitor.window_lowest, "Lowest window id");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
+        assert_equal(monitor.window_lowest, e3.id, "Lowest window id");
 
         this.base_folder.email_removed(new Gee.ArrayList<EmailIdentifier>.wrap({e3.id}));
         wait_for_signal(monitor, "conversations-removed");
-        assert_int(0, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 0, "Conversation count");
         assert_null(monitor.window_lowest, "Lowest window id");
 
         // Close the monitor to cancel the final load so it does not
@@ -330,7 +330,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         related_paths.set(e3, this.other_folder.path);
 
         ConversationMonitor monitor = setup_monitor({e1}, paths);
-        assert_int(1, monitor.size, "Initial conversation count");
+        assert_equal<int?>(monitor.size, 1, "Initial conversation count");
 
         this.other_folder.expect_call("open_async");
         this.other_folder.expect_call("list_email_by_sparse_id_async")
@@ -389,11 +389,11 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.other_folder.assert_expectations();
         this.account.assert_expectations();
 
-        assert_int(1, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
 
         Conversation c1 = Collection.first(monitor.read_only_view);
-        assert_int(2, c1.get_count(), "Conversation message count");
-        assert_equal(e3, c1.get_email_by_id(e3.id),
+        assert_equal<int?>(c1.get_count(), 2, "Conversation message count");
+        assert_equal(c1.get_email_by_id(e3.id), e3,
                      "Appended email not present in conversation");
     }
 
@@ -405,7 +405,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         paths.set(e1.id, this.base_folder.path);
 
         ConversationMonitor monitor = setup_monitor({e1}, paths);
-        assert_int(1, monitor.size, "Conversation count");
+        assert_equal<int?>(monitor.size, 1, "Conversation count");
 
         // Mark message as deleted
         Gee.HashMap<EmailIdentifier,EmailFlags> flags_changed =
@@ -418,7 +418,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         wait_for_signal(monitor, "email-flags-changed");
 
-        assert_int(0, monitor.size, "Conversation count should now be zero after being marked deleted.");
+        assert_equal<int?>(
+            monitor.size, 0,
+            "Conversation count should now be zero after being marked deleted."
+        );
     }
 
     private Email setup_email(int id, Email? references = null) {
@@ -465,7 +468,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
          */
 
         this.base_folder.expect_call("open_async");
-        ExpectedCall list_call = this.base_folder
+        ValaUnit.ExpectedCall list_call = this.base_folder
             .expect_call("list_email_by_id_async")
             .returns_object(new Gee.ArrayList<Email>.wrap(base_folder_email));
 
@@ -491,7 +494,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             bool found_related = false;
             Gee.Set<RFC822.MessageID> seen_ids = new Gee.HashSet<RFC822.MessageID>();
             foreach (Email base_email in base_folder_email) {
-                ExpectedCall call =
+                ValaUnit.ExpectedCall call =
                     this.account.expect_call("local_search_message_id_async");
                 seen_ids.add(base_email.message_id);
                 if (has_related && related_paths[base_i] != null) {
@@ -531,8 +534,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
                 }
             }
 
-            ExpectedCall contains =
-            this.account.expect_call("get_containing_folders_async");
+            ValaUnit.ExpectedCall contains =
+                this.account.expect_call("get_containing_folders_async");
             if (paths != null) {
                 contains.returns_object(paths);
             }

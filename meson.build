@@ -153,6 +153,15 @@ endif
 # Build glue
 #
 
+vala_unit_proj = subproject(
+  'vala-unit',
+  default_options: [
+    'install=false',
+    'valadoc=@0@'.format(enable_valadoc)
+  ]
+)
+vala_unit_dep = vala_unit_proj.get_variable('vala_unit_dep')
+
 if enable_valadoc
   valadoc = find_program('valadoc')
 endif

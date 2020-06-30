@@ -5,7 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-internal class Geary.MockContactHarvester : ContactHarvester, GLib.Object {
+internal class Geary.MockContactHarvester :
+    Geary.BaseObject,
+    ContactHarvester {
 
     public async void harvest_from_email(Gee.Collection<Email> messages,
                                          GLib.Cancellable? cancellable)

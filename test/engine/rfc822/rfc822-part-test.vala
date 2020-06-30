@@ -26,8 +26,8 @@ class Geary.RFC822.PartTest : TestCase {
     public void new_from_minimal_mime_part() throws GLib.Error {
         Part test = new Part(new_part("test/plain", CR_BODY.data));
 
-        assert_null_string(test.content_id, "content_id");
-        assert_null_string(test.content_description, "content_description");
+        assert_null(test.content_id, "content_id");
+        assert_null(test.content_description, "content_description");
         assert_null(test.content_disposition, "content_disposition");
     }
 
@@ -48,13 +48,12 @@ class Geary.RFC822.PartTest : TestCase {
 
         Part test = new Part(part);
 
-        assert_string(TYPE, test.content_type.to_string());
-        assert_string(ID, test.content_id);
-        assert_string(DESC, test.content_description);
+        assert_equal(test.content_type.to_string(), TYPE);
+        assert_equal(test.content_id, ID);
+        assert_equal(test.content_description, DESC);
         assert_non_null(test.content_disposition, "content_disposition");
-        assert_int(
-            Geary.Mime.DispositionType.INLINE,
-            test.content_disposition.disposition_type
+        assert_equal<Geary.Mime.DispositionType?>(
+            test.content_disposition.disposition_type, INLINE
         );
     }
 
@@ -63,7 +62,7 @@ class Geary.RFC822.PartTest : TestCase {
 
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
-        assert_string(CR_BODY, buf.to_string());
+        assert_equal(buf.to_string(), CR_BODY);
     }
 
     public void write_to_buffer_plain_crlf() throws GLib.Error {
@@ -72,7 +71,7 @@ class Geary.RFC822.PartTest : TestCase {
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
         // CRLF should be stripped
-        assert_string(CR_BODY, buf.to_string());
+        assert_equal(buf.to_string(), CR_BODY);
     }
 
     public void write_to_buffer_plain_ical() throws GLib.Error {
@@ -81,7 +80,7 @@ class Geary.RFC822.PartTest : TestCase {
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
         // CRLF should not be stripped
-        assert_string(ICAL_BODY, buf.to_string());
+        assert_equal(buf.to_string(), ICAL_BODY);
     }
 
     public void write_to_buffer_plain_utf8() throws GLib.Error {
@@ -89,7 +88,7 @@ class Geary.RFC822.PartTest : TestCase {
 
         Memory.Buffer buf = test.write_to_buffer(Part.EncodingConversion.NONE);
 
-        assert_string(UTF8_BODY, buf.to_string());
+        assert_equal(buf.to_string(), UTF8_BODY);
     }
 
     private GMime.Part new_part(string? mime_type,

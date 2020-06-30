@@ -40,7 +40,7 @@ class Geary.Db.VersionedDatabaseTest : TestCase {
 
         Geary.Db.Result result = db.query("SELECT * FROM TestTable;");
         assert_false(result.finished, "Row not inserted");
-        assert_string("value", result.string_for("col"));
+        assert_equal(result.string_for("col"), "value");
         assert_false(result.next(), "Multiple rows inserted");
 
         db.file.delete();

@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2018 Michael Gratton <mike@vee.net>
  *
@@ -106,7 +107,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         );
         db.open.end(async_result());
 
-        assert_int(26, db.get_schema_version(), "Post-upgrade version");
+        assert_equal<int?>(db.get_schema_version(), 26, "Post-upgrade version");
 
         // Since schema v22 deletes the re-creates all attachments,
         // attachment 12 should no longer exist on the file system and
@@ -157,7 +158,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         int i = 0;
         while (!result.finished) {
             assert_true(i < expected.length, "Too many rows");
-            assert_string(expected[i], result.string_at(0));
+            assert_equal(result.string_at(0), expected[i]);
             i++;
             result.next();
         }

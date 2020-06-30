@@ -93,9 +93,9 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(results.get(mock));
-        assert_int(0, this.folder.get_properties().email_unread);
+        assert_equal<int?>(results.size, 1);
+        assert_true(results.get(mock));
+        assert_equal(this.folder.get_properties().email_unread, 0);
     }
 
     public void create_unread_email() throws GLib.Error {
@@ -113,9 +113,9 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(results.get(mock));
-        assert_int(1, this.folder.get_properties().email_unread);
+        assert_equal<int?>(results.size, 1);
+        assert_true(results.get(mock));
+        assert_equal<int?>(this.folder.get_properties().email_unread, 1);
     }
 
     public void create_no_unread_update() throws GLib.Error {
@@ -133,9 +133,9 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(results.get(mock));
-        assert_int(0, this.folder.get_properties().email_unread);
+        assert_equal<int?>(results.size, 1);
+        assert_true(results.get(mock));
+        assert_equal<int?>(this.folder.get_properties().email_unread, 0);
     }
 
     public void merge_email() throws GLib.Error {
@@ -163,8 +163,8 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(!results.get(mock));
+        assert_equal<int?>(results.size, 1);
+        assert_true(!results.get(mock));
 
         // Fetch it again to make sure it's been merged using required
         // fields to check
@@ -182,8 +182,8 @@ class Geary.ImapDB.FolderTest : TestCase {
             assert_no_error(err);
         }
 
-        assert_string(fixture_to, merged.to.to_string());
-        assert_string(mock_subject, merged.subject.to_string());
+        assert_equal(merged.to.to_string(), fixture_to);
+        assert_equal(merged.subject.to_string(), mock_subject);
     }
 
     public void merge_add_flags() throws GLib.Error {
@@ -214,8 +214,8 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(!results.get(test));
+        assert_equal<int?>(results.size, 1);
+        assert_false(results.get(test));
 
         assert_flags((EmailIdentifier) test.id, test_flags);
     }
@@ -248,8 +248,8 @@ class Geary.ImapDB.FolderTest : TestCase {
         Gee.Map<Email,bool> results =
             this.folder.create_or_merge_email_async.end(async_result());
 
-        assert_int(1, results.size);
-        assert(!results.get(test));
+        assert_equal<int?>(results.size, 1);
+        assert_false(results.get(test));
 
         assert_flags((EmailIdentifier) test.id, test_flags);
     }
@@ -381,7 +381,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         int i = 0;
         while (!result.finished) {
             assert_true(i < expected.length, "Too many rows");
-            assert_int64(expected[i], result.int64_at(0));
+            assert_equal<int64?>(result.int64_at(0), expected[i]);
             i++;
             result.next();
         }
