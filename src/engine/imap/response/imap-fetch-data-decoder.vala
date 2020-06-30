@@ -160,12 +160,15 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         return new Envelope(
             sent_date,
             new Geary.RFC822.Subject.from_rfc822_string(subject.ascii),
-            parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
+            parse_addresses(from),
+            parse_addresses(sender),
+            parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null,
             (cc != null) ? parse_addresses(cc) : null,
             (bcc != null) ? parse_addresses(bcc) : null,
-            (in_reply_to != null) ? new Geary.RFC822.MessageIDList.from_rfc822_string(in_reply_to.ascii) : null,
-            (message_id != null) ? new Geary.RFC822.MessageID(message_id.ascii) : null);
+            (in_reply_to != null) ? new_message_id_list(in_reply_to.ascii) : null,
+            (message_id != null) ? new_message_id(message_id.ascii) : null
+        );
     }
 
     // TODO: This doesn't handle group lists (see Johnson, p.268) -- this will throw an
@@ -188,6 +191,30 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         }
 
         return new Geary.RFC822.MailboxAddresses(list);
+    }
+
+    private RFC822.MessageID? new_message_id(string? rfc822) {
+        RFC822.MessageID? id = null;
+        if (!String.is_empty_or_whitespace(rfc822)) {
+            try {
+                id = new RFC822.MessageID.from_rfc822_string(rfc822);
+            } catch (RFC822.Error err) {
+                debug("Failed to parse message id: %s", err.message);
+            }
+        }
+        return id;
+    }
+
+    private RFC822.MessageIDList? new_message_id_list(string? rfc822) {
+        RFC822.MessageIDList? list = null;
+        if (!String.is_empty_or_whitespace(rfc822)) {
+            try {
+                list = new RFC822.MessageIDList.from_rfc822_string(rfc822);
+            } catch (RFC822.Error err) {
+                debug("Failed to parse message id list: %s", err.message);
+            }
+        }
+        return list;
     }
 }
 
