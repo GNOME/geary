@@ -1012,8 +1012,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 Geary.RFC822.Message? message = null;
                 try {
                     message = email.get_message();
-                } catch (Error e) {
-                    // Not enough fields to construct the message
+                } catch (EngineError.INCOMPLETE_MESSAGE err) {
+                    debug("Not enough fields to construct message for preview: %s", err.message);
+                } catch (GLib.Error err) {
+                    warning("Error constructing message for preview: %s", err.message);
                 }
                 if (message != null) {
                     string preview = message.get_preview();
