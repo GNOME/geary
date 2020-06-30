@@ -47,6 +47,9 @@ class Geary.Imap.DeserializerTest : TestCase {
         // fail, disable for the moment
         add_test("invalid_flag_prefix", invalid_flag_prefix);
 
+        add_test("reserved_in_response_text", reserved_in_response_text);
+
+
         add_test("instant_eos", instant_eos);
         add_test("bye_eos", bye_eos);
     }
@@ -220,14 +223,13 @@ class Geary.Imap.DeserializerTest : TestCase {
 
     public void aliyun_greeting() throws Error {
         string greeting = "* OK AliYun IMAP Server Ready(10.147.40.164)";
-        string parsed = "* OK AliYun IMAP Server Ready (10.147.40.164)";
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
 
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert(message.to_string() == parsed);
+        assert(message.to_string() == greeting);
     }
 
     public void invalid_atom_prefix() throws Error {
@@ -318,6 +320,18 @@ class Geary.Imap.DeserializerTest : TestCase {
 
         //this.process.begin(Expect.DESER_FAIL, this.async_completion);
         //this.process.end(async_result());
+    }
+
+    public void reserved_in_response_text() throws Error {
+        // As seen in #711
+        string line = """a008 BAD Missing ] in: header.fields""";
+        this.stream.add_data(line.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, this.async_completion);
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == line);
     }
 
     public void instant_eos() throws Error {

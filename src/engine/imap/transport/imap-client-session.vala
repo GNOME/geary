@@ -286,6 +286,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /** Records the actual name and delimiter used for the inbox */
     internal MailboxInformation? inbox { get; private set; default = null; }
 
+    /** The quirks being used by this session. */
+    internal Quirks quirks { get; set; }
+
     // Locations personal mailboxes for this session
     private Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
 
@@ -296,7 +299,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
 
     private Endpoint imap_endpoint;
-    private Quirks quirks;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
 
@@ -1290,7 +1292,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         // the endpoint's max pipeline size is positive, if so use
         // multiple batches with a maximum size of that.
 
-        uint max_batch_size = this.imap_endpoint.max_pipeline_batch_size;
+        uint max_batch_size = this.quirks.max_pipeline_batch_size;
         if (max_batch_size < 1) {
             max_batch_size = cmds.size;
         }

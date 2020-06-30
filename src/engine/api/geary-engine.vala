@@ -426,22 +426,7 @@ public class Geary.Engine : BaseObject {
             uint timeout = service.protocol == Protocol.IMAP
                 ? Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC
                 : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
-
             shared = new_endpoint(provider, service, timeout);
-
-            // XXX this is pretty hacky, move this back into the
-            // OutlookAccount somehow
-            if (provider == ServiceProvider.OUTLOOK) {
-                // As of June 2016, outlook.com's IMAP servers have a bug
-                // where a large number (~50) of pipelined STATUS commands on
-                // mailboxes with many messages will eventually cause it to
-                // break command parsing and return a BAD response, causing us
-                // to drop the connection. Limit the number of pipelined
-                // commands per batch to work around this.  See b.g.o Bug
-                // 766552
-                shared.max_pipeline_batch_size = 25;
-            }
-
             this.shared_endpoints.set(key, new EndpointWeakRef(shared));
         }
 
