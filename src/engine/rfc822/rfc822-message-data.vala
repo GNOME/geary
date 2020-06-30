@@ -41,13 +41,16 @@ public interface Geary.RFC822.EncodedMessageData :
 public class Geary.RFC822.MessageID :
     Geary.MessageData.StringMessageData, DecodedMessageData {
 
-    private string rfc822;
+    private string rfc822 = null;
 
     public MessageID(string value) {
         base(value);
     }
 
-    public MessageID.from_rfc822_string(string rfc822) {
+    public MessageID.from_rfc822_string(string rfc822) throws Error {
+        if (String.is_empty_or_whitespace(rfc822)) {
+            throw new Error.INVALID("Empty RFC822 message id: %s", rfc822);
+        }
         base(GMime.utils_decode_message_id(rfc822));
         this.rfc822 = rfc822;
     }
@@ -96,7 +99,8 @@ public class Geary.RFC822.MessageIDList :
         list.add(msg_id);
     }
 
-    public MessageIDList.from_rfc822_string(string value) {
+    public MessageIDList.from_rfc822_string(string rfc822)
+        throws Error {
         this();
 
         // Have seen some mailers use commas between Message-IDs and whitespace inside Message-IDs,
@@ -117,7 +121,7 @@ public class Geary.RFC822.MessageIDList :
         char ch;
         bool in_message_id = false;
         bool bracketed = false;
-        while (Ascii.get_next_char(value, ref index, out ch)) {
+        while (Ascii.get_next_char(rfc822, ref index, out ch)) {
             bool add_char = false;
             switch (ch) {
                 case '<':
@@ -176,8 +180,9 @@ public class Geary.RFC822.MessageIDList :
         if (!String.is_empty(canonicalized.str))
             list.add(new MessageID(canonicalized.str));
 
-        // don't assert that list.size > 0; even though this method should generated a decoded ID
-        // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
+        if (this.list.is_empty) {
+            throw new Error.INVALID("Empty RFC822 message id list: %s", rfc822);
+        }
     }
 
     /** Returns the id at the given index, if it exists. */
