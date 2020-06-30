@@ -341,7 +341,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
 
-    private string references { get; private set; }
+    private Geary.RFC822.MessageIDList? references = null;
 
     [GtkChild]
     private Gtk.Grid editor_container;
@@ -1143,7 +1143,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 if (referred.in_reply_to != null)
                     this.in_reply_to.add_all(referred.in_reply_to.get_all());
                 if (referred.references != null)
-                    this.references = referred.references.to_rfc822_string();
+                    this.references = referred.references;
                 if (referred.subject != null)
                     this.subject = referred.subject.value ?? "";
             break;
@@ -1373,10 +1373,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 new Geary.RFC822.MessageIDList(this.in_reply_to)
             );
 
-        if (!Geary.String.is_empty(this.references)) {
-            email.set_references(
-                new Geary.RFC822.MessageIDList.from_rfc822_string(this.references)
-            );
+        if (this.references != null) {
+            email.set_references(this.references);
         }
 
         email.attached_files.add_all(this.attached_files);

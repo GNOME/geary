@@ -96,9 +96,9 @@ namespace Geary.RFC822.Utils {
         return new MailboxAddresses(result);
     }
 
-    public string reply_references(Email source) {
-        // generate list for References
-        var list = new Gee.ArrayList<MessageID>();
+    /** Generate a References header value in reply to a message. */
+    public MessageIDList? reply_references(Email source) {
+        var list = new Gee.LinkedList<MessageID>();
 
         // 1. Start with the source's References list
         if (source.references != null) {
@@ -119,12 +119,7 @@ namespace Geary.RFC822.Utils {
             list.add(source.message_id);
         }
 
-        string[] strings = new string[list.size];
-        for(int i = 0; i < list.size; ++i) {
-            strings[i] = list[i].value;
-        }
-
-        return (list.size > 0) ? string.joinv(" ", strings) : "";
+        return (list.is_empty) ? null : new MessageIDList(list);
     }
 
     public string email_addresses_for_reply(MailboxAddresses? addresses,
