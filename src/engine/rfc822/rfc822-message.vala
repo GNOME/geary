@@ -961,11 +961,21 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         return addresses;
     }
 
-    private MessageIDList append_message_id(MessageIDList? existing,
-                                            string header_value) {
-        MessageIDList ids = new MessageIDList.from_rfc822_string(header_value);
-        if (existing != null) {
-            ids = existing.append(ids);
+    private MessageIDList? append_message_id(MessageIDList? existing,
+                                            string header_value)
+        throws Error {
+        MessageIDList? ids = existing;
+        if (!String.is_empty_or_whitespace(header_value)) {
+            try {
+                ids = new MessageIDList.from_rfc822_string(header_value);
+                if (existing != null) {
+                    ids = existing.append(ids);
+                }
+            } catch (Error err) {
+                // Can't simply throw this since we need to be as lax as
+                // possible when decoding messages. Hence just log it.
+                debug("Error parsing message id list: %s", err.message);
+            }
         }
         return ids;
     }
