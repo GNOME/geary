@@ -18,6 +18,7 @@ internal class Application.Controller : Geary.BaseObject {
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
 
+    private const uint CLEANUP_CHECK_AFTER_IDLE_BACKGROUND_MINUTES = 5;
 
     /** Determines if conversations can be trashed from the given folder. */
     public static bool does_folder_support_trash(Geary.Folder? target) {
@@ -91,6 +92,11 @@ internal class Application.Controller : Geary.BaseObject {
     // Requested mailto composers not yet fullfulled
     private Gee.List<string?> pending_mailtos = new Gee.ArrayList<string>();
 
+    // Timeout to do work in idle after all windows have been sent to the background
+    private Geary.TimeoutManager all_windows_backgrounded_timeout;
+
+    private GLib.Cancellable? storage_cleanup_cancellable;
+
 
     /**
      * Emitted when an account is added or is enabled.
@@ -147,6 +153,9 @@ internal class Application.Controller : Geary.BaseObject {
         Composer.WebView.load_resources();
         ConversationWebView.load_resources();
         Accounts.SignatureWebView.load_resources();
+
+        this.all_windows_backgrounded_timeout =
+            new Geary.TimeoutManager.seconds(CLEANUP_CHECK_AFTER_IDLE_BACKGROUND_MINUTES * 60, on_unfocused_idle);
 
         this.folks = Folks.IndividualAggregator.dup();
         if (!this.folks.is_prepared) {
@@ -1413,6 +1422,35 @@ internal class Application.Controller : Geary.BaseObject {
         }
     }
 
+    /**
+     * Track a window receiving focus, for idle background work.
+     */
+    public void window_focus_in() {
+        this.all_windows_backgrounded_timeout.reset();
+
+        if (this.storage_cleanup_cancellable != null) {
+            this.storage_cleanup_cancellable.cancel();
+
+            // Cleanup was still running and we don't know where we got to so
+            // we'll clear each of these so it runs next time we're in the
+            // background
+            foreach (AccountContext context in this.accounts.values) {
+                context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
+
+                Geary.Account account = context.account;
+                account.last_storage_cleanup = null;
+            }
+            this.storage_cleanup_cancellable = null;
+        }
+    }
+
+    /**
+     * Track a window going unfocused, for idle background work.
+     */
+    public void window_focus_out() {
+        this.all_windows_backgrounded_timeout.start();
+    }
+
     /** Displays a composer on the last active main window. */
     internal void show_composer(Composer.Widget composer) {
         var target = this.application.get_active_main_window();
@@ -1670,6 +1708,30 @@ internal class Application.Controller : Geary.BaseObject {
                 }
             }
         }
+    }
+
+    private void on_unfocused_idle() {
+        // Schedule later, catching cases where work should occur later while still in background
+        this.all_windows_backgrounded_timeout.reset();
+        window_focus_out();
+
+        if (this.storage_cleanup_cancellable == null)
+            do_background_storage_cleanup.begin();
+    }
+
+    private async void do_background_storage_cleanup() {
+        debug("Checking for backgrounded idle work");
+        this.storage_cleanup_cancellable = new GLib.Cancellable();
+
+        foreach (AccountContext context in this.accounts.values) {
+            Geary.Account account = context.account;
+            context.cancellable.cancelled.connect(this.storage_cleanup_cancellable.cancel);
+            yield account.cleanup_storage(this.storage_cleanup_cancellable);
+            if (this.storage_cleanup_cancellable.is_cancelled())
+                break;
+            context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
+        }
+        this.storage_cleanup_cancellable = null;
     }
 
 }

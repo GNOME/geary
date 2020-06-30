@@ -1298,6 +1298,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // open while processing first the flag updates then the
         // expunge from the remote
         yield this.replay_queue.checkpoint(cancellable);
+
+        Geary.ClientService services_to_pause[] = {};
+        yield this._account.local.db.run_gc(NONE, services_to_pause, cancellable);
     }
 
     private void check_open(string method) throws EngineError {

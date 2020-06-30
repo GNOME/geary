@@ -41,6 +41,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
     private const int REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT = 500;
     private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
+    private const int OLD_MSG_DETACH_BATCH_SIZE = 1000;
 
     [Flags]
     public enum ListFlags {
@@ -880,6 +881,107 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
+    }
+
+    public async Gee.Collection<Geary.EmailIdentifier>? detach_emails_before_timestamp(DateTime cutoff,
+        GLib.Cancellable? cancellable) throws Error {
+        debug("Detaching emails before %s for folder ID %s", cutoff.to_string(), this.folder_id.to_string());
+        Gee.ArrayList<ImapDB.EmailIdentifier>? deleted_email_ids = null;
+        Gee.ArrayList<string> deleted_primary_keys = null;
+
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            // MessageLocationTable.ordering isn't relied on due to IMAP folder
+            // UIDs not guaranteed to be in order.
+            StringBuilder sql = new StringBuilder();
+            sql.append("""
+                SELECT id, message_id, ordering
+                FROM MessageLocationTable
+                WHERE folder_id = ?
+                AND message_id IN (
+                    SELECT id
+                    FROM MessageTable
+                    INDEXED BY MessageTableInternalDateTimeTIndex
+                    WHERE internaldate_time_t < ?
+                )
+            """);
+
+            Db.Statement stmt = cx.prepare(sql.str);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_int64(1, cutoff.to_unix());
+
+            Db.Result results = stmt.exec(cancellable);
+
+            while (!results.finished) {
+                if (deleted_email_ids == null) {
+                    deleted_email_ids = new Gee.ArrayList<ImapDB.EmailIdentifier>();
+                    deleted_primary_keys = new Gee.ArrayList<string>();
+                }
+
+                deleted_email_ids.add(
+                    new ImapDB.EmailIdentifier(results.int64_at(1),
+                                               new Imap.UID(results.int64_at(2)))
+                );
+                deleted_primary_keys.add(results.rowid_at(0).to_string());
+
+                results.next(cancellable);
+            }
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        if (deleted_email_ids != null) {
+            // Delete in batches to avoid hiting SQLite maximum query
+            // length (although quite unlikely)
+            int delete_index = 0;
+            while (delete_index < deleted_primary_keys.size) {
+                int batch_counter = 0;
+
+                StringBuilder message_location_ids_sql_sublist = new StringBuilder();
+                StringBuilder message_ids_sql_sublist = new StringBuilder();
+                while (delete_index < deleted_primary_keys.size
+                       && batch_counter < OLD_MSG_DETACH_BATCH_SIZE) {
+                    if (batch_counter > 0) {
+                        message_location_ids_sql_sublist.append(",");
+                        message_ids_sql_sublist.append(",");
+                    }
+                    message_location_ids_sql_sublist.append(
+                        deleted_primary_keys.get(delete_index)
+                    );
+                    message_ids_sql_sublist.append(
+                        deleted_email_ids.get(delete_index).message_id.to_string()
+                    );
+                    delete_index++;
+                    batch_counter++;
+                }
+
+                yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+                    StringBuilder sql = new StringBuilder();
+                    sql.append("""
+                        DELETE FROM MessageLocationTable
+                        WHERE id IN (
+                    """);
+                    sql.append(message_location_ids_sql_sublist.str);
+                    sql.append(")");
+                    Db.Statement stmt = cx.prepare(sql.str);
+
+                    stmt.exec(cancellable);
+
+                    sql = new StringBuilder();
+                    sql.append("""
+                        DELETE FROM MessageSearchTable
+                        WHERE docid IN (
+                    """);
+                    sql.append(message_ids_sql_sublist.str);
+                    sql.append(")");
+                    stmt = cx.prepare(sql.str);
+
+                    stmt.exec(cancellable);
+
+                    return Db.TransactionOutcome.COMMIT;
+                }, cancellable);
+            }
+        }
+
+        return deleted_email_ids;
     }
 
     public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,

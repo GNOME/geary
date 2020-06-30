@@ -286,4 +286,7 @@ public class Geary.MockAccount : Account, MockObject {
         );
     }
 
+    public override async void cleanup_storage(GLib.Cancellable? cancellable) {
+
+    }
 }

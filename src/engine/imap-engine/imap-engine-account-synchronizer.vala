@@ -25,6 +25,7 @@ private class Geary.ImapEngine.AccountSynchronizer :
         );
 
         this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
+        this.account.old_messages_background_cleanup_request.connect(old_messages_background_cleanup);
         this.account.folders_available_unavailable.connect(on_folders_updated);
         this.account.folders_contents_altered.connect(on_folders_contents_altered);
     }
@@ -44,7 +45,11 @@ private class Geary.ImapEngine.AccountSynchronizer :
         );
     }
 
-    private void send_all(Gee.Collection<Folder> folders, bool became_available) {
+    private void send_all(Gee.Collection<Folder> folders,
+                                            bool became_available,
+                                            bool for_storage_clean=false,
+                                            IdleGarbageCollection? post_idle_detach_op=null) {
+
         foreach (Folder folder in folders) {
             // Only sync folders that:
             // 1. Can actually be opened (i.e. are selectable)
@@ -60,11 +65,19 @@ private class Geary.ImapEngine.AccountSynchronizer :
                 !folder.properties.is_local_only &&
                 !folder.properties.is_virtual) {
 
-                AccountOperation op = became_available
-                    ? new CheckFolderSync(
-                        this.account, imap_folder, this.max_epoch
-                    )
-                    : new RefreshFolderSync(this.account, imap_folder);
+                AccountOperation op;
+                if (became_available || for_storage_clean) {
+                    CheckFolderSync check_op = new CheckFolderSync(
+                        this.account,
+                        imap_folder,
+                        this.max_epoch,
+                        for_storage_clean,
+                        post_idle_detach_op
+                    );
+                    op = check_op;
+                } else {
+                    op = new RefreshFolderSync(this.account, imap_folder);
+                }
 
                 try {
                     this.account.queue_operation(op);
@@ -81,6 +94,22 @@ private class Geary.ImapEngine.AccountSynchronizer :
         // doesn't mean the contents in the folders have changed
         if (this.account.is_open()) {
             send_all(this.account.list_folders(), true);
+        }
+    }
+
+    private void old_messages_background_cleanup(GLib.Cancellable? cancellable) {
+
+        if (this.account.is_open()) {
+            IdleGarbageCollection op = new IdleGarbageCollection(account);
+
+            send_all(this.account.list_folders(), false, true, op);
+
+            // Add GC operation after message removal during background cleanup
+            try {
+                this.account.queue_operation(op);
+            } catch (Error err) {
+                warning("Failed to queue sync operation: %s", err.message);
+            }
         }
     }
 
@@ -214,15 +243,20 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
  */
 private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
 
-
     private DateTime sync_max_epoch;
+    private bool for_storage_clean;
+    private IdleGarbageCollection? post_idle_detach_op;
 
 
     internal CheckFolderSync(GenericAccount account,
                              MinimalFolder folder,
-                             DateTime sync_max_epoch) {
+                             DateTime sync_max_epoch,
+                             bool for_storage_clean,
+                             IdleGarbageCollection? post_idle_detach_op) {
         base(account, folder);
         this.sync_max_epoch = sync_max_epoch;
+        this.for_storage_clean = for_storage_clean;
+        this.post_idle_detach_op = post_idle_detach_op;
     }
 
     protected override async void sync_folder(Cancellable cancellable)
@@ -238,9 +272,34 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
             prefetch_max_epoch = this.sync_max_epoch;
         }
 
+        ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+
+        // Detach older emails outside the prefetch window
+        if (this.account.information.prefetch_period_days >= 0) {
+            Gee.Collection<Geary.EmailIdentifier>? detached_ids =
+                yield local_folder.detach_emails_before_timestamp(prefetch_max_epoch,
+                                                                  cancellable);
+            if (detached_ids != null) {
+                this.folder.email_locally_removed(detached_ids);
+                if (post_idle_detach_op != null) {
+                    post_idle_detach_op.messages_detached();
+                }
+
+                if (!for_storage_clean) {
+                    GenericAccount imap_account = (GenericAccount) account;
+                    ForegroundGarbageCollection op =
+                        new ForegroundGarbageCollection(imap_account);
+                    try {
+                        imap_account.queue_operation(op);
+                    } catch (Error err) {
+                        warning("Failed to queue sync operation: %s", err.message);
+                    }
+                }
+            }
+        }
+
         // get oldest local email and its time, as well as number
         // of messages in local store
-        ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
         Gee.List<Geary.Email>? list = yield local_folder.list_email_by_id_async(
             null,
             1,
@@ -365,4 +424,71 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
         );
     }
 
+}
+
+/**
+ * Kicks off garbage collection after old messages have been removed.
+ *
+ * Queues a basic GC run which will run if old messages were detached
+ * after a folder became available. Not used for backgrounded account
+ * storage operations, which are handled instead by the
+ * {@link IdleGarbageCollection}.
+ */
+private class Geary.ImapEngine.ForegroundGarbageCollection: AccountOperation {
+
+    internal ForegroundGarbageCollection(GenericAccount account) {
+        base(account);
+    }
+
+    public override async void execute(GLib.Cancellable cancellable)
+        throws Error {
+        if (cancellable.is_cancelled())
+            return;
+
+        // Run basic GC
+        GenericAccount generic_account = (GenericAccount) account;
+        Geary.ClientService services_to_pause[] = {};
+        yield generic_account.local.db.run_gc(NONE, services_to_pause, cancellable);
+    }
+
+    public override bool equal_to(AccountOperation op) {
+        return (op != null
+                && (this == op || this.get_type() == op.get_type())
+                && this.account == op.account);
+    }
+
+}
+
+/**
+ * Performs garbage collection after old messages have been removed during
+ * backgrounded idle cleanup.
+ *
+ * Queues a GC run after a cleanup of messages has occurred while the
+ * app is idle in the background. Vacuuming will be permitted and if
+ * messages have been removed a reap will be forced.
+ */
+private class Geary.ImapEngine.IdleGarbageCollection: AccountOperation {
+
+    // Vacuum is allowed as we're running in the background
+    private Geary.ImapDB.Database.GarbageCollectionOptions options = ALLOW_VACUUM;
+
+    internal IdleGarbageCollection(GenericAccount account) {
+        base(account);
+    }
+
+    public override async void execute(GLib.Cancellable cancellable)
+        throws Error {
+        if (cancellable.is_cancelled())
+            return;
+
+        GenericAccount generic_account = (GenericAccount) this.account;
+        generic_account.local.db.run_gc.begin(this.options,
+                                              {generic_account.imap, generic_account.smtp},
+                                              cancellable);
+    }
+
+    public void messages_detached() {
+        // Reap is forced if messages were detached
+        this.options |= FORCE_REAP;
+    }
 }

@@ -17,6 +17,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // we don't need to double check.
     private const int REFRESH_FOLDER_LIST_SEC = 15 * 60;
 
+    /** Minimum interval between account storage cleanup work */
+    private const uint APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES = 60 * 24;
+
     private const Folder.SpecialUse[] SUPPORTED_SPECIAL_FOLDERS = {
         DRAFTS,
         SENT,
@@ -38,6 +41,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
+
+    public signal void old_messages_background_cleanup_request(GLib.Cancellable? cancellable);
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -134,6 +139,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             else
                 throw err;
         }
+
+        this.last_storage_cleanup = yield this.local.fetch_last_cleanup_async(cancellable);
+        this.notify["last_storage_cleanup"].connect(on_last_storage_cleanup_notify);
 
         this.open = true;
         notify_opened();
@@ -559,6 +567,24 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return (map.size == 0) ? null : map;
     }
 
+    /** {@inheritDoc} */
+    public override async void cleanup_storage(GLib.Cancellable? cancellable) {
+        debug("Backgrounded storage cleanup check for %s account", this.information.display_name);
+
+        DateTime now = new DateTime.now_local();
+        DateTime? last_cleanup = this.last_storage_cleanup;
+
+        if (last_cleanup == null ||
+            (now.difference(last_cleanup) / TimeSpan.MINUTE > APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES)) {
+            // Interval check is OK, start by detaching old messages
+            this.last_storage_cleanup = now;
+            this.old_messages_background_cleanup_request(cancellable);
+        } else if (local.db.want_background_vacuum) {
+            // Vacuum has been flagged as needed, run it
+            local.db.run_gc.begin(ALLOW_VACUUM, {this.imap, this.smtp}, cancellable);
+        }
+    }
+
     /**
      * Constructs a set of folders and adds them to the account.
      *
@@ -774,6 +800,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 folder.email_appended.connect(notify_email_appended);
                 folder.email_inserted.connect(notify_email_inserted);
                 folder.email_removed.connect(notify_email_removed);
+                folder.email_locally_removed.connect(notify_email_locally_removed);
                 folder.email_locally_complete.connect(notify_email_locally_complete);
                 folder.email_flags_changed.connect(notify_email_flags_changed);
             }
@@ -783,6 +810,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 folder.email_appended.disconnect(notify_email_appended);
                 folder.email_inserted.disconnect(notify_email_inserted);
                 folder.email_removed.disconnect(notify_email_removed);
+                folder.email_locally_removed.disconnect(notify_email_locally_removed);
                 folder.email_locally_complete.disconnect(notify_email_locally_complete);
                 folder.email_flags_changed.disconnect(notify_email_flags_changed);
             }
@@ -805,6 +833,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     protected override void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         base.notify_email_removed(folder, ids);
         schedule_unseen_update(folder);
+    }
+
+    /** {@inheritDoc} */
+    protected override void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        base.notify_email_locally_removed(folder, ids);
     }
 
     /** {@inheritDoc} */
@@ -967,6 +1000,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 this.refresh_folder_timer.reset();
             }
         }
+    }
+
+    private void on_last_storage_cleanup_notify() {
+        this.local.set_last_cleanup_async.begin(
+            this.last_storage_cleanup,
+            this.open_cancellable
+        );
     }
 
 }

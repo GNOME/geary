@@ -18,6 +18,28 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     /** SQLite UTF-8 collation name. */
     public const string UTF8_COLLATE = "UTF8COLL";
 
+    /** Options to use when running garbage collection. */
+    [Flags]
+    public enum GarbageCollectionOptions {
+
+        /** Reaping will not be forced and vacuuming not permitted. */
+        NONE,
+
+        /**
+         * Reaping will be performed, regardless of recommendation.
+         */
+        FORCE_REAP,
+
+        /**
+         * Whether to permit database vacuum.
+         *
+         * Vacuuming is performed in the foreground.
+         */
+        ALLOW_VACUUM;
+    }
+
+    public bool want_background_vacuum { get; set; default = false; }
+
 
     private static void utf8_transliterate_fold(Sqlite.Context context,
                                                 Sqlite.Value[] values) {
@@ -73,6 +95,26 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         throws Error {
         yield base.open(flags, cancellable);
 
+        Geary.ClientService services_to_pause[] = {};
+        yield run_gc(NONE, services_to_pause, cancellable);
+    }
+
+    /**
+     * Run garbage collection
+     *
+     * Reap should only be forced when there is known cleanup to perform and
+     * the interval based recommendation should be bypassed.
+     */
+    public async void run_gc(GarbageCollectionOptions options,
+                             Geary.ClientService[] services_to_pause,
+                             GLib.Cancellable? cancellable)
+                                 throws Error {
+
+        if (this.gc != null) {
+            debug("GC abandoned, possibly already running");
+            return;
+        }
+
         // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
         // called
         if (cancellable != null)
@@ -89,26 +131,49 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
         // be run at the same time as REAP)
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
-            if (!vacuum_monitor.is_in_progress)
-                vacuum_monitor.notify_start();
+            if (GarbageCollectionOptions.ALLOW_VACUUM in options) {
+                this.want_background_vacuum = false;
+                foreach (ClientService service in services_to_pause) {
+                    yield service.stop(gc_cancellable);
+                }
 
-            try {
-                yield this.gc.vacuum_async(gc_cancellable);
-            } catch (Error err) {
-                message(
-                    "Vacuum of IMAP database %s failed: %s", this.path, err.message
-                );
-                throw err;
-            } finally {
-                if (vacuum_monitor.is_in_progress)
-                    vacuum_monitor.notify_finish();
-            }
+                if (!vacuum_monitor.is_in_progress)
+                    vacuum_monitor.notify_start();
+
+                try {
+                    yield this.gc.vacuum_async(gc_cancellable);
+                } catch (Error err) {
+                    message(
+                        "Vacuum of IMAP database %s failed: %s", this.path, err.message
+                    );
+                    throw err;
+                } finally {
+                    if (vacuum_monitor.is_in_progress)
+                        vacuum_monitor.notify_finish();
+                }
+
+                foreach (ClientService service in services_to_pause) {
+                    yield service.start(gc_cancellable);
+                }
+            } else {
+                // Flag a vacuum to run later when we've been idle in the background
+                debug("Flagging desire to GC vacuum");
+                this.want_background_vacuum = true;
+           }
+        }
+
+        // Abandon REAP if cancelled
+        if (cancellable != null && cancellable.is_cancelled()) {
+            cancellable.cancelled.disconnect(cancel_gc);
+            return;
         }
 
         // REAP can run in the background while the application is executing
-        if ((recommended & GC.RecommendedOperation.REAP) != 0) {
+        if (GarbageCollectionOptions.FORCE_REAP in options || (recommended & GC.RecommendedOperation.REAP) != 0) {
             // run in the background and allow application to continue running
             this.gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
+        } else {
+            this.gc = null;
         }
 
         if (cancellable != null)
@@ -122,6 +187,24 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             message("Garbage collection of IMAP database %s failed: %s",
                     this.path, err.message);
         }
+
+        // Check if after reap we now want to schedule a background vacuum. The idea
+        // here is eg. if we've just reduced prefetch period, reap has detached a
+        // whole lot of messages and we want to vacuum. This check catches that
+        // vacuum recommendation, flagging it to run when in background.
+        this.gc.should_run_async.begin(
+            gc_cancellable,
+            (obj, res) => {
+                try {
+                    GC.RecommendedOperation recommended = this.gc.should_run_async.end(res);
+                    if ((recommended & GC.RecommendedOperation.VACUUM) != 0)
+                        this.want_background_vacuum = true;
+                } catch (Error err) {
+                    debug("Failed to run GC check on %s after REAP: %s",
+                          this.path, err.message);
+                }
+            }
+        );
 
         this.gc = null;
     }

@@ -26,6 +26,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         //add_test("merge_existing_preview", merge_existing_preview);
         add_test("set_flags", set_flags);
         add_test("set_flags_on_deleted", set_flags_on_deleted);
+        add_test("detach_emails_before_timestamp", detach_emails_before_timestamp);
     }
 
     public override void set_up() throws GLib.Error {
@@ -321,6 +322,70 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.set_email_flags_async.end(async_result());
 
         assert_flags(test, test_flags);
+    }
+
+    public void detach_emails_before_timestamp() throws GLib.Error {
+        // Ensures that messages outside the folder and within the epoch aren't
+        // removed, and that messages meeting the criteria are removed.
+
+        this.account.db.exec(
+            "INSERT INTO FolderTable (id, name) VALUES (2, 'other');"
+        );
+
+        GLib.DateTime threshold = new GLib.DateTime.local(2020, 1, 1, 0, 0, 0);
+        GLib.DateTime beyond_threshold = new GLib.DateTime.local(2019, 1, 1, 0, 0, 0);
+        GLib.DateTime within_threshold = new GLib.DateTime.local(2021, 1, 1, 0, 0, 0);
+
+        Email.Field fixture_fields = Email.Field.RECEIVERS;
+        string fixture_to = "test1@example.com";
+        this.account.db.exec(
+            "INSERT INTO MessageTable (id, fields, to_field, internaldate_time_t) " +
+            "VALUES (1, %d, '%s', %s);".printf(fixture_fields,
+                                               fixture_to,
+                                               within_threshold.to_unix().to_string())
+        );
+        this.account.db.exec(
+            "INSERT INTO MessageTable (id, fields, to_field, internaldate_time_t) " +
+            "VALUES (2, %d, '%s', %s);".printf(fixture_fields,
+                                               fixture_to,
+                                               within_threshold.to_unix().to_string())
+        );
+        this.account.db.exec(
+            "INSERT INTO MessageTable (id, fields, to_field, internaldate_time_t) " +
+            "VALUES (3, %d, '%s', %s);".printf(fixture_fields,
+                                               fixture_to,
+                                               beyond_threshold.to_unix().to_string())
+        );
+
+        this.account.db.exec("""
+            INSERT INTO MessageLocationTable
+                (id, message_id, folder_id, ordering, remove_marker)
+                VALUES
+                (1, 1, 1, 1, 1),
+                (2, 2, 2, 1, 1),
+                (3, 3, 1, 2, 1);
+        """);
+
+        this.folder.detach_emails_before_timestamp.begin(
+            threshold,
+            null,
+            this.async_completion
+        );
+        this.folder.detach_emails_before_timestamp.end(async_result());
+
+        int64[] expected = { 1, 2 };
+        Db.Result result = this.account.db.query(
+            "SELECT id FROM MessageLocationTable"
+        );
+
+        int i = 0;
+        while (!result.finished) {
+            assert_true(i < expected.length, "Too many rows");
+            assert_int64(expected[i], result.int64_at(0));
+            i++;
+            result.next();
+        }
+        assert_true(i == expected.length, "Not enough rows");
     }
 
     private Email new_mock_remote_email(int64 uid,

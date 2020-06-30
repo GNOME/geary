@@ -500,6 +500,15 @@ public class Application.MainWindow :
         // Window actions
         add_action_entries(MainWindow.WINDOW_ACTIONS, this);
 
+        this.focus_in_event.connect((w, e) => {
+            application.controller.window_focus_in();
+            return false;
+        });
+        this.focus_out_event.connect((w, e) => {
+            application.controller.window_focus_out();
+            return false;
+        });
+
         setup_layout(application.config);
         on_change_orientation();
 

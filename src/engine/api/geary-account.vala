@@ -145,6 +145,17 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public ProgressMonitor db_upgrade_monitor { get; protected set; }
     public ProgressMonitor db_vacuum_monitor { get; protected set; }
 
+    /**
+     * The last time the account storage was cleaned.
+     *
+     * This does not imply that a full reap plus vacuum garbage
+     * collection (GC) is performed, merely that:
+     * 1. Any old messages are removed
+     * 2. If any old messages were removed, or the defined period
+     * (in ImapDB.GC) has past, a GC reap is performed
+     * 3. GC vacuum is run if recommended
+     */
+    public GLib.DateTime? last_storage_cleanup { get; set; }
 
     public signal void opened();
 
@@ -235,6 +246,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * Fired when emails are removed from a folder in this account.
      */
     public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+
+    /**
+     * Fired when emails are removed from a local folder in this account.
+     */
+    public signal void email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
 
     /**
      * Fired when one or more emails have been locally saved to a folder with
@@ -511,6 +527,16 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         return new Logging.State(this, this.information.id);
     }
 
+    /**
+     * Perform cleanup of account storage.
+     *
+     * Work is performed if the appropriate interval has past since last
+     * execution. Alternatively if the interval has not past but vacuum GC
+     * has been flagged to run this will be executed. Designed to be run
+     * while the app is in the background and idle.
+     */
+    public abstract async void cleanup_storage(GLib.Cancellable? cancellable);
+
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {
         opened();
@@ -556,6 +582,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     /** Fires a {@link email_removed} signal. */
     protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_removed(folder, ids);
+    }
+
+    /** Fires a {@link email_locally_removed} signal. */
+    protected virtual void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_removed(folder, ids);
     }
 
     /** Fires a {@link email_locally_complete} signal. */

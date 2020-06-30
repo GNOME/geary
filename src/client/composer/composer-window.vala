@@ -47,6 +47,15 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
             set_titlebar(this.composer.header);
         }
 
+        this.focus_in_event.connect((w, e) => {
+            application.controller.window_focus_in();
+            return false;
+        });
+        this.focus_out_event.connect((w, e) => {
+            application.controller.window_focus_out();
+            return false;
+        });
+
         show();
         set_position(Gtk.WindowPosition.CENTER);
     }
