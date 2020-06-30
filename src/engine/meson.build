@@ -93,6 +93,7 @@ geary_engine_vala_sources = files(
   'imap/api/imap-folder-properties.vala',
   'imap/api/imap-folder-root.vala',
   'imap/api/imap-folder-session.vala',
+  'imap/api/imap-quirks.vala',
   'imap/api/imap-session-object.vala',
   'imap/command/imap-append-command.vala',
   'imap/command/imap-authenticate-command.vala',

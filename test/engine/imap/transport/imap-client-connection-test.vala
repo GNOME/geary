@@ -38,7 +38,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
     }
 
     public void connect_disconnect() throws GLib.Error {
-        var test_article = new ClientConnection(new_endpoint());
+        var test_article = new ClientConnection(new_endpoint(), new Quirks());
 
         test_article.connect_async.begin(null, this.async_completion);
         test_article.connect_async.end(async_result());
@@ -69,7 +69,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
         const int IDLE_TIMEOUT = 1;
 
         var test_article = new ClientConnection(
-            new_endpoint(), COMMAND_TIMEOUT, IDLE_TIMEOUT
+            new_endpoint(), new Quirks(), COMMAND_TIMEOUT, IDLE_TIMEOUT
         );
         test_article.connect_async.begin(null, this.async_completion);
         test_article.connect_async.end(async_result());
@@ -123,7 +123,9 @@ class Geary.Imap.ClientConnectionTest : TestCase {
         bool recv_fail = false;
         bool timed_out = false;
 
-        var test_article = new ClientConnection(new_endpoint(), TIMEOUT);
+        var test_article = new ClientConnection(
+            new_endpoint(), new Quirks(), TIMEOUT
+        );
         test_article.sent_command.connect(() => { sent = true; });
         test_article.receive_failure.connect(() => { recv_fail = true; });
         test_article.connect_async.begin(null, this.async_completion);

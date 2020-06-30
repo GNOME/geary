@@ -84,6 +84,9 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     public Logging.Source? logging_parent { get { return _logging_parent; } }
     private weak Logging.Source? _logging_parent = null;
 
+    /** The quirks being used by this deserializer. */
+    internal Quirks quirks { get; set; }
+
     private string identifier;
     private DataInputStream input;
     private Geary.State.Machine fsm;
@@ -99,6 +102,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     private Geary.Memory.GrowableBuffer? block_buffer = null;
     private unowned uint8[]? current_buffer = null;
     private int ins_priority = Priority.DEFAULT;
+    private bool is_parsing_flags = false;
 
 
     /**
@@ -153,12 +157,16 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     public signal void end_of_stream();
 
 
-    public Deserializer(string identifier, GLib.InputStream input) {
+    public Deserializer(string identifier,
+                        GLib.InputStream input,
+                        Quirks quirks) {
         this.identifier = identifier;
 
         this.input = new GLib.DataInputStream(input);
         this.input.set_close_base_stream(false);
         this.input.set_newline_type(CR_LF);
+
+        this.quirks = quirks;
 
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
@@ -175,7 +183,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
 
-            new Geary.State.Mapping(State.FLAG, Event.CHAR, on_first_flag_char),
+            new Geary.State.Mapping(State.FLAG, Event.CHAR, on_flag_char),
             new Geary.State.Mapping(State.FLAG, Event.EOL, on_atom_eol),
             new Geary.State.Mapping(State.FLAG, Event.EOS, on_eos),
             new Geary.State.Mapping(State.FLAG, Event.ERROR, on_error),
@@ -425,23 +433,28 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         }
     }
 
-    private bool is_current_string_empty() {
-        return (current_string == null) || String.is_empty(current_string.str);
+    private inline  bool is_current_string_empty() {
+        return (
+            this.current_string == null || this.current_string.len == 0
+        );
     }
 
     // Case-insensitive compare
-    private bool is_current_string_ci(string cmp) {
-        if (current_string == null || String.is_empty(current_string.str))
+    private inline bool is_current_string_ci(string cmp) {
+        if (this.current_string == null ||
+            this.current_string.len != cmp.length) {
             return false;
+        }
 
-        return Ascii.stri_equal(current_string.str, cmp);
+        return Ascii.stri_equal(this.current_string.str, cmp);
     }
 
-    private void append_to_string(char ch) {
-        if (current_string == null)
-            current_string = new StringBuilder();
+    private inline void append_to_string(char ch) {
+        if (this.current_string == null) {
+            this.current_string = new StringBuilder();
+        }
 
-        current_string.append_c(ch);
+        this.current_string.append_c(ch);
     }
 
     private void save_string_parameter(bool quoted) {
@@ -544,12 +557,11 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
                 return State.START_PARAM;
 
             case ']':
-                if (ch == get_current_context_terminator()) {
-                    return pop();
+                if (ch != get_current_context_terminator()) {
+                    warning("Received an unexpected closing brace");
+                    return State.FAILED;
                 }
-
-                // Received an unexpected closing brace
-                return State.FAILED;
+                return pop();
 
             case '{':
                 return State.LITERAL;
@@ -564,16 +576,17 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
                 return State.START_PARAM;
 
             case ')':
-                if (ch == get_current_context_terminator()) {
-                    return pop();
+                if (ch != get_current_context_terminator()) {
+                    warning("Received an unexpected closing parens");
+                    return State.FAILED;
                 }
-
-                // Received an unexpected closing parens
-                return State.FAILED;
+                this.is_parsing_flags = false;
+                return pop();
 
             case '\\':
                 // Start of a flag
                 append_to_string(ch);
+                this.is_parsing_flags = true;
                 return State.FLAG;
 
             case ' ':
@@ -581,32 +594,44 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
                 return State.START_PARAM;
 
             default:
-                if (!DataFormat.is_atom_special(ch)) {
+                if (!this.is_parsing_flags) {
+                    if (DataFormat.is_atom_special(ch)) {
+                        warning("Received an invalid atom-char: %c", ch);
+                        return State.FAILED;
+                    }
                     append_to_string(ch);
                     return State.ATOM;
+                } else {
+                    if (DataFormat.is_atom_special(
+                            ch, this.quirks.flag_atom_exceptions)) {
+                        warning("Received an invalid flag-char: %c", ch);
+                        return State.FAILED;
+                    }
+                    append_to_string(ch);
+                    return State.FLAG;
                 }
-                // Received an invalid atom-char
-                return State.FAILED;
         }
     }
 
     private uint on_tag_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
 
-        // drop if not allowed for tags (allowing for continuations and watching for spaces, which
-        // indicate a change of state)
-        if (DataFormat.is_tag_special(ch, " +"))
+        if (is_current_string_empty() &&
+            (ch == '*' || ch == '+')) {
+            // At first tag character. Allow a single `*` to indicate
+            // an untagged response or a `+` here for continuations
+            append_to_string(ch);
             return State.TAG;
+        }
 
-        // space indicates end of tag
-        if (ch == ' ') {
+        // Any tag special here indicates end-of-tag, so save and work
+        // out where to go next
+        if (DataFormat.is_tag_special(ch)) {
             save_string_parameter(false);
-
-            return State.START_PARAM;
+            return on_first_param_char(state, event, user);
         }
 
         append_to_string(ch);
-
         return State.TAG;
     }
 
@@ -619,19 +644,6 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         if (ch == '[' && (is_current_string_ci("body") || is_current_string_ci("body.peek"))) {
             append_to_string(ch);
             return State.PARTIAL_BODY_ATOM;
-        }
-
-        // space indicates end-of-atom, consume it and return to go.
-        if (ch == ' ') {
-            save_string_parameter(false);
-            return State.START_PARAM;
-        }
-
-        // as does an end-of-list delim
-        char terminator = get_current_context_terminator();
-        if (ch == terminator) {
-            save_string_parameter(false);
-            return pop();
         }
 
         // Any of the atom specials indicate end of atom, so save and
@@ -647,30 +659,41 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
     // Although flags basically have the form "\atom", the special
     // flag "\*" isn't a valid atom, and hence we need a special case
-    // for flag parsing. This is only used for the first char after
-    // the '\', since all following chars must be valid for atoms
-    private uint on_first_flag_char(uint state, uint event, void *user) {
+    // for it.
+    private uint on_flag_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
 
-        // handle special flag "\*", this also indicates end-of-flag
-        if (ch == '*') {
-            append_to_string(ch);
+        if (is_current_string_ci("\\")) {
+            // At the start of the flag.
+            //
+            // Check for special flag "\*", which also indicates
+            // end-of-flag
+            if (ch == '*') {
+                append_to_string(ch);
+                save_string_parameter(false);
+                return State.START_PARAM;
+            }
+
+            // Any of the atom specials indicate end of atom, but we are
+            // at the first char after a "\" and a flag has to have at
+            // least one atom char to be valid, so if we get an
+            // atom-special here bail out.
+            if (DataFormat.is_atom_special(ch, this.quirks.flag_atom_exceptions)) {
+                warning("Empty flag atom");
+                return State.FAILED;
+            }
+        }
+
+        // Any of the atom specials indicate end of atom, so save
+        // and work out where to go next
+        if (DataFormat.is_atom_special(ch, this.quirks.flag_atom_exceptions)) {
             save_string_parameter(false);
-            return State.START_PARAM;
+            return on_first_param_char(state, event, user);
         }
 
-        // Any of the atom specials indicate end of atom, but we are
-        // at the first char after a "\" and a flag has to have at
-        // least one atom char to be valid, so if we get an
-        // atom-special here bail out.
-        if (DataFormat.is_atom_special(ch)) {
-            return State.FAILED;
-        }
-
-        // Append the char, but then switch to the ATOM state, since
-        // '*' is no longer valid and the remainder must be an atom
+        // Valid flag char, so append and continue
         append_to_string(ch);
-        return State.ATOM;
+        return State.FLAG;
     }
 
     private uint on_eol(uint state, uint event, void *user) {
@@ -776,8 +799,10 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         // if close-bracket, end of literal length field -- next event must be EOL
         if (ch == '}') {
             // empty literal treated as garbage
-            if (is_current_string_empty())
+            if (is_current_string_empty()) {
+                warning("Empty flag atom");
                 return State.FAILED;
+            }
 
             literal_length_remaining = (size_t) long.parse(this.current_string.str);
             this.current_string = null;

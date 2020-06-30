@@ -296,6 +296,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
 
     private Endpoint imap_endpoint;
+    private Quirks quirks;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
 
@@ -344,8 +345,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public signal void status(StatusData status_data);
 
 
-    public ClientSession(Endpoint imap_endpoint) {
+    public ClientSession(Endpoint imap_endpoint, Quirks quirks) {
         this.imap_endpoint = imap_endpoint;
+        this.quirks = quirks;
 
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.NOT_CONNECTED, Event.CONNECT, on_connect),
@@ -774,7 +776,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         MachineParams params = (MachineParams) object;
 
         assert(cx == null);
-        cx = new ClientConnection(imap_endpoint);
+        cx = new ClientConnection(imap_endpoint, this.quirks);
         cx.set_logging_parent(this);
         cx.sent_command.connect(on_network_sent_command);
         cx.send_failure.connect(on_network_send_error);

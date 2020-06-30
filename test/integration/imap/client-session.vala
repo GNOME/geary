@@ -28,7 +28,10 @@ class Integration.Imap.ClientSession : TestCase {
 
     public override void set_up() {
         this.session = new Geary.Imap.ClientSession(
-            this.config.target
+            this.config.target,
+            Geary.Imap.ClientService.new_quirks_for_provider(
+                this.config.provider
+            )
         );
     }
 

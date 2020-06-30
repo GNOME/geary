@@ -39,6 +39,24 @@ public class Geary.Imap.ClientService : Geary.ClientService {
     private const int CHECK_NOOP_THRESHOLD_SEC = 5;
 
 
+    public static Quirks new_quirks_for_provider(ServiceProvider provider) {
+        var quirks = new Quirks();
+        switch (provider) {
+        case GMAIL:
+            // As of 2020-05-02, GMail doesn't seem to quote flag
+            // atoms containing reserved characters, and at least one
+            // use of both `]` and ` ` have been found. This works
+            // around the former. See #746
+            quirks.flag_atom_exceptions = "]";
+            break;
+        default:
+            // noop
+            break;
+        }
+        return quirks;
+    }
+
+
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
      * selected a mailbox.  (This is not recommended.)
@@ -101,6 +119,8 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         get { return LOGGING_DOMAIN; }
     }
 
+    private Quirks quirks;
+
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.Set<ClientSession> all_sessions =
         new Gee.HashSet<ClientSession>();
@@ -112,9 +132,10 @@ public class Geary.Imap.ClientService : Geary.ClientService {
 
 
     public ClientService(AccountInformation account,
-                         ServiceInformation service,
+                         ServiceInformation configuration,
                          Endpoint remote) {
-        base(account, service, remote);
+        base(account, configuration, remote);
+        this.quirks = new_quirks_for_provider(account.service_provider);
     }
 
     /**
@@ -445,7 +466,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
             throw new ImapError.UNAUTHENTICATED("Token not loaded");
         }
 
-        ClientSession new_session = new ClientSession(remote);
+        ClientSession new_session = new ClientSession(remote, this.quirks);
         new_session.set_logging_parent(this);
         yield new_session.connect_async(
             ClientSession.DEFAULT_GREETING_TIMEOUT_SEC, cancellable

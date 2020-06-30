@@ -65,6 +65,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
     private Geary.Endpoint endpoint;
     private int cx_id;
+    private Quirks quirks;
     private IOStream? cx = null;
     private Deserializer? deserializer = null;
     private Serializer? serializer = null;
@@ -111,9 +112,11 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
     public ClientConnection(
         Geary.Endpoint endpoint,
+        Quirks quirks,
         uint command_timeout = Command.DEFAULT_RESPONSE_TIMEOUT_SEC,
         uint idle_timeout_sec = DEFAULT_IDLE_TIMEOUT_SEC) {
         this.endpoint = endpoint;
+        this.quirks = quirks;
         this.cx_id = next_cx_id++;
         this.command_timeout = command_timeout;
         this.idle_timer = new TimeoutManager.seconds(
@@ -323,7 +326,9 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
         // Not buffering the Deserializer because it uses a
         // DataInputStream, which is already buffered
-        this.deserializer = new Deserializer(id, this.cx.input_stream);
+        this.deserializer = new Deserializer(
+            id, this.cx.input_stream, this.quirks
+        );
         this.deserializer.bytes_received.connect(on_bytes_received);
         this.deserializer.deserialize_failure.connect(on_deserialize_failure);
         this.deserializer.end_of_stream.connect(on_eos);

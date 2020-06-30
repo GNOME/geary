@@ -43,7 +43,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         );
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -69,7 +69,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         );
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
@@ -87,7 +87,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
     public void connect_timeout() throws GLib.Error {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
 
         GLib.Timer timer = new GLib.Timer();
         timer.start();
@@ -115,7 +115,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         );
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
@@ -147,7 +147,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a001 OK ohhai");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -184,7 +184,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a001 OK laters");
         this.server.add_script_line(DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -215,7 +215,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a002 OK laters");
         this.server.add_script_line(DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -260,7 +260,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a004 OK there");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -304,7 +304,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a002 OK there");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
@@ -367,7 +367,7 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(SEND_LINE, "a003 OK there");
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
-        var test_article = new ClientSession(new_endpoint());
+        var test_article = new ClientSession(new_endpoint(), new Quirks());
         assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
 
         test_article.connect_async.begin(
