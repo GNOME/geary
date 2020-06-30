@@ -369,8 +369,14 @@ public class Geary.RFC822.Header :
     Geary.MessageData.BlockMessageData, EncodedMessageData {
 
 
-    private GMime.Message? message = null;
+    private GMime.HeaderList headers;
     private string[]? names = null;
+
+
+    // The ctors for this class seem the wrong way around, but the
+    // default accepts a memory buffer and not a GMime.HeaderList to
+    // keep it consistent with other EncodedMessageData
+    // implementations.
 
     public Header(Memory.Buffer buffer) throws Error {
         base("RFC822.Header", buffer);
@@ -381,15 +387,25 @@ public class Geary.RFC822.Header :
         parser.set_respect_content_length(false);
         parser.set_format(MESSAGE);
 
-        this.message = parser.construct_message(null);
-        if (this.message == null) {
+        var message = parser.construct_message(null);
+        if (message == null) {
             throw new Error.INVALID("Unable to parse RFC 822 headers");
         }
+
+        this.headers = message.get_header_list();
+    }
+
+    public Header.from_gmime(GMime.Object gmime) {
+        base(
+            "RFC822.Header",
+            new Memory.StringBuffer(gmime.get_headers(get_format_options()))
+        );
+        this.headers = gmime.get_header_list();
     }
 
     public string? get_header(string name) {
         string? value = null;
-        var header = this.message.get_header_list().get_header(name);
+        var header = this.headers.get_header(name);
         if (header != null) {
             value = header.get_value();
         }
@@ -398,7 +414,7 @@ public class Geary.RFC822.Header :
 
     public string? get_raw_header(string name) {
         string? value = null;
-        var header = this.message.get_header_list().get_header(name);
+        var header = this.headers.get_header(name);
         if (header != null) {
             value = header.get_raw_value();
         }
@@ -407,10 +423,9 @@ public class Geary.RFC822.Header :
 
     public string[] get_header_names() {
         if (this.names == null) {
-            GMime.HeaderList headers = this.message.get_header_list();
-            var names = new string[headers.get_count()];
+            var names = new string[this.headers.get_count()];
             for (int i = 0; i < names.length; i++) {
-                names[i] = headers.get_header_at(i).get_name();
+                names[i] = this.headers.get_header_at(i).get_name();
             }
             this.names = names;
         }
@@ -422,8 +437,47 @@ public class Geary.RFC822.Header :
 public class Geary.RFC822.Text :
     Geary.MessageData.BlockMessageData, EncodedMessageData {
 
+
+    private class GMimeBuffer : Memory.Buffer, Memory.UnownedBytesBuffer {
+
+
+        public override size_t allocated_size {
+            get { return (size_t) this.stream.length; }
+        }
+
+        public override size_t size {
+            get { return (size_t) this.stream.length; }
+        }
+
+        private GMime.Stream stream;
+        private GLib.Bytes buf = null;
+
+        public GMimeBuffer(GMime.Stream stream) {
+            this.stream = stream;
+        }
+
+        public override GLib.Bytes get_bytes() {
+            if (this.buf == null) {
+                this.stream.seek(0, SET);
+                uint8[] bytes = new uint8[this.stream.length()];
+                this.stream.read(bytes);
+                this.buf = new GLib.Bytes.take(bytes);
+            }
+            return this.buf;
+        }
+
+        public unowned uint8[] to_unowned_uint8_array() {
+            return get_bytes().get_data();
+        }
+
+    }
+
     public Text(Memory.Buffer buffer) {
         base("RFC822.Text", buffer);
+    }
+
+    public Text.from_gmime(GMime.Stream gmime) {
+        base("RFC822.Text", new GMimeBuffer(gmime));
     }
 
 }
