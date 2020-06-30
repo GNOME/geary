@@ -100,14 +100,8 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     /** Value of the X-Mailer header. */
     public string? mailer { get; protected set; default = null; }
 
+    // The backing store for this message. Used to access body parts.
     private GMime.Message message;
-
-    // Since GMime.Message does a bad job of separating the headers and body (GMime.Message.get_body()
-    // returns the full message, headers and all), we keep a buffer around that points to the body
-    // part from the source.  This is only needed by get_email().  Unfortunately, we can't always
-    // set these easily, so sometimes get_email() won't work.
-    private Memory.Buffer? body_buffer = null;
-    private size_t? body_offset = null;
 
 
     public Message(Full full) throws Error {
@@ -120,10 +114,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         this.from_gmime_message(message);
-
-        // See the declaration of these fields for why we do this.
-        this.body_buffer = full.buffer;
-        this.body_offset = (size_t) parser.get_headers_end();
     }
 
     public Message.from_gmime_message(GMime.Message message)
@@ -203,10 +193,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         }
 
         this.from_gmime_message(message);
-
-        // See the declaration of these fields for why we do this.
-        this.body_buffer = body.buffer;
-        this.body_offset = 0;
     }
 
     public async Message.from_composed_email(Geary.ComposedEmail email,
@@ -588,34 +574,6 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             )
         );
         return part;
-    }
-
-    /**
-     * Construct a Geary.Email from a Message.  NOTE: this requires you to have created
-     * the Message in such a way that its body_buffer and body_offset fields will be filled
-     * out.  See the various constructors for details.  (Otherwise, we don't have a way
-     * to get the body part directly, because of GMime's shortcomings.)
-     */
-    public Geary.Email get_email(Geary.EmailIdentifier id) throws GLib.Error {
-        assert(body_buffer != null);
-        assert(body_offset != null);
-
-        Geary.Email email = new Geary.Email(id);
-
-        email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
-            message.get_headers(Geary.RFC822.get_format_options()))));
-        email.set_send_date(date);
-        email.set_originators(from, sender, reply_to);
-        email.set_receivers(to, cc, bcc);
-        email.set_full_references(message_id, in_reply_to, references);
-        email.set_message_subject(subject);
-        email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
-            body_buffer, body_offset)));
-        string preview = get_preview();
-        if (preview != "") {
-            email.set_message_preview(new PreviewText.from_string(preview));
-        }
-        return email;
     }
 
     /**
