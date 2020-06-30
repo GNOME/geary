@@ -131,12 +131,12 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(
             message.get(1) is UnquotedStringParameter,
             "Not parsed as n atom"
         );
-        assert_string(bytes, message.get(1).to_string());
+        assert_string(message.get(1).to_string(), bytes);
     }
 
     public void parse_wildcard_flag() throws GLib.Error {
@@ -148,12 +148,12 @@ class Geary.Imap.DeserializerTest : TestCase {
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
 
-        assert_int(2, message.size);
+        assert_equal<int?>(message.size, 2);
         assert_true(
             message.get(1) is UnquotedStringParameter,
             "Not parsed as n atom"
         );
-        assert_string(bytes, message.get(1).to_string());
+        assert_string(message.get(1).to_string(), bytes);
     }
 
     public void parse_response_code() throws Error {
