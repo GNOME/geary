@@ -130,8 +130,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
             if (GarbageCollectionOptions.ALLOW_VACUUM in options) {
                 this.want_background_vacuum = false;
-                foreach (ClientService service in to_pause) {
-                    yield service.stop(gc_cancellable);
+                if (to_pause != null) {
+                    foreach (ClientService service in to_pause) {
+                        yield service.stop(gc_cancellable);
+                    }
                 }
 
                 if (!vacuum_monitor.is_in_progress)
@@ -149,8 +151,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         vacuum_monitor.notify_finish();
                 }
 
-                foreach (ClientService service in to_pause) {
-                    yield service.start(gc_cancellable);
+                if (to_pause != null) {
+                    foreach (ClientService service in to_pause) {
+                        yield service.start(gc_cancellable);
+                    }
                 }
             } else {
                 // Flag a vacuum to run later when we've been idle in the background
