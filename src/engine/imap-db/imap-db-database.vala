@@ -94,9 +94,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     public new async void open(Db.DatabaseFlags flags, Cancellable? cancellable)
         throws Error {
         yield base.open(flags, cancellable);
-
-        Geary.ClientService services_to_pause[] = {};
-        yield run_gc(NONE, services_to_pause, cancellable);
+        yield run_gc(NONE, null, cancellable);
     }
 
     /**
@@ -106,10 +104,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      * the interval based recommendation should be bypassed.
      */
     public async void run_gc(GarbageCollectionOptions options,
-                             Geary.ClientService[] services_to_pause,
+                             Gee.Collection<Geary.ClientService>? to_pause,
                              GLib.Cancellable? cancellable)
-                                 throws Error {
-
+        throws GLib.Error {
         if (this.gc != null) {
             debug("GC abandoned, possibly already running");
             return;
@@ -133,7 +130,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
             if (GarbageCollectionOptions.ALLOW_VACUUM in options) {
                 this.want_background_vacuum = false;
-                foreach (ClientService service in services_to_pause) {
+                foreach (ClientService service in to_pause) {
                     yield service.stop(gc_cancellable);
                 }
 
@@ -152,7 +149,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         vacuum_monitor.notify_finish();
                 }
 
-                foreach (ClientService service in services_to_pause) {
+                foreach (ClientService service in to_pause) {
                     yield service.start(gc_cancellable);
                 }
             } else {

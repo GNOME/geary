@@ -447,8 +447,7 @@ private class Geary.ImapEngine.ForegroundGarbageCollection: AccountOperation {
 
         // Run basic GC
         GenericAccount generic_account = (GenericAccount) account;
-        Geary.ClientService services_to_pause[] = {};
-        yield generic_account.local.db.run_gc(NONE, services_to_pause, cancellable);
+        yield generic_account.local.db.run_gc(NONE, null, cancellable);
     }
 
     public override bool equal_to(AccountOperation op) {
@@ -482,9 +481,13 @@ private class Geary.ImapEngine.IdleGarbageCollection: AccountOperation {
             return;
 
         GenericAccount generic_account = (GenericAccount) this.account;
-        generic_account.local.db.run_gc.begin(this.options,
-                                              {generic_account.imap, generic_account.smtp},
-                                              cancellable);
+        generic_account.local.db.run_gc.begin(
+            this.options,
+            new Gee.ArrayList<ClientService>.wrap(
+                {generic_account.imap, generic_account.smtp}
+            ),
+            cancellable
+        );
     }
 
     public void messages_detached() {
