@@ -490,7 +490,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     private async GMime.Part? get_file_part(File file,
                                             Geary.Mime.DispositionType disposition,
-                                            GLib.Cancellable cancellable)
+                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
         FileInfo file_info = yield file.query_info_async(
             FileAttribute.STANDARD_CONTENT_TYPE,
