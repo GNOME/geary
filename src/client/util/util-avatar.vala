@@ -108,7 +108,7 @@ namespace Util.Avatar {
 
     public Gdk.RGBA get_color_for_name(string name) {
         // https://gitlab.gnome.org/Community/Design/HIG-app-icons/blob/master/GNOME%20HIG.gpl
-        const double[,3] GNOME_COLOR_PALETTE = {
+        const double[,] GNOME_COLOR_PALETTE = {
             {  98, 160, 234 },
             {  53, 132, 228 },
             {  28, 113, 216 },
