@@ -188,7 +188,7 @@ public class Application.ContactStore : Geary.BaseObject {
 
     internal async Geary.Contact
         lookup_engine_contact(Geary.RFC822.MailboxAddress mailbox,
-                              GLib.Cancellable cancellable)
+                              GLib.Cancellable? cancellable)
         throws GLib.Error {
         string email_key = to_cache_key(mailbox.address);
         Geary.Contact contact = this.engine_address_cache.get_entry(email_key);
@@ -243,7 +243,7 @@ public class Application.ContactStore : Geary.BaseObject {
     }
 
     private async Folks.Individual? search_folks_by_email(string address,
-                                                          GLib.Cancellable cancellable)
+                                                          GLib.Cancellable? cancellable)
         throws GLib.Error {
         Folks.SearchView view = new Folks.SearchView(
             this.individuals,
