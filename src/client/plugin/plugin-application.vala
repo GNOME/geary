@@ -76,7 +76,7 @@ public interface Plugin.Application : Geary.BaseObject {
      * Registers a plugin action with the application.
      *
      * Once registered, the action will be available for use in user
-     * interface elements such as {@link Button}.
+     * interface elements such as {@link Actionable}.
      *
      * @see deregister_action
      */

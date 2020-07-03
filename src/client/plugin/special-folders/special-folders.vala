@@ -161,7 +161,7 @@ public class Plugin.SpecialFolders :
         var bar = this.info_bars.get(target);
         if (bar == null) {
             bar = new InfoBar(target.display_name);
-            bar.primary_button = new Button(
+            bar.primary_button = new Actionable(
                 // Translators: Info bar button label for emptying
                 // trash/spam folders
                 _("Empty"),
@@ -181,7 +181,7 @@ public class Plugin.SpecialFolders :
             // email
             _("This message has not yet been sent.")
         );
-        bar.primary_button = new Button(
+        bar.primary_button = new Actionable(
             // Translators: Info bar button label for editing a draft
             // email
             _("Edit"),

@@ -113,8 +113,8 @@ client_vala_sources = files(
   'folder-list/folder-list-special-grouping.vala',
 
   'plugin/plugin-account.vala',
+  'plugin/plugin-actionable.vala',
   'plugin/plugin-application.vala',
-  'plugin/plugin-button.vala',
   'plugin/plugin-composer.vala',
   'plugin/plugin-contact-store.vala',
   'plugin/plugin-email-extension.vala',

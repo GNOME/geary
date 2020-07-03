@@ -185,7 +185,7 @@ public class Plugin.MailMerge :
         // Translators: Infobar status label for an email mail merge
         // template
         var bar = new InfoBar(_("Mail merge template"));
-        bar.primary_button = new Button(
+        bar.primary_button = new Actionable(
             // Translators: Info bar button label for performing a
             // mail-merge on an email template
             _("Merge"),
@@ -193,7 +193,7 @@ public class Plugin.MailMerge :
             target.to_variant()
         );
         bar.secondary_buttons.add(
-            new Button(
+            new Actionable(
                 // Translators: Info bar button label for editing an
                 // existing email template
                 _("Edit"),

@@ -42,7 +42,7 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * object's method, such as {@link
      * FolderContext.remove_folder_info_bar}.
      */
-    public Button? primary_button { get; set; default = null; }
+    public Actionable? primary_button { get; set; default = null; }
 
     /**
      * Optional secondary buttons for the info bar.
@@ -56,8 +56,8 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * object's method, such as {@link
      * FolderContext.remove_folder_info_bar}.
      */
-    public Gee.BidirList<Button> secondary_buttons {
-        get; private set; default = new Gee.LinkedList<Button>();
+    public Gee.BidirList<Actionable> secondary_buttons {
+        get; private set; default = new Gee.LinkedList<Actionable>();
     }
 
     /** Constructs a new info bar with the given status. */

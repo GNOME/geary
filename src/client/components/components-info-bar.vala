@@ -99,7 +99,8 @@ public class Components.InfoBar : Gtk.InfoBar {
         return (Gtk.Box) base.get_action_area();
     }
 
-    private void add_plugin_button(Plugin.Button plugin, string action_group_name) {
+    private void add_plugin_button(Plugin.Actionable plugin,
+                                   string action_group_name) {
         var gtk = new Gtk.Button.with_label(plugin.label);
         gtk.set_action_name(action_group_name + "." + plugin.action.name);
         if (plugin.action_target != null) {

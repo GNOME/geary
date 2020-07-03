@@ -276,7 +276,7 @@ public class Plugin.EmailTemplates :
         var bar = this.info_bars.get(target);
         if (bar == null) {
             bar = new InfoBar(target.display_name);
-            bar.primary_button = new Button(
+            bar.primary_button = new Actionable(
                 // Translators: Info bar button label for creating a
                 // new email template
                 _("New"),
@@ -291,7 +291,7 @@ public class Plugin.EmailTemplates :
     private InfoBar new_template_email_info_bar(EmailIdentifier target) {
         // Translators: Infobar status label for an email template
         var bar = new InfoBar(_("Message template"));
-        bar.primary_button = new Button(
+        bar.primary_button = new Actionable(
             // Translators: Info bar button label for sending an
             // email template
             _("Send"),
@@ -299,7 +299,7 @@ public class Plugin.EmailTemplates :
             target.to_variant()
         );
         bar.secondary_buttons.add(
-            new Button(
+            new Actionable(
                 // Translators: Info bar button label for editing an
                 // existing email template
                 _("Edit"),
