@@ -194,7 +194,7 @@ namespace ValaUnit {
     private void assert_equal_enum<T>(T actual,
                                       T expected,
                                       string? context)
-    throws TestError {
+        throws TestError {
         int actual_val = (int) ((int?) actual);
         int expected_val = (int) ((int?) expected);
         if (actual_val != expected_val) {
@@ -203,8 +203,8 @@ namespace ValaUnit {
     }
 
     private void assert_equal_string(string? actual,
-                                    string? expected,
-                                    string? context)
+                                     string? expected,
+                                     string? context)
         throws TestError {
         string actual_val = (string) actual;
         string expected_val = (string) expected;
@@ -353,7 +353,7 @@ public interface ValaUnit.TestAssertions : GLib.Object {
     }
 
     /** Asserts a value is null */
-    public void assert_null<T>(T actual, string? context = null)
+    public void assert_is_null<T>(T actual, string? context = null)
         throws TestError {
         if (actual != null) {
             ValaUnit.assert(
@@ -417,6 +417,17 @@ public interface ValaUnit.TestAssertions : GLib.Object {
             ValaUnit.assert("Expected an array, was null", context);
         }
         return new ArrayCollectionAssertion<E>((E[]) actual, context);
+    }
+
+    /** Asserts an array is null */
+    public void assert_array_is_null<T>(T[]? actual, string? context = null)
+        throws TestError {
+        if (actual != null) {
+            ValaUnit.assert(
+                "%s is non-null, expected null".printf(typeof(T).name()),
+                context
+            );
+        }
     }
 
     /** Asserts a collection is non-null and empty. */
@@ -520,6 +531,12 @@ public interface ValaUnit.TestAssertions : GLib.Object {
     public void assert(bool actual, string? context = null)
         throws TestError {
         assert_true(actual, context);
+    }
+
+    /** Asserts a value is null. */
+    public void assert_null<T>(T actual, string? context = null)
+        throws TestError {
+        assert_is_null(actual, context);
     }
 
     /**
