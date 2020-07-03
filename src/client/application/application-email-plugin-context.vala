@@ -13,18 +13,18 @@ internal class Application.EmailPluginContext :
 
 
     private unowned Client application;
-    private EmailStoreFactory email_factory;
+    private PluginManager.PluginGlobals globals;
+    private PluginManager.PluginContext plugin;
     private Plugin.EmailStore email;
-    private string action_group_name;
 
 
     internal EmailPluginContext(Client application,
-                                EmailStoreFactory email_factory,
-                                string action_group_name) {
+                                PluginManager.PluginGlobals globals,
+                                PluginManager.PluginContext plugin) {
         this.application = application;
-        this.email_factory = email_factory;
-        this.email = email_factory.new_email_store();
-        this.action_group_name = action_group_name;
+        this.globals = globals;
+        this.plugin = plugin;
+        this.email = globals.email.new_email_store();
     }
 
     public async Plugin.EmailStore get_email_store()
@@ -35,14 +35,16 @@ internal class Application.EmailPluginContext :
     public void add_email_info_bar(Plugin.EmailIdentifier displayed,
                                     Plugin.InfoBar info_bar,
                                     uint priority) {
-        Geary.EmailIdentifier? id = this.email_factory.to_engine_id(displayed);
+        Geary.EmailIdentifier? id = this.globals.email.to_engine_id(displayed);
         if (id != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.conversation_viewer.current_list != null) {
                     main.conversation_viewer.current_list.add_email_info_bar(
                         id,
                         new Components.InfoBar.for_plugin(
-                            info_bar, this.action_group_name, (int) priority
+                            info_bar,
+                            this.plugin.action_group_name,
+                            (int) priority
                         )
                     );
                 }
@@ -52,7 +54,7 @@ internal class Application.EmailPluginContext :
 
     public void remove_email_info_bar(Plugin.EmailIdentifier displayed,
                                       Plugin.InfoBar info_bar) {
-        Geary.EmailIdentifier? id = this.email_factory.to_engine_id(displayed);
+        Geary.EmailIdentifier? id = this.globals.email.to_engine_id(displayed);
         if (id != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.conversation_viewer.current_list != null) {
@@ -72,7 +74,7 @@ internal class Application.EmailPluginContext :
             this.application.controller.get_context_for_account(account);
         if (context != null) {
             this.email.email_displayed(
-                this.email_factory.to_plugin_email(email, context)
+                this.globals.email.to_plugin_email(email, context)
             );
         }
     }
@@ -83,13 +85,13 @@ internal class Application.EmailPluginContext :
             this.application.controller.get_context_for_account(account);
         if (context != null) {
             this.email.email_sent(
-                this.email_factory.to_plugin_email(email, context)
+                this.globals.email.to_plugin_email(email, context)
             );
         }
     }
 
     internal void destroy() {
-        this.email_factory.destroy_email_store(this.email);
+        this.globals.email.destroy_email_store(this.email);
     }
 
 }

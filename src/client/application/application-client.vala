@@ -613,7 +613,7 @@ public class Application.Client : Gtk.Application {
     public async void show_email(GLib.Variant? id) {
         MainWindow main = yield this.present();
         if (id != null) {
-            EmailStoreFactory email = this.controller.plugins.email_factory;
+            EmailStoreFactory email = this.controller.plugins.globals.email;
             AccountContext? context = email.get_account_from_variant(id);
             Geary.EmailIdentifier? email_id =
                 email.get_email_identifier_from_variant(id);
@@ -694,7 +694,7 @@ public class Application.Client : Gtk.Application {
         MainWindow main = yield this.present();
         if (id != null) {
             Geary.Folder? folder =
-                this.controller.plugins.folders_factory.get_folder_from_variant(id);
+                this.controller.plugins.globals.folders.get_folder_from_variant(id);
             if (folder != null) {
                 yield main.select_folder(folder, true);
             }
