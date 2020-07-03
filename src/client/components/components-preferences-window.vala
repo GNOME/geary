@@ -35,6 +35,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                              Application.PluginManager plugins) {
         Object(
             application: parent.application,
+            default_width: 450,
             transient_for: parent
         );
         this.plugins = plugins;
