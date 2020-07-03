@@ -1556,7 +1556,20 @@ public class Application.MainWindow :
         );
     }
 
-    private void create_composer_from_viewer(Composer.Widget.ContextType type) {
+    private async void create_composer(Geary.Account send_context,
+                                       Composer.Widget.ContextType type,
+                                       Geary.Email context,
+                                       string? quote) {
+        var composer = yield this.controller.compose_with_context(
+            this.controller.get_context_for_account(send_context.information),
+            type,
+            context,
+            quote ?? ""
+        );
+        this.controller.present_composer(composer);
+    }
+
+    private async void create_composer_from_viewer(Composer.Widget.ContextType type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1564,12 +1577,8 @@ public class Application.MainWindow :
             email_view = list_view.get_reply_target();
         }
         if (account != null && email_view != null) {
-            email_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = email_view.get_selection_for_quoting.end(res);
-                    this.controller.compose_with_context_email.begin(
-                        type, email_view.email, quote ?? ""
-                    );
-                });
+            string? quote = yield email_view.get_selection_for_quoting();
+            yield create_composer(account, type, email_view.email, quote);
         }
     }
 
@@ -2105,8 +2114,11 @@ public class Application.MainWindow :
                 // TODO: Determine how to map between conversations
                 // and drafts correctly.
                 Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-                this.controller.compose_with_context_email.begin(
-                    EDIT, draft, null
+                this.create_composer.begin(
+                    this.selected_folder.account,
+                    EDIT,
+                    draft,
+                    null
                 );
             }
         }
@@ -2134,15 +2146,15 @@ public class Application.MainWindow :
     }
 
     private void on_reply_conversation() {
-        create_composer_from_viewer(REPLY_SENDER);
+        this.create_composer_from_viewer.begin(REPLY_SENDER);
     }
 
     private void on_reply_all_conversation() {
-        create_composer_from_viewer(REPLY_ALL);
+        this.create_composer_from_viewer.begin(REPLY_ALL);
     }
 
     private void on_forward_conversation() {
-        create_composer_from_viewer(FORWARD);
+        this.create_composer_from_viewer.begin(FORWARD);
     }
 
     private void on_show_copy_menu() {
@@ -2458,24 +2470,24 @@ public class Application.MainWindow :
 
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                REPLY_SENDER, target, quote
+            this.create_composer.begin(
+                this.selected_account, REPLY_SENDER, target, quote
             );
         }
     }
 
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                REPLY_ALL, target, quote
+            this.create_composer.begin(
+                this.selected_account, REPLY_ALL, target, quote
             );
         }
     }
 
     private void on_email_forward(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                FORWARD, target, quote
+            this.create_composer.begin(
+                this.selected_account, FORWARD, target, quote
             );
         }
     }

@@ -726,8 +726,25 @@ public class Application.Client : Gtk.Application {
     }
 
     public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
-        yield this.present();
-        yield this.controller.compose_new_email(to);
+        MainWindow main = yield this.present();
+        AccountContext? account = null;
+        if (main.selected_account == null) {
+            account = this.controller.get_context_for_account(
+                main.selected_account.information
+            );
+        }
+        if (account == null) {
+            account = Geary.Collection.first(
+                this.controller.get_account_contexts()
+            );
+        }
+        if (account != null) {
+            Composer.Widget composer = yield this.controller.compose_blank(
+                account,
+                to
+            );
+            this.controller.present_composer(composer);
+        }
     }
 
     public async void new_composer_mailto(string? mailto) {
