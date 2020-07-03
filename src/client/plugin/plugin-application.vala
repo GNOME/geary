@@ -15,13 +15,62 @@ public interface Plugin.Application : Geary.BaseObject {
 
 
     /**
-     * Constructs a new, blank composer for the given account.
+     * Emitted when a new composer is registered with the application.
+     *
+     * A composer is registered when it is first constructed.
+     *
+     * @see Composer.present
+     */
+    public signal void composer_registered(Composer composer);
+
+    /**
+     * Emitted when an existing composer is de-registered.
+     *
+     * A composer is deregistered when it is destroyed, either after
+     * being sent, closed, or discarded.
+     */
+    public signal void composer_deregistered(Composer composer);
+
+
+    /**
+     * Obtains a new, blank composer for the given account.
      *
      * The composer will be initialised to send an email from the
-     * given account. This may be changed by people before they send
-     * the email, however.
+     * given account. This may be changed via the UI before the email
+     * is sent, however.
+     *
+     * Existing composer instances are re-used where possible, thus if
+     * a blank composer is already open, the same instance may be
+     * returned if this method is called multiple times.
      */
-    public abstract Composer new_composer(Account source) throws Error;
+    public abstract async Composer compose_blank(Account send_from)
+        throws Error;
+
+    /**
+     * Obtains a new composer with the given message as a context
+     *
+     * The composer will be initialised to send an email from the
+     * given account, with the given email loaded as either an email
+     * to edit, a reply, or a forwarded message, depending on the
+     * given context.
+     *
+     * If a quote is given, this added as a quote in the composer's
+     * body.
+     *
+     * Existing composer instances are re-used where possible, thus if
+     * a composer with a given context and email is already open, the
+     * same instance may be returned if this method is called multiple
+     * times with the same arguments.
+     *
+     * Returns null if there is an existing composer open and the
+     * prompt to close it was declined.
+     */
+    public abstract async Composer? compose_with_context(
+        Account send_from,
+        Composer.ContextType type,
+        EmailIdentifier context,
+        string? quote = null
+    ) throws Error;
 
     /**
      * Registers a plugin action with the application.

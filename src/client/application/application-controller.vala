@@ -339,7 +339,7 @@ internal class Application.Controller :
             composer = new Composer.Widget(
                 this,
                 this.application.config,
-                context,
+                send_context,
                 null
             );
             register_composer(composer);
@@ -418,7 +418,7 @@ internal class Application.Controller :
             composer = new Composer.Widget(
                 this,
                 this.application.config,
-                account,
+                send_context,
                 null
             );
             register_composer(composer);

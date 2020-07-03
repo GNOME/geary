@@ -138,7 +138,16 @@ public class Plugin.EmailTemplates :
     private async void edit_email(Folder? target, EmailIdentifier? id, bool send) {
         var account = (target != null) ? target.account : id.account;
         try {
-            var composer = this.plugin_application.new_composer(account);
+            Plugin.Composer? composer = null;
+            if (id != null) {
+                composer = yield this.plugin_application.compose_with_context(
+                    id.account,
+                    Composer.ContextType.EDIT,
+                    id
+                );
+            } else {
+                composer = yield this.plugin_application.compose_blank(account);
+            }
             if (!send) {
                 var folder = target;
                 if (folder == null && id != null) {
@@ -153,10 +162,7 @@ public class Plugin.EmailTemplates :
                 composer.can_send = false;
             }
 
-            if (id != null) {
-                yield composer.edit_email(id);
-            }
-            composer.show();
+            composer.present();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
         }

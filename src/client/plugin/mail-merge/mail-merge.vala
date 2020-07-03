@@ -138,7 +138,11 @@ public class Plugin.MailMerge :
 
     private async void edit_email(EmailIdentifier id) {
         try {
-            var composer = this.plugin_application.new_composer(id.account);
+            var composer = yield this.plugin_application.compose_with_context(
+                id.account,
+                Composer.ContextType.EDIT,
+                id
+            );
             var containing = yield this.folder_store.list_containing_folders(
                 id, this.cancellable
             );
@@ -148,8 +152,7 @@ public class Plugin.MailMerge :
 
             composer.save_to_folder(folder);
             composer.can_send = false;
-            yield composer.edit_email(id);
-            composer.show();
+            composer.present();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
         }

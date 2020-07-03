@@ -146,9 +146,12 @@ public class Plugin.SpecialFolders :
 
     private async void edit_draft(EmailIdentifier id) {
         try {
-            var composer = this.plugin_application.new_composer(id.account);
-            yield composer.edit_email(id);
-            composer.show();
+            var composer = yield this.plugin_application.compose_with_context(
+                id.account,
+                Composer.ContextType.EDIT,
+                id
+            );
+            composer.present();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
         }

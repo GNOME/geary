@@ -342,6 +342,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get; private set; default = new Geary.RFC822.MessageIDList();
     }
 
+    /** Overrides for the draft folder as save destination, if any. */
+    internal Geary.Folder? save_to { get; private set; default = null; }
+
     internal WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
@@ -490,7 +493,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> inline_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
     private Gee.Map<string,Geary.Memory.Buffer> cid_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
 
-    private Geary.Folder? save_to;
     private Geary.App.DraftManager? draft_manager = null;
     private GLib.Cancellable? draft_manager_opening = null;
     private Geary.TimeoutManager draft_timer;
@@ -1100,6 +1102,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
             this.draft_timer.reset();
         }
+    }
+
+    /** Overrides the draft folder as a destination for saving. */
+    internal async void set_save_to_override(Geary.Folder? save_to)
+        throws GLib.Error {
+        this.save_to = save_to;
+        yield reopen_draft_manager();
     }
 
     /**

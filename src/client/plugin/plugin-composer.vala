@@ -7,9 +7,42 @@
 
 /**
  * An object representing a composer for use by plugins.
+ *
+ * Instances of this interface can be obtained by calling {@link
+ * Application.compose_blank} or {@link
+ * Application.compose_with_context}. A composer instance may not be
+ * visible until {@link present} is called, allowing it to be
+ * configured via calls to this interface first, if required.
  */
 public interface Plugin.Composer : Geary.BaseObject {
 
+
+    /**
+     * Determines the type of the context email passed to the composer
+     *
+     * @see Application.compose_with_context
+     */
+    public enum ContextType {
+        /** No context mail was provided. */
+        NONE,
+
+        /** Context is an email to edited, for example a draft or template. */
+        EDIT,
+
+        /** Context is an email being replied to the sender only. */
+        REPLY_SENDER,
+
+        /** Context is an email being replied to all recipients. */
+        REPLY_ALL,
+
+        /** Context is an email being forwarded. */
+        FORWARD
+    }
+
+    /**
+     * Denotes the account the composed email will be sent from.
+     */
+    public abstract Plugin.Account? sender_context { get; }
 
     /**
      * Determines if the email in the composer can be sent.
@@ -17,33 +50,33 @@ public interface Plugin.Composer : Geary.BaseObject {
     public abstract bool can_send { get; set; }
 
     /**
-     * Causes the composer to be made visible.
+     * Denotes the folder that the email will be saved to.
      *
-     * The composer will be shown as either full-pane and in-window if
-     * not a reply to a currently displayed conversation, inline and
-     * in-window if a reply to an existing conversation being
-     * displayed, or detached if there is already an in-window
-     * composer being displayed.
+     * If non-null, fixes the folder used by the composer for saving
+     * the email. If null, the current account's Draft folder will be
+     * used.
+     *
+     * @see save_to_folder
      */
-    public abstract void show();
+    public abstract Plugin.Folder? save_to { get; }
+
 
     /**
-     * Loads an email into the composer to be edited.
+     * Presents the composer on screen.
      *
-     * Loads the given email, and sets it as the email to be edited in
-     * this composer. This must be called before calling {@link show},
-     * and has no effect if called afterwards.
+     * The composer is made visible if this has not yet been done so,
+     * and the application attempts to ensure that it is presented on
+     * the active display.
      */
-    public async abstract void edit_email(EmailIdentifier to_load)
-        throws GLib.Error;
+    public abstract void present();
 
     /**
      * Sets the folder used to save the message being composed.
      *
      * Ensures email for both automatic and manual saving of the email
-     * in the composer is saved to the given folder. This must be
-     * called before calling {@link show}, and has no effect if called
-     * afterwards.
+     * in the composer is saved to the given folder. This disables
+     * changing accounts in the composer's UI since email cannot be
+     * saved across accounts.
      */
     public abstract void save_to_folder(Plugin.Folder? location);
 

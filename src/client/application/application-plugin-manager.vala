@@ -124,6 +124,8 @@ public class Application.PluginManager : GLib.Object {
         internal weak PluginGlobals globals;
 
         private GLib.SimpleActionGroup? action_group = null;
+        private Gee.Map<Composer.Widget,ComposerImpl> composer_impls =
+        new Gee.HashMap<Composer.Widget,ComposerImpl>();
 
 
         public ApplicationImpl(Client backing,
@@ -134,14 +136,82 @@ public class Application.PluginManager : GLib.Object {
             this.globals = globals;
         }
 
-        public Plugin.Composer new_composer(Plugin.Account source)
+        public async Plugin.Composer compose_blank(Plugin.Account source)
             throws Plugin.Error {
             var impl = source as AccountImpl;
             if (impl == null) {
                 throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
             }
-            return new ComposerImpl(
-                this.backing, impl.backing, this.folders, this.email
+            return to_plugin_composer(
+                yield this.backing.controller.compose_blank(impl.backing)
+            );
+        }
+
+        public async Plugin.Composer? compose_with_context(
+            Plugin.Account send_from,
+            Plugin.Composer.ContextType plugin_type,
+            Plugin.EmailIdentifier to_load,
+            string? quote = null
+        ) throws Plugin.Error {
+            var source_impl = send_from as AccountImpl;
+            if (source_impl == null) {
+                throw new Plugin.Error.NOT_SUPPORTED("Not a valid account");
+            }
+            var id = this.globals.email.to_engine_id(to_load);
+            if (id == null) {
+                throw new Plugin.Error.NOT_FOUND("Email id not found");
+            }
+            Gee.Collection<Geary.Email>? email = null;
+            try {
+                email = yield source_impl.backing.emails.list_email_by_sparse_id_async(
+                    Geary.Collection.single(id),
+                    Composer.Widget.REQUIRED_FIELDS,
+                    NONE,
+                    source_impl.backing.cancellable
+                );
+            } catch (GLib.Error err) {
+                throw new Plugin.Error.NOT_FOUND(
+                    "Error looking up email: %s", err.message
+                );
+            }
+            if (email == null || email.is_empty) {
+                throw new Plugin.Error.NOT_FOUND("Email not found for id");
+            }
+            var context = Geary.Collection.first(email);
+
+            var type = Composer.Widget.ContextType.NONE;
+            switch (plugin_type) {
+            case NONE:
+                type = Composer.Widget.ContextType.NONE;
+                break;
+
+            case EDIT:
+                type = Composer.Widget.ContextType.EDIT;
+                // Use the same folder that the email exists since it
+                // could be getting edited somewhere outside of drafts
+                // (e.g. templates)
+                break;
+
+            case REPLY_SENDER:
+                type = Composer.Widget.ContextType.REPLY_SENDER;
+                break;
+
+            case REPLY_ALL:
+                type = Composer.Widget.ContextType.REPLY_ALL;
+                break;
+
+            case FORWARD:
+                type = Composer.Widget.ContextType.FORWARD;
+                break;
+            }
+
+            return to_plugin_composer(
+                yield this.backing.controller.compose_with_context(
+                    source_impl.backing,
+                    type,
+                    context,
+                    quote
+                )
             );
         }
 
@@ -212,6 +282,33 @@ public class Application.PluginManager : GLib.Object {
             this.backing.controller.report_problem(problem);
         }
 
+        internal void engine_composer_registered(Composer.Widget registered) {
+            var impl = to_plugin_composer(registered);
+            if (impl != null) {
+                composer_registered(impl);
+            }
+        }
+
+        internal void engine_composer_deregistered(Composer.Widget deregistered) {
+            var impl = this.composer_impls.get(deregistered);
+            if (impl != null) {
+                composer_deregistered(impl);
+                this.composer_impls.unset(deregistered);
+            }
+        }
+
+        private ComposerImpl? to_plugin_composer(Composer.Widget? widget) {
+            ComposerImpl impl = null;
+            if (widget != null) {
+                impl = this.composer_impls.get(widget);
+                if (impl == null) {
+                    impl = new ComposerImpl(widget, this);
+                    this.composer_impls.set(widget, impl);
+                }
+            }
+            return impl;
+        }
+
         private void on_window_added(Gtk.Window window) {
             if (this.action_group != null) {
                 var main = window as MainWindow;
@@ -246,75 +343,72 @@ public class Application.PluginManager : GLib.Object {
     }
 
 
-    private class ComposerImpl : Geary.BaseObject, Plugin.Composer {
+    /** An implementation of the plugin Composer interface. */
+    internal class ComposerImpl : Geary.BaseObject, Plugin.Composer {
 
 
-        public override bool can_send { get; set; default = true; }
-
-        private Client application;
-        private AccountContext account;
-        private FolderStoreFactory folders;
-        private EmailStoreFactory email;
-        private Geary.Email? to_load = null;
-        private Geary.Folder? save_location = null;
-
-
-        public ComposerImpl(Client application,
-                            AccountContext account,
-                            FolderStoreFactory folders,
-                            EmailStoreFactory email) {
-            this.application = application;
-            this.account = account;
-            this.folders = folders;
-            this.email = email;
+        public bool can_send {
+            get { return this.backing.can_send; }
+            set { this.backing.can_send = value; }
         }
 
-        public void show() {
-            this.show_impl.begin();
-        }
-
-        public async void edit_email(Plugin.EmailIdentifier to_load)
-            throws Error {
-            Geary.EmailIdentifier? id = this.email.to_engine_id(to_load);
-            if (id == null) {
-                throw new Plugin.Error.NOT_FOUND("Email id not found");
-            }
-            Gee.Collection<Geary.Email>? email =
-                yield this.account.emails.list_email_by_sparse_id_async(
-                    Geary.Collection.single(id),
-                    Composer.Widget.REQUIRED_FIELDS,
-                    NONE,
-                    this.account.cancellable
+        public Plugin.Account? sender_context {
+            get {
+                // ugh
+                this._sender_context = this.application.globals.accounts.get(
+                    this.backing.sender_context
                 );
-            if (email != null && !email.is_empty) {
-                this.to_load = Geary.Collection.first(email);
+                return this._sender_context;
             }
+        }
+        private Plugin.Account? _sender_context = null;
+
+        public Plugin.Folder? save_to  {
+            get {
+                // Ugh
+                this._save_to = (
+                    (backing.save_to != null)
+                    ? this.application.globals.folders.get_plugin_folder(
+                        this.backing.save_to
+                    )
+                    : null
+                );
+                return this._save_to;
+            }
+        }
+        private Plugin.Folder? _save_to = null;
+
+        private Composer.Widget backing;
+        private weak ApplicationImpl application;
+
+
+        public ComposerImpl(Composer.Widget backing,
+                            ApplicationImpl application) {
+            this.backing = backing;
+            this.application = application;
         }
 
         public void save_to_folder(Plugin.Folder? location) {
-            var folder = this.folders.get_engine_folder(location);
-            if (folder != null && folder.account == this.account.account) {
-                this.save_location = folder;
+            var engine = this.application.globals.folders.get_engine_folder(location);
+            if (engine != null && engine.account == this.backing.sender_context.account) {
+                this.backing.set_save_to_override.begin(
+                    engine,
+                    (obj, res) => {
+                        try {
+                            this.backing.set_save_to_override.end(res);
+                        } catch (GLib.Error err) {
+                            debug(
+                                "Error setting folder for saving: %s",
+                                err.message
+                            );
+                        }
+                    }
+                );
             }
         }
 
-        private async void show_impl() {
-            var controller = this.application.controller;
-            Composer.Widget? composer = null;
-            if (this.to_load == null) {
-                composer = yield controller.compose_new_email(
-                    null,
-                    this.save_location
-                );
-            } else {
-                composer = yield controller.compose_with_context_email(
-                    EDIT,
-                    this.to_load,
-                    null,
-                    this.save_location
-                );
-            }
-            composer.can_send = this.can_send;
+        public void present() {
+            this.application.backing.controller.present_composer(this.backing);
         }
 
     }
@@ -627,6 +721,18 @@ public class Application.PluginManager : GLib.Object {
 
         plugin_deactivated(context.info, error);
         this.plugin_set.unset(context.info);
+    }
+
+    private void on_composer_registered(Composer.Widget registered) {
+        foreach (var context in this.plugin_set.values) {
+            context.application.engine_composer_registered(registered);
+        }
+    }
+
+    private void on_composer_deregistered(Composer.Widget deregistered) {
+        foreach (var context in this.plugin_set.values) {
+            context.application.engine_composer_deregistered(deregistered);
+        }
     }
 
 }
