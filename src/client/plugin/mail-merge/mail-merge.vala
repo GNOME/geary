@@ -40,6 +40,7 @@ public class Plugin.MailMerge :
 
     private const string ACTION_EDIT = "edit-template";
     private const string ACTION_MERGE = "merge-template";
+    private const string ACTION_LOAD = "load-merge-data";
 
     private const int INFO_BAR_PRIORITY = 10;
 
@@ -90,6 +91,10 @@ public class Plugin.MailMerge :
         );
         this.merge_action.activate.connect(on_merge_activated);
         this.plugin_application.register_action(this.merge_action);
+
+        this.plugin_application.composer_registered.connect(
+            this.on_composer_registered
+        );
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {
@@ -181,6 +186,42 @@ public class Plugin.MailMerge :
         }
     }
 
+    private async void update_composer(Composer composer) {
+        if (true) {
+            var load_action = new GLib.SimpleAction(ACTION_LOAD, null);
+            load_action.activate.connect(
+                () => { load_composer_data.begin(composer); }
+            );
+            composer.register_action(load_action);
+            composer.append_menu_item(
+                new Actionable(_("Mail Merge"), load_action)
+            );
+        }
+    }
+
+    private async void load_composer_data(Composer composer) {
+        var chooser = new Gtk.FileChooserNative(
+            _("Mail Merge"), null, OPEN, _("_Open"), _("_Cancel")
+        );
+        var csv_filter = new Gtk.FileFilter();
+        csv_filter.set_filter_name(_("Comma separated values (CSV)"));
+        csv_filter.add_mime_type("text/csv");
+        chooser.add_filter(csv_filter);
+        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
+            try {
+                var input = yield chooser.get_file().read_async(
+                    GLib.Priority.DEFAULT,
+                    this.cancellable
+                );
+                var csv = yield new Util.Csv.Reader(input, this.cancellable);
+                var record = yield csv.read_record();
+                debug("XXX record: %s", string.join(",", record));
+            } catch (GLib.Error err) {
+                debug("Error loading CSV: %s", err.message);
+            }
+        }
+    }
+
     private InfoBar new_template_email_info_bar(EmailIdentifier target) {
         // Translators: Infobar status label for an email mail merge
         // template
@@ -248,6 +289,10 @@ public class Plugin.MailMerge :
                 this.merge_email.begin(id);
             }
         }
+    }
+
+    private void on_composer_registered(Composer registered) {
+        this.update_composer.begin(registered);
     }
 
     private void on_email_displayed(Email email) {
