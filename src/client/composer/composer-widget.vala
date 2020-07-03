@@ -1104,6 +1104,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Inserts a menu section into the composer's menu.
+     */
+    public void insert_menu_section(GLib.MenuModel section) {
+        var menu = this.more_options_button.menu_model as GLib.Menu;
+        if (menu != null) {
+            menu.insert_section(0, null, section);
+        }
+    }
+
     /** Overrides the draft folder as a destination for saving. */
     internal async void set_save_to_override(Geary.Folder? save_to)
         throws GLib.Error {

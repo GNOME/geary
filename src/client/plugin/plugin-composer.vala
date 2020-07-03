@@ -80,4 +80,39 @@ public interface Plugin.Composer : Geary.BaseObject {
      */
     public abstract void save_to_folder(Plugin.Folder? location);
 
+    /**
+     * Registers a plugin action with this specific composer.
+     *
+     * Once registered, the action will be available for use in user
+     * interface elements such as {@link Actionable}.
+     *
+     * @see deregister_action
+     */
+    public abstract void register_action(GLib.Action action);
+
+    /**
+     * De-registers a plugin action, removing it from this composer.
+     *
+     * Makes a previously registered no longer available.
+     *
+     * @see register_action
+     */
+    public abstract void deregister_action(GLib.Action action);
+
+    /**
+     * Adds a menu item to the composer's menu.
+     *
+     * The menu item will be added to a section unique to this plugin
+     * on the composer's menu. The item's action must be registered
+     * either with the application via {@link
+     * Application.register_action} if it is a global action, or with
+     * the composer via {@link register_action} if it is
+     * composer-specific for it to be successfully activated.
+     *
+     * @see register_action
+     * @see Application.register_action
+     */
+    public abstract void append_menu_item(Actionable menu_item);
+
+
 }

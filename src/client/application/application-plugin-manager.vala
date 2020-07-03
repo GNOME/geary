@@ -380,12 +380,18 @@ public class Application.PluginManager : GLib.Object {
 
         private Composer.Widget backing;
         private weak ApplicationImpl application;
+        private GLib.SimpleActionGroup? action_group = null;
+        private GLib.Menu? menu_items = null;
+        private string action_group_name;
+
+
 
 
         public ComposerImpl(Composer.Widget backing,
                             ApplicationImpl application) {
             this.backing = backing;
             this.application = application;
+            this.action_group_name = application.plugin.action_group_name + "-cmp";
         }
 
         public void save_to_folder(Plugin.Folder? location) {
@@ -410,6 +416,37 @@ public class Application.PluginManager : GLib.Object {
         public void present() {
             this.application.backing.controller.present_composer(this.backing);
         }
+
+        public void register_action(GLib.Action action) {
+            if (this.action_group == null) {
+                this.action_group = new GLib.SimpleActionGroup();
+                this.backing.insert_action_group(
+                    this.action_group_name,
+                    this.action_group
+                );
+            }
+
+            this.action_group.add_action(action);
+        }
+
+        public void deregister_action(GLib.Action action) {
+            this.action_group.remove_action(action.get_name());
+        }
+
+        public void append_menu_item(Plugin.Actionable menu_item) {
+            if (this.menu_items == null) {
+                this.menu_items = new GLib.Menu();
+                this.backing.insert_menu_section(this.menu_items);
+            }
+            this.menu_items.append(
+                menu_item.label,
+                GLib.Action.print_detailed_name(
+                    this.action_group_name + "." + menu_item.action.name,
+                    menu_item.action_target
+                )
+            );
+        }
+
 
     }
 
