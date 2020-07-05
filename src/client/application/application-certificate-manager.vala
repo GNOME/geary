@@ -430,7 +430,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         lock (this.pinned_certs) {
             context = this.pinned_certs.get(id);
             if (context != null) {
-                is_pinned = true;
+                is_pinned = context.certificate.is_same(chain);
             } else {
                 // Cert not found in memory, check with GCR if
                 // enabled.
@@ -453,7 +453,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                             this.store_dir, id, cancellable
                         );
                         this.pinned_certs.set(id, context);
-                        is_pinned = true;
+                        is_pinned = context.certificate.is_same(chain);
                     } catch (GLib.IOError.NOT_FOUND err) {
                         // Cert was not found saved, so it not pinned
                     } catch (GLib.Error err) {
