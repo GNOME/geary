@@ -49,6 +49,9 @@ public class Plugin.SentSound : PluginBase, EmailExtension {
             );
         } catch (GLib.Error err) {
             warning("Failed to play sent mail sound: %s", err.message);
+            this.plugin_application.report_problem(
+                new Geary.ProblemReport(err)
+            );
         }
     }
 
