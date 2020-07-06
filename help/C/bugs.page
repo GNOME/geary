@@ -9,7 +9,7 @@
 
   <title>Need help with Geary?</title>
 
-  <section id="folder-list">
+  <section id="getting-support">
     <title>Getting support</title>
 
     <p>If you are having trouble using Geary, please <link
@@ -17,7 +17,7 @@
     touch</link> with the Geary community about the problem.</p>
   </section>
 
-  <section id="folder-list">
+  <section id="reporting-bugs">
     <title>Reporting bugs</title>
 
     <p>If you suspect you have found a bug in Geary, please follow the
