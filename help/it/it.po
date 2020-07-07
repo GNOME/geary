@@ -1335,7 +1335,7 @@ msgid ""
 "select the text and click the appropriate button on the formatting toolbar."
 msgstr ""
 "Il compositore email di Geary permette di usare stili di testo come "
-"<em>grassetto</em> e <em>corsivo/em>, indentazione del testo per la "
+"<em>grassetto</em> e <em>corsivo</em>, indentazione del testo per la "
 "citazione e collegamenti a pagine web. Basta selezionare il testo e fare "
 "clic sul pulsante apposito nella barra degli strumenti di formattazione."
 
