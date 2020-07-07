@@ -113,6 +113,7 @@ client_vala_sources = files(
   'folder-list/folder-list-special-grouping.vala',
 
   'plugin/plugin-account.vala',
+  'plugin/plugin-action-bar.vala',
   'plugin/plugin-actionable.vala',
   'plugin/plugin-application.vala',
   'plugin/plugin-composer.vala',
