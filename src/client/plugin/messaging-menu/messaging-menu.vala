@@ -15,7 +15,11 @@ public void peas_register_types(TypeModule module) {
     );
 }
 
-/** Updates the Unity messaging menu when new mail arrives. */
+/**
+ * Updates the Unity messaging menu when new mail arrives.
+ *
+ * @link https://wiki.ubuntu.com/MessagingMenu#Recommended_behavior_for_e-mail_clients
+ */
 public class Plugin.MessagingMenu :
     PluginBase, NotificationExtension, FolderExtension {
 

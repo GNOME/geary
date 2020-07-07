@@ -32,7 +32,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
             this.sw.notify["active"].connect_after(() => update_plugin());
             this.sw.valign = CENTER;
 
-            var row = new Hdy.ActionRow();
             this.title = plugin.get_name();
             this.subtitle = plugin.get_description();
             this.activatable_widget = this.sw;

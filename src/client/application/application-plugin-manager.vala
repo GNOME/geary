@@ -581,14 +581,6 @@ public class Application.PluginManager : GLib.Object {
         return info.get_module_name() in AUTOLOAD_MODULES;
     }
 
-    internal Gee.Iterator<Plugin.Application> get_plugin_applications() {
-        return Geary.traverse(
-            this.plugin_set.values
-        ).map<Plugin.Application>(
-            (ctx) => ctx.instance.plugin_application
-        ).iterator();
-    }
-
     internal Gee.Collection<NotificationPluginContext> get_notification_contexts() {
         return this.notification_contexts.values.read_only_view;
     }
