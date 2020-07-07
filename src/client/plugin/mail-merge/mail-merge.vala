@@ -209,13 +209,9 @@ public class Plugin.MailMerge :
         chooser.add_filter(csv_filter);
         if (chooser.run() == Gtk.ResponseType.ACCEPT) {
             try {
-                var input = yield chooser.get_file().read_async(
-                    GLib.Priority.DEFAULT,
-                    this.cancellable
+                composer.set_action_bar(
+                    yield new_composer_action_bar(chooser.get_file())
                 );
-                var csv = yield new Util.Csv.Reader(input, this.cancellable);
-                var record = yield csv.read_record();
-                debug("XXX record: %s", string.join(",", record));
             } catch (GLib.Error err) {
                 debug("Error loading CSV: %s", err.message);
             }
@@ -243,6 +239,29 @@ public class Plugin.MailMerge :
             )
         );
         return bar;
+    }
+
+    private async ActionBar new_composer_action_bar(GLib.File csv_file)
+        throws GLib.Error {
+        var info = yield csv_file.query_info_async(
+            GLib.FileAttribute.STANDARD_DISPLAY_NAME,
+            NONE,
+            GLib.Priority.DEFAULT,
+            this.cancellable
+        );
+        var input = yield csv_file.read_async(
+            GLib.Priority.DEFAULT,
+            this.cancellable
+        );
+        var csv = yield new Util.Csv.Reader(input, this.cancellable);
+        var record = yield csv.read_record();
+        debug("XXX record: %s", string.join(",", record));
+
+        var action_bar = new ActionBar();
+        action_bar.append_item(
+            new ActionBar.LabelItem(info.get_display_name()), CENTRE
+        );
+        return action_bar;
     }
 
     private bool contains_field(string value) {
