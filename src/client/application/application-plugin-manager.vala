@@ -382,6 +382,7 @@ public class Application.PluginManager : GLib.Object {
         private weak ApplicationImpl application;
         private GLib.SimpleActionGroup? action_group = null;
         private GLib.Menu? menu_items = null;
+        private Gtk.ActionBar? action_bar = null;
         private string action_group_name;
 
 
@@ -447,6 +448,90 @@ public class Application.PluginManager : GLib.Object {
             );
         }
 
+        public void set_action_bar(Plugin.ActionBar plugin_bar) {
+            if (this.action_bar != null) {
+                this.action_bar.hide();
+                this.action_bar.destroy();
+                this.action_bar = null;
+            }
+
+            this.action_bar = new Gtk.ActionBar();
+            Gtk.Box? centre = null;
+            foreach (var pos in new Plugin.ActionBar.Position[] { START, CENTRE, END}) {
+                foreach (var item in plugin_bar.get_items(pos)) {
+                    var widget = widget_for_item(item);
+                    switch (pos) {
+                    case START:
+                        this.action_bar.pack_start(widget);
+                        break;
+
+                    case CENTRE:
+                        if (centre == null) {
+                            centre = new Gtk.Box(HORIZONTAL, 0);
+                            this.action_bar.set_center_widget(centre);
+                        }
+                        centre.add(widget);
+                        break;
+
+                    case END:
+                        this.action_bar.pack_end(widget);
+                        break;
+                    }
+                }
+            }
+
+            this.action_bar.show_all();
+            this.backing.add_action_bar(this.action_bar);
+        }
+
+        private Gtk.Widget? widget_for_item(Plugin.ActionBar.Item item) {
+            var item_type = item.get_type();
+            if (item_type == typeof(Plugin.ActionBar.LabelItem)) {
+                var label = new Gtk.Label(
+                    ((Plugin.ActionBar.LabelItem) item).text
+                );
+                return label;
+            }
+            if (item_type == typeof(Plugin.ActionBar.ButtonItem)) {
+                var button_item = item as Plugin.ActionBar.ButtonItem;
+                var button = new Gtk.Button.with_label(button_item.action.label);
+                button.set_action_name(
+                    this.action_group_name + "." + button_item.action.action.name
+                );
+                if (button_item.action.action_target != null) {
+                    button.set_action_target_value(button_item.action.action_target);
+                }
+                return button;
+            }
+            if (item_type == typeof(Plugin.ActionBar.MenuItem)) {
+                var menu_item = item as Plugin.ActionBar.MenuItem;
+
+                var label = new Gtk.Box(HORIZONTAL, 6);
+                label.add(new Gtk.Label(menu_item.label));
+                label.add(new Gtk.Image.from_icon_name(
+                    "pan-up-symbolic", Gtk.IconSize.BUTTON
+                ));
+
+                var button = new Gtk.MenuButton();
+                button.direction = Gtk.ArrowType.UP;
+                button.use_popover = true;
+                button.menu_model = menu_item.menu;
+                button.add(label);
+
+                return button;
+            }
+            if (item_type == typeof(Plugin.ActionBar.GroupItem)) {
+                var group_items = item as Plugin.ActionBar.GroupItem;
+                var box = new Gtk.Box(HORIZONTAL, 0);
+                box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED);
+                foreach (var group_item in group_items.get_items()) {
+                    box.add(widget_for_item(group_item));
+                }
+                return box;
+            }
+
+            return null;
+        }
 
     }
 

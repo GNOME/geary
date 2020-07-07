@@ -114,5 +114,13 @@ public interface Plugin.Composer : Geary.BaseObject {
      */
     public abstract void append_menu_item(Actionable menu_item);
 
+    /**
+     * Sets an action bar for the plugin on this composer.
+     *
+     * If any existing action bar for this plugin has previously been
+     * set, it is first removed.
+     */
+    public abstract void set_action_bar(ActionBar action_bar);
+
 
 }

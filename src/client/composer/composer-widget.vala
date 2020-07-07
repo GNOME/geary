@@ -1116,8 +1116,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /** Adds an action bar to the composer. */
+    public void add_action_bar(Gtk.ActionBar to_add) {
+        this.action_bar_box.pack_start(to_add);
+        this.action_bar_box.reorder_child(to_add, 0);
+    }
+
     /** Overrides the draft folder as a destination for saving. */
-    internal async void set_save_to_override(Geary.Folder? save_to)
+    public async void set_save_to_override(Geary.Folder? save_to)
         throws GLib.Error {
         this.save_to = save_to;
         yield reopen_draft_manager();
