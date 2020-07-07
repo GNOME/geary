@@ -389,6 +389,13 @@
                                 <property name="accelerator">&lt;primary&gt;T</property>
                             </object>
                         </child>
+                        <child>
+                            <object class="GtkShortcutsShortcut">
+                                <property name="visible">True</property>
+                                <property name="title" translatable="yes" context="shortcut window">Detach the composer</property>
+                                <property name="accelerator">&lt;primary&gt;D</property>
+                            </object>
+                        </child>
                     </object>
                 </child>
                 <child>
