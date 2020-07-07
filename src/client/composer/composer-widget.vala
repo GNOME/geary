@@ -419,6 +419,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Label message_overlay_label;
     [GtkChild]
+    private Gtk.Box action_bar_box;
+    [GtkChild]
     private Gtk.Box attachments_box;
     [GtkChild]
     private Gtk.Box hidden_on_attachment_drag_over;
@@ -1953,8 +1955,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         wrapper_box.pack_start(new Gtk.Separator(HORIZONTAL));
 
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        box.margin_top = 6;
-        box.margin_bottom = 6;
         wrapper_box.pack_start(box);
 
         /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
@@ -1963,8 +1963,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gtk.Label label = new Gtk.Label(label_text);
         box.pack_start(label);
         label.halign = Gtk.Align.START;
-        label.margin_start = 4;
-        label.margin_end = 4;
 
         Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
         box.pack_start(remove_button, false, false);

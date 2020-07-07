@@ -191,6 +191,14 @@ grid.geary-message-summary {
   border-radius: 0px;
 }
 
+.geary-attachments-box > box > box {
+  margin: 6px;
+}
+
+.geary-attachments-box > box > box > label {
+  margin: 0px 4px;
+}
+
 /* AttachmentPane  */
 
 .geary-attachment-pane flowbox {
