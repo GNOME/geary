@@ -82,6 +82,19 @@ public interface Plugin.Composer : Geary.BaseObject {
     public abstract void present();
 
     /**
+     * Inserts text at the current cursor position.
+     *
+     * The given text is inserted at the current cursor position in
+     * the composer. Note that this may be in an address field,
+     * subject line, or message body, depending on which component is
+     * focused.
+     *
+     * If the text is inserted into the message body, any HTML markup
+     * present in the string will appear as-is.
+     */
+    public abstract void insert_text(string plain_text);
+
+    /**
      * Sets the folder used to save the message being composed.
      *
      * Ensures email for both automatic and manual saving of the email

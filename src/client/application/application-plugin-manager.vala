@@ -420,6 +420,15 @@ public class Application.PluginManager : GLib.Object {
             this.application.backing.controller.present_composer(this.backing);
         }
 
+        public void insert_text(string plain_text) {
+            var entry = this.backing.focused_input_widget as Gtk.Entry;
+            if (entry != null) {
+                entry.insert_at_cursor(plain_text);
+            } else {
+                this.backing.editor.insert_text(plain_text);
+            }
+        }
+
         public void register_action(GLib.Action action) {
             if (this.action_group == null) {
                 this.action_group = new GLib.SimpleActionGroup();
