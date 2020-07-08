@@ -287,6 +287,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /** The email body editor widget. */
+    public WebView editor { get; private set; }
+
     /** Determines if the composer can send the message. */
     public bool can_send {
         get {
@@ -344,8 +347,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** Overrides for the draft folder as save destination, if any. */
     internal Geary.Folder? save_to { get; private set; default = null; }
-
-    internal WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
 
