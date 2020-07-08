@@ -290,6 +290,15 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** The email body editor widget. */
     public WebView editor { get; private set; }
 
+    /**
+     * The last focused text input widget.
+     *
+     * This may be a Gtk.Entry if an address field or the subject was
+     * most recently focused, or the {@link editor} if the body was
+     * most recently focused.
+     */
+    public Gtk.Widget? focused_input_widget { get; private set; default = null; }
+
     /** Determines if the composer can send the message. */
     public bool can_send {
         get {
@@ -1351,6 +1360,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.visible_on_attachment_drag_over.set_size_request(-1, -1);
         }
    }
+
+    [GtkCallback]
+    private void on_set_focus_child() {
+        var window = get_toplevel() as Gtk.Window;
+        if (window != null) {
+            Gtk.Widget? last_focused = window.get_focus();
+            if (last_focused == this.editor ||
+                (last_focused is Gtk.Entry && last_focused.is_ancestor(this))) {
+                this.focused_input_widget = last_focused;
+            }
+        }
+    }
 
     [GtkCallback]
     private bool on_drag_motion() {

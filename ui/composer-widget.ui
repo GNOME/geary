@@ -9,6 +9,7 @@
     <signal name="drag-drop" handler="on_drag_drop" swapped="no"/>
     <signal name="drag-leave" handler="on_drag_leave" swapped="no"/>
     <signal name="drag-motion" handler="on_drag_motion" swapped="no"/>
+    <signal name="set-focus-child" handler="on_set_focus_child" after="yes" swapped="no"/>
     <child>
       <object class="GtkBox" id="composer_container">
         <property name="visible">True</property>
