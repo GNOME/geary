@@ -39,6 +39,7 @@ public class Plugin.MailMerge :
 
 
     private const string ACTION_EDIT = "edit-template";
+    private const string ACTION_INSERT_FIELD = "insert-field";
     private const string ACTION_MERGE = "merge-template";
     private const string ACTION_LOAD = "load-merge-data";
 
@@ -207,15 +208,29 @@ public class Plugin.MailMerge :
         csv_filter.set_filter_name(_("Comma separated values (CSV)"));
         csv_filter.add_mime_type("text/csv");
         chooser.add_filter(csv_filter);
+
+        var insert_field_action = new GLib.SimpleAction(
+            ACTION_INSERT_FIELD,
+            GLib.VariantType.STRING
+        );
+        composer.register_action(insert_field_action);
+        insert_field_action.activate.connect(
+            (param) => { insert_field(composer, (string) param); }
+        );
+
         if (chooser.run() == Gtk.ResponseType.ACCEPT) {
             try {
                 composer.set_action_bar(
-                    yield new_composer_action_bar(chooser.get_file())
+                    yield new_composer_action_bar(
+                        chooser.get_file(),
+                        composer.action_group_name
+                    )
                 );
             } catch (GLib.Error err) {
                 debug("Error loading CSV: %s", err.message);
             }
         }
+
     }
 
     private InfoBar new_template_email_info_bar(EmailIdentifier target) {
@@ -241,7 +256,8 @@ public class Plugin.MailMerge :
         return bar;
     }
 
-    private async ActionBar new_composer_action_bar(GLib.File csv_file)
+    private async ActionBar new_composer_action_bar(GLib.File csv_file,
+                                                    string action_group_name)
         throws GLib.Error {
         var info = yield csv_file.query_info_async(
             GLib.FileAttribute.STANDARD_DISPLAY_NAME,
@@ -255,13 +271,32 @@ public class Plugin.MailMerge :
         );
         var csv = yield new Util.Csv.Reader(input, this.cancellable);
         var record = yield csv.read_record();
-        debug("XXX record: %s", string.join(",", record));
+
+        var text_fields_menu = new GLib.Menu();
+        foreach (var field in record) {
+            text_fields_menu.append(
+                field,
+                GLib.Action.print_detailed_name(
+                    action_group_name + "." + ACTION_INSERT_FIELD,
+                    field
+                )
+            );
+        }
 
         var action_bar = new ActionBar();
         action_bar.append_item(
-            new ActionBar.LabelItem(info.get_display_name()), CENTRE
+            /// Translators: Action bar menu button label for
+            /// mail-merge plugin
+            new ActionBar.MenuItem(_("Insert field"), text_fields_menu), START
+        );
+        action_bar.append_item(
+            new ActionBar.LabelItem(info.get_display_name()), START
         );
         return action_bar;
+    }
+
+    private void insert_field(Composer composer, string field) {
+        composer.insert_text(FIELD_START + field + FIELD_END);
     }
 
     private bool contains_field(string value) {
