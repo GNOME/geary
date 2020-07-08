@@ -195,6 +195,8 @@ public class Plugin.MailMerge :
             );
             composer.register_action(load_action);
             composer.append_menu_item(
+                /// Translators: Menu item label for invoking mail
+                /// merge in composer
                 new Actionable(_("Mail Merge"), load_action)
             );
         }
@@ -202,9 +204,15 @@ public class Plugin.MailMerge :
 
     private async void load_composer_data(Composer composer) {
         var chooser = new Gtk.FileChooserNative(
-            _("Mail Merge"), null, OPEN, _("_Open"), _("_Cancel")
+            /// Translators: File chooser title after invoking mail
+            /// merge in composer
+            _("Mail Merge"),
+            null, OPEN,
+            _("_Open"),
+            _("_Cancel")
         );
         var csv_filter = new Gtk.FileFilter();
+        /// Translators: File chooser filer label
         csv_filter.set_filter_name(_("Comma separated values (CSV)"));
         csv_filter.add_mime_type("text/csv");
         chooser.add_filter(csv_filter);
