@@ -363,6 +363,11 @@ public class Application.PluginManager : GLib.Object {
         }
         private Plugin.Account? _sender_context = null;
 
+        public string action_group_name {
+            get { return this._action_group_name; }
+        }
+        private string _action_group_name;
+
         public Plugin.Folder? save_to  {
             get {
                 // Ugh
@@ -383,16 +388,13 @@ public class Application.PluginManager : GLib.Object {
         private GLib.SimpleActionGroup? action_group = null;
         private GLib.Menu? menu_items = null;
         private Gtk.ActionBar? action_bar = null;
-        private string action_group_name;
-
-
 
 
         public ComposerImpl(Composer.Widget backing,
                             ApplicationImpl application) {
             this.backing = backing;
             this.application = application;
-            this.action_group_name = application.plugin.action_group_name + "-cmp";
+            this._action_group_name = application.plugin.action_group_name + "-cmp";
         }
 
         public void save_to_folder(Plugin.Folder? location) {

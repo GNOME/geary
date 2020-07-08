@@ -50,6 +50,17 @@ public interface Plugin.Composer : Geary.BaseObject {
     public abstract bool can_send { get; set; }
 
     /**
+     * The group name for GLib actions registered against this object.
+     *
+     * All actions are registered via {@link register_action} will be
+     * added to an action group with the name returned by this
+     * property.
+     *
+     * This must be used when using actions with GLib MenuModel items.
+     */
+    public abstract string action_group_name { get; }
+
+    /**
      * Denotes the folder that the email will be saved to.
      *
      * If non-null, fixes the folder used by the composer for saving
