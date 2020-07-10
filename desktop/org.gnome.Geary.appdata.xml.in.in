@@ -6,7 +6,6 @@
   <id>@appid@.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
-  <update_contact>geary-list@gnome.org</update_contact>
 
   <!-- Translators: The application name -->
   <name>Geary</name>
