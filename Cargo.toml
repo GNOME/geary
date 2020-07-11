@@ -10,4 +10,7 @@ gdk = "0.13"
 gtk = { version = "0.9", features= ["v3_16"] }
 gio = "0.9"
 log = "0.4"
-gettext-rs= { version = "0.4", features = ["gettext-system"] }
+gettext-rs = { version = "0.4", features = ["gettext-system"] }
+libhandy = { git = "https://gitlab.gnome.org/World/Rust/libhandy-rs.git" }
+pretty_env_logger = "0.4"
+anyhow = "1.0"

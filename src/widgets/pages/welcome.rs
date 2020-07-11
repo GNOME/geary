@@ -1,5 +1,6 @@
 use gettextrs::gettext;
 use gtk::prelude::*;
+use libhandy::prelude::HeaderBarExt;
 
 pub struct WelcomePageWidget {
     pub widget: gtk::Box,
@@ -16,10 +17,14 @@ impl WelcomePageWidget {
     }
 
     fn init(&self) {
-        self.widget.set_valign(gtk::Align::Center);
-        self.widget.set_halign(gtk::Align::Center);
-        self.widget.set_margin_top(24);
-        self.widget.set_margin_bottom(24);
+        self.widget.set_property_expand(true);
+
+        let container = gtk::Box::new(gtk::Orientation::Vertical, 0);
+        container.set_property_expand(true);
+        container.set_valign(gtk::Align::Center);
+        container.set_halign(gtk::Align::Center);
+        container.set_margin_top(24);
+        container.set_margin_bottom(24);
 
         let name = glib::get_os_info("NAME").unwrap_or("GNOME".into());
         let version = glib::get_os_info("VERSION").unwrap_or("3.36".into());
@@ -27,17 +32,17 @@ impl WelcomePageWidget {
 
         let logo = gtk::Image::from_icon_name(Some(&icon), gtk::IconSize::Dialog);
         logo.set_pixel_size(196);
-        self.widget.add(&logo);
+        container.add(&logo);
 
         let title = gtk::Label::new(Some(&gettext(format!("Welcome to {} {}", name, version))));
         title.set_margin_top(36);
         title.get_style_context().add_class("large-title");
-        self.widget.add(&title);
+        container.add(&title);
 
         let text = gtk::Label::new(Some(&gettext("Hi there! If you are new to GNOME, you can take the tour to learn some essential features.")));
         text.get_style_context().add_class("body");
         text.set_margin_top(12);
-        self.widget.add(&text);
+        container.add(&text);
 
         let actions_container = gtk::Box::new(gtk::Orientation::Horizontal, 12);
         actions_container.set_halign(gtk::Align::Center);
@@ -60,6 +65,13 @@ impl WelcomePageWidget {
         actions_container.add(&start_tour_btn);
         actions_container.set_focus_child(Some(&start_tour_btn));
 
-        self.widget.add(&actions_container);
+        container.add(&actions_container);
+
+        let headerbar = libhandy::HeaderBar::new();
+        headerbar.set_show_close_button(true);
+        headerbar.set_title(Some(&gettext("Welcome Tour")));
+
+        self.widget.add(&headerbar);
+        self.widget.add(&container);
     }
 }

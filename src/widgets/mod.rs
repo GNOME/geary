@@ -1,4 +1,3 @@
-mod headerbar;
 mod pages;
 mod paginator;
 mod window;

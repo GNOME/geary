@@ -58,7 +58,9 @@ impl Application {
             "next-page",
             clone!(@strong application => move |_, _| {
                 if let Some(window) = &*application.window.borrow().clone() {
-                    window.next_page();
+                    if window.paginator.borrow_mut().next().is_err() {
+                        window.widget.close();
+                    }
                 }
             }),
         );
@@ -67,7 +69,9 @@ impl Application {
             "previous-page",
             clone!(@strong application => move |_, _| {
                 if let Some(window) = &*application.window.borrow().clone() {
-                    window.previous_page();
+                    if window.paginator.borrow_mut().previous().is_err() {
+                        window.stop_tour();
+                    }
                 }
             }),
         );
