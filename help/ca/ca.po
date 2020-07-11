@@ -244,7 +244,7 @@ msgstr ""
 "Per a moure converses a la carpeta <gui>Paperera</gui>, seleccioneu-les i feu "
 "clic al botó de la barra d'eines <gui style=\"button\">Paperera</gui>. Per a "
 "esborrar les converses definitivament, mantingueu premuda la tecla "
-"<key>Majúscules</key> i feu clic al botó <gui "
+"<key>Maj</key> i feu clic al botó <gui "
 "style=\"button\">Suprimeix</gui> que apareix en el lloc del botó "
 "<gui>Paperera</gui>, o obriu la conversa a la carpeta <gui>Paperera</gui> i "
 "feu clic a <gui style=\"button\">Suprimeix</gui>."
@@ -916,7 +916,7 @@ msgstr ""
 #. (itstool) path: section/title
 #: C/search.page:23
 msgid "Search operators"
-msgstr "Cerca operadors"
+msgstr "Operadors de cerca"
 
 #. (itstool) path: section/p
 #: C/search.page:24

@@ -203,7 +203,7 @@ msgstr "Mostra o amaga la barra de format"
 
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "True if the formatting toolbar in the composer is shown."
-msgstr "Cert si es mostra la barra d'eines de formatació a l'editor"
+msgstr "Cert si es mostra la barra d'eines de formatació a l'editor."
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Position of message list pane"
@@ -241,7 +241,7 @@ msgid ""
 "emulate those used by Gmail."
 msgstr ""
 "Habilita les dreceres per a les accions de correu electrònic que no "
-"requereixen prémer <Ctrl> per emular les utilitzades per Gmail."
+"requereixen prémer <Ctrl> per a emular les utilitzades per Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Languages that shall be used in the spell checker"
@@ -254,7 +254,6 @@ msgid ""
 msgstr ""
 "Una llista de locales POSIX, amb la llista buida desactivant la verificació "
 "ortogràfica i la llista nul·la utilitzant llengües d'escriptori per defecte."
-" "
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Languages that are displayed in the spell checker popover"
@@ -275,7 +274,7 @@ msgstr "Notifica'm el correu nou a l'inici"
 
 #: desktop/org.gnome.Geary.gschema.xml:97
 msgid "True to notify of new mail at startup."
-msgstr "Cert per notificar l'arribada d'un correu nou a l'inici."
+msgstr "Cert per a notificar l'arribada d'un correu nou a l'inici."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Ask when opening an attachment"
@@ -283,7 +282,7 @@ msgstr "Pregunteu quan obriu un fitxer adjunt"
 
 #: desktop/org.gnome.Geary.gschema.xml:103
 msgid "True to ask when opening an attachment."
-msgstr "Cert per preguntar quan s'obri un fitxer adjunt."
+msgstr "Cert per a preguntar quan s'obri un fitxer adjunt."
 
 #: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Whether to compose emails in HTML"
@@ -311,7 +310,7 @@ msgstr "Amplia/redueix el visor de la conversa"
 #: desktop/org.gnome.Geary.gschema.xml:121
 msgid "The zoom to apply on the conservation view."
 msgstr ""
-"L'amplificació/reducció per a aplicar a la visualitació de la conversa."
+"L'amplificació/reducció per a aplicar a la visualització de la conversa."
 
 #: desktop/org.gnome.Geary.gschema.xml:126
 msgid "Size of detached composer window"
@@ -331,7 +330,7 @@ msgid ""
 "to disable."
 msgstr ""
 "El nombre de segons a esperar abans d'enviar un correu electrònic. Establiu-"
-"ho a zero o menys per a inhabilitar-ho. "
+"ho a zero o menys per a inhabilitar-ho."
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
@@ -342,7 +341,7 @@ msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
-"El temps en segons durant el qual s'han de mostrar les notificacions breus. "
+"El temps en segons durant el qual s'han de mostrar les notificacions breus."
 
 #: desktop/org.gnome.Geary.gschema.xml:146
 msgid "List of optional plugins"
@@ -961,7 +960,7 @@ msgstr "Nom de la distribució"
 #. / Application runtime information label
 #: src/client/application/application-client.vala:323
 msgid "Distribution release"
-msgstr "Versió de la distribució "
+msgstr "Versió de la distribució"
 
 #. / Application runtime information label
 #: src/client/application/application-client.vala:331
@@ -988,7 +987,7 @@ msgstr ""
 #. / command line option is used.
 #: src/client/application/application-client.vala:1049
 msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "L'opció `-hidden` està en desús i s'eliminarà en el futur. "
+msgstr "L'opció `-hidden` està en desús i s'eliminarà en el futur."
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1067,7 +1066,7 @@ msgstr[1] "S'han restaurat els missatges a %s"
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "S'ha arxivat el missatge"
-msgstr[1] "S'han arxivat el missatges"
+msgstr[1] "S'han arxivat els missatges"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1172,7 +1171,7 @@ msgstr "Corre a %s desat"
 #: src/client/application/application-controller.vala:2527
 #: src/client/application/application-controller.vala:2585
 msgid "Composer could not be restored"
-msgstr "No s'ha pogut restaurar l'editor "
+msgstr "No s'ha pogut restaurar l'editor"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
@@ -1343,7 +1342,7 @@ msgstr "Sistema"
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
 #: ui/problem-details-dialog.ui:42
 msgid "Save As"
-msgstr "Desa i anomena..."
+msgstr "Desa i anomena"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:225
@@ -1377,7 +1376,7 @@ msgid ""
 "<Ctrl>"
 msgstr ""
 "Habilita les dreceres de teclat per a les accions de correu electrònic que "
-"no requereixen prémer <Ctrl> "
+"no requereixen prémer <Ctrl>"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:95
@@ -2746,7 +2745,7 @@ msgstr "No s'ha pogut determinar el tipus mime per a «%s»."
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "No s'ha pogut determinar el tipus de contingut per al tipus MIME «%s» a "
-"«%s». "
+"«%s»."
 
 #: src/engine/rfc822/rfc822-message.vala:1001
 msgid "(no subject)"
@@ -3206,7 +3205,7 @@ msgstr "Però ha estat falsificada com a:"
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:344
 msgid "The sender may not be trustworthy"
-msgstr "El remitent pot ser no és de confiança"
+msgstr "El remitent potser no és de confiança"
 
 #: ui/conversation-email.ui:27
 msgid "Save all attachments"
@@ -3551,7 +3550,7 @@ msgstr "Respon al remitent "
 #: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
-msgstr "Selecciona la la conversa següent o anterior"
+msgstr "Selecciona la conversa següent o anterior"
 
 #: ui/gtk/help-overlay.ui:373
 msgid "Composer Shortcuts"
