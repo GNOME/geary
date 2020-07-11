@@ -5,6 +5,3 @@ pub static NAME_SUFFIX: &str = @NAME_SUFFIX@;
 pub static VERSION: &str = @VERSION@;
 pub static GETTEXT_PACKAGE: &str = @GETTEXT_PACKAGE@;
 pub static LOCALEDIR: &str = @LOCALEDIR@;
-pub static DISTRO_NAME: &str = @DISTRO_NAME@;
-pub static DISTRO_VERSION: &str = @DISTRO_VERSION@;
-pub static DISTRO_ICON_NAME: &str = @DISTRO_ICON_NAME@;

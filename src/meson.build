@@ -6,9 +6,6 @@ global_conf.set_quoted('NAME_SUFFIX', name_suffix)
 global_conf.set_quoted('VERSION', version + version_suffix)
 global_conf.set_quoted('GETTEXT_PACKAGE', gettext_package)
 global_conf.set_quoted('LOCALEDIR', localedir)
-global_conf.set_quoted('DISTRO_NAME', get_option('distro_name'))
-global_conf.set_quoted('DISTRO_VERSION', get_option('distro_version'))
-global_conf.set_quoted('DISTRO_ICON_NAME', get_option('distro_icon_name'))
 config = configure_file(
   input: 'config.rs.in',
   output: 'config.rs',

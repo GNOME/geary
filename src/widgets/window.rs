@@ -50,7 +50,7 @@ impl Window {
         self.headerbar.set_page_nr(current_page + 1, total_pages);
 
         if current_page == total_pages {
-            self.widget.destroy();
+            self.widget.close();
         } else {
             self.paginator.next();
         }

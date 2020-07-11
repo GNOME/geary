@@ -1,4 +1,3 @@
-use crate::config;
 use gettextrs::gettext;
 use gtk::prelude::*;
 
@@ -22,11 +21,15 @@ impl WelcomePageWidget {
         self.widget.set_margin_top(24);
         self.widget.set_margin_bottom(24);
 
-        let logo = gtk::Image::new_from_icon_name(Some(config::DISTRO_ICON_NAME), gtk::IconSize::Dialog);
+        let name = glib::get_os_info("NAME").unwrap_or("GNOME".into());
+        let version = glib::get_os_info("VERSION").unwrap_or("3.36".into());
+        let icon = glib::get_os_info("LOGO").unwrap_or("start-here-symbolic".into());
+
+        let logo = gtk::Image::from_icon_name(Some(&icon), gtk::IconSize::Dialog);
         logo.set_pixel_size(196);
         self.widget.add(&logo);
 
-        let title = gtk::Label::new(Some(&gettext(format!("Welcome to {} {}", config::DISTRO_NAME, config::DISTRO_VERSION))));
+        let title = gtk::Label::new(Some(&gettext(format!("Welcome to {} {}", name, version))));
         title.set_margin_top(36);
         title.get_style_context().add_class("large-title");
         self.widget.add(&title);

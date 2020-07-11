@@ -10,7 +10,6 @@
     "tags" : [
         "nightly"
     ],
-    "desktop-file-name-suffix" : " (Devel)",
     "finish-args" : [
         "--share=ipc",
         "--socket=fallback-x11",
@@ -23,7 +22,6 @@
             "--share=network"
         ],
         "env" : {
-            "RUSTFLAGS" : "--remap-path-prefix =../",
             "CARGO_HOME" : "/run/build/gnome-tour/cargo",
             "RUST_BACKTRACE" : "1"
         }
@@ -38,7 +36,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://gitlab.gnome.org/bilelmoussaoui/gnome-tour.git"
+                    "url" : "https://gitlab.gnome.org/GNOME/gnome-tour.git"
                 }
             ]
         }
