@@ -44,6 +44,7 @@ impl ImagePageWidget {
     }
 
     fn init(&self) {
+        self.widget.set_property_expand(true);
         self.widget.set_halign(gtk::Align::Fill);
         self.widget.set_valign(gtk::Align::Fill);
 
