@@ -1,5 +1,4 @@
 data/org.gnome.Tour.metainfo.xml.in.in
 data/org.gnome.Tour.desktop.in.in
 src/widgets/pages/welcome.rs
-src/widgets/headerbar.rs
 src/widgets/window.rs
