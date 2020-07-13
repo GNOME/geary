@@ -73,13 +73,12 @@ impl PaginatorWidget {
 
             p.close_btn.set_opacity(opacity);
             p.close_btn.set_visible(opacity > 0_f64);
-        }));
 
-        self.carousel.connect_page_changed(clone!(@weak p => move |_carousel, page_nr| {
+            let page_nr = position.round() as u32;
             let pages = &p.pages.borrow();
             let page = pages.get(page_nr as usize).unwrap();
-            p.headerbar.set_title(Some(&page.get_title()));
 
+            p.headerbar.set_title(Some(&page.get_title()));
             p.current_page.replace(page_nr);
         }));
 
