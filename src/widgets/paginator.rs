@@ -14,6 +14,7 @@ pub struct PaginatorWidget {
     pages: RefCell<Vec<Box<dyn Pageable>>>,
     current_page: RefCell<u32>,
     next_btn: gtk::Button,
+    close_btn: gtk::Button,
 }
 
 impl PaginatorWidget {
@@ -25,6 +26,7 @@ impl PaginatorWidget {
             carousel: libhandy::Carousel::new(),
             headerbar: libhandy::HeaderBar::new(),
             next_btn: gtk::Button::new(),
+            close_btn: gtk::Button::new(),
             pages: RefCell::new(Vec::new()),
             current_page: RefCell::new(0),
         });
@@ -60,35 +62,46 @@ impl PaginatorWidget {
         self.carousel.set_property_expand(true);
         self.carousel.set_animation_duration(300);
 
-        self.carousel.connect_page_changed(clone!(@weak p => move |carousel, page_nr| {
+        self.carousel.connect_property_position_notify(clone!(@weak p => move |carousel| {
+            let n_pages = carousel.get_n_pages() as f64;
+            let position = carousel.get_position();
+            let opacity = (position - n_pages + 2_f64).max(0_f64);
+
+            p.close_btn.set_opacity(opacity);
+            p.close_btn.set_visible(opacity > 0_f64);
+        }));
+
+        self.carousel.connect_page_changed(clone!(@weak p => move |_carousel, page_nr| {
             let pages = &p.pages.borrow();
             let page = pages.get(page_nr as usize).unwrap();
             p.headerbar.set_title(Some(&page.get_title()));
 
-            if page_nr == carousel.get_n_pages() - 1 {
-                p.next_btn.set_label(&gettext("Close"));
-            } else {
-                p.next_btn.set_label(&gettext("Next"));
-            }
             p.current_page.replace(page_nr);
         }));
 
         let previous_btn = gtk::Button::new();
         previous_btn.add(&gtk::Label::new(Some("Previous")));
-        previous_btn.set_halign(gtk::Align::Start);
         previous_btn.set_action_name(Some("app.previous-page"));
-        previous_btn.set_hexpand(true);
-        previous_btn.set_property_width_request(60);
+
+        let btn_size_group = gtk::SizeGroup::new(gtk::SizeGroupMode::Horizontal);
+        btn_size_group.add_widget(&previous_btn);
+        btn_size_group.add_widget(&self.next_btn);
+        btn_size_group.add_widget(&self.close_btn);
 
         self.next_btn.add(&gtk::Label::new(Some(&gettext("Next"))));
         self.next_btn.get_style_context().add_class("suggested-action");
         self.next_btn.set_action_name(Some("app.next-page"));
-        self.next_btn.set_halign(gtk::Align::End);
-        self.next_btn.set_hexpand(true);
-        self.next_btn.set_property_width_request(60);
+
+        self.close_btn.add(&gtk::Label::new(Some(&gettext("Close"))));
+        self.close_btn.get_style_context().add_class("suggested-action");
+        self.close_btn.set_action_name(Some("app.next-page"));
+
+        let next_overlay = gtk::Overlay::new();
+        next_overlay.add(&self.next_btn);
+        next_overlay.add_overlay(&self.close_btn);
 
         self.headerbar.pack_start(&previous_btn);
-        self.headerbar.pack_end(&self.next_btn);
+        self.headerbar.pack_end(&next_overlay);
         self.headerbar.set_show_close_button(false);
 
         self.widget.add(&self.headerbar);
