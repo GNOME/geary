@@ -80,6 +80,7 @@ impl Application {
 
     fn setup_signals(&self, app: Rc<Self>) {
         self.app.connect_startup(clone!(@weak app => move |_| {
+            libhandy::init();
             app.setup_css();
             app.setup_gactions(app.clone());
         }));
