@@ -1,0 +1,161 @@
+# Romanian translation for gnome-tour.
+# Copyright (C) 2020 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Florentina Mușat <florentina.musat.28@gmail.com>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
+"POT-Creation-Date: 2020-07-12 11:11+0000\n"
+"PO-Revision-Date: 2020-07-13 13:18+0300\n"
+"Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 "
+"< 20)) ? 1 : 2);;\n"
+"Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
+"X-Generator: Poedit 2.3.1\n"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:7
+msgid "GNOME Tour"
+msgstr "Tur GNOME"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter."
+msgstr "Tur și persoană care salută GNOME."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "Un tur ghidat și o persoană care salută pentru GNOME."
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:15
+msgid "Main Window"
+msgstr "Fereastra principală"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:34
+msgid "The GNOME Project"
+msgstr "Proiectul GNOME"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Tour"
+msgstr "Tur"
+
+#: data/org.gnome.Tour.desktop.in.in:4
+msgid "Greeter & Tour"
+msgstr "Persoană care salută și tur"
+
+#: data/org.gnome.Tour.desktop.in.in:9
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: src/widgets/pages/welcome.rs:42
+msgid ""
+"Hi there! If you are new to GNOME, you can take the tour to learn some "
+"essential features."
+msgstr ""
+"Bună! Dacă sunteți nou la GNOME, puteți să luați turul pentru a învăța "
+"niște funcționalități esențiale."
+
+#: src/widgets/pages/welcome.rs:52
+msgid "Take the Tour"
+msgstr "Ia turul"
+
+#: src/widgets/pages/welcome.rs:59
+msgid "No Thanks"
+msgstr "Nu mulțumesc"
+
+#: src/widgets/pages/welcome.rs:72
+msgid "Welcome Tour"
+msgstr "Tur de bun venit"
+
+#: src/widgets/window.rs:61
+msgid "Activities Overview"
+msgstr "Prezentare generală a activităților"
+
+#: src/widgets/window.rs:62
+msgid "Open Activities to start apps"
+msgstr "Deschide Activități pentru a porni aplicații"
+
+#: src/widgets/window.rs:63
+msgid "You can also view open windows, search and use workspaces."
+msgstr ""
+"Puteți, de asemenea, să vizualizați ferestrele deschise, să căutați și să "
+"utilizați spațiile de lucru."
+
+#: src/widgets/window.rs:68
+msgid "Search"
+msgstr "Caută"
+
+#: src/widgets/window.rs:69
+msgid "In the Activities Overview, just start typing to search"
+msgstr ""
+"În prezentarea generală a activităților, doar începeți să tastați pentru a "
+"căuta"
+
+#: src/widgets/window.rs:70
+msgid ""
+"Search can be used to launch apps, find settings, do calculations and much "
+"more."
+msgstr ""
+"Căutarea poate fi utilizată pentru a lansa aplicații, căuta configurări, "
+"face calcule și mult mai multe."
+
+#: src/widgets/window.rs:75
+msgid "Date & Time"
+msgstr "Data și ora"
+
+#: src/widgets/window.rs:76
+msgid "Click the time to see your now and next"
+msgstr "Apăsați clic pe oră pentru a vedea prezentul și următorul"
+
+#: src/widgets/window.rs:77
+msgid ""
+"This includes notifications, media controls, calendar events, the weather "
+"and world clocks."
+msgstr ""
+"Acest lucru include înștiințări, controale media, evenimente de calendar, "
+"vremea și ceasurile globale."
+
+#: src/widgets/window.rs:82
+msgid "System Menu"
+msgstr "Meniul de sistem"
+
+#: src/widgets/window.rs:83
+msgid "View system information and settings"
+msgstr "Vizualizează informațiile de sistem și configurările"
+
+#: src/widgets/window.rs:84
+msgid "Get an overview of the system status and quickly change settings."
+msgstr ""
+"Obține o prezentare generală a stării sistemului și schimbă configurările "
+"rapid."
+
+#: src/widgets/window.rs:88
+msgid "Software"
+msgstr "Software"
+
+#: src/widgets/window.rs:89
+msgid "Find and install apps"
+msgstr "Caută și instalează aplicații"
+
+#: src/widgets/window.rs:90
+msgid ""
+"The Software app makes it easy to find and install all the apps you need."
+msgstr ""
+"Aplicația Software face mai ușor să găsiți și să instalați aplicațiile de "
+"care aveți nevoie."
+
+#: src/widgets/window.rs:95
+msgid "Learn More"
+msgstr "Învață mai multe"
+
+#: src/widgets/window.rs:96
+msgid "That's it! To learn more, see the Help"
+msgstr "Asta e tot! Pentru a învăța mai multe, consultați Ajutorul"
+
+#: src/widgets/window.rs:97
+msgid "The help app contains information, tips and tricks."
+msgstr "Aplicația ajutor conține informații, chichițe și șmecherii."
