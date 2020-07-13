@@ -4,14 +4,12 @@ use libhandy::prelude::HeaderBarExt;
 
 pub struct WelcomePageWidget {
     pub widget: gtk::Box,
-    handle: libhandy::WindowHandle,
 }
 
 impl WelcomePageWidget {
     pub fn new() -> Self {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
-        let handle = libhandy::WindowHandle::new();
-        let welcome_page = Self { widget, handle };
+        let welcome_page = Self { widget };
 
         welcome_page.init();
         welcome_page
@@ -72,9 +70,7 @@ impl WelcomePageWidget {
         headerbar.set_show_close_button(true);
         headerbar.set_title(Some(&gettext("Welcome Tour")));
 
-        self.handle.add(&headerbar);
-
-        self.widget.add(&self.handle);
+        self.widget.add(&headerbar);
         self.widget.add(&container);
     }
 }

@@ -48,6 +48,8 @@ impl Window {
         self.widget.set_default_size(920, 640);
         self.deck.set_transition_type(libhandy::DeckTransitionType::Slide);
         self.deck.set_transition_duration(300);
+        self.deck.set_can_swipe_back(true);
+        self.deck.set_can_swipe_forward(true);
 
         // Devel Profile
         if PROFILE == "Devel" {
@@ -56,7 +58,7 @@ impl Window {
 
         self.deck.add(&self.welcome_page.widget);
 
-        self.paginator.borrow().add_page(Box::new(ImagePageWidget::new(
+        self.paginator.borrow_mut().add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/activities.svg",
             gettext("Activities Overview"),
             gettext("Open Activities to start apps"),
