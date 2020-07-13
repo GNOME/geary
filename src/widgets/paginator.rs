@@ -56,26 +56,32 @@ impl PaginatorWidget {
         let page_nr = self.pages.borrow().len();
         self.carousel.insert(&page.get_widget(), page_nr as i32);
         self.pages.borrow_mut().push(page);
+
+        self.update_position();
+    }
+
+    fn update_position(&self) {
+        let n_pages = self.carousel.get_n_pages() as f64;
+        let position = self.carousel.get_position();
+        let opacity = (position - n_pages + 2_f64).max(0_f64);
+
+        self.close_btn.set_opacity(opacity);
+        self.close_btn.set_visible(opacity > 0_f64);
+
+        let page_nr = position.round() as u32;
+        let pages = &self.pages.borrow();
+        let page = pages.get(page_nr as usize).unwrap();
+
+        self.headerbar.set_title(Some(&page.get_title()));
+        self.current_page.replace(page_nr);
     }
 
     fn init(&self, p: Rc<Self>) {
         self.carousel.set_property_expand(true);
         self.carousel.set_animation_duration(300);
 
-        self.carousel.connect_property_position_notify(clone!(@weak p => move |carousel| {
-            let n_pages = carousel.get_n_pages() as f64;
-            let position = carousel.get_position();
-            let opacity = (position - n_pages + 2_f64).max(0_f64);
-
-            p.close_btn.set_opacity(opacity);
-            p.close_btn.set_visible(opacity > 0_f64);
-
-            let page_nr = position.round() as u32;
-            let pages = &p.pages.borrow();
-            let page = pages.get(page_nr as usize).unwrap();
-
-            p.headerbar.set_title(Some(&page.get_title()));
-            p.current_page.replace(page_nr);
+        self.carousel.connect_property_position_notify(clone!(@weak p => move |_| {
+            p.update_position();
         }));
 
         let previous_btn = gtk::Button::with_label(&gettext("_Previous"));
