@@ -48,17 +48,17 @@ impl WelcomePageWidget {
         actions_container.set_halign(gtk::Align::Center);
         actions_container.set_margin_top(36);
 
-        let start_tour_btn = gtk::Button::new();
-        start_tour_btn.add(&gtk::Label::new(Some(&gettext("Take the Tour"))));
+        let start_tour_btn = gtk::Button::with_label(&gettext("_Take the Tour"));
         start_tour_btn.get_style_context().add_class("suggested-action");
         start_tour_btn.set_property_height_request(40);
         start_tour_btn.set_property_width_request(180);
+        start_tour_btn.set_use_underline(true);
         start_tour_btn.set_action_name(Some("app.start-tour"));
 
-        let skip_tour_btn = gtk::Button::new();
-        skip_tour_btn.add(&gtk::Label::new(Some(&gettext("No Thanks"))));
+        let skip_tour_btn = gtk::Button::with_label(&gettext("_No Thanks"));
         skip_tour_btn.set_property_height_request(40);
         skip_tour_btn.set_property_width_request(180);
+        skip_tour_btn.set_use_underline(true);
         skip_tour_btn.set_action_name(Some("app.skip-tour"));
 
         actions_container.add(&skip_tour_btn);
