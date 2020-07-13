@@ -70,7 +70,7 @@ impl Application {
             clone!(@strong application => move |_, _| {
                 if let Some(window) = &*application.window.borrow().clone() {
                     if window.paginator.borrow_mut().previous().is_err() {
-                        window.stop_tour();
+                        window.reset_tour();
                     }
                 }
             }),
@@ -88,7 +88,7 @@ impl Application {
            let window = Window::new(&gtk_app);
             gtk_app.add_window(&window.widget);
             window.widget.present();
-            window.widget.show_all();
+            window.widget.show();
             app.window.replace(Rc::new(Some(window)));
         }));
     }

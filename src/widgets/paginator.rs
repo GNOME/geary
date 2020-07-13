@@ -15,6 +15,7 @@ pub struct PaginatorWidget {
     current_page: RefCell<u32>,
     next_btn: gtk::Button,
     close_btn: gtk::Button,
+    previous_btn: gtk::Button,
 }
 
 impl PaginatorWidget {
@@ -27,6 +28,7 @@ impl PaginatorWidget {
             headerbar: libhandy::HeaderBar::new(),
             next_btn: gtk::Button::with_label(&gettext("_Next")),
             close_btn: gtk::Button::with_label(&gettext("_Close")),
+            previous_btn: gtk::Button::with_label(&gettext("_Previous")),
             pages: RefCell::new(Vec::new()),
             current_page: RefCell::new(0),
         });
@@ -63,15 +65,23 @@ impl PaginatorWidget {
     fn update_position(&self) {
         let n_pages = self.carousel.get_n_pages() as f64;
         let position = self.carousel.get_position();
-        let opacity = (position - n_pages + 2_f64).max(0_f64);
-
-        self.close_btn.set_opacity(opacity);
-        self.close_btn.set_visible(opacity > 0_f64);
-
         let page_nr = position.round() as u32;
+
+        let opacity_close = (position - n_pages + 2_f64).max(0_f64);
+        let opacity_previous = if position <= 1_f64 { position } else { 1_f64 };
+        let opacity_next = if position <= 1_f64 && position <= n_pages { position % n_pages } else { 1_f64 };
+
+        self.close_btn.set_opacity(opacity_close);
+        self.close_btn.set_visible(opacity_close > 0_f64);
+
+        self.previous_btn.set_opacity(opacity_previous);
+        self.previous_btn.set_visible(opacity_previous > 0_f64);
+
+        self.next_btn.set_opacity(opacity_next);
+        self.next_btn.set_visible(opacity_next > 0_f64);
+
         let pages = &self.pages.borrow();
         let page = pages.get(page_nr as usize).unwrap();
-
         self.headerbar.set_title(Some(&page.get_title()));
         self.current_page.replace(page_nr);
     }
@@ -79,17 +89,14 @@ impl PaginatorWidget {
     fn init(&self, p: Rc<Self>) {
         self.carousel.set_property_expand(true);
         self.carousel.set_animation_duration(300);
+        self.carousel.show();
 
         self.carousel.connect_property_position_notify(clone!(@weak p => move |_| {
             p.update_position();
         }));
 
-        let previous_btn = gtk::Button::with_label(&gettext("_Previous"));
-        previous_btn.set_use_underline(true);
-        previous_btn.set_action_name(Some("app.previous-page"));
-
         let btn_size_group = gtk::SizeGroup::new(gtk::SizeGroupMode::Horizontal);
-        btn_size_group.add_widget(&previous_btn);
+        btn_size_group.add_widget(&self.previous_btn);
         btn_size_group.add_widget(&self.next_btn);
         btn_size_group.add_widget(&self.close_btn);
 
@@ -101,16 +108,22 @@ impl PaginatorWidget {
         self.close_btn.set_use_underline(true);
         self.close_btn.set_action_name(Some("app.next-page"));
 
+        self.previous_btn.set_use_underline(true);
+        self.previous_btn.set_action_name(Some("app.previous-page"));
+
         let next_overlay = gtk::Overlay::new();
         next_overlay.add(&self.next_btn);
         next_overlay.add_overlay(&self.close_btn);
+        next_overlay.show();
 
-        self.headerbar.pack_start(&previous_btn);
+        self.headerbar.pack_start(&self.previous_btn);
         self.headerbar.pack_end(&next_overlay);
         self.headerbar.set_show_close_button(false);
+        self.headerbar.show();
 
         self.widget.add(&self.headerbar);
         self.widget.add(&self.carousel);
+        self.widget.show();
     }
 
     pub fn set_page(&self, page_nr: u32) {

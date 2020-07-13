@@ -6,13 +6,10 @@ use std::rc::Rc;
 use super::pages::{ImagePageWidget, WelcomePageWidget};
 use super::paginator::PaginatorWidget;
 use crate::config::PROFILE;
-use libhandy::prelude::DeckExt;
 
 pub struct Window {
     pub widget: libhandy::ApplicationWindow,
-    deck: libhandy::Deck,
     pub paginator: RefCell<Rc<PaginatorWidget>>,
-    welcome_page: WelcomePageWidget,
 }
 
 impl Window {
@@ -20,43 +17,31 @@ impl Window {
         let widget = libhandy::ApplicationWindow::new();
         widget.set_application(Some(app));
 
-        let deck = libhandy::Deck::new();
         let paginator = RefCell::new(PaginatorWidget::new());
 
-        let mut window_widget = Window {
-            widget,
-            deck,
-            welcome_page: WelcomePageWidget::new(),
-            paginator,
-        };
+        let mut window_widget = Window { widget, paginator };
 
         window_widget.init();
         window_widget
     }
 
     pub fn start_tour(&self) {
-        self.deck.set_visible_child(&self.paginator.borrow().widget);
-        self.paginator.borrow_mut().set_page(0);
+        self.paginator.borrow_mut().set_page(1);
     }
 
-    pub fn stop_tour(&self) {
+    pub fn reset_tour(&self) {
         self.paginator.borrow_mut().set_page(0);
-        self.deck.set_visible_child(&self.welcome_page.widget);
     }
 
     fn init(&mut self) {
         self.widget.set_default_size(920, 640);
-        self.deck.set_transition_type(libhandy::DeckTransitionType::Slide);
-        self.deck.set_transition_duration(300);
-        self.deck.set_can_swipe_back(true);
-        self.deck.set_can_swipe_forward(true);
 
         // Devel Profile
         if PROFILE == "Devel" {
             self.widget.get_style_context().add_class("devel");
         }
 
-        self.deck.add(&self.welcome_page.widget);
+        self.paginator.borrow_mut().add_page(Box::new(WelcomePageWidget::new()));
 
         self.paginator.borrow_mut().add_page(Box::new(ImagePageWidget::new(
             "/org/gnome/Tour/activities.svg",
@@ -101,7 +86,6 @@ impl Window {
         last_page.widget.get_style_context().add_class("last-page");
         self.paginator.borrow_mut().add_page(Box::new(last_page));
 
-        self.deck.add(&self.paginator.borrow().widget);
-        self.widget.add(&self.deck);
+        self.widget.add(&self.paginator.borrow().widget);
     }
 }
