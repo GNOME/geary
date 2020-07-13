@@ -28,8 +28,8 @@ impl PaginatorWidget {
             carousel: libhandy::Carousel::new(),
             headerbar: libhandy::HeaderBar::new(),
             btn_size_group: gtk::SizeGroup::new(gtk::SizeGroupMode::Horizontal),
-            next_btn: gtk::Button::new(),
-            close_btn: gtk::Button::new(),
+            next_btn: gtk::Button::with_label(&gettext("_Next")),
+            close_btn: gtk::Button::with_label(&gettext("_Close")),
             next_overlay: gtk::Overlay::new(),
             pages: RefCell::new(Vec::new()),
             current_page: RefCell::new(0),
@@ -82,20 +82,20 @@ impl PaginatorWidget {
             p.current_page.replace(page_nr);
         }));
 
-        let previous_btn = gtk::Button::new();
-        previous_btn.add(&gtk::Label::new(Some("Previous")));
+        let previous_btn = gtk::Button::with_label(&gettext("_Previous"));
+        previous_btn.set_use_underline(true);
         previous_btn.set_action_name(Some("app.previous-page"));
 
         self.btn_size_group.add_widget(&previous_btn);
         self.btn_size_group.add_widget(&self.next_btn);
         self.btn_size_group.add_widget(&self.close_btn);
 
-        self.next_btn.add(&gtk::Label::new(Some(&gettext("Next"))));
         self.next_btn.get_style_context().add_class("suggested-action");
+        self.next_btn.set_use_underline(true);
         self.next_btn.set_action_name(Some("app.next-page"));
 
-        self.close_btn.add(&gtk::Label::new(Some(&gettext("Close"))));
         self.close_btn.get_style_context().add_class("suggested-action");
+        self.close_btn.set_use_underline(true);
         self.close_btn.set_action_name(Some("app.next-page"));
 
         self.next_overlay.add(&self.next_btn);
