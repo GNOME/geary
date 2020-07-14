@@ -106,7 +106,7 @@ impl PaginatorWidget {
 
         self.close_btn.get_style_context().add_class("suggested-action");
         self.close_btn.set_use_underline(true);
-        self.close_btn.set_action_name(Some("app.next-page"));
+        self.close_btn.set_action_name(Some("app.quit"));
 
         self.previous_btn.set_use_underline(true);
         self.previous_btn.set_action_name(Some("app.previous-page"));
