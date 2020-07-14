@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-tour master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues\n"
-"POT-Creation-Date: 2020-03-16 03:31+0000\n"
-"PO-Revision-Date: 2020-04-01 22:13+0300\n"
+"POT-Creation-Date: 2020-07-13 22:47+0000\n"
+"PO-Revision-Date: 2020-07-14 13:35+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -51,118 +51,119 @@ msgstr "Тур і вітання"
 msgid "Gnome;GTK;"
 msgstr "Gnome;GTK;гноме;гном;жтека;гтк;"
 
-#: src/widgets/pages/welcome.rs:34
+#: src/widgets/pages/welcome.rs:42
 msgid ""
 "Hi there! If you are new to GNOME, you can take the tour to learn some "
 "essential features."
 msgstr ""
-"Привіт! Якщо ви ще мало знаєте про GNOME, ви можете здійснити тур цим"
-" середовищем, щоб дізнатися про його основні можливості."
-
-#: src/widgets/pages/welcome.rs:44
-msgid "Take the Tour"
-msgstr "Здійснити тур"
+"Привіт! Якщо ви ще мало знаєте про GNOME, ви можете здійснити тур цим "
+"середовищем, щоб дізнатися про його основні можливості."
 
 #: src/widgets/pages/welcome.rs:51
-msgid "No Thanks"
-msgstr "Ні, дякую"
+#| msgid "Take the Tour"
+msgid "_Take the Tour"
+msgstr "Зді_йснити тур"
 
-#: src/widgets/headerbar.rs:30
-msgid "Close"
-msgstr "Закрити"
+#: src/widgets/pages/welcome.rs:58
+#| msgid "No Thanks"
+msgid "_No Thanks"
+msgstr "_Ні, дякую"
 
-#: src/widgets/headerbar.rs:32 src/widgets/headerbar.rs:67
-msgid "Next"
-msgstr "Далі"
-
-#: src/widgets/headerbar.rs:57
+#: src/widgets/pages/welcome.rs:72
 msgid "Welcome Tour"
 msgstr "Вітаємо у нашому «Турі»"
 
-#: src/widgets/window.rs:94
+#: src/widgets/window.rs:61
 msgid "Activities Overview"
 msgstr "Огляд діяльності"
 
-#: src/widgets/window.rs:95
+#: src/widgets/window.rs:62
 msgid "Open Activities to start apps"
 msgstr "Відкрийте меню «Діяльність», щоб запустити програми"
 
-#: src/widgets/window.rs:96
+#: src/widgets/window.rs:63
 msgid "You can also view open windows, search and use workspaces."
 msgstr ""
-"Ви також можете бачити список відкритих вікон, шукати і користуватися"
-" робочими просторами."
+"Ви також можете бачити список відкритих вікон, шукати і користуватися "
+"робочими просторами."
 
-#: src/widgets/window.rs:101
+#: src/widgets/window.rs:68
 msgid "Search"
 msgstr "Пошук"
 
-#: src/widgets/window.rs:102
+#: src/widgets/window.rs:69
 msgid "In the Activities Overview, just start typing to search"
 msgstr ""
-"У огляді діяльності ви можете просто почати вводити текст, щоб розпочати пошук"
+"У огляді діяльності ви можете просто почати вводити текст, щоб розпочати "
+"пошук"
 
-#: src/widgets/window.rs:103
+#: src/widgets/window.rs:70
 msgid ""
 "Search can be used to launch apps, find settings, do calculations and much "
 "more."
 msgstr ""
-"Пошуком можна скористатися для запуску програм, пошуку параметрів, виконання"
-" обчислень тощо."
+"Пошуком можна скористатися для запуску програм, пошуку параметрів, виконання "
+"обчислень тощо."
 
-#: src/widgets/window.rs:108
+#: src/widgets/window.rs:75
 msgid "Date & Time"
 msgstr "Дата і час"
 
-#: src/widgets/window.rs:109
+#: src/widgets/window.rs:76
 msgid "Click the time to see your now and next"
 msgstr "Клацніть на панелі часу, щоб переглянути поточні дані і майбутні події"
 
-#: src/widgets/window.rs:110
+#: src/widgets/window.rs:77
 msgid ""
 "This includes notifications, media controls, calendar events, the weather "
 "and world clocks."
 msgstr ""
-"Тут розташовано область сповіщень, керування відтворенням мультимедійних"
-" даних, записи подій календаря, прогноз погоди і годинник."
+"Тут розташовано область сповіщень, керування відтворенням мультимедійних "
+"даних, записи подій календаря, прогноз погоди і годинник."
 
-#: src/widgets/window.rs:115
+#: src/widgets/window.rs:82
 msgid "System Menu"
 msgstr "Меню системи"
 
-#: src/widgets/window.rs:116
+#: src/widgets/window.rs:83
 msgid "View system information and settings"
 msgstr "Перегляд відомостей щодо системи та параметрів"
 
-#: src/widgets/window.rs:117
+#: src/widgets/window.rs:84
 msgid "Get an overview of the system status and quickly change settings."
 msgstr ""
-"Ознайомтеся із оглядом стану системи та отримайте швидкий доступ до зміни"
-" параметрів."
+"Ознайомтеся із оглядом стану системи та отримайте швидкий доступ до зміни "
+"параметрів."
 
-#: src/widgets/window.rs:121
+#: src/widgets/window.rs:88
 msgid "Software"
 msgstr "Програмне забезпечення"
 
-#: src/widgets/window.rs:122
+#: src/widgets/window.rs:89
 msgid "Find and install apps"
 msgstr "Пошук і встановлення програм"
 
-#: src/widgets/window.rs:123
+#: src/widgets/window.rs:90
 msgid ""
 "The Software app makes it easy to find and install all the apps you need."
 msgstr ""
-"Програма «Програмне забезпечення» спрощує пошук і встановлення усіх потрібних"
-" вам програм."
+"Програма «Програмне забезпечення» спрощує пошук і встановлення усіх "
+"потрібних вам програм."
 
-#: src/widgets/window.rs:128
+#: src/widgets/window.rs:95
 msgid "Learn More"
 msgstr "Дізнатись більше"
 
-#: src/widgets/window.rs:129
+#: src/widgets/window.rs:96
 msgid "That's it! To learn more, see the Help"
 msgstr "Ось і все! Щоб дізнатися більше, ознайомтеся із «Довідкою»."
 
-#: src/widgets/window.rs:130
+#: src/widgets/window.rs:97
 msgid "The help app contains information, tips and tricks."
 msgstr "У довідці мітяться відомості щодо програм, підказки і настанови."
+
+#~ msgid "Close"
+#~ msgstr "Закрити"
+
+#~ msgid "Next"
+#~ msgstr "Далі"
