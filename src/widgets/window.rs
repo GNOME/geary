@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use super::pages::{ImagePageWidget, WelcomePageWidget};
 use super::paginator::PaginatorWidget;
-use crate::config::PROFILE;
+use crate::config::{APP_ID, PROFILE};
 
 pub struct Window {
     pub widget: libhandy::ApplicationWindow,
@@ -35,6 +35,7 @@ impl Window {
 
     fn init(&mut self) {
         self.widget.set_default_size(920, 640);
+        self.widget.set_icon_name(Some(APP_ID));
 
         // Devel Profile
         if PROFILE == "Devel" {
