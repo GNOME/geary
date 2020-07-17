@@ -35,7 +35,7 @@ internal class Application.FolderPluginContext :
     public void add_folder_info_bar(Plugin.Folder selected,
                                     Plugin.InfoBar info_bar,
                                     uint priority) {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(selected);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(selected);
         if (folder != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.selected_folder == folder) {
@@ -53,7 +53,7 @@ internal class Application.FolderPluginContext :
 
     public void remove_folder_info_bar(Plugin.Folder selected,
                                        Plugin.InfoBar info_bar) {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(selected);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(selected);
         if (folder != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.selected_folder == folder) {
@@ -69,7 +69,7 @@ internal class Application.FolderPluginContext :
     public void register_folder_used_as(Plugin.Folder target,
                                         string name,
                                         string icon_name) throws Plugin.Error {
-        var context = this.globals.folders.get_folder_context(target);
+        var context = this.globals.folders.to_folder_context(target);
         if (context != null) {
             try {
                 context.folder.set_used_as_custom(true);
@@ -85,7 +85,7 @@ internal class Application.FolderPluginContext :
 
     public void unregister_folder_used_as(Plugin.Folder target)
         throws Plugin.Error {
-        var context = this.globals.folders.get_folder_context(target);
+        var context = this.globals.folders.to_folder_context(target);
         if (context != null) {
             try {
                 context.folder.set_used_as_custom(false);

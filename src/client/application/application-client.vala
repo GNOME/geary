@@ -614,9 +614,9 @@ public class Application.Client : Gtk.Application {
         MainWindow main = yield this.present();
         if (id != null) {
             EmailStoreFactory email = this.controller.plugins.globals.email;
-            AccountContext? context = email.get_account_from_variant(id);
+            AccountContext? context = email.get_account_for_variant(id);
             Geary.EmailIdentifier? email_id =
-                email.get_email_identifier_from_variant(id);
+                email.get_email_identifier_for_variant(id);
             if (context != null && email_id != null) {
                 // Determine what folders the email is in
                 Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? folders = null;
@@ -694,7 +694,7 @@ public class Application.Client : Gtk.Application {
         MainWindow main = yield this.present();
         if (id != null) {
             Geary.Folder? folder =
-                this.controller.plugins.globals.folders.get_folder_from_variant(id);
+                this.controller.plugins.globals.folders.get_folder_for_variant(id);
             if (folder != null) {
                 yield main.select_folder(folder, true);
             }

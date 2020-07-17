@@ -80,7 +80,7 @@ internal class Application.NotificationPluginContext :
 
     public async Plugin.ContactStore get_contacts_for_folder(Plugin.Folder source)
         throws Plugin.Error.NOT_FOUND, Plugin.Error.PERMISSION_DENIED {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(source);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(source);
         AccountContext? context = null;
         if (folder != null) {
             context = this.application.controller.get_context_for_account(
@@ -109,7 +109,7 @@ internal class Application.NotificationPluginContext :
         // conversations are visible. That is, if there is a main
         // window, it's focused, the folder is selected, and the
         // conversation list is at the top.
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(target);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(target);
         MainWindow? window = this.application.last_active_main_window;
         return (
             folder != null &&
@@ -130,7 +130,7 @@ internal class Application.NotificationPluginContext :
      */
     public int get_new_message_count(Plugin.Folder target)
         throws Plugin.Error.NOT_FOUND {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(target);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(target);
         MonitorInformation? info = null;
         if (folder != null) {
             info = folder_information.get(folder);
@@ -150,7 +150,7 @@ internal class Application.NotificationPluginContext :
      * recording new messages for a specific folder.
      */
     public void start_monitoring_folder(Plugin.Folder target) {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(target);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(target);
         AccountContext? context =
             this.application.controller.get_context_for_account(
                 folder.account.information
@@ -170,7 +170,7 @@ internal class Application.NotificationPluginContext :
 
     /** Stops monitoring a folder for new messages. */
     public void stop_monitoring_folder(Plugin.Folder target) {
-        Geary.Folder? folder = this.globals.folders.get_engine_folder(target);
+        Geary.Folder? folder = this.globals.folders.to_engine_folder(target);
         if (folder != null) {
             remove_folder(folder);
         }
@@ -179,7 +179,7 @@ internal class Application.NotificationPluginContext :
     /** Determines if a folder is curently being monitored. */
     public bool is_monitoring_folder(Plugin.Folder target) {
         return this.folder_information.has_key(
-            this.globals.folders.get_engine_folder(target)
+            this.globals.folders.to_engine_folder(target)
         );
     }
 
@@ -243,7 +243,7 @@ internal class Application.NotificationPluginContext :
                               bool arrived,
                               Gee.Collection<Geary.EmailIdentifier> delta) {
         Plugin.Folder folder =
-            this.globals.folders.get_plugin_folder(info.folder);
+            this.globals.folders.to_plugin_folder(info.folder);
         AccountContext? context =
             this.application.controller.get_context_for_account(
                 info.folder.account.information

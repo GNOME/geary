@@ -20,7 +20,7 @@ public interface Plugin.EmailStore : Geary.BaseObject {
      * The type of variant email identifiers.
      *
      * @see EmailIdentifier.to_variant
-     * @see get_email_identifier_from_variant
+     * @see get_email_identifier_for_variant
      */
     public abstract GLib.VariantType email_identifier_variant_type { get; }
 
@@ -42,6 +42,6 @@ public interface Plugin.EmailStore : Geary.BaseObject {
      * @see EmailIdentifier.to_variant
      * @see email_identifier_variant_type
      */
-    public abstract EmailIdentifier? get_email_identifier_from_variant(GLib.Variant id);
+    public abstract EmailIdentifier? get_email_identifier_for_variant(GLib.Variant id);
 
 }

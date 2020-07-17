@@ -336,7 +336,7 @@ public class Plugin.EmailTemplates :
 
     private void on_new_activated(GLib.Action action, GLib.Variant? target) {
         if (this.folder_store != null && target != null) {
-            Folder? folder = this.folder_store.get_folder_from_variant(target);
+            Folder? folder = this.folder_store.get_folder_for_variant(target);
             if (folder != null) {
                 this.edit_email.begin(folder, null, false);
             }
@@ -346,7 +346,7 @@ public class Plugin.EmailTemplates :
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
                 this.edit_email.begin(null, id, false);
             }
@@ -356,7 +356,7 @@ public class Plugin.EmailTemplates :
     private void on_send_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
                 this.edit_email.begin(null, id, true);
             }

@@ -20,7 +20,7 @@ public interface Plugin.FolderStore : Geary.BaseObject {
      * The type of variant folder identifiers.
      *
      * @see Folder.to_variant
-     * @see get_folder_from_variant
+     * @see get_folder_for_variant
      */
     public abstract GLib.VariantType folder_variant_type { get; }
 
@@ -61,7 +61,7 @@ public interface Plugin.FolderStore : Geary.BaseObject {
      * @see Folder.to_variant
      * @see folder_variant_type
      */
-    public abstract Folder? get_folder_from_variant(GLib.Variant id);
+    public abstract Folder? get_folder_for_variant(GLib.Variant id);
 
 
 }

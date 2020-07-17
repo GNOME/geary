@@ -336,7 +336,7 @@ public class Plugin.MailMerge :
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
                 this.edit_email.begin(id);
             }
@@ -346,9 +346,9 @@ public class Plugin.MailMerge :
     private void on_merge_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
-                this.merge_email.begin(id);
+                this.merge_email.begin(id, null);
             }
         }
     }

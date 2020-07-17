@@ -89,11 +89,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             return emails;
         }
 
-        public Plugin.EmailIdentifier? get_email_identifier_from_variant(
+        public Plugin.EmailIdentifier? get_email_identifier_for_variant(
             GLib.Variant variant
         ) {
-            var account = this.factory.get_account_from_variant(variant);
-            var id = this.factory.get_email_identifier_from_variant(variant);
+            var account = this.factory.get_account_for_variant(variant);
+            var id = this.factory.get_email_identifier_for_variant(variant);
             IdImpl? plugin_id = null;
             if (account != null && id != null) {
                 var plugin_account = this.factory.accounts.get(account);
@@ -306,6 +306,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
     }
 
+    public Geary.Email? to_engine_email(Plugin.Email plugin) {
+        var impl = plugin as EmailImpl;
+        return (impl != null) ? impl.backing : null;
+    }
+
     public Gee.Collection<Plugin.EmailIdentifier> to_plugin_ids(
         Gee.Collection<Geary.EmailIdentifier> engine_ids,
         AccountContext account
@@ -328,7 +333,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
     /** Returns the account context for the given plugin email id. */
-    public AccountContext get_account_from_variant(GLib.Variant target) {
+    public AccountContext get_account_for_variant(GLib.Variant target) {
         AccountContext? account = null;
         string id = (string) target.get_child_value(0);
         foreach (var context in this.accounts.keys) {
@@ -343,9 +348,9 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     /** Returns the engine email id for the given plugin email id. */
     public Geary.EmailIdentifier?
-        get_email_identifier_from_variant(GLib.Variant target) {
+        get_email_identifier_for_variant(GLib.Variant target) {
         Geary.EmailIdentifier? id = null;
-        var context = get_account_from_variant(target);
+        var context = get_account_for_variant(target);
         if (context != null) {
             try {
                 id = context.account.to_email_identifier(

@@ -219,7 +219,7 @@ public class Plugin.SpecialFolders :
 
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
-            EmailIdentifier? id = this.email_store.get_email_identifier_from_variant(
+            EmailIdentifier? id = this.email_store.get_email_identifier_for_variant(
                 target
             );
             if (id != null) {
@@ -232,7 +232,7 @@ public class Plugin.SpecialFolders :
 
     private void on_empty_activated(GLib.Action action, GLib.Variant? target) {
         if (this.folder_store != null && target != null) {
-            Folder? folder = this.folder_store.get_folder_from_variant(target);
+            Folder? folder = this.folder_store.get_folder_for_variant(target);
             if (folder != null) {
                 this.plugin_application.empty_folder.begin(folder);
             }

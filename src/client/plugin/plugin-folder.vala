@@ -36,7 +36,7 @@ public interface Plugin.Folder : Geary.BaseObject {
      * FolderStore}, and is suitable to be used as the `show-folder`
      * application action parameter.
      *
-     * @see FolderStore.get_folder_from_variant
+     * @see FolderStore.get_folder_for_variant
      * @see FolderStore.folder_variant_type
      */
     public abstract GLib.Variant to_variant();

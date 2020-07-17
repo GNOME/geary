@@ -235,7 +235,7 @@ public class Application.PluginManager : GLib.Object {
         }
 
         public void show_folder(Plugin.Folder folder) {
-            Geary.Folder? target = this.globals.folders.get_engine_folder(folder);
+            Geary.Folder? target = this.globals.folders.to_engine_folder(folder);
             if (target != null) {
                 MainWindow window = this.backing.get_active_main_window();
                 window.select_folder.begin(target, true);
@@ -251,7 +251,7 @@ public class Application.PluginManager : GLib.Object {
                );
            }
 
-           Geary.Folder? target = this.globals.folders.get_engine_folder(folder);
+           Geary.Folder? target = this.globals.folders.to_engine_folder(folder);
            if (target != null) {
                if (!main.prompt_empty_folder(target.used_as)) {
                    throw new Plugin.Error.PERMISSION_DENIED(
@@ -373,7 +373,7 @@ public class Application.PluginManager : GLib.Object {
                 // Ugh
                 this._save_to = (
                     (backing.save_to != null)
-                    ? this.application.globals.folders.get_plugin_folder(
+                    ? this.application.globals.folders.to_plugin_folder(
                         this.backing.save_to
                     )
                     : null
@@ -398,7 +398,7 @@ public class Application.PluginManager : GLib.Object {
         }
 
         public void save_to_folder(Plugin.Folder? location) {
-            var engine = this.application.globals.folders.get_engine_folder(location);
+            var engine = this.application.globals.folders.to_engine_folder(location);
             if (engine != null && engine.account == this.backing.sender_context.account) {
                 this.backing.set_save_to_override.begin(
                     engine,
@@ -621,9 +621,26 @@ public class Application.PluginManager : GLib.Object {
         this.is_startup = false;
     }
 
+    /** Returns the client account context for the given plugin account, if any. */
+    public AccountContext? to_client_account(Plugin.Account plugin) {
+        var impl = plugin as AccountImpl;
+        return (impl != null) ? impl.backing : null;
+    }
+
+    /** Returns the engine account for the given plugin account, if any. */
+    public Geary.Account? to_engine_account(Plugin.Account plugin) {
+        var impl = plugin as AccountImpl;
+        return (impl != null) ? impl.backing.account : null;
+    }
+
     /** Returns the engine folder for the given plugin folder, if any. */
-    public Geary.Folder? get_engine_folder(Plugin.Folder plugin) {
-        return this.globals.folders.get_engine_folder(plugin);
+    public Geary.Folder? to_engine_folder(Plugin.Folder plugin) {
+        return this.globals.folders.to_engine_folder(plugin);
+    }
+
+    /** Returns the engine email for the given plugin email, if any. */
+    public Geary.Email? to_engine_email(Plugin.Email plugin) {
+        return this.globals.email.to_engine_email(plugin);
     }
 
     public Gee.Collection<Peas.PluginInfo> get_optional_plugins() {
