@@ -203,34 +203,23 @@ public class Plugin.MailMerge :
     }
 
     private async void load_composer_data(Composer composer) {
-        var chooser = new Gtk.FileChooserNative(
-            /// Translators: File chooser title after invoking mail
-            /// merge in composer
-            _("Mail Merge"),
-            null, OPEN,
-            _("_Open"),
-            _("_Cancel")
-        );
-        var csv_filter = new Gtk.FileFilter();
-        /// Translators: File chooser filer label
-        csv_filter.set_filter_name(_("Comma separated values (CSV)"));
-        csv_filter.add_mime_type("text/csv");
-        chooser.add_filter(csv_filter);
+        var data = show_merge_data_chooser();
+        if (data != null) {
+            var insert_field_action = new GLib.SimpleAction(
+                ACTION_INSERT_FIELD,
+                GLib.VariantType.STRING
+            );
+            composer.register_action(insert_field_action);
+            insert_field_action.activate.connect(
+                (param) => {
+                    insert_field(composer, (string) param);
+                }
+            );
 
-        var insert_field_action = new GLib.SimpleAction(
-            ACTION_INSERT_FIELD,
-            GLib.VariantType.STRING
-        );
-        composer.register_action(insert_field_action);
-        insert_field_action.activate.connect(
-            (param) => { insert_field(composer, (string) param); }
-        );
-
-        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
             try {
                 composer.set_action_bar(
                     yield new_composer_action_bar(
-                        chooser.get_file(),
+                        data,
                         composer.action_group_name
                     )
                 );
@@ -301,6 +290,28 @@ public class Plugin.MailMerge :
             new ActionBar.LabelItem(info.get_display_name()), START
         );
         return action_bar;
+    }
+
+    private GLib.File? show_merge_data_chooser() {
+        var chooser = new Gtk.FileChooserNative(
+            /// Translators: File chooser title after invoking mail
+            /// merge in composer
+            _("Mail Merge"),
+            null, OPEN,
+            _("_Open"),
+            _("_Cancel")
+        );
+        var csv_filter = new Gtk.FileFilter();
+        /// Translators: File chooser filer label
+        csv_filter.set_filter_name(_("Comma separated values (CSV)"));
+        csv_filter.add_mime_type("text/csv");
+        chooser.add_filter(csv_filter);
+
+        return (
+            chooser.run() == Gtk.ResponseType.ACCEPT
+            ? chooser.get_file()
+            : null
+        );
     }
 
     private void insert_field(Composer composer, string field) {
