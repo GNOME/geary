@@ -68,12 +68,9 @@ public class Sidebar.Branch : Geary.BaseObject {
                 children = new Gee.TreeSet<Node>(comparator_wrapper);
 
             bool added = children.add(child);
-            assert(added);
         }
 
         public void remove_child(Node child) {
-            assert(children != null);
-
             Gee.SortedSet<Node> new_children = new Gee.TreeSet<Node>(comparator_wrapper);
 
             // For similar reasons as in reorder_child(), can't rely on TreeSet to locate this
