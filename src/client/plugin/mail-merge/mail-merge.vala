@@ -18,7 +18,7 @@ public void peas_register_types(TypeModule module) {
  * Plugin to Fill in and send email templates using a spreadsheet.
  */
 public class Plugin.MailMerge :
-    PluginBase, FolderExtension, EmailExtension {
+    PluginBase, FolderExtension, EmailExtension, TrustedExtension {
 
 
     private const string FIELD_START = "{{";
@@ -54,6 +54,13 @@ public class Plugin.MailMerge :
         get; set construct;
     }
 
+    public global::Application.Client client_application {
+        get; set construct;
+    }
+
+    public global::Application.PluginManager client_plugins {
+        get; set construct;
+    }
 
     private FolderStore? folder_store = null;
     private EmailStore? email_store = null;
@@ -164,8 +171,49 @@ public class Plugin.MailMerge :
         }
     }
 
-    private async void merge_email(EmailIdentifier id) {
+    private async void merge_email(EmailIdentifier id,
+                                   GLib.File? default_csv_file) {
+        var csv_file = default_csv_file ?? show_merge_data_chooser();
+        if (csv_file != null) {
+            try {
+                var csv_input = yield csv_file.read_async(
+                    GLib.Priority.DEFAULT,
+                    this.cancellable
+                );
+                var csv = yield new Util.Csv.Reader(csv_input, this.cancellable);
 
+                Gee.Collection<Email> emails = yield this.email_store.get_email(
+                    Geary.Collection.single(id),
+                    this.cancellable
+                );
+                if (!emails.is_empty) {
+                    var account_context = this.client_plugins.to_client_account(
+                        id.account
+                    );
+                    var email = Geary.Collection.first(emails);
+                    var merge_folder = new Plugin.MailMergeFolder(
+                        account_context.account,
+                        account_context.account.local_folder_root,
+                        this.client_plugins.to_engine_email(email),
+                        csv
+                    );
+
+                    var folder_context = new global::Application.FolderContext(
+                        merge_folder
+                    );
+                    folder_context.display_name = _("Mail Merge");
+                    folder_context.icon_name = "mail-outbox-symbolic";
+                    account_context.add_folders(
+                        Geary.Collection.single(folder_context)
+                    );
+
+                    var main = this.client_application.get_active_main_window();
+                    yield main.select_folder(merge_folder, true);
+                }
+            } catch (GLib.Error err) {
+                debug("Displaying merge folder failed: %s", err.message);
+            }
+        }
     }
 
     private async void update_email(Email target) {
