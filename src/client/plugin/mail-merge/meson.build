@@ -8,7 +8,8 @@ plugin_data = plugin_name + plugin_data_suffix
 plugin_dest = plugins_dir / plugin_name
 
 lib_src = files(
-  'util-csv.vala'
+  'mail-merge-folder.vala',
+  'util-csv.vala',
 )
 
 test_src = files(
