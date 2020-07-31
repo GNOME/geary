@@ -908,12 +908,15 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 }
             }
 
+            // When setting email properties below, the relevant
+            // Geary.Email setter needs to be called regardless of
+            // whether the value being set is null, since the setter
+            // will update the email's flags so we know the email has
+            // the field set and it is null.
+
             // DATE
             if (required_but_not_set(DATE, required_fields, email)) {
-                RFC822.Date? date = unflatten_date(headers.get("Date"));
-                if (date != null) {
-                    email.set_send_date(date);
-                }
+                email.set_send_date(unflatten_date(headers.get("Date")));
             }
 
             // ORIGINATORS
@@ -944,7 +947,9 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             // References header will be present if REFERENCES were required, which is why
             // REFERENCES is set at the bottom of the method, when all information has been gathered
             if (message_id == null) {
-                message_id = unflatten_message_id(headers.get("Message-ID"));
+                message_id = unflatten_message_id(
+                    headers.get("Message-ID")
+                );
             }
             if (in_reply_to == null) {
                 in_reply_to = unflatten_message_id_list(
@@ -958,13 +963,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             }
 
             // SUBJECT
-            // Unlike DATE, allow for empty subjects
             if (required_but_not_set(Geary.Email.Field.SUBJECT, required_fields, email)) {
+                RFC822.Subject? subject = null;
                 string? value = headers.get("Subject");
-                if (value != null)
-                    email.set_message_subject(new RFC822.Subject.from_rfc822_string(value));
-                else
-                    email.set_message_subject(null);
+                if (value != null) {
+                    subject = new RFC822.Subject.from_rfc822_string(value);
+                }
+                email.set_message_subject(subject);
             }
         }
 
@@ -983,12 +988,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 preview_specifier
             );
 
+            RFC822.PreviewText? preview = null;
             if (preview_headers != null && preview_headers.size > 0 &&
                 preview_body != null && preview_body.size > 0) {
-                email.set_message_preview(
-                    new RFC822.PreviewText.with_header(
-                        preview_headers, preview_body
-                    )
+                preview = new RFC822.PreviewText.with_header(
+                    preview_headers, preview_body
                 );
             } else {
                 warning("No preview specifiers \"%s\" and \"%s\" found",
@@ -996,6 +1000,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
                     warning(" - has %s", specifier.to_string());
             }
+            email.set_message_preview(preview);
         }
 
         // If body was requested, get it now. We also set the preview
@@ -1012,8 +1017,10 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 Geary.RFC822.Message? message = null;
                 try {
                     message = email.get_message();
-                } catch (Error e) {
-                    // Not enough fields to construct the message
+                } catch (EngineError.INCOMPLETE_MESSAGE err) {
+                    debug("Not enough fields to construct message for preview: %s", err.message);
+                } catch (GLib.Error err) {
+                    warning("Error constructing message for preview: %s", err.message);
                 }
                 if (message != null) {
                     string preview = message.get_preview();

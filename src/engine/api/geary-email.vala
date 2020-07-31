@@ -326,10 +326,37 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
      */
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
 
+
     private Geary.RFC822.Message? message = null;
 
+
+    /** Constructs a new, empty email with the given id. */
     public Email(Geary.EmailIdentifier id) {
         this.id = id;
+    }
+
+    /**
+     * Construct a Geary.Email from a complete RFC822 message.
+     */
+    public Email.from_message(EmailIdentifier id,
+                              RFC822.Message message) throws GLib.Error {
+        this(id);
+        set_send_date(message.date);
+        set_originators(message.from, message.sender, message.reply_to);
+        set_receivers(message.to, message.cc, message.bcc);
+        set_full_references(
+            message.message_id, message.in_reply_to, message.references
+        );
+        set_message_subject(message.subject);
+        set_message_header(message.get_header());
+        set_message_body(message.get_body());
+        string preview = message.get_preview();
+        if (!String.is_empty_or_whitespace(preview)) {
+            set_message_preview(new RFC822.PreviewText.from_string(preview));
+        }
+
+        // Set this last as the methods above would reset it otherwise
+        this.message = message;
     }
 
     /**
@@ -367,6 +394,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
 
     public void set_send_date(Geary.RFC822.Date? date) {
         this.date = date;
+        this.message = null;
 
         fields |= Field.DATE;
     }
@@ -387,6 +415,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
         this.from = from;
         this.sender = sender;
         this.reply_to = reply_to;
+        this.message = null;
 
         fields |= Field.ORIGINATORS;
     }
@@ -396,6 +425,7 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
         this.to = to;
         this.cc = cc;
         this.bcc = bcc;
+        this.message = null;
 
         fields |= Field.RECEIVERS;
     }
@@ -405,30 +435,28 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
         this.message_id = message_id;
         this.in_reply_to = in_reply_to;
         this.references = references;
+        this.message = null;
 
         fields |= Field.REFERENCES;
     }
 
     public void set_message_subject(Geary.RFC822.Subject? subject) {
         this.subject = subject;
+        this.message = null;
 
         fields |= Field.SUBJECT;
     }
 
     public void set_message_header(Geary.RFC822.Header header) {
         this.header = header;
-
-        // reset the message object, which is built from this text
-        message = null;
+        this.message = null;
 
         fields |= Field.HEADER;
     }
 
     public void set_message_body(Geary.RFC822.Text body) {
         this.body = body;
-
-        // reset the message object, which is built from this text
-        message = null;
+        this.message = null;
 
         fields |= Field.BODY;
     }
@@ -478,15 +506,15 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
      * thrown.
      */
     public Geary.RFC822.Message get_message() throws EngineError, Error {
-        if (message != null)
-            return message;
-
-        if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
-            throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
-
-        message = new Geary.RFC822.Message.from_parts(header, body);
-
-        return message;
+        if (this.message == null) {
+            if (!fields.fulfills(REQUIRED_FOR_MESSAGE)) {
+                throw new EngineError.INCOMPLETE_MESSAGE(
+                    "Parsed email requires HEADER and BODY"
+                );
+            }
+            this.message = new Geary.RFC822.Message.from_parts(header, body);
+        }
+        return this.message;
     }
 
     /**
