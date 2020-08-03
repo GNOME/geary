@@ -624,11 +624,29 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     }
 
     /**
-     * Returns the possibly body of the message.
+     * Returns the body of the message.
      */
     public Text get_body() {
-        GMime.Part part = (GMime.Part) this.message.get_mime_part();
-        return new Text.from_gmime(part.get_content().get_stream());
+        Text? body = null;
+        GMime.Object? gmime = this.message.get_mime_part();
+        if (gmime != null) {
+            var stream = new GMime.StreamMem();
+
+            // GMime doens't support writing content-only via the
+            // public API, so suppress all headers in the message
+            // instead.
+            GMime.FormatOptions options = Geary.RFC822.get_format_options().clone();
+            GMime.HeaderList headers = message.get_header_list();
+            int count = headers.get_count();
+            for (int i = 0; i < count; i++) {
+                options.add_hidden_header(headers.get_header_at(i).get_name());
+            }
+            gmime.write_to_stream(options, stream);
+            body = new Text.from_gmime(stream);
+        } else {
+            body = new Text(Memory.EmptyBuffer.instance);
+        }
+        return body;
     }
 
     /**

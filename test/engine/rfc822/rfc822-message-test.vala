@@ -54,7 +54,8 @@ This is the second line.
         add_test("multipart_alternative_as_html",
                  multipart_alternative_as_html);
         add_test("get_header", get_header);
-        add_test("get_body", get_body);
+        add_test("get_body_single_part", get_body_single_part);
+        add_test("get_body_multipart", get_body_multipart);
         add_test("get_preview", get_preview);
         add_test("get_recipients", get_recipients);
         add_test("get_searchable_body", get_searchable_body);
@@ -185,10 +186,33 @@ This is the second line.
         assert(header.get_header("From") == "Alice <alice@example.net>");
     }
 
-    public void get_body() throws GLib.Error {
+    public void get_body_single_part() throws GLib.Error {
         Message message = resource_to_message(BASIC_TEXT_PLAIN);
         Text body = message.get_body();
-        assert(body.buffer.to_string().replace("\r", "") == BASIC_PLAIN_BODY);
+        assert_string(
+            body.buffer.to_string().replace("\r", "")
+        ).contains(
+            // should contain the body
+            BASIC_PLAIN_BODY
+        ).not_contains(
+            // should not contain headers (like the subject)
+            "Re: Basic text/plain message"
+        );
+    }
+
+    public void get_body_multipart() throws GLib.Error {
+        Message message = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
+        Text body = message.get_body();
+
+        assert_string(
+            body.buffer.to_string().replace("\r", "")
+        ).contains(
+            // should contain  the body
+            BASIC_PLAIN_BODY
+        ).not_contains(
+            // should not contain headers (like the subject)
+            "Re: Basic text/html message"
+        );
     }
 
     public void get_preview() throws GLib.Error {

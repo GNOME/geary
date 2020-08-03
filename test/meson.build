@@ -21,10 +21,11 @@ geary_test_engine_sources = [
 
   'engine/api/geary-account-information-test.vala',
   'engine/api/geary-attachment-test.vala',
+  'engine/api/geary-composed-email-test.vala',
+  'engine/api/geary-email-test.vala',
   'engine/api/geary-engine-test.vala',
   'engine/api/geary-folder-path-test.vala',
   'engine/api/geary-service-information-test.vala',
-  'engine/api/geary-composed-email-test.vala',
   'engine/app/app-conversation-test.vala',
   'engine/app/app-conversation-monitor-test.vala',
   'engine/app/app-conversation-set-test.vala',
