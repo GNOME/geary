@@ -90,6 +90,7 @@ int main(string[] args) {
     // last
     engine.add_suite(new Geary.RFC822.MessageTest().suite);
     engine.add_suite(new Geary.String.Test().suite);
+    engine.add_suite(new Geary.EmailTest().suite);
     engine.add_suite(new Geary.ComposedEmailTest().suite);
 
     /*
