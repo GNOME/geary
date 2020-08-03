@@ -89,7 +89,6 @@ flatpak:
     APP_ID: org.gnome.Geary.Devel
     FLATPAK_MODULE: geary
     MANIFEST_PATH: org.gnome.Geary.yaml
-    MESON_ARGS: "-Dprofile=development"
     RUNTIME_REPO: 'https://nightly.gnome.org/gnome-nightly.flatpakrepo'
     TEST_RUN_ARGS: $TEST_ARGS
   extends: .flatpak
