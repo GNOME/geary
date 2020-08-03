@@ -93,6 +93,5 @@ flatpak:
 
 nightly:
   extends: '.publish_nightly'
-  only:
-    refs:
-      - mainline
+  dependencies: ['flatpak']
+  needs: ['flatpak']
