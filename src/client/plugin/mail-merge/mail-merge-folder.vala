@@ -132,10 +132,7 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
         this.template = template;
         this.data = data;
 
-        Geary.Nonblocking.Concurrent.global.schedule_async.begin(
-            (c) => this.load_data(c),
-            this.loading
-        );
+        this.load_data.begin(this.loading);
     }
 
     /** {@inheritDoc} */
@@ -189,23 +186,27 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
             if (Geary.Folder.ListFlags.OLDEST_TO_NEWEST in flags) {
                 incr = -1;
             }
+            int next_index = -1;
             if (initial == null) {
                 initial = (EmailIdentifier) (
                     incr > 0
                     ? this.list.first().id
                     : this.list.last().id
                 );
+                next_index = (int) initial.message_id;
+            } else {
+                if (Geary.Folder.ListFlags.INCLUDING_ID in flags) {
+                    list.add(this.list[(int) initial.message_id]);
+                }
+                next_index = (int) initial.message_id;
+                next_index += incr;
             }
 
-            int64 index = initial.message_id;
-            if (Geary.Folder.ListFlags.INCLUDING_ID in flags) {
-                list.add(this.list[(int) initial.message_id]);
-            }
-            index += incr;
-
-            while (list.size < count && index > 0 && index < this.list.size) {
-                list.add(this.list[(int) index]);
-                index += incr;
+            while (list.size < count &&
+                   next_index >= 0 &&
+                   next_index < this.list.size) {
+                list.add(this.list[next_index]);
+                next_index += incr;
             }
         }
 
@@ -243,11 +244,56 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
 
 
     // NB: This is called from a thread outside of the main loop
-    private void load_data(GLib.Cancellable? cancellable) {
+    private async void load_data(GLib.Cancellable? cancellable) {
         int64 next_id = 0;
-        int loaded = 0;
+        try {
+            var template = yield load_template(cancellable);
+            Geary.Memory.Buffer? raw_rfc822 = null;
+            yield Geary.Nonblocking.Concurrent.global.schedule_async(
+                (c) => {
+                    raw_rfc822 = template.get_message().get_rfc822_buffer();
+                },
+                cancellable
+            );
 
-        
+            string[] headers = yield this.data.read_record();
+            var fields = new Gee.HashMap<string,string>();
+            string[] record = yield this.data.read_record();
+            while (record != null) {
+                fields.clear();
+                for (int i = 0; i < headers.length; i++) {
+                    fields.set(headers[i], record[i]);
+                }
+                var message = new Geary.RFC822.Message.from_buffer(raw_rfc822);
+
+                var id = new EmailIdentifier(next_id++);
+                var email = new Geary.Email.from_message(id, message);
+                email.set_flags(new Geary.EmailFlags());
+
+                // Update folder state then notify about the new email
+                this.list.add(email);
+                this.map.set(id, email);
+                this._properties.set_total((int) next_id);
+
+                notify_email_inserted(Geary.Collection.single(id));
+                record = yield this.data.read_record();
+            }
+        } catch (GLib.Error err) {
+            debug("Error processing email for merge: %s", err.message);
+        }
+    }
+
+    private async Geary.Email load_template(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        var template = this.template;
+        if (!template.fields.fulfills(Geary.Email.REQUIRED_FOR_MESSAGE)) {
+            template = yield this.account.local_fetch_email_async(
+                template.id,
+                Geary.Email.REQUIRED_FOR_MESSAGE,
+                cancellable
+            );
+        }
+        return template;
     }
 
 }
