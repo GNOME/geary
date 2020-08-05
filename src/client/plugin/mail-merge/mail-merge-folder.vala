@@ -108,14 +108,11 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
     }
     private Geary.FolderPath _path;
 
-    /**
-     * {@inheritDoc}
-     *
-     * This is always {@link Folder.SpecialUse.CUSTOM}
-     */
+    /** {@inheritDoc} */
     public override Geary.Folder.SpecialUse used_as {
-        get { return CUSTOM; }
+        get { return this._used_as; }
     }
+    Geary.Folder.SpecialUse _used_as = NONE;
 
     private Gee.Map<Geary.EmailIdentifier,Geary.Email> map =
         new Gee.HashMap<Geary.EmailIdentifier,Geary.Email>();
@@ -237,8 +234,10 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
 
     public override void set_used_as_custom(bool enabled)
         throws Geary.EngineError.UNSUPPORTED {
-        throw new Geary.EngineError.UNSUPPORTED(
-            "Folder special use cannot be changed"
+        this._used_as = (
+            enabled
+            ? Geary.Folder.SpecialUse.CUSTOM
+            : Geary.Folder.SpecialUse.NONE
         );
     }
 

@@ -65,6 +65,8 @@ public class Plugin.MailMerge :
     private FolderStore? folder_store = null;
     private EmailStore? email_store = null;
 
+    private MailMergeFolder? merge_folder = null;
+
     private GLib.SimpleAction? edit_action = null;
     private GLib.SimpleAction? merge_action = null;
 
@@ -84,6 +86,7 @@ public class Plugin.MailMerge :
         ).add_all_to(this.folder_names);
 
         this.folder_store = yield this.folders.get_folder_store();
+        this.folder_store.folders_available.connect(on_folders_available);
 
         this.email_store = yield this.email.get_email_store();
         this.email_store.email_displayed.connect(on_email_displayed);
@@ -191,24 +194,18 @@ public class Plugin.MailMerge :
                         id.account
                     );
                     var email = Geary.Collection.first(emails);
-                    var merge_folder = new Plugin.MailMergeFolder(
+                    this.merge_folder = new Plugin.MailMergeFolder(
                         account_context.account,
                         account_context.account.local_folder_root,
                         this.client_plugins.to_engine_email(email),
                         csv
                     );
 
-                    var folder_context = new global::Application.FolderContext(
-                        merge_folder
+                    account_context.account.register_local_folder(
+                        this.merge_folder
                     );
-                    folder_context.display_name = _("Mail Merge");
-                    folder_context.icon_name = "mail-outbox-symbolic";
-                    account_context.add_folders(
-                        Geary.Collection.single(folder_context)
-                    );
-
                     var main = this.client_application.get_active_main_window();
-                    yield main.select_folder(merge_folder, true);
+                    yield main.select_folder(this.merge_folder, true);
                 }
             } catch (GLib.Error err) {
                 debug("Displaying merge folder failed: %s", err.message);
@@ -414,6 +411,29 @@ public class Plugin.MailMerge :
 
     private void on_composer_registered(Composer registered) {
         this.update_composer.begin(registered);
+    }
+
+    private void on_folders_available(Gee.Collection<Folder> available) {
+        foreach (var folder in available) {
+            var engine_folder = this.client_plugins.to_engine_folder(folder);
+            if (this.merge_folder == engine_folder) {
+                try {
+                    this.folders.register_folder_used_as(
+                        folder,
+                        // Translators: The name of the folder used to
+                        // display merged email
+                        _("Mail Merge"),
+                        "mail-outbox-symbolic"
+                    );
+                } catch (GLib.Error err) {
+                    warning(
+                        "Failed to register %s as merge folder: %s",
+                        folder.persistent_id,
+                        err.message
+                    );
+                }
+            }
+        }
     }
 
     private void on_email_displayed(Email email) {
