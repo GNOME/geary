@@ -435,6 +435,42 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     ) throws GLib.Error;
 
     /**
+     * Registers a local folder with the account.
+     *
+     * The registering a local folder will cause the account will hook
+     * to the folder's signals such as {@link Folder.email_appended}
+     * and forward them on to the account-wide equivalents, include
+     * the list folder in the folder list, allow email in the folder
+     * to be found by account-wide operations, and so on. The folder
+     * will then be signalled as being available via {@link
+     * folders_available_unavailable}.
+     *
+     * A {@link EngineError.ALREADY_EXISTS} exception will be thrown
+     * if the given folder is already registered, or {@link
+     * EngineError.NOT_FOUND} if its path does not have {@link
+     * local_folder_root} as its root.
+     *
+     * @see deregister_local_folder
+     */
+    public abstract void register_local_folder(Folder local)
+        throws GLib.Error;
+
+    /**
+     * De-registers a local folder with the account.
+     *
+     * De-registering a previously registered local folder will signal
+     * it as being unavailable via {@link
+     * folders_available_unavailable} and unhook it from the account.
+     *
+     * A {@link local_folder_root} error will be thrown if the given
+     * folder is not already registered.
+     *
+     * @see register_local_folder
+     */
+    public abstract void deregister_local_folder(Folder local)
+        throws GLib.Error;
+
+    /**
      * Search the local account for emails referencing a Message-ID value
      * (which can appear in the Message-ID header itself, as well as the
      * In-Reply-To header, and maybe more places).  Fetch the requested fields,

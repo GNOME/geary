@@ -48,8 +48,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Cancellable? open_cancellable = null;
     private Nonblocking.Semaphore? remote_ready_lock = null;
 
-    private Gee.Map<FolderPath,MinimalFolder> folder_map =
+    private Gee.Map<FolderPath,MinimalFolder> remote_folders =
         new Gee.HashMap<FolderPath,MinimalFolder>();
+    private Gee.Map<FolderPath,Folder> local_folders =
+        new Gee.HashMap<FolderPath,Folder>();
 
     private AccountProcessor? processor;
     private AccountSynchronizer sync;
@@ -152,7 +154,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // outgoing so local folders can be loaded first in case
         // queued mail gets sent and needs to get saved somewhere.
         yield this.imap.start(cancellable);
-        this.queue_operation(new StartPostie(this));
+        this.queue_operation(new StartPostie(this, this.smtp.outbox));
 
         // Kick off a background update of the search table.
         //
@@ -185,13 +187,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.imap.discard_returned_sessions = true;
         this.remote_ready_lock.reset();
 
-        // Close folders and ensure they do in fact close
+        // Notify folders are going away and wait for remotes to close
 
-        Gee.BidirSortedSet<Folder> remotes = sort_by_path(this.folder_map.values);
-        this.folder_map.clear();
+        var locals = sort_by_path(this.local_folders.values);
+        this.local_folders.clear();
+        notify_folders_available_unavailable(null, locals);
+
+        var remotes = sort_by_path(this.remote_folders.values);
+        this.remote_folders.clear();
         notify_folders_available_unavailable(null, remotes);
-
-        foreach (Geary.Folder folder in remotes) {
+        foreach (var folder in remotes) {
             debug("Waiting for remote to close: %s", folder.to_string());
             yield folder.wait_for_close_async();
         }
@@ -402,7 +407,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** {@inheritDoc} */
     public override Folder get_folder(FolderPath path)
         throws EngineError.NOT_FOUND {
-        Folder? folder = this.folder_map.get(path);
+        Folder? folder = null;
+        if (this.local.imap_folder_root.is_descendant(path)) {
+            folder = this.remote_folders.get(path);
+        } else if (this.local_folder_root.is_descendant(path)) {
+            folder = this.local_folders.get(path);
+        }
         if (folder == null) {
             throw new EngineError.NOT_FOUND(
                 "Folder not found: %s", path.to_string()
@@ -414,21 +424,37 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** {@inheritDoc} */
     public override Gee.Collection<Folder> list_folders() {
         var all = new Gee.HashSet<Folder>();
-        all.add_all(this.folder_map.values);
+        all.add_all(this.remote_folders.values);
+        all.add_all(this.local_folders.values);
         return all;
     }
 
     /** {@inheritDoc} */
     public override Gee.Collection<Folder> list_matching_folders(FolderPath? parent)
         throws EngineError.NOT_FOUND {
-        return traverse<FolderPath>(folder_map.keys)
+        Gee.Map<FolderPath,Folder>? folders = null;
+        if (this.local.imap_folder_root.is_descendant(parent)) {
+            folders = this.remote_folders;
+        } else if (this.local_folder_root.is_descendant(parent)) {
+            folders = this.local_folders;
+        } else {
+            throw new EngineError.NOT_FOUND(
+                "Unknown folder root: %s", parent.to_string()
+            );
+        }
+        if (!folders.has_key(parent)) {
+            throw new EngineError.NOT_FOUND(
+                "Unknown parent: %s", parent.to_string()
+            );
+        }
+        return traverse<FolderPath>(folders.keys)
             .filter(p => {
                 FolderPath? path_parent = p.parent;
                 return ((parent == null && path_parent == null) ||
                     (parent != null && path_parent != null &&
                      path_parent.equal_to(parent)));
             })
-            .map<Geary.Folder>(p => folder_map.get(p))
+            .map<Geary.Folder>(p => folders.get(p))
             .to_array_list();
     }
 
@@ -466,7 +492,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         FolderPath root =
             yield remote.get_default_personal_namespace(cancellable);
         FolderPath path = root.get_child(name);
-        if (this.folder_map.has_key(path)) {
+        if (this.remote_folders.has_key(path)) {
             throw new EngineError.ALREADY_EXISTS(
                 "Folder already exists: %s", path.to_string()
             );
@@ -481,13 +507,48 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             remote_folder, cancellable
         );
         add_folders(Collection.single(local_folder), false);
-        var folder = this.folder_map.get(path);
+        var folder = this.remote_folders.get(path);
         if (use != NONE) {
             promote_folders(
                 Collection.single_map<Folder.SpecialUse,Folder>(use, folder)
             );
         }
         return folder;
+    }
+
+    /** {@inheritDoc} */
+    public override void register_local_folder(Folder local)
+        throws GLib.Error {
+            var path = local.path;
+        if (this.local_folders.has_key(path)) {
+            throw new EngineError.ALREADY_EXISTS(
+                "Folder already exists: %s", path.to_string()
+            );
+        }
+        if (!this.local_folder_root.is_descendant(path)) {
+            throw new EngineError.NOT_FOUND(
+                "Not a desendant of the local folder root: %s", path.to_string()
+            );
+        }
+        this.local_folders.set(path, local);
+        notify_folders_available_unavailable(
+            sort_by_path(Collection.single(local)), null
+        );
+    }
+
+    /** {@inheritDoc} */
+    public override void deregister_local_folder(Folder local)
+        throws GLib.Error {
+        var path = local.path;
+        if (!this.local_folders.has_key(path)) {
+            throw new EngineError.NOT_FOUND(
+                "Unknown folder: %s", path.to_string()
+            );
+        }
+        notify_folders_available_unavailable(
+            null, sort_by_path(Collection.single(local))
+        );
+        this.local_folders.unset(path);
     }
 
     private ImapDB.EmailIdentifier check_id(Geary.EmailIdentifier id) throws EngineError {
@@ -563,7 +624,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Gee.MultiMap<EmailIdentifier,FolderPath> map =
             new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
         yield this.local.get_containing_folders_async(ids, map, cancellable);
-        yield this.smtp.outbox.add_to_containing_folders_async(ids, map, cancellable);
+        foreach (var folder in this.local_folders.values) {
+            var path = folder.path;
+            var matching = yield folder.contains_identifiers(ids, cancellable);
+            foreach (var id in matching) {
+                map.set(id, path);
+            }
+        }
         return (map.size == 0) ? null : map;
     }
 
@@ -608,7 +675,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         );
         foreach(ImapDB.Folder db_folder in db_folders) {
             FolderPath path = db_folder.get_path();
-            if (!this.folder_map.has_key(path)) {
+            if (!this.remote_folders.has_key(path)) {
                 MinimalFolder folder = new_folder(db_folder);
                 folder.report_problem.connect(notify_report_problem);
                 if (folder.used_as == NONE) {
@@ -618,7 +685,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                     }
                 }
                 built_folders.add(folder);
-                this.folder_map.set(folder.path, folder);
+                this.remote_folders.set(folder.path, folder);
             }
         }
 
@@ -699,9 +766,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             Account.folder_path_comparator
         );
         foreach(Geary.Folder folder in folders) {
-            MinimalFolder? impl = this.folder_map.get(folder.path);
+            MinimalFolder? impl = this.remote_folders.get(folder.path);
             if (impl != null) {
-                this.folder_map.unset(folder.path);
+                this.remote_folders.unset(folder.path);
                 removed.add(impl);
             }
         }
@@ -742,7 +809,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 Gee.List<string> search_names = special_search_names.get(use);
                 foreach (string search_name in search_names) {
                     FolderPath search_path = root.get_child(search_name);
-                    foreach (FolderPath test_path in folder_map.keys) {
+                    foreach (FolderPath test_path in this.remote_folders.keys) {
                         if (test_path.compare_normalized_ci(search_path) == 0) {
                             path = search_path;
                             break;
@@ -764,8 +831,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 );
             }
 
-            if (this.folder_map.has_key(path)) {
-                special = this.folder_map.get(path);
+            if (this.remote_folders.has_key(path)) {
+                special = this.remote_folders.get(path);
                 promote_folders(
                     Collection.single_map<Folder.SpecialUse,Folder>(use, special)
                 );
@@ -1077,12 +1144,17 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 internal class Geary.ImapEngine.StartPostie : AccountOperation {
 
 
-    internal StartPostie(Account account) {
+    private Outbox.Folder outbox;
+
+
+    internal StartPostie(Account account, Outbox.Folder outbox) {
         base(account);
+        this.outbox = outbox;
     }
 
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
+        this.account.register_local_folder(this.outbox);
         yield this.account.outgoing.start(cancellable);
     }
 
