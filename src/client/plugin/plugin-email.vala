@@ -90,8 +90,8 @@ public interface Plugin.EmailIdentifier :
      * This value is suitable to be used as the `show-email`
      * application action parameter.
      *
-     * @see EmailStore.get_email_identifier_from_variant
-     * @see EmailStore.email_identifier_variant_type`
+     * @see EmailStore.get_email_identifier_for_variant
+     * @see EmailStore.email_identifier_variant_type
      */
     public abstract GLib.Variant to_variant();
 
