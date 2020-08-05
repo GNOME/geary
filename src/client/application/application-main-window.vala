@@ -599,28 +599,26 @@ public class Application.MainWindow :
 
     /** Updates the window's title and headerbar titles. */
     public void update_title() {
+        AccountContext? account = get_selected_account_context();
+        FolderContext? folder = (
+            account != null && this.selected_folder != null
+            ? account.get_folder(this.selected_folder)
+            : null
+        );
         string title = _("Geary");
-        if (this.selected_folder != null) {
+        string? account_name = null;
+        string? folder_name = null;
+        if (account != null && folder != null) {
+            account_name = account.account.information.display_name;
+            folder_name = folder.display_name;
             /// Translators: Main window title, first string
             /// substitution being the currently selected folder name,
             /// the second being the selected account name.
-            title = _("%s — %s").printf(
-                Util.I18n.to_folder_display_name(this.selected_folder),
-                this.selected_folder.account.information.display_name
-            );
+            title = _("%s — %s").printf(folder_name, account_name);
         }
         this.title = title;
-
-        this.main_toolbar.account = (
-            this.selected_folder != null
-            ? this.selected_folder.account.information.display_name
-            : ""
-        );
-        this.main_toolbar.folder = (
-            this.selected_folder != null
-            ? Util.I18n.to_folder_display_name(this.selected_folder)
-            : ""
-        );
+        this.main_toolbar.account = account_name ?? "";
+        this.main_toolbar.folder = folder_name?? "";
     }
 
     /** Updates the window's account status info bars. */
@@ -1650,36 +1648,29 @@ public class Application.MainWindow :
     }
 
     private void update_headerbar() {
-        if (this.selected_folder == null) {
-            this.main_toolbar.account = null;
-            this.main_toolbar.folder = null;
-
-            return;
-        }
-
-        this.main_toolbar.account =
-            this.selected_folder.account.information.display_name;
-
-        /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
-        // except for Drafts and Outbox, where we show total count
-        int count;
-        switch (this.selected_folder.used_as) {
+        update_title();
+        if (this.selected_folder != null) {
+            // Current folder's name followed by its unread count,
+            // i.e. "Inbox (42)" except for Drafts and Outbox, where
+            // we show total count
+            int count;
+            switch (this.selected_folder.used_as) {
             case DRAFTS:
             case OUTBOX:
                 count = this.selected_folder.properties.email_total;
-            break;
+                break;
 
             default:
                 count = this.selected_folder.properties.email_unread;
-            break;
-        }
+                break;
+            }
 
-        var folder_name = Util.I18n.to_folder_display_name(this.selected_folder);
-        this.main_toolbar.folder = (
-            count > 0
-            ? _("%s (%d)").printf(folder_name, count)
-            : folder_name
-        );
+            if (count > 0) {
+                this.main_toolbar.folder = _("%s (%d)").printf(
+                    this.main_toolbar.folder, count
+                );
+            }
+        }
     }
 
     private void update_conversation_actions(ConversationCount count) {
