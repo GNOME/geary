@@ -125,31 +125,17 @@ public class Plugin.MailMerge :
         this.folder_names.clear();
     }
 
-    private async bool is_mail_merge_template(Email email) {
-        var found = (
-            (email.subject != null &&
-             contains_field(email.subject.to_rfc822_string())) ||
-            (email.to != null &&
-             contains_field(email.to.to_rfc822_string())) ||
-            (email.cc != null &&
-             contains_field(email.cc.to_rfc822_string())) ||
-            (email.bcc != null &&
-             contains_field(email.bcc.to_rfc822_string())) ||
-            (email.reply_to != null &&
-             contains_field(email.bcc.to_rfc822_string())) ||
-            (email.sender != null &&
-             contains_field(email.sender.to_rfc822_string()))
-        );
-        if (!found) {
-            string body = "";
-            try {
-                body = yield email.load_body_as(PLAIN, true, this.cancellable);
-            } catch (GLib.Error err) {
-                debug("Failed to load template body: %s", err.message);
+    private async bool is_mail_merge_template(Email plugin) {
+        bool is_merge = false;
+        try {
+            Geary.Email? email = yield load_merge_email(plugin);
+            if (email != null) {
+                is_merge = MailMergeProcessor.is_mail_merge_template(email);
             }
-            found = contains_field(body);
+        } catch (GLib.Error err) {
+            warning("Unable to load merge template: %s", err.message);
         }
-        return found;
+        return is_merge;
     }
 
     private async void edit_email(EmailIdentifier id) {
@@ -194,10 +180,11 @@ public class Plugin.MailMerge :
                         id.account
                     );
                     var email = Geary.Collection.first(emails);
+
                     this.merge_folder = new Plugin.MailMergeFolder(
                         account_context.account,
                         account_context.account.local_folder_root,
-                        this.client_plugins.to_engine_email(email),
+                        yield load_merge_email(email),
                         csv
                     );
 
@@ -360,33 +347,27 @@ public class Plugin.MailMerge :
     }
 
     private void insert_field(Composer composer, string field) {
-        composer.insert_text(FIELD_START + field + FIELD_END);
+        composer.insert_text(MailMergeProcessor.to_field(field));
     }
 
-    private bool contains_field(string value) {
-        var found = false;
-        var index = 0;
-        while (!found) {
-            var field_start = value.index_of(FIELD_START, index);
-            if (field_start < 0) {
-                break;
-            }
-            found = parse_field((string) value.data[field_start:-1]) != null;
-            index = field_start + 1;
+    private async Geary.Email load_merge_email(Email plugin) throws GLib.Error {
+        Geary.Email? engine = this.client_plugins.to_engine_email(plugin);
+        if (engine != null &&
+            !engine.fields.fulfills(MailMergeProcessor.REQUIRED_FIELDS)) {
+            var account_context = this.client_plugins.to_client_account(
+                plugin.identifier.account
+            );
+            engine = yield account_context.emails.fetch_email_async(
+                engine.id,
+                MailMergeProcessor.REQUIRED_FIELDS,
+                Geary.Folder.ListFlags.LOCAL_ONLY,
+                this.cancellable
+            );
         }
-        return found;
-    }
-
-    private string? parse_field(string value) {
-        string? field = null;
-        if (value.has_prefix(FIELD_START)) {
-            int start = FIELD_START.length;
-            int end = value.index_of(FIELD_END, start);
-            if (end >= 0) {
-                field = value.substring(start, end - FIELD_END.length).strip();
-            }
+        if (engine == null) {
+            throw new Geary.EngineError.NOT_FOUND("Plugin email not found");
         }
-        return field;
+        return engine;
     }
 
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {

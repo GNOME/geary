@@ -9,6 +9,7 @@ plugin_dest = plugins_dir / plugin_name
 
 lib_src = files(
   'mail-merge-folder.vala',
+  'mail-merge-processor.vala',
   'util-csv.vala',
 )
 
