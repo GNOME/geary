@@ -85,6 +85,17 @@ public class Mock.Folder : Geary.Folder,
         void_call("synchronise_remote", { cancellable });
     }
 
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        return yield object_call_async<Gee.Collection<Geary.EmailIdentifier>>(
+            "contains_identifiers",
+            {ids, cancellable},
+            new Gee.LinkedList<Geary.EmailIdentifier>()
+        );
+    }
+
     public override async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,

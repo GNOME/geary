@@ -627,6 +627,20 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
         throws GLib.Error;
 
     /**
+     * Determines the email identifiers that are contained in the folder.
+     *
+     * The returned collection will be a subset of the given input
+     * collection that contains an input identifier only if that
+     * identifier belongs to an email contained by the folder.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async Gee.Collection<EmailIdentifier> contains_identifiers(
+        Gee.Collection<EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error;
+
+    /**
      * List a number of contiguous emails in the folder's vector.
      *
      * Emails in the folder are listed starting at a particular

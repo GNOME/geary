@@ -1201,6 +1201,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.replay_queue.schedule_server_notification(op);
     }
 
+    /** {@inheritDoc} */
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        check_open("contains_identifiers");
+        return yield this.local_folder.contains_identifiers(ids, cancellable);
+    }
+
     //
     // list email variants
     //

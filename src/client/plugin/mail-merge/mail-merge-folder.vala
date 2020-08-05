@@ -141,6 +141,18 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
         );
     }
 
+    /** {@inheritDoc} */
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        return Geary.traverse(
+            ids
+        ).filter(
+            (id) => this.map.has_key(id)
+        ).to_hash_set();
+    }
+
     public override async Geary.Email
         fetch_email_async(Geary.EmailIdentifier id,
                           Geary.Email.Field required_fields,

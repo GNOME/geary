@@ -213,6 +213,18 @@ public class Geary.App.SearchFolder :
         return results;
     }
 
+    /** {@inheritDoc} */
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        return Geary.traverse(
+            ids
+        ).filter(
+            (id) => this.id_map.has_key(id)
+        ).to_hash_set();
+    }
+
     public override async Gee.List<Email>? list_email_by_id_async(
         EmailIdentifier? initial_id,
         int count,

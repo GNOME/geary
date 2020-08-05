@@ -210,6 +210,34 @@ public class Geary.Outbox.Folder :
         }
     }
 
+    /** {@inheritDoc} */
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        check_open();
+        var contains = new Gee.HashSet<Geary.EmailIdentifier>();
+        yield db.exec_transaction_async(
+            RO,
+            (cx, cancellable) => {
+                foreach (Geary.EmailIdentifier id in ids) {
+                    var outbox_id = id as EmailIdentifier;
+                    if (outbox_id != null) {
+                        var row = do_fetch_row_by_ordering(
+                            cx, outbox_id.ordering, cancellable
+                        );
+                        if (row != null) {
+                            contains.add(id);
+                        }
+                    }
+                }
+                return DONE;
+            },
+            cancellable
+        );
+        return contains;
+    }
+
     public override async Gee.List<Email>?
         list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
                                int count,
