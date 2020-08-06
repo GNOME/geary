@@ -21,10 +21,6 @@ public class Plugin.MailMerge :
     PluginBase, FolderExtension, EmailExtension, TrustedExtension {
 
 
-    private const string FIELD_START = "{{";
-    private const string FIELD_END = "}}";
-
-
     // Translators: Templates folder name alternatives. Separate names
     // using a vertical bar and put the most common localized name to
     // the front for the default. English names do not need to be
@@ -125,21 +121,6 @@ public class Plugin.MailMerge :
         this.folder_names.clear();
     }
 
-    private async bool is_mail_merge_template(Email plugin) {
-        bool is_merge = false;
-        try {
-            Geary.Email? email = yield load_merge_email(plugin);
-            if (email != null) {
-                is_merge = global::MailMerge.Processor.is_mail_merge_template(
-                    email
-                );
-            }
-        } catch (GLib.Error err) {
-            warning("Unable to load merge template: %s", err.message);
-        }
-        return is_merge;
-    }
-
     private async void edit_email(EmailIdentifier id) {
         try {
             var composer = yield this.plugin_application.compose_with_context(
@@ -213,13 +194,20 @@ public class Plugin.MailMerge :
         } catch (GLib.Error err) {
             warning("Could not load folders for email: %s", err.message);
         }
-        if (containing.any_match((f) => f.display_name in this.folder_names) &&
-            yield is_mail_merge_template(target)) {
-            this.email.add_email_info_bar(
-                target.identifier,
-                new_template_email_info_bar(target.identifier),
-                INFO_BAR_PRIORITY
-            );
+        if (containing.any_match((f) => f.display_name in this.folder_names)) {
+            try {
+                var email = yield load_merge_email(target);
+                if (global::MailMerge.Processor.is_mail_merge_template(email)) {
+                    this.email.add_email_info_bar(
+                        target.identifier,
+                        new_template_email_info_bar(target.identifier),
+                        INFO_BAR_PRIORITY
+                    );
+                }
+            } catch (GLib.Error err) {
+                warning("Error checking email for merge templates: %s",
+                        err.message);
+            }
         }
     }
 

@@ -14,6 +14,7 @@ lib_src = files(
 )
 
 test_src = files(
+  'mail-merge-test-processor.vala',
   'mail-merge-test-reader.vala',
   'mail-merge-test.vala'
 )

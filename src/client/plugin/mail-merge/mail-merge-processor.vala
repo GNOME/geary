@@ -19,6 +19,81 @@ public class MailMerge.Processor : GLib.Object {
     private const string FIELD_END = "}}";
 
 
+    private struct Parser {
+
+        public unowned string text;
+        public int index;
+        public bool spent;
+        public bool at_field_start;
+        public bool at_field_end;
+
+        public Parser(string text) {
+            this.text = text;
+            this.index = 0;
+            this.spent = (text.length == 0);
+            this.at_field_start = text.has_prefix(FIELD_START);
+            this.at_field_end = false;
+        }
+
+        public string read_text() {
+            this.at_field_end = false;
+
+            int start = this.index;
+            char c = this.text[this.index];
+            while (c != 0) {
+                this.index++;
+                if (c == FIELD_START[0] &&
+                    this.text[this.index] == FIELD_START[1]) {
+                    this.index--;
+                    this.at_field_start = true;
+                    break;
+                }
+                c = this.text[this.index];
+            }
+            if (c == 0) {
+                this.spent = true;
+            }
+            return this.text.slice(start, this.index);
+        }
+
+        public string read_field() {
+            this.at_field_start = false;
+
+            // Skip the opening field separator
+            this.index += FIELD_START.length;
+
+            int start = this.index;
+            char c = this.text[this.index];
+            while (c != 0) {
+                this.index++;
+                if (c == FIELD_END[0]) {
+                    if (this.text[this.index] == FIELD_END[1]) {
+                        this.index++;
+                        this.at_field_end = true;
+                        break;
+                    }
+                }
+                c = this.text[this.index];
+            }
+            var end = this.index;
+            if (this.at_field_end) {
+                // Don't include the closing field separator
+                end -= FIELD_END.length;
+            } else {
+                // No closing field separator found, so not a valid
+                // field. Move start back so it includes the opening
+                // field separator
+                start -= FIELD_START.length;
+            }
+            if (c == 0 || this.index == this.text.length) {
+                this.spent = true;
+            }
+            return this.text.slice(start, end);
+        }
+
+    }
+
+
     public static string to_field(string name) {
         return FIELD_START + name + FIELD_END;
     }
@@ -51,30 +126,21 @@ public class MailMerge.Processor : GLib.Object {
         return found;
     }
 
-    private static bool contains_field(string value) {
+    public static bool contains_field(string text) {
+        var parser = Parser(text);
         var found = false;
-        var index = 0;
-        while (!found) {
-            var field_start = value.index_of(FIELD_START, index);
-            if (field_start < 0) {
-                break;
+        while (!parser.spent) {
+            if (parser.at_field_start) {
+                parser.read_field();
+                if (parser.at_field_end) {
+                    found = true;
+                    break;
+                }
+            } else {
+                parser.read_text();
             }
-            found = parse_field((string) value.data[field_start:-1]) != null;
-            index = field_start + 1;
         }
         return found;
-    }
-
-    private static string? parse_field(string value) {
-        string? field = null;
-        if (value.has_prefix(FIELD_START)) {
-            int start = FIELD_START.length;
-            int end = value.index_of(FIELD_END, start);
-            if (end >= 0) {
-                field = value.substring(start, end - FIELD_END.length).strip();
-            }
-        }
-        return field;
     }
 
 }
