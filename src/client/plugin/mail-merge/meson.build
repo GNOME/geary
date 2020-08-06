@@ -14,7 +14,8 @@ lib_src = files(
 )
 
 test_src = files(
-  'util-test.vala'
+  'mail-merge-test-reader.vala',
+  'mail-merge-test.vala'
 )
 
 lib = static_library(

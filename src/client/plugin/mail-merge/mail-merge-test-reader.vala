@@ -5,11 +5,11 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ReaderTests : ValaUnit.TestCase {
+public class Plugin.MailMergeTestReader : ValaUnit.TestCase {
 
 
-    public ReaderTests() {
-        base("ReaderTests");
+    public MailMergeTestReader() {
+        base("MailMergeTestReader");
         add_test("read_simple_lf", read_simple_lf);
         add_test("read_simple_crlf", read_simple_crlf);
         add_test("read_no_trailing_new_line", read_no_trailing_new_line);
@@ -157,25 +157,4 @@ bar",""""""";
         );
     }
 
-}
-
-
-int main(string[] args) {
-    Test.init(ref args);
-
-    typeof(ReaderTests).name();
-
-    TestSuite root = TestSuite.get_root();
-    root.add_suite(new ReaderTests().suite);
-
-    MainLoop loop = new MainLoop();
-    int ret = -1;
-    Idle.add(() => {
-            ret = Test.run();
-            loop.quit();
-            return false;
-        });
-
-    loop.run();
-    return ret;
 }
