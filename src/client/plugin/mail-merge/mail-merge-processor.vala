@@ -8,7 +8,7 @@
 /**
  * Substitutes merge fields in an email with actual data.
  */
-public class Plugin.MailMergeProcessor : GLib.Object {
+public class MailMerge.Processor : GLib.Object {
 
 
     public const Geary.Email.Field REQUIRED_FIELDS =

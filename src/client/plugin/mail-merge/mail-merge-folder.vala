@@ -8,7 +8,7 @@
 /**
  * Plugin to Fill in and send email templates using a spreadsheet.
  */
-public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
+public class MailMerge.Folder : Geary.AbstractLocalFolder {
 
 
     private class EmailIdentifier : Geary.EmailIdentifier {
@@ -119,14 +119,14 @@ public class Plugin.MailMergeFolder : Geary.AbstractLocalFolder {
     private Gee.List<Geary.Email> list =
         new Gee.ArrayList<Geary.Email>();
     private Geary.Email template;
-    private Util.Csv.Reader data;
+    private Csv.Reader data;
     private GLib.Cancellable loading = new GLib.Cancellable();
 
 
-    public MailMergeFolder(Geary.Account account,
-                           Geary.FolderRoot root,
-                           Geary.Email template,
-                           Util.Csv.Reader data) {
+    public Folder(Geary.Account account,
+                  Geary.FolderRoot root,
+                  Geary.Email template,
+                  Csv.Reader data) {
         this._account = account;
         this._path = root.get_child("$Plugin.MailMerge$");
         this.template = template;

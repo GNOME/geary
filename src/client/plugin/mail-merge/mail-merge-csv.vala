@@ -7,7 +7,7 @@
 
 
 /** Denotes CSV-specific error conditions. */
-public errordomain Plugin.Util.Csv.DataError {
+public errordomain MailMerge.Csv.DataError {
 
     /** The input stream contained non-text data. */
     NON_TEXT_DATA,
@@ -26,7 +26,7 @@ public errordomain Plugin.Util.Csv.DataError {
  * To use this class, simply construct an instance start calling
  * {@link read_record}.
  */
-public class Plugin.Util.Csv.Reader : Geary.BaseObject {
+public class MailMerge.Csv.Reader : Geary.BaseObject {
 
 
     // UTF byte prefixes indicating multi-byte codepoints

@@ -65,7 +65,7 @@ public class Plugin.MailMerge :
     private FolderStore? folder_store = null;
     private EmailStore? email_store = null;
 
-    private MailMergeFolder? merge_folder = null;
+    private global::MailMerge.Folder? merge_folder = null;
 
     private GLib.SimpleAction? edit_action = null;
     private GLib.SimpleAction? merge_action = null;
@@ -130,7 +130,9 @@ public class Plugin.MailMerge :
         try {
             Geary.Email? email = yield load_merge_email(plugin);
             if (email != null) {
-                is_merge = MailMergeProcessor.is_mail_merge_template(email);
+                is_merge = global::MailMerge.Processor.is_mail_merge_template(
+                    email
+                );
             }
         } catch (GLib.Error err) {
             warning("Unable to load merge template: %s", err.message);
@@ -169,7 +171,9 @@ public class Plugin.MailMerge :
                     GLib.Priority.DEFAULT,
                     this.cancellable
                 );
-                var csv = yield new Util.Csv.Reader(csv_input, this.cancellable);
+                var csv = yield new global::MailMerge.Csv.Reader(
+                    csv_input, this.cancellable
+                );
 
                 Gee.Collection<Email> emails = yield this.email_store.get_email(
                     Geary.Collection.single(id),
@@ -181,7 +185,7 @@ public class Plugin.MailMerge :
                     );
                     var email = Geary.Collection.first(emails);
 
-                    this.merge_folder = new Plugin.MailMergeFolder(
+                    this.merge_folder = new global::MailMerge.Folder(
                         account_context.account,
                         account_context.account.local_folder_root,
                         yield load_merge_email(email),
@@ -298,7 +302,9 @@ public class Plugin.MailMerge :
             GLib.Priority.DEFAULT,
             this.cancellable
         );
-        var csv = yield new Util.Csv.Reader(input, this.cancellable);
+        var csv = yield new global::MailMerge.Csv.Reader(
+            input, this.cancellable
+        );
         var record = yield csv.read_record();
 
         var text_fields_menu = new GLib.Menu();
@@ -347,19 +353,19 @@ public class Plugin.MailMerge :
     }
 
     private void insert_field(Composer composer, string field) {
-        composer.insert_text(MailMergeProcessor.to_field(field));
+        composer.insert_text(global::MailMerge.Processor.to_field(field));
     }
 
     private async Geary.Email load_merge_email(Email plugin) throws GLib.Error {
         Geary.Email? engine = this.client_plugins.to_engine_email(plugin);
         if (engine != null &&
-            !engine.fields.fulfills(MailMergeProcessor.REQUIRED_FIELDS)) {
+            !engine.fields.fulfills(global::MailMerge.Processor.REQUIRED_FIELDS)) {
             var account_context = this.client_plugins.to_client_account(
                 plugin.identifier.account
             );
             engine = yield account_context.emails.fetch_email_async(
                 engine.id,
-                MailMergeProcessor.REQUIRED_FIELDS,
+                global::MailMerge.Processor.REQUIRED_FIELDS,
                 Geary.Folder.ListFlags.LOCAL_ONLY,
                 this.cancellable
             );

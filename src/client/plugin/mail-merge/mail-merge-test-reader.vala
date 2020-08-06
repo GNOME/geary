@@ -5,11 +5,11 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Plugin.MailMergeTestReader : ValaUnit.TestCase {
+public class MailMerge.TestReader : ValaUnit.TestCase {
 
 
-    public MailMergeTestReader() {
-        base("MailMergeTestReader");
+    public TestReader() {
+        base("MailMerge.TestReader");
         add_test("read_simple_lf", read_simple_lf);
         add_test("read_simple_crlf", read_simple_crlf);
         add_test("read_no_trailing_new_line", read_no_trailing_new_line);
@@ -150,9 +150,9 @@ bar",""""""";
         assert_array_is_null(eof1);
     }
 
-    private async Plugin.Util.Csv.Reader new_reader(uint8[] data)
+    private async MailMerge.Csv.Reader new_reader(uint8[] data)
         throws GLib.Error {
-        return yield new Plugin.Util.Csv.Reader(
+        return yield new MailMerge.Csv.Reader(
             new GLib.MemoryInputStream.from_data(data, null)
         );
     }
