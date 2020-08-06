@@ -1182,12 +1182,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 foreach (var candidate in email_map.get_keys()) {
                     if (candidate.message_id != null &&
                         mid.equal_to(candidate.message_id)) {
-                        to_addresses = to_addresses.append(
+                        to_addresses = to_addresses.merge_list(
                             Geary.RFC822.Utils.create_to_addresses_for_reply(
                                 candidate, sender_addresses
                             )
                         );
-                        cc_addresses = cc_addresses.append(
+                        cc_addresses = cc_addresses.merge_list(
                             Geary.RFC822.Utils.create_cc_addresses_for_reply_all(
                                 candidate, sender_addresses
                             )

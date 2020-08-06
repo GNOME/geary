@@ -13,6 +13,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         add_test("from_rfc822_string_quoted", from_rfc822_string_quoted);
         add_test("to_rfc822_string", to_rfc822_string);
         add_test("contains_all", contains_all);
+        add_test("merge", merge);
         add_test("equal_to", equal_to);
         add_test("hash", hash);
     }
@@ -84,6 +85,20 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
             )
         );
     }
+
+    public void merge() throws GLib.Error {
+        var a1 = new MailboxAddress(null, "a@example.com");
+        var b = new MailboxAddress(null, "b@example.com");
+        var a2 = new MailboxAddress(null, "a@example.com");
+        var list = new MailboxAddresses.single(a1);
+
+        assert_equal<int?>(list.merge_mailbox(b).size, 2);
+        assert_equal<int?>(list.merge_mailbox(a2).size, 1);
+
+        assert_equal<int?>(list.merge_list(new MailboxAddresses.single(b)).size, 2);
+        assert_equal<int?>(list.merge_list(new MailboxAddresses.single(a2)).size, 1);
+    }
+
 
     public void equal_to() throws GLib.Error {
         var mailboxes_a = new_addreses({ "test1@example.com" });

@@ -71,16 +71,25 @@ public class Geary.RFC822.MailboxAddresses :
     private uint hash_value = 0;
 
 
+    /**
+     * Constructs a new mailbox list.
+     *
+     * If the optional collection of addresses is not given, the list
+     * is created empty. Otherwise the collection's addresses are
+     * added to the list by iterating over it in natural order.
+     */
     public MailboxAddresses(Gee.Collection<MailboxAddress>? addrs = null) {
         if (addrs != null) {
             this.addrs.add_all(addrs);
         }
     }
 
+    /** Constructs a new mailbox list with a single address. */
     public MailboxAddresses.single(MailboxAddress addr) {
         this.addrs.add(addr);
     }
 
+    /** Constructs a new mailbox list by parsing a RFC822 string. */
     public MailboxAddresses.from_rfc822_string(string rfc822)
         throws Error {
         var list = GMime.InternetAddressList.parse(
@@ -93,6 +102,7 @@ public class Geary.RFC822.MailboxAddresses :
         this.from_gmime(list);
     }
 
+    /** Constructs a new mailbox from a GMime list. */
     public MailboxAddresses.from_gmime(GMime.InternetAddressList list)
         throws Error {
         int length = list.length();
@@ -166,10 +176,51 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     /**
+     * Returns a list with the given mailbox appended if not already present.
+     *
+     * This list is returned if the given mailbox is already present,
+     * otherwise the result of a call to {@link concatenate_mailbox} is
+     * returned.
+     */
+    public MailboxAddresses merge_mailbox(MailboxAddress other) {
+        return (
+            this.addrs.contains(other)
+            ? this
+            : this.concatenate_mailbox(other)
+        );
+    }
+
+    /**
+     * Returns a list with the given mailboxes appended if not already present.
+     *
+     * This list is returned if all given mailboxes are already
+     * present, otherwise the result of a call to {@link
+     * concatenate_mailbox} for each not present is returned.
+     */
+    public MailboxAddresses merge_list(MailboxAddresses other) {
+        var list = this;
+        foreach (var addr in other) {
+            if (!this.addrs.contains(addr)) {
+                list = list.concatenate_mailbox(addr);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Returns a new list with the given address appended to this list's.
+     */
+    public MailboxAddresses concatenate_mailbox(MailboxAddress other) {
+        var new_addrs = new MailboxAddresses(this.addrs);
+        new_addrs.addrs.add(other);
+        return new_addrs;
+    }
+
+    /**
      * Returns a new list with the given addresses appended to this list's.
      */
-    public MailboxAddresses append(MailboxAddresses others) {
-        MailboxAddresses new_addrs = new MailboxAddresses(this.addrs);
+    public MailboxAddresses concatenate_list(MailboxAddresses others) {
+        var new_addrs = new MailboxAddresses(this.addrs);
         new_addrs.addrs.add_all(others.addrs);
         return new_addrs;
     }
