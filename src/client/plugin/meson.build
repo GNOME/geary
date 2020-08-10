@@ -6,8 +6,8 @@
 plugin_dependencies = [
   folks,
   gdk,
-  geary_client_dep,
-  geary_engine_dep,
+  client_dep,
+  engine_dep,
   gee,
   gmime,
   goa,

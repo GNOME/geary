@@ -17,7 +17,7 @@ libmock_sources = [
   'mock/mock-search-query.vala',
 ]
 
-geary_test_engine_sources = [
+test_engine_sources = [
   'test-case.vala',
   'test-server.vala',
   'test-engine.vala',
@@ -70,10 +70,10 @@ geary_test_engine_sources = [
   'engine/util-string-test.vala',
   'engine/util-timeout-manager-test.vala',
 
-  geary_test_engine_resources
+  test_engine_resources
 ]
 
-geary_test_client_sources = [
+test_client_sources = [
   'test-case.vala',
   'test-client.vala',
 
@@ -97,7 +97,7 @@ geary_test_client_sources = [
   geary_resources
 ]
 
-geary_test_integration_sources = [
+test_integration_sources = [
   'test-case.vala',
   'test-integration.vala',
 
@@ -107,40 +107,40 @@ geary_test_integration_sources = [
 
 # Engine tests
 
-geary_test_engine_dependencies = [
-  geary_engine_internal_dep,
+test_engine_dependencies = [
+  engine_internal_dep,
   vala_unit_dep,
 ]
-geary_test_engine_dependencies += geary_engine_dependencies
+test_engine_dependencies += engine_dependencies
 
-geary_test_engine_vala_args = geary_vala_args
+test_engine_vala_args = geary_vala_args
 
 if get_option('tnef-support')
-  geary_test_engine_dependencies += libytnef
-  geary_test_engine_vala_args += [
+  test_engine_dependencies += libytnef
+  test_engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
   ]
 endif
 
-geary_test_engine_bin = executable('test-engine',
-  geary_test_engine_sources + libmock_sources,
-  dependencies: geary_test_engine_dependencies,
+test_engine_bin = executable('test-engine',
+  test_engine_sources + libmock_sources,
+  dependencies: test_engine_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_test_engine_vala_args,
+  vala_args: test_engine_vala_args,
   c_args: geary_c_args,
 )
 
 # Client tests
 
-geary_test_client_dependencies = [
-  geary_client_dep,
+test_client_dependencies = [
+  client_dep,
   vala_unit_dep,
 ]
-geary_test_client_dependencies += geary_client_dependencies
+test_client_dependencies += client_dependencies
 
-geary_test_client_bin = executable('test-client',
-  geary_test_client_sources + libmock_sources,
-  dependencies: geary_test_client_dependencies,
+test_client_bin = executable('test-client',
+  test_client_sources + libmock_sources,
+  dependencies: test_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
@@ -148,10 +148,10 @@ geary_test_client_bin = executable('test-client',
 
 # Integration tests
 
-geary_test_integration_bin = executable('test-integration',
-  geary_test_integration_sources,
+test_integration_bin = executable('test-integration',
+  test_integration_sources,
   dependencies: [
-    geary_engine_dep,
+    engine_dep,
     gee,
     gio,
     gmime,
@@ -163,5 +163,5 @@ geary_test_integration_bin = executable('test-integration',
   c_args: geary_c_args,
 )
 
-test('engine-tests', geary_test_engine_bin)
-test('client-tests', geary_test_client_bin)
+test('engine-tests', test_engine_bin)
+test('client-tests', test_client_bin)
