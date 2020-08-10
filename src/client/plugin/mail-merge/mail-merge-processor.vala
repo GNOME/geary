@@ -11,8 +11,9 @@
 public class MailMerge.Processor : GLib.Object {
 
 
-    public const Geary.Email.Field REQUIRED_FIELDS =
-        Geary.Email.REQUIRED_FOR_MESSAGE;
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        ENVELOPE | Geary.Email.REQUIRED_FOR_MESSAGE
+    );
 
 
     private const string FIELD_START = "{{";
@@ -141,6 +142,130 @@ public class MailMerge.Processor : GLib.Object {
             }
         }
         return found;
+    }
+
+
+    /** The email template being processed. */
+    public Geary.Email template {
+        get; private set;
+    }
+
+    /** The email constructed by the processor. */
+    public Geary.ComposedEmail? email {
+        get; private set; default = null;
+    }
+
+    /** A list of data fields missing when processing the template. */
+    public Gee.List<string> missing_fields {
+        get; private set; default = new Gee.LinkedList<string>();
+    }
+
+    /** Constructs a new merge processor with the given template. */
+    public Processor(Geary.Email template) {
+        this.template = template;
+    }
+
+    /**
+     * Merges the template with the given data to produce a complete message.
+     *
+     * Creates a new composed email based on the template and given
+     * data, set it as the {@email} property and returns it.
+     */
+    public Geary.ComposedEmail merge(Gee.Map<string,string> values)
+        throws GLib.Error {
+        var from = format_mailbox_addresses(this.template.from, values);
+        var email = this.email = new Geary.ComposedEmail(
+            new GLib.DateTime.now(), from
+        );
+        email.set_to(format_mailbox_addresses(this.template.to, values));
+        email.set_cc(format_mailbox_addresses(this.template.cc, values));
+        email.set_bcc(format_mailbox_addresses(this.template.bcc, values));
+        email.set_reply_to(format_mailbox_addresses(this.template.reply_to, values));
+        email.set_sender(format_mailbox_address(this.template.sender, values));
+        if (this.template.subject != null) {
+            email.set_subject(
+                format_string(this.template.subject.value, values)
+            );
+        }
+        email.set_in_reply_to(this.template.in_reply_to);
+        email.set_references(this.template.references);
+        // Don't set the Message-ID since it should be per-recipient
+
+        var message = this.template.get_message();
+        if (message.has_plain_body()) {
+            email.body_text = format_string(
+                message.get_plain_body(false, null), values
+            );
+        }
+        if (message.has_html_body()) {
+            email.body_html = format_string(
+                message.get_html_body(null), values
+            );
+        }
+
+        return email;
+    }
+
+    private inline Geary.RFC822.MailboxAddresses? format_mailbox_addresses(
+        Geary.RFC822.MailboxAddresses? addresses,
+        Gee.Map<string,string> values
+    ) {
+        Geary.RFC822.MailboxAddresses? formatted = null;
+        if (addresses != null && !addresses.is_empty) {
+            formatted = new Geary.RFC822.MailboxAddresses();
+            foreach (var addr in addresses) {
+                formatted = formatted.merge_mailbox(
+                    format_mailbox_address(addr, values)
+                );
+            }
+        }
+        return formatted;
+    }
+
+    private inline Geary.RFC822.MailboxAddress? format_mailbox_address(
+        Geary.RFC822.MailboxAddress? address,
+        Gee.Map<string,string> values
+    ) {
+        Geary.RFC822.MailboxAddress? formatted = null;
+        if (address != null) {
+            formatted = new Geary.RFC822.MailboxAddress(
+                format_string(address.name, values),
+                format_string(address.address, values)
+            );
+        }
+        return formatted;
+    }
+
+    private inline string format_string(string? text,
+                                        Gee.Map<string,string> values) {
+        string? formatted = null;
+        if (text != null) {
+            var buf = new GLib.StringBuilder.sized(text.length);
+            var parser = Parser(text);
+
+            while (!parser.spent) {
+                string? value = null;
+                if (parser.at_field_start) {
+                    var field = parser.read_field();
+                    if (parser.at_field_end) {
+                        // found end-of-field-delim, look it up
+                        value = values.get(field);
+                        if (value == null) {
+                            this.missing_fields.add(field);
+                            value = to_field(field);
+                        }
+                    } else {
+                        // didn't find end-of-field-delim, treat as text
+                        value = field;
+                    }
+                } else {
+                    value = parser.read_text();
+                }
+                buf.append(value);
+            }
+            formatted = buf.str;
+        }
+        return formatted;
     }
 
 }

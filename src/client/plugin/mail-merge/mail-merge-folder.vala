@@ -264,7 +264,11 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                 for (int i = 0; i < headers.length; i++) {
                     fields.set(headers[i], record[i]);
                 }
-                var message = new Geary.RFC822.Message.from_buffer(raw_rfc822);
+                var processor = new Processor(this.template);
+                var composed = processor.merge(fields);
+                var message = yield new Geary.RFC822.Message.from_composed_email(
+                    composed, null, cancellable
+                );
 
                 var id = new EmailIdentifier(next_id++);
                 var email = new Geary.Email.from_message(id, message);

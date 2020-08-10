@@ -53,6 +53,8 @@ public class MailMerge.TestProcessor : ValaUnit.TestCase {
         base("MailMerge.TestProcessor");
         add_test("contains_field", contains_field);
         add_test("is_mail_merge_template", is_mail_merge_template);
+        add_test("identity_merge", identity_merge);
+        add_test("subject_merge", subject_merge);
     }
 
     public void contains_field() throws GLib.Error {
@@ -83,6 +85,31 @@ public class MailMerge.TestProcessor : ValaUnit.TestCase {
             Processor.is_mail_merge_template(string_to_email(TEMPLATE_BODY)),
             "body"
         );
+    }
+
+    public void identity_merge() throws GLib.Error {
+        var original = string_to_email(TEMPLATE_SUBJECT);
+        var processor = new Processor(original);
+        var merged = processor.merge(Gee.Map.empty<string,string>());
+
+        assert_equal(merged.from.to_rfc822_string(), original.from.to_rfc822_string());
+        assert_equal(merged.reply_to.to_rfc822_string(), original.reply_to.to_rfc822_string());
+        assert_equal(merged.sender.to_rfc822_string(), original.sender.to_rfc822_string());
+        assert_equal(merged.to.to_rfc822_string(), original.to.to_rfc822_string());
+        assert_equal(merged.cc.to_rfc822_string(), original.cc.to_rfc822_string());
+        assert_equal(merged.bcc.to_rfc822_string(), original.bcc.to_rfc822_string());
+        assert_equal(merged.subject.to_rfc822_string(), original.subject.to_rfc822_string());
+        assert_equal(merged.body_text, original.get_message().get_plain_body(false, null));
+    }
+
+    public void subject_merge() throws GLib.Error {
+        var original = string_to_email(TEMPLATE_SUBJECT);
+        var processor = new Processor(original);
+        var merged = processor.merge(
+            Geary.Collection.single_map("subject", "test")
+        );
+
+        assert_equal(merged.subject.value, "test");
     }
 
     private Geary.Email string_to_email(string message_text)
@@ -120,7 +147,7 @@ To: Charlie <charlie@example.net>
 CC: Dave <dave@example.net>
 BCC: Eve <eve@example.net>
 Reply-To: "Alice: Personal Account" <alice@example.org>
-Subject: {{hello}}
+Subject: {{subject}}
 Date: Fri, 21 Nov 1997 10:01:10 -0600
 Message-ID: <3456@example.net>
 In-Reply-To: <1234@local.machine.example>
