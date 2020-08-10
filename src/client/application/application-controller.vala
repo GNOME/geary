@@ -13,7 +13,8 @@
  * A single instance of this class is constructed by {@link Client}
  * when the primary application instance is started.
  */
-internal class Application.Controller : Geary.BaseObject {
+internal class Application.Controller :
+    Geary.BaseObject, AccountInterface {
 
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
@@ -78,6 +79,7 @@ internal class Application.Controller : Geary.BaseObject {
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
+    private bool is_loading_accounts = true;
 
     // Cancelled if the controller is closed
     private GLib.Cancellable controller_open;
@@ -96,31 +98,6 @@ internal class Application.Controller : Geary.BaseObject {
     private Geary.TimeoutManager all_windows_backgrounded_timeout;
 
     private GLib.Cancellable? storage_cleanup_cancellable;
-
-
-    /**
-     * Emitted when an account is added or is enabled.
-     *
-     * This will be emitted after an account is opened and added to
-     * the controller.
-     */
-    public signal void account_available(AccountContext context);
-
-    /**
-     * Emitted when an account is removed or is disabled.
-     *
-     * This will be emitted after the account is removed from the
-     * controller's collection of accounts, but before the {@link
-     * AccountContext.cancellable} is cancelled and before the account
-     * itself is closed.
-     *
-     * The `is_shutdown` argument will be true if the application is
-     * in the middle of quitting, otherwise if the account was simply
-     * removed but the application will keep running, then it will be
-     * false.
-     */
-    public signal void account_unavailable(AccountContext context,
-                                           bool is_shutdown);
 
 
     /**
@@ -213,8 +190,9 @@ internal class Application.Controller : Geary.BaseObject {
 
         yield this.account_manager.connect_goa(cancellable);
 
-        // Start loading accounts
+        // Load accounts
         yield this.account_manager.load_accounts(cancellable);
+        this.is_loading_accounts = false;
 
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
@@ -1003,7 +981,7 @@ internal class Application.Controller : Geary.BaseObject {
         // Notify before opening so that listeners have a chance to
         // hook into it before signals start getting fired by folders
         // becoming available, etc.
-        account_available(context);
+        account_available(context, this.is_loading_accounts);
 
         bool retry = false;
         do {
