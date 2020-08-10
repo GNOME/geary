@@ -11,6 +11,26 @@
  */
 public class Composer.WebView : ClientWebView {
 
+    /** HTML id used for the main text section of the message body. */
+    public const string BODY_HTML_ID = "geary-body";
+    /** HTML id used for the signature section of the message body. */
+    public const string SIGNATURE_HTML_ID = "geary-signature";
+    /** HTML id used for the bottom-quote section of the message body. */
+    public const string QUOTE_HTML_ID = "geary-quote";
+
+    // Markup fragments used when loading a new message.
+    private const string HTML_PRE = """<html><body class="%s">""";
+    private const string HTML_POST = """</body></html>""";
+    private const string BODY_PRE = """
+<div id="%s" dir="auto">""";
+    private const string BODY_POST = """</div>
+<div id="%s" class="geary-no-display" dir="auto"></div>
+""";
+    private const string QUOTE = """
+<div id="%s" dir="auto"><br />%s</div>
+""";
+    private const string CURSOR = "<div><span id=\"cursormarker\"></span><br /></div>";
+    private const string SPACER = "<div><br /></div>";
 
     // WebKit message handler names
     private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
@@ -149,24 +169,11 @@ public class Composer.WebView : ClientWebView {
                               string quote,
                               bool top_posting,
                               bool body_complete) {
-        const string HTML_PRE = """<html><body class="%s">""";
-        const string HTML_POST = """</body></html>""";
-        const string BODY_PRE = """
-<div id="geary-body" dir="auto">""";
-        const string BODY_POST = """</div>
-<div id="geary-signature" class="geary-no-display" dir="auto"></div>
-""";
-        const string QUOTE = """
-<div id="geary-quote" dir="auto"><br />%s</div>
-""";
-        const string CURSOR = "<div><span id=\"cursormarker\"></span><br /></div>";
-        const string SPACER = "<div><br /></div>";
-
         StringBuilder html = new StringBuilder();
         string body_class = (this.is_rich_text) ? "" : "plain";
         html.append(HTML_PRE.printf(body_class));
         if (!body_complete) {
-            html.append(BODY_PRE);
+            html.append(BODY_PRE.printf(BODY_HTML_ID));
             bool have_body = !Geary.String.is_empty(body);
             if (have_body) {
                 html.append(body);
@@ -179,10 +186,10 @@ public class Composer.WebView : ClientWebView {
             }
 
             html.append(CURSOR);
-            html.append(BODY_POST);
+            html.append(BODY_POST.printf(SIGNATURE_HTML_ID));
 
             if (top_posting && !Geary.String.is_empty(quote)) {
-                html.append_printf(QUOTE, quote);
+                html.append_printf(QUOTE, QUOTE_HTML_ID, quote);
             }
         } else {
             html.append(body);
