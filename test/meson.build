@@ -133,7 +133,7 @@ test_engine_bin = executable('test-engine',
 # Client tests
 
 test_client_dependencies = [
-  client_dep,
+  client_internal_dep,
   vala_unit_dep,
 ]
 test_client_dependencies += client_dependencies
@@ -144,6 +144,7 @@ test_client_bin = executable('test-client',
   include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
+  build_rpath: client_build_dir,
 )
 
 # Integration tests

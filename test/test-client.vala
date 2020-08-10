@@ -6,10 +6,6 @@
  */
 
 
-extern const string _INSTALL_PREFIX;
-extern const string _BUILD_ROOT_DIR;
-extern const string _GSETTINGS_DIR;
-
 int main(string[] args) {
     /*
      * Set env vars right up front to avoid weird bugs

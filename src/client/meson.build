@@ -170,6 +170,21 @@ client_dependencies = [
   webkit2gtk,
 ]
 
+client_build_dir = meson.current_build_dir()
+
+# Generate internal VAPI for unit testing. See Meson issue
+# https://github.com/mesonbuild/meson/issues/1781 for official
+# internal VAPI support.
+client_vala_args = geary_vala_args
+client_vala_args += [
+  '--internal-header=@0@/@1@-internal.h'.format(
+    client_build_dir, client_package_name
+  ),
+  '--internal-vapi=@0@/@1@-internal.vapi'.format(
+    client_build_dir, client_package_name
+  )
+]
+
 # Enable shared shecondary process if available.
 # See issues #558 and #559
 webkit_version = webkit2gtk.version().split('.')
@@ -192,9 +207,44 @@ client_lib = shared_library(
   install_dir: client_lib_dir,
 )
 
+# Dummy target to tell Meson about the internal VAPI given the
+# workaround above, and fix the VAPI header to work around
+# GNOME/vala#358
+client_internal_header_fixup = custom_target(
+  'client_internal_header_fixup',
+  output: [
+    'geary-client-internal.h',
+    'geary-client-internal.vapi',
+  ],
+  command: [
+    find_program('sed'),
+    '-ibak',
+    's/@0@.h/geary-client-internal.h/g'.format(client_package),
+    '@OUTDIR@/geary-client-internal.vapi',
+  ],
+  depends: client_lib
+)
+
 client_dep = declare_dependency(
-  link_with: client_lib,
+  link_with: [
+    client_lib,
+    sqlite3_unicodesn_lib
+  ],
+  include_directories: include_directories('.')
+)
+
+client_internal_dep = declare_dependency(
+  # Can't just include client_lib in link_with since that will
+  # pull in the public header and we get duplicate symbol errors.
+  link_args: [
+    '-L' + client_build_dir,
+    '-l' + client_package
+  ],
+  link_with: [
+    sqlite3_unicodesn_lib,
+  ],
   include_directories: include_directories('.'),
+  sources: client_internal_header_fixup
 )
 
 subdir('plugin')
