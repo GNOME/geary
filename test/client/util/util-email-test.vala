@@ -99,7 +99,7 @@ public class Util.Email.Test : TestCase {
                                   Geary.RFC822.MailboxAddress? sender,
                                   Geary.RFC822.MailboxAddress? reply_to)
         throws GLib.Error {
-        Geary.Email email = new Geary.Email(new Geary.MockEmailIdentifer(1));
+        Geary.Email email = new Geary.Email(new Mock.EmailIdentifer(1));
         email.set_originators(
             from != null
             ? new Geary.RFC822.MailboxAddresses(Geary.Collection.single(from))

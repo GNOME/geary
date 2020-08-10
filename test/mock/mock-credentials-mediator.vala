@@ -5,9 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockCredentialsMediator :
+public class Mock.CredentialsMediator :
     GLib.Object,
-    CredentialsMediator,
+    Geary.CredentialsMediator,
     ValaUnit.TestAssertions,
     ValaUnit.MockObject {
 
@@ -16,8 +16,8 @@ public class Geary.MockCredentialsMediator :
         get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
 
-    public virtual async bool load_token(AccountInformation account,
-                                         ServiceInformation service,
+    public virtual async bool load_token(Geary.AccountInformation account,
+                                         Geary.ServiceInformation service,
                                          GLib.Cancellable? cancellable)
         throws GLib.Error {
         return object_call<bool>("load_token", { service, cancellable }, false);
@@ -31,8 +31,8 @@ public class Geary.MockCredentialsMediator :
      * are ignored).  Return false if the user tried to cancel the
      * interaction, or true if they tried to proceed.
      */
-    public virtual async bool prompt_token(AccountInformation account,
-                                           ServiceInformation service,
+    public virtual async bool prompt_token(Geary.AccountInformation account,
+                                           Geary.ServiceInformation service,
                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
         return boolean_call(

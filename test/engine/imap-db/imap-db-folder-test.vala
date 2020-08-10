@@ -37,7 +37,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.config = new Geary.AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockCredentialsMediator(),
+            new Mock.CredentialsMediator(),
             new Geary.RFC822.MailboxAddress(null, "test@example.com")
         );
 

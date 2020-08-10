@@ -5,28 +5,28 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockFolder : Folder,
+public class Mock.Folder : Geary.Folder,
     ValaUnit.TestAssertions,
     ValaUnit.MockObject {
 
 
-    public override Account account {
+    public override Geary.Account account {
         get { return this._account; }
     }
 
-    public override FolderProperties properties {
+    public override Geary.FolderProperties properties {
         get { return this._properties; }
     }
 
-    public override FolderPath path {
+    public override Geary.FolderPath path {
         get { return this._path; }
     }
 
-    public override Folder.SpecialUse used_as {
+    public override Geary.Folder.SpecialUse used_as {
         get { return this._used_as; }
     }
 
-    public override ProgressMonitor opening_monitor {
+    public override Geary.ProgressMonitor opening_monitor {
         get { return this._opening_monitor; }
     }
 
@@ -35,31 +35,31 @@ public class Geary.MockFolder : Folder,
     }
 
 
-    private Account _account;
-    private FolderProperties _properties;
-    private FolderPath _path;
-    private Folder.SpecialUse _used_as;
-    private ProgressMonitor _opening_monitor;
+    private Geary.Account _account;
+    private Geary.FolderProperties _properties;
+    private Geary.FolderPath _path;
+    private Geary.Folder.SpecialUse _used_as;
+    private Geary.ProgressMonitor _opening_monitor;
 
 
-    public MockFolder(Account? account,
-                      FolderProperties? properties,
-                      FolderPath? path,
-                      Folder.SpecialUse used_as,
-                      ProgressMonitor? monitor) {
+    public Folder(Geary.Account? account,
+                  Geary.FolderProperties? properties,
+                  Geary.FolderPath? path,
+                  Geary.Folder.SpecialUse used_as,
+                  Geary.ProgressMonitor? monitor) {
         this._account = account;
-        this._properties = properties ?? new MockFolderPoperties();
+        this._properties = properties ?? new FolderPoperties();
         this._path = path;
         this._used_as = used_as;
         this._opening_monitor = monitor;
     }
 
-    public override Folder.OpenState get_open_state() {
-        return OpenState.CLOSED;
+    public override Geary.Folder.OpenState get_open_state() {
+        return Geary.Folder.OpenState.CLOSED;
     }
 
-    public override async bool open_async(Folder.OpenFlags open_flags,
-                                 Cancellable? cancellable = null)
+    public override async bool open_async(Geary.Folder.OpenFlags open_flags,
+                                          GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         return yield boolean_call_async(
             "open_async",
@@ -68,16 +68,16 @@ public class Geary.MockFolder : Folder,
         );
     }
 
-    public override async bool close_async(Cancellable? cancellable = null)
+    public override async bool close_async(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         return yield boolean_call_async(
             "close_async", { cancellable }, false
         );
     }
 
-    public override async void wait_for_close_async(Cancellable? cancellable = null)
+    public override async void wait_for_close_async(GLib.Cancellable? cancellable = null)
     throws GLib.Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
     public override async void synchronise_remote(GLib.Cancellable? cancellable)
@@ -89,10 +89,10 @@ public class Geary.MockFolder : Folder,
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
                                Geary.Email.Field required_fields,
-                               Folder.ListFlags flags,
-                               Cancellable? cancellable = null)
+                               Geary.Folder.ListFlags flags,
+                               GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        return yield object_call_async<Gee.List<Email>?>(
+        return yield object_call_async<Gee.List<Geary.Email>?>(
             "list_email_by_id_async",
             {initial_id, int_arg(count), box_arg(required_fields), box_arg(flags), cancellable},
             null
@@ -102,10 +102,10 @@ public class Geary.MockFolder : Folder,
     public override async Gee.List<Geary.Email>?
         list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                       Geary.Email.Field required_fields,
-                                      Folder.ListFlags flags,
-                                      Cancellable? cancellable = null)
+                                      Geary.Folder.ListFlags flags,
+                                      GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        return yield object_call_async<Gee.List<Email>?>(
+        return yield object_call_async<Gee.List<Geary.Email>?>(
             "list_email_by_sparse_id_async",
             {ids, box_arg(required_fields), box_arg(flags), cancellable},
             null
@@ -115,15 +115,15 @@ public class Geary.MockFolder : Folder,
     public override async Geary.Email
         fetch_email_async(Geary.EmailIdentifier email_id,
                           Geary.Email.Field required_fields,
-                          Folder.ListFlags flags,
-                          Cancellable? cancellable = null)
+                          Geary.Folder.ListFlags flags,
+                          GLib.Cancellable? cancellable = null)
     throws GLib.Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
     public override void set_used_as_custom(bool enabled)
-        throws EngineError.UNSUPPORTED {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        throws Geary.EngineError.UNSUPPORTED {
+        throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
 }

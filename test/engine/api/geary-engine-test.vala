@@ -49,7 +49,7 @@ class Geary.EngineTest : TestCase {
         this.account = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockCredentialsMediator(),
+            new Mock.CredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.account.set_account_directories(this.tmp, this.tmp);

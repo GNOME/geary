@@ -9,7 +9,7 @@
 class Geary.ContactHarvesterImplTest : TestCase {
 
 
-    private ContactStoreMock? store = null;
+    private Mock.ContactStore? store = null;
     private Email? email = null;
     private RFC822.MailboxAddress test_address = null;
     private RFC822.MailboxAddress sender_address = null;
@@ -26,7 +26,7 @@ class Geary.ContactHarvesterImplTest : TestCase {
     }
 
     public override void set_up() throws GLib.Error {
-        this.store = new ContactStoreMock();
+        this.store = new Mock.ContactStore();
         this.email = new Email(
             new ImapDB.EmailIdentifier.no_message_id(new Imap.UID(1))
         );

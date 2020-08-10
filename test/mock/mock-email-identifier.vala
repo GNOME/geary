@@ -5,13 +5,13 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockEmailIdentifer : EmailIdentifier {
+public class Mock.EmailIdentifer : Geary.EmailIdentifier {
 
 
     private int id;
 
 
-    public MockEmailIdentifer(int id) {
+    public EmailIdentifer(int id) {
         this.id = id;
     }
 
@@ -22,7 +22,7 @@ public class Geary.MockEmailIdentifer : EmailIdentifier {
     public override bool equal_to(Geary.EmailIdentifier other) {
         return (
             this.get_type() == other.get_type() &&
-            this.id == ((MockEmailIdentifer) other).id
+            this.id == ((EmailIdentifer) other).id
         );
     }
 
@@ -39,7 +39,7 @@ public class Geary.MockEmailIdentifer : EmailIdentifier {
     }
 
     public override int natural_sort_comparator(Geary.EmailIdentifier other) {
-        MockEmailIdentifer? other_mock = other as MockEmailIdentifer;
+        EmailIdentifer? other_mock = other as EmailIdentifer;
         return (other_mock == null) ? 1 : this.id - other_mock.id;
     }
 

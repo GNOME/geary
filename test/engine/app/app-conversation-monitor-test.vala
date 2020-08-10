@@ -10,10 +10,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
 
     AccountInformation? account_info = null;
-    MockAccount? account = null;
+    Mock.Account? account = null;
     FolderRoot? folder_root = null;
-    MockFolder? base_folder = null;
-    MockFolder? other_folder = null;
+    Mock.Folder? base_folder = null;
+    Mock.Folder? other_folder = null;
 
 
     public ConversationMonitorTest() {
@@ -35,19 +35,19 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.account_info = new AccountInformation(
             "account_01",
             ServiceProvider.OTHER,
-            new MockCredentialsMediator(),
+            new Mock.CredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
-        this.account = new MockAccount(this.account_info);
+        this.account = new Mock.Account(this.account_info);
         this.folder_root = new FolderRoot("#test", false);
-        this.base_folder = new MockFolder(
+        this.base_folder = new Mock.Folder(
             this.account,
             null,
             this.folder_root.get_child("base"),
             NONE,
             null
         );
-        this.other_folder = new MockFolder(
+        this.other_folder = new Mock.Folder(
             this.account,
             null,
             this.folder_root.get_child("other"),
@@ -425,7 +425,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
     }
 
     private Email setup_email(int id, Email? references = null) {
-        Email email = new Email(new MockEmailIdentifer(id));
+        Email email = new Email(new Mock.EmailIdentifer(id));
         DateTime now = new DateTime.now_local();
         Geary.RFC822.MessageID mid = new Geary.RFC822.MessageID(
             "test%d@localhost".printf(id)
@@ -438,7 +438,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             );
         }
         email.set_send_date(new RFC822.Date(now));
-        email.set_email_properties(new MockEmailProperties(now));
+        email.set_email_properties(new Mock.EmailProperties(now));
         email.set_full_references(mid, null, refs_list);
         return email;
     }
