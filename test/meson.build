@@ -84,6 +84,7 @@ test_client_sources = [
   'client/components/client-web-view-test-case.vala',
   'client/components/components-validator-test.vala',
   'client/composer/composer-web-view-test.vala',
+  'client/composer/composer-widget-test.vala',
   'client/util/util-avatar-test.vala',
   'client/util/util-cache-test.vala',
   'client/util/util-email-test.vala',

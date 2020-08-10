@@ -299,6 +299,39 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
     private bool _can_send = true;
 
+    /** Currently selected sender mailbox. */
+    public Geary.RFC822.MailboxAddresses from { get; private set; }
+
+    /** Current text of the `to` entry. */
+    public string to {
+        get { return this.to_entry.get_text(); }
+        private set { this.to_entry.set_text(value); }
+    }
+
+    /** Current text of the `cc` entry. */
+    public string cc {
+        get { return this.cc_entry.get_text(); }
+        private set { this.cc_entry.set_text(value); }
+    }
+
+    /** Current text of the `bcc` entry. */
+    public string bcc {
+        get { return this.bcc_entry.get_text(); }
+        private set { this.bcc_entry.set_text(value); }
+    }
+
+    /** Current text of the `reply-to` entry. */
+    public string reply_to {
+        get { return this.reply_to_entry.get_text(); }
+        private set { this.reply_to_entry.set_text(value); }
+    }
+
+    /** Current text of the `sender` entry. */
+    public string subject {
+        get { return this.subject_entry.get_text(); }
+        private set { this.subject_entry.set_text(value); }
+    }
+
     internal WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
@@ -306,37 +339,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     internal bool has_multiple_from_addresses {
         get {
             return (
-                this.accounts.size > 1 ||
+                this.application.get_account_contexts().size > 1 ||
                 this.sender_context.account.information.has_sender_aliases
             );
         }
-    }
-
-    internal string subject {
-        get { return this.subject_entry.get_text(); }
-        private set { this.subject_entry.set_text(value); }
-    }
-
-    private Geary.RFC822.MailboxAddresses from { get; private set; }
-
-    private string to {
-        get { return this.to_entry.get_text(); }
-        set { this.to_entry.set_text(value); }
-    }
-
-    private string cc {
-        get { return this.cc_entry.get_text(); }
-        set { this.cc_entry.set_text(value); }
-    }
-
-    private string bcc {
-        get { return this.bcc_entry.get_text(); }
-        set { this.bcc_entry.set_text(value); }
-    }
-
-    private string reply_to {
-        get { return this.reply_to_entry.get_text(); }
-        set { this.reply_to_entry.set_text(value); }
     }
 
     private Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
@@ -462,8 +468,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private Gee.Collection<Application.AccountContext> accounts;
-
     private string? pointer_url = null;
     private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
@@ -509,7 +513,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get { return this.parent as Container; }
     }
 
-    private Application.Client application;
+    private ApplicationInterface application;
+
+    private Application.Configuration config;
 
     // Timeout for showing the slow image paste pulsing bar
     private Geary.TimeoutManager show_background_work_timeout = null;
@@ -518,18 +524,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Geary.TimeoutManager background_work_pulse;
 
 
-    public Widget(Application.Client application,
-                  Application.AccountContext initial_account,
-                  Gee.Collection<Application.AccountContext> all_accounts,
-                  Geary.Folder? save_to = null) {
+    internal Widget(ApplicationInterface application,
+                    Application.Configuration config,
+                    Application.AccountContext initial_account,
+                    Geary.Folder? save_to = null) {
         components_reflow_box_get_type();
         base_ref();
         this.application = application;
+        this.config = config;
         this.sender_context = initial_account;
-        this.accounts = all_accounts;
         this.save_to = save_to;
 
-        this.header = new Headerbar(application.config);
+        this.header = new Headerbar(config);
         this.header.expand_composer.connect(on_expand_compact_headers);
 
         // Setup drag 'n drop
@@ -576,7 +582,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         update_subject_spell_checker();
 
-        this.editor = new WebView(application.config);
+        this.editor = new WebView(config);
         this.editor.set_hexpand(true);
         this.editor.set_vexpand(true);
         this.editor.content_loaded.connect(on_editor_content_loaded);
@@ -596,10 +602,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
         // Listen to account signals to update from menu.
-        this.application.engine.account_available.connect(
+        this.application.account_available.connect(
             on_account_available
         );
-        this.application.engine.account_unavailable.connect(
+        this.application.account_unavailable.connect(
             on_account_unavailable
         );
 
@@ -653,7 +659,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         ((Gtk.CellRendererText) cells.data).ellipsize = END;
 
         // Create spellcheck popover
-        Application.Configuration config = this.application.config;
         var spell_check_popover = new SpellCheckPopover(
             this.select_dictionary_button, config
         );
@@ -783,17 +788,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         var body = "";
         var complete_quote = "";
+        var body_complete = false;
         switch (type) {
         case EDIT:
             this.saved_id = full_context.id;
             yield restore_reply_to_state();
             fill_in_from_context(full_context);
             Geary.RFC822.Message message = full_context.get_message();
-            body = (
-                message.has_html_body()
-                ? message.get_html_body(null)
-                : message.get_plain_body(true, null)
-            );
+            if (message.has_html_body()) {
+                body = message.get_html_body(null);
+                body_complete = body.contains(
+                    """id="%s"""".printf(WebView.BODY_HTML_ID)
+                );
+            } else {
+                body = message.get_plain_body(true, null);
+            }
             break;
 
         case REPLY_SENDER:
@@ -801,7 +810,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             add_recipients_and_ids(this.context_type, full_context);
             fill_in_from_context(full_context);
             complete_quote = Util.Email.quote_email_for_reply(
-                full_context, quote, this.application.config.clock_format, HTML
+                full_context, quote, this.config.clock_format, HTML
             );
             if (!Geary.String.is_empty(quote)) {
                 this.top_posting = false;
@@ -836,11 +845,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Detaches the composer and opens it in a new window. */
     public void detach() {
         Gtk.Widget? focused_widget = null;
+        var application = this.container.top_window.application as Application.Client;
+
         if (this.container != null) {
             focused_widget = this.container.top_window.get_focus();
             this.container.close();
         }
-        Window new_window = new Window(this, this.application);
+
+        var new_window = new Window(this, application);
 
         // Workaround a GTK+ crasher, Bug 771812. When the
         // composer is re-parented, its menu_button's popover
@@ -853,7 +865,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // popover.
         this.composer_actions.change_action_state(
             ACTION_TEXT_FORMAT,
-            this.application.config.compose_as_html ? "html" : "plain"
+            this.config.compose_as_html ? "html" : "plain"
         );
 
         set_mode(DETACHED);
@@ -979,7 +991,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             try {
                 yield close_draft_manager(KEEP);
             } catch (GLib.Error error) {
-                this.application.controller.report_problem(
+                this.application.report_problem(
                     new Geary.AccountProblemReport(
                         this.sender_context.account.information, error
                     )
@@ -995,10 +1007,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             warning("Draft manager still open on composer destroy");
         }
 
-        this.application.engine.account_available.disconnect(
+        this.application.account_available.disconnect(
             on_account_available
         );
-        this.application.engine.account_unavailable.disconnect(
+        this.application.account_unavailable.disconnect(
             on_account_unavailable
         );
 
@@ -1220,13 +1232,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
             entries_users.change_action_state(
                 ACTION_TEXT_FORMAT,
-                this.application.config.compose_as_html ? "html" : "plain"
+                this.config.compose_as_html ? "html" : "plain"
             );
         }
 
         this.composer_actions.change_action_state(
             ACTION_SHOW_FORMATTING,
-            this.application.config.formatting_toolbar_visible
+            this.config.formatting_toolbar_visible
         );
 
         get_action(Action.Edit.UNDO).set_enabled(false);
@@ -1384,13 +1396,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
 
         try {
-            if (!for_draft) {
-                if (this.editor.is_rich_text) {
-                    email.body_html = yield this.editor.get_html();
-                }
-                email.body_text = yield this.editor.get_text();
-            } else {
-                email.body_html = yield this.editor.get_html_for_draft();
+            email.body_text = yield this.editor.get_text();
+            if (this.editor.is_rich_text) {
+                email.body_html = (
+                    for_draft
+                    ? yield this.editor.get_html_for_draft()
+                    : yield this.editor.get_html()
+                );
             }
         } catch (Error error) {
             debug("Error getting composer message body: %s", error.message);
@@ -1423,7 +1435,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             Util.Email.quote_email_for_reply(
                 referred,
                 to_quote,
-                this.application.config.clock_format,
+                this.config.clock_format,
                 Geary.RFC822.TextFormat.HTML
             )
         );
@@ -1618,14 +1630,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         try {
             yield this.editor.clean_content();
-            yield this.application.controller.send_composed_email(this);
+            yield this.application.send_composed_email(this);
             yield close_draft_manager(DISCARD);
 
             if (this.container != null) {
                 this.container.close();
             }
         } catch (GLib.Error error) {
-            this.application.controller.report_problem(
+            this.application.report_problem(
                 new Geary.AccountProblemReport(
                     this.sender_context.account.information, error
                 )
@@ -1795,7 +1807,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             try {
                 yield save_draft();
             } catch (GLib.Error error) {
-                this.application.controller.report_problem(
+                this.application.report_problem(
                     new Geary.AccountProblemReport(
                         this.sender_context.account.information, error
                     )
@@ -1808,28 +1820,29 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (this.container != null) {
             this.container.close();
         }
-        yield this.application.controller.save_composed_email(this);
+        yield this.application.save_composed_email(this);
     }
 
     private async void discard_and_close() {
         set_enabled(false);
 
+        // Pass on to the controller so the discarded email can be
+        // re-opened on undo
+        yield this.application.discard_composed_email(this);
+
         try {
             yield close_draft_manager(DISCARD);
         } catch (GLib.Error error) {
-            this.application.controller.report_problem(
+            this.application.report_problem(
                 new Geary.AccountProblemReport(
                     this.sender_context.account.information, error
                 )
             );
         }
 
-        // Pass on to the controller so the discarded email can be
-        // re-opened on undo
         if (this.container != null) {
             this.container.close();
         }
-        yield this.application.controller.discard_composed_email(this);
     }
 
     private void update_attachments_view() {
@@ -2192,7 +2205,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                             ClientWebView.INTERNAL_URL_PREFIX + unique_filename
                         );
                     } catch (Error error) {
-                        this.application.controller.report_problem(
+                        this.application.report_problem(
                             new Geary.ProblemReport(error)
                         );
                     }
@@ -2243,7 +2256,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.editor.set_rich_text(compose_as_html);
 
-        this.application.config.compose_as_html = compose_as_html;
+        this.config.compose_as_html = compose_as_html;
         this.more_options_button.popover.popdown();
     }
 
@@ -2300,7 +2313,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_show_formatting(SimpleAction? action, Variant? new_state) {
         bool show_formatting = new_state.get_boolean();
-        this.application.config.formatting_toolbar_visible = show_formatting;
+        this.config.formatting_toolbar_visible = show_formatting;
         action.set_state(new_state);
 
         update_formatting_toolbar();
@@ -2444,7 +2457,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     if (!this.editor.is_rich_text)
                         append_menu_section(context_menu, section);
                 } else if (section == this.context_menu_inspector) {
-                    if (this.application.config.enable_inspector)
+                    if (this.config.enable_inspector)
                         append_menu_section(context_menu, section);
                 } else {
                     append_menu_section(context_menu, section);
@@ -2581,10 +2594,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         // If there's only one account and it not have any aliases,
         // show nothing.
-        if (this.accounts.size < 1 ||
-            (this.accounts.size == 1 &&
-            !Geary.Collection.first(this.accounts)
-             .account.information.has_sender_aliases)) {
+        Gee.Collection<Application.AccountContext> accounts =
+            this.application.get_account_contexts();
+        if (accounts.size < 1 ||
+            (accounts.size == 1 &&
+            !Geary.Collection.first(
+                accounts
+            ).account.information.has_sender_aliases)) {
             return false;
         }
 
@@ -2599,7 +2615,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // is set to true if the current message's from address has
         // been set in the ComboBox.
         bool set_active = add_account_emails_to_from_list(this.sender_context);
-        foreach (var account in this.accounts) {
+        foreach (var account in accounts) {
             if (account != this.sender_context) {
                 set_active = add_account_emails_to_from_list(
                     account, set_active
@@ -2635,7 +2651,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         try {
                             this.reopen_draft_manager.end(res);
                         } catch (GLib.Error error) {
-                            this.application.controller.report_problem(
+                            this.application.report_problem(
                                 new Geary.AccountProblemReport(
                                     current_account.information, error
                                 )
@@ -2683,7 +2699,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void update_subject_spell_checker() {
         Gspell.Language? lang = null;
-        string[] langs = this.application.config.get_spell_check_languages();
+        string[] langs = this.config.get_spell_check_languages();
         if (langs.length == 1) {
             lang = Gspell.Language.lookup(langs[0]);
         } else {
@@ -2805,7 +2821,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // without the popover immediately appearing and raining on
         // their text selection parade.
         if (this.pointer_url != null &&
-            this.application.config.compose_as_html) {
+            this.config.compose_as_html) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
@@ -2863,7 +2879,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_add_attachment() {
         AttachmentDialog dialog = new AttachmentDialog(
-            this.container.top_window, this.application.config
+            this.container.top_window, this.config
         );
         if (dialog.run() == Gtk.ResponseType.ACCEPT) {
             dialog.hide();
@@ -2889,7 +2905,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_insert_image(SimpleAction action, Variant? param) {
         AttachmentDialog dialog = new AttachmentDialog(
-            this.container.top_window, this.application.config
+            this.container.top_window, this.config
         );
         Gtk.FileFilter filter = new Gtk.FileFilter();
         // Translators: This is the name of the file chooser filter
@@ -2976,7 +2992,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 try {
                     this.save_draft.end(res);
                 } catch (GLib.Error error) {
-                    this.application.controller.report_problem(
+                    this.application.report_problem(
                         new Geary.AccountProblemReport(
                             current_account.information, error
                         )

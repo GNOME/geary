@@ -71,6 +71,7 @@ client_vala_sources = files(
   'components/status-bar.vala',
   'components/stock.vala',
 
+  'composer/composer-application-interface.vala',
   'composer/composer-box.vala',
   'composer/composer-container.vala',
   'composer/composer-email-entry.vala',

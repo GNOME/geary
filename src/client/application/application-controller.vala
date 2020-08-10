@@ -14,7 +14,7 @@
  * when the primary application instance is started.
  */
 internal class Application.Controller :
-    Geary.BaseObject, AccountInterface {
+    Geary.BaseObject, AccountInterface, Composer.ApplicationInterface {
 
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
@@ -331,9 +331,9 @@ internal class Application.Controller :
         Composer.Widget? composer = null;
         if (context != null) {
             composer = new Composer.Widget(
-                this.application,
+                this,
+                this.application.config,
                 context,
-                this.accounts.values.read_only_view,
                 save_to
             );
             register_composer(composer);
@@ -408,9 +408,9 @@ internal class Application.Controller :
         Composer.Widget? composer = null;
         if (account != null) {
             composer = new Composer.Widget(
-                this.application,
+                this,
+                this.application.config,
                 account,
-                this.accounts.values.read_only_view,
                 save_to
             );
             register_composer(composer);
@@ -439,9 +439,9 @@ internal class Application.Controller :
             var context = this.accounts.get(window.selected_account.information);
             if (context != null) {
                 var composer = new Composer.Widget(
-                    this.application,
-                    context,
-                    this.accounts.values.read_only_view
+                    this,
+                    this.application.config,
+                    context
                 );
                 register_composer(composer);
                 show_composer(composer);

@@ -53,6 +53,7 @@ int main(string[] args) {
     client.add_suite(new Application.ConfigurationTest().suite);
     client.add_suite(new ClientWebViewTest().suite);
     client.add_suite(new Composer.WebViewTest().suite);
+    client.add_suite(new Composer.WidgetTest().suite);
     client.add_suite(new Components.ValidatorTest().suite);
     client.add_suite(new Util.Avatar.Test().suite);
     client.add_suite(new Util.Cache.Test().suite);
