@@ -67,6 +67,7 @@ public class Geary.RFC822.MessageID :
 
 }
 
+
 /**
  * A immutable list of RFC822 Message-ID values.
  */
@@ -88,17 +89,26 @@ public class Geary.RFC822.MessageIDList :
     private Gee.List<MessageID> list = new Gee.ArrayList<MessageID>();
 
 
+    /**
+     * Constructs a new Message-Id list.
+     *
+     * If the optional collection of ids is not given, the list
+     * is created empty. Otherwise the collection's ids are
+     * added to the list by iterating over it in natural order.
+     */
     public MessageIDList(Gee.Collection<MessageID>? collection = null) {
         if (collection != null) {
             this.list.add_all(collection);
         }
     }
 
-    public MessageIDList.single(MessageID msg_id) {
+    /** Constructs a new Message-Id list containing a single id. */
+    public MessageIDList.single(MessageID msg_id){
         this();
         list.add(msg_id);
     }
 
+    /** Constructs a new Message-Id list by parsing a RFC822 string. */
     public MessageIDList.from_rfc822_string(string rfc822)
         throws Error {
         this();
@@ -201,10 +211,19 @@ public class Geary.RFC822.MessageIDList :
     }
 
     /**
-     * Returns a new list with the given messages ids appended to this list's.
+     * Returns a new list with the given list appended to this.
      */
-    public MessageIDList append(MessageIDList others) {
-        MessageIDList new_ids = new MessageIDList(this.list);
+    public MessageIDList concatenate_id(MessageID other) {
+        var new_ids = new MessageIDList(this.list);
+        new_ids.list.add(other);
+        return new_ids;
+    }
+
+    /**
+     * Returns a new list with the given list appended to this.
+     */
+    public MessageIDList concatenate_list(MessageIDList others) {
+        var new_ids = new MessageIDList(this.list);
         new_ids.list.add_all(others.list);
         return new_ids;
     }

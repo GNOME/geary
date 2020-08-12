@@ -960,7 +960,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             try {
                 ids = new MessageIDList.from_rfc822_string(header_value);
                 if (existing != null) {
-                    ids = existing.append(ids);
+                    ids = existing.concatenate_list(ids);
                 }
             } catch (Error err) {
                 // Can't simply throw this since we need to be as lax as
