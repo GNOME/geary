@@ -215,12 +215,29 @@ public class Geary.RFC822.MailboxAddresses :
         return this.hash_value;
     }
 
-    public bool equal_to(MailboxAddresses other) {
+    /** Determines if this list contains all of the other's, in any order. */
+    public bool contains_all(MailboxAddresses other) {
         return (
             this == other ||
             (this.addrs.size == other.addrs.size &&
              this.addrs.contains_all(other.addrs))
         );
+    }
+
+    /** Determines if this list contains all of the other's, in order. */
+    public bool equal_to(MailboxAddresses other) {
+        if (this == other) {
+            return true;
+        }
+        if (this.addrs.size != other.addrs.size) {
+            return false;
+        }
+        for (int i = 0; i < this.addrs.size; i++) {
+            if (!this.addrs[i].equal_to(other.addrs[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
