@@ -2485,7 +2485,7 @@ private class Application.SendComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         if (this.can_undo) {
             /// Translators: The label for an in-app notification. The
             /// string substitution is a list of recipients of the email.
@@ -2550,7 +2550,7 @@ private class Application.SaveComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         this.executed_label = _(
@@ -2608,7 +2608,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         this.executed_label = _(

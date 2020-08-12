@@ -1361,8 +1361,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     /** Returns a representation of the current message. */
-    public async Geary.ComposedEmail get_composed_email(GLib.DateTime? date_override = null,
-                                                        bool for_draft = false) {
+    public async Geary.ComposedEmail to_composed_email(GLib.DateTime? date_override = null,
+                                                       bool for_draft = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(),
             from
@@ -1789,7 +1789,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.draft_timer.reset();
 
         if (this.draft_manager != null) {
-            Geary.ComposedEmail draft = yield get_composed_email(null, true);
+            Geary.ComposedEmail draft = yield to_composed_email(null, true);
             yield this.draft_manager.update(
                 yield new Geary.RFC822.Message.from_composed_email(
                     draft, null, null
