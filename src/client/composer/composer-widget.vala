@@ -882,7 +882,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
         update_extended_headers();
 
-        yield finish_loading(body, complete_quote, (type == EDIT));
+        yield finish_loading(body, complete_quote, body_complete);
     }
 
     /**
@@ -1407,12 +1407,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         try {
             email.body_text = yield this.editor.get_text();
-            if (this.editor.is_rich_text) {
-                email.body_html = (
-                    for_draft
-                    ? yield this.editor.get_html_for_draft()
-                    : yield this.editor.get_html()
-                );
+            if (for_draft) {
+                // Must save HTML even if in plain text mode since we
+                // need it to restore body/sig/reply state
+                email.body_html = yield this.editor.get_html_for_draft();
+            } else if (this.editor.is_rich_text) {
+                email.body_html = yield this.editor.get_html();
             }
         } catch (Error error) {
             debug("Error getting composer message body: %s", error.message);
