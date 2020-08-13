@@ -211,6 +211,34 @@ public class Geary.RFC822.MessageIDList :
     }
 
     /**
+     * Returns a list with the given id appended if not already present.
+     *
+     * This list is returned if the given id is already present,
+     * otherwise the result of a call to {@link concatenate_id} is
+     * returned.
+     */
+    public MessageIDList merge_id(MessageID other) {
+        return this.list.contains(other) ? this : this.concatenate_id(other);
+    }
+
+    /**
+     * Returns a list with the given ids appended if not already present.
+     *
+     * This list is returned if all given ids are already present,
+     * otherwise the result of a call to {@link concatenate_id} for
+     * each not present is returned.
+     */
+    public MessageIDList merge_list(MessageIDList other) {
+        var list = this;
+        foreach (var id in other) {
+            if (!this.list.contains(id)) {
+                list = list.concatenate_id(id);
+            }
+        }
+        return list;
+    }
+
+    /**
      * Returns a new list with the given list appended to this.
      */
     public MessageIDList concatenate_id(MessageID other) {
