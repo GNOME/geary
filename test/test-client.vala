@@ -32,6 +32,7 @@ int main(string[] args) {
     Gtk.init(ref args);
     Test.init(ref args);
 
+    IconFactory.init(GLib.File.new_for_path(_SOURCE_ROOT_DIR));
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();
