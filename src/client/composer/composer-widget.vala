@@ -332,6 +332,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         private set { this.subject_entry.set_text(value); }
     }
 
+    /** The In-Reply-To header value for the composed email, if any. */
+    public Geary.RFC822.MessageIDList in_reply_to {
+        get; private set; default = new Geary.RFC822.MessageIDList();
+    }
+
+    /** The References header value for the composed email, if any. */
+    public Geary.RFC822.MessageIDList references {
+        get; private set; default = new Geary.RFC822.MessageIDList();
+    }
+
     internal WebView editor { get; private set; }
 
     internal Headerbar header { get; private set; }
@@ -344,10 +354,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
         }
     }
-
-    private Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
-
-    private Geary.RFC822.MessageIDList? references = null;
 
     [GtkChild]
     private Gtk.Grid editor_container;
@@ -471,8 +477,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private string? pointer_url = null;
     private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
-    private Geary.RFC822.MailboxAddresses reply_to_addresses;
-    private Geary.RFC822.MailboxAddresses reply_cc_addresses;
     private bool top_posting = true;
 
     // The message(s) this email is in reply to/forwarded from
@@ -681,6 +685,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         throws GLib.Error {
         if (to != null) {
             this.to = to.to_full_display();
+            update_extended_headers();
         }
         yield finish_loading("", "", false);
     }
@@ -741,6 +746,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 }
             }
             yield finish_loading(body, "", false);
+            update_extended_headers();
         }
     }
 
@@ -785,6 +791,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             type == FORWARD) {
             this.pending_include = AttachPending.ALL;
         }
+        this.pending_attachments = full_context.attachments;
 
         var body = "";
         var complete_quote = "";
@@ -792,8 +799,35 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         switch (type) {
         case EDIT:
             this.saved_id = full_context.id;
-            yield restore_reply_to_state();
-            fill_in_from_context(full_context);
+
+            if (full_context.from != null) {
+                this.from = full_context.from;
+            }
+            if (full_context.to != null) {
+                this.to_entry.addresses = full_context.to;
+            }
+            if (full_context.cc != null) {
+                this.cc_entry.addresses = full_context.cc;
+            }
+            if (full_context.bcc != null) {
+                this.bcc_entry.addresses = full_context.bcc;
+            }
+            if (full_context.reply_to != null) {
+                this.reply_to_entry.addresses = full_context.reply_to;
+            }
+            if (full_context.in_reply_to != null) {
+                this.in_reply_to = this.in_reply_to.concatenate_list(
+                    full_context.in_reply_to
+                );
+            }
+            if (full_context.references != null) {
+                this.references = this.references.concatenate_list(
+                    full_context.references
+                );
+            }
+            if (full_context.subject != null) {
+                this.subject = full_context.subject.value ?? "";
+            }
             Geary.RFC822.Message message = full_context.get_message();
             if (message.has_html_body()) {
                 body = message.get_html_body(null);
@@ -803,12 +837,24 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             } else {
                 body = message.get_plain_body(true, null);
             }
+            yield restore_reply_to_state();
             break;
 
         case REPLY_SENDER:
         case REPLY_ALL:
-            add_recipients_and_ids(this.context_type, full_context);
-            fill_in_from_context(full_context);
+            // Set the preferred from address based on the message
+            // being replied to
+            if (!update_from_address(full_context.to)) {
+                if (!update_from_address(full_context.cc)) {
+                    if (!update_from_address(full_context.bcc)) {
+                        update_from_address(full_context.from);
+                    }
+                }
+            }
+            this.subject = Geary.RFC822.Utils.create_subject_for_reply(
+                full_context
+            );
+            add_recipients_and_ids(type, full_context);
             complete_quote = Util.Email.quote_email_for_reply(
                 full_context, quote, this.config.clock_format, HTML
             );
@@ -820,13 +866,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             break;
 
         case FORWARD:
-            add_recipients_and_ids(this.context_type, full_context);
-            fill_in_from_context(full_context);
+            this.subject = Geary.RFC822.Utils.create_subject_for_forward(
+                full_context
+            );
+            if (full_context.message_id != null) {
+                this.references = this.references.concatenate_id(
+                    full_context.message_id
+                );
+            }
             complete_quote = Util.Email.quote_email_for_forward(
                 full_context, quote, HTML
             );
+            this.referred_ids.add(full_context.id);
             break;
         }
+        update_extended_headers();
 
         yield finish_loading(body, complete_quote, (type == EDIT));
     }
@@ -1059,9 +1113,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * Restores the composer's widget state from any replied to messages.
      */
     private async void restore_reply_to_state() {
-        bool first_email = true;
+        Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
+            this.sender_context.account.information.sender_mailboxes;
+        var to_addresses = new Geary.RFC822.MailboxAddresses();
+        var cc_addresses = new Geary.RFC822.MailboxAddresses();
 
-        foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
+        bool new_email = true;
+        foreach (var mid in this.in_reply_to) {
             Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map = null;
             try {
                 // TODO: Folder blacklist
@@ -1079,105 +1137,63 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     error.message
                 );
             }
-            if (email_map == null)
-                continue;
-            Gee.Set<Geary.Email> emails = email_map.get_keys();
-            Geary.Email? email = null;
-            foreach (Geary.Email candidate in emails) {
-                if (candidate.message_id != null &&
-                    mid.equal_to(candidate.message_id)) {
-                    email = candidate;
-                    break;
+            if (email_map != null) {
+                foreach (var candidate in email_map.get_keys()) {
+                    if (candidate.message_id != null &&
+                        mid.equal_to(candidate.message_id)) {
+                        to_addresses = to_addresses.append(
+                            Geary.RFC822.Utils.create_to_addresses_for_reply(
+                                candidate, sender_addresses
+                            )
+                        );
+                        cc_addresses = cc_addresses.append(
+                            Geary.RFC822.Utils.create_cc_addresses_for_reply_all(
+                                candidate, sender_addresses
+                            )
+                        );
+                        this.referred_ids.add(candidate.id);
+                        new_email = false;
+                    }
                 }
             }
-            if (email == null)
-                continue;
-
-            add_recipients_and_ids(this.context_type, email, false);
-
-            first_email = false;
         }
-        if (first_email)  // Either no referenced emails, or we don't have them.  Treat as new.
-            return;
+        if (!new_email) {
+            if (this.cc == "") {
+                this.context_type = REPLY_SENDER;
+            } else {
+                this.context_type = REPLY_ALL;
+            }
 
-        if (this.cc == "") {
-            this.context_type = REPLY_SENDER;
-        } else {
-            this.context_type = REPLY_ALL;
-        }
+            if (!this.to_entry.addresses.contains_all(to_addresses)) {
+                this.to_entry.set_modified();
+            }
+            if (!this.cc_entry.addresses.contains_all(cc_addresses)) {
+                this.cc_entry.set_modified();
+            }
+            if (this.bcc != "") {
+                this.bcc_entry.set_modified();
+            }
 
-        if (!to_entry.addresses.equal_to(reply_to_addresses))
-            this.to_entry.set_modified();
-        if (cc != "" && !cc_entry.addresses.equal_to(reply_cc_addresses))
-            this.cc_entry.set_modified();
-        if (bcc != "")
-            this.bcc_entry.set_modified();
+            // We're in compact inline mode, but there are modified email
+            // addresses, so set us to use plain inline mode instead so
+            // the modified addresses can be seen. If there are CC
+            if (this.current_mode == INLINE_COMPACT && (
+                    this.to_entry.is_modified ||
+                    this.cc_entry.is_modified ||
+                    this.bcc_entry.is_modified ||
+                    this.reply_to_entry.is_modified)) {
+                set_mode(INLINE);
+            }
 
-        // We're in compact inline mode, but there are modified email
-        // addresses, so set us to use plain inline mode instead so
-        // the modified addresses can be seen. If there are CC
-        if (this.current_mode == INLINE_COMPACT && (
-                this.to_entry.is_modified ||
-                this.cc_entry.is_modified ||
-                this.bcc_entry.is_modified ||
-                this.reply_to_entry.is_modified)) {
-            set_mode(INLINE);
-        }
-
-        // If there's a modified header that would normally be hidden,
-        // show full fields.
-        if (this.bcc_entry.is_modified ||
-            this.reply_to_entry.is_modified) {
-            this.editor_actions.change_action_state(
-                ACTION_SHOW_EXTENDED_HEADERS, true
-            );
-        }
-    }
-
-    // Copies the addresses (e.g. From/To/CC) and content from
-    // referred into this one
-    private void fill_in_from_context(Geary.Email referred) {
-        this.pending_attachments = referred.attachments;
-        switch (this.context_type) {
-            case EDIT:
-                if (referred.from != null)
-                    this.from = referred.from;
-                if (referred.to != null)
-                    this.to_entry.addresses = referred.to;
-                if (referred.cc != null)
-                    this.cc_entry.addresses = referred.cc;
-                if (referred.bcc != null) {
-                    this.bcc_entry.addresses = referred.bcc;
-                }
-                if (referred.reply_to != null) {
-                    this.reply_to_entry.addresses = referred.reply_to;
-                }
-                if (referred.in_reply_to != null)
-                    this.in_reply_to.add_all(referred.in_reply_to.get_all());
-                if (referred.references != null)
-                    this.references = referred.references;
-                if (referred.subject != null)
-                    this.subject = referred.subject.value ?? "";
-            break;
-
-            case REPLY_SENDER:
-            case REPLY_ALL:
-                this.subject = Geary.RFC822.Utils.create_subject_for_reply(
-                    referred
+            // If there's a modified header that would normally be hidden,
+            // show full fields.
+            if (this.bcc_entry.is_modified ||
+                this.reply_to_entry.is_modified) {
+                this.editor_actions.change_action_state(
+                    ACTION_SHOW_EXTENDED_HEADERS, true
                 );
-                this.references = Geary.RFC822.Utils.reply_references(
-                    referred
-                );
-            break;
-
-            case FORWARD:
-                this.subject = Geary.RFC822.Utils.create_subject_for_forward(
-                    referred
-                );
-            break;
+            }
         }
-
-        update_extended_headers();
     }
 
     public void present() {
@@ -1260,11 +1276,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
     }
 
-    private bool check_preferred_from_address(Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
-        Geary.RFC822.MailboxAddresses? referred_addresses) {
+    private bool update_from_address(Geary.RFC822.MailboxAddresses? referred_addresses) {
         if (referred_addresses != null) {
-            foreach (Geary.RFC822.MailboxAddress address in account_addresses) {
-                if (referred_addresses.get_all().contains(address)) {
+            var senders = this.sender_context.account.information.sender_mailboxes;
+            var referred = referred_addresses.get_all();
+            foreach (Geary.RFC822.MailboxAddress address in senders) {
+                if (referred.contains(address)) {
                     this.from = new Geary.RFC822.MailboxAddresses.single(address);
                     return true;
                 }
@@ -1376,18 +1393,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.reply_to_entry.addresses
         ).set_subject(
             this.subject
+        ).set_in_reply_to(
+            this.in_reply_to
+        ).set_references(
+            this.references
         );
-
-        if ((this.context_type == REPLY_SENDER ||
-             this.context_type == REPLY_ALL) &&
-            !this.in_reply_to.is_empty)
-            email.set_in_reply_to(
-                new Geary.RFC822.MessageIDList(this.in_reply_to)
-            );
-
-        if (this.references != null) {
-            email.set_references(this.references);
-        }
 
         email.attached_files.add_all(this.attached_files);
         email.inline_files.set_all(this.inline_files);
@@ -1442,62 +1452,44 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void add_recipients_and_ids(ContextType type,
-                                        Geary.Email referred,
-                                        bool modify_headers = true) {
+                                        Geary.Email referred) {
         Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
             this.sender_context.account.information.sender_mailboxes;
 
-        // Set the preferred from address. New messages should retain
-        // the account default and drafts should retain the draft's
-        // from addresses, so don't update them here
-        if (this.context_type != NONE &&
-            this.context_type != EDIT) {
-            if (!check_preferred_from_address(sender_addresses, referred.to)) {
-                if (!check_preferred_from_address(sender_addresses, referred.cc))
-                    if (!check_preferred_from_address(sender_addresses, referred.bcc))
-                        check_preferred_from_address(sender_addresses, referred.from);
-            }
-        }
-
-        // Update the recipient addresses
-        Geary.RFC822.MailboxAddresses to_addresses =
-            Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_addresses);
-        Geary.RFC822.MailboxAddresses cc_addresses =
-            Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_addresses);
-        reply_to_addresses = Geary.RFC822.Utils.merge_addresses(reply_to_addresses, to_addresses);
-        reply_cc_addresses = Geary.RFC822.Utils.remove_addresses(
-            Geary.RFC822.Utils.merge_addresses(reply_cc_addresses, cc_addresses),
-            reply_to_addresses);
-
-        if (!modify_headers)
-            return;
-
-        bool recipients_modified = this.to_entry.is_modified || this.cc_entry.is_modified || this.bcc_entry.is_modified;
-        if (!recipients_modified) {
-            if (type == REPLY_SENDER || type == REPLY_ALL) {
-                this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(
-                    to_entry.addresses,
-                    to_addresses
-                );
-            }
-            if (type == REPLY_ALL) {
-                this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
-                    Geary.RFC822.Utils.merge_addresses(
-                        this.cc_entry.addresses, cc_addresses
-                    ),
-                    this.to_entry.addresses
-                );
-            } else {
-                this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
+        // Add the sender to the To address list if needed
+        this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(
+            to_entry.addresses,
+            Geary.RFC822.Utils.create_to_addresses_for_reply(
+                referred, sender_addresses
+            )
+        );
+        if (type == REPLY_ALL) {
+            // Add other recipients to the Cc address list if needed,
+            // but don't include any already in the To list.
+            this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
+                Geary.RFC822.Utils.merge_addresses(
                     this.cc_entry.addresses,
-                    this.to_entry.addresses
-                );
-            }
+                    Geary.RFC822.Utils.create_cc_addresses_for_reply_all(
+                        referred, sender_addresses
+                    )
+                ),
+                this.to_entry.addresses
+            );
         }
 
+        // Include the new message's id in the In-Reply-To header
         if (referred.message_id != null) {
-            this.in_reply_to.add(referred.message_id);
+            this.in_reply_to = this.in_reply_to.merge_id(
+                referred.message_id
+            );
         }
+
+        // Merge the new message's references with this
+        this.references = this.references.merge_list(
+            Geary.RFC822.Utils.reply_references(referred)
+        );
+
+        // Include the email in the composer's list of referred email
         this.referred_ids.add(referred.id);
     }
 

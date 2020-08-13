@@ -93,6 +93,14 @@ public class Composer.WidgetTest : TestCase {
         add_test("load_empty_body_to", load_empty_body_to);
         add_test("load_mailto", load_mailto);
         add_test("load_context_edit", load_context_edit);
+        add_test("load_context_reply_sender", load_context_reply_sender);
+        add_test("load_context_reply_sender_with_reply_to", load_context_reply_sender_with_reply_to);
+        add_test("load_context_reply_all_to_account", load_context_reply_all_to_account);
+        add_test("load_context_reply_all_cc_account", load_context_reply_all_cc_account);
+        add_test("load_context_reply_all_to_other", load_context_reply_all_to_other);
+        add_test("load_context_reply_all_to_other_with_reply_to", load_context_reply_all_to_other_with_reply_to);
+        add_test("load_context_forward", load_context_forward);
+        add_test("to_composed_email", to_composed_email);
     }
 
     public override void set_up() {
@@ -158,40 +166,292 @@ public class Composer.WidgetTest : TestCase {
 
     public void load_context_edit() throws GLib.Error {
         var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_WITH_REPLY_TO);
 
-        widget.load_context.begin(
-            EDIT, load_email(), null, this.async_completion
-        );
+        var mock_account = (Mock.Account) this.account.account;
+        var search_call = mock_account.expect_call("local_search_message_id_async");
+
+        widget.load_context.begin(EDIT, email, null, this.async_completion);
         widget.load_context.end(async_result());
+
+        mock_account.assert_expectations();
+        var search_arg = search_call.called_arg<Geary.RFC822.MessageID>(0);
+        assert_equal(
+            search_arg.to_rfc822_string(),
+            "<1234@local.machine.example>"
+        );
 
         assert_equal(widget.to, "Charlie <charlie@example.net>");
         assert_equal(widget.cc, "Dave <dave@example.net>");
         assert_equal(widget.bcc, "Eve <eve@example.net>");
         assert_equal(widget.reply_to, "Alice: Personal Account <alice@example.org>");
-        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(widget.subject, "Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<1234@local.machine.example>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example>"
+        );
     }
 
-    private Geary.Email load_email()
+    public void load_context_reply_sender() throws GLib.Error {
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_NO_REPLY_TO);
+
+        widget.load_context.begin(REPLY_SENDER, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice <alice@example.net>");
+        assert_equal(widget.cc, "");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_reply_sender_with_reply_to() throws GLib.Error {
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_WITH_REPLY_TO);
+
+        widget.load_context.begin(REPLY_SENDER, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice: Personal Account <alice@example.org>");
+        assert_equal(widget.cc, "");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_reply_all_to_account() throws GLib.Error {
+        // If the message's To includes the account's primary mailbox,
+        // then that should not be included in the CC
+        this.account.account.information.replace_sender(
+            0, new Geary.RFC822.MailboxAddress("Charlie", "charlie@example.net")
+        );
+
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_NO_REPLY_TO);
+
+        widget.load_context.begin(REPLY_ALL, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice <alice@example.net>");
+        assert_equal(widget.cc, "Dave <dave@example.net>");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_reply_all_cc_account() throws GLib.Error {
+        // If the message's CC includes the account's primary mailbox,
+        // then that should not be included in the CC either
+        this.account.account.information.replace_sender(
+            0, new Geary.RFC822.MailboxAddress("Dave", "dave@example.net")
+        );
+
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_NO_REPLY_TO);
+
+        widget.load_context.begin(REPLY_ALL, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice <alice@example.net>");
+        assert_equal(widget.cc, "Charlie <charlie@example.net>");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_reply_all_to_other() throws GLib.Error {
+        // Neither the message's To or CC contains the account's
+        // primary mailbox, so CC should include all of the addresses
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_NO_REPLY_TO);
+
+        widget.load_context.begin(REPLY_ALL, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice <alice@example.net>");
+        assert_equal(widget.cc, "Charlie <charlie@example.net>, Dave <dave@example.net>");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_reply_all_to_other_with_reply_to() throws GLib.Error {
+        // Neither the message's To or CC contains the account's
+        // primary mailbox, so CC should include all of the addresses
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_WITH_REPLY_TO);
+
+        widget.load_context.begin(REPLY_ALL, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "Alice: Personal Account <alice@example.org>");
+        assert_equal(widget.cc, "Charlie <charlie@example.net>, Dave <dave@example.net>");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Re: Basic text/plain message");
+        assert_equal(
+            widget.in_reply_to.to_rfc822_string(),
+            "<3456@example.net>"
+        );
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
+        );
+    }
+
+    public void load_context_forward() throws GLib.Error {
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_NO_REPLY_TO);
+
+        widget.load_context.begin(FORWARD, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+
+        assert_equal(widget.to, "");
+        assert_equal(widget.cc, "");
+        assert_equal(widget.bcc, "");
+        assert_equal(widget.reply_to, "");
+        assert_equal(widget.subject, "Fwd: Basic text/plain message");
+        assert_equal(widget.in_reply_to.to_rfc822_string(), "", "In-Reply-To");
+        assert_equal(
+            widget.references.to_rfc822_string(),
+            "<3456@example.net>",
+            "References"
+        );
+    }
+
+    public void to_composed_email() throws GLib.Error {
+        var widget = new Widget(this.application, this.config, this.account);
+        var email = load_email(MESSAGE_WITH_REPLY_TO);
+
+        var mock_account = (Mock.Account) this.account.account;
+        mock_account.expect_call("local_search_message_id_async");
+
+        widget.load_context.begin(EDIT, email, null, this.async_completion);
+        widget.load_context.end(async_result());
+        mock_account.assert_expectations();
+
+        widget.to_composed_email.begin(null, false, this.async_completion);
+        Geary.ComposedEmail composed = widget.to_composed_email.end(async_result());
+
+        assert_equal(
+            composed.to.to_rfc822_string(),
+            "Charlie <charlie@example.net>"
+        );
+        assert_equal(
+            composed.cc.to_rfc822_string(),
+            "Dave <dave@example.net>"
+        );
+        assert_equal(
+            composed.bcc.to_rfc822_string(),
+            "Eve <eve@example.net>"
+        );
+        // XXX this checked without the "Alice: " prefix, since
+        // Composer.ContactEntry uses
+        // RFC822.MailboxAddresses.from_rfc822_string() to parse its
+        // entry text, and that strips off the colon and anything in
+        // front since it's an invalid char.
+        assert_equal(
+            composed.reply_to.to_rfc822_string(),
+            "Personal Account <alice@example.org>"
+        );
+        assert_equal(
+            composed.subject.to_rfc822_string(),
+            "Basic text/plain message"
+        );
+        assert_equal(
+            composed.in_reply_to.to_rfc822_string(),
+            "<1234@local.machine.example>"
+        );
+        assert_equal(
+            composed.references.to_rfc822_string(),
+            "<1234@local.machine.example> <5678@local.machine.example>"
+        );
+    }
+
+    private Geary.Email load_email(string text)
         throws GLib.Error {
         var message = new Geary.RFC822.Message.from_buffer(
-            new Geary.Memory.StringBuffer(MESSAGE.replace("\n","\r\n"))
+            new Geary.Memory.StringBuffer(text.replace("\n","\r\n"))
         );
         return new Geary.Email.from_message(
             new Mock.EmailIdentifer(0), message
         );
     }
 
-    private const string MESSAGE = """From: Alice <alice@example.net>
+    private const string MESSAGE_NO_REPLY_TO = """From: Alice <alice@example.net>
+Sender: Bob <bob@example.net>
+To: Charlie <charlie@example.net>
+CC: Dave <dave@example.net>
+BCC: Eve <eve@example.net>
+Subject: Basic text/plain message
+Date: Fri, 21 Nov 1997 10:01:10 -0600
+Message-ID: <3456@example.net>
+In-Reply-To: <1234@local.machine.example>
+References: <1234@local.machine.example> <5678@local.machine.example>
+X-Mailer: Geary Test Suite 1.0
+
+This is the first line.
+
+This is the second line.
+
+""";
+
+    private const string MESSAGE_WITH_REPLY_TO = """From: Alice <alice@example.net>
 Sender: Bob <bob@example.net>
 To: Charlie <charlie@example.net>
 CC: Dave <dave@example.net>
 BCC: Eve <eve@example.net>
 Reply-To: "Alice: Personal Account" <alice@example.org>
-Subject: Re: Basic text/plain message
+Subject: Basic text/plain message
 Date: Fri, 21 Nov 1997 10:01:10 -0600
 Message-ID: <3456@example.net>
 In-Reply-To: <1234@local.machine.example>
-References: <1234@local.machine.example>
+References: <1234@local.machine.example> <5678@local.machine.example>
 X-Mailer: Geary Test Suite 1.0
 
 This is the first line.
