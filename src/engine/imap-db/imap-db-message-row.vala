@@ -209,7 +209,7 @@ private class Geary.ImapDB.MessageRow {
         }
 
         if (email.fields.is_all_set(Geary.Email.Field.REFERENCES)) {
-            message_id = (email.message_id != null) ? email.message_id.value : null;
+            message_id = (email.message_id != null) ? email.message_id.to_rfc822_string() : null;
             in_reply_to = (email.in_reply_to != null) ? email.in_reply_to.to_rfc822_string() : null;
             references = (email.references != null) ? email.references.to_rfc822_string() : null;
 
