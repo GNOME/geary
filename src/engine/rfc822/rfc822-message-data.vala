@@ -262,8 +262,9 @@ public class Geary.RFC822.MessageIDList :
 
     public string to_rfc822_string() {
         string[] strings = new string[list.size];
-        for(int i = 0; i < this.list.size; ++i)
+        for (int i = 0; i < this.list.size; ++i) {
             strings[i] = this.list[i].to_rfc822_string();
+        }
 
         return string.joinv(" ", strings);
     }
