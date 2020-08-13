@@ -15,6 +15,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
         add_test("header_from_rfc822", header_from_rfc822);
         add_test("header_names_from_rfc822", header_names_from_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
+        add_test("MessageIDList.from_rfc822_string", message_id_list_from_rfc822_string);
     }
 
     public void preview_text_with_header() throws GLib.Error {
@@ -106,6 +107,110 @@ class Geary.RFC822.MessageDataTest : TestCase {
         const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
         Date neg_half_hour_tz = new Date.from_rfc822_string(NEG_HALF_HOUR_TZ);
         assert_equal(neg_half_hour_tz.to_rfc822_string(), NEG_HALF_HOUR_TZ);
+    }
+
+    public void message_id_list_from_rfc822_string() throws GLib.Error {
+
+        // Standard variants
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("<id@example.com>").get_all(),
+            "<id@example.com>"
+        )
+        .size(1)
+        .contains(new MessageID("id@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("<id1@example.com><id2@example.com>").get_all(),
+            "<id1@example.com><id2@example.com>"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("<id1@example.com> <id2@example.com>").get_all(),
+            "<id1@example.com> <id2@example.com>"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        // Parens as delim are invalid but seen in the wild
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("(id@example.com)").get_all(),
+            "(id@example.com)"
+        )
+        .size(1)
+        .contains(new MessageID("id@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("(id1@example.com)(id2@example.com>").get_all(),
+            "(id1@example.com)(id2@example.com>"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("(id1@example.com) (id2@example.com)").get_all(),
+            "(id1@example.com) (id2@example.com)"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        // No delimiters
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("id@example.com").get_all(),
+            "id@example.com"
+        )
+        .size(1)
+        .contains(new MessageID("id@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("id1@example.com id2@example.com").get_all(),
+            "id1@example.com id2@example.com"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        // Comma-separated is invalid but seen in the wild
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("<id1@example.com>,<id2@example.com>").get_all(),
+            "<id1@example.com>,<id2@example.com>"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("<id1@example.com>, <id2@example.com>").get_all(),
+            "<id1@example.com>, <id2@example.com>"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("(id1@example.com),(id2@example.com)").get_all(),
+            "(id1@example.com),(id2@example.com)"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
+
+        assert_collection(
+            new MessageIDList.from_rfc822_string("(id1@example.com), (id2@example.com)").get_all(),
+            "(id1@example.com), (id2@example.com)"
+        )
+        .size(2)
+        .contains(new MessageID("id1@example.com"))
+        .contains(new MessageID("id2@example.com"));
     }
 
 
