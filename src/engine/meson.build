@@ -1,5 +1,5 @@
 # Geary engine
-geary_engine_vala_sources = files(
+engine_vala_sources = files(
   'api/geary.vala',
   'api/geary-abstract-local-folder.vala',
   'api/geary-account.vala',
@@ -312,11 +312,11 @@ geary_engine_vala_sources = files(
   'util/util-trillian.vala',
 )
 
-geary_engine_sources = [
-  geary_engine_vala_sources,
+engine_sources = [
+  engine_vala_sources,
 ]
 
-geary_engine_dependencies = [
+engine_dependencies = [
   gee,
   gio,
   glib,
@@ -328,46 +328,46 @@ geary_engine_dependencies = [
 ]
 
 if libunwind_dep.found()
-  geary_engine_dependencies += libunwind
+  engine_dependencies += libunwind
 endif
 
-build_dir = meson.current_build_dir()
+engine_build_dir = meson.current_build_dir()
 
 # Generate internal VAPI for unit testing. See Meson issue
 # https://github.com/mesonbuild/meson/issues/1781 for official
 # internal VAPI support.
-geary_engine_vala_args = geary_vala_args
-geary_engine_vala_args += [
-  '--internal-header=@0@/geary-engine-internal.h'.format(build_dir),
-  '--internal-vapi=@0@/geary-engine-internal.vapi'.format(build_dir)
+engine_vala_args = geary_vala_args
+engine_vala_args += [
+  '--internal-header=@0@/geary-engine-internal.h'.format(engine_build_dir),
+  '--internal-vapi=@0@/geary-engine-internal.vapi'.format(engine_build_dir)
 ]
 
 if libunwind_dep.found()
-  geary_engine_vala_args += [
+  engine_vala_args += [
     '-D', 'HAVE_LIBUNWIND',
   ]
 endif
 
 if get_option('tnef-support')
-  geary_engine_dependencies += libytnef
-  geary_engine_vala_args += [
+  engine_dependencies += libytnef
+  engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
   ]
 endif
 
-geary_engine_lib = static_library('geary-engine',
-  geary_engine_sources,
-  dependencies: geary_engine_dependencies,
+engine_lib = static_library('geary-engine',
+  engine_sources,
+  dependencies: engine_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_engine_vala_args,
+  vala_args: engine_vala_args,
   c_args: geary_c_args,
 )
 
 # Dummy target to tell Meson about the internal VAPI given the
 # workaround above, and fix the VAPI header to work around
 # GNOME/vala#358
-geary_engine_internal_header_fixup = custom_target(
-  'geary_engine_internal_header_fixup',
+engine_internal_header_fixup = custom_target(
+  'engine_internal_header_fixup',
   output: [
     'geary-engine-internal.h',
     'geary-engine-internal.vapi',
@@ -378,27 +378,27 @@ geary_engine_internal_header_fixup = custom_target(
     's/geary-engine.h/geary-engine-internal.h/g',
     '@OUTDIR@/geary-engine-internal.vapi',
   ],
-  depends: geary_engine_lib
+  depends: engine_lib
 )
 
-geary_engine_dep = declare_dependency(
+engine_dep = declare_dependency(
   link_with: [
-    geary_engine_lib,
+    engine_lib,
     sqlite3_unicodesn_lib
   ],
   include_directories: include_directories('.')
 )
 
-geary_engine_internal_dep = declare_dependency(
-  # Can't just include geary_engine_lib in link_with since that will
+engine_internal_dep = declare_dependency(
+  # Can't just include engine_lib in link_with since that will
   # pull in the public header and we get duplicate symbol errors.
   link_args: [
-    '-L' + build_dir,
+    '-L' + engine_build_dir,
     '-lgeary-engine'
   ],
   link_with: [
     sqlite3_unicodesn_lib,
   ],
   include_directories: include_directories('.'),
-  sources: geary_engine_internal_header_fixup
+  sources: engine_internal_header_fixup
 )

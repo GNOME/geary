@@ -1,17 +1,18 @@
 # Geary client
 
-geary_client_package_name = 'geary-client'
-geary_client_api_version = '.'.join([
+client_package_name = 'geary-client'
+client_api_version = '.'.join([
   geary_version.split('.')[0],
   geary_version.split('.')[1]
 ])
-geary_client_package = '@0@-@1@'.format(
-  geary_client_package_name,
-  geary_client_api_version
+client_package = '@0@-@1@'.format(
+  client_package_name,
+  client_api_version
 )
 
-geary_client_vala_sources = files(
+client_vala_sources = files(
   'application/application-account-context.vala',
+  'application/application-account-interface.vala',
   'application/application-attachment-manager.vala',
   'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
@@ -70,6 +71,7 @@ geary_client_vala_sources = files(
   'components/status-bar.vala',
   'components/stock.vala',
 
+  'composer/composer-application-interface.vala',
   'composer/composer-box.vala',
   'composer/composer-container.vala',
   'composer/composer-email-entry.vala',
@@ -145,12 +147,12 @@ geary_client_vala_sources = files(
   'util/util-migrate.vala',
 )
 
-geary_client_dependencies = [
+client_dependencies = [
   enchant,
   folks,
   gck,
   gcr,
-  geary_engine_dep,
+  engine_dep,
   gee,
   gio,
   gmime,
@@ -170,33 +172,81 @@ geary_client_dependencies = [
   webkit2gtk,
 ]
 
-geary_client_vala_args = geary_vala_args
+client_build_dir = meson.current_build_dir()
+
+# Generate internal VAPI for unit testing. See Meson issue
+# https://github.com/mesonbuild/meson/issues/1781 for official
+# internal VAPI support.
+client_vala_args = geary_vala_args
+client_vala_args += [
+  '--internal-header=@0@/@1@-internal.h'.format(
+    client_build_dir, client_package_name
+  ),
+  '--internal-vapi=@0@/@1@-internal.vapi'.format(
+    client_build_dir, client_package_name
+  )
+]
 
 # Enable shared shecondary process if available.
 # See issues #558 and #559
 webkit_version = webkit2gtk.version().split('.')
 if webkit_version[0].to_int() <= 2 and webkit_version[1].to_int() <= 24
   message('Enabling WebKitGTK shared process model')
-  geary_client_vala_args += [
+  client_vala_args += [
     '-D', 'HAS_WEBKIT_SHARED_PROC'
   ]
 endif
 
 # Main client application library
-geary_client_lib = shared_library(
-  geary_client_package,
-  geary_client_vala_sources + geary_resources,
-  dependencies: geary_client_dependencies,
+client_lib = shared_library(
+  client_package,
+  client_vala_sources + geary_resources,
+  dependencies: client_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_client_vala_args,
+  vala_args: client_vala_args,
   c_args: geary_c_args,
   install: true,
   install_dir: client_lib_dir,
 )
 
-geary_client_dep = declare_dependency(
-  link_with: geary_client_lib,
+# Dummy target to tell Meson about the internal VAPI given the
+# workaround above, and fix the VAPI header to work around
+# GNOME/vala#358
+client_internal_header_fixup = custom_target(
+  'client_internal_header_fixup',
+  output: [
+    'geary-client-internal.h',
+    'geary-client-internal.vapi',
+  ],
+  command: [
+    find_program('sed'),
+    '-ibak',
+    's/@0@.h/geary-client-internal.h/g'.format(client_package),
+    '@OUTDIR@/geary-client-internal.vapi',
+  ],
+  depends: client_lib
+)
+
+client_dep = declare_dependency(
+  link_with: [
+    client_lib,
+    sqlite3_unicodesn_lib
+  ],
+  include_directories: include_directories('.')
+)
+
+client_internal_dep = declare_dependency(
+  # Can't just include client_lib in link_with since that will
+  # pull in the public header and we get duplicate symbol errors.
+  link_args: [
+    '-L' + client_build_dir,
+    '-l' + client_package
+  ],
+  link_with: [
+    sqlite3_unicodesn_lib,
+  ],
   include_directories: include_directories('.'),
+  sources: client_internal_header_fixup
 )
 
 subdir('plugin')

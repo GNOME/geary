@@ -74,10 +74,12 @@ namespace Geary.RFC822.Utils {
         if (first != null) {
             result.add_all(first.get_all());
             // Add addresses from second that aren't in first.
-            if (second != null)
-                foreach (MailboxAddress address in second)
-            if (!first.contains_normalized(address.address))
-                result.add(address);
+            if (second != null) {
+                foreach (MailboxAddress address in second) {
+                    if (!first.contains_normalized(address.address))
+                        result.add(address);
+                }
+            }
         } else if (second != null) {
             result.add_all(second.get_all());
         }

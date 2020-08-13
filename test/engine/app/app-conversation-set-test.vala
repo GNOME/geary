@@ -29,7 +29,7 @@ class Geary.App.ConversationSetTest : TestCase {
 
     public override void set_up() {
         this.folder_root = new FolderRoot("#test", false);
-        this.base_folder = new MockFolder(
+        this.base_folder = new Mock.Folder(
             null,
             null,
             this.folder_root.get_child("test"),
@@ -477,7 +477,7 @@ class Geary.App.ConversationSetTest : TestCase {
     }
 
     private Email setup_email(int id, Email? references = null) {
-        Email email = new Email(new MockEmailIdentifer(id));
+        Email email = new Email(new Mock.EmailIdentifer(id));
         DateTime now = new DateTime.now_local();
         Geary.RFC822.MessageID mid = new Geary.RFC822.MessageID(
             "test%d@localhost".printf(id)
@@ -490,7 +490,7 @@ class Geary.App.ConversationSetTest : TestCase {
             );
         }
         email.set_send_date(new RFC822.Date(now));
-        email.set_email_properties(new MockEmailProperties(now));
+        email.set_email_properties(new Mock.EmailProperties(now));
         email.set_full_references(mid, null, refs_list);
         return email;
     }

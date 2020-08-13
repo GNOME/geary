@@ -20,7 +20,7 @@ class Geary.AccountInformationTest : TestCase {
             new AccountInformation(
                 "test",
                 ServiceProvider.OTHER,
-                new MockCredentialsMediator(),
+                new Mock.CredentialsMediator(),
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
@@ -28,7 +28,7 @@ class Geary.AccountInformationTest : TestCase {
             new AccountInformation(
                 "test",
                 ServiceProvider.GMAIL,
-                new MockCredentialsMediator(),
+                new Mock.CredentialsMediator(),
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
@@ -36,7 +36,7 @@ class Geary.AccountInformationTest : TestCase {
             new AccountInformation(
                 "test",
                 ServiceProvider.OUTLOOK,
-                new MockCredentialsMediator(),
+                new Mock.CredentialsMediator(),
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
@@ -44,7 +44,7 @@ class Geary.AccountInformationTest : TestCase {
             new AccountInformation(
                 "test",
                 ServiceProvider.YAHOO,
-                new MockCredentialsMediator(),
+                new Mock.CredentialsMediator(),
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
@@ -54,7 +54,7 @@ class Geary.AccountInformationTest : TestCase {
         AccountInformation test = new AccountInformation(
             "test",
             ServiceProvider.OTHER,
-            new MockCredentialsMediator(),
+            new Mock.CredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
 
@@ -124,7 +124,7 @@ class Geary.AccountInformationTest : TestCase {
         return new AccountInformation(
             "test",
             provider,
-            new MockCredentialsMediator(),
+            new Mock.CredentialsMediator(),
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
     }

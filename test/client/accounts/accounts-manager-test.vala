@@ -47,7 +47,7 @@ class Accounts.ManagerTest : TestCase {
             null, "test1@example.com"
         );
 
-        this.mediator = new Geary.MockCredentialsMediator();
+        this.mediator = new Mock.CredentialsMediator();
         this.account = new Geary.AccountInformation(
             TEST_ID,
             Geary.ServiceProvider.OTHER,

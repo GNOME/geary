@@ -16,6 +16,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
         add_test("header_names_from_rfc822", header_names_from_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
         add_test("MessageIDList.from_rfc822_string", message_id_list_from_rfc822_string);
+        add_test("MessageIdList.merge", message_id_list_merge);
     }
 
     public void preview_text_with_header() throws GLib.Error {
@@ -211,6 +212,19 @@ class Geary.RFC822.MessageDataTest : TestCase {
         .size(2)
         .contains(new MessageID("id1@example.com"))
         .contains(new MessageID("id2@example.com"));
+    }
+
+    public void message_id_list_merge() throws GLib.Error {
+        var a1 = new MessageID("a");
+        var b = new MessageID("b");
+        var a2 = new MessageID("a");
+        var list = new MessageIDList.single(a1);
+
+        assert_equal<int?>(list.merge_id(b).size, 2);
+        assert_equal<int?>(list.merge_id(a2).size, 1);
+
+        assert_equal<int?>(list.merge_list(new MessageIDList.single(b)).size, 2);
+        assert_equal<int?>(list.merge_list(new MessageIDList.single(a2)).size, 1);
     }
 
 

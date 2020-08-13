@@ -6,10 +6,6 @@
  */
 
 
-extern const string _INSTALL_PREFIX;
-extern const string _BUILD_ROOT_DIR;
-extern const string _GSETTINGS_DIR;
-
 int main(string[] args) {
     /*
      * Set env vars right up front to avoid weird bugs
@@ -36,6 +32,7 @@ int main(string[] args) {
     Gtk.init(ref args);
     Test.init(ref args);
 
+    IconFactory.init(GLib.File.new_for_path(_SOURCE_ROOT_DIR));
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();
@@ -57,6 +54,7 @@ int main(string[] args) {
     client.add_suite(new Application.ConfigurationTest().suite);
     client.add_suite(new ClientWebViewTest().suite);
     client.add_suite(new Composer.WebViewTest().suite);
+    client.add_suite(new Composer.WidgetTest().suite);
     client.add_suite(new Components.ValidatorTest().suite);
     client.add_suite(new Util.Avatar.Test().suite);
     client.add_suite(new Util.Cache.Test().suite);

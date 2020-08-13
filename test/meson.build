@@ -1,22 +1,27 @@
 subdir('data')
 
-geary_test_engine_sources = [
+# Mock classes should be compiled into a stand-alone test lib for
+# re-use by both client and engine test suites, but we can't since
+# that would depend on geary-engine.vapi, and the engine test sute
+# needs to depend geary-engine_internal.vapi, which leads to duplicate
+# symbols when linking. So just duplicate the sources in both.
+libmock_sources = [
+  'mock/mock-account.vala',
+  'mock/mock-contact-store.vala',
+  'mock/mock-client-service.vala',
+  'mock/mock-credentials-mediator.vala',
+  'mock/mock-email-identifier.vala',
+  'mock/mock-email-properties.vala',
+  'mock/mock-folder.vala',
+  'mock/mock-folder-properties.vala',
+  'mock/mock-search-query.vala',
+]
+
+test_engine_sources = [
   'test-case.vala',
   'test-server.vala',
   'test-engine.vala',
 
-  # These should be included in the test lib sources, but we can't
-  # since that would make the test lib depend on geary-engine.vapi,
-  # and the engine test sute needs to depend
-  # geary-engine_internal.vapi, which leads to duplicate symbols when
-  # linking
-  'engine/api/geary-account-mock.vala',
-  'engine/api/geary-contact-store-mock.vala',
-  'engine/api/geary-credentials-mediator-mock.vala',
-  'engine/api/geary-email-identifier-mock.vala',
-  'engine/api/geary-email-properties-mock.vala',
-  'engine/api/geary-folder-mock.vala',
-  'engine/api/geary-folder-properties-mock.vala',
   'engine/common/common-contact-harvester-mock.vala',
 
   'engine/api/geary-account-information-test.vala',
@@ -65,20 +70,12 @@ geary_test_engine_sources = [
   'engine/util-string-test.vala',
   'engine/util-timeout-manager-test.vala',
 
-  geary_test_engine_resources
+  test_engine_resources
 ]
 
-geary_test_client_sources = [
+test_client_sources = [
   'test-case.vala',
   'test-client.vala',
-
-  # These should be included in the test lib sources, but we can't
-  # since that would make the test lib depend on geary-engine.vapi,
-  # and the engine test sute needs to depend
-  # geary-engine_internal.vapi, which leads to duplicate symbols when
-  # linking
-  'engine/api/geary-email-identifier-mock.vala',
-  'engine/api/geary-credentials-mediator-mock.vala',
 
   'client/accounts/accounts-manager-test.vala',
   'client/application/application-client-test.vala',
@@ -87,6 +84,7 @@ geary_test_client_sources = [
   'client/components/client-web-view-test-case.vala',
   'client/components/components-validator-test.vala',
   'client/composer/composer-web-view-test.vala',
+  'client/composer/composer-widget-test.vala',
   'client/util/util-avatar-test.vala',
   'client/util/util-cache-test.vala',
   'client/util/util-email-test.vala',
@@ -100,7 +98,7 @@ geary_test_client_sources = [
   geary_resources
 ]
 
-geary_test_integration_sources = [
+test_integration_sources = [
   'test-case.vala',
   'test-integration.vala',
 
@@ -110,51 +108,52 @@ geary_test_integration_sources = [
 
 # Engine tests
 
-geary_test_engine_dependencies = [
-  geary_engine_internal_dep,
+test_engine_dependencies = [
+  engine_internal_dep,
   vala_unit_dep,
 ]
-geary_test_engine_dependencies += geary_engine_dependencies
+test_engine_dependencies += engine_dependencies
 
-geary_test_engine_vala_args = geary_vala_args
+test_engine_vala_args = geary_vala_args
 
 if get_option('tnef-support')
-  geary_test_engine_dependencies += libytnef
-  geary_test_engine_vala_args += [
+  test_engine_dependencies += libytnef
+  test_engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
   ]
 endif
 
-geary_test_engine_bin = executable('test-engine',
-  geary_test_engine_sources,
-  dependencies: geary_test_engine_dependencies,
+test_engine_bin = executable('test-engine',
+  test_engine_sources + libmock_sources,
+  dependencies: test_engine_dependencies,
   include_directories: config_h_dir,
-  vala_args: geary_test_engine_vala_args,
+  vala_args: test_engine_vala_args,
   c_args: geary_c_args,
 )
 
 # Client tests
 
-geary_test_client_dependencies = [
-  geary_client_dep,
+test_client_dependencies = [
+  client_internal_dep,
   vala_unit_dep,
 ]
-geary_test_client_dependencies += geary_client_dependencies
+test_client_dependencies += client_dependencies
 
-geary_test_client_bin = executable('test-client',
-  geary_test_client_sources,
-  dependencies: geary_test_client_dependencies,
+test_client_bin = executable('test-client',
+  test_client_sources + libmock_sources,
+  dependencies: test_client_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
+  build_rpath: client_build_dir,
 )
 
 # Integration tests
 
-geary_test_integration_bin = executable('test-integration',
-  geary_test_integration_sources,
+test_integration_bin = executable('test-integration',
+  test_integration_sources,
   dependencies: [
-    geary_engine_dep,
+    engine_dep,
     gee,
     gio,
     gmime,
@@ -166,5 +165,5 @@ geary_test_integration_bin = executable('test-integration',
   c_args: geary_c_args,
 )
 
-test('engine-tests', geary_test_engine_bin)
-test('client-tests', geary_test_client_bin)
+test('engine-tests', test_engine_bin)
+test('client-tests', test_client_bin)

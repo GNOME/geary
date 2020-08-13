@@ -53,41 +53,41 @@ subdir('client')
 subdir('console')
 subdir('mailer')
 
-geary_web_process_sources = files(
+web_process_sources = files(
   'client/web-process/web-process-extension.vala',
   'client/util/util-js.vala',
 )
 
 # Web process extension library
-geary_web_process = library('geary-web-process',
-  geary_web_process_sources,
+web_process = library('geary-web-process',
+  web_process_sources,
   dependencies: [
-    geary_engine_dep,
+    engine_dep,
     gee,
     gmime,
     webkit2gtk_web_extension,
   ],
   include_directories: config_h_dir,
-  vala_args: geary_client_vala_args,
+  vala_args: client_vala_args,
   c_args: geary_c_args,
   install: true,
   install_dir: web_extensions_dir
 )
 
 # Now finally, make the geary executable
-geary_bin_sources = files(
+bin_sources = files(
   'client' / 'application' / 'main.vala',
 )
 
-geary_bin_sources += [
+bin_sources += [
   geary_compiled_schema,
   geary_resources # Included here so they show up in the executable.
 ]
-geary_bin_dependencies = [
+bin_dependencies = [
   folks,
   gdk,
-  geary_client_dep,
-  geary_engine_dep,
+  client_dep,
+  engine_dep,
   gee,
   gmime,
   goa,
@@ -100,9 +100,9 @@ geary_bin_dependencies = [
   webkit2gtk,
 ]
 
-geary_bin = executable('geary',
-  geary_bin_sources,
-  dependencies: geary_bin_dependencies,
+bin = executable('geary',
+  bin_sources,
+  dependencies: bin_dependencies,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
   install: true,
@@ -142,10 +142,10 @@ endforeach
 valadoc_dep_args += [ '--pkg', 'posix' ]
 
 if enable_valadoc
-  geary_docs = custom_target('valadoc',
+  docs = custom_target('valadoc',
     build_by_default: true,
-    depends: [geary_client_lib, geary_engine_lib],
-    input: geary_client_vala_sources + geary_engine_sources,
+    depends: [client_lib, engine_lib],
+    input: client_vala_sources + engine_sources,
     output: 'valadoc',
     command: [ valadoc,
       '--verbose',

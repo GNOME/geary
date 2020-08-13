@@ -21,7 +21,7 @@ class Geary.EmailTest: TestCase {
 
     public void email_from_basic_message() throws GLib.Error {
         var message = resource_to_message(BASIC_TEXT_PLAIN);
-        var email = new Email.from_message(new MockEmailIdentifer(0), message);
+        var email = new Email.from_message(new Mock.EmailIdentifer(0), message);
 
         assert_non_null(email);
         assert_non_null(email.subject);
@@ -30,7 +30,7 @@ class Geary.EmailTest: TestCase {
 
     public void email_from_multipart() throws GLib.Error {
         var message = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
-        var email = new Email.from_message(new MockEmailIdentifer(0), message);
+        var email = new Email.from_message(new Mock.EmailIdentifer(0), message);
 
         assert_non_null(email);
         assert_non_null(email.subject);

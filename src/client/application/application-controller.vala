@@ -13,7 +13,8 @@
  * A single instance of this class is constructed by {@link Client}
  * when the primary application instance is started.
  */
-internal class Application.Controller : Geary.BaseObject {
+internal class Application.Controller :
+    Geary.BaseObject, AccountInterface, Composer.ApplicationInterface {
 
 
     private const uint MAX_AUTH_ATTEMPTS = 3;
@@ -78,6 +79,7 @@ internal class Application.Controller : Geary.BaseObject {
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
+    private bool is_loading_accounts = true;
 
     // Cancelled if the controller is closed
     private GLib.Cancellable controller_open;
@@ -96,31 +98,6 @@ internal class Application.Controller : Geary.BaseObject {
     private Geary.TimeoutManager all_windows_backgrounded_timeout;
 
     private GLib.Cancellable? storage_cleanup_cancellable;
-
-
-    /**
-     * Emitted when an account is added or is enabled.
-     *
-     * This will be emitted after an account is opened and added to
-     * the controller.
-     */
-    public signal void account_available(AccountContext context);
-
-    /**
-     * Emitted when an account is removed or is disabled.
-     *
-     * This will be emitted after the account is removed from the
-     * controller's collection of accounts, but before the {@link
-     * AccountContext.cancellable} is cancelled and before the account
-     * itself is closed.
-     *
-     * The `is_shutdown` argument will be true if the application is
-     * in the middle of quitting, otherwise if the account was simply
-     * removed but the application will keep running, then it will be
-     * false.
-     */
-    public signal void account_unavailable(AccountContext context,
-                                           bool is_shutdown);
 
 
     /**
@@ -213,8 +190,9 @@ internal class Application.Controller : Geary.BaseObject {
 
         yield this.account_manager.connect_goa(cancellable);
 
-        // Start loading accounts
+        // Load accounts
         yield this.account_manager.load_accounts(cancellable);
+        this.is_loading_accounts = false;
 
         // Expunge any deleted accounts in the background, so we're
         // not blocking the app continuing to open.
@@ -353,9 +331,9 @@ internal class Application.Controller : Geary.BaseObject {
         Composer.Widget? composer = null;
         if (context != null) {
             composer = new Composer.Widget(
-                this.application,
+                this,
+                this.application.config,
                 context,
-                this.accounts.values.read_only_view,
                 save_to
             );
             register_composer(composer);
@@ -430,9 +408,9 @@ internal class Application.Controller : Geary.BaseObject {
         Composer.Widget? composer = null;
         if (account != null) {
             composer = new Composer.Widget(
-                this.application,
+                this,
+                this.application.config,
                 account,
-                this.accounts.values.read_only_view,
                 save_to
             );
             register_composer(composer);
@@ -461,9 +439,9 @@ internal class Application.Controller : Geary.BaseObject {
             var context = this.accounts.get(window.selected_account.information);
             if (context != null) {
                 var composer = new Composer.Widget(
-                    this.application,
-                    context,
-                    this.accounts.values.read_only_view
+                    this,
+                    this.application.config,
+                    context
                 );
                 register_composer(composer);
                 show_composer(composer);
@@ -1003,7 +981,7 @@ internal class Application.Controller : Geary.BaseObject {
         // Notify before opening so that listeners have a chance to
         // hook into it before signals start getting fired by folders
         // becoming available, etc.
-        account_available(context);
+        account_available(context, this.is_loading_accounts);
 
         bool retry = false;
         do {
@@ -2507,7 +2485,7 @@ private class Application.SendComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         if (this.can_undo) {
             /// Translators: The label for an in-app notification. The
             /// string substitution is a list of recipients of the email.
@@ -2572,7 +2550,7 @@ private class Application.SaveComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         this.executed_label = _(
@@ -2630,7 +2608,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.get_composed_email();
+        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
         this.executed_label = _(

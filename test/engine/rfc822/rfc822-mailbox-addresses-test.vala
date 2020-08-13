@@ -12,6 +12,7 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
         add_test("from_rfc822_string_encoded", from_rfc822_string_encoded);
         add_test("from_rfc822_string_quoted", from_rfc822_string_quoted);
         add_test("to_rfc822_string", to_rfc822_string);
+        add_test("contains_all", contains_all);
         add_test("equal_to", equal_to);
         add_test("hash", hash);
     }
@@ -52,6 +53,38 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
                .to_rfc822_string() == "test1@example.com, test2@example.com");
     }
 
+    public void contains_all() throws GLib.Error {
+        var mailboxes_a = new_addreses({ "test1@example.com" });
+        var mailboxes_b = new_addreses({ "test1@example.com" });
+        var mailboxes_c = new_addreses({ "test2@example.com" });
+
+        assert_true(mailboxes_a.contains_all(mailboxes_a));
+        assert_true(mailboxes_a.contains_all(mailboxes_b));
+        assert_false(mailboxes_a.contains_all(mailboxes_c));
+
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).contains_all(
+                new_addreses({ "test1@example.com", "test2@example.com" })
+            )
+        );
+        assert_true(
+            new_addreses({ "test1@example.com", "test2@example.com" }).contains_all(
+                new_addreses({ "test2@example.com", "test1@example.com" })
+            )
+        );
+
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).contains_all(
+                new_addreses({ "test1@example.com" })
+            )
+        );
+        assert_false(
+            new_addreses({ "test1@example.com", "test2@example.com" }).contains_all(
+                new_addreses({ "test1@example.com", "test3@example.com" })
+            )
+        );
+    }
+
     public void equal_to() throws GLib.Error {
         var mailboxes_a = new_addreses({ "test1@example.com" });
         var mailboxes_b = new_addreses({ "test1@example.com" });
@@ -66,12 +99,11 @@ class Geary.RFC822.MailboxAddressesTest : TestCase {
                 new_addreses({ "test1@example.com", "test2@example.com" })
             )
         );
-        assert_true(
+        assert_false(
             new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
                 new_addreses({ "test2@example.com", "test1@example.com" })
             )
         );
-
         assert_false(
             new_addreses({ "test1@example.com", "test2@example.com" }).equal_to(
                 new_addreses({ "test1@example.com" })
