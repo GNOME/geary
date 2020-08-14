@@ -719,10 +719,6 @@ public class Application.MainWindow :
                      !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
                 }
-
-                if (to_select.used_as == SEARCH) {
-                    this.previous_non_search_folder = to_select;
-                }
             } else {
                 this.folder_list.deselect_folder();
             }
@@ -931,6 +927,12 @@ public class Application.MainWindow :
             this.search_open.cancel();
             var cancellable = this.search_open = new GLib.Cancellable();
 
+            if (this.previous_non_search_folder == null &&
+                this.selected_folder != null &&
+                this.selected_folder.used_as != SEARCH) {
+                this.previous_non_search_folder = this.selected_folder;
+            }
+
             var strategy = this.application.config.get_search_strategy();
             try {
                 var query = yield context.account.new_search_query(
@@ -953,11 +955,23 @@ public class Application.MainWindow :
         this.search_open.cancel();
         this.search_open = new GLib.Cancellable();
 
-        if (this.previous_non_search_folder != null &&
+        if (this.selected_folder == null ||
             this.selected_folder.used_as == SEARCH) {
-            this.select_folder.begin(
-                this.previous_non_search_folder, is_interactive
-            );
+            var to_select = this.previous_non_search_folder;
+            if (to_select == null) {
+                var account = get_selected_account_context();
+                if (account != null) {
+                    to_select = account.inbox;
+                }
+
+            }
+            if (to_select != null) {
+                this.select_folder.begin(
+                    this.previous_non_search_folder, is_interactive
+                );
+            } else {
+                select_first_inbox(is_interactive);
+            }
         }
         this.folder_list.remove_search();
 
@@ -1043,7 +1057,7 @@ public class Application.MainWindow :
             }
 
             // Finally, remove the account and its folders
-            remove_folders(to_remove.get_folders());
+            remove_folders(to_remove.get_folders(), false);
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
         }
@@ -1062,9 +1076,17 @@ public class Application.MainWindow :
     }
 
     /** Removes a folder from the window. */
-    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+    private void remove_folders(Gee.Collection<FolderContext> to_remove,
+                                bool update_selecton) {
         foreach (var context in to_remove) {
             Geary.Folder folder = context.folder;
+            if (this.selected_folder == folder) {
+                var account = get_selected_account_context();
+                if (account != null) {
+                    this.select_folder.begin(account.inbox, true);
+                }
+            }
+
             folder.use_changed.disconnect(on_use_changed);
             if (folder.account == this.selected_account) {
                 this.main_toolbar.copy_folder_menu.remove_folder(folder);
@@ -1956,7 +1978,7 @@ public class Application.MainWindow :
     }
 
     private void on_folders_unavailable(Gee.Collection<FolderContext> unavailable) {
-        remove_folders(unavailable);
+        remove_folders(unavailable, true);
     }
 
     private void on_use_changed(Geary.Folder folder,
