@@ -199,10 +199,11 @@ public class Plugin.MailMerge :
                     );
                     var email = Geary.Collection.first(emails);
 
-                    this.merge_folder = new global::MailMerge.Folder(
+                    this.merge_folder = yield new global::MailMerge.Folder(
                         account_context.account,
                         account_context.account.local_folder_root,
                         yield load_merge_email(email),
+                        csv_file,
                         csv
                     );
 

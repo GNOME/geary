@@ -114,6 +114,22 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
     }
     Geary.Folder.SpecialUse _used_as = NONE;
 
+    /** The source data file used the folder. */
+    public GLib.File data_location { get; private set; }
+
+    /** The display name for {@link data_location}. */
+    public string data_display_name { get; private set; }
+
+    /** The number of email that have been sent. */
+    public uint email_sent { get; private set; default = 0; }
+
+    /** The number of email in total. */
+    public uint email_total { get; private set; default = 0; }
+
+    /** Specifies if the merged mail is currently being sent. */
+    public bool is_sending { get; private set; default = false; }
+
+
     private Gee.Map<Geary.EmailIdentifier,Geary.Email> map =
         new Gee.HashMap<Geary.EmailIdentifier,Geary.Email>();
     private Gee.List<Geary.Email> list =
@@ -123,16 +139,35 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
     private GLib.Cancellable loading = new GLib.Cancellable();
 
 
-    public Folder(Geary.Account account,
-                  Geary.FolderRoot root,
-                  Geary.Email template,
-                  Csv.Reader data) {
+    public async Folder(Geary.Account account,
+                        Geary.FolderRoot root,
+                        Geary.Email template,
+                        GLib.File data_location,
+                        Csv.Reader data)
+        throws GLib.Error {
         this._account = account;
         this._path = root.get_child("$Plugin.MailMerge$");
         this.template = template;
+        this.data_location = data_location;
         this.data = data;
 
+        var info = yield data_location.query_info_async(
+            GLib.FileAttribute.STANDARD_DISPLAY_NAME,
+            NONE,
+            GLib.Priority.DEFAULT,
+            null
+        );
+        this.data_display_name = info.get_display_name();
+
+        // Do this in the background to avoid blocking while the whole
+        // file is processed
         this.load_data.begin(this.loading);
+    }
+
+
+    /** Starts or stops the folder sending mail. */
+    public void set_sending(bool is_sending) {
+        this.is_sending = is_sending;
     }
 
     /** {@inheritDoc} */
@@ -278,6 +313,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                 this.list.add(email);
                 this.map.set(id, email);
                 this._properties.set_total((int) next_id);
+                this.email_total = (uint) next_id;
 
                 notify_email_inserted(Geary.Collection.single(id));
                 record = yield this.data.read_record();
