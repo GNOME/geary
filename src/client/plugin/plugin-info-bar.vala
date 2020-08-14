@@ -15,6 +15,9 @@
 public class Plugin.InfoBar : Geary.BaseObject {
 
 
+    /** Emitted when the close button is activated. */
+    public signal void close_activated();
+
     /**
      * A short, human-readable status message.
      *

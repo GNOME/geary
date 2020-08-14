@@ -27,6 +27,9 @@ public class Components.InfoBar : Gtk.InfoBar {
     public Gtk.Label? description { get; private set; default = null; }
 
 
+    private Plugin.InfoBar? plugin = null;
+
+
     /**
      * Constructs a new info bar.
      *
@@ -76,6 +79,7 @@ public class Components.InfoBar : Gtk.InfoBar {
                               string action_group_name,
                               int priority) {
         this(plugin.status, plugin.description);
+        this.plugin = plugin;
         this.show_close_button = plugin.show_close_button;
 
         var secondaries = plugin.secondary_buttons.bidir_list_iterator();
@@ -91,6 +95,18 @@ public class Components.InfoBar : Gtk.InfoBar {
         set_data<int>(InfoBarStack.PRIORITY_QUEUE_KEY, priority);
 
         show_all();
+    }
+
+    /* {@inheritDoc} */
+    public override void response(int response) {
+        if (response == Gtk.ResponseType.CLOSE && this.plugin != null) {
+            this.plugin.close_activated();
+        }
+    }
+
+    /* {@inheritDoc} */
+    public override void destroy() {
+        this.plugin = null;
     }
 
     // GTK 3.24.16 fixed the binding for this, but that and the VAPI
