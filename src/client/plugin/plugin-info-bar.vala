@@ -23,7 +23,7 @@ public class Plugin.InfoBar : Geary.BaseObject {
      *
      * This should ideally be less than 20 characters long.
      */
-    public string status { get; private set; }
+    public string status { get; set; }
 
     /**
      * An optional, longer human-readable explanation of the status.
@@ -31,7 +31,7 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * This provides additional information and context for {@link
      * status}.
      */
-    public string? description { get; private set; }
+    public string? description { get; set; }
 
     /** Determines if a close button is displayed by the info bar. */
     public bool show_close_button { get; set; default = false; }

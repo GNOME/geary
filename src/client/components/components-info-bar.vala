@@ -82,6 +82,13 @@ public class Components.InfoBar : Gtk.InfoBar {
         this.plugin = plugin;
         this.show_close_button = plugin.show_close_button;
 
+        plugin.notify["status"].connect(
+            () => { this.status.label = plugin.status; }
+        );
+        plugin.notify["description"].connect(
+            () => { this.description.label = plugin.description; }
+        );
+
         var secondaries = plugin.secondary_buttons.bidir_list_iterator();
         bool has_prev = secondaries.last();
         while (has_prev) {
