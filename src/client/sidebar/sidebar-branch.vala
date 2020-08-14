@@ -73,17 +73,14 @@ public class Sidebar.Branch : Geary.BaseObject {
         public void remove_child(Node child) {
             Gee.SortedSet<Node> new_children = new Gee.TreeSet<Node>(comparator_wrapper);
 
-            // For similar reasons as in reorder_child(), can't rely on TreeSet to locate this
-            // node because we need reference equality.
-            bool found = false;
+            // For similar reasons as in reorder_child(), can't rely
+            // on TreeSet to locate this node because we need
+            // reference equality.
             foreach (Node c in children) {
-                if (c != child)
+                if (c != child) {
                     new_children.add(c);
-                else
-                    found = true;
+                }
             }
-
-            assert(found);
 
             if (new_children.size != 0)
                 children = new_children;
