@@ -28,6 +28,8 @@ public class Components.InfoBar : Gtk.InfoBar {
 
 
     private Plugin.InfoBar? plugin = null;
+    private string? plugin_action_group_name = null;
+    private Gtk.Button? plugin_primary_button = null;
 
 
     /**
@@ -80,6 +82,7 @@ public class Components.InfoBar : Gtk.InfoBar {
                               int priority) {
         this(plugin.status, plugin.description);
         this.plugin = plugin;
+        this.plugin_action_group_name = action_group_name;
         this.show_close_button = plugin.show_close_button;
 
         plugin.notify["status"].connect(
@@ -88,16 +91,17 @@ public class Components.InfoBar : Gtk.InfoBar {
         plugin.notify["description"].connect(
             () => { this.description.label = plugin.description; }
         );
+        plugin.notify["primary-button"].connect(
+            () => { this.update_plugin_primary_button(); }
+        );
 
         var secondaries = plugin.secondary_buttons.bidir_list_iterator();
         bool has_prev = secondaries.last();
         while (has_prev) {
-            add_plugin_button(secondaries.get(), action_group_name);
+            get_action_area().add(new_plugin_button(secondaries.get()));
             has_prev = secondaries.previous();
         }
-        if (plugin.primary_button != null) {
-            add_plugin_button(plugin.primary_button, action_group_name);
-        }
+        update_plugin_primary_button();
 
         set_data<int>(InfoBarStack.PRIORITY_QUEUE_KEY, priority);
 
@@ -122,14 +126,40 @@ public class Components.InfoBar : Gtk.InfoBar {
         return (Gtk.Box) base.get_action_area();
     }
 
-    private void add_plugin_button(Plugin.Actionable plugin,
-                                   string action_group_name) {
-        var gtk = new Gtk.Button.with_label(plugin.label);
-        gtk.set_action_name(action_group_name + "." + plugin.action.name);
-        if (plugin.action_target != null) {
-            gtk.set_action_target_value(plugin.action_target);
+    private void update_plugin_primary_button() {
+        Gtk.Button? new_button = null;
+        if (this.plugin != null && this.plugin.primary_button != null) {
+            new_button = new_plugin_button(this.plugin.primary_button);
         }
-        get_action_area().add(gtk);
+        if (this.plugin_primary_button != null) {
+            get_action_area().remove(plugin_primary_button);
+        }
+        if (new_button != null) {
+            get_action_area().add(new_button);
+        }
+        this.plugin_primary_button = new_button;
+    }
+
+    private Gtk.Button new_plugin_button(Plugin.Actionable ui) {
+        Gtk.Button? button = null;
+        if (ui.icon_name == null) {
+            button = new Gtk.Button.with_label(ui.label);
+        } else {
+            var icon = new Gtk.Image.from_icon_name(
+                ui.icon_name, Gtk.IconSize.BUTTON
+            );
+            button = new Gtk.Button();
+            button.add(icon);
+            button.tooltip_text = ui.label;
+        }
+        button.set_action_name(
+            this.plugin_action_group_name + "." + ui.action.name
+        );
+        if (ui.action_target != null) {
+            button.set_action_target_value(ui.action_target);
+        }
+        button.show_all();
+        return button;
     }
 
 }
