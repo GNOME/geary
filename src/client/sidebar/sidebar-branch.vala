@@ -63,11 +63,10 @@ public class Sidebar.Branch : Geary.BaseObject {
 
         public void add_child(Node child) {
             child.parent = this;
-
-            if (children == null)
-                children = new Gee.TreeSet<Node>(comparator_wrapper);
-
-            bool added = children.add(child);
+            if (this.children == null) {
+                this.children = new Gee.TreeSet<Node>(comparator_wrapper);
+            }
+            this.children.add(child);
         }
 
         public void remove_child(Node child) {
