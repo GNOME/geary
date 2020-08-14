@@ -38,6 +38,8 @@ public class Plugin.MailMerge :
     private const string ACTION_INSERT_FIELD = "insert-field";
     private const string ACTION_MERGE = "merge-template";
     private const string ACTION_LOAD = "load-merge-data";
+    private const string ACTION_START = "start-send";
+    private const string ACTION_PAUSE = "pause-send";
 
     private const int INFO_BAR_PRIORITY = 10;
 
@@ -62,9 +64,15 @@ public class Plugin.MailMerge :
     private EmailStore? email_store = null;
 
     private global::MailMerge.Folder? merge_folder = null;
+    private InfoBar merge_bar = null;
 
     private GLib.SimpleAction? edit_action = null;
     private GLib.SimpleAction? merge_action = null;
+    private GLib.SimpleAction? start_action = null;
+    private GLib.SimpleAction? pause_action = null;
+
+    private Actionable? start_ui = null;
+    private Actionable? pause_ui = null;
 
     private Gee.List<string> folder_names = new Gee.ArrayList<string>();
 
@@ -83,6 +91,7 @@ public class Plugin.MailMerge :
 
         this.folder_store = yield this.folders.get_folder_store();
         this.folder_store.folders_available.connect(on_folders_available);
+        this.folder_store.folder_selected.connect(on_folder_selected);
 
         this.email_store = yield this.email.get_email_store();
         this.email_store.email_displayed.connect(on_email_displayed);
@@ -98,6 +107,30 @@ public class Plugin.MailMerge :
         );
         this.merge_action.activate.connect(on_merge_activated);
         this.plugin_application.register_action(this.merge_action);
+
+        this.start_action = new GLib.SimpleAction(ACTION_START, null);
+        this.start_action.activate.connect(on_start_activated);
+        this.plugin_application.register_action(this.start_action);
+
+        this.start_ui = new Actionable.with_icon(
+            // Translators: Info bar label for starting sending a mail
+            // merge
+            _("Start"),
+            "media-playback-start-symbolic",
+            this.start_action
+        );
+
+        this.pause_action = new GLib.SimpleAction(ACTION_PAUSE, null);
+        this.pause_action.activate.connect(on_pause_activated);
+        this.plugin_application.register_action(this.pause_action);
+
+        this.pause_ui = new Actionable.with_icon(
+            // Translators: Info bar label for pausing sending a mail
+            // merge
+            _("Pause"),
+            "media-playback-pause-symbolic",
+            this.pause_action
+        );
 
         this.plugin_application.composer_registered.connect(
             this.on_composer_registered
@@ -173,6 +206,19 @@ public class Plugin.MailMerge :
                         csv
                     );
 
+                    this.merge_bar = new InfoBar(
+                        this.merge_folder.data_display_name, ""
+                    );
+                    update_merge_folder_info_bar();
+                    this.merge_bar.show_close_button = true;
+                    this.merge_bar.close_activated.connect(on_merge_closed);
+                    this.merge_folder.notify["email-sent"].connect(
+                        () => { update_merge_folder_info_bar(); }
+                    );
+                    this.merge_folder.notify["email-total"].connect(
+                        () => { update_merge_folder_info_bar(); }
+                    );
+
                     account_context.account.register_local_folder(
                         this.merge_folder
                     );
@@ -183,6 +229,19 @@ public class Plugin.MailMerge :
                 debug("Displaying merge folder failed: %s", err.message);
             }
         }
+    }
+
+    private void update_merge_folder_info_bar() {
+        // Translators: Info bar description for the mail merge
+        // folder. The first string substitution the number of email
+        // already sent, the second is the total number to send.
+        this.merge_bar.description = _("Sent %u of %u").printf(
+            this.merge_folder.email_sent,
+            this.merge_folder.email_total
+        );
+        this.merge_bar.primary_button = (
+            (this.merge_folder.is_sending) ? this.pause_ui : this.start_ui
+        );
     }
 
     private async void update_email(Email target) {
@@ -384,8 +443,32 @@ public class Plugin.MailMerge :
         }
     }
 
+    private void on_start_activated(GLib.Action action, GLib.Variant? target) {
+        this.merge_folder.set_sending(true);
+        update_merge_folder_info_bar();
+    }
+
+    private void on_pause_activated(GLib.Action action, GLib.Variant? target) {
+        this.merge_folder.set_sending(false);
+        update_merge_folder_info_bar();
+    }
+
     private void on_composer_registered(Composer registered) {
         this.update_composer.begin(registered);
+    }
+
+    private void on_merge_closed() {
+        if (this.merge_folder != null) {
+            try {
+                this.merge_folder.account.deregister_local_folder(
+                    this.merge_folder
+                );
+            } catch (GLib.Error err) {
+                warning("Error de-registering merge folder: %s", err.message);
+            }
+            this.merge_folder = null;
+            this.merge_bar = null;
+        }
     }
 
     private void on_folders_available(Gee.Collection<Folder> available) {
@@ -408,6 +491,15 @@ public class Plugin.MailMerge :
                     );
                 }
             }
+        }
+    }
+
+    private void on_folder_selected(Folder selected) {
+        var engine_folder = this.client_plugins.to_engine_folder(selected);
+        if (this.merge_folder == engine_folder) {
+            this.folders.add_folder_info_bar(
+                selected, this.merge_bar, INFO_BAR_PRIORITY
+            );
         }
     }
 
