@@ -80,9 +80,14 @@ public class Geary.ComposedEmail : EmailHeaderSet, BaseObject {
 
     public string img_src_prefix { get; set; default = ""; }
 
-    public ComposedEmail(DateTime date, RFC822.MailboxAddresses from) {
-        this._date = new RFC822.Date(date);
+    public ComposedEmail(GLib.DateTime date, RFC822.MailboxAddresses from) {
+        set_date(date);
         this._from = from;
+    }
+
+    public ComposedEmail set_date(GLib.DateTime date) {
+        this._date = new RFC822.Date(date);
+        return this;
     }
 
     public ComposedEmail set_sender(RFC822.MailboxAddress? sender) {
