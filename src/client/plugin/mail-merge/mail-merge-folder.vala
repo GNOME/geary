@@ -130,10 +130,10 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
     public bool is_sending { get; private set; default = false; }
 
 
-    private Gee.Map<Geary.EmailIdentifier,Geary.Email> map =
+    private Gee.List<Geary.EmailIdentifier> ids =
+        new Gee.ArrayList<Geary.EmailIdentifier>();
+    private Gee.Map<Geary.EmailIdentifier,Geary.Email> email =
         new Gee.HashMap<Geary.EmailIdentifier,Geary.Email>();
-    private Gee.List<Geary.Email> list =
-        new Gee.ArrayList<Geary.Email>();
     private Geary.Email template;
     private Csv.Reader data;
     private GLib.Cancellable loading = new GLib.Cancellable();
@@ -178,7 +178,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
         return Geary.traverse(
             ids
         ).filter(
-            (id) => this.map.has_key(id)
+            (id) => this.email.has_key(id)
         ).to_hash_set();
     }
 
@@ -189,7 +189,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                           GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_open();
-        var email = this.map.get(id);
+        var email = this.email.get(id);
         if (email == null) {
             throw new Geary.EngineError.NOT_FOUND(
                 "No email with ID %s in merge", id.to_string()
@@ -216,7 +216,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
         }
 
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-        if (!this.list.is_empty && count > 0) {
+        if (!this.ids.is_empty && count > 0) {
             int incr = 1;
             if (Geary.Folder.ListFlags.OLDEST_TO_NEWEST in flags) {
                 incr = -1;
@@ -225,13 +225,13 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
             if (initial == null) {
                 initial = (EmailIdentifier) (
                     incr > 0
-                    ? this.list.first().id
-                    : this.list.last().id
+                    ? this.ids.first()
+                    : this.ids.last()
                 );
                 next_index = (int) initial.message_id;
             } else {
                 if (Geary.Folder.ListFlags.INCLUDING_ID in flags) {
-                    list.add(this.list[(int) initial.message_id]);
+                    list.add(this.email.get(this.ids[(int) initial.message_id]));
                 }
                 next_index = (int) initial.message_id;
                 next_index += incr;
@@ -239,8 +239,8 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
 
             while (list.size < count &&
                    next_index >= 0 &&
-                   next_index < this.list.size) {
-                list.add(this.list[next_index]);
+                   next_index < this.ids.size) {
+                list.add(this.email.get(this.ids[next_index]));
                 next_index += incr;
             }
         }
@@ -257,7 +257,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
         check_open();
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         foreach (var id in ids) {
-            var email = this.map.get(id);
+            var email = this.email.get(id);
             if (email == null) {
                 throw new Geary.EngineError.NOT_FOUND(
                     "No email with ID %s in merge", id.to_string()
@@ -310,8 +310,8 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                 email.set_flags(new Geary.EmailFlags());
 
                 // Update folder state then notify about the new email
-                this.list.add(email);
-                this.map.set(id, email);
+                this.ids.add(id);
+                this.email.set(id, email);
                 this._properties.set_total((int) next_id);
                 this.email_total = (uint) next_id;
 
