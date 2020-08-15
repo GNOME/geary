@@ -132,11 +132,18 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
 
     private Gee.List<Geary.EmailIdentifier> ids =
         new Gee.ArrayList<Geary.EmailIdentifier>();
+    private Gee.Map<Geary.EmailIdentifier,Geary.ComposedEmail> composed =
+        new Gee.HashMap<Geary.EmailIdentifier,Geary.ComposedEmail>();
     private Gee.Map<Geary.EmailIdentifier,Geary.Email> email =
         new Gee.HashMap<Geary.EmailIdentifier,Geary.Email>();
     private Geary.Email template;
     private Csv.Reader data;
     private GLib.Cancellable loading = new GLib.Cancellable();
+    private GLib.Cancellable sending = new GLib.Cancellable();
+
+
+    /** Emitted when an error sending an email is reported. */
+    public signal void send_error(GLib.Error error);
 
 
     public async Folder(Geary.Account account,
@@ -167,7 +174,24 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
 
     /** Starts or stops the folder sending mail. */
     public void set_sending(bool is_sending) {
-        this.is_sending = is_sending;
+        if (is_sending && !this.is_sending) {
+            this.send_loop.begin();
+            this.is_sending = true;
+        } else if (!is_sending && this.is_sending) {
+            this.sending.cancel();
+            this.sending = new GLib.Cancellable();
+        }
+    }
+
+    /** {@inheritDoc} */
+    public override async bool close_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        var is_closing = yield base.close_async(cancellable);
+        if (is_closing) {
+            this.loading.cancel();
+            set_sending(false);
+        }
+        return is_closing;
     }
 
     /** {@inheritDoc} */
@@ -307,10 +331,15 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
 
                 var id = new EmailIdentifier(next_id++);
                 var email = new Geary.Email.from_message(id, message);
+                // Don't set a date since it would be re-set on send,
+                // and we don't want to give people the wrong idea of
+                // what it will be
+                email.set_send_date(null);
                 email.set_flags(new Geary.EmailFlags());
 
                 // Update folder state then notify about the new email
                 this.ids.add(id);
+                this.composed.set(id, composed);
                 this.email.set(id, email);
                 this._properties.set_total((int) next_id);
                 this.email_total = (uint) next_id;
@@ -334,6 +363,38 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
             );
         }
         return template;
+    }
+
+    private async void send_loop() {
+        var cancellable = this.sending;
+        var smtp = this._account.outgoing as Geary.Smtp.ClientService;
+        if (smtp != null) {
+            while (!this.ids.is_empty && !this.sending.is_cancelled()) {
+                var last = this.ids.size - 1;
+                var id = this.ids[last];
+
+                try {
+                    var composed = this.composed.get(id);
+                    composed.set_date(new GLib.DateTime.now());
+                    yield smtp.send_email(composed, cancellable);
+
+                    this.email_sent++;
+
+                    this.ids.remove_at(last);
+                    this.email.unset(id);
+                    this.composed.unset(id);
+                    this._properties.set_total(last);
+                    notify_email_removed(Geary.Collection.single(id));
+                } catch (GLib.Error err) {
+                    warning("Error sending merge email: %s", err.message);
+                    send_error(err);
+                    break;
+                }
+            }
+        } else {
+            warning("Account has no outgoing SMTP service");
+        }
+        this.is_sending = false;
     }
 
 }
