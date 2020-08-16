@@ -155,7 +155,6 @@ if enable_valadoc
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
-      '--vapidir=@0@'.format('/usr/share/vala-0.48'),
       '--vapidir=@0@'.format(vapi_dir),
       '--vapidir=@0@'.format(meson.current_build_dir()),
       '@INPUT@',
