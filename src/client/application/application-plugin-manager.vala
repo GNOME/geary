@@ -141,6 +141,10 @@ public class Application.PluginManager : GLib.Object {
            }
         }
 
+        public void report_problem(Geary.ProblemReport problem) {
+            this.backing.controller.report_problem(problem);
+        }
+
         private void on_window_added(Gtk.Window window) {
             if (this.action_group != null) {
                 var main = window as MainWindow;

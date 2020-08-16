@@ -61,4 +61,20 @@ public interface Plugin.Application : Geary.BaseObject {
     public abstract async void empty_folder(Folder folder)
         throws Error.PERMISSION_DENIED;
 
+
+    /**
+     * Sends a problem report to the application.
+     *
+     * Calling this method will display a problem report for the
+     * plugin with a given error so that both people using the
+     * application are aware that an error condition exists, and that
+     * they may report the problem to developers.
+     *
+     * Since displaying an error report causes visual and workflow
+     * disruptions, and as such this method called with care and only
+     * when necessary. For logging, use {@link GLib.debug} and related
+     * methods and these will appear in Geary's Inspector.
+     */
+    public abstract void report_problem(Geary.ProblemReport problem);
+
 }
