@@ -95,13 +95,13 @@ public class MainToolbar : Gtk.Box {
 
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
-        this.header_group.add_header_bar(header);
+        this.header_group.add_gtk_header_bar(header);
         pack_start(header, true, true);
     }
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
-        this.header_group.remove_header_bar(header);
+        this.header_group.remove_gtk_header_bar(header);
         conversation_header.show();
     }
 

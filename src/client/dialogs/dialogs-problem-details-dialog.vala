@@ -9,7 +9,7 @@
  * Displays technical details when a problem has been reported.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/problem-details-dialog.ui")]
-public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
+public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
 
 
     private const string ACTION_CLOSE = "problem-details-close";
