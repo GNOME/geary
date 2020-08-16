@@ -133,13 +133,25 @@ valadoc_dependencies = [
 ]
 
 # Hopefully Meson will get baked-in valadoc support, so we don't have
-# to do this any more. https://github.com/mesonbuild/meson/issues/894
+# to resort to these kinds of hacks any more. See
+# https://github.com/mesonbuild/meson/issues/894
+
 valadoc_dep_args = []
 foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
   valadoc_dep_args += dep.name()
 endforeach
 valadoc_dep_args += [ '--pkg', 'posix' ]
+
+valadoc_vapi_dirs = [
+  vapi_dir,
+  meson.current_build_dir()
+]
+
+valadoc_vapidir_args = []
+foreach dir : valadoc_vapi_dirs
+  valadoc_vapidir_args += '--vapidir=@0@'.format(dir)
+endforeach
 
 if enable_valadoc
   docs = custom_target('valadoc',
@@ -155,9 +167,8 @@ if enable_valadoc
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
-      '--vapidir=@0@'.format(vapi_dir),
-      '--vapidir=@0@'.format(meson.current_build_dir()),
-      '@INPUT@',
-    ] + valadoc_dep_args
+    ] + valadoc_dep_args + valadoc_vapidir_args + [
+      '@INPUT@'
+    ]
   )
 endif
