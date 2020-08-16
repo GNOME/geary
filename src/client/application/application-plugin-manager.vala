@@ -33,8 +33,8 @@ public class Application.PluginManager : GLib.Object {
             this.plugin = plugin;
         }
 
-        public async void activate() throws GLib.Error {
-            yield this.plugin.activate();
+        public async void activate(bool is_startup) throws GLib.Error {
+            yield this.plugin.activate(is_startup);
         }
 
         public async void deactivate(bool is_shutdown) throws GLib.Error {
@@ -275,6 +275,7 @@ public class Application.PluginManager : GLib.Object {
     private Controller controller;
     private Configuration config;
     private Peas.Engine plugins;
+    private bool is_startup = true;
     private bool is_shutdown = false;
     private string trusted_path;
 
@@ -327,6 +328,8 @@ public class Application.PluginManager : GLib.Object {
                 warning("Plugin %s not available: %s", name, err.message);
             }
         }
+
+        this.is_startup = false;
 
         this.application.window_added.connect(on_window_added);
         foreach (MainWindow main in this.application.get_main_windows()) {
@@ -499,9 +502,10 @@ public class Application.PluginManager : GLib.Object {
 
             if (do_activate) {
                 var plugin_context = new PluginContext(info, plugin);
-                plugin_context.activate.begin((obj, res) => {
-                        on_plugin_activated(plugin_context, res);
-                    });
+                plugin_context.activate.begin(
+                    this.is_startup,
+                    (obj, res) => { on_plugin_activated(plugin_context, res); }
+                );
             }
         } else {
             warning(

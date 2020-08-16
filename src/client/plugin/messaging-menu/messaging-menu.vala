@@ -33,7 +33,7 @@ public class Plugin.MessagingMenu :
     private FolderStore? folder_store = null;
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         this.app = new global::MessagingMenu.App(
             "%s.desktop".printf(global::Application.Client.APP_ID)
         );
