@@ -43,7 +43,7 @@ public class Plugin.NotificationBadge :
     private UnityLauncherEntry? entry = null;
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         var connection = this.client_application.get_dbus_connection();
         var path = this.client_application.get_dbus_object_path();
         if (connection == null || path == null) {

@@ -57,7 +57,7 @@ public class Plugin.DesktopNotifications :
     private GLib.Cancellable? cancellable = null;
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         this.cancellable = new GLib.Cancellable();
         this.email_store = yield this.email.get_email_store();
 

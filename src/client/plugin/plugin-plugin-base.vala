@@ -30,10 +30,13 @@ public abstract class Plugin.PluginBase : Geary.BaseObject {
     /**
      * Invoked to activate the plugin, after loading.
      *
-     * If this method raises an error, it will be unloaded without
-     * deactivating.
+     * If `is_startup` is true, the plugin is being automatically
+     * loaded as the application is starting up. Otherwise, the plugin
+     * is being loaded after being enabled in the application
+     * preferences. If this method raises an error, it will be
+     * unloaded without deactivating.
      */
-    public abstract async void activate() throws GLib.Error;
+    public abstract async void activate(bool is_startup) throws GLib.Error;
 
     /**
      * Invoked to deactivate the plugin, prior to unloading.

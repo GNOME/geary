@@ -65,7 +65,7 @@ public class Plugin.EmailTemplates :
     private GLib.Cancellable cancellable = new GLib.Cancellable();
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         // Add localised first, so if we need to create a folder it
         // will be created localised.
         Geary.iterate_array(LOC_NAMES.split("|")).map<string>(

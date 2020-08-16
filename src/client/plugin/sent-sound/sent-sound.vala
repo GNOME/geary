@@ -27,12 +27,16 @@ public class Plugin.SentSound : PluginBase, EmailExtension {
     private EmailStore? store = null;
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         this.context = new GSound.Context();
         this.context.init();
 
         this.store = yield this.email.get_email_store();
         this.store.email_sent.connect(on_sent);
+
+        if (!is_startup) {
+            play_sound();
+        }
     }
 
     public override async void deactivate(bool is_shutdown) throws GLib.Error {
@@ -42,14 +46,21 @@ public class Plugin.SentSound : PluginBase, EmailExtension {
         this.context = null;
     }
 
-    private void on_sent() {
+    private void play_sound() {
         try {
             this.context.play_simple(
                 null, GSound.Attribute.EVENT_ID, "message-sent-email"
             );
         } catch (GLib.Error err) {
             warning("Failed to play sent mail sound: %s", err.message);
+            this.plugin_application.report_problem(
+                new Geary.ProblemReport(err)
+            );
         }
+    }
+
+    private void on_sent() {
+        play_sound();
     }
 
 }

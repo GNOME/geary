@@ -49,7 +49,7 @@ public class Plugin.SpecialFolders :
     private GLib.Cancellable cancellable = new GLib.Cancellable();
 
 
-    public override async void activate() throws GLib.Error {
+    public override async void activate(bool is_startup) throws GLib.Error {
         this.email_store = yield this.email.get_email_store();
         this.email_store.email_displayed.connect(on_email_displayed);
 
