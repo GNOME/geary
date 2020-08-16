@@ -44,7 +44,6 @@ geary_c_args = [
   '-DGCK_API_SUBJECT_TO_CHANGE',
   '-DGCR_API_SUBJECT_TO_CHANGE',
   '-DGOA_API_IS_SUBJECT_TO_CHANGE',
-  '-DHANDY_USE_UNSTABLE_API',
 ]
 
 subdir('sqlite3-unicodesn')

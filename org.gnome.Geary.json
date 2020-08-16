@@ -203,13 +203,15 @@
             "name": "libhandy",
             "buildsystem": "meson",
             "config-opts": [
-                "-Dglade_catalog=disabled"
+                "-Dglade_catalog=disabled",
+                "-Dexamples=false",
+                "-Dtests=false"
             ],
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://source.puri.sm/Librem5/libhandy.git",
-                    "branch": "v0.0.13"
+                    "url": "https://gitlab.gnome.org/GNOME/libhandy.git",
+                    "branch": "master"
                 }
             ]
         },
