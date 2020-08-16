@@ -138,7 +138,11 @@ valadoc_dependencies = [
 valadoc_dep_args = []
 foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
-  valadoc_dep_args += dep.name()
+  if dep != libhandy
+    valadoc_dep_args += dep.name()
+  else
+    valadoc_dep_args += 'libhandy-1'
+  endif
 endforeach
 valadoc_dep_args += [ '--pkg', 'posix' ]
 
@@ -146,6 +150,9 @@ valadoc_vapi_dirs = [
   vapi_dir,
   meson.current_build_dir()
 ]
+if libhandy_vapi != ''
+  valadoc_vapi_dirs += libhandy_vapi
+endif
 
 valadoc_vapidir_args = []
 foreach dir : valadoc_vapi_dirs

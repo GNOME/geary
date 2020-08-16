@@ -118,6 +118,7 @@ if libunwind_dep.found()
 endif
 
 # Handy 1.0 is still rather new
+libhandy_vapi = ''
 if not libhandy.found()
   libhandy_project = subproject(
     'libhandy',
@@ -130,9 +131,10 @@ if not libhandy.found()
   libhandy = declare_dependency(
     dependencies: [
       libhandy_project.get_variable('libhandy_dep'),
-      libhandy_project.get_variable('libhandy_vapi'),
+      libhandy_project.get_variable('libhandy_vapi')
     ]
   )
+  libhandy_vapi = meson.build_root() / 'subprojects' / 'libhandy' / 'src'
 endif
 
 # Optional dependencies
