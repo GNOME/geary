@@ -15,8 +15,10 @@
  */
 
 public class Geary.Imap.ContinuationResponse : ServerResponse {
-    private ContinuationResponse() {
-        base (Tag.get_continuation());
+
+
+    private ContinuationResponse(Quirks quirks) {
+        base(Tag.get_continuation(), quirks);
     }
 
     /**
@@ -25,9 +27,9 @@ public class Geary.Imap.ContinuationResponse : ServerResponse {
      * The supplied root is "stripped" of its children.  This may happen even if an exception is
      * thrown.  It's recommended to use {@link is_continuation_response} prior to this call.
      */
-    public ContinuationResponse.migrate(RootParameters root) throws ImapError {
-        base.migrate(root);
-
+    public ContinuationResponse.migrate(RootParameters root, Quirks quirks)
+        throws ImapError {
+        base.migrate(root, quirks);
         if (!tag.is_continuation())
             throw new ImapError.INVALID("Tag %s is not a continuation", tag.to_string());
     }
@@ -37,8 +39,6 @@ public class Geary.Imap.ContinuationResponse : ServerResponse {
      */
     public static bool is_continuation_response(RootParameters root) {
         Tag? tag = root.get_tag();
-
         return tag != null ? tag.is_continuation() : false;
     }
 }
-

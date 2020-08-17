@@ -14,10 +14,15 @@
  */
 
 public abstract class Geary.Imap.ServerResponse : RootParameters {
-    public Tag tag { get; private set; }
 
-    protected ServerResponse(Tag tag) {
+
+    public Tag tag { get; private set; }
+    public Quirks quirks { get; private set; }
+
+
+    protected ServerResponse(Tag tag, Quirks quirks) {
         this.tag = tag;
+        this.quirks = quirks;
     }
 
     /**
@@ -25,36 +30,16 @@ public abstract class Geary.Imap.ServerResponse : RootParameters {
      *
      * The supplied root is "stripped" of its children.
      */
-    protected ServerResponse.migrate(RootParameters root) throws ImapError {
+    protected ServerResponse.migrate(RootParameters root,
+                                     Quirks quirks)
+        throws ImapError {
         base.migrate(root);
+        this.quirks = quirks;
 
-        if (!has_tag())
+        if (!has_tag()) {
             throw new ImapError.INVALID("Server response does not have a tag token: %s", to_string());
-
-        tag = get_tag();
+        }
+        this.tag = get_tag();
     }
 
-    /**
-     * Migrate the contents of RootParameters into a new, properly-typed ServerResponse.
-     *
-     * The returned ServerResponse may be a {@link ContinuationResponse}, {@link ServerData},
-     * or a generic {@link StatusResponse}.
-     *
-     * The RootParameters will be migrated and stripped clean upon exit.
-     *
-     * @throws ImapError.PARSE_ERROR if not a known form of ServerResponse.
-     */
-    public static ServerResponse migrate_from_server(RootParameters root) throws ImapError {
-        if (ContinuationResponse.is_continuation_response(root))
-            return new ContinuationResponse.migrate(root);
-
-        if (StatusResponse.is_status_response(root))
-            return new StatusResponse.migrate(root);
-
-        if (ServerData.is_server_data(root))
-            return new ServerData.migrate(root);
-
-        throw new ImapError.PARSE_ERROR("Unknown server response: %s", root.to_string());
-    }
 }
-

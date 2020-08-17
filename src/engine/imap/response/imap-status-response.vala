@@ -11,8 +11,6 @@
  * StatusResponses may be tagged or untagged, depending on their nature.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-7.1]] for more information.
- *
- * @see ServerResponse.migrate_from_server
  */
 
 public class Geary.Imap.StatusResponse : ServerResponse {
@@ -34,8 +32,11 @@ public class Geary.Imap.StatusResponse : ServerResponse {
      */
     public ResponseCode? response_code { get; private set; }
 
-    private StatusResponse(Tag tag, Status status, ResponseCode? response_code) {
-        base (tag);
+    private StatusResponse(Tag tag,
+                           Status status,
+                           ResponseCode? response_code,
+                           Quirks quirks) {
+        base(tag, quirks);
 
         this.status = status;
         this.response_code = response_code;
@@ -48,8 +49,9 @@ public class Geary.Imap.StatusResponse : ServerResponse {
      * The supplied root is "stripped" of its children.  This may happen even if an exception is
      * thrown.  It's recommended to use {@link is_status_response} prior to this call.
      */
-    public StatusResponse.migrate(RootParameters root) throws ImapError {
-        base.migrate(root);
+    public StatusResponse.migrate(RootParameters root, Quirks quirks)
+        throws ImapError {
+            base.migrate(root, quirks);
 
         status = Status.from_parameter(get_as_string(1));
         response_code = get_if_list(2) as ResponseCode;

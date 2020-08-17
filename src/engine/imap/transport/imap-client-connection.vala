@@ -467,25 +467,23 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
 
     private void on_parameters_ready(RootParameters root) {
         try {
-            ServerResponse response = ServerResponse.migrate_from_server(root);
-            GLib.Type type = response.get_type();
-            if (type == typeof(StatusResponse)) {
-                on_status_response((StatusResponse) response);
-            } else if (type == typeof(ServerData)) {
-                on_server_data((ServerData) response);
-            } else if (type == typeof(ContinuationResponse)) {
-                on_continuation_response((ContinuationResponse) response);
+            // Important! The order of these tests matters.
+            if (ContinuationResponse.is_continuation_response(root)) {
+                on_continuation_response(
+                    new ContinuationResponse.migrate(root, this.quirks)
+                );
+            } else if (StatusResponse.is_status_response(root)) {
+                on_status_response(new StatusResponse.migrate(root, this.quirks));
+            } else if (ServerData.is_server_data(root)) {
+                on_server_data(new ServerData.migrate(root, this.quirks));
             } else {
-                warning(
-                    "Unknown ServerResponse of type %s received: %s:",
-                    response.get_type().name(),
-                    response.to_string()
+                throw new ImapError.PARSE_ERROR(
+                    "Unknown server response: %s", root.to_string()
                 );
             }
         } catch (ImapError err) {
             received_bad_response(root, err);
         }
-
 
         if (this.pending_queue.is_empty && this.sent_queue.is_empty) {
             // There's nothing remaining to send, and every sent

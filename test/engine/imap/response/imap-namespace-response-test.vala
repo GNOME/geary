@@ -126,7 +126,7 @@ class Geary.Imap.NamespaceResponseTest : TestCase {
         else
             root.add(shared);
 
-        return new ServerData.migrate(root);
+        return new ServerData.migrate(root, new Quirks());
     }
 
     private ListParameter newNamespace(string prefix, string? delim) {

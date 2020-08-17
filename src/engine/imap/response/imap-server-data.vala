@@ -13,8 +13,8 @@
 public class Geary.Imap.ServerData : ServerResponse {
     public ServerDataType server_data_type { get; private set; }
 
-    private ServerData(Tag tag, ServerDataType server_data_type) {
-        base (tag);
+    private ServerData(Tag tag, ServerDataType server_data_type, Quirks quirks) {
+        base(tag, quirks);
 
         this.server_data_type = server_data_type;
     }
@@ -25,8 +25,9 @@ public class Geary.Imap.ServerData : ServerResponse {
      * The supplied root is "stripped" of its children.  This may happen even if an exception is
      * thrown.  It's recommended to use {@link is_server_data} prior to this call.
      */
-    public ServerData.migrate(RootParameters root) throws ImapError {
-        base.migrate(root);
+    public ServerData.migrate(RootParameters root, Quirks quirks)
+        throws ImapError {
+        base.migrate(root, quirks);
 
         server_data_type = ServerDataType.from_response(this);
     }
