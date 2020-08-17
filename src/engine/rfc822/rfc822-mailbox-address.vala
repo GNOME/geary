@@ -233,7 +233,18 @@ public class Geary.RFC822.MailboxAddress :
         this.source_route = source_route;
         this.mailbox = decode_address_part(mailbox);
         this.domain = domain;
-        this.address = "%s@%s".printf(mailbox, domain);
+
+        bool empty_mailbox = String.is_empty_or_whitespace(mailbox);
+        bool empty_domain = String.is_empty_or_whitespace(domain);
+        if (!empty_mailbox && !empty_domain) {
+            this.address = "%s@%s".printf(mailbox, domain);
+        } else if (empty_mailbox) {
+            this.address = domain;
+        } else if (empty_domain) {
+            this.address = mailbox;
+        } else {
+            this.address = "";
+        }
     }
 
     public MailboxAddress.from_rfc822_string(string rfc822) throws Error {
@@ -266,9 +277,11 @@ public class Geary.RFC822.MailboxAddress :
         // GMime strips source route for us, so the address part
         // should only ever contain a single '@'
         string? name = mailbox.get_name();
-        if (name != "") {
-            this.name = decode_name(name);
-        }
+        this.name = (
+            !String.is_empty_or_whitespace(name)
+            ? decode_name(name)
+            : null
+        );
 
         string address = mailbox.get_addr();
         int atsign = Ascii.last_index_of(address, '@');
@@ -286,7 +299,7 @@ public class Geary.RFC822.MailboxAddress :
         } else {
             this.mailbox = "";
             this.domain = "";
-            this.address = address;
+            this.address = decode_address_part(address);
         }
     }
 
@@ -502,15 +515,33 @@ public class Geary.RFC822.MailboxAddress :
         // GMime.utils_header_encode_text will use MIME encoding,
         // which is disallowed in mailboxes by RFC 2074 §5. So quote
         // manually.
-        string local_part = this.mailbox;
-        if (local_part_needs_quoting(local_part)) {
-            local_part = quote_string(local_part);
+        var address = "";
+        if (this.mailbox != "") {
+            address = this.mailbox;
+            if (local_part_needs_quoting(address)) {
+                address = quote_string(address);
+            }
         }
-        return "%s@%s".printf(
-            local_part,
-            // XXX Need to punycode international domains.
-            this.domain
-        );
+        if (this.domain != "") {
+            address = "%s@%s".printf(
+                address,
+                // XXX Need to punycode international domains.
+                this.domain
+            );
+        }
+        if (address == "") {
+            // Both mailbox and domain are empty, i.e. there was no
+            // '@' symbol in the address, so just assume the address
+            // is a mailbox since this is not uncommon practice on
+            // UNIX systems where mail is sent from a local account,
+            // and it supports a greater range of characters than the
+            // domain component
+            address = this.address;
+            if (local_part_needs_quoting(address)) {
+                address = quote_string(address);
+            }
+        }
+        return address;
     }
 
     /**
