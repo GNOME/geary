@@ -206,7 +206,7 @@ public class Geary.RFC822.MailboxAddress :
      *
      * The given name (if any) and address parts will be used
      * verbatim, and quoted or encoded if needed when serialising to
-     * an RFC 833 mailbox address string.
+     * an RFC 822 mailbox address string.
      */
     public MailboxAddress(string? name, string address) {
         this.name = name;
