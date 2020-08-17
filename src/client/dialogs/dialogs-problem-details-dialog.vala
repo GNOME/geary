@@ -58,7 +58,6 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
             transient_for: parent,
             use_header_bar: 1
         );
-        set_default_size(600, 400);
 
         Geary.AccountProblemReport? account_report =
             report as Geary.AccountProblemReport;
