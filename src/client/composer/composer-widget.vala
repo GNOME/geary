@@ -879,6 +879,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
             this.referred_ids.add(full_context.id);
             break;
+
+        case NONE:
+            // no-op
+            break;
         }
         update_extended_headers();
 
@@ -1532,6 +1536,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.recipients.set_visible(false);
             this.subject_row.visible = false;
             set_compact_header_recipients();
+            break;
+
+        case PresentationMode.CLOSED:
+        case PresentationMode.NONE:
+            // no-op
             break;
         }
 

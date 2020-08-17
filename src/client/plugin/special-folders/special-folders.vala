@@ -100,6 +100,10 @@ public class Plugin.SpecialFolders :
                 target, get_folder_info_bar(target), PRIORITY
             );
             break;
+
+        default:
+            // no-op
+            break;
         }
     }
 

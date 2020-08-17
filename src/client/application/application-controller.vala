@@ -1572,6 +1572,10 @@ internal class Application.Controller :
                 );
             }
             break;
+
+        case Accounts.Manager.Status.REMOVED:
+            // Account is gone, no further action is required
+            break;
         }
     }
 
@@ -1677,6 +1681,10 @@ internal class Application.Controller :
                         // Reset so the infobar does not show up again
                         context.tls_validation_failed = false;
                     }
+                    break;
+
+                default:
+                    // No special action required for other statuses
                     break;
                 }
 

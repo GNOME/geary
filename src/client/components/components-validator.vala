@@ -258,6 +258,10 @@ public class Components.Validator : GLib.Object {
             case Trigger.LOST_FOCUS:
                 focus_lost();
                 break;
+
+            case Trigger.MANUAL:
+                // no-op
+                break;
             }
         } else if (!this.pulse_timer.is_running) {
             this.pulse_timer.start();

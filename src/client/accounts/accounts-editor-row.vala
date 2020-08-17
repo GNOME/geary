@@ -273,7 +273,7 @@ internal class Accounts.ServiceProviderRow<PaneType> :
 
     public ServiceProviderRow(Geary.ServiceProvider provider,
                               string other_type_label) {
-        string? label = other_type_label;
+        string? label = null;
         switch (provider) {
         case Geary.ServiceProvider.GMAIL:
             label = _("Gmail");
@@ -285,6 +285,10 @@ internal class Accounts.ServiceProviderRow<PaneType> :
 
         case Geary.ServiceProvider.YAHOO:
             label = _("Yahoo");
+            break;
+
+        case Geary.ServiceProvider.OTHER:
+            label = other_type_label;
             break;
         }
 
