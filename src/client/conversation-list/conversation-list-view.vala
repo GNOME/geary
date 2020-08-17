@@ -174,6 +174,10 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                     this.get_window().beep();
                 }
                 break;
+
+            default:
+                // no-op
+                break;
             }
 
             set_cursor(target_path, null, false);

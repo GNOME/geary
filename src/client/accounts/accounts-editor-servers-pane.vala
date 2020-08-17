@@ -127,6 +127,11 @@ internal class Accounts.EditorServersPane :
         case OTHER:
             add_row(this.details_list, this.save_sent);
             break;
+        default:
+            // XXX GMail and Outlook auto-save sent mail so don't
+            // include save sent option, but we shouldn't be
+            // hard-coding visible rows like this
+            break;
         }
 
         // Receiving

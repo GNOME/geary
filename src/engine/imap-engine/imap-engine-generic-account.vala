@@ -979,6 +979,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             unloc_names.add("Archive | Archives");
 
             break;
+
+        default:
+            // no-op
+            break;
         }
 
         loc_names.add_all(unloc_names);

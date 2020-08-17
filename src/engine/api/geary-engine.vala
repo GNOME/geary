@@ -348,6 +348,9 @@ public class Geary.Engine : BaseObject {
         case CUSTOM:
             credentials = service.credentials;
             break;
+        case NONE:
+            // no-op
+            break;
         }
 
         Geary.Smtp.ClientSession client = new Geary.Smtp.ClientSession(endpoint);

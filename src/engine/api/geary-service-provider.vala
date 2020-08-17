@@ -40,6 +40,9 @@ public enum Geary.ServiceProvider {
         case OUTLOOK:
             ImapEngine.OutlookAccount.setup_account(service);
             break;
+        case OTHER:
+            // no-op
+            break;
         }
     }
 
@@ -53,6 +56,9 @@ public enum Geary.ServiceProvider {
             break;
         case OUTLOOK:
             ImapEngine.OutlookAccount.setup_service(service);
+            break;
+        case OTHER:
+            // no-op
             break;
         }
     }

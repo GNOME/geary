@@ -56,6 +56,9 @@ public class Components.EntryUndo : Geary.BaseObject {
                 case DELETE:
                     do_insert(manager.target);
                     break;
+                case NONE:
+                    // no-op
+                    break;
                 }
                 manager.events_enabled = true;
             }
@@ -72,6 +75,9 @@ public class Components.EntryUndo : Geary.BaseObject {
                     break;
                 case DELETE:
                     do_delete(manager.target);
+                    break;
+                case NONE:
+                    // no-op
                     break;
                 }
                 manager.events_enabled = true;

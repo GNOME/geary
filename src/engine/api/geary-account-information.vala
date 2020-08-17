@@ -131,6 +131,8 @@ public class Geary.AccountInformation : BaseObject {
             case OUTLOOK:
                 save = false;
                 break;
+            default:
+                break;
             }
             return save;
         }
@@ -432,6 +434,9 @@ public class Geary.AccountInformation : BaseObject {
             break;
         case CUSTOM:
             outgoing = this.outgoing.credentials;
+            break;
+        case NONE:
+            // no-op
             break;
         }
         return outgoing;

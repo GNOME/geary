@@ -1781,6 +1781,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     case Geary.Email.Field.PROPERTIES:
                         append = "internaldate, internaldate_time_t, rfc822_size";
                     break;
+
+                    case NONE:
+                        // no-op
+                        break;
+
+                    case ENVELOPE:
+                    case ALL:
+                        // XXX hmm
+                        break;
                 }
             }
 

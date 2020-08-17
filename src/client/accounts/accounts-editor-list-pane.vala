@@ -365,6 +365,10 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         case Geary.ServiceProvider.YAHOO:
             details = _("Yahoo");
             break;
+
+        case Geary.ServiceProvider.OTHER:
+            // no-op: Use the generated label
+            break;
         }
         this.service_label.set_text(details);
     }
@@ -392,6 +396,10 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
                 // used.
                 _("This account has encountered a problem and is unavailable")
             );
+            break;
+
+        case REMOVED:
+            // Nothing to do - account is gone
             break;
         }
 
@@ -440,7 +448,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
         this.provider = provider;
 
         // Translators: Label for adding a generic email account
-        string? name = _("Other email providers");
+        string? name = null;
         switch (provider) {
         case Geary.ServiceProvider.GMAIL:
             name = _("Gmail");
@@ -452,6 +460,10 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
 
         case Geary.ServiceProvider.YAHOO:
             name = _("Yahoo");
+            break;
+
+        case Geary.ServiceProvider.OTHER:
+            name = _("Other email providers");
             break;
         }
         this.service_name.set_text(name);

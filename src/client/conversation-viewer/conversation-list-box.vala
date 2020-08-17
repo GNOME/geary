@@ -568,6 +568,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                         composer.focus(DOWN);
                         handled = true;
                         break;
+                    default:
+                        // no-op
+                        break;
                     }
                 }
             }
@@ -594,6 +597,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 break;
             case Gtk.ScrollType.END:
                 value = adj.get_upper();
+                break;
+            default:
+                // no-op
                 break;
             }
             adj.set_value(value);

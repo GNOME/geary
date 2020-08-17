@@ -76,6 +76,11 @@ public class Composer.Headerbar : Gtk.HeaderBar {
             this.recipients_button.visible = true;
             this.set_attached(true);
             break;
+
+        case Widget.PresentationMode.CLOSED:
+        case Widget.PresentationMode.NONE:
+            // no-op
+            break;
         }
 
         this.show_close_button = (mode == Widget.PresentationMode.PANED
