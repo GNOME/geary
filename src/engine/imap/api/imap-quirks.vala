@@ -67,6 +67,8 @@ public class Geary.Imap.Quirks : BaseObject {
                 update_for_gmail();
             } else if (greeting.has_prefix("The Microsoft Exchange")) {
                 update_for_outlook();
+            } else if (greeting.has_prefix("Dovecot")) {
+                update_for_dovecot();
             }
         }
     }
@@ -99,6 +101,20 @@ public class Geary.Imap.Quirks : BaseObject {
      */
     public void update_for_outlook() {
         this.max_pipeline_batch_size = 25;
+    }
+
+    /**
+     * Updates this quirks object with known quirks for Dovecot
+     *
+     * Dovecot 2.3.4.1 and earlier uses "MISSING_MAILBOX" and
+     * "MISSING_DOMAIN" in the address structures of FETCH ENVELOPE
+     * replies when the mailbox or domain is missing.
+     *
+     * See [[https://dovecot.org/pipermail/dovecot/2020-August/119658.html]]
+     */
+    public void update_for_dovecot() {
+        this.empty_envelope_mailbox_name = "MISSING_MAILBOX";
+        this.empty_envelope_host_name = "MISSING_DOMAIN";
     }
 
 }
