@@ -564,7 +564,7 @@ public class Application.MainWindow :
             // Translators: An info bar status label
             _("Security problem"),
             // Translators: An info bar description label
-            _("An account has reported an untrusted server..")
+            _("An account has reported an untrusted server.")
         );
         // Translators: An info bar button label
         var cert_retry = new Gtk.Button.with_label(_("Check"));
