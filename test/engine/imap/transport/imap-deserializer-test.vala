@@ -202,7 +202,6 @@ class Geary.Imap.DeserializerTest : TestCase {
         string greeting = "* OK Gimap ready for requests from 115.187.245.46 c194mb399904375ivc";
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
-        this.deser.quirks = ClientService.new_quirks_for_provider(GMAIL);
 
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
@@ -249,7 +248,8 @@ class Geary.Imap.DeserializerTest : TestCase {
         string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing)""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
-        this.deser.quirks = ClientService.new_quirks_for_provider(GMAIL);
+        this.deser.quirks = new Imap.Quirks();
+        this.deser.quirks.update_for_gmail();
 
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
@@ -261,7 +261,8 @@ class Geary.Imap.DeserializerTest : TestCase {
         string flags = """* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing \*)] Flags permitted.""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
-        this.deser.quirks = ClientService.new_quirks_for_provider(GMAIL);
+        this.deser.quirks = new Imap.Quirks();
+        this.deser.quirks.update_for_gmail();
 
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());
@@ -275,7 +276,8 @@ class Geary.Imap.DeserializerTest : TestCase {
         string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $Forwarded $MDNSent $NotPhishing $Phishing Junk LoadRemoteImages NonJunk OIB-Seen-INBOX OIB-Seen-Unsubscribe OIB-Seen-[Gmail]/Important OIB-Seen-[Gmail]/Spam OIB-Seen-[Gmail]/Tous les messages)""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
-        this.deser.quirks = ClientService.new_quirks_for_provider(GMAIL);
+        this.deser.quirks = new Imap.Quirks();
+        this.deser.quirks.update_for_gmail();
 
         this.process.begin(Expect.MESSAGE, this.async_completion);
         RootParameters? message = this.process.end(async_result());

@@ -245,6 +245,14 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         get { return this.capabilities.has_capability(Capabilities.IDLE); }
     }
 
+    /**
+     * The server's greeting, if any.
+     *
+     * This will be null up until the session has successfully
+     * connected and the server has responded with a greeting.
+     */
+    public StatusResponse? server_greeting { get; private set; default = null; }
+
     /** The currently selected mailbox, if any. */
     public MailboxSpecifier? selected_mailbox = null;
 
@@ -846,9 +854,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             new_state = State.LOGOUT;
         }
 
+        this.server_greeting = status_response;
+        debug("Server greeting: %s", status_response.get_text());
+
         try {
-            connect_waiter.notify();
-        } catch (Error err) {
+            this.connect_waiter.notify();
+        } catch (GLib.Error err) {
             warning(
                 "Unable to notify connect_waiter of connection: %s",
                 err.message

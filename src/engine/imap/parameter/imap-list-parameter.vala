@@ -29,6 +29,17 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     private Gee.List<Parameter> list = new Gee.ArrayList<Parameter>();
 
 
+    /** Constructs a new, empty list. */
+    public ListParameter() {
+        // noop
+    }
+
+    /** Constructs a new list wit a single parameter. */
+    public ListParameter.single(Parameter param) {
+        base();
+        add(param);
+    }
+
     /**
      * Appends a parameter to the end of this list.
      *

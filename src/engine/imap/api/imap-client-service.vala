@@ -39,36 +39,6 @@ public class Geary.Imap.ClientService : Geary.ClientService {
     private const int CHECK_NOOP_THRESHOLD_SEC = 5;
 
 
-    public static Quirks new_quirks_for_provider(ServiceProvider provider) {
-        var quirks = new Quirks();
-        switch (provider) {
-        case GMAIL:
-            // As of 2020-05-02, GMail doesn't seem to quote flag
-            // atoms containing reserved characters, and at least one
-            // use of both `]` and ` ` have been found. This works
-            // around the former. See #746
-            quirks.flag_atom_exceptions = "]";
-            break;
-
-        case ServiceProvider.OUTLOOK:
-            // As of June 2016, outlook.com's IMAP servers have a bug
-            // where a large number (~50) of pipelined STATUS commands
-            // on mailboxes with many messages will eventually cause
-            // it to break command parsing and return a BAD response,
-            // causing us to drop the connection. Limit the number of
-            // pipelined commands per batch to work around this.  See
-            // b.g.o Bug 766552
-            quirks.max_pipeline_batch_size = 25;
-            break;
-
-        default:
-            // noop
-            break;
-        }
-        return quirks;
-    }
-
-
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
      * selected a mailbox.  (This is not recommended.)
@@ -131,7 +101,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         get { return LOGGING_DOMAIN; }
     }
 
-    private Quirks quirks;
+    private Quirks quirks = new Quirks();
 
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.Set<ClientSession> all_sessions =
@@ -147,7 +117,6 @@ public class Geary.Imap.ClientService : Geary.ClientService {
                          ServiceInformation configuration,
                          Endpoint remote) {
         base(account, configuration, remote);
-        this.quirks = new_quirks_for_provider(account.service_provider);
     }
 
     /**
@@ -403,6 +372,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
             // An error was thrown, so close the pool
             this.close_pool.begin(true);
         } else {
+            this.quirks.update_for_server(new_session);
             try {
                 yield this.sessions_mutex.execute_locked(() => {
                         this.all_sessions.add(new_session);
