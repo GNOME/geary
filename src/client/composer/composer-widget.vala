@@ -846,7 +846,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             if (message.has_html_body()) {
                 body = message.get_html_body(null);
                 body_complete = body.contains(
-                    """id="%s"""".printf(WebView.BODY_HTML_ID)
+                    "id=\"%s\"".printf(WebView.BODY_HTML_ID)
                 );
             } else {
                 body = message.get_plain_body(true, null);

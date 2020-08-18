@@ -1,4 +1,5 @@
 [Plugin]
 Module=desktop-notifications
+# Translators: This is an internal plugin so this name does not need
+# to be tanslated
 Name=Desktop Notifications
-Description=Displays desktop notifications when new email is delivered

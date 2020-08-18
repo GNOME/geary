@@ -1,3 +1,5 @@
 [Plugin]
 Module=special-folders
+# Translators: This is an internal plugin so this name does not need
+# to be tanslated.
 Name=Special Folders
