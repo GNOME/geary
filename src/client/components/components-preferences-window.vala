@@ -35,7 +35,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
             this.title = plugin.get_name();
             this.subtitle = plugin.get_description();
             this.activatable_widget = this.sw;
-            this.add_action(this.sw);
+            this.add(this.sw);
 
             plugins.plugin_activated.connect((info) => {
                     if (this.plugin == info) {
@@ -106,7 +106,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                              Application.PluginManager plugins) {
         Object(
             application: parent.application,
-            default_width: 450,
+            default_width: 540,
             transient_for: parent
         );
         this.plugins = plugins;
@@ -124,7 +124,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         autoselect_row.title = _("_Automatically select next message");
         autoselect_row.use_underline = true;
         autoselect_row.activatable_widget = autoselect;
-        autoselect_row.add_action(autoselect);
+        autoselect_row.add(autoselect);
 
         var display_preview = new Gtk.Switch();
         display_preview.valign = CENTER;
@@ -134,7 +134,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         display_preview_row.title = _("_Display conversation preview");
         display_preview_row.use_underline = true;
         display_preview_row.activatable_widget = display_preview;
-        display_preview_row.add_action(display_preview);
+        display_preview_row.add(display_preview);
 
         var three_pane_view = new Gtk.Switch();
         three_pane_view.valign = CENTER;
@@ -144,7 +144,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         three_pane_view_row.title = _("Use _three pane view");
         three_pane_view_row.use_underline = true;
         three_pane_view_row.activatable_widget = three_pane_view;
-        three_pane_view_row.add_action(three_pane_view);
+        three_pane_view_row.add(three_pane_view);
 
         var single_key_shortucts = new Gtk.Switch();
         single_key_shortucts.valign = CENTER;
@@ -157,7 +157,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         );
         single_key_shortucts_row.use_underline = true;
         single_key_shortucts_row.activatable_widget = single_key_shortucts;
-        single_key_shortucts_row.add_action(single_key_shortucts);
+        single_key_shortucts_row.add(single_key_shortucts);
 
         var startup_notifications = new Gtk.Switch();
         startup_notifications.valign = CENTER;
@@ -171,7 +171,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
             "Geary will keep running after all windows are closed"
         );
         startup_notifications_row.activatable_widget = startup_notifications;
-        startup_notifications_row.add_action(startup_notifications);
+        startup_notifications_row.add(startup_notifications);
 
         var group = new Hdy.PreferencesGroup();
         /// Translators: Preferences group title
@@ -188,8 +188,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         /// Translators: Preferences page title
         page.title = _("Preferences");
         page.icon_name = "preferences-other-symbolic";
-        page.propagate_natural_height = true;
-        page.propagate_natural_width = true;
         page.add(group);
         page.show_all();
 
@@ -251,7 +249,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         /// Translators: Preferences page title
         page.title = _("Plugins");
         page.icon_name = "application-x-addon-symbolic";
-        page.propagate_natural_width = true;
         page.add(group);
         page.show_all();
 

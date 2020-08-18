@@ -113,8 +113,7 @@ public class Components.ProblemReportInfoBar : InfoBar {
                 main.application,
                 this.report
             );
-            dialog.run();
-            dialog.destroy();
+            dialog.show();
         }
     }
 

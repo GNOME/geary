@@ -26,6 +26,11 @@ geary_vala_args = [
   '--enable-checking',
 ]
 
+# Remove once libhandy 1.0 has been packaged and is widely available
+if libhandy.version().version_compare('<1.0')
+  geary_vala_args += [ '--disable-since-check' ]
+endif
+
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
 if reference_tracking
@@ -44,7 +49,6 @@ geary_c_args = [
   '-DGCK_API_SUBJECT_TO_CHANGE',
   '-DGCR_API_SUBJECT_TO_CHANGE',
   '-DGOA_API_IS_SUBJECT_TO_CHANGE',
-  '-DHANDY_USE_UNSTABLE_API',
 ]
 
 subdir('sqlite3-unicodesn')
@@ -133,13 +137,32 @@ valadoc_dependencies = [
 ]
 
 # Hopefully Meson will get baked-in valadoc support, so we don't have
-# to do this any more. https://github.com/mesonbuild/meson/issues/894
+# to resort to these kinds of hacks any more. See
+# https://github.com/mesonbuild/meson/issues/894
+
 valadoc_dep_args = []
 foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
-  valadoc_dep_args += dep.name()
+  if dep != libhandy
+    valadoc_dep_args += dep.name()
+  else
+    valadoc_dep_args += 'libhandy-1'
+  endif
 endforeach
 valadoc_dep_args += [ '--pkg', 'posix' ]
+
+valadoc_vapi_dirs = [
+  vapi_dir,
+  meson.current_build_dir()
+]
+if libhandy_vapi != ''
+  valadoc_vapi_dirs += libhandy_vapi
+endif
+
+valadoc_vapidir_args = []
+foreach dir : valadoc_vapi_dirs
+  valadoc_vapidir_args += '--vapidir=@0@'.format(dir)
+endforeach
 
 if enable_valadoc
   docs = custom_target('valadoc',
@@ -155,10 +178,8 @@ if enable_valadoc
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
-      '--vapidir=@0@'.format('/usr/share/vala-0.48'),
-      '--vapidir=@0@'.format(vapi_dir),
-      '--vapidir=@0@'.format(meson.current_build_dir()),
-      '@INPUT@',
-    ] + valadoc_dep_args
+    ] + valadoc_dep_args + valadoc_vapidir_args + [
+      '@INPUT@'
+    ]
   )
 endif

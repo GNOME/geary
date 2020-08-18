@@ -390,6 +390,7 @@ public class Application.Client : Gtk.Application {
 
         // Calls Gtk.init(), amongst other things
         base.startup();
+        Hdy.init();
 
         this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
@@ -967,7 +968,7 @@ public class Application.Client : Gtk.Application {
                 this,
                 new Geary.ProblemReport(err)
             );
-            dialog.run();
+            dialog.show();
         }
 
         if (mutex_token != Geary.Nonblocking.Mutex.INVALID_TOKEN) {

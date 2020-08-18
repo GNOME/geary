@@ -9,7 +9,7 @@
  * Displays technical details when a problem has been reported.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/problem-details-dialog.ui")]
-public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
+public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
 
 
     private const string ACTION_CLOSE = "problem-details-close";
@@ -58,7 +58,6 @@ public class Dialogs.ProblemDetailsDialog : Hdy.Dialog {
             transient_for: parent,
             use_header_bar: 1
         );
-        set_default_size(600, 400);
 
         Geary.AccountProblemReport? account_report =
             report as Geary.AccountProblemReport;

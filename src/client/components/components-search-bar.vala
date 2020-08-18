@@ -39,8 +39,8 @@ public class SearchBar : Hdy.SearchBar {
         this.entry.placeholder_text = DEFAULT_SEARCH_TEXT;
         this.entry.has_focus = true;
 
-        var column = new Hdy.Column();
-        column.maximum_width = 450;
+        var column = new Hdy.Clamp();
+        column.maximum_size = 450;
         column.add(this.entry);
 
         connect_entry(this.entry);
