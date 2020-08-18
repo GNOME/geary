@@ -142,7 +142,7 @@ public enum Geary.Imap.FetchDataSpecifier {
      *
      * @return null if no FetchDataDecoder is associated with this value, or an invalid value.
      */
-    public FetchDataDecoder? get_decoder() {
+    public FetchDataDecoder? get_decoder(Quirks quirks) {
         switch (this) {
             case UID:
                 return new UIDDecoder();
@@ -151,7 +151,7 @@ public enum Geary.Imap.FetchDataSpecifier {
                 return new MessageFlagsDecoder();
 
             case ENVELOPE:
-                return new EnvelopeDecoder();
+                return new EnvelopeDecoder(quirks);
 
             case INTERNALDATE:
                 return new InternalDateDecoder();

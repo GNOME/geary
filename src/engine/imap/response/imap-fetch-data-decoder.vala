@@ -124,8 +124,14 @@ public class Geary.Imap.RFC822SizeDecoder : Geary.Imap.FetchDataDecoder {
 }
 
 public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
-    public EnvelopeDecoder() {
-        base (FetchDataSpecifier.ENVELOPE);
+
+
+    private Quirks quirks;
+
+
+    public EnvelopeDecoder(Quirks quirks) {
+        base(FetchDataSpecifier.ENVELOPE);
+        this.quirks = quirks;
     }
 
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
@@ -150,7 +156,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             try {
                 sent_date = new RFC822.Date.from_rfc822_string(sent.ascii);
             } catch (GLib.Error err) {
-                debug(
+                warning(
                     "Error parsing sent date from FETCH envelope: %s",
                     err.message
                 );
@@ -179,14 +185,22 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             ListParameter fields = listp.get_as_empty_list(ctr);
             StringParameter? name = fields.get_as_nullable_string(0);
             StringParameter? source_route = fields.get_as_nullable_string(1);
-            StringParameter mailbox = fields.get_as_empty_string(2);
-            StringParameter domain = fields.get_as_empty_string(3);
+            StringParameter? mailbox = fields.get_as_empty_string(2);
+            StringParameter? domain = fields.get_as_empty_string(3);
+
+            if (mailbox.ascii == this.quirks.empty_envelope_mailbox_name) {
+                mailbox = null;
+            }
+            if (domain.ascii == this.quirks.empty_envelope_host_name) {
+                domain = null;
+            }
 
             Geary.RFC822.MailboxAddress addr = new Geary.RFC822.MailboxAddress.imap(
                 (name != null) ? name.nullable_ascii : null,
                 (source_route != null) ? source_route.nullable_ascii : null,
-                mailbox.ascii,
-                domain.ascii);
+                mailbox != null ? mailbox.ascii : "",
+                domain != null ? domain.ascii : ""
+            );
             list.add(addr);
         }
 

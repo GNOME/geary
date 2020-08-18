@@ -38,6 +38,26 @@ public class Geary.Imap.Quirks : BaseObject {
      */
     public uint max_pipeline_batch_size { get; set; default = 0; }
 
+    /**
+     * The value sent by the server for missing envelope mailbox local parts.
+     *
+     * IMAP FETCH ENVELOPE structures use NIL for the "mailbox name"
+     * part (in addition to a NIL "host name" part) as an end-of-list
+     * marker for RFC822 group syntax. To indicate a missing
+     * local-part in a non-group mailbox some mail servers use a
+     * string such as "MISSING_MAILBOX" rather than the empty string.
+     */
+    public string empty_envelope_mailbox_name { get; set; default = ""; }
+
+    /**
+     * The value sent by the server for missing envelope mailbox domains.
+     *
+     * IMAP FETCH ENVELOPE structures use NIL for the "host name"
+     * argument to indicate RFC822 group syntax. To indicate a missing
+     * some mail servers use a string such as "MISSING_DOMAIN" rather
+     * than the empty string.
+     */
+    public string empty_envelope_host_name { get; set; default = ""; }
 
 
     public void update_for_server(ClientSession session) {
