@@ -22,6 +22,8 @@ public class Geary.RFC822.MailboxAddress :
     Gee.Hashable<MailboxAddress>,
     DecodedMessageData {
 
+    private static Regex? email_regex = null;
+
     private static unichar[] ATEXT = {
         '!', '#', '$', '%', '&', '\'', '*', '+', '-',
         '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'
@@ -29,17 +31,20 @@ public class Geary.RFC822.MailboxAddress :
 
     /** Determines if a string contains a valid RFC822 mailbox address. */
     public static bool is_valid_address(string address) {
-        try {
-            // http://www.regular-expressions.info/email.html
-            // matches john@dep.aol.museum not john@aol...com
-            Regex email_regex =
-                new Regex("[A-Z0-9._%+-]+@((?:[A-Z0-9-]+\\.)+[A-Z]{2}|localhost)",
-                    RegexCompileFlags.CASELESS);
-            return email_regex.match(address);
-        } catch (RegexError e) {
-            debug("Regex error validating email address: %s", e.message);
-            return false;
+        if (MailboxAddress.email_regex == null) {
+            try {
+                // http://www.regular-expressions.info/email.html
+                // matches john@dep.aol.museum not john@aol...com
+                MailboxAddress.email_regex = new Regex(
+                    "[A-Z0-9._%+-]+@((?:[A-Z0-9-]+\\.)+[A-Z]{2}|localhost)",
+                    RegexCompileFlags.CASELESS
+                );
+            } catch (RegexError e) {
+                warning("Regex error validating email address: %s", e.message);
+                return false;
+            }
         }
+        return MailboxAddress.email_regex.match(address);
     }
 
     private static string decode_name(string name) {
