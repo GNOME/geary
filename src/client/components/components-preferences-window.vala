@@ -255,53 +255,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         add(page);
     }
 
-    private Hdy.ActionRow new_plugin_row(Peas.PluginInfo plugin) {
-        var @switch = new Gtk.Switch();
-        @switch.active = plugin.is_loaded();
-        @switch.notify["active"].connect_after(
-            () => enable_plugin(plugin, switch)
-        );
-        @switch.valign = CENTER;
-
-        var row = new Hdy.ActionRow();
-        row.title = plugin.get_name();
-        row.subtitle = plugin.get_description();
-        row.activatable_widget = @switch;
-        row.add(@switch);
-
-        return row;
-    }
-
-    private void enable_plugin(Peas.PluginInfo plugin, Gtk.Switch @switch) {
-        if (@switch.active && !plugin.is_loaded()) {
-            bool loaded = false;
-            try {
-                loaded = this.plugins.load_optional(plugin);
-            } catch (GLib.Error err) {
-                warning(
-                    "Plugin %s not able to be loaded: %s",
-                    plugin.get_name(), err.message
-                );
-            }
-            if (!loaded) {
-                @switch.active = false;
-            }
-        } else if (!@switch.active && plugin.is_loaded()) {
-            bool unloaded = false;
-            try {
-                unloaded = this.plugins.unload_optional(plugin);
-            } catch (GLib.Error err) {
-                warning(
-                    "Plugin %s not able to be loaded: %s",
-                    plugin.get_name(), err.message
-                );
-            }
-            if (!unloaded) {
-                @switch.active = true;
-            }
-        }
-    }
-
     private void on_close() {
         close();
     }
