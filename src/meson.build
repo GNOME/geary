@@ -26,6 +26,11 @@ geary_vala_args = [
   '--enable-checking',
 ]
 
+# Remove once libhandy 1.0 has been packaged and is widely available
+if libhandy.version().version_compare('<1.0')
+  geary_vala_args += [ '--disable-since-check' ]
+endif
+
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
 if reference_tracking
