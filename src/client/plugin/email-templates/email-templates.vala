@@ -15,7 +15,7 @@ public void peas_register_types(TypeModule module) {
 }
 
 /**
- * Manages UI for special folders.
+ * Enables editing and sending email templates.
  */
 public class Plugin.EmailTemplates :
     PluginBase, FolderExtension, EmailExtension {
@@ -138,7 +138,16 @@ public class Plugin.EmailTemplates :
     private async void edit_email(Folder? target, EmailIdentifier? id, bool send) {
         var account = (target != null) ? target.account : id.account;
         try {
-            var composer = this.plugin_application.new_composer(account);
+            Plugin.Composer? composer = null;
+            if (id != null) {
+                composer = yield this.plugin_application.compose_with_context(
+                    id.account,
+                    Composer.ContextType.EDIT,
+                    id
+                );
+            } else {
+                composer = yield this.plugin_application.compose_blank(account);
+            }
             if (!send) {
                 var folder = target;
                 if (folder == null && id != null) {
@@ -153,10 +162,7 @@ public class Plugin.EmailTemplates :
                 composer.can_send = false;
             }
 
-            if (id != null) {
-                yield composer.edit_email(id);
-            }
-            composer.show();
+            composer.present();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
         }
@@ -270,7 +276,7 @@ public class Plugin.EmailTemplates :
         var bar = this.info_bars.get(target);
         if (bar == null) {
             bar = new InfoBar(target.display_name);
-            bar.primary_button = new Button(
+            bar.primary_button = new Actionable(
                 // Translators: Info bar button label for creating a
                 // new email template
                 _("New"),
@@ -285,7 +291,7 @@ public class Plugin.EmailTemplates :
     private InfoBar new_template_email_info_bar(EmailIdentifier target) {
         // Translators: Infobar status label for an email template
         var bar = new InfoBar(_("Message template"));
-        bar.primary_button = new Button(
+        bar.primary_button = new Actionable(
             // Translators: Info bar button label for sending an
             // email template
             _("Send"),
@@ -293,7 +299,7 @@ public class Plugin.EmailTemplates :
             target.to_variant()
         );
         bar.secondary_buttons.add(
-            new Button(
+            new Actionable(
                 // Translators: Info bar button label for editing an
                 // existing email template
                 _("Edit"),
@@ -330,7 +336,7 @@ public class Plugin.EmailTemplates :
 
     private void on_new_activated(GLib.Action action, GLib.Variant? target) {
         if (this.folder_store != null && target != null) {
-            Folder? folder = this.folder_store.get_folder_from_variant(target);
+            Folder? folder = this.folder_store.get_folder_for_variant(target);
             if (folder != null) {
                 this.edit_email.begin(folder, null, false);
             }
@@ -340,7 +346,7 @@ public class Plugin.EmailTemplates :
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
                 this.edit_email.begin(null, id, false);
             }
@@ -350,7 +356,7 @@ public class Plugin.EmailTemplates :
     private void on_send_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
             EmailIdentifier? id =
-                this.email_store.get_email_identifier_from_variant(target);
+                this.email_store.get_email_identifier_for_variant(target);
             if (id != null) {
                 this.edit_email.begin(null, id, true);
             }

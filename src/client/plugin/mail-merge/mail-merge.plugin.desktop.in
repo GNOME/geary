@@ -1,0 +1,5 @@
+[Plugin]
+Module=mail-merge
+Depends=email-templates
+Name=Mail Merge
+Description=Fill in and send email templates using a spreadsheet

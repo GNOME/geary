@@ -146,9 +146,12 @@ public class Plugin.SpecialFolders :
 
     private async void edit_draft(EmailIdentifier id) {
         try {
-            var composer = this.plugin_application.new_composer(id.account);
-            yield composer.edit_email(id);
-            composer.show();
+            var composer = yield this.plugin_application.compose_with_context(
+                id.account,
+                Composer.ContextType.EDIT,
+                id
+            );
+            composer.present();
         } catch (GLib.Error err) {
             warning("Unable to construct composer: %s", err.message);
         }
@@ -158,7 +161,7 @@ public class Plugin.SpecialFolders :
         var bar = this.info_bars.get(target);
         if (bar == null) {
             bar = new InfoBar(target.display_name);
-            bar.primary_button = new Button(
+            bar.primary_button = new Actionable(
                 // Translators: Info bar button label for emptying
                 // trash/spam folders
                 _("Empty"),
@@ -178,7 +181,7 @@ public class Plugin.SpecialFolders :
             // email
             _("This message has not yet been sent.")
         );
-        bar.primary_button = new Button(
+        bar.primary_button = new Actionable(
             // Translators: Info bar button label for editing a draft
             // email
             _("Edit"),
@@ -216,7 +219,7 @@ public class Plugin.SpecialFolders :
 
     private void on_edit_activated(GLib.Action action, GLib.Variant? target) {
         if (this.email_store != null && target != null) {
-            EmailIdentifier? id = this.email_store.get_email_identifier_from_variant(
+            EmailIdentifier? id = this.email_store.get_email_identifier_for_variant(
                 target
             );
             if (id != null) {
@@ -229,7 +232,7 @@ public class Plugin.SpecialFolders :
 
     private void on_empty_activated(GLib.Action action, GLib.Variant? target) {
         if (this.folder_store != null && target != null) {
-            Folder? folder = this.folder_store.get_folder_from_variant(target);
+            Folder? folder = this.folder_store.get_folder_for_variant(target);
             if (folder != null) {
                 this.plugin_application.empty_folder.begin(folder);
             }

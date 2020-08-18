@@ -32,10 +32,23 @@ namespace Util.Email {
         return compare_conversation_ascending(b, a);
     }
 
-    /** Returns the stripped subject line, or a placeholder if none. */
-    public string strip_subject_prefixes(Geary.Email email) {
-        string? cleaned = (email.subject != null) ? email.subject.strip_prefixes() : null;
-        return !Geary.String.is_empty(cleaned) ? cleaned : _("(No subject)");
+    /**
+     * Returns the subject for an email stripped of prefixes.
+     *
+     * If the email has no subject, returns a localised placeholder.
+     */
+    public string strip_subject_prefixes(Geary.EmailHeaderSet email) {
+        string? cleaned = null;
+        if (email.subject != null) {
+            cleaned = email.subject.strip_prefixes();
+        }
+        return (
+            !Geary.String.is_empty_or_whitespace(cleaned)
+            ? cleaned
+            // Translators: Label used when an email has a missing or
+            // an empty subject
+            : _("(No subject)")
+        );
     }
 
     /**

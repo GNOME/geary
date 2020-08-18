@@ -287,6 +287,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /** The email body editor widget. */
+    public WebView editor { get; private set; }
+
+    /**
+     * The last focused text input widget.
+     *
+     * This may be a Gtk.Entry if an address field or the subject was
+     * most recently focused, or the {@link editor} if the body was
+     * most recently focused.
+     */
+    public Gtk.Widget? focused_input_widget { get; private set; default = null; }
+
     /** Determines if the composer can send the message. */
     public bool can_send {
         get {
@@ -342,7 +354,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         get; private set; default = new Geary.RFC822.MessageIDList();
     }
 
-    internal WebView editor { get; private set; }
+    /** Overrides for the draft folder as save destination, if any. */
+    internal Geary.Folder? save_to { get; private set; default = null; }
 
     internal Headerbar header { get; private set; }
 
@@ -415,6 +428,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     [GtkChild]
     private Gtk.Label message_overlay_label;
+    [GtkChild]
+    private Gtk.Box action_bar_box;
     [GtkChild]
     private Gtk.Box attachments_box;
     [GtkChild]
@@ -490,7 +505,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> inline_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
     private Gee.Map<string,Geary.Memory.Buffer> cid_files = new Gee.HashMap<string,Geary.Memory.Buffer>();
 
-    private Geary.Folder? save_to;
     private Geary.App.DraftManager? draft_manager = null;
     private GLib.Cancellable? draft_manager_opening = null;
     private Geary.TimeoutManager draft_timer;
@@ -1103,6 +1117,29 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     /**
+     * Inserts a menu section into the composer's menu.
+     */
+    public void insert_menu_section(GLib.MenuModel section) {
+        var menu = this.more_options_button.menu_model as GLib.Menu;
+        if (menu != null) {
+            menu.insert_section(0, null, section);
+        }
+    }
+
+    /** Adds an action bar to the composer. */
+    public void add_action_bar(Gtk.ActionBar to_add) {
+        this.action_bar_box.pack_start(to_add);
+        this.action_bar_box.reorder_child(to_add, 0);
+    }
+
+    /** Overrides the draft folder as a destination for saving. */
+    public async void set_save_to_override(Geary.Folder? save_to)
+        throws GLib.Error {
+        this.save_to = save_to;
+        yield reopen_draft_manager();
+    }
+
+    /**
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
@@ -1145,12 +1182,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 foreach (var candidate in email_map.get_keys()) {
                     if (candidate.message_id != null &&
                         mid.equal_to(candidate.message_id)) {
-                        to_addresses = to_addresses.append(
+                        to_addresses = to_addresses.merge_list(
                             Geary.RFC822.Utils.create_to_addresses_for_reply(
                                 candidate, sender_addresses
                             )
                         );
-                        cc_addresses = cc_addresses.append(
+                        cc_addresses = cc_addresses.merge_list(
                             Geary.RFC822.Utils.create_cc_addresses_for_reply_all(
                                 candidate, sender_addresses
                             )
@@ -1323,6 +1360,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.visible_on_attachment_drag_over.set_size_request(-1, -1);
         }
    }
+
+    [GtkCallback]
+    private void on_set_focus_child() {
+        var window = get_toplevel() as Gtk.Window;
+        if (window != null) {
+            Gtk.Widget? last_focused = window.get_focus();
+            if (last_focused == this.editor ||
+                (last_focused is Gtk.Entry && last_focused.is_ancestor(this))) {
+                this.focused_input_widget = last_focused;
+            }
+        }
+    }
 
     [GtkCallback]
     private bool on_drag_motion() {
@@ -1934,8 +1983,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         wrapper_box.pack_start(new Gtk.Separator(HORIZONTAL));
 
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        box.margin_top = 6;
-        box.margin_bottom = 6;
         wrapper_box.pack_start(box);
 
         /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
@@ -1944,8 +1991,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gtk.Label label = new Gtk.Label(label_text);
         box.pack_start(label);
         label.halign = Gtk.Align.START;
-        label.margin_start = 4;
-        label.margin_end = 4;
 
         Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
         box.pack_start(remove_button, false, false);

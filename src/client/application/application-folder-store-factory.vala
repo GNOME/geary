@@ -70,7 +70,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             Geary.Folder engine = yield account.backing.account.create_personal_folder(
                 name, NONE, cancellable
             );
-            var folder = this.factory.get_plugin_folder(engine);
+            var folder = this.factory.to_plugin_folder(engine);
             if (folder == null) {
                 throw new Geary.EngineError.NOT_FOUND(
                     "No plugin folder found for the created folder"
@@ -79,8 +79,8 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             return folder;
         }
 
-        public Plugin.Folder? get_folder_from_variant(GLib.Variant variant) {
-            var folder = this.factory.get_folder_from_variant(variant);
+        public Plugin.Folder? get_folder_for_variant(GLib.Variant variant) {
+            var folder = this.factory.get_folder_for_variant(variant);
             return this.factory.folders.get(folder);
         }
 
@@ -189,24 +189,24 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
     }
 
     /** Returns the plugin folder for the given engine folder. */
-    public Plugin.Folder? get_plugin_folder(Geary.Folder engine) {
+    public Plugin.Folder? to_plugin_folder(Geary.Folder engine) {
         return this.folders.get(engine);
     }
 
     /** Returns the engine folder for the given plugin folder. */
-    public Geary.Folder? get_engine_folder(Plugin.Folder plugin) {
+    public Geary.Folder? to_engine_folder(Plugin.Folder plugin) {
         FolderImpl? impl = plugin as FolderImpl;
         return (impl != null) ? impl.backing.folder : null;
     }
 
     /** Returns the folder context for the given plugin folder. */
-    public FolderContext get_folder_context(Plugin.Folder plugin) {
+    public FolderContext to_folder_context(Plugin.Folder plugin) {
         FolderImpl? impl = plugin as FolderImpl;
         return (impl != null) ? impl.backing : null;
     }
 
     /** Returns the folder context for the given plugin folder id. */
-    public Geary.Folder? get_folder_from_variant(GLib.Variant target) {
+    public Geary.Folder? get_folder_for_variant(GLib.Variant target) {
         string id = (string) target.get_child_value(0);
         AccountContext? context = null;
         foreach (var key in this.accounts.keys) {
@@ -322,7 +322,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         if (main != null) {
             Geary.Folder? selected = main.selected_folder;
             if (selected != null) {
-                var plugin = get_plugin_folder(selected);
+                var plugin = to_plugin_folder(selected);
                 if (plugin != null) {
                     foreach (FolderStoreImpl store in this.stores) {
                         store.folder_selected(plugin);

@@ -112,14 +112,14 @@ public class Application.AccountContext : Geary.BaseObject {
     /**
      * Returns read-only collection of all known folder contexts.
      */
-    internal Gee.Collection<FolderContext> get_folders() {
+    public Gee.Collection<FolderContext> get_folders() {
         return this.folders.values.read_only_view;
     }
 
     /**
      * Returns context for a folder belonging to this context's account.
      */
-    internal FolderContext? get_folder(Geary.Folder target) {
+    public FolderContext? get_folder(Geary.Folder target) {
         FolderContext? context = null;
         if (this.account == target.account) {
             context = this.folders.get(target.path);
@@ -128,7 +128,7 @@ public class Application.AccountContext : Geary.BaseObject {
     }
 
     /** Adds a context for a folder belonging to the account. */
-    internal void add_folders(Gee.Collection<FolderContext> to_add) {
+    public void add_folders(Gee.Collection<FolderContext> to_add) {
         foreach (var context in to_add) {
             this.folders.set(context.folder.path, context);
         }
@@ -136,7 +136,7 @@ public class Application.AccountContext : Geary.BaseObject {
     }
 
     /** Adds a context for a folder belonging to the account. */
-    internal void remove_folders(Gee.Collection<FolderContext> to_remove) {
+    public void remove_folders(Gee.Collection<FolderContext> to_remove) {
         foreach (var context in to_remove) {
             this.folders.unset(context.folder.path);
         }

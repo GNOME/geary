@@ -341,6 +341,55 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return results;
     }
 
+    /** Returns a subset of the given ids that are in this folder. */
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        var contained_ids = new Gee.HashMap<int64?,EmailIdentifier>(
+            Collection.int64_hash_func,
+            Collection.int64_equal_func
+        );
+        if (!ids.is_empty) {
+            var valid_ids = new Gee.HashMap<int64?,EmailIdentifier>(
+                Collection.int64_hash_func,
+                Collection.int64_equal_func
+            );
+            yield db.exec_transaction_async(
+                RO,
+                (cx, cancellable) => {
+                    var sql = new StringBuilder("""
+                        SELECT message_id
+                        FROM MessageLocationTable
+                        WHERE message_id IN (
+                    """);
+                    foreach (var id in ids) {
+                        var id_impl = id as EmailIdentifier;
+                        if (id_impl != null) {
+                            sql.append(id_impl.message_id.to_string());
+                            valid_ids.set(id_impl.message_id, id_impl);
+                        }
+                    }
+                    sql.append(") AND folder_id=? AND remove_marker<>?");
+
+                    Db.Statement stmt = cx.prepare(sql.str);
+                    stmt.bind_rowid(0, this.folder_id);
+                    stmt.bind_bool(0, false);
+
+                    Db.Result results = stmt.exec(cancellable);
+                    while (!results.finished) {
+                        var message_id = results.int64_at(0);
+                        contained_ids.set(message_id, valid_ids.get(message_id));
+                        results.next(cancellable);
+                    }
+                    return COMMIT;
+                },
+                cancellable
+            );
+        }
+        return contained_ids.values;
+    }
+
     public async Gee.List<Geary.Email>? list_email_by_id_async(ImapDB.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable)
         throws Error {

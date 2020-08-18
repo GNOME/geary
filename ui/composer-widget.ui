@@ -9,6 +9,7 @@
     <signal name="drag-drop" handler="on_drag_drop" swapped="no"/>
     <signal name="drag-leave" handler="on_drag_leave" swapped="no"/>
     <signal name="drag-motion" handler="on_drag_motion" swapped="no"/>
+    <signal name="set-focus-child" handler="on_set_focus_child" after="yes" swapped="no"/>
     <child>
       <object class="GtkBox" id="composer_container">
         <property name="visible">True</property>
@@ -575,6 +576,18 @@
                 </style>
               </object>
             </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="action_bar_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkRevealer" id="formatting">
                 <property name="visible">True</property>
@@ -1219,28 +1232,25 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox" id="attachments_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
-            <property name="margin_start">6</property>
-            <property name="margin_end">6</property>
-            <property name="margin_top">0</property>
-            <property name="margin_bottom">3</property>
             <property name="orientation">vertical</property>
             <child>
               <placeholder/>
             </child>
+            <style>
+              <class name="geary-attachments-box"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>

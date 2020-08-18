@@ -15,6 +15,31 @@
 public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
 
 
+    /**
+     * GLib.Object data key for priority queue value.
+     *
+     * @see StackType.PRIORITY_QUEUE
+     * @see priority_queue_comparator
+     */
+    public const string PRIORITY_QUEUE_KEY =
+        "Components.InfoBarStack.PRIORITY_QUEUE_KEY";
+
+
+    /** Supported stack algorithms. */
+    public enum StackType {
+        /** Always shows the most recently added info bar. */
+        SINGLE,
+
+        /**
+         * Shows the highest priority infobar.
+         *
+         * @see priority_queue_comparator
+         */
+        PRIORITY_QUEUE;
+
+    }
+
+
     private class SingletonQueue : Gee.AbstractQueue<Gtk.InfoBar> {
 
         public override bool read_only {
@@ -88,6 +113,37 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     }
 
 
+    /**
+     * Comparator used for the priority queue algorithm.
+     *
+     * When {@link algorithm} is set to {@link
+     * StackType.PRIORITY_QUEUE}, this comparator is used for the
+     * priority queue to compare info bars. It uses an integer value
+     * stored via GLib.Object.set_data with {@link PRIORITY_QUEUE_KEY}
+     * as a key to determine the relative priority between two info
+     * bars.
+     *
+     * @see algorithm
+     * @see StackType.PRIORITY_QUEUE
+     */
+    public static int priority_queue_comparator(Gtk.InfoBar a, Gtk.InfoBar b) {
+        return (
+            b.get_data<int>(PRIORITY_QUEUE_KEY) -
+            a.get_data<int>(PRIORITY_QUEUE_KEY)
+        );
+    }
+
+
+    /** The algorithm used when showing info bars. */
+    public StackType algorithm {
+        get { return this._algorithm; }
+        construct set {
+            this._algorithm = value;
+            update_queue_type();
+        }
+    }
+    private StackType _algorithm = SINGLE;
+
     /** Determines if an info bar is currently being shown. */
     public bool has_current {
         get { return (this.current_info_bar != null); }
@@ -98,12 +154,17 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
         get { return get_child() as Gtk.InfoBar; }
     }
 
-    private Gee.Queue<Gtk.InfoBar> available = new SingletonQueue();
+    private Gee.Queue<Gtk.InfoBar> available;
     private int last_allocated_height = 0;
 
 
     construct {
         get_style_context().add_class("geary-info-bar-stack");
+        update_queue_type();
+    }
+
+    public InfoBarStack(StackType algorithm) {
+        Object(algorithm: algorithm);
     }
 
     /**
@@ -165,6 +226,20 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             this.visible = false;
             this.last_allocated_height = 0;
         }
+    }
+
+    private void update_queue_type() {
+        switch (this._algorithm) {
+        case SINGLE:
+            this.available = new SingletonQueue();
+            break;
+        case PRIORITY_QUEUE:
+            this.available = new Gee.PriorityQueue<Gtk.InfoBar>(
+                InfoBarStack.priority_queue_comparator
+            );
+            break;
+        }
+        update();
     }
 
     private void on_allocation_changed() {

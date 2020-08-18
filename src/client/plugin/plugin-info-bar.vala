@@ -15,12 +15,15 @@
 public class Plugin.InfoBar : Geary.BaseObject {
 
 
+    /** Emitted when the close button is activated. */
+    public signal void close_activated();
+
     /**
      * A short, human-readable status message.
      *
      * This should ideally be less than 20 characters long.
      */
-    public string status { get; private set; }
+    public string status { get; set; }
 
     /**
      * An optional, longer human-readable explanation of the status.
@@ -28,7 +31,7 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * This provides additional information and context for {@link
      * status}.
      */
-    public string? description { get; private set; }
+    public string? description { get; set; }
 
     /** Determines if a close button is displayed by the info bar. */
     public bool show_close_button { get; set; default = false; }
@@ -42,7 +45,7 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * object's method, such as {@link
      * FolderContext.remove_folder_info_bar}.
      */
-    public Button? primary_button { get; set; default = null; }
+    public Actionable? primary_button { get; set; default = null; }
 
     /**
      * Optional secondary buttons for the info bar.
@@ -56,8 +59,8 @@ public class Plugin.InfoBar : Geary.BaseObject {
      * object's method, such as {@link
      * FolderContext.remove_folder_info_bar}.
      */
-    public Gee.BidirList<Button> secondary_buttons {
-        get; private set; default = new Gee.LinkedList<Button>();
+    public Gee.BidirList<Actionable> secondary_buttons {
+        get; private set; default = new Gee.LinkedList<Actionable>();
     }
 
     /** Constructs a new info bar with the given status. */

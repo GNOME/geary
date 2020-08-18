@@ -210,6 +210,34 @@ public class Geary.Outbox.Folder :
         }
     }
 
+    /** {@inheritDoc} */
+    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        GLib.Cancellable? cancellable = null)
+    throws GLib.Error {
+        check_open();
+        var contains = new Gee.HashSet<Geary.EmailIdentifier>();
+        yield db.exec_transaction_async(
+            RO,
+            (cx, cancellable) => {
+                foreach (Geary.EmailIdentifier id in ids) {
+                    var outbox_id = id as EmailIdentifier;
+                    if (outbox_id != null) {
+                        var row = do_fetch_row_by_ordering(
+                            cx, outbox_id.ordering, cancellable
+                        );
+                        if (row != null) {
+                            contains.add(id);
+                        }
+                    }
+                }
+                return DONE;
+            },
+            cancellable
+        );
+        return contains;
+    }
+
     public override async Gee.List<Email>?
         list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
                                int count,
@@ -353,29 +381,6 @@ public class Geary.Outbox.Folder :
     public override void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED {
         throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
-    }
-
-    internal async void
-        add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                        Gee.MultiMap<Geary.EmailIdentifier,FolderPath> map,
-                                        GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        check_open();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            foreach (Geary.EmailIdentifier id in ids) {
-                EmailIdentifier? outbox_id = id as EmailIdentifier;
-                if (outbox_id == null)
-                    continue;
-
-                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-                if (row == null)
-                    continue;
-
-                map.set(id, path);
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
     }
 
     // Utility for getting an email object back from an outbox row.

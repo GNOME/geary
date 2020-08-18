@@ -613,10 +613,10 @@ public class Application.Client : Gtk.Application {
     public async void show_email(GLib.Variant? id) {
         MainWindow main = yield this.present();
         if (id != null) {
-            EmailStoreFactory email = this.controller.plugins.email_factory;
-            AccountContext? context = email.get_account_from_variant(id);
+            EmailStoreFactory email = this.controller.plugins.globals.email;
+            AccountContext? context = email.get_account_for_variant(id);
             Geary.EmailIdentifier? email_id =
-                email.get_email_identifier_from_variant(id);
+                email.get_email_identifier_for_variant(id);
             if (context != null && email_id != null) {
                 // Determine what folders the email is in
                 Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? folders = null;
@@ -694,7 +694,7 @@ public class Application.Client : Gtk.Application {
         MainWindow main = yield this.present();
         if (id != null) {
             Geary.Folder? folder =
-                this.controller.plugins.folders_factory.get_folder_from_variant(id);
+                this.controller.plugins.globals.folders.get_folder_for_variant(id);
             if (folder != null) {
                 yield main.select_folder(folder, true);
             }
@@ -726,8 +726,25 @@ public class Application.Client : Gtk.Application {
     }
 
     public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
-        yield this.present();
-        yield this.controller.compose_new_email(to);
+        MainWindow main = yield this.present();
+        AccountContext? account = null;
+        if (main.selected_account == null) {
+            account = this.controller.get_context_for_account(
+                main.selected_account.information
+            );
+        }
+        if (account == null) {
+            account = Geary.Collection.first(
+                this.controller.get_account_contexts()
+            );
+        }
+        if (account != null) {
+            Composer.Widget composer = yield this.controller.compose_blank(
+                account,
+                to
+            );
+            this.controller.present_composer(composer);
+        }
     }
 
     public async void new_composer_mailto(string? mailto) {

@@ -89,11 +89,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             return emails;
         }
 
-        public Plugin.EmailIdentifier? get_email_identifier_from_variant(
+        public Plugin.EmailIdentifier? get_email_identifier_for_variant(
             GLib.Variant variant
         ) {
-            var account = this.factory.get_account_from_variant(variant);
-            var id = this.factory.get_email_identifier_from_variant(variant);
+            var account = this.factory.get_account_for_variant(variant);
+            var id = this.factory.get_email_identifier_for_variant(variant);
             IdImpl? plugin_id = null;
             if (account != null && id != null) {
                 var plugin_account = this.factory.accounts.get(account);
@@ -112,7 +112,9 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
 
     /** Implementation of the plugin email interface. */
-    internal class EmailImpl : Geary.BaseObject, Plugin.Email {
+    internal class EmailImpl : Geary.BaseObject,
+        Geary.EmailHeaderSet,
+        Plugin.Email {
 
 
         public Plugin.EmailIdentifier identifier {
@@ -125,14 +127,53 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
         private IdImpl? _id = null;
 
+        public Geary.RFC822.MailboxAddresses? from {
+            get { return this.backing.from; }
+        }
+
+        public Geary.RFC822.MailboxAddress? sender {
+            get { return this.backing.sender; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? reply_to {
+            get { return this.backing.reply_to; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? to {
+            get { return this.backing.to; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? cc {
+            get { return this.backing.cc; }
+        }
+
+        public Geary.RFC822.MailboxAddresses? bcc {
+            get { return this.backing.bcc; }
+        }
+
+        public Geary.RFC822.MessageID? message_id {
+            get { return this.backing.message_id; }
+        }
+
+        public Geary.RFC822.MessageIDList? in_reply_to {
+            get { return this.backing.in_reply_to; }
+        }
+
+        public Geary.RFC822.MessageIDList? references {
+            get { return this.backing.references; }
+        }
+
+        public Geary.RFC822.Subject? subject {
+            get { return this.backing.subject; }
+        }
+
+        public Geary.RFC822.Date? date {
+            get { return this.backing.date; }
+        }
+
         public Geary.EmailFlags flags {
             get { return this.backing.email_flags; }
         }
-
-        public string subject {
-            get { return this._subject; }
-        }
-        string _subject;
 
         internal Geary.Email backing { get; private set; }
         internal PluginManager.AccountImpl account { get; private set; }
@@ -142,14 +183,46 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                            PluginManager.AccountImpl account) {
             this.backing = backing;
             this.account = account;
-            Geary.RFC822.Subject? subject = this.backing.subject;
-            this._subject = subject != null ? subject.to_string() : "";
         }
 
         public Geary.RFC822.MailboxAddress? get_primary_originator() {
             return Util.Email.get_primary_originator(this.backing);
         }
 
+        public async string load_body_as(Plugin.Email.BodyType type,
+                                         bool convert,
+                                         GLib.Cancellable? cancellable)
+            throws GLib.Error {
+            if (!(Geary.Email.REQUIRED_FOR_MESSAGE in this.backing.fields)) {
+                Geary.Account account = this.account.backing.account;
+                this.backing = yield account.local_fetch_email_async(
+                    this.backing.id,
+                    Geary.Email.REQUIRED_FOR_MESSAGE | this.backing.fields,
+                    cancellable
+                );
+            }
+
+            Geary.RFC822.Message message = this.backing.get_message();
+            string body = "";
+            switch (type) {
+            case PLAIN:
+                if (message.has_plain_body()) {
+                    body = message.get_plain_body(false, null) ?? "";
+                } else {
+                    body = message.get_searchable_body(false) ?? "";
+                }
+                break;
+
+            case HTML:
+                if (message.has_html_body()) {
+                    body = message.get_html_body(null) ?? "";
+                } else {
+                    body = message.get_plain_body(true, null) ?? "";
+                }
+                break;
+            }
+            return body;
+        }
     }
 
 
@@ -233,6 +306,11 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         }
     }
 
+    public Geary.Email? to_engine_email(Plugin.Email plugin) {
+        var impl = plugin as EmailImpl;
+        return (impl != null) ? impl.backing : null;
+    }
+
     public Gee.Collection<Plugin.EmailIdentifier> to_plugin_ids(
         Gee.Collection<Geary.EmailIdentifier> engine_ids,
         AccountContext account
@@ -255,7 +333,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
     }
 
     /** Returns the account context for the given plugin email id. */
-    public AccountContext get_account_from_variant(GLib.Variant target) {
+    public AccountContext get_account_for_variant(GLib.Variant target) {
         AccountContext? account = null;
         string id = (string) target.get_child_value(0);
         foreach (var context in this.accounts.keys) {
@@ -270,9 +348,9 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
     /** Returns the engine email id for the given plugin email id. */
     public Geary.EmailIdentifier?
-        get_email_identifier_from_variant(GLib.Variant target) {
+        get_email_identifier_for_variant(GLib.Variant target) {
         Geary.EmailIdentifier? id = null;
-        var context = get_account_from_variant(target);
+        var context = get_account_for_variant(target);
         if (context != null) {
             try {
                 id = context.account.to_email_identifier(

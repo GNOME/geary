@@ -101,6 +101,22 @@ internal class Application.Controller :
 
 
     /**
+     * Emitted when a composer is registered.
+     *
+     * This will be emitted after a composer is constructed, but
+     * before it is shown.
+     */
+    public signal void composer_registered(Composer.Widget widget);
+
+    /**
+     * Emitted when a composer is deregistered.
+     *
+     * This will be emitted when a composer has been closed and is
+     * about to be destroyed.
+     */
+    public signal void composer_deregistered(Composer.Widget widget);
+
+    /**
      * Constructs a new instance of the controller.
      */
     public async Controller(Client application,
@@ -312,37 +328,26 @@ internal class Application.Controller :
     /**
      * Opens a composer for writing a new, blank message.
      */
-    public async Composer.Widget? compose_new_email(Geary.RFC822.MailboxAddress? to = null,
-                                                    Geary.Folder? save_to = null) {
-        // If there's already an empty composer open, just use that
+    public async Composer.Widget compose_blank(AccountContext send_context,
+                                               Geary.RFC822.MailboxAddress? to = null) {
         MainWindow main = this.application.get_active_main_window();
-        Composer.Widget existing = main.conversation_viewer.current_composer;
-        if (existing != null &&
-            existing.current_mode == PANED &&
-            existing.is_blank) {
-            existing.present();
-            existing.set_focus();
-            return existing;
-        }
-
-        var context = this.accounts.get(
-            this.application.get_active_main_window().selected_account.information
-        );
-        Composer.Widget? composer = null;
-        if (context != null) {
+        Composer.Widget composer = main.conversation_viewer.current_composer;
+        if (composer == null ||
+            composer.current_mode != PANED ||
+            !composer.is_blank ||
+            composer.sender_context != send_context) {
             composer = new Composer.Widget(
                 this,
                 this.application.config,
-                context,
-                save_to
+                send_context,
+                null
             );
             register_composer(composer);
-            show_composer(composer);
-            try {
-                yield composer.load_empty_body(to);
-            } catch (GLib.Error err) {
-                report_problem(new Geary.ProblemReport(err));
-            }
+        }
+        try {
+            yield composer.load_empty_body(to);
+        } catch (GLib.Error err) {
+            report_problem(new Geary.ProblemReport(err));
         }
         return composer;
     }
@@ -354,39 +359,44 @@ internal class Application.Controller :
      * the context is loaded to be edited (e.g. for drafts, templates,
      * sending again. Otherwise the context is treated as the email to
      * be replied to, etc.
+     *
+     * Returns null if there is an existing composer open and the
+     * prompt to close it was declined.
      */
-    public async Composer.Widget? compose_with_context_email(Composer.Widget.ContextType type,
-                                                             Geary.Email context,
-                                                             string? quote,
-                                                             Geary.Folder? save_to = null) {
-        MainWindow show_on = this.application.get_active_main_window();
+    public async Composer.Widget? compose_with_context(AccountContext send_context,
+                                                       Composer.Widget.ContextType type,
+                                                       Geary.Email context,
+                                                       string? quote) {
+        MainWindow main = this.application.get_active_main_window();
+        Composer.Widget? composer = null;
         if (type == EDIT) {
             // Check all known composers since the context may be open
             // an existing composer already.
-            foreach (Composer.Widget composer in this.composer_widgets) {
-                if (composer.current_mode != NONE &&
-                    composer.current_mode != CLOSED &&
-                    composer.saved_id != null &&
-                    composer.saved_id.equal_to(context.id)) {
-                    composer.present();
-                    composer.set_focus();
-                    return composer;
+            foreach (var existing in this.composer_widgets) {
+                if (existing.current_mode != NONE &&
+                    existing.current_mode != CLOSED &&
+                    composer.sender_context == send_context &&
+                    existing.saved_id != null &&
+                    existing.saved_id.equal_to(context.id)) {
+                    composer = existing;
+                    break;
                 }
             }
         } else {
             // See whether there is already an inline message in the
             // current window that is either a reply/forward for that
             // message, or there is a quote to insert into it.
-            foreach (Composer.Widget existing in this.composer_widgets) {
-                if (existing.get_toplevel() == show_on &&
+            foreach (var existing in this.composer_widgets) {
+                if (existing.get_toplevel() == main &&
                     (existing.current_mode == INLINE ||
                      existing.current_mode == INLINE_COMPACT) &&
+                    existing.sender_context == send_context &&
                     (context.id in existing.get_referred_ids() ||
                      quote != null)) {
                     try {
                         existing.append_to_email(context, quote, type);
-                        existing.present();
-                        return existing;
+                        composer = existing;
+                        break;
                     } catch (Geary.EngineError error) {
                         report_problem(new Geary.ProblemReport(error));
                     }
@@ -397,21 +407,19 @@ internal class Application.Controller :
             // new one. Replies must open inline in the main window,
             // so we need to ensure there are no composers open there
             // first.
-            if (!show_on.close_composer(true)) {
+            if (composer == null && !main.close_composer(true)) {
+                // Prompt to close the existing composer was declined,
+                // so bail out
                 return null;
             }
         }
 
-        var account = this.accounts.get(
-            this.application.get_active_main_window().selected_account.information
-        );
-        Composer.Widget? composer = null;
-        if (account != null) {
+        if (composer == null) {
             composer = new Composer.Widget(
                 this,
                 this.application.config,
-                account,
-                save_to
+                send_context,
+                null
             );
             register_composer(composer);
 
@@ -420,12 +428,6 @@ internal class Application.Controller :
             } catch (GLib.Error err) {
                 report_problem(new Geary.ProblemReport(err));
             }
-
-            // Have to load the body before showing the composer
-            // because we need to know what other messages the context
-            // message refers to, so it can be displayed as an inline
-            // composer if appropriate.
-            show_composer(composer);
         }
         return composer;
     }
@@ -444,7 +446,7 @@ internal class Application.Controller :
                     context
                 );
                 register_composer(composer);
-                show_composer(composer);
+                present_composer(composer);
 
                 try {
                     yield composer.load_mailto(mailto);
@@ -974,8 +976,6 @@ internal class Application.Controller :
             smtp.email_sent.connect(on_sent);
             smtp.sending_monitor.start.connect(on_sending_started);
             smtp.sending_monitor.finish.connect(on_sending_finished);
-            var outbox_context = new FolderContext(smtp.outbox);
-            context.add_folders(Geary.Collection.single(outbox_context));
         }
 
         // Notify before opening so that listeners have a chance to
@@ -1381,7 +1381,7 @@ internal class Application.Controller :
 
     /** Clears new message counts in notification plugin contexts. */
     internal void clear_new_messages(Geary.Folder source,
-                                   Gee.Set<Geary.App.Conversation> visible) {
+                                     Gee.Set<Geary.App.Conversation> visible) {
         foreach (MainWindow window in this.application.get_main_windows()) {
             window.folder_list.set_has_new(source, false);
         }
@@ -1429,11 +1429,15 @@ internal class Application.Controller :
         this.all_windows_backgrounded_timeout.start();
     }
 
-    /** Displays a composer on the last active main window. */
-    internal void show_composer(Composer.Widget composer) {
-        var target = this.application.get_active_main_window();
-        target.show_composer(composer);
+    /** Attempts to make the composer visible on the active monitor. */
+    internal void present_composer(Composer.Widget composer) {
+        if (composer.current_mode == CLOSED ||
+            composer.current_mode == NONE) {
+            var target = this.application.get_active_main_window();
+            target.show_composer(composer);
+        }
         composer.set_focus();
+        composer.present();
     }
 
     internal bool check_open_composers() {
@@ -1448,17 +1452,21 @@ internal class Application.Controller :
     }
 
     internal void register_composer(Composer.Widget widget) {
-        debug(@"Registered composer of type $(widget.context_type); $(this.composer_widgets.size) composers total");
-        widget.destroy.connect_after(this.on_composer_widget_destroy);
-        this.composer_widgets.add(widget);
+        if (!(widget in this.composer_widgets)) {
+            debug(@"Registered composer of type $(widget.context_type); " +
+              @"$(this.composer_widgets.size) composers total");
+            widget.destroy.connect_after(this.on_composer_widget_destroy);
+            this.composer_widgets.add(widget);
+            composer_registered(widget);
+        }
     }
 
     private void on_composer_widget_destroy(Gtk.Widget sender) {
         Composer.Widget? composer = sender as Composer.Widget;
-        if (composer != null) {
-            composer_widgets.remove((Composer.Widget) sender);
+        if (composer != null && composer_widgets.remove(composer)) {
             debug(@"Composer type $(composer.context_type) destroyed; " +
                   @"$(this.composer_widgets.size) composers remaining");
+            composer_deregistered(composer);
         }
     }
 
@@ -2518,7 +2526,7 @@ private class Application.SendComposerCommand : ComposerCommand {
         this.saved = null;
 
         this.composer.set_enabled(true);
-        this.application.controller.show_composer(this.composer);
+        this.application.controller.present_composer(this.composer);
         clear_composer();
     }
 
@@ -2572,7 +2580,7 @@ private class Application.SaveComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer);
+            this.controller.present_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.
@@ -2630,7 +2638,7 @@ private class Application.DiscardComposerCommand : ComposerCommand {
         if (this.composer != null) {
             this.destroy_timer.reset();
             this.composer.set_enabled(true);
-            this.controller.show_composer(this.composer);
+            this.controller.present_composer(this.composer);
             clear_composer();
         } else {
             /// Translators: A label for an in-app notification.

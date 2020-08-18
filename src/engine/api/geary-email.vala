@@ -193,79 +193,90 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
     /**
      * {@inheritDoc}
      *
-     * Value will be valid if {@link Field.DATE} is set.
+     * Value will be valid if {@link Field.ORIGINATORS} is set.
      */
-    public Geary.RFC822.Date? date { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? from { get { return this._from; } }
+    private RFC822.MailboxAddresses? _from  = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.ORIGINATORS} is set.
      */
-    public Geary.RFC822.MailboxAddresses? from { get; protected set; default = null; }
+    public RFC822.MailboxAddress? sender { get { return this._sender; } }
+    private RFC822.MailboxAddress? _sender = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.ORIGINATORS} is set.
      */
-    public Geary.RFC822.MailboxAddress? sender { get; protected set; default = null; }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Value will be valid if {@link Field.ORIGINATORS} is set.
-     */
-    public Geary.RFC822.MailboxAddresses? reply_to { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? reply_to { get { return this._reply_to; } }
+    private RFC822.MailboxAddresses? _reply_to = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.RECEIVERS} is set.
      */
-    public Geary.RFC822.MailboxAddresses? to { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? to { get { return this._to; } }
+    private RFC822.MailboxAddresses? _to = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.RECEIVERS} is set.
      */
-    public Geary.RFC822.MailboxAddresses? cc { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? cc { get { return this._cc; } }
+    private RFC822.MailboxAddresses? _cc = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.RECEIVERS} is set.
      */
-    public Geary.RFC822.MailboxAddresses? bcc { get; protected set; default = null; }
+    public RFC822.MailboxAddresses? bcc { get { return this._bcc; } }
+    private RFC822.MailboxAddresses? _bcc = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.REFERENCES} is set.
      */
-    public Geary.RFC822.MessageID? message_id { get; protected set; default = null; }
+    public RFC822.MessageID? message_id { get { return this._message_id; } }
+    private RFC822.MessageID? _message_id = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.REFERENCES} is set.
      */
-    public Geary.RFC822.MessageIDList? in_reply_to { get; protected set; default = null; }
+    public RFC822.MessageIDList? in_reply_to { get { return this._in_reply_to; } }
+    private RFC822.MessageIDList? _in_reply_to = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.REFERENCES} is set.
      */
-    public Geary.RFC822.MessageIDList? references { get; protected set; default = null; }
+    public RFC822.MessageIDList? references { get { return this._references; } }
+    private RFC822.MessageIDList? _references = null;
 
     /**
      * {@inheritDoc}
      *
      * Value will be valid if {@link Field.SUBJECT} is set.
      */
-    public Geary.RFC822.Subject? subject { get; protected set; default = null; }
+    public RFC822.Subject? subject { get { return this._subject; } }
+    private RFC822.Subject? _subject = null;
+
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.DATE} is set.
+     */
+    public RFC822.Date? date { get { return this._date; } }
+    private RFC822.Date? _date = null;
 
     /**
      * {@inheritDoc}
@@ -392,11 +403,11 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
         return email_flags != null ? Trillian.from_boolean(email_flags.load_remote_images()) : Trillian.UNKNOWN;
     }
 
-    public void set_send_date(Geary.RFC822.Date? date) {
-        this.date = date;
-        this.message = null;
+    public void set_send_date(RFC822.Date? date) {
+        this._date = date;
 
-        fields |= Field.DATE;
+        this.message = null;
+        this.fields |= Field.DATE;
     }
 
     /**
@@ -406,58 +417,60 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
      * and From not be identical, and that both From and ReplyTo are
      * optional.
      */
-    public void set_originators(Geary.RFC822.MailboxAddresses? from,
-                                Geary.RFC822.MailboxAddress? sender,
-                                Geary.RFC822.MailboxAddresses? reply_to)
+    public void set_originators(RFC822.MailboxAddresses? from,
+                                RFC822.MailboxAddress? sender,
+                                RFC822.MailboxAddresses? reply_to)
         throws Error {
         // XXX Should be throwing an error here if from is empty or
         // sender is same as from
-        this.from = from;
-        this.sender = sender;
-        this.reply_to = reply_to;
-        this.message = null;
+        this._from = from;
+        this._sender = sender;
+        this._reply_to = reply_to;
 
-        fields |= Field.ORIGINATORS;
+        this.message = null;
+        this.fields |= Field.ORIGINATORS;
     }
 
-    public void set_receivers(Geary.RFC822.MailboxAddresses? to,
-        Geary.RFC822.MailboxAddresses? cc, Geary.RFC822.MailboxAddresses? bcc) {
-        this.to = to;
-        this.cc = cc;
-        this.bcc = bcc;
-        this.message = null;
+    public void set_receivers(RFC822.MailboxAddresses? to,
+                              RFC822.MailboxAddresses? cc,
+                              RFC822.MailboxAddresses? bcc) {
+        this._to = to;
+        this._cc = cc;
+        this._bcc = bcc;
 
-        fields |= Field.RECEIVERS;
+        this.message = null;
+        this.fields |= Field.RECEIVERS;
     }
 
-    public void set_full_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageIDList? in_reply_to,
+    public void set_full_references(RFC822.MessageID? message_id,
+                                    RFC822.MessageIDList? in_reply_to,
         Geary.RFC822.MessageIDList? references) {
-        this.message_id = message_id;
-        this.in_reply_to = in_reply_to;
-        this.references = references;
-        this.message = null;
+        this._message_id = message_id;
+        this._in_reply_to = in_reply_to;
+        this._references = references;
 
-        fields |= Field.REFERENCES;
+        this.message = null;
+        this.fields |= Field.REFERENCES;
     }
 
     public void set_message_subject(Geary.RFC822.Subject? subject) {
-        this.subject = subject;
-        this.message = null;
+        this._subject = subject;
 
-        fields |= Field.SUBJECT;
+        this.message = null;
+        this.fields |= Field.SUBJECT;
     }
 
     public void set_message_header(Geary.RFC822.Header header) {
         this.header = header;
-        this.message = null;
 
+        this.message = null;
         fields |= Field.HEADER;
     }
 
     public void set_message_body(Geary.RFC822.Text body) {
         this.body = body;
-        this.message = null;
 
+        this.message = null;
         fields |= Field.BODY;
     }
 

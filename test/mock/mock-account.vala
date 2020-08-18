@@ -88,6 +88,18 @@ public class Mock.Account : Geary.Account,
         );
     }
 
+    /** {@inheritDoc} */
+    public override void register_local_folder(Geary.Folder local)
+        throws GLib.Error {
+        void_call("register_local_folder", { local });
+    }
+
+    /** {@inheritDoc} */
+    public override void deregister_local_folder(Geary.Folder local)
+        throws GLib.Error {
+        void_call("deregister_local_folder", { local });
+    }
+
     public override Geary.EmailIdentifier to_email_identifier(GLib.Variant serialised)
         throws Geary.EngineError.BAD_PARAMETERS {
         try {

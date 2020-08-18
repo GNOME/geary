@@ -283,7 +283,7 @@ public class Application.MainWindow :
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
-        get; private set; default = new Components.InfoBarStack();
+        get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -333,7 +333,8 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Overlay overlay;
 
-    private Components.InfoBarStack info_bars = new Components.InfoBarStack();
+    private Components.InfoBarStack info_bars =
+        new Components.InfoBarStack(SINGLE);
 
     private Components.InfoBar offline_infobar;
 
@@ -598,28 +599,26 @@ public class Application.MainWindow :
 
     /** Updates the window's title and headerbar titles. */
     public void update_title() {
+        AccountContext? account = get_selected_account_context();
+        FolderContext? folder = (
+            account != null && this.selected_folder != null
+            ? account.get_folder(this.selected_folder)
+            : null
+        );
         string title = _("Geary");
-        if (this.selected_folder != null) {
+        string? account_name = null;
+        string? folder_name = null;
+        if (account != null && folder != null) {
+            account_name = account.account.information.display_name;
+            folder_name = folder.display_name;
             /// Translators: Main window title, first string
             /// substitution being the currently selected folder name,
             /// the second being the selected account name.
-            title = _("%s — %s").printf(
-                Util.I18n.to_folder_display_name(this.selected_folder),
-                this.selected_folder.account.information.display_name
-            );
+            title = _("%s — %s").printf(folder_name, account_name);
         }
         this.title = title;
-
-        this.main_toolbar.account = (
-            this.selected_folder != null
-            ? this.selected_folder.account.information.display_name
-            : ""
-        );
-        this.main_toolbar.folder = (
-            this.selected_folder != null
-            ? Util.I18n.to_folder_display_name(this.selected_folder)
-            : ""
-        );
+        this.main_toolbar.account = account_name ?? "";
+        this.main_toolbar.folder = folder_name?? "";
     }
 
     /** Updates the window's account status info bars. */
@@ -719,10 +718,6 @@ public class Application.MainWindow :
                     (to_select.used_as != INBOX ||
                      !this.folder_list.select_inbox(to_select.account))) {
                     this.folder_list.select_folder(to_select);
-                }
-
-                if (to_select.used_as == SEARCH) {
-                    this.previous_non_search_folder = to_select;
                 }
             } else {
                 this.folder_list.deselect_folder();
@@ -932,6 +927,12 @@ public class Application.MainWindow :
             this.search_open.cancel();
             var cancellable = this.search_open = new GLib.Cancellable();
 
+            if (this.previous_non_search_folder == null &&
+                this.selected_folder != null &&
+                this.selected_folder.used_as != SEARCH) {
+                this.previous_non_search_folder = this.selected_folder;
+            }
+
             var strategy = this.application.config.get_search_strategy();
             try {
                 var query = yield context.account.new_search_query(
@@ -954,11 +955,23 @@ public class Application.MainWindow :
         this.search_open.cancel();
         this.search_open = new GLib.Cancellable();
 
-        if (this.previous_non_search_folder != null &&
+        if (this.selected_folder == null ||
             this.selected_folder.used_as == SEARCH) {
-            this.select_folder.begin(
-                this.previous_non_search_folder, is_interactive
-            );
+            var to_select = this.previous_non_search_folder;
+            if (to_select == null) {
+                var account = get_selected_account_context();
+                if (account != null) {
+                    to_select = account.inbox;
+                }
+
+            }
+            if (to_select != null) {
+                this.select_folder.begin(
+                    this.previous_non_search_folder, is_interactive
+                );
+            } else {
+                select_first_inbox(is_interactive);
+            }
         }
         this.folder_list.remove_search();
 
@@ -1044,7 +1057,7 @@ public class Application.MainWindow :
             }
 
             // Finally, remove the account and its folders
-            remove_folders(to_remove.get_folders());
+            remove_folders(to_remove.get_folders(), false);
             this.folder_list.remove_account(to_remove.account);
             this.accounts.remove(to_remove);
         }
@@ -1063,9 +1076,17 @@ public class Application.MainWindow :
     }
 
     /** Removes a folder from the window. */
-    private void remove_folders(Gee.Collection<FolderContext> to_remove) {
+    private void remove_folders(Gee.Collection<FolderContext> to_remove,
+                                bool update_selecton) {
         foreach (var context in to_remove) {
             Geary.Folder folder = context.folder;
+            if (this.selected_folder == folder) {
+                var account = get_selected_account_context();
+                if (account != null) {
+                    this.select_folder.begin(account.inbox, true);
+                }
+            }
+
             folder.use_changed.disconnect(on_use_changed);
             if (folder.account == this.selected_account) {
                 this.main_toolbar.copy_folder_menu.remove_folder(folder);
@@ -1555,7 +1576,20 @@ public class Application.MainWindow :
         );
     }
 
-    private void create_composer_from_viewer(Composer.Widget.ContextType type) {
+    private async void create_composer(Geary.Account send_context,
+                                       Composer.Widget.ContextType type,
+                                       Geary.Email context,
+                                       string? quote) {
+        var composer = yield this.controller.compose_with_context(
+            this.controller.get_context_for_account(send_context.information),
+            type,
+            context,
+            quote ?? ""
+        );
+        this.controller.present_composer(composer);
+    }
+
+    private async void create_composer_from_viewer(Composer.Widget.ContextType type) {
         Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
         ConversationListBox? list_view = this.conversation_viewer.current_list;
@@ -1563,12 +1597,8 @@ public class Application.MainWindow :
             email_view = list_view.get_reply_target();
         }
         if (account != null && email_view != null) {
-            email_view.get_selection_for_quoting.begin((obj, res) => {
-                    string? quote = email_view.get_selection_for_quoting.end(res);
-                    this.controller.compose_with_context_email.begin(
-                        type, email_view.email, quote ?? ""
-                    );
-                });
+            string? quote = yield email_view.get_selection_for_quoting();
+            yield create_composer(account, type, email_view.email, quote);
         }
     }
 
@@ -1640,36 +1670,29 @@ public class Application.MainWindow :
     }
 
     private void update_headerbar() {
-        if (this.selected_folder == null) {
-            this.main_toolbar.account = null;
-            this.main_toolbar.folder = null;
-
-            return;
-        }
-
-        this.main_toolbar.account =
-            this.selected_folder.account.information.display_name;
-
-        /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
-        // except for Drafts and Outbox, where we show total count
-        int count;
-        switch (this.selected_folder.used_as) {
+        update_title();
+        if (this.selected_folder != null) {
+            // Current folder's name followed by its unread count,
+            // i.e. "Inbox (42)" except for Drafts and Outbox, where
+            // we show total count
+            int count;
+            switch (this.selected_folder.used_as) {
             case DRAFTS:
             case OUTBOX:
                 count = this.selected_folder.properties.email_total;
-            break;
+                break;
 
             default:
                 count = this.selected_folder.properties.email_unread;
-            break;
-        }
+                break;
+            }
 
-        var folder_name = Util.I18n.to_folder_display_name(this.selected_folder);
-        this.main_toolbar.folder = (
-            count > 0
-            ? _("%s (%d)").printf(folder_name, count)
-            : folder_name
-        );
+            if (count > 0) {
+                this.main_toolbar.folder = _("%s (%d)").printf(
+                    this.main_toolbar.folder, count
+                );
+            }
+        }
     }
 
     private void update_conversation_actions(ConversationCount count) {
@@ -1955,7 +1978,7 @@ public class Application.MainWindow :
     }
 
     private void on_folders_unavailable(Gee.Collection<FolderContext> unavailable) {
-        remove_folders(unavailable);
+        remove_folders(unavailable, true);
     }
 
     private void on_use_changed(Geary.Folder folder,
@@ -2104,8 +2127,11 @@ public class Application.MainWindow :
                 // TODO: Determine how to map between conversations
                 // and drafts correctly.
                 Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-                this.controller.compose_with_context_email.begin(
-                    EDIT, draft, null
+                this.create_composer.begin(
+                    this.selected_folder.account,
+                    EDIT,
+                    draft,
+                    null
                 );
             }
         }
@@ -2133,15 +2159,15 @@ public class Application.MainWindow :
     }
 
     private void on_reply_conversation() {
-        create_composer_from_viewer(REPLY_SENDER);
+        this.create_composer_from_viewer.begin(REPLY_SENDER);
     }
 
     private void on_reply_all_conversation() {
-        create_composer_from_viewer(REPLY_ALL);
+        this.create_composer_from_viewer.begin(REPLY_ALL);
     }
 
     private void on_forward_conversation() {
-        create_composer_from_viewer(FORWARD);
+        this.create_composer_from_viewer.begin(FORWARD);
     }
 
     private void on_show_copy_menu() {
@@ -2457,24 +2483,24 @@ public class Application.MainWindow :
 
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                REPLY_SENDER, target, quote
+            this.create_composer.begin(
+                this.selected_account, REPLY_SENDER, target, quote
             );
         }
     }
 
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                REPLY_ALL, target, quote
+            this.create_composer.begin(
+                this.selected_account, REPLY_ALL, target, quote
             );
         }
     }
 
     private void on_email_forward(Geary.Email target, string? quote) {
         if (this.selected_account != null) {
-            this.controller.compose_with_context_email.begin(
-                FORWARD, target, quote
+            this.create_composer.begin(
+                this.selected_account, FORWARD, target, quote
             );
         }
     }
