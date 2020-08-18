@@ -1,4 +1,5 @@
 [Plugin]
 Module=notification-badge
+# Translators: This is an internal plugin so this name does not need
+# to be tanslated.
 Name=Notification Badge
-Description=Displays a dock badge showing the number of new messages
