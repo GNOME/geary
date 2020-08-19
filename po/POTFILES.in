@@ -47,6 +47,7 @@ src/client/components/components-inspector.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-preferences-window.vala
 src/client/components/components-problem-report-info-bar.vala
+src/client/components/components-reflow-box.c
 src/client/components/components-search-bar.vala
 src/client/components/components-validator.vala
 src/client/components/count-badge.vala

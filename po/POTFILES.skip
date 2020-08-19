@@ -1,5 +1,5 @@
 # List of source files that should *not* be translated.
 # Please keep this file sorted alphabetically.
+_build
 build
-src/client/components/components-reflow-box.c
-subprojects/libhandy
+subprojects
