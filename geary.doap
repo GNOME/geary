@@ -22,13 +22,6 @@ interface.</description>
 
   <maintainer>
     <foaf:Person>
-      <foaf:name>Jim Nelson</foaf:name>
-      <foaf:mbox rdf:resource="mailto:jim@yorba.org" />
-      <gnome:userid>jnelson</gnome:userid>
-    </foaf:Person>
-  </maintainer>
-  <maintainer>
-    <foaf:Person>
       <foaf:name>Michael Gratton</foaf:name>
       <foaf:mbox rdf:resource="mailto:mike@vee.net"/>
       <gnome:userid>mjog</gnome:userid>
