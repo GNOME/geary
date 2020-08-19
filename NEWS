@@ -1,3 +1,60 @@
+Version 3.37.90
+~~~~~~~~~~~~~~
+Released: 2020-08-19
+
+Notable changes included in this release:
+
+ * Drop messages in the database older than the storage preference
+ * Added a mail merge plugin
+ * Sent sound plugin improvements
+ * Follow system font preference in the conversation list
+ * Hide composer formatting toolbar by default
+ * Improved default preferences window size
+ * Improved server compatibility
+ * Code cleanup, build and bug fixes
+ * Broke out generic unit test code into a stand-alone subproject
+ * Use a distinct icon for nightly builds
+ * Update vala dependency to >= 0.46.2
+ * Update libhandy dependency to >= 0.90
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Adwait Rawat
+ * Andres Salomon
+ * Chris Heywood
+ * Diego Escalante Urrelo
+ * Federico Bruni
+ * Guillaume Ayoub
+ * hkdb
+ * Jan Tojnar
+ * Jordan Petridis
+ * Oliver Giles
+ * Rico Tzschichholz
+ * Thibault Martin
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Baurzhan Muftakhidinov (kk)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Dušan Kazik (sk)
+ * Emin Tufan Çetin (tr)
+ * Federico Bruni (it)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+ * Thibault Martin (fr)
+ * Yuri Chornoivan (uk)
+
+And for the user manual:
+ * Andre Klapper (it)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+ * Yuri Chornoivan (uk)
+
 Version 3.37.1
 ~~~~~~~~~~~~~~
 Released: 2020-05-03
