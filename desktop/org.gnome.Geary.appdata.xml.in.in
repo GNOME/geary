@@ -92,8 +92,20 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>New mail notifications now show contact photos</li>
-          <li>New preferences pane for managing plugins</li>
+          <li>Clean up email in database older than the storage preference</li>
+          <li>New Preferences window pane for managing plugins</li>
+          <li>New Email Templates plugin</li>
+          <li>New Mail Merge plugin</li>
+          <li>New Sent Sound plugin</li>
+          <li>New Unity Messaging Menu plugin</li>
+          <li>Reduced number of spurious problem report info bars</li>
+          <li>Improved ordering of folders in the folder list</li>
+          <li>Spam folder renamed to Junk</li>
+          <li>Composer formatting toolbar initially hidden for new installs</li>
+          <li>Desktop mail notifications now show contact photos</li>
+          <li>Improved server compatibility</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
         </ul>
       </description>
     </release>
