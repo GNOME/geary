@@ -12,7 +12,9 @@ public class Application.PluginManager : GLib.Object {
 
 
     // Plugins that will be loaded automatically when the client
-    // application stats up
+    // application stats up and hence hidden in the UI. Note that the
+    // .plugin files for these should be listed in po/POTFILES.skip,
+    // so translators don't need to bother with them.
     private const string[] AUTOLOAD_MODULES = {
         "desktop-notifications",
         "folder-highlight",

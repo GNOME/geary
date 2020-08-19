@@ -2,4 +2,8 @@
 # Please keep this file sorted alphabetically.
 _build
 build
+src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in
+src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in
+src/client/plugin/notification-badge/notification-badge.plugin.desktop.in
+src/client/plugin/special-folders/special-folders.plugin.desktop.in
 subprojects

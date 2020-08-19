@@ -109,11 +109,9 @@ src/client/plugin/plugin-info-bar.vala
 src/client/plugin/plugin-notification-extension.vala
 src/client/plugin/plugin-plugin-base.vala
 src/client/plugin/plugin-trusted-extension.vala
-src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in
 src/client/plugin/desktop-notifications/desktop-notifications.vala
 src/client/plugin/email-templates/email-templates.plugin.desktop.in
 src/client/plugin/email-templates/email-templates.vala
-src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in
 src/client/plugin/folder-highlight/folder-highlight.vala
 src/client/plugin/mail-merge/mail-merge-csv.vala
 src/client/plugin/mail-merge/mail-merge-folder.vala
@@ -125,12 +123,10 @@ src/client/plugin/mail-merge/mail-merge.plugin.desktop.in
 src/client/plugin/mail-merge/mail-merge.vala
 src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in
 src/client/plugin/messaging-menu/messaging-menu.vala
-src/client/plugin/notification-badge/notification-badge.plugin.desktop.in
 src/client/plugin/notification-badge/notification-badge.vala
 src/client/plugin/notification-badge/unity-launcher-entry.vala
 src/client/plugin/sent-sound/sent-sound.plugin.desktop.in
 src/client/plugin/sent-sound/sent-sound.vala
-src/client/plugin/special-folders/special-folders.plugin.desktop.in
 src/client/plugin/special-folders/special-folders.vala
 src/client/sidebar/sidebar-branch.vala
 src/client/sidebar/sidebar-common.vala
