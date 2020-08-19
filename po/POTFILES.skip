@@ -1,5 +1,9 @@
 # List of source files that should *not* be translated.
 # Please keep this file sorted alphabetically.
+_build
 build
-src/client/components/components-reflow-box.c
-subprojects/libhandy
+src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in
+src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in
+src/client/plugin/notification-badge/notification-badge.plugin.desktop.in
+src/client/plugin/special-folders/special-folders.plugin.desktop.in
+subprojects
