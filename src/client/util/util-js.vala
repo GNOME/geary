@@ -185,7 +185,7 @@ namespace Util.JS {
     }
 
     /**
-     * A class for constructing a well formed, safe, invokable JS call.
+     * A class for constructing a well formed, safe, invocable JS call.
      */
     public class Callable {
 

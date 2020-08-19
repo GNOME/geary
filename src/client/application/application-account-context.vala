@@ -46,7 +46,7 @@ public class Application.AccountContext : Geary.BaseObject {
         get; internal set; default = false;
     }
 
-    /** Determines if the account is prompting for a pasword. */
+    /** Determines if the account is prompting for a password. */
     internal bool authentication_prompting {
         get; internal set; default = false;
     }

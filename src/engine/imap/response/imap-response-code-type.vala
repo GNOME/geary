@@ -26,7 +26,7 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public const string COPYUID = "copyuid";
     public const string MYRIGHTS = "myrights";
     public const string NEWNAME = "newname";
-    public const string NONEXISTANT = "nonexistant";
+    public const string NONEXISTENT = "nonexistent";
     public const string PARSE = "parse";
     public const string PERMANENT_FLAGS = "permanentflags";
     public const string READONLY = "read-only";

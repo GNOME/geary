@@ -35,7 +35,7 @@ option(
   'valadoc',
   type: 'boolean',
   value: false,
-  description: 'Whether to build the documentaton (requires valadoc).'
+  description: 'Whether to build the documentation (requires valadoc).'
 )
 
 # Development options

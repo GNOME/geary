@@ -120,7 +120,7 @@ public interface Plugin.NotificationContext : Geary.BaseObject {
     /** Stops monitoring a folder for new messages. */
     public abstract void stop_monitoring_folder(Plugin.Folder target);
 
-    /** Determines if a folder is curently being monitored. */
+    /** Determines if a folder is currently being monitored. */
     public abstract bool is_monitoring_folder(Plugin.Folder target);
 
 }
