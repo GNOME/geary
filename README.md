@@ -28,7 +28,7 @@ Getting in Touch
 
  * Geary wiki: https://wiki.gnome.org/Apps/Geary
  * Support and discussion: See the `geary` tag on [GNOME Discourse](https://discourse.gnome.org/tags/c/applications/7/geary)
- * Matrix channel: [#_gimpnet_#geary:gnome.org](https://riot.im/app/#/room/#_gimpnet_#geary:gnome.org)
+ * Matrix channel: [#geary:gnome.org](https://gnome.element.io/#/room/#geary:gnome.org)
 
 **Code Of Conduct**
 
