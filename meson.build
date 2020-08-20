@@ -140,6 +140,7 @@ endif
 # Optional dependencies
 appstream_util = find_program('appstream-util', required: false)
 desktop_file_validate = find_program('desktop-file-validate', required: false)
+codespell = find_program('codespell', required: false)
 libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', required: false)
 
 #
@@ -219,3 +220,31 @@ subdir('sql')
 subdir('ui')
 subdir('src')
 subdir('test')
+
+# General QA tests
+
+if codespell.found()
+  test(
+    'codespell',
+    codespell,
+    protocol: 'exitcode',
+    args: [
+      '-f',
+      '-q', '4',
+      '-s',
+      '-S', 'build,_build,\*.xz,\*.png,src/sqlite3-unicodesn',
+      'CONTRIBUTING.md',
+      'NEWS',
+      'INSTALL',
+      'THANKS',
+      'desktop',
+      'help/C',
+      'icons',
+      'sql',
+      'src',
+      'subprojects/vala-unit',
+      'test',
+      'ui'
+    ]
+  )
+endif
