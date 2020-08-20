@@ -34,7 +34,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         // noop
     }
 
-    /** Constructs a new list wit a single parameter. */
+    /** Constructs a new list with a single parameter. */
     public ListParameter.single(Parameter param) {
         base();
         add(param);

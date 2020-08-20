@@ -437,7 +437,7 @@ public class Composer.WebView : ClientWebView {
                     null)
                 );
         } catch (Error err) {
-            debug("Error checking or attchment keywords: %s", err.message);
+            debug("Error checking or attachment keywords: %s", err.message);
             return false;
         }
     }

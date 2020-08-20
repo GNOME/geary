@@ -179,7 +179,7 @@ Changes:
  * Substantial client application/controller/main window/composer class
    cleanup
  * Geary.Engine API cleanup
- * Improve logging intialisation
+ * Improve logging initialisation
  * Online manual updates
 
 Thanks to all who contributed code fixes and enhancements to this

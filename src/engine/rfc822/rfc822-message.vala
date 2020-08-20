@@ -643,7 +643,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         if (gmime != null) {
             var stream = new GMime.StreamMem();
 
-            // GMime doens't support writing content-only via the
+            // GMime doesn't support writing content-only via the
             // public API, so suppress all headers in the message
             // instead.
             GMime.FormatOptions options = Geary.RFC822.get_format_options().clone();

@@ -194,7 +194,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 // Translators: In-app notification label
                 message = _("Check your receiving login and password");
             } catch (GLib.TlsError.BAD_CERTIFICATE err) {
-                debug("Error validating IMAP certifiate: %s", err.message);
+                debug("Error validating IMAP certificate: %s", err.message);
                 // Nothing to do here, since the untrusted host
                 // handler will be dealing with it
             } catch (GLib.IOError.CANCELLED err) {
@@ -262,7 +262,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             } catch (GLib.TlsError.BAD_CERTIFICATE err) {
                 // Nothing to do here, since the untrusted host
                 // handler will be dealing with it
-                debug("Error validating SMTP certifiate: %s", err.message);
+                debug("Error validating SMTP certificate: %s", err.message);
             } catch (GLib.Error err) {
                 Geary.ErrorContext context = new Geary.ErrorContext(err);
                 debug("Error validating SMTP service: %s",

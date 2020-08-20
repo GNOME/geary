@@ -327,7 +327,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         ClientSession? new_session = null;
         try {
             // Work around GNOME/glib#1872 by waiting a second and
-            // retying when a G_IO_ERROR_FAILED is received. Pull this
+            // retrying when a G_IO_ERROR_FAILED is received. Pull this
             // loop out when that bug is fixed.
             int attempts = 3;
             while (new_session == null) {

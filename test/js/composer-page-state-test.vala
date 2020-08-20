@@ -381,7 +381,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
-                @"ComposerPageState.containsKeywords('http://something/esle.sf2', $complete_keys, $suffix_keys);"
+                @"ComposerPageState.containsKeywords('http://something/else.sf2', $complete_keys, $suffix_keys);"
                 ).get_js_value()
             ));
 

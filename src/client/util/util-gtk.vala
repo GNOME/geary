@@ -159,7 +159,7 @@ namespace Util.Gtk {
      * @param existing_child_menu - if not null, a child menu that is
      * about to be descended into
      * @param existing_action - existing fully qualified action name
-     * of the curent item, if any
+     * of the current item, if any
      * @param new_item - copy of the menu item being visited, which if
      * accepted will be added to the new model
      */

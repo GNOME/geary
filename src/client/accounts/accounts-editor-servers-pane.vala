@@ -322,7 +322,7 @@ internal class Accounts.EditorServersPane :
         } catch (GLib.TlsError.BAD_CERTIFICATE err) {
             // Nothing to do here, since the untrusted host
             // handler will be dealing with it
-            debug("Error validating IMAP certifiate: %s", err.message);
+            debug("Error validating IMAP certificate: %s", err.message);
         } catch (GLib.IOError.CANCELLED err) {
             // Nothing to do here, someone just cancelled
             debug("IMAP validation was cancelled: %s", err.message);
@@ -356,7 +356,7 @@ internal class Accounts.EditorServersPane :
             } catch (GLib.TlsError.BAD_CERTIFICATE err) {
                 // Nothing to do here, since the untrusted host
                 // handler will be dealing with it
-                debug("Error validating SMTP certifiate: %s", err.message);
+                debug("Error validating SMTP certificate: %s", err.message);
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here, someone just cancelled
                 debug("SMTP validation was cancelled: %s", err.message);

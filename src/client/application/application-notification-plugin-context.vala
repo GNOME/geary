@@ -176,7 +176,7 @@ internal class Application.NotificationPluginContext :
         }
     }
 
-    /** Determines if a folder is curently being monitored. */
+    /** Determines if a folder is currently being monitored. */
     public bool is_monitoring_folder(Plugin.Folder target) {
         return this.folder_information.has_key(
             this.globals.folders.to_engine_folder(target)

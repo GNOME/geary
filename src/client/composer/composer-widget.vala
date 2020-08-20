@@ -2764,7 +2764,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
             if (lang == null) {
                 // No preferred lang found, so just use first
-                // supported matching langauge
+                // supported matching language
                 foreach (string pref in langs) {
                     lang = Gspell.Language.lookup(pref);
                     if (lang != null) {
