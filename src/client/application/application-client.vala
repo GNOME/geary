@@ -28,6 +28,7 @@ public class Application.Client : Gtk.Application {
 
     public const string NAME = "Geary" + _NAME_SUFFIX;
     public const string APP_ID = _APP_ID;
+    public const string RESOURCE_BASE_PATH = "/org/gnome/Geary";
     public const string SCHEMA_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
@@ -337,6 +338,7 @@ public class Application.Client : Gtk.Application {
     public Client() {
         Object(
             application_id: APP_ID,
+            resource_base_path: RESOURCE_BASE_PATH,
             flags: (
                 GLib.ApplicationFlags.HANDLES_OPEN |
                 GLib.ApplicationFlags.HANDLES_COMMAND_LINE
