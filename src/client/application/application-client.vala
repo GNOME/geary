@@ -1184,11 +1184,14 @@ public class Application.Client : Gtk.Application {
     private void on_activate_new_window() {
         // If there was an existing active main, select the same
         // account/folder/conversation.
+        Geary.Folder? folder = null;
+        Gee.Collection<Geary.App.Conversation>? conversations = null;
         MainWindow? current = this.last_active_main_window;
-        this.new_window.begin(
-            current.selected_folder,
-            current.conversation_list_view.copy_selected()
-        );
+        if (current != null) {
+            folder = current.selected_folder;
+            conversations = current.conversation_list_view.copy_selected();
+        }
+        this.new_window.begin(folder, conversations);
     }
 
     private void on_activate_preferences() {

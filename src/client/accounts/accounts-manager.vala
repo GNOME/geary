@@ -306,7 +306,7 @@ public class Accounts.Manager : GLib.Object {
      * restore_account}.
      */
     public async void remove_account(Geary.AccountInformation account,
-                                     GLib.Cancellable cancellable)
+                                     GLib.Cancellable? cancellable)
         throws GLib.Error {
         this.accounts.unset(account.id);
         this.removed.add(account);
@@ -324,7 +324,7 @@ public class Accounts.Manager : GLib.Object {
      * he account was removed.
      */
     public async void restore_account(Geary.AccountInformation account,
-                                      GLib.Cancellable cancellable)
+                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (this.removed.remove(account)) {
             yield save_account(account, cancellable);

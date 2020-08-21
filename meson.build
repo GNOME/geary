@@ -50,7 +50,7 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
-target_vala = '0.46.2'
+target_vala = '0.48.6'
 target_glib = '2.60.4'
 target_gtk = '3.24.7'
 target_webkit = '2.26'

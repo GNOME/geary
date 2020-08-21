@@ -947,6 +947,16 @@ internal class Application.Controller :
         }
     }
 
+    private void add_account(Geary.AccountInformation added) {
+        try {
+            this.application.engine.add_account(added);
+        } catch (Geary.EngineError.ALREADY_EXISTS err) {
+            // all good
+        } catch (GLib.Error err) {
+            report_problem(new Geary.AccountProblemReport(added, err));
+        }
+    }
+
     private async void open_account(Geary.Account account) {
         AccountContext context = new AccountContext(
             account,
@@ -1010,6 +1020,19 @@ internal class Application.Controller :
         } while (retry);
 
         update_account_status();
+    }
+
+    private async void remove_account(Geary.AccountInformation removed) {
+        yield close_account(removed, false);
+        try {
+            this.application.engine.remove_account(removed);
+        } catch (Geary.EngineError.NOT_FOUND err) {
+            // all good
+        } catch (GLib.Error err) {
+            report_problem(
+                new Geary.AccountProblemReport(removed, err)
+            );
+        }
     }
 
     private async void close_account(Geary.AccountInformation config,
@@ -1540,11 +1563,7 @@ internal class Application.Controller :
     private void on_account_added(Geary.AccountInformation added,
                                   Accounts.Manager.Status status) {
         if (status == Accounts.Manager.Status.ENABLED) {
-            try {
-                this.application.engine.add_account(added);
-            } catch (GLib.Error err) {
-                report_problem(new Geary.AccountProblemReport(added, err));
-            }
+            this.add_account(added);
         }
     }
 
@@ -1552,33 +1571,12 @@ internal class Application.Controller :
                                            Accounts.Manager.Status status) {
         switch (status) {
         case Accounts.Manager.Status.ENABLED:
-            if (!this.application.engine.has_account(changed)) {
-                try {
-                    this.application.engine.add_account(changed);
-                } catch (GLib.Error err) {
-                    report_problem(new Geary.AccountProblemReport(changed, err));
-                }
-            }
+            this.add_account(changed);
             break;
 
         case Accounts.Manager.Status.UNAVAILABLE:
         case Accounts.Manager.Status.DISABLED:
-            if (this.application.engine.has_account(changed)) {
-                this.close_account.begin(
-                    changed,
-                    false,
-                    (obj, res) => {
-                        this.close_account.end(res);
-                        try {
-                            this.application.engine.remove_account(changed);
-                        } catch (GLib.Error err) {
-                            report_problem(
-                                new Geary.AccountProblemReport(changed, err)
-                            );
-                        }
-                    }
-                );
-            }
+            this.remove_account.begin(changed);
             break;
 
         case Accounts.Manager.Status.REMOVED:
@@ -1588,23 +1586,7 @@ internal class Application.Controller :
     }
 
     private void on_account_removed(Geary.AccountInformation removed) {
-        debug("%s: Closing account for removal", removed.id);
-        this.close_account.begin(
-            removed,
-            false,
-            (obj, res) => {
-                this.close_account.end(res);
-                debug("%s: Account closed", removed.id);
-                try {
-                    this.application.engine.remove_account(removed);
-                    debug("%s: Account removed from engine", removed.id);
-                } catch (GLib.Error err) {
-                    report_problem(
-                        new Geary.AccountProblemReport(removed, err)
-                    );
-                }
-            }
-        );
+        this.remove_account.begin(removed);
     }
 
     private void on_report_problem(Geary.ProblemReport problem) {
