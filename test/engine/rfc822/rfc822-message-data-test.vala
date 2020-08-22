@@ -15,6 +15,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
         add_test("header_from_rfc822", header_from_rfc822);
         add_test("header_names_from_rfc822", header_names_from_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
+        add_test("MessageId.from_rfc822_string", message_id_from_rfc822_string);
         add_test("MessageId.to_rfc822_string", message_id_to_rfc822_string);
         add_test("MessageIdList.from_rfc822_string", message_id_list_from_rfc822_string);
         add_test("MessageIdList.merge", message_id_list_merge);
@@ -109,6 +110,61 @@ class Geary.RFC822.MessageDataTest : TestCase {
         const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
         Date neg_half_hour_tz = new Date.from_rfc822_string(NEG_HALF_HOUR_TZ);
         assert_equal(neg_half_hour_tz.to_rfc822_string(), NEG_HALF_HOUR_TZ);
+    }
+
+
+    public void message_id_from_rfc822_string() throws GLib.Error {
+        assert_equal(
+            new MessageID.from_rfc822_string("<note_895184@gitlab.gnome.org>").value,
+            "note_895184@gitlab.gnome.org"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string(" <note_895184@gitlab.gnome.org>\n").value,
+            "note_895184@gitlab.gnome.org"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("note_895184@gitlab.gnome.org").value,
+            "note_895184@gitlab.gnome.org"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string(" note_895184@gitlab.gnome.org\n").value,
+            "note_895184@gitlab.gnome.org"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("(note_895184@gitlab.gnome.org)").value,
+            "note_895184@gitlab.gnome.org"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("<note_895184>").value,
+           "note_895184"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("<note 895184>").value,
+            "note 895184"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("<id1> <id2>").value,
+            "id1"
+        );
+
+        try {
+            new MessageID.from_rfc822_string("");
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            assert_error(err, new Error.INVALID(""));
+        }
+        try {
+            new MessageID.from_rfc822_string(" ");
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            assert_error(err, new Error.INVALID(""));
+        }
+        try {
+            new MessageID.from_rfc822_string(" \n");
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            assert_error(err, new Error.INVALID(""));
+        }
     }
 
     public void message_id_to_rfc822_string() throws GLib.Error {
