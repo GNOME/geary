@@ -712,6 +712,12 @@ public class Application.Client : Gtk.Application {
             this.inspector.destroy.connect(() => {
                     this.inspector = null;
                 });
+
+            // Create a new window group for the inspector so it is
+            // not affected by the app's modal dialogs
+            var group = new Gtk.WindowGroup();
+            group.add_window(this.inspector);
+
             this.inspector.show();
         } else {
             this.inspector.present();
