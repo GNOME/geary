@@ -41,8 +41,6 @@ public interface Geary.RFC822.EncodedMessageData :
 public class Geary.RFC822.MessageID :
     Geary.MessageData.StringMessageData, DecodedMessageData {
 
-    private string rfc822 = null;
-
     public MessageID(string value) {
         base(value);
     }
@@ -52,17 +50,13 @@ public class Geary.RFC822.MessageID :
             throw new Error.INVALID("Empty RFC822 message id: %s", rfc822);
         }
         base(GMime.utils_decode_message_id(rfc822));
-        this.rfc822 = rfc822;
     }
 
     /**
      * Returns the {@link Date} in RFC 822 format.
      */
     public string to_rfc822_string() {
-        if (this.rfc822 == null) {
-            this.rfc822 = "<%s>".printf(this.value);
-        }
-        return this.rfc822;
+        return "<%s>".printf(this.value);
     }
 
 }

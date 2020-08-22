@@ -15,7 +15,8 @@ class Geary.RFC822.MessageDataTest : TestCase {
         add_test("header_from_rfc822", header_from_rfc822);
         add_test("header_names_from_rfc822", header_names_from_rfc822);
         add_test("PreviewText.with_header", preview_text_with_header);
-        add_test("MessageIDList.from_rfc822_string", message_id_list_from_rfc822_string);
+        add_test("MessageId.to_rfc822_string", message_id_to_rfc822_string);
+        add_test("MessageIdList.from_rfc822_string", message_id_list_from_rfc822_string);
         add_test("MessageIdList.merge", message_id_list_merge);
     }
 
@@ -108,6 +109,21 @@ class Geary.RFC822.MessageDataTest : TestCase {
         const string NEG_HALF_HOUR_TZ = "Thu, 28 Feb 2019 00:00:00 -1030";
         Date neg_half_hour_tz = new Date.from_rfc822_string(NEG_HALF_HOUR_TZ);
         assert_equal(neg_half_hour_tz.to_rfc822_string(), NEG_HALF_HOUR_TZ);
+    }
+
+    public void message_id_to_rfc822_string() throws GLib.Error {
+        assert_equal(
+            new MessageID("note_895184@gitlab.gnome.org").to_rfc822_string(),
+            "<note_895184@gitlab.gnome.org>"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string("<note_895184@gitlab.gnome.org>").to_rfc822_string(),
+            "<note_895184@gitlab.gnome.org>"
+        );
+        assert_equal(
+            new MessageID.from_rfc822_string(" <note_895184@gitlab.gnome.org>\n").to_rfc822_string(),
+            "<note_895184@gitlab.gnome.org>"
+        );
     }
 
     public void message_id_list_from_rfc822_string() throws GLib.Error {
