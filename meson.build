@@ -51,7 +51,7 @@ valac = meson.get_compiler('vala')
 #
 
 target_vala = '0.48.6'
-target_glib = '2.60.4'
+target_glib = '2.64'
 target_gtk = '3.24.7'
 target_webkit = '2.26'
 
