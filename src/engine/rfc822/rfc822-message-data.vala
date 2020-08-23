@@ -41,28 +41,57 @@ public interface Geary.RFC822.EncodedMessageData :
 public class Geary.RFC822.MessageID :
     Geary.MessageData.StringMessageData, DecodedMessageData {
 
-    private string rfc822 = null;
-
     public MessageID(string value) {
         base(value);
     }
 
     public MessageID.from_rfc822_string(string rfc822) throws Error {
-        if (String.is_empty_or_whitespace(rfc822)) {
-            throw new Error.INVALID("Empty RFC822 message id: %s", rfc822);
+        int len = rfc822.length;
+        int start = 0;
+        while (start < len && rfc822[start].isspace()) {
+            start += 1;
         }
-        base(GMime.utils_decode_message_id(rfc822));
-        this.rfc822 = rfc822;
+        char end_delim = 0;
+        bool break_on_space = false;
+        if (start < len) {
+            switch (rfc822[start]) {
+            case '<':
+                // Standard delim
+                start += 1;
+                end_delim = '>';
+                break;
+
+            case '(':
+                // Non-standard delim
+                start += 1;
+                end_delim = ')';
+                break;
+
+            default:
+                // no other supported delimiters, so just end at white
+                // space or EOS
+                break_on_space = true;
+                break;
+            }
+        }
+        int end = start + 1;
+        while (end < len &&
+               rfc822[end] != end_delim &&
+               (!break_on_space || !rfc822[end].isspace())) {
+            end += 1;
+        }
+
+        if (start + 1 >= end) {
+            throw new Error.INVALID("Empty RFC822 message id");
+        }
+        base(rfc822.slice(start, end));
     }
 
     /**
      * Returns the {@link Date} in RFC 822 format.
      */
     public string to_rfc822_string() {
-        if (this.rfc822 == null) {
-            this.rfc822 = "<%s>".printf(this.value);
-        }
-        return this.rfc822;
+        return "<%s>".printf(this.value);
     }
 
 }

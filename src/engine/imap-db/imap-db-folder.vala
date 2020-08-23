@@ -1473,8 +1473,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         stmt.bind_string(0, internaldate);
         stmt.bind_int64(1, rfc822_size);
-        if (email.message_id != null)
-            stmt.bind_string(2, email.message_id.to_string());
+        if (email.message_id != null) {
+            stmt.bind_string(2, email.message_id.to_rfc822_string());
+        }
 
         Db.Result results = stmt.exec(cancellable);
         if (!results.finished) {
