@@ -108,7 +108,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async void open_async(Cancellable? cancellable = null) throws Error {
+    public override async void open_async(Cancellable? cancellable = null) throws GLib.Error {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
 
@@ -263,7 +263,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      *
      * The account must have been opened before calling this method.
      */
-    public async Imap.AccountSession claim_account_session(Cancellable? cancellable = null)
+    public async Imap.AccountSession claim_account_session(GLib.Cancellable? cancellable = null)
         throws Error {
         check_open();
         debug("Acquiring account session");
@@ -308,7 +308,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * The account must have been opened before calling this method.
      */
     public async Imap.FolderSession claim_folder_session(Geary.FolderPath path,
-                                                         Cancellable cancellable)
+                                                         GLib.Cancellable? cancellable)
         throws Error {
         check_open();
         debug("Acquiring folder session for: %s", path.to_string());
@@ -1198,7 +1198,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
         this.specials = specials;
     }
 
-    public override async void execute(Cancellable cancellable) throws Error {
+    public override async void execute(GLib.Cancellable cancellable) throws Error {
         // Use sorted maps here to a) aid debugging, and b) ensure
         // that parent folders are processed before child folders
         var existing_folders = new Gee.TreeMap<FolderPath,Folder>(
@@ -1248,7 +1248,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
     private async bool enumerate_remote_folders_async(Imap.AccountSession remote,
                                                       Gee.Map<FolderPath,Imap.Folder> folders,
                                                       Geary.FolderPath? parent,
-                                                      Cancellable? cancellable)
+                                                      GLib.Cancellable? cancellable)
         throws Error {
         bool results_suspect = false;
 
@@ -1283,7 +1283,7 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                                             Gee.Map<FolderPath,Geary.Folder> existing_folders,
                                             Gee.Map<FolderPath,Imap.Folder> remote_folders,
                                             bool remote_folders_suspect,
-                                            Cancellable? cancellable) {
+                                            GLib.Cancellable? cancellable) {
         // update all remote folders properties in the local store and
         // active in the system
         Gee.HashSet<Geary.FolderPath> altered_paths = new Gee.HashSet<Geary.FolderPath>();
@@ -1427,7 +1427,7 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
         base(account, folder);
     }
 
-    public override async void execute(Cancellable cancellable) throws Error {
+    public override async void execute(GLib.Cancellable cancellable) throws GLib.Error {
         GenericAccount account = (GenericAccount) this.account;
         if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
             Imap.AccountSession? remote = yield account.claim_account_session(
