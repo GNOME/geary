@@ -947,23 +947,42 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // UIDs not guaranteed to be in order.
             StringBuilder sql = new StringBuilder();
             sql.append("""
-                SELECT ml.id, ml.message_id, ml.ordering
+                SELECT COUNT(*)
                 FROM MessageLocationTable ml
                 INNER JOIN MessageTable m
                 INDEXED BY MessageTableInternalDateTimeTIndex
                     ON ml.message_id = m.id
-                WHERE folder_id = ?
-                AND m.internaldate_time_t < ?
-                ORDER BY m.internaldate_time_t DESC
-                LIMIT -1 OFFSET ?;
+                WHERE ml.folder_id = ?
+                AND m.internaldate_time_t >= ?
             """);
 
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, cutoff.to_unix());
-            stmt.bind_int64(2, MINIMUM_MESSAGES_TO_RETAIN_DURING_GC);
-
             Db.Result results = stmt.exec(cancellable);
+            int64 found_within_threshold = results.int64_at(0);
+            int64 extra_to_retain = 
+                (MINIMUM_MESSAGES_TO_RETAIN_DURING_GC - found_within_threshold).clamp(0, int64.MAX);
+
+            sql = new StringBuilder();
+            sql.append("""
+                SELECT ml.id, ml.message_id, ml.ordering
+                FROM MessageLocationTable ml
+                INNER JOIN MessageTable m
+                INDEXED BY MessageTableInternalDateTimeTIndex
+                    ON ml.message_id = m.id
+                WHERE ml.folder_id = ?
+                AND m.internaldate_time_t < ?
+                ORDER BY m.internaldate_time_t DESC
+                LIMIT -1 OFFSET ?;
+            """);
+
+            stmt = cx.prepare(sql.str);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_int64(1, cutoff.to_unix());
+            stmt.bind_int64(2, extra_to_retain);
+
+            results = stmt.exec(cancellable);
 
             while (!results.finished) {
                 if (deleted_email_ids == null) {
