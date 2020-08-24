@@ -43,6 +43,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
     private const int OLD_MSG_DETACH_BATCH_SIZE = 1000;
 
+    // When old messages beyond the period set in the account preferences are removed this number 
+    // are retained even if they are beyond the threshold.
+    private const int MINIMUM_MESSAGES_TO_RETAIN_DURING_GC = 100;
+
     [Flags]
     public enum ListFlags {
         NONE = 0,
@@ -943,20 +947,21 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // UIDs not guaranteed to be in order.
             StringBuilder sql = new StringBuilder();
             sql.append("""
-                SELECT id, message_id, ordering
-                FROM MessageLocationTable
+                SELECT ml.id, ml.message_id, ml.ordering
+                FROM MessageLocationTable ml
+                INNER JOIN MessageTable m
+                INDEXED BY MessageTableInternalDateTimeTIndex
+                    ON ml.message_id = m.id
                 WHERE folder_id = ?
-                AND message_id IN (
-                    SELECT id
-                    FROM MessageTable
-                    INDEXED BY MessageTableInternalDateTimeTIndex
-                    WHERE internaldate_time_t < ?
-                )
+                AND m.internaldate_time_t < ?
+                ORDER BY m.internaldate_time_t DESC
+                LIMIT -1 OFFSET ?;
             """);
 
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, cutoff.to_unix());
+            stmt.bind_int64(2, MINIMUM_MESSAGES_TO_RETAIN_DURING_GC);
 
             Db.Result results = stmt.exec(cancellable);
 
