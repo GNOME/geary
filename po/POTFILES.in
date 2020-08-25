@@ -37,7 +37,6 @@ src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/client-action.vala
-src/client/components/client-web-view.vala
 src/client/components/components-attachment-pane.vala
 src/client/components/components-conversation-actions.vala
 src/client/components/components-conversation-action-bar.vala
@@ -52,6 +51,7 @@ src/client/components/components-problem-report-info-bar.vala
 src/client/components/components-reflow-box.c
 src/client/components/components-search-bar.vala
 src/client/components/components-validator.vala
+src/client/components/components-web-view.vala
 src/client/components/count-badge.vala
 src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala

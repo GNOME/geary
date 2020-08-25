@@ -5,10 +5,10 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ClientWebViewTest : TestCase {
+public class Components.WebViewTest : TestCase {
 
-    public ClientWebViewTest() {
-        base("ClientWebViewTest");
+    public WebViewTest() {
+        base("Components.WebViewTest");
         add_test("init_web_context", init_web_context);
         add_test("load_resources", load_resources);
     }
@@ -18,7 +18,7 @@ public class ClientWebViewTest : TestCase {
             Application.Client.SCHEMA_ID
         );
         config.enable_debug = true;
-        ClientWebView.init_web_context(
+        WebView.init_web_context(
             config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
             File.new_for_path("/tmp") // XXX use something better here
@@ -27,7 +27,7 @@ public class ClientWebViewTest : TestCase {
 
     public void load_resources() throws GLib.Error {
         try {
-            ClientWebView.load_resources(GLib.File.new_for_path("/tmp"));
+            WebView.load_resources(GLib.File.new_for_path("/tmp"));
         } catch (GLib.Error err) {
             assert_not_reached();
         }

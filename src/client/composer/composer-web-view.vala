@@ -9,7 +9,7 @@
 /**
  * A WebView for editing messages in the composer.
  */
-public class Composer.WebView : ClientWebView {
+public class Composer.WebView : Components.WebView {
 
     /** HTML id used for the main text section of the message body. */
     public const string BODY_HTML_ID = "geary-body";
@@ -112,10 +112,10 @@ public class Composer.WebView : ClientWebView {
 
     public static new void load_resources()
         throws Error {
-        WebView.app_style = ClientWebView.load_app_stylesheet(
+        WebView.app_style = Components.WebView.load_app_stylesheet(
             "composer-web-view.css"
         );
-        WebView.app_script = ClientWebView.load_app_script(
+        WebView.app_script = Components.WebView.load_app_script(
             "composer-web-view.js"
         );
     }

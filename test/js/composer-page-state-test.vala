@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Composer.PageStateTest : ClientWebViewTestCase<Composer.WebView> {
+class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
 
     public const string COMPLETE_BODY_TEMPLATE =
         """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div><div id="geary-signature" dir="auto"></div>""";

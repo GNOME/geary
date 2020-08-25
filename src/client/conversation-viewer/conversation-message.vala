@@ -310,8 +310,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     internal Components.InfoBarStack info_bars;
 
+    /**
+     * Emitted when web_view's content has finished loaded.
+     *
+     * See {@link Components.WebView.is_content_loaded} for details.
+     */
+    internal bool is_content_loaded {
+        get {
+            return this.web_view != null && this.web_view.is_content_loaded;
+        }
+    }
+
     /** HTML view that displays the message body. */
-    internal ConversationWebView web_view { get; private set; }
+    private ConversationWebView? web_view { get; private set; }
 
     // The message headers represented by this view
     private Geary.EmailHeaderSet headers;
@@ -426,6 +437,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         string uri, string? alt_text, Geary.Memory.Buffer? buffer
     );
 
+    /** Emitted when web_view has loaded a resource added to it. */
+    public signal void internal_resource_loaded(string name);
+
+    /** Emitted when web_view's selection has changed. */
+    public signal void selection_changed(bool has_selection);
+
+    /**
+     * Emitted when web_view's content has finished loaded.
+     *
+     * See {@link Components.WebView.is_content_loaded} for details.
+     */
+    public signal void content_loaded();
+
 
     /**
      * Constructs a new view from an email's headers and body.
@@ -467,6 +491,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         );
     }
 
+    private void trigger_internal_resource_loaded(string name) {
+        internal_resource_loaded(name);
+    }
+
+    private void trigger_content_loaded() {
+        content_loaded();
+    }
+
+    private void trigger_selection_changed(bool has_selection) {
+        selection_changed(has_selection);
+    }
+
     private ConversationMessage(Geary.EmailHeaderSet headers,
                                 string? preview,
                                 bool load_remote_resources,
@@ -487,19 +523,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             .activate.connect(on_copy_email_address);
         add_action(ACTION_COPY_LINK, true, VariantType.STRING)
             .activate.connect(on_copy_link);
-        add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
-                web_view.copy_clipboard();
-            });
-        add_action(ACTION_OPEN_INSPECTOR, config.enable_inspector).activate.connect(() => {
-                this.web_view.get_inspector().show();
-            });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
             .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
-        add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
-                web_view.select_all();
-            });
         insert_action_group("msg", message_actions);
 
         // Context menu
@@ -552,25 +579,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.subject_searchable = headers.subject.value.casefold();
         }
 
-        // Web view
-
-        this.web_view = new ConversationWebView(config);
-        this.web_view.context_menu.connect(on_context_menu);
-        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
-        this.web_view.link_activated.connect((link) => {
-                on_link_activated(new GLib.Variant("s", link));
-            });
-        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
-        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
-        this.web_view.resource_load_started.connect(on_resource_load_started);
-        this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
-        this.web_view.selection_changed.connect(on_selection_changed);
-        this.web_view.set_hexpand(true);
-        this.web_view.set_vexpand(true);
-        this.web_view.show();
-
         this.body_container.set_has_tooltip(true); // Used to show link URLs
-        this.body_container.add(this.web_view);
         this.show_progress_timeout = new Geary.TimeoutManager.milliseconds(
             Util.Gtk.SHOW_PROGRESS_TIMEOUT_MSEC, this.on_show_progress_timeout
         );
@@ -582,6 +591,51 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             Util.Gtk.PROGRESS_PULSE_TIMEOUT_MSEC, this.body_progress.pulse
         );
         this.progress_pulse.repetition = FOREVER;
+    }
+
+    private void initialize_web_view() {
+        var viewer = get_ancestor(typeof(ConversationViewer)) as ConversationViewer;
+
+        // Ensure we share the same WebProcess with the last one
+        // constructed if possible.
+        if (viewer != null && viewer.previous_web_view != null) {
+            this.web_view = new ConversationWebView.with_related_view(
+                this.config,
+                viewer.previous_web_view
+            );
+        } else {
+            this.web_view = new ConversationWebView(this.config);
+        }
+        if (viewer != null) {
+            viewer.previous_web_view = this.web_view;
+        }
+
+        this.web_view.context_menu.connect(on_context_menu);
+        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
+        this.web_view.link_activated.connect((link) => {
+                on_link_activated(new GLib.Variant("s", link));
+            });
+        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
+        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
+        this.web_view.resource_load_started.connect(on_resource_load_started);
+        this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
+        this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
+        this.web_view.content_loaded.connect(trigger_content_loaded);
+        this.web_view.selection_changed.connect(trigger_selection_changed);
+        this.web_view.set_hexpand(true);
+        this.web_view.set_vexpand(true);
+        this.web_view.show();
+        this.body_container.add(this.web_view);
+        add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
+                web_view.copy_clipboard();
+            });
+        add_action(ACTION_OPEN_INSPECTOR, config.enable_inspector).activate.connect(() => {
+                this.web_view.get_inspector().show();
+            });
+        add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
+                web_view.select_all();
+            });
     }
 
     ~ConversationMessage() {
@@ -597,10 +651,77 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         base.destroy();
     }
 
+    public async string? get_selection_for_quoting() throws Error {
+        if (this.web_view == null)
+            initialize_web_view();
+        return yield web_view.get_selection_for_quoting();
+    }
+
+    public async string? get_selection_for_find() throws Error {
+        if (this.web_view == null)
+            initialize_web_view();
+        return yield web_view.get_selection_for_find();
+    }
+
+    /**
+     * Adds a set of internal resources to web_view.
+     *
+     * @see add_internal_resource
+     */
+    public void add_internal_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
+        if (this.web_view == null)
+            initialize_web_view();
+        web_view.add_internal_resources(res);
+    }
+
+    public WebKit.PrintOperation new_print_operation() {
+        if (this.web_view == null)
+            initialize_web_view();
+        return new WebKit.PrintOperation(web_view);
+    }
+
+    public async void run_javascript (string script, Cancellable? cancellable) throws Error {
+        if (this.web_view == null)
+            initialize_web_view();
+        yield web_view.run_javascript(script, cancellable);
+    }
+
+    public void zoom_in() {
+        if (this.web_view == null)
+            initialize_web_view();
+        web_view.zoom_in();
+    }
+
+    public void zoom_out() {
+        if (this.web_view == null)
+            initialize_web_view();
+        web_view.zoom_out();
+    }
+
+    public void zoom_reset() {
+        if (this.web_view == null)
+            initialize_web_view();
+        web_view.zoom_reset();
+    }
+
+    public void web_view_translate_coordinates(Gtk.Widget widget, int x, int anchor_y, out int x1, out int y1) {
+        if (this.web_view == null)
+            initialize_web_view();
+        web_view.translate_coordinates(widget, x, anchor_y, out x1, out y1);
+    }
+
+    public int web_view_get_allocated_height() {
+        if (this.web_view == null)
+            initialize_web_view();
+        return web_view.get_allocated_height();
+    }
+
     /**
      * Shows the complete message and hides the compact headers.
      */
     public void show_message_body(bool include_transitions=true) {
+        if (this.web_view == null)
+            initialize_web_view();
         set_revealer(this.compact_revealer, false, include_transitions);
         set_revealer(this.header_revealer, true, include_transitions);
         set_revealer(this.body_revealer, true, include_transitions);
@@ -785,6 +906,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
         }
 
+        if (this.web_view == null) {
+            initialize_web_view();
+        }
+
         bool contact_load_images = (
             this.primary_contact != null &&
             this.primary_contact.load_remote_resources
@@ -835,6 +960,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             }
         }
 
+        if (this.web_view == null)
+            initialize_web_view();
         uint webkit_found = yield this.web_view.highlight_search_terms(
             search_matches, cancellable
         );
@@ -848,7 +975,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         foreach (ContactFlowBoxChild address in this.searchable_addresses) {
             address.unmark_search_terms();
         }
-        this.web_view.unmark_search_terms();
+
+        if (this.web_view != null)
+            this.web_view.unmark_search_terms();
     }
 
     /**
@@ -1011,6 +1140,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     // returns HTML that is placed into the document in the position
     // where the MIME part was found
     private string? inline_image_replacer(Geary.RFC822.Part part) {
+        if (this.web_view == null)
+            initialize_web_view();
         Geary.Mime.ContentType content_type = part.content_type;
         if (content_type.media_type != "image" ||
             !this.web_view.can_show_mime_type(content_type.to_string())) {
@@ -1045,7 +1176,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             clean_filename,
             REPLACED_IMAGE_CLASS,
-            ClientWebView.CID_URL_PREFIX,
+            Components.WebView.CID_URL_PREFIX,
             Geary.HTML.escape_markup(id)
         );
     }
@@ -1059,7 +1190,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.load_remote_resources = true;
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
-        this.web_view.load_remote_images();
+        if (this.web_view != null) {
+            this.web_view.load_remote_images();
+        }
         if (update_email_flag) {
             flag_remote_images();
         }
@@ -1074,11 +1207,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         if (placeholder != null) {
             this.body_placeholder = placeholder;
-            this.web_view.hide();
+            if (this.web_view != null)
+                this.web_view.hide();
             this.body_container.add(placeholder);
             show_message_body(true);
         } else {
-            this.web_view.show();
+            if (this.web_view != null)
+                this.web_view.show();
         }
     }
 
@@ -1106,10 +1241,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_is_loading_notify() {
-        if (this.web_view.is_loading) {
-            start_progress_loading();
-        } else {
-            stop_progress_loading();
+        if (this.web_view != null) {
+            if (this.web_view.is_loading) {
+                start_progress_loading();
+            } else {
+                stop_progress_loading();
+            }
         }
     }
 
@@ -1369,7 +1506,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             alt_text = (string) alt_maybe;
         }
 
-        if (uri.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+        if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
             // We can get the data directly from the attachment, so
             // don't bother getting it from the web view
             save_image(uri, alt_text, null);
