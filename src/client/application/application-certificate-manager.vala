@@ -381,8 +381,8 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         GLib.TlsCertificateFlags ret = this.parent.verify_chain(
             chain, purpose, identity, interaction, flags, cancellable
         );
-        if (should_verify(ret, purpose, identity) &&
-            verify(chain, identity, cancellable)) {
+        if (check_pinned(ret, purpose, identity) &&
+            is_pinned(chain, identity, cancellable)) {
             ret = 0;
         }
         return ret;
@@ -399,16 +399,16 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         GLib.TlsCertificateFlags ret = yield this.parent.verify_chain_async(
             chain, purpose, identity, interaction, flags, cancellable
         );
-        if (should_verify(ret, purpose, identity) &&
-            yield verify_async(chain, identity, cancellable)) {
+        if (check_pinned(ret, purpose, identity) &&
+            yield is_pinned_async(chain, identity, cancellable)) {
             ret = 0;
         }
         return ret;
     }
 
-    private inline bool should_verify(GLib.TlsCertificateFlags parent_ret,
-                                      string purpose,
-                                      GLib.SocketConnectable? identity) {
+    private inline bool check_pinned(GLib.TlsCertificateFlags parent_ret,
+                                     string purpose,
+                                     GLib.SocketConnectable? identity) {
         // If the parent didn't verify, check for a locally pinned
         // cert if it looks like we should, but always reject revoked
         // certs
@@ -420,22 +420,22 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
         );
     }
 
-    private bool verify(GLib.TlsCertificate chain,
-                        GLib.SocketConnectable identity,
-                        GLib.Cancellable? cancellable)
+    private bool is_pinned(GLib.TlsCertificate chain,
+                           GLib.SocketConnectable identity,
+                           GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool is_verified = false;
+        bool is_pinned = false;
         string id = to_name(identity);
         TrustContext? context = null;
         lock (this.pinned_certs) {
             context = this.pinned_certs.get(id);
             if (context != null) {
-                is_verified = true;
+                is_pinned = context.certificate.is_same(chain);
             } else {
                 // Cert not found in memory, check with GCR if
                 // enabled.
                 if (this.use_gcr) {
-                    is_verified = gcr_trust_is_certificate_pinned(
+                    is_pinned = gcr_trust_is_certificate_pinned(
                         new Gcr.SimpleCertificate(chain.certificate.data),
                         GLib.TlsDatabase.PURPOSE_AUTHENTICATE_SERVER,
                         id,
@@ -443,7 +443,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                     );
                 }
 
-                if (!is_verified) {
+                if (!is_pinned) {
                     // Cert is not pinned in memory or in GCR, so look
                     // for it on disk. Do this even if GCR support is
                     // enabled, since if the cert was previously saved
@@ -453,7 +453,7 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                             this.store_dir, id, cancellable
                         );
                         this.pinned_certs.set(id, context);
-                        is_verified = true;
+                        is_pinned = context.certificate.is_same(chain);
                     } catch (GLib.IOError.NOT_FOUND err) {
                         // Cert was not found saved, so it not pinned
                     } catch (GLib.Error err) {
@@ -465,18 +465,18 @@ private class Application.TlsDatabase : GLib.TlsDatabase {
                 }
             }
         }
-        return is_verified;
+        return is_pinned;
     }
 
-    private async bool verify_async(GLib.TlsCertificate chain,
-                                    GLib.SocketConnectable identity,
-                                    GLib.Cancellable? cancellable)
+    private async bool is_pinned_async(GLib.TlsCertificate chain,
+                                       GLib.SocketConnectable identity,
+                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool is_valid = false;
+        bool pinned = false;
         yield Geary.Nonblocking.Concurrent.global.schedule_async(() => {
-                is_valid = verify(chain, identity, cancellable);
+                pinned = is_pinned(chain, identity, cancellable);
             }, cancellable);
-        return is_valid;
+        return pinned;
     }
 
     private TrustContext? lookup_id(string id) {
