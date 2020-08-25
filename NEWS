@@ -1,3 +1,24 @@
+Version 3.36.3
+~~~~~~~~~~~~~~
+Released: 2020-08-27
+
+Enhancements included in this release:
+ * Fixed handling of pinned, invalid TLS certificates: CVE-2020-24661
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Jordan Petridis
+ * Vanadiae
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Dušan Kazik (sk)
+ * Thibault Martin (fr)
+
+And for the user manual:
+ * Piotr Drąg (pl)
+ * Yuri Chornoivan (uk)
+
 Version 3.36.2
 ~~~~~~~~~~~~~~
 Released: 2020-05-03

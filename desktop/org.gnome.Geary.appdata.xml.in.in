@@ -89,6 +89,15 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.36.3" date="2020-08-26">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Security fix for self-signed certificates</li>
+          <li>Numerous user interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.36.2" date="2020-05-03">
       <description>
         <p>Enhancements included in this release:</p>
