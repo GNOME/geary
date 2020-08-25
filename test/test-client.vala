@@ -50,6 +50,7 @@ int main(string[] args) {
     // Keep this before other ClientWebView based tests since it tests
     // WebContext init
     client.add_suite(new Accounts.ManagerTest().suite);
+    client.add_suite(new Application.CertificateManagerTest().suite);
     client.add_suite(new Application.ClientTest().suite);
     client.add_suite(new Application.ConfigurationTest().suite);
     client.add_suite(new ClientWebViewTest().suite);

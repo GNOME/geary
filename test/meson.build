@@ -79,6 +79,7 @@ test_client_sources = [
   'test-client.vala',
 
   'client/accounts/accounts-manager-test.vala',
+  'client/application/application-certificate-manager-test.vala',
   'client/application/application-client-test.vala',
   'client/application/application-configuration-test.vala',
   'client/components/client-web-view-test.vala',

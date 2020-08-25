@@ -153,8 +153,13 @@ public class Application.CertificateManager : GLib.Object {
 }
 
 
-/** TLS database that observes locally pinned certs. */
-private class Application.TlsDatabase : GLib.TlsDatabase {
+/**
+ * TLS database that observes locally pinned certs.
+ *
+ * An instance of this is managed by {@link CertificateManager}, the
+ * application should simply construct an instance of that.
+ */
+internal class Application.TlsDatabase : GLib.TlsDatabase {
 
 
     /** A certificate and the identities it is trusted for. */
