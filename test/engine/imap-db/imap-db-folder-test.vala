@@ -366,6 +366,22 @@ class Geary.ImapDB.FolderTest : TestCase {
                 (3, 3, 1, 2, 1);
         """);
 
+        for (int i = 4; i <= 200; i++) {
+            this.account.db.exec(
+                "INSERT INTO MessageTable (id, fields, to_field, internaldate_time_t) " +
+                "VALUES (%d, %d, '%s', %s);".printf(i,
+                                                fixture_fields,
+                                                fixture_to,
+                                                beyond_threshold.to_unix().to_string())
+            );
+            this.account.db.exec(
+                "INSERT INTO MessageLocationTable " + 
+                "    (id, message_id, folder_id, ordering, remove_marker) " + 
+                "VALUES (%d, %d, 1, %d, 1);".printf(i, i, i)
+            );
+        }
+
+
         this.folder.detach_emails_before_timestamp.begin(
             threshold,
             null,
@@ -375,7 +391,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         int64[] expected = { 1, 2 };
         Db.Result result = this.account.db.query(
-            "SELECT id FROM MessageLocationTable"
+            "SELECT id FROM MessageLocationTable WHERE id IN (1, 2);"
         );
 
         int i = 0;
@@ -386,6 +402,13 @@ class Geary.ImapDB.FolderTest : TestCase {
             result.next();
         }
         assert_true(i == expected.length, "Not enough rows");
+
+        result = this.account.db.query(
+            "SELECT COUNT(id) FROM MessageLocationTable WHERE folder_id = 1;"
+        );
+        assert_false(result.finished);
+        assert_equal<int64?>(result.int64_at(0), 100);
+        result.next();
     }
 
     private Email new_mock_remote_email(int64 uid,
