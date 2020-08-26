@@ -128,6 +128,165 @@ namespace Util.JS {
     }
 
     /**
+     * Converts a JS value to a GLib variant.
+     *
+     * Simple value objects (string, number, and Boolean values),
+     * arrays of these, and objects with these types as properties are
+     * supported. Arrays are converted to arrays of variants, and
+     * objects to dictionaries containing string keys and variant
+     * values. Null or undefined values are returned as an empty maybe
+     * variant type, since it is not possible to determine the actual
+     * type.
+     *
+     * Throws a type error if the given value's type is not supported.
+     */
+    public inline GLib.Variant value_to_variant(JSC.Value value)
+        throws Error {
+        if (value.is_null() || value.is_undefined()) {
+            return new GLib.Variant.maybe(GLib.VariantType.VARIANT, null);
+        }
+        if (value.is_boolean()) {
+            return new GLib.Variant.boolean(value.to_boolean());
+        }
+        if (value.is_number()) {
+            return new GLib.Variant.double(value.to_double());
+        }
+        if (value.is_string()) {
+            return new GLib.Variant.string(value.to_string());
+        }
+        if (value.is_array()) {
+            int len = to_int32(value.object_get_property("length"));
+            GLib.Variant[] values = new GLib.Variant[len];
+            for (int i = 0; i < len; i++) {
+                values[i] = new GLib.Variant.variant(
+                    value_to_variant(value.object_get_property_at_index(i))
+                );
+            }
+            return new GLib.Variant.array(GLib.VariantType.VARIANT, values);
+        }
+        if (value.is_object()) {
+            GLib.VariantDict dict = new GLib.VariantDict();
+            string[] names = value.object_enumerate_properties();
+            if (names != null) {
+                foreach (var name in names) {
+                    try {
+                        dict.insert_value(
+                            name,
+                            new GLib.Variant.variant(
+                                value_to_variant(
+                                    value.object_get_property(name)
+                                )
+                            )
+                        );
+                    } catch (Error.TYPE err) {
+                        // ignored
+                    }
+                }
+            }
+            return dict.end();
+        }
+        throw new Error.TYPE("Unsupported JS type: %s", value.to_string());
+    }
+
+    /**
+     * Converts a GLib variant to a JS value.
+     *
+     * Simple value objects (string, number, and Boolean values),
+     * arrays and tuples of these, and dictionaries with string keys
+     * are supported. Tuples and arrays are converted to JS arrays,
+     * and dictionaries or tuples containing dictionary entries are
+     * converted to JS objects.
+     *
+     * Throws a type error if the given variant's type is not supported.
+     */
+    public inline JSC.Value variant_to_value(JSC.Context context,
+                                             GLib.Variant variant)
+        throws Error.TYPE {
+        JSC.Value? value = null;
+        GLib.Variant.Class type = variant.classify();
+        if (type == MAYBE) {
+            GLib.Variant? maybe = variant.get_maybe();
+            if (maybe != null) {
+                value = variant_to_value(context, maybe);
+            } else {
+                value = new JSC.Value.null(context);
+            }
+        } else if (type == VARIANT) {
+            value = variant_to_value(context, variant.get_variant());
+        } else if (type == STRING) {
+            value = new JSC.Value.string(context, variant.get_string());
+        } else if (type == BOOLEAN) {
+            value = new JSC.Value.boolean(context, variant.get_boolean());
+        } else if (type == DOUBLE) {
+            value = new JSC.Value.number(context, variant.get_double());
+        } else if (type == INT64) {
+            value = new JSC.Value.number(context, (double) variant.get_int64());
+        } else if (type == INT32) {
+            value = new JSC.Value.number(context, (double) variant.get_int32());
+        } else if (type == INT16) {
+            value = new JSC.Value.number(context, (double) variant.get_int16());
+        } else if (type == UINT64) {
+            value = new JSC.Value.number(context, (double) variant.get_uint64());
+        } else if (type == UINT32) {
+            value = new JSC.Value.number(context, (double) variant.get_uint32());
+        } else if (type == UINT16) {
+            value = new JSC.Value.number(context, (double) variant.get_uint16());
+        } else if (type == BYTE) {
+            value = new JSC.Value.number(context, (double) variant.get_byte());
+        } else if (type == ARRAY ||
+                   type == TUPLE) {
+            size_t len = variant.n_children();
+            if (len == 0) {
+                if (type == ARRAY ||
+                    type == TUPLE) {
+                    value = new JSC.Value.array_from_garray(context, null);
+                } else {
+                    value = new JSC.Value.object(context, null, null);
+                }
+            } else {
+                var first = variant.get_child_value(0);
+                if (first.classify() == DICT_ENTRY) {
+                    value = new JSC.Value.object(context, null, null);
+                    for (size_t i = 0; i < len; i++) {
+                        var entry = variant.get_child_value(i);
+                        if (entry.classify() != DICT_ENTRY) {
+                            throw new Error.TYPE(
+                                "Variant mixes dict entries with others: %s",
+                                variant.print(true)
+                            );
+                        }
+                        var key = entry.get_child_value(0);
+                        if (key.classify() != STRING) {
+                            throw new Error.TYPE(
+                                "Dict entry key is not a string: %s",
+                                entry.print(true)
+                            );
+                        }
+                        value.object_set_property(
+                            key.get_string(),
+                            variant_to_value(context, entry.get_child_value(1))
+                        );
+                    }
+                } else {
+                    var values = new GLib.GenericArray<JSC.Value>((uint) len);
+                    for (size_t i = 0; i < len; i++) {
+                        values.add(
+                            variant_to_value(context, variant.get_child_value(i))
+                        );
+                    }
+                    value = new JSC.Value.array_from_garray(context, values);
+                }
+            }
+        }
+        if (value == null) {
+            throw new Error.TYPE(
+                "Unsupported variant type %s", variant.print(true)
+            );
+        }
+        return value;
+    }
+
+    /**
      * Escapes a string so as to be safe to use as a JS string literal.
      *
      * This does not append opening or closing quotes.
