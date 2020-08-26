@@ -93,7 +93,7 @@
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
-          <li>Security fix for self-signed certificates</li>
+          <li>Fixed handling of pinned, invalid TLS certificates: CVE-2020-24661</li>
           <li>Numerous user interface translation updates</li>
         </ul>
       </description>
