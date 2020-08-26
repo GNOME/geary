@@ -4,10 +4,12 @@ Released: 2020-08-27
 
 Enhancements included in this release:
  * Fixed handling of pinned, invalid TLS certificates: CVE-2020-24661
+ * Build bug fixes
 
 Thanks to all who contributed code fixes and enhancements to this
 release:
  * Jordan Petridis
+ * Rico Tzschichholz
  * Vanadiae
 
 Thanks also to all who contributed translations, for the user
