@@ -1,3 +1,26 @@
+Version 3.37.91
+~~~~~~~~~~~~~~~
+Released: 2020-08-27
+
+Notable changes included in this release:
+
+ * Fixed handling of pinned, invalid TLS certificates: CVE-2020-24661
+ * Removed libhandy subproject due to translation infrastructure issue
+ * Update vala dependency to >= 0.48.6
+ * Update glib dependency to >= 2.64
+ * Various bug fixes and user interface improvements
+ * various user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Björn Daase
+ * Chris Heywood
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Daniel Mustieles (es)
+ * Piotr Drąg (pl)
+
 Version 3.37.90
 ~~~~~~~~~~~~~~
 Released: 2020-08-19
