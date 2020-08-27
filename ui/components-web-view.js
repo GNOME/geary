@@ -200,3 +200,12 @@ PageState.prototype = {
         throw this.testResult;
     }
 };
+
+let MessageSender = function(name) {
+    return function() {
+        // Since typeof(arguments) == 'object', convert to an array so
+        // that Components.WebView.MessageCallback callbacks get
+        // arrays or tuples rather than dicts as arguments
+        _GearyWebExtension.send(name, Array.from(arguments));
+    };
+};

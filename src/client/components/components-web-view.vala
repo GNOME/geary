@@ -199,6 +199,24 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
 
     /**
+     * Delegate for message handler callbacks.
+     *
+     * @see register_message_callback
+     */
+    protected delegate void MessageCallback(GLib.Variant? parameters);
+
+    // Work around for not being able to put delegates in a Gee collection.
+    private class MessageCallable {
+
+        public unowned MessageCallback handler;
+
+        public MessageCallable(MessageCallback handler) {
+            this.handler = handler;
+        }
+
+    }
+
+    /**
      * Determines if the view's content has been fully loaded.
      *
      * This property is updated immediately before the {@link
@@ -263,6 +281,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
     private Gee.List<ulong> registered_message_handlers =
         new Gee.LinkedList<ulong>();
+    private Gee.Map<string,MessageCallable> message_handlers =
+        new Gee.HashMap<string,MessageCallable>();
 
     private double webkit_reported_height = 0;
 
@@ -359,6 +379,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             this.user_content_manager.disconnect(id);
         }
         this.registered_message_handlers.clear();
+        this.message_handlers.clear();
         base.destroy();
     }
 
@@ -568,6 +589,14 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Registers a callback for a specific WebKit user message.
+     */
+    protected void register_message_callback(string name,
+                                             MessageCallback handler) {
+        this.message_handlers.set(name, new MessageCallable(handler));
+    }
+
     private void init(Application.Configuration config) {
         // XXX get the allow prefix from the extension somehow
 
@@ -594,6 +623,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         register_message_handler(
             SELECTION_CHANGED, on_selection_changed
         );
+
+        this.user_message_received.connect(this.on_message_received);
 
         // Manage zoom level, ensure it's sane
         config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
@@ -801,6 +832,30 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         } catch (Util.JS.Error err) {
             debug("Could not get selection content: %s", err.message);
         }
+    }
+
+    private bool on_message_received(WebKit.UserMessage message) {
+        if (message.name == MESSAGE_EXCEPTION_NAME) {
+            var detail = new GLib.VariantDict(message.parameters);
+            var name = detail.lookup_value("name", GLib.VariantType.STRING) as string;
+            var log_message = detail.lookup_value("message", GLib.VariantType.STRING) as string;
+            warning(
+                "Error sending message from JS: %s: %s",
+                name ?? "unknown",
+                log_message ?? "unknown"
+            );
+        } else if (this.message_handlers.has_key(message.name)) {
+            debug(
+                "Message received: %s(%s)",
+                message.name,
+                message.parameters != null ? message.parameters.print(true) : ""
+            );
+            MessageCallable callback = this.message_handlers.get(message.name);
+            callback.handler(message.parameters);
+        } else {
+            warning("Message with unknown handler received: %s", message.name);
+        }
+        return true;
     }
 
 }

@@ -38,6 +38,8 @@ public class GearyWebExtension : Object {
 
     private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
 
+    private const string EXTENSION_CLASS_VAR = "_GearyWebExtension";
+    private const string EXTENSION_CLASS_SEND = "send";
     private const string REMOTE_LOAD_VAR = "_gearyAllowRemoteResourceLoads";
 
     private WebKit.WebExtension extension;
@@ -180,6 +182,25 @@ public class GearyWebExtension : Object {
                                  WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
         JSC.Context context = frame.get_js_context();
+
+        var extension_class = context.register_class(
+            this.get_type().name(),
+            null,
+            null,
+            null
+        );
+        extension_class.add_method(
+            EXTENSION_CLASS_SEND,
+            (instance, values) => {
+                return this.on_page_send_message(page, values);
+            },
+            GLib.Type.NONE
+        );
+        context.set_value(
+            EXTENSION_CLASS_VAR,
+            new JSC.Value.object(context, extension_class, extension_class)
+        );
+
         context.set_value(
             REMOTE_LOAD_VAR,
             new JSC.Value.boolean(context, false)
@@ -256,6 +277,48 @@ public class GearyWebExtension : Object {
             debug("Failed to handle message: %s", err.message);
         }
 
+        return true;
+    }
+
+    private bool on_page_send_message(WebKit.WebPage page,
+                                      GLib.GenericArray<JSC.Value> args) {
+        WebKit.UserMessage? message = null;
+        if (args.length > 0) {
+            var name = args.get(0).to_string();
+            GLib.Variant? parameters = null;
+            if (args.length > 1) {
+                JSC.Value param_value = args.get(1);
+                try {
+                    int len = Util.JS.to_int32(
+                        param_value.object_get_property("length")
+                    );
+                    if (len == 1) {
+                        parameters = Util.JS.value_to_variant(
+                            param_value.object_get_property_at_index(0)
+                        );
+                    } else if (len > 1) {
+                        parameters = Util.JS.value_to_variant(param_value);
+                    }
+                } catch (Util.JS.Error err) {
+                    message = to_exception_message(
+                        this.get_type().name(), err.message
+                    );
+                }
+            }
+            if (message == null) {
+                message = new WebKit.UserMessage(name, parameters);
+            }
+        }
+        if (message == null) {
+            var log_message = "Not enough parameters for JS call to %s.%s()".printf(
+                EXTENSION_CLASS_VAR,
+                EXTENSION_CLASS_SEND
+            );
+            debug(log_message);
+            message = to_exception_message(this.get_type().name(), log_message);
+        }
+
+        page.send_message_to_view.begin(message, null);
         return true;
     }
 
