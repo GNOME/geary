@@ -15,7 +15,7 @@ public void peas_register_types(TypeModule module) {
 }
 
 /**
- * Plugin to Fill in and send email templates using a spreadsheet.
+ * Plugin to fill in and send email templates using a spreadsheet.
  */
 public class Plugin.MailMerge :
     PluginBase, FolderExtension, EmailExtension, TrustedExtension {
