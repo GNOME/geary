@@ -236,7 +236,11 @@ public class Plugin.MailMerge :
         // Translators: Info bar description for the mail merge
         // folder. The first string substitution the number of email
         // already sent, the second is the total number to send.
-        this.merge_bar.description = _("Sent %u of %u").printf(
+        this.merge_bar.description = ngettext(
+            "Sent %u of %u",
+            "Sent %u of %u",
+            this.merge_folder.email_total
+        ).printf(
             this.merge_folder.email_sent,
             this.merge_folder.email_total
         );
