@@ -145,6 +145,37 @@ public class GearyWebExtension : Object {
         return ret;
     }
 
+    private WebKit.UserMessage to_exception_message(string? name,
+                                                    string? message,
+                                                    string? backtrace = null,
+                                                    string? source = null,
+                                                    int line_number = -1,
+                                                    int column_number = -1) {
+        var detail = new GLib.VariantDict();
+        if (name != null) {
+            detail.insert_value("name", new GLib.Variant.string(name));
+        }
+        if (message != null) {
+            detail.insert_value("message", new GLib.Variant.string(message));
+        }
+        if (backtrace != null) {
+            detail.insert_value("backtrace", new GLib.Variant.string(backtrace));
+        }
+        if (source != null) {
+            detail.insert_value("source", new GLib.Variant.string(source));
+        }
+        if (line_number > 0) {
+            detail.insert_value("line_number", new GLib.Variant.uint32(line_number));
+        }
+        if (column_number > 0) {
+            detail.insert_value("column_number", new GLib.Variant.uint32(column_number));
+        }
+        return new WebKit.UserMessage(
+            MESSAGE_EXCEPTION_NAME,
+            detail.end()
+        );
+    }
+
     private void on_page_created(WebKit.WebExtension extension,
                                  WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
@@ -203,25 +234,14 @@ public class GearyWebExtension : Object {
 
             JSC.Exception? thrown = context.get_exception();
             if (thrown != null) {
-                var detail = new GLib.VariantDict();
-                if (thrown.get_message() != null) {
-                    detail.insert_value("name", new GLib.Variant.string(thrown.get_name()));
-                }
-                if (thrown.get_message() != null) {
-                    detail.insert_value("message", new GLib.Variant.string(thrown.get_message()));
-                }
-                if (thrown.get_backtrace_string() != null) {
-                    detail.insert_value("backtrace_string", new GLib.Variant.string(thrown.get_backtrace_string()));
-                }
-                if (thrown.get_source_uri() != null) {
-                    detail.insert_value("source_uri", new GLib.Variant.string(thrown.get_source_uri()));
-                }
-                detail.insert_value("line_number", new GLib.Variant.uint32(thrown.get_line_number()));
-                detail.insert_value("column_number", new GLib.Variant.uint32(thrown.get_column_number()));
                 message.send_reply(
-                    new WebKit.UserMessage(
-                        MESSAGE_EXCEPTION_NAME,
-                        detail.end()
+                    to_exception_message(
+                        thrown.get_name(),
+                        thrown.get_message(),
+                        thrown.get_backtrace_string(),
+                        thrown.get_source_uri(),
+                        (int) thrown.get_line_number(),
+                        (int) thrown.get_column_number()
                     )
                 );
             } else {
