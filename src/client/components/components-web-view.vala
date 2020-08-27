@@ -26,6 +26,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
 
+    // Keep these in sync with GearyWebExtension
+    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
+    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+
     // WebKit message handler names
     private const string COMMAND_STACK_CHANGED = "commandStackChanged";
     private const string CONTENT_LOADED = "contentLoaded";
@@ -467,9 +471,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     protected async void call_void(Util.JS.Callable target,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-        yield send_message_to_page(
-            target.to_message(), cancellable
-        );
+        yield call_impl(target, cancellable);
     }
 
     /**
@@ -488,12 +490,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     protected async T call_returning<T>(Util.JS.Callable target,
                                         GLib.Cancellable? cancellable)
         throws GLib.Error {
-        WebKit.UserMessage? response = yield send_message_to_page(
-            target.to_message(), cancellable
-        );
+        WebKit.UserMessage? response = yield call_impl(target, cancellable);
         if (response == null) {
             throw new Util.JS.Error.TYPE(
-                "Method call did not return a value: %s", target.to_string()
+                "Method call %s did not return a value", target.to_string()
             );
         }
         GLib.Variant? param = response.parameters;
@@ -610,6 +610,48 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                              "document-font", SettingsBindFlags.DEFAULT);
         system_settings.bind("monospace-font-name", this,
                              "monospace-font", SettingsBindFlags.DEFAULT);
+    }
+
+    private async WebKit.UserMessage? call_impl(Util.JS.Callable target,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        WebKit.UserMessage? response = yield send_message_to_page(
+            target.to_message(), cancellable
+        );
+        if (response != null) {
+            var response_name = response.name;
+            if (response_name == MESSAGE_EXCEPTION_NAME) {
+                var exception = new GLib.VariantDict(response.parameters);
+                var name = exception.lookup_value("name", GLib.VariantType.STRING) as string;
+                var message = exception.lookup_value("message", GLib.VariantType.STRING) as string;
+                var backtrace = exception.lookup_value("backtrace_string", GLib.VariantType.STRING) as string;
+                var source = exception.lookup_value("source_uri", GLib.VariantType.STRING) as string;
+                var line = exception.lookup_value("line_number", GLib.VariantType.UINT32);
+                var column = exception.lookup_value("column_number", GLib.VariantType.UINT32);
+
+                var log_message = "Method call %s raised %s exception at %s:%d:%d: %s".printf(
+                    target.to_string(),
+                    name ?? "unknown",
+                    source ?? "unknown",
+                    (line != null ? (int) line.get_uint32() : -1),
+                    (column != null ? (int) column.get_uint32() : -1),
+                    message ?? "unknown"
+                );
+                debug(log_message);
+                if (backtrace != null) {
+                    debug(backtrace);
+                }
+
+                throw new Util.JS.Error.EXCEPTION(log_message);
+            } else if (response_name != MESSAGE_RETURN_VALUE_NAME) {
+                throw new Util.JS.Error.TYPE(
+                    "Method call %s returned unknown name: %s",
+                    target.to_string(),
+                    response_name
+                );
+            }
+        }
+        return response;
     }
 
     private void handle_cid_request(WebKit.URISchemeRequest request) {

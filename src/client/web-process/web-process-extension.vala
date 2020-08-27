@@ -31,6 +31,8 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
 public class GearyWebExtension : Object {
 
     private const string PAGE_STATE_OBJECT_NAME = "geary";
+
+    // Keep these in sync with Components.WebView
     private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
     private const string MESSAGE_EXCEPTION_NAME = "__exception__";
 
@@ -199,12 +201,37 @@ public class GearyWebExtension : Object {
             // rain hail or shine.
             // https://bugs.webkit.org/show_bug.cgi?id=215880
 
-            message.send_reply(
-                new WebKit.UserMessage(
-                    MESSAGE_RETURN_VALUE_NAME,
-                    Util.JS.value_to_variant(ret)
-                )
-            );
+            JSC.Exception? thrown = context.get_exception();
+            if (thrown != null) {
+                var detail = new GLib.VariantDict();
+                if (thrown.get_message() != null) {
+                    detail.insert_value("name", new GLib.Variant.string(thrown.get_name()));
+                }
+                if (thrown.get_message() != null) {
+                    detail.insert_value("message", new GLib.Variant.string(thrown.get_message()));
+                }
+                if (thrown.get_backtrace_string() != null) {
+                    detail.insert_value("backtrace_string", new GLib.Variant.string(thrown.get_backtrace_string()));
+                }
+                if (thrown.get_source_uri() != null) {
+                    detail.insert_value("source_uri", new GLib.Variant.string(thrown.get_source_uri()));
+                }
+                detail.insert_value("line_number", new GLib.Variant.uint32(thrown.get_line_number()));
+                detail.insert_value("column_number", new GLib.Variant.uint32(thrown.get_column_number()));
+                message.send_reply(
+                    new WebKit.UserMessage(
+                        MESSAGE_EXCEPTION_NAME,
+                        detail.end()
+                    )
+                );
+            } else {
+                message.send_reply(
+                    new WebKit.UserMessage(
+                        MESSAGE_RETURN_VALUE_NAME,
+                        Util.JS.value_to_variant(ret)
+                    )
+                );
+            }
         } catch (GLib.Error err) {
             debug("Failed to handle message: %s", err.message);
         }

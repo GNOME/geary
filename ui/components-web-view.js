@@ -194,5 +194,9 @@ PageState.prototype = {
     testReturn: function(value) {
         this.testResult = value;
         return value;
+    },
+    testThrow: function(value) {
+        this.testResult = value;
+        throw this.testResult;
     }
 };
