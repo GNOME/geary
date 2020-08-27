@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-08-18 09:04+0000\n"
-"PO-Revision-Date: 2020-08-16 04:30+0900\n"
+"PO-Revision-Date: 2020-08-27 22:48+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
 "Language: ja\n"
@@ -831,7 +831,7 @@ msgstr "メインウィンドウを隠して起動する (非推奨)"
 #. / Command line option
 #: src/client/application/application-client.vala:102
 msgid "Enable WebKitGTK Inspector in web views"
-msgstr ""
+msgstr "ウェブビューの WebKitGTK インスペクターを有効にする"
 
 #. / Command line option
 #: src/client/application/application-client.vala:105
@@ -1142,7 +1142,7 @@ msgstr "%s へのメールを保存しました"
 #: src/client/application/application-controller.vala:2588
 #: src/client/application/application-controller.vala:2646
 msgid "Composer could not be restored"
-msgstr ""
+msgstr "作成画面を復元できませんでした"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
@@ -1183,10 +1183,8 @@ msgstr "セキュリティの問題"
 
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:567
-#, fuzzy
-#| msgid "An account has reported an untrusted server.."
 msgid "An account has reported an untrusted server."
-msgstr "信頼できないサーバーです"
+msgstr "信頼できないサーバーです。"
 
 #. Translators: An info bar button label
 #: src/client/application/application-main-window.vala:570
@@ -1283,7 +1281,7 @@ msgstr "次回から表示しない(_A)"
 
 #: src/client/components/components-inspector.vala:78
 msgid "Inspector"
-msgstr ""
+msgstr "インスペクター"
 
 #. / Translators: Title for Inspector logs pane
 #. / Translators: Title for problem report dialog logs pane
@@ -2177,70 +2175,65 @@ msgstr "フォルダーのハイライト"
 #: src/client/plugin/mail-merge/mail-merge.vala:385
 #: src/client/plugin/mail-merge/mail-merge.vala:484
 msgid "Mail Merge"
-msgstr ""
+msgstr "差し込みメール"
 
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr ""
+"スプレッドシートを使用してメールのテンプレートを埋め、メールを送信します"
 
 #. Translators: Info bar label for starting sending a mail
 #. merge
 #: src/client/plugin/mail-merge/mail-merge.vala:118
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Star"
 msgid "Start"
-msgstr "星を付ける"
+msgstr "開始"
 
 #. Translators: Info bar label for pausing sending a mail
 #. merge
 #: src/client/plugin/mail-merge/mail-merge.vala:130
 msgid "Pause"
-msgstr ""
+msgstr "一時停止"
 
 #. Translators: Info bar description for the mail merge
 #. folder. The first string substitution the number of email
 #. already sent, the second is the total number to send.
 #: src/client/plugin/mail-merge/mail-merge.vala:239
-#, fuzzy, c-format
-#| msgid "Sent Sound"
+#, c-format
+#| msgid "Sent %u of %u"
 msgid "Sent %u of %u"
-msgstr "メール送信音"
+msgid_plural "Sent %u of %u"
+msgstr[0] "%u / %u 送信"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
 #: src/client/plugin/mail-merge/mail-merge.vala:320
-#, fuzzy
-#| msgid "Message template"
 msgid "Mail merge template"
-msgstr "メッセージのテンプレート"
+msgstr "差し込みメールテンプレート"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
 #: src/client/plugin/mail-merge/mail-merge.vala:324
 msgid "Merge"
-msgstr ""
+msgstr "差し込み"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
 #: src/client/plugin/mail-merge/mail-merge.vala:373
-#, fuzzy
-#| msgid "Insert an image"
 msgid "Insert field"
-msgstr "画像を挿入"
+msgstr "フィールドを挿入"
 
 #. / Translators: File chooser filer label
 #: src/client/plugin/mail-merge/mail-merge.vala:392
 msgid "Comma separated values (CSV)"
-msgstr ""
+msgstr "カンマ区切り値 (CSV)"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Messaging Menu"
-msgstr ""
+msgstr "メッセージメニュー"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr ""
+msgstr "新着メールを Unity メッセージメニューの通知機能で表示します"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2265,7 +2258,7 @@ msgstr "メール送信時にデスクトップのメール送信音を鳴らし
 #. to be tanslated.
 #: src/client/plugin/special-folders/special-folders.plugin.desktop.in:6
 msgid "Special Folders"
-msgstr ""
+msgstr "Special Folders"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
@@ -2838,7 +2831,7 @@ msgstr "このサーバーを信頼しない(_D)"
 
 #: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
 msgid "Detach the composer from the window"
-msgstr "ウィンドウから作成ウィンドウを分離する"
+msgstr "ウィンドウから作成画面を分離する"
 
 #: ui/composer-headerbar.ui:135
 msgid "_Send"
@@ -3119,7 +3112,7 @@ msgstr "一致するログエントリーを検索"
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:35
 msgid "Toggle appending new log entries"
-msgstr ""
+msgstr "新しいログエントリーの追加を切り替え"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:55
@@ -3544,7 +3537,7 @@ msgstr "添付ファイルを追加する"
 #: ui/gtk/help-overlay.ui:395
 msgctxt "shortcut window"
 msgid "Detach the composer"
-msgstr ""
+msgstr "作成画面を分離する"
 
 #: ui/gtk/help-overlay.ui:408
 msgctxt "shortcut window"
