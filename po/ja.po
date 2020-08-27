@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-08-15 19:40+0000\n"
+"POT-Creation-Date: 2020-08-18 09:04+0000\n"
 "PO-Revision-Date: 2020-08-16 04:30+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese (Japan) (https://l10n.gnome.org/module/geary/)\n"
@@ -35,8 +35,8 @@ msgstr "Geary でファイルを送信"
 #: desktop/geary-autostart.desktop.in.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:555
-#: src/client/application/application-main-window.vala:601
+#: src/client/accounts/accounts-editor-servers-pane.vala:560
+#: src/client/application/application-main-window.vala:608
 msgid "Geary"
 msgstr "Geary"
 
@@ -356,13 +356,13 @@ msgstr ""
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:195
-#: src/client/accounts/accounts-editor-servers-pane.vala:316
+#: src/client/accounts/accounts-editor-servers-pane.vala:321
 msgid "Check your receiving login and password"
 msgstr "受信のログイン名とパスワードを確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:210
-#: src/client/accounts/accounts-editor-servers-pane.vala:329
+#: src/client/accounts/accounts-editor-servers-pane.vala:334
 msgid "Check your receiving server details"
 msgstr "受信サーバーの詳細を確認してください"
 
@@ -372,13 +372,13 @@ msgstr "受信サーバーの詳細を確認してください"
 #. specify custom creds here
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:232
-#: src/client/accounts/accounts-editor-servers-pane.vala:350
+#: src/client/accounts/accounts-editor-servers-pane.vala:355
 msgid "Check your sending login and password"
 msgstr "送信のログイン名とパスワードを確認してください"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:246
-#: src/client/accounts/accounts-editor-servers-pane.vala:363
+#: src/client/accounts/accounts-editor-servers-pane.vala:368
 msgid "Check your sending server details"
 msgstr "送信サーバーの詳細を確認してください"
 
@@ -434,14 +434,14 @@ msgstr "person@example.com"
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
 #: src/client/accounts/accounts-editor-add-pane.vala:593
-#: src/client/accounts/accounts-editor-servers-pane.vala:884
+#: src/client/accounts/accounts-editor-servers-pane.vala:889
 msgid "Login name"
 msgstr "ログイン名"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
 #: src/client/accounts/accounts-editor-add-pane.vala:607
-#: src/client/accounts/accounts-editor-servers-pane.vala:1006
+#: src/client/accounts/accounts-editor-servers-pane.vala:1011
 #: ui/password-dialog.glade:108
 msgid "Password"
 msgstr "パスワード"
@@ -451,7 +451,7 @@ msgstr "パスワード"
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:629
-#: src/client/accounts/accounts-editor-servers-pane.vala:728
+#: src/client/accounts/accounts-editor-servers-pane.vala:733
 msgid "IMAP server"
 msgstr "IMAP サーバー"
 
@@ -466,7 +466,7 @@ msgstr "imap.example.com"
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:638
-#: src/client/accounts/accounts-editor-servers-pane.vala:734
+#: src/client/accounts/accounts-editor-servers-pane.vala:739
 msgid "SMTP server"
 msgstr "SMTP サーバー"
 
@@ -610,55 +610,54 @@ msgid_plural "%d days back"
 msgstr[0] "%d日前"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2038
+#: src/client/application/application-main-window.vala:2061
 msgid "Undo"
 msgstr "元に戻す"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2021
+#: src/client/application/application-main-window.vala:2044
 msgid "Redo"
 msgstr "やり直す"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:358
-#: src/client/accounts/accounts-editor-list-pane.vala:446
+#: src/client/accounts/accounts-editor-list-pane.vala:454
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:362
-#: src/client/accounts/accounts-editor-list-pane.vala:450
+#: src/client/accounts/accounts-editor-list-pane.vala:458
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:366
-#: src/client/accounts/accounts-editor-list-pane.vala:454
+#: src/client/accounts/accounts-editor-list-pane.vala:462
 #: src/client/accounts/accounts-editor-row.vala:287
 msgid "Yahoo"
 msgstr "Yahoo"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:384
+#: src/client/accounts/accounts-editor-list-pane.vala:388
 msgid "This account has been disabled"
 msgstr "このアカウントは無効になっています"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:393
+#: src/client/accounts/accounts-editor-list-pane.vala:397
 msgid "This account has encountered a problem and is unavailable"
 msgstr "このアカウントは問題が発生したため利用できません"
 
-#. Translators: Label for adding a generic email account
-#: src/client/accounts/accounts-editor-list-pane.vala:443
+#: src/client/accounts/accounts-editor-list-pane.vala:466
 msgid "Other email providers"
 msgstr "他のメールプロバイダー"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:560
+#: src/client/accounts/accounts-editor-list-pane.vala:572
 #, c-format
 msgid "Account “%s” removed"
 msgstr "アカウント“%s”を削除しました"
@@ -666,7 +665,7 @@ msgstr "アカウント“%s”を削除しました"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:567
+#: src/client/accounts/accounts-editor-list-pane.vala:579
 #, c-format
 msgid "Account “%s” restored"
 msgstr "アカウント“%s”を復元しました"
@@ -679,30 +678,30 @@ msgstr "このアイテムを移動するにはドラッグしてください"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:295
+#: src/client/accounts/accounts-editor-row.vala:299
 msgid "Service provider"
 msgstr "サービスプロバイダー"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:469
+#: src/client/accounts/accounts-editor-row.vala:473
 msgid "Connection security"
 msgstr "接続のセキュリティ"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:480
-#: src/client/accounts/accounts-editor-servers-pane.vala:755
-#: src/client/accounts/accounts-editor-servers-pane.vala:970
+#: src/client/accounts/accounts-editor-row.vala:484
+#: src/client/accounts/accounts-editor-servers-pane.vala:760
+#: src/client/accounts/accounts-editor-servers-pane.vala:975
 msgid "None"
 msgstr "なし"
 
-#: src/client/accounts/accounts-editor-row.vala:487
+#: src/client/accounts/accounts-editor-row.vala:491
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:494
+#: src/client/accounts/accounts-editor-row.vala:498
 msgid "TLS"
 msgstr "TLS"
 
@@ -710,35 +709,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:535
-#: src/client/application/application-main-window.vala:553
+#: src/client/accounts/accounts-editor-row.vala:539
+#: src/client/application/application-main-window.vala:554
 msgid "Login"
 msgstr "ログイン"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:542
+#: src/client/accounts/accounts-editor-row.vala:546
 msgid "No login needed"
 msgstr "ログイン不要"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:550
+#: src/client/accounts/accounts-editor-row.vala:554
 msgid "Use same login as receiving"
 msgstr "受信と同じ情報を使う"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:558
+#: src/client/accounts/accounts-editor-row.vala:562
 msgid "Use a different login"
 msgstr "他の情報を使う"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:377
+#: src/client/accounts/accounts-editor-servers-pane.vala:382
 #, c-format
 msgid "Account not updated: %s"
 msgstr "アカウントを更新しません: %s"
@@ -746,23 +745,23 @@ msgstr "アカウントを更新しません: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:540
+#: src/client/accounts/accounts-editor-servers-pane.vala:545
 msgid "Account source"
 msgstr "アカウントのソース"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
+#: src/client/accounts/accounts-editor-servers-pane.vala:557
 msgid "GNOME Online Accounts"
 msgstr "GNOME オンラインアカウント"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:611
+#: src/client/accounts/accounts-editor-servers-pane.vala:616
 msgid "Save draft email on server"
 msgstr "下書きメールをサーバーに保存"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:666
+#: src/client/accounts/accounts-editor-servers-pane.vala:671
 msgid "Save sent email on server"
 msgstr "送信メールをサーバーに保存"
 
@@ -771,12 +770,12 @@ msgstr "送信メールをサーバーに保存"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:956
+#: src/client/accounts/accounts-editor-servers-pane.vala:961
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s は OAuth2 を使用しています"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:966
+#: src/client/accounts/accounts-editor-servers-pane.vala:971
 msgid "Use receiving server login"
 msgstr "受信サーバーの情報を使う"
 
@@ -962,36 +961,36 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1049
+#: src/client/application/application-client.vala:1066
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "`--hidden` オプションは非推奨です。将来的に削除されます。"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1082
+#: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "不明な引数です: “%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:477
+#: src/client/application/application-controller.vala:479
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "%s のメール送信時に問題が発生しました"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:481
+#: src/client/application/application-controller.vala:483
 msgid "Email will not be sent until re-connected"
 msgstr "再接続するまでメールを送信しません"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:580
+#: src/client/application/application-controller.vala:582
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "スレッドをマークしました"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:586
+#: src/client/application/application-controller.vala:588
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "スレッドのマークを外しました"
@@ -999,8 +998,8 @@ msgstr[0] "スレッドのマークを外しました"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:612
-#: src/client/application/application-controller.vala:696
+#: src/client/application/application-controller.vala:614
+#: src/client/application/application-controller.vala:698
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1011,29 +1010,29 @@ msgstr[0] "スレッドを %s へ移動しました"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:620
-#: src/client/application/application-controller.vala:642
+#: src/client/application/application-controller.vala:622
+#: src/client/application/application-controller.vala:644
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
 msgstr[0] "スレッドを %s へ復元しました"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:663
+#: src/client/application/application-controller.vala:665
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "スレッドをアーカイブへ移動しました"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:719
+#: src/client/application/application-controller.vala:721
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "メッセージを %s へ復元しました"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:740
+#: src/client/application/application-controller.vala:742
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "メッセージをアーカイブへ移動しました"
@@ -1041,7 +1040,7 @@ msgstr[0] "メッセージをアーカイブへ移動しました"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:775
+#: src/client/application/application-controller.vala:777
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1050,7 +1049,7 @@ msgstr[0] "メッセージを %s へ移動しました"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:803
+#: src/client/application/application-controller.vala:805
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1059,7 +1058,7 @@ msgstr[0] "スレッドを %s としてラベル付けしました"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:811
+#: src/client/application/application-controller.vala:813
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
@@ -1120,87 +1119,89 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1470
+#: src/client/application/application-controller.vala:1478
 #, c-format
 msgid "Email sent to %s"
 msgstr "%s へメールを送信しました"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2493
+#: src/client/application/application-controller.vala:2509
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "%s へのメールが送信待機中です"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2557
+#: src/client/application/application-controller.vala:2573
 #, c-format
 msgid "Email to %s saved"
 msgstr "%s へのメールを保存しました"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2572
-#: src/client/application/application-controller.vala:2630
+#: src/client/application/application-controller.vala:2588
+#: src/client/application/application-controller.vala:2646
 msgid "Composer could not be restored"
 msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2615
+#: src/client/application/application-controller.vala:2631
 #, c-format
 msgid "Email to %s discarded"
 msgstr "%s へのメールを破棄しました"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:539
+#: src/client/application/application-main-window.vala:540
 msgid "Working offline"
 msgstr "オフラインで作業中です"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:541
+#: src/client/application/application-main-window.vala:542
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "再接続するまでメールの送受信はできません。"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:548
+#: src/client/application/application-main-window.vala:549
 msgid "Login problem"
 msgstr "ログインの問題"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:550
+#: src/client/application/application-main-window.vala:551
 msgid "An account has reported an incorrect login or password."
 msgstr "ログイン情報かパスワードが間違っています。"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:557
+#: src/client/application/application-main-window.vala:558
 msgid "Retry login, you will be prompted for your password"
 msgstr "ログインの再試行にはパスワードが必要です"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:564
+#: src/client/application/application-main-window.vala:565
 msgid "Security problem"
 msgstr "セキュリティの問題"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:566
-msgid "An account has reported an untrusted server.."
+#: src/client/application/application-main-window.vala:567
+#, fuzzy
+#| msgid "An account has reported an untrusted server.."
+msgid "An account has reported an untrusted server."
 msgstr "信頼できないサーバーです"
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:569
+#: src/client/application/application-main-window.vala:570
 msgid "Check"
 msgstr "確認"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:573
+#: src/client/application/application-main-window.vala:574
 msgid "Check the security details for the connection"
 msgstr "接続のセキュリティに関する詳細を確認"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:606
+#: src/client/application/application-main-window.vala:617
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1208,47 +1209,47 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:983
+#: src/client/application/application-main-window.vala:996
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "ラベル"
 
-#: src/client/application/application-main-window.vala:1272
+#: src/client/application/application-main-window.vala:1293
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s フォルダーのすべてのメールを空にしますか?"
 
-#: src/client/application/application-main-window.vala:1273
+#: src/client/application/application-main-window.vala:1294
 msgid "This removes the email from Geary and your email server."
 msgstr "メールを Geary とメールサーバーから削除します。"
 
-#: src/client/application/application-main-window.vala:1274
+#: src/client/application/application-main-window.vala:1295
 msgid "This cannot be undone."
 msgstr "これは元に戻すことができません。"
 
-#: src/client/application/application-main-window.vala:1275
+#: src/client/application/application-main-window.vala:1296
 #, c-format
 msgid "Empty %s"
 msgstr "%s を空にする"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1332
+#: src/client/application/application-main-window.vala:1353
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "このスレッドを完全に削除しますか?"
 
-#: src/client/application/application-main-window.vala:1337
-#: src/client/application/application-main-window.vala:1352
+#: src/client/application/application-main-window.vala:1358
+#: src/client/application/application-main-window.vala:1373
 msgid "Delete"
 msgstr "削除"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1347
+#: src/client/application/application-main-window.vala:1368
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "このメッセージを完全に削除しますか?"
 
-#: src/client/application/application-main-window.vala:1670
+#: src/client/application/application-main-window.vala:1691
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1259,7 +1260,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1933
+#: src/client/composer/composer-widget.vala:1989
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1315,26 +1316,26 @@ msgid "Cancel"
 msgstr "キャンセル"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:53
+#: src/client/components/components-preferences-window.vala:124
 msgid "_Automatically select next message"
 msgstr "自動的に次のメッセージを選択する(_A)"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:63
+#: src/client/components/components-preferences-window.vala:134
 msgid "_Display conversation preview"
 msgstr "スレッドプレビューを表示する(_D)"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:73
+#: src/client/components/components-preferences-window.vala:144
 msgid "Use _three pane view"
 msgstr "3ペインビューを使う(_T)"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:83
+#: src/client/components/components-preferences-window.vala:154
 msgid "Use _single key email shortcuts"
 msgstr "シングルキーメールショートカットを使用する(_S)"
 
-#: src/client/components/components-preferences-window.vala:85
+#: src/client/components/components-preferences-window.vala:156
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
@@ -1342,22 +1343,22 @@ msgstr ""
 "<Ctrl> を押すことなくメールを操作できるキーボードショートカットを有効にします"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:96
+#: src/client/components/components-preferences-window.vala:167
 msgid "_Watch for new mail when closed"
 msgstr "閉じても新着メールを監視する(_W)"
 
 #. / Translators: Preferences tooltip
-#: src/client/components/components-preferences-window.vala:100
+#: src/client/components/components-preferences-window.vala:171
 msgid "Geary will keep running after all windows are closed"
 msgstr "すべてのウィンドウを閉じても Geary の実行を続けます"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:118
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "設定"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:181
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "プラグイン"
 
@@ -1452,27 +1453,27 @@ msgstr "アカウント %s を検索"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but one is not provided.
-#: src/client/components/components-validator.vala:390
+#: src/client/components/components-validator.vala:394
 msgid "An email address is required"
 msgstr "メールアドレスは必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but the address is invalid.
-#: src/client/components/components-validator.vala:394
+#: src/client/components/components-validator.vala:398
 msgid "Not a valid email address"
 msgstr "有効なメールアドレスではありません"
 
 #. Translators: Tooltip used when an entry requires a valid,
 #. resolvable server name to be entered, but one is not
 #. provided.
-#: src/client/components/components-validator.vala:440
+#: src/client/components/components-validator.vala:444
 msgid "A server name is required"
 msgstr "サーバー名は必須です"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. server name to be entered, but it was unable to be
 #. looked-up in the DNS.
-#: src/client/components/components-validator.vala:445
+#: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
 msgstr "サーバー名が見つかりませんでした"
 
@@ -1526,7 +1527,9 @@ msgstr "送信メール保存時にエラーが発生しました"
 msgid "_OK"
 msgstr "OK(_O)"
 
-#: src/client/components/stock.vala:19 ui/password-dialog.glade:196
+#: src/client/components/stock.vala:19
+#: src/client/plugin/mail-merge/mail-merge.vala:388
+#: ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "キャンセル(_C)"
 
@@ -1550,7 +1553,9 @@ msgstr "破棄(_D)"
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: src/client/components/stock.vala:26 ui/components-attachment-pane-menus.ui:7
+#: src/client/components/stock.vala:26
+#: src/client/plugin/mail-merge/mail-merge.vala:387
+#: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "開く(_O)"
 
@@ -1627,90 +1632,90 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:979
+#: src/client/composer/composer-widget.vala:997
 msgid "Do you want to keep or discard this draft message?"
 msgstr "この下書きメッセージを保持または破棄しますか?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1005
+#: src/client/composer/composer-widget.vala:1023
 msgid "Do you want to discard this draft message?"
 msgstr "この下書きメッセージを破棄しますか?"
 
-#: src/client/composer/composer-widget.vala:1587
+#: src/client/composer/composer-widget.vala:1645
 msgid "Send message with an empty subject and body?"
 msgstr "メッセージを件名と本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1589
+#: src/client/composer/composer-widget.vala:1647
 msgid "Send message with an empty subject?"
 msgstr "メッセージを件名なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1591
+#: src/client/composer/composer-widget.vala:1649
 msgid "Send message with an empty body?"
 msgstr "メッセージを本文なしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1600
+#: src/client/composer/composer-widget.vala:1658
 msgid "Send message without an attachment?"
 msgstr "メッセージを添付ファイルなしで送信しますか?"
 
-#: src/client/composer/composer-widget.vala:1919
+#: src/client/composer/composer-widget.vala:1977
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s”はすでに添付されています。"
 
-#: src/client/composer/composer-widget.vala:1955
-#: src/client/composer/composer-widget.vala:2005
+#: src/client/composer/composer-widget.vala:2009
+#: src/client/composer/composer-widget.vala:2059
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s”は空ファイルです。"
 
-#: src/client/composer/composer-widget.vala:1993
+#: src/client/composer/composer-widget.vala:2047
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s”が見つかりませんでした。"
 
-#: src/client/composer/composer-widget.vala:1999
+#: src/client/composer/composer-widget.vala:2053
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s”はフォルダーです。"
 
-#: src/client/composer/composer-widget.vala:2018
+#: src/client/composer/composer-widget.vala:2072
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s”を読み取り用に開けませんでした。"
 
-#: src/client/composer/composer-widget.vala:2026
+#: src/client/composer/composer-widget.vala:2080
 msgid "Cannot add attachment"
 msgstr "添付できません"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2086
+#: src/client/composer/composer-widget.vala:2140
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:236 ui/conversation-message.ui:312
+#: src/client/util/util-email.vala:249 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "宛先:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2092
+#: src/client/composer/composer-widget.vala:2146
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:241 ui/conversation-message.ui:357
+#: src/client/util/util-email.vala:254 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2098
+#: src/client/composer/composer-widget.vala:2152
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2104
+#: src/client/composer/composer-widget.vala:2158
 msgid "Reply-To: "
 msgstr "Reply-To: "
 
-#: src/client/composer/composer-widget.vala:2356
+#: src/client/composer/composer-widget.vala:2410
 msgid "Select Color"
 msgstr "色を選択"
 
@@ -1719,14 +1724,14 @@ msgstr "色を選択"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2545
+#: src/client/composer/composer-widget.vala:2599
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s (%2$s を通して使用)"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2905
+#: src/client/composer/composer-widget.vala:2959
 msgid "Images"
 msgstr "画像"
 
@@ -1743,49 +1748,49 @@ msgid "Search for more languages"
 msgstr "言語を検索"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:335
+#: src/client/conversation-list/conversation-list-view.vala:339
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "スレッドをゴミ箱へ移動(_T)"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:347
+#: src/client/conversation-list/conversation-list-view.vala:351
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "スレッドを削除(_D)"
 
-#: src/client/conversation-list/conversation-list-view.vala:360
+#: src/client/conversation-list/conversation-list-view.vala:364
 #: ui/main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "既読としてマーク(_R)"
 
-#: src/client/conversation-list/conversation-list-view.vala:368
+#: src/client/conversation-list/conversation-list-view.vala:372
 #: ui/main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "未読としてマーク(_U)"
 
-#: src/client/conversation-list/conversation-list-view.vala:376
+#: src/client/conversation-list/conversation-list-view.vala:380
 #: ui/main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "星を外す(_N)"
 
-#: src/client/conversation-list/conversation-list-view.vala:383
+#: src/client/conversation-list/conversation-list-view.vala:387
 #: ui/main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "星を付ける(_S)"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:392
+#: src/client/conversation-list/conversation-list-view.vala:396
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "返信(_R)"
 
-#: src/client/conversation-list/conversation-list-view.vala:398
+#: src/client/conversation-list/conversation-list-view.vala:402
 msgid "R_eply All"
 msgstr "全員に返信(_E)"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:404
+#: src/client/conversation-list/conversation-list-view.vala:408
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "転送(_F)"
@@ -1796,19 +1801,19 @@ msgstr "自分"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:537
-#: src/client/util/util-email.vala:227
+#: src/client/util/util-email.vala:240
 msgid "From:"
 msgstr "差出人:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
 #: src/client/conversation-viewer/conversation-email.vala:557
-#: src/client/util/util-email.vala:232
+#: src/client/util/util-email.vala:245
 msgid "Date:"
 msgstr "日時:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
 #: src/client/conversation-viewer/conversation-email.vala:567
-#: src/client/util/util-email.vala:230
+#: src/client/util/util-email.vala:243
 msgid "Subject:"
 msgstr "件名:"
 
@@ -2053,13 +2058,11 @@ msgid "%d result"
 msgid_plural "%d results"
 msgstr[0] "%d 件の結果"
 
-#: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:4
+#. Translators: This is an internal plugin so this name does not need
+#. to be tanslated
+#: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:6
 msgid "Desktop Notifications"
 msgstr "デスクトップ通知"
-
-#: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:5
-msgid "Displays desktop notifications when new email is delivered"
-msgstr ""
 
 #. / Notification body when a message as been received
 #. / and other unread messages have not been
@@ -2120,29 +2123,30 @@ msgstr "送信メール用の使い回し可能なテンプレートを作成し
 #. the front for the default. English names do not need to be
 #. included.
 #: src/client/plugin/email-templates/email-templates.vala:29
+#: src/client/plugin/mail-merge/mail-merge.vala:29
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
 msgstr "テンプレート | テンプレートメール | メールテンプレート"
 
 #. Translators: The name of the folder used to
 #. store email templates
-#: src/client/plugin/email-templates/email-templates.vala:195
+#: src/client/plugin/email-templates/email-templates.vala:201
 msgid "Templates"
 msgstr "テンプレート"
 
 #. Translators: Info bar button label for creating a
 #. new email template
-#: src/client/plugin/email-templates/email-templates.vala:276
+#: src/client/plugin/email-templates/email-templates.vala:282
 msgid "New"
 msgstr "新規"
 
 #. Translators: Infobar status label for an email template
-#: src/client/plugin/email-templates/email-templates.vala:287
+#: src/client/plugin/email-templates/email-templates.vala:293
 msgid "Message template"
 msgstr "メッセージのテンプレート"
 
 #. Translators: Info bar button label for sending an
 #. email template
-#: src/client/plugin/email-templates/email-templates.vala:291
+#: src/client/plugin/email-templates/email-templates.vala:297
 msgid "Send"
 msgstr "送信"
 
@@ -2150,17 +2154,84 @@ msgstr "送信"
 #. existing email template
 #. Translators: Info bar button label for editing a draft
 #. email
-#: src/client/plugin/email-templates/email-templates.vala:299
-#: src/client/plugin/special-folders/special-folders.vala:180
+#: src/client/plugin/email-templates/email-templates.vala:305
+#: src/client/plugin/mail-merge/mail-merge.vala:332
+#: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "編集"
 
-#: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:4
+#. Translators: This is an internal plugin so this name does not need
+#. to be tanslated
+#: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:6
 msgid "Folder Highlight"
 msgstr "フォルダーのハイライト"
 
-#: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:5
-msgid "Highlights folders that have newly delivered mail"
+#. / Translators: Menu item label for invoking mail
+#. / merge in composer
+#. / Translators: File chooser title after invoking mail
+#. / merge in composer
+#. Translators: The name of the folder used to
+#. display merged email
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.vala:284
+#: src/client/plugin/mail-merge/mail-merge.vala:385
+#: src/client/plugin/mail-merge/mail-merge.vala:484
+msgid "Mail Merge"
+msgstr ""
+
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+msgid "Fill in and send email templates using a spreadsheet"
+msgstr ""
+
+#. Translators: Info bar label for starting sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:118
+#, fuzzy
+#| msgctxt "shortcut window"
+#| msgid "Star"
+msgid "Start"
+msgstr "星を付ける"
+
+#. Translators: Info bar label for pausing sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:130
+msgid "Pause"
+msgstr ""
+
+#. Translators: Info bar description for the mail merge
+#. folder. The first string substitution the number of email
+#. already sent, the second is the total number to send.
+#: src/client/plugin/mail-merge/mail-merge.vala:239
+#, fuzzy, c-format
+#| msgid "Sent Sound"
+msgid "Sent %u of %u"
+msgstr "メール送信音"
+
+#. Translators: Infobar status label for an email mail merge
+#. template
+#: src/client/plugin/mail-merge/mail-merge.vala:320
+#, fuzzy
+#| msgid "Message template"
+msgid "Mail merge template"
+msgstr "メッセージのテンプレート"
+
+#. Translators: Info bar button label for performing a
+#. mail-merge on an email template
+#: src/client/plugin/mail-merge/mail-merge.vala:324
+msgid "Merge"
+msgstr ""
+
+#. / Translators: Action bar menu button label for
+#. / mail-merge plugin
+#: src/client/plugin/mail-merge/mail-merge.vala:373
+#, fuzzy
+#| msgid "Insert an image"
+msgid "Insert field"
+msgstr "画像を挿入"
+
+#. / Translators: File chooser filer label
+#: src/client/plugin/mail-merge/mail-merge.vala:392
+msgid "Comma separated values (CSV)"
 msgstr ""
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
@@ -2171,18 +2242,16 @@ msgstr ""
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr ""
 
-#: src/client/plugin/messaging-menu/messaging-menu.vala:75
+#: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
 msgid "%s — New Messages"
 msgstr "%s — 新着メッセージ"
 
-#: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:4
+#. Translators: This is an internal plugin so this name does not need
+#. to be tanslated.
+#: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:6
 msgid "Notification Badge"
 msgstr "通知バッジ"
-
-#: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:5
-msgid "Displays a dock badge showing the number of new messages"
-msgstr "Dock に新着メッセージ数を示すバッジを表示します"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Sent Sound"
@@ -2192,36 +2261,38 @@ msgstr "メール送信音"
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "メール送信時にデスクトップのメール送信音を鳴らします"
 
-#: src/client/plugin/special-folders/special-folders.plugin.desktop.in:4
+#. Translators: This is an internal plugin so this name does not need
+#. to be tanslated.
+#: src/client/plugin/special-folders/special-folders.plugin.desktop.in:6
 msgid "Special Folders"
 msgstr ""
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
-#: src/client/plugin/special-folders/special-folders.vala:160
+#: src/client/plugin/special-folders/special-folders.vala:167
 msgid "Empty"
 msgstr "空にする"
 
 #. Translators: Info bar status message for a draft email
-#: src/client/plugin/special-folders/special-folders.vala:172
+#: src/client/plugin/special-folders/special-folders.vala:179
 msgid "Draft message"
 msgstr "下書きメッセージ"
 
 #. Translators: Info bar status description for a draft
 #. email
-#: src/client/plugin/special-folders/special-folders.vala:175
+#: src/client/plugin/special-folders/special-folders.vala:182
 msgid "This message has not yet been sent."
 msgstr "このメッセージはまだ送信していません。"
 
 #. Translators: Info bar status message for an sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:191
+#: src/client/plugin/special-folders/special-folders.vala:198
 msgid "Message not saved"
 msgstr "メッセージが保存されませんでした"
 
 #. Translators: Info bar status description for a sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:194
+#: src/client/plugin/special-folders/special-folders.vala:201
 msgid "This message was sent, but has not been saved to your account."
 msgstr ""
 "このメッセージを送信しましたが、お使いのアカウントに保存されませんでした。"
@@ -2292,32 +2363,37 @@ msgstr "昨日"
 msgid "%A"
 msgstr "%A"
 
-#. / 12 hours format for datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:216
+#. / 12 hours format for datetime that a message being replied
+#. / to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:218
 msgid "%a, %b %-e, %Y at %l:%M %P"
 msgstr "%Y/%m/%d, %H:%M"
 
-#. / 24 hours format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:220
+#. / 24 hours format for the datetime that a message being
+#. / replied to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:224
 msgid "%a, %b %-e, %Y at %H:%M"
 msgstr "%Y/%m/%d, %H:%M"
 
-#. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:224
+#. / Format for the datetime that a message being replied to
+#. / was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:230
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%Y/%m/%d, %H:%M"
 
-#: src/client/util/util-email.vala:38
+#. Translators: Label used when an email has a missing or
+#. an empty subject
+#: src/client/util/util-email.vala:50
 msgid "(No subject)"
 msgstr "(件名なし)"
 
 #. / Translators: This is shown for displaying a list of email
 #. / recipients that happens to be empty, i.e. contains no
 #. / email addresses.
-#: src/client/util/util-email.vala:135
+#: src/client/util/util-email.vala:148
 msgid "(No recipients)"
 msgstr "(受信者なし)"
 
@@ -2326,7 +2402,7 @@ msgstr "(受信者なし)"
 #. / addresses. The first (string) substitution is
 #. / address of the first, the second substitution is
 #. / the number of n - 1 remaining recipients.
-#: src/client/util/util-email.vala:147
+#: src/client/util/util-email.vala:160
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
@@ -2335,26 +2411,26 @@ msgstr[0] "%s とその他 %d 人"
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: src/client/util/util-email.vala:180
+#: src/client/util/util-email.vala:193
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr ""
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: src/client/util/util-email.vala:187
+#: src/client/util/util-email.vala:200
 #, c-format
 msgid "%s wrote:"
 msgstr ""
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: src/client/util/util-email.vala:193
+#: src/client/util/util-email.vala:206
 #, c-format
 msgid "On %s:"
 msgstr ""
 
-#: src/client/util/util-email.vala:222
+#: src/client/util/util-email.vala:235
 msgid "---------- Forwarded message ----------"
 msgstr ""
 
@@ -2594,7 +2670,7 @@ msgstr ""
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:929
+#: src/engine/imap-engine/imap-engine-generic-account.vala:996
 msgid "Drafts | Draft"
 msgstr "下書き"
 
@@ -2602,13 +2678,13 @@ msgstr "下書き"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:938
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1005
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "送信済み | 送信 | 送信メール | 送信済みメール | 送信済メール"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:943
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1010
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "送信したアイテム"
@@ -2617,7 +2693,7 @@ msgstr "送信したアイテム"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:953
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2627,13 +2703,13 @@ msgstr "迷惑メール | スパム | スパムメール | ごみ | ゴミ"
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:963
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "ごみ箱 | ゴミ箱"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:968
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1035
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "削除したアイテム"
@@ -2642,21 +2718,21 @@ msgstr "削除したアイテム"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:978
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
 msgid "Archive | Archives"
 msgstr "アーカイブ"
 
-#: src/engine/rfc822/rfc822-message.vala:517
+#: src/engine/rfc822/rfc822-message.vala:528
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s”の MIME タイプを確認できませんでした。"
 
-#: src/engine/rfc822/rfc822-message.vala:528
+#: src/engine/rfc822/rfc822-message.vala:539
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%1$s”の MIME タイプ“%2$s”のコンテンツタイプを確認できませんでした。"
 
-#: src/engine/rfc822/rfc822-message.vala:1002
+#: src/engine/rfc822/rfc822-message.vala:1013
 msgid "(no subject)"
 msgstr "(件名なし)"
 
@@ -2837,168 +2913,168 @@ msgid "_Inspect…"
 msgstr "検証(_I)…"
 
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:60
+#: ui/composer-widget.ui:61
 msgid "_From"
 msgstr "差出人(_F)"
 
 #. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:130
+#: ui/composer-widget.ui:131
 msgid "_To"
 msgstr "宛先(_T)"
 
-#: ui/composer-widget.ui:158
+#: ui/composer-widget.ui:159
 msgid "Show Cc, Bcc, and Reply-To fields"
 msgstr "Cc、Bcc、Reply-To フィールドを表示"
 
-#: ui/composer-widget.ui:219
+#: ui/composer-widget.ui:220
 msgid "_Cc"
 msgstr "Cc(_C)"
 
-#: ui/composer-widget.ui:267
+#: ui/composer-widget.ui:268
 msgid "_Bcc"
 msgstr "Bcc(_B)"
 
-#: ui/composer-widget.ui:315
+#: ui/composer-widget.ui:316
 msgid "_Reply-To"
 msgstr "Reply-To(_R)"
 
-#: ui/composer-widget.ui:372
+#: ui/composer-widget.ui:373
 msgid "_Subject"
 msgstr "件名(_S)"
 
-#: ui/composer-widget.ui:445
+#: ui/composer-widget.ui:446
 msgid "Drop files here"
 msgstr "ここにファイルをドロップしてください"
 
-#: ui/composer-widget.ui:461
+#: ui/composer-widget.ui:462
 msgid "To add them as attachments"
 msgstr "添付ファイルとして追加します"
 
-#: ui/composer-widget.ui:602
+#: ui/composer-widget.ui:615
 msgid "Bold text"
 msgstr "テキストを太字にする"
 
-#: ui/composer-widget.ui:626
+#: ui/composer-widget.ui:639
 msgid "Italic text"
 msgstr "テキストを斜体にする"
 
-#: ui/composer-widget.ui:650
+#: ui/composer-widget.ui:663
 msgid "Underline text"
 msgstr "テキストに下線を引く"
 
-#: ui/composer-widget.ui:674
+#: ui/composer-widget.ui:687
 msgid "Strikethrough text"
 msgstr "テキストに取り消し線を引く"
 
-#: ui/composer-widget.ui:707
+#: ui/composer-widget.ui:720
 msgid "Insert bulleted list"
 msgstr "箇条書きリストを挿入"
 
-#: ui/composer-widget.ui:731
+#: ui/composer-widget.ui:744
 msgid "Insert numbered list"
 msgstr "番号付き箇条書きリストを挿入"
 
-#: ui/composer-widget.ui:764
+#: ui/composer-widget.ui:777
 msgid "Indent or quote text"
 msgstr "テキストのインデント/引用"
 
-#: ui/composer-widget.ui:788
+#: ui/composer-widget.ui:801
 msgid "Un-indent or unquote text"
 msgstr "テキストのインデント/引用を解除"
 
-#: ui/composer-widget.ui:817
+#: ui/composer-widget.ui:830
 msgid "Remove text formatting"
 msgstr "テキストの書式を削除"
 
-#: ui/composer-widget.ui:836
+#: ui/composer-widget.ui:849
 msgid "Change font type"
 msgstr "フォントの種類を変更"
 
-#: ui/composer-widget.ui:851
+#: ui/composer-widget.ui:864
 msgid "Sans Serif"
 msgstr "ゴシック体"
 
-#: ui/composer-widget.ui:862
+#: ui/composer-widget.ui:875
 msgid "Serif"
 msgstr "明朝体"
 
-#: ui/composer-widget.ui:873
+#: ui/composer-widget.ui:886
 msgid "Fixed Width"
 msgstr "等幅"
 
-#: ui/composer-widget.ui:899
+#: ui/composer-widget.ui:912
 msgid "Change font color"
 msgstr "フォントの色を変更"
 
-#: ui/composer-widget.ui:914
+#: ui/composer-widget.ui:927
 msgid "Change font size"
 msgstr "フォントサイズを変更"
 
-#: ui/composer-widget.ui:949
+#: ui/composer-widget.ui:962
 msgid "Insert or update text link"
 msgstr "リンクを挿入/更新"
 
-#: ui/composer-widget.ui:973
+#: ui/composer-widget.ui:986
 msgid "Insert an image"
 msgstr "画像を挿入"
 
-#: ui/composer-widget.ui:1015
+#: ui/composer-widget.ui:1028
 msgid "Undo last edit"
 msgstr "元に戻す"
 
-#: ui/composer-widget.ui:1039
+#: ui/composer-widget.ui:1052
 msgid "Redo last edit"
 msgstr "やり直す"
 
-#: ui/composer-widget.ui:1068 ui/composer-widget.ui:1093
+#: ui/composer-widget.ui:1081 ui/composer-widget.ui:1106
 msgid "Attach a file"
 msgstr "ファイルを添付"
 
-#: ui/composer-widget.ui:1117
+#: ui/composer-widget.ui:1130
 msgid "Add original attachments"
 msgstr "元の添付ファイルを追加"
 
-#: ui/composer-widget.ui:1162
+#: ui/composer-widget.ui:1175
 msgid "More options"
 msgstr "他のオプション"
 
-#: ui/composer-widget.ui:1182
+#: ui/composer-widget.ui:1195
 msgid "Show formatting toolbar"
 msgstr "書式ツールバーを表示"
 
-#: ui/composer-widget.ui:1200
+#: ui/composer-widget.ui:1213
 msgid "Select spell checking languages"
 msgstr "スペルチェックする言語を選択"
 
-#: ui/composer-widget.ui:1263
+#: ui/composer-widget.ui:1273
 msgid "S_ans Serif"
 msgstr "Sans Serif(_A)"
 
-#: ui/composer-widget.ui:1268
+#: ui/composer-widget.ui:1278
 msgid "S_erif"
 msgstr "Serif(_E)"
 
-#: ui/composer-widget.ui:1273
+#: ui/composer-widget.ui:1283
 msgid "_Fixed Width"
 msgstr "等幅(_F)"
 
-#: ui/composer-widget.ui:1283
+#: ui/composer-widget.ui:1293
 msgid "_Small"
 msgstr "小(_S)"
 
-#: ui/composer-widget.ui:1288
+#: ui/composer-widget.ui:1298
 msgid "_Medium"
 msgstr "中(_M)"
 
-#: ui/composer-widget.ui:1293
+#: ui/composer-widget.ui:1303
 msgid "Lar_ge"
 msgstr "大(_G)"
 
-#: ui/composer-widget.ui:1303
+#: ui/composer-widget.ui:1313
 msgid "_Rich Text"
 msgstr "リッチテキスト(_R)"
 
-#: ui/composer-widget.ui:1308
+#: ui/composer-widget.ui:1318
 msgid "_Plain Text"
 msgstr "プレーンテキスト(_P)"
 
@@ -3026,9 +3102,9 @@ msgid ""
 "ReportingABug\">new bug report</a>."
 msgstr ""
 "問題が深刻な場合や継続して発生している場合は、詳細を保存して<a href="
-"\"https://wiki.gnome.org/Apps/Geary/Contact\">各種連絡先</a>に投稿する"
-"か、<a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">バグとして報"
-"告</a>してください。"
+"\"https://wiki.gnome.org/Apps/Geary/Contact\">各種連絡先</a>に投稿するか、<a "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">バグとして報告</a>し"
+"てください。"
 
 #: ui/components-inspector-error-view.ui:49
 msgid "Details:"
@@ -3620,6 +3696,9 @@ msgstr "認証(_A)"
 msgid "Geary update in progress…"
 msgstr "Geary を更新しています…"
 
+#~ msgid "Displays a dock badge showing the number of new messages"
+#~ msgstr "Dock に新着メッセージ数を示すバッジを表示します"
+
 #~ msgid "Log periodic activity"
 #~ msgstr "定期的なアクティビティを記録する"
 
@@ -3987,10 +4066,6 @@ msgstr "Geary を更新しています…"
 #~ msgctxt "shortcut window"
 #~ msgid "Additional Shortcuts"
 #~ msgstr "その他のショートカット"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Star"
-#~ msgstr "星を付ける"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Unstar"
