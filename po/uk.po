@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-08-27 00:32+0000\n"
-"PO-Revision-Date: 2020-08-27 08:43+0300\n"
+"POT-Creation-Date: 2020-08-27 12:37+0000\n"
+"PO-Revision-Date: 2020-08-27 15:49+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -1634,7 +1634,7 @@ msgid "_OK"
 msgstr "_Гаразд"
 
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:388
+#: src/client/plugin/mail-merge/mail-merge.vala:392
 #: ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "_Скасувати"
@@ -1660,7 +1660,7 @@ msgid "_Help"
 msgstr "_Довідка"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:387
+#: src/client/plugin/mail-merge/mail-merge.vala:391
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Відкрити"
@@ -2293,7 +2293,7 @@ msgstr "Надіслати"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:332
+#: src/client/plugin/mail-merge/mail-merge.vala:336
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Редагувати"
@@ -2305,9 +2305,9 @@ msgstr "Редагувати"
 #. Translators: The name of the folder used to
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
-#: src/client/plugin/mail-merge/mail-merge.vala:284
-#: src/client/plugin/mail-merge/mail-merge.vala:385
-#: src/client/plugin/mail-merge/mail-merge.vala:484
+#: src/client/plugin/mail-merge/mail-merge.vala:288
+#: src/client/plugin/mail-merge/mail-merge.vala:389
+#: src/client/plugin/mail-merge/mail-merge.vala:488
 msgid "Mail Merge"
 msgstr "Об'єднання пошти"
 
@@ -2332,31 +2332,36 @@ msgstr "Пауза"
 #. Translators: Info bar description for the mail merge
 #. folder. The first string substitution the number of email
 #. already sent, the second is the total number to send.
-#: src/client/plugin/mail-merge/mail-merge.vala:239
+#: src/client/plugin/mail-merge/mail-merge.vala:240
 #, c-format
+#| msgid "Sent %u of %u"
 msgid "Sent %u of %u"
-msgstr "Надіслано %u з %u"
+msgid_plural "Sent %u of %u"
+msgstr[0] "Надіслано %u з %u"
+msgstr[1] "Надіслано %u з %u"
+msgstr[2] "Надіслано %u з %u"
+msgstr[3] "Надіслано %u з %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:320
+#: src/client/plugin/mail-merge/mail-merge.vala:324
 msgid "Mail merge template"
 msgstr "Шаблон об'єднання пошти"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:328
 msgid "Merge"
 msgstr "Об'єднати"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:373
+#: src/client/plugin/mail-merge/mail-merge.vala:377
 msgid "Insert field"
 msgstr "Вставити поле"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:396
 msgid "Comma separated values (CSV)"
 msgstr "Значення, розділені комами (CSV)"
 
@@ -3832,25 +3837,3 @@ msgstr "_Засвідчення"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Виконується оновлення…"
-
-#~ msgid "Desktop Notifications"
-#~ msgstr "Сповіщення на стільниці"
-
-#~ msgid "Folder Highlight"
-#~ msgstr "Підсвічування тек"
-
-#~ msgid "Notification Badge"
-#~ msgstr "Банер сповіщення"
-
-#~ msgid "Special Folders"
-#~ msgstr "Особливі теки"
-
-#~ msgid "Displays desktop notifications when new email is delivered"
-#~ msgstr ""
-#~ "Показувати сповіщення на стільниці, коли надходять нові повідомлення"
-
-#~ msgid "Highlights folders that have newly delivered mail"
-#~ msgstr "Підсвічує теки, у яких нові повідомлення"
-
-#~ msgid "Displays a dock badge showing the number of new messages"
-#~ msgstr "Показує на панелі банер із кількістю нових повідомлень"
