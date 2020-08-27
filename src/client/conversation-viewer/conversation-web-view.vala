@@ -89,20 +89,18 @@ public class ConversationWebView : Components.WebView {
      * Returns the current selection, for prefill as find text.
      */
     public async string? get_selection_for_find() throws Error{
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getSelectionForFind"), null
+        return yield call_returning<string?>(
+            Util.JS.callable("getSelectionForFind"), null
         );
-        return Util.JS.to_string(result);
     }
 
     /**
      * Returns the current selection, for quoting in a message.
      */
     public async string? get_selection_for_quoting() throws Error {
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getSelectionForQuoting"), null
+        return yield call_returning<string?>(
+            Util.JS.callable("getSelectionForQuoting"), null
         );
-        return Util.JS.to_string(result);
     }
 
     /**
@@ -110,10 +108,9 @@ public class ConversationWebView : Components.WebView {
      */
     public async int? get_anchor_target_y(string anchor_body)
         throws GLib.Error {
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getAnchorTargetY").string(anchor_body), null
+        return yield call_returning<int?>(
+            Util.JS.callable("getAnchorTargetY").string(anchor_body), null
         );
-        return (int) Util.JS.to_int32(result);
     }
 
     /**

@@ -87,6 +87,8 @@ PageState.prototype = {
         window.addEventListener("transitionend", function(e) {
             queuePreferredHeightUpdate();
         }, false); // load does not bubble
+
+        this.testResult = null;
     },
     getPreferredHeight: function() {
         // Return the scroll height of the HTML element since the BODY
@@ -184,5 +186,13 @@ PageState.prototype = {
             this.hasSelection = hasSelection;
             window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
         }
+    },
+    // Methods below are for unit tests.
+    testVoid: function() {
+        this.testResult = "void";
+    },
+    testReturn: function(value) {
+        this.testResult = value;
+        return value;
     }
 };

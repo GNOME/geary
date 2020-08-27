@@ -370,9 +370,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * Returns the view's content as an HTML string.
      */
     public async string? get_html() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getHtml"), null)
-        );
+        return yield call_returning<string?>(Util.JS.callable("getHtml"), null);
     }
 
     /**
@@ -410,7 +408,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * Load any remote images previously that were blocked.
      */
     public void load_remote_images() {
-        this.call.begin(Util.JS.callable("geary.loadRemoteImages"), null);
+        this.call_void.begin(Util.JS.callable("loadRemoteImages"), null);
     }
 
     /**
@@ -455,21 +453,100 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     public new async void set_editable(bool enabled,
                                        Cancellable? cancellable)
         throws Error {
-        yield call(
-            Util.JS.callable("geary.setEditable").bool(enabled), cancellable
+        yield call_void(
+            Util.JS.callable("setEditable").bool(enabled), cancellable
         );
     }
 
     /**
      * Invokes a {@link Util.JS.Callable} on this web view.
+     *
+     * This calls the given callable on the `geary` object for the
+     * current view, any returned value are ignored.
      */
-    protected async JSC.Value call(Util.JS.Callable target,
+    protected async void call_void(Util.JS.Callable target,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-        WebKit.JavascriptResult result = yield run_javascript(
-            target.to_string(), cancellable
+        yield send_message_to_page(
+            target.to_message(), cancellable
         );
-        return result.get_js_value();
+    }
+
+    /**
+     * Invokes a {@link Util.JS.Callable} on this web view.
+     *
+     * This calls the given callable on the `geary` object for the
+     * current view. The value returned by the call is returned by
+     * this method.
+     *
+     * The type parameter `T` must match the type returned by the
+     * call, else an error is thrown. Only simple nullable value types
+     * are supported for T, for more complex return types (arrays,
+     * dictionaries, etc) specify {@link GLib.Variant} for `T` and
+     * manually parse that.
+     */
+    protected async T call_returning<T>(Util.JS.Callable target,
+                                        GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        WebKit.UserMessage? response = yield send_message_to_page(
+            target.to_message(), cancellable
+        );
+        if (response == null) {
+            throw new Util.JS.Error.TYPE(
+                "Method call did not return a value: %s", target.to_string()
+            );
+        }
+        GLib.Variant? param = response.parameters;
+        T ret_value = null;
+        var ret_type = typeof(T);
+        if (ret_type == typeof(GLib.Variant)) {
+            ret_value = param;
+        } else {
+            if (param != null && param.get_type().is_maybe()) {
+                param = param.get_maybe();
+            }
+            if (param != null) {
+                // Since these replies are coming from JS via
+                // Util.JS.value_to_variant, they will only be one of
+                // string, double, bool, array or dict
+                var param_type = param.classify();
+                if (ret_type == typeof(string) && param_type == STRING) {
+                    ret_value = param.get_string();
+                } else if (ret_type == typeof(bool) && param_type == BOOLEAN) {
+                    ret_value = (bool?) param.get_boolean();
+                } else if (ret_type == typeof(int) && param_type == DOUBLE) {
+                    ret_value = (int?) ((int) param.get_double());
+                } else if (ret_type == typeof(short) && param_type == DOUBLE) {
+                    ret_value = (short?) ((short) param.get_double());
+                } else if (ret_type == typeof(char) && param_type == DOUBLE) {
+                    ret_value = (char?) ((char) param.get_double());
+                } else if (ret_type == typeof(long) && param_type == DOUBLE) {
+                    ret_value = (long?) ((long) param.get_double());
+                } else if (ret_type == typeof(int64) && param_type == DOUBLE) {
+                    ret_value = (int64?) ((int64) param.get_double());
+                } else if (ret_type == typeof(uint) && param_type == DOUBLE) {
+                    ret_value = (uint?) ((uint) param.get_double());
+                } else if (ret_type == typeof(uchar) && param_type == DOUBLE) {
+                    ret_value = (uchar?) ((uchar) param.get_double());
+                } else if (ret_type == typeof(ushort) && param_type == DOUBLE) {
+                    ret_value = (ushort?) ((ushort) param.get_double());
+                } else if (ret_type == typeof(ulong) && param_type == DOUBLE) {
+                    ret_value = (ulong?) ((ulong) param.get_double());
+                } else if (ret_type == typeof(uint64) && param_type == DOUBLE) {
+                    ret_value = (uint64?) ((uint64) param.get_double());
+                } else if (ret_type == typeof(double) && param_type == DOUBLE) {
+                    ret_value = (double?) param.get_double();
+                } else if (ret_type == typeof(float) && param_type == DOUBLE) {
+                    ret_value = (float?) ((float) param.get_double());
+                } else {
+                    throw new Util.JS.Error.TYPE(
+                        "%s is not a supported type for %s",
+                        ret_type.name(), param_type.to_string()
+                    );
+                }
+            }
+        }
+        return ret_value;
     }
 
     /**

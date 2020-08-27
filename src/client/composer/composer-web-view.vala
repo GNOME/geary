@@ -202,8 +202,8 @@ public class Composer.WebView : Components.WebView {
      * Returns the view's content as HTML without being cleaned.
      */
     public async string? get_html_for_draft() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getHtml").bool(false), null)
+        return yield call_returning<string?>(
+            Util.JS.callable("getHtml").bool(false), null
         );
     }
 
@@ -213,8 +213,8 @@ public class Composer.WebView : Components.WebView {
     public void set_rich_text(bool enabled) {
         this.is_rich_text = enabled;
         if (this.is_content_loaded) {
-            this.call.begin(
-                Util.JS.callable("geary.setRichText").bool(enabled), null
+            this.call_void.begin(
+                Util.JS.callable("setRichText").bool(enabled), null
             );
         }
     }
@@ -223,14 +223,14 @@ public class Composer.WebView : Components.WebView {
      * Undoes the last edit operation.
      */
     public void undo() {
-        this.call.begin(Util.JS.callable("geary.undo"), null);
+        this.call_void.begin(Util.JS.callable("undo"), null);
     }
 
     /**
      * Redoes the last undone edit operation.
      */
     public void redo() {
-        this.call.begin(Util.JS.callable("geary.redo"), null);
+        this.call_void.begin(Util.JS.callable("redo"), null);
     }
 
     /**
@@ -239,9 +239,9 @@ public class Composer.WebView : Components.WebView {
      * Returns an id to be used to refer to the selection in
      * subsequent calls.
      */
-    public async string save_selection() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.saveSelection"), null)
+    public async string? save_selection() throws Error {
+        return yield call_returning<string?>(
+            Util.JS.callable("saveSelection"), null
         );
     }
 
@@ -249,9 +249,7 @@ public class Composer.WebView : Components.WebView {
      * Removes a saved selection.
      */
     public void free_selection(string id) {
-        this.call.begin(
-            Util.JS.callable("geary.freeSelection").string(id), null
-        );
+        this.call_void.begin(Util.JS.callable("freeSelection").string(id), null);
     }
 
     /**
@@ -357,9 +355,9 @@ public class Composer.WebView : Components.WebView {
      * will be inserted wrapping the selection.
      */
     public void insert_link(string href, string selection_id) {
-        this.call.begin(
+        this.call_void.begin(
             Util.JS.callable(
-                "geary.insertLink"
+                "insertLink"
             ).string(href).string(selection_id),
             null
         );
@@ -373,8 +371,8 @@ public class Composer.WebView : Components.WebView {
      * unlinked section.
      */
     public void delete_link(string selection_id) {
-        this.call.begin(
-            Util.JS.callable("geary.deleteLink").string(selection_id),
+        this.call_void.begin(
+            Util.JS.callable("deleteLink").string(selection_id),
             null
         );
     }
@@ -396,23 +394,23 @@ public class Composer.WebView : Components.WebView {
      * Indents the line at the current text cursor location.
      */
     public void indent_line() {
-        this.call.begin(Util.JS.callable("geary.indentLine"), null);
+        this.call_void.begin(Util.JS.callable("indentLine"), null);
     }
 
     public void insert_olist() {
-        this.call.begin(Util.JS.callable("geary.insertOrderedList"), null);
+        this.call_void.begin(Util.JS.callable("insertOrderedList"), null);
     }
 
     public void insert_ulist() {
-        this.call.begin(Util.JS.callable("geary.insertUnorderedList"), null);
+        this.call_void.begin(Util.JS.callable("insertUnorderedList"), null);
     }
 
     /**
      * Updates the signature block if it has not been deleted.
      */
     public new void update_signature(string signature) {
-        this.call.begin(
-            Util.JS.callable("geary.updateSignature").string(signature), null
+        this.call_void.begin(
+            Util.JS.callable("updateSignature").string(signature), null
         );
     }
 
@@ -420,22 +418,21 @@ public class Composer.WebView : Components.WebView {
      * Removes the quoted message (if any) from the composer.
      */
     public void delete_quoted_message() {
-        this.call.begin(Util.JS.callable("geary.deleteQuotedMessage"), null);
+        this.call_void.begin(Util.JS.callable("deleteQuotedMessage"), null);
     }
 
     /**
      * Determines if the editor content contains an attachment keyword.
      */
-    public async bool contains_attachment_keywords(string keyword_spec,
-                                                   string subject) {
+    public async bool? contains_attachment_keywords(string keyword_spec,
+                                                    string subject) {
         try {
-            return Util.JS.to_bool(
-                yield call(
-                    Util.JS.callable("geary.containsAttachmentKeyword")
-                    .string(keyword_spec)
-                    .string(subject),
-                    null)
-                );
+            return yield call_returning<bool?>(
+                Util.JS.callable("containsAttachmentKeyword")
+                .string(keyword_spec)
+                .string(subject),
+                null
+            );
         } catch (Error err) {
             debug("Error checking or attachment keywords: %s", err.message);
             return false;
@@ -449,7 +446,7 @@ public class Composer.WebView : Components.WebView {
      * this.
      */
     public async void clean_content() throws Error {
-        this.call.begin(Util.JS.callable("geary.cleanContent"), null);
+        this.call_void.begin(Util.JS.callable("cleanContent"), null);
     }
 
     /**
@@ -459,10 +456,10 @@ public class Composer.WebView : Components.WebView {
         const int MAX_BREAKABLE_LEN = 72; // F=F recommended line limit
         const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
 
-        string body_text = Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getText"), null)
+        string? body_text = yield call_returning<string?>(
+            Util.JS.callable("getText"), null
         );
-        string[] lines = body_text.split("\n");
+        string[] lines = (body_text ?? "").split("\n");
         GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
         foreach (string line in lines) {
             // Strip trailing whitespace, so it doesn't look like a

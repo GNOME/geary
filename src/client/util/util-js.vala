@@ -348,40 +348,54 @@ namespace Util.JS {
      */
     public class Callable {
 
-        private string base_name;
-        private string[] safe_args = new string[0];
+        private string name;
+        private GLib.Variant[] args = {};
 
 
-        public Callable(string base_name) {
-            this.base_name = base_name;
+        public Callable(string name) {
+            this.name = name;
+        }
+
+        public WebKit.UserMessage to_message() {
+            GLib.Variant? args = null;
+            if (this.args.length == 1) {
+                args = this.args[0];
+            } else if (this.args.length > 1) {
+                args = new GLib.Variant.tuple(this.args);
+            }
+            return new WebKit.UserMessage(this.name, args);
         }
 
         public string to_string() {
-            return base_name + "(" + global::string.joinv(",", safe_args) + ");";
+            string[] args = new string[this.args.length];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = this.args[i].print(true);
+            }
+            return this.name + "(" + global::string.joinv(",", args) + ")";
         }
 
         public Callable string(string value) {
-            add_param("\"" + escape_string(value) + "\"");
+            add_param(new GLib.Variant.string(value));
             return this;
         }
 
         public Callable double(double value) {
-            add_param(value.to_string());
+            add_param(new GLib.Variant.double(value));
             return this;
         }
 
         public Callable int(int value) {
-            add_param(value.to_string());
+            add_param(new GLib.Variant.int32(value));
             return this;
         }
 
         public Callable bool(bool value) {
-            add_param(value ? "true" : "false");
+            add_param(new GLib.Variant.boolean(value));
             return this;
         }
 
-        private inline void add_param(string value) {
-            this.safe_args += value;
+        private inline void add_param(GLib.Variant value) {
+            this.args += value;
         }
 
     }

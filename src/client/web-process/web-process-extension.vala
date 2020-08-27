@@ -30,6 +30,10 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
  */
 public class GearyWebExtension : Object {
 
+    private const string PAGE_STATE_OBJECT_NAME = "geary";
+    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
+    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+
     private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
 
     private const string REMOTE_LOAD_VAR = "_gearyAllowRemoteResourceLoads";
@@ -157,6 +161,55 @@ public class GearyWebExtension : Object {
         page.get_editor().selection_changed.connect(() => {
                 selection_changed(page);
             });
+        page.user_message_received.connect(on_page_message_received);
+    }
+
+    private bool on_page_message_received(WebKit.WebPage page,
+                                          WebKit.UserMessage message) {
+        WebKit.Frame frame = page.get_main_frame();
+        JSC.Context context = frame.get_js_context();
+        JSC.Value page_state = context.get_value(PAGE_STATE_OBJECT_NAME);
+
+        try {
+            JSC.Value[]? call_param = null;
+            GLib.Variant? message_param = message.parameters;
+            if (message_param != null) {
+                if (message_param.is_container()) {
+                    size_t len = message_param.n_children();
+                    call_param = new JSC.Value[len];
+                    for (size_t i = 0; i < len; i++) {
+                        call_param[i] = Util.JS.variant_to_value(
+                            context,
+                            message_param.get_child_value(i)
+                        );
+                    }
+                } else {
+                    call_param = {
+                        Util.JS.variant_to_value(context, message_param)
+                    };
+                }
+            }
+
+            JSC.Value ret = page_state.object_invoke_methodv(
+                message.name, call_param
+            );
+
+            // Must send a reply, even for void calls, otherwise
+            // WebKitGTK will complain. So return a message return
+            // rain hail or shine.
+            // https://bugs.webkit.org/show_bug.cgi?id=215880
+
+            message.send_reply(
+                new WebKit.UserMessage(
+                    MESSAGE_RETURN_VALUE_NAME,
+                    Util.JS.value_to_variant(ret)
+                )
+            );
+        } catch (GLib.Error err) {
+            debug("Failed to handle message: %s", err.message);
+        }
+
+        return true;
     }
 
 }
