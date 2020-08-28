@@ -22,7 +22,6 @@ PageState.prototype = {
 
         this._selectionChanged = MessageSender("selection_changed");
         this._contentLoaded = MessageSender("content_loaded");
-        this._remoteImageLoadBlocked = MessageSender("remote_image_load_blocked");
         this._preferredHeightChanged = MessageSender("preferred_height_changed");
         this._commandStackChanged = MessageSender("command_stack_changed");
         this._documentModified = MessageSender("document_modified");
@@ -44,6 +43,10 @@ PageState.prototype = {
 
         document.addEventListener("DOMContentLoaded", function(e) {
             state.loaded();
+        });
+
+        document.addEventListener("selectionchange", function(e) {
+            state.selectionChanged();
         });
 
         // Coalesce multiple calls to updatePreferredHeight using a
@@ -147,9 +150,6 @@ PageState.prototype = {
     },
     stopBodyObserver: function() {
         this.bodyObserver.disconnect();
-    },
-    remoteImageLoadBlocked: function() {
-        this._remoteImageLoadBlocked();
     },
     /**
      * Sends "preferredHeightChanged" message if it has changed.

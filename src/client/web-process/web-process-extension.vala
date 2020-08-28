@@ -77,7 +77,10 @@ public class GearyWebExtension : Object {
             if (should_load_remote_images(page)) {
                 should_load = true;
             } else {
-                remote_image_load_blocked(page);
+                page.send_message_to_view.begin(
+                    new WebKit.UserMessage("remote_image_load_blocked", null),
+                    null
+                );
             }
         }
 
@@ -97,54 +100,6 @@ public class GearyWebExtension : Object {
             );
         }
         return should_load;
-    }
-
-    private void remote_image_load_blocked(WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        try {
-            execute_script(
-                context,
-                "geary.remoteImageLoadBlocked();",
-                GLib.Log.FILE,
-                GLib.Log.METHOD,
-                GLib.Log.LINE
-            );
-        } catch (Error err) {
-            debug(
-                "Error calling PageState::remoteImageLoadBlocked: %s",
-                err.message
-            );
-        }
-    }
-
-    private void selection_changed(WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        try {
-            execute_script(
-                context,
-                "geary.selectionChanged();",
-                GLib.Log.FILE,
-                GLib.Log.METHOD,
-                GLib.Log.LINE
-            );
-        } catch (Error err) {
-            debug("Error calling PageStates::selectionChanged: %s", err.message);
-        }
-    }
-
-    private JSC.Value execute_script(JSC.Context context,
-                                     string script,
-                                     string file_name,
-                                     string method_name,
-                                     int line_number)
-        throws Util.JS.Error {
-        JSC.Value ret = context.evaluate_with_source_uri(
-            script, -1, "geary:%s/%s".printf(file_name, method_name), line_number
-        );
-        Util.JS.check_exception(context);
-        return ret;
     }
 
     private WebKit.UserMessage to_exception_message(string? name,
@@ -208,13 +163,6 @@ public class GearyWebExtension : Object {
 
         page.console_message_sent.connect(on_console_message);
         page.send_request.connect(on_send_request);
-        // XXX investigate whether the earliest supported
-        // version of WK supports the DOM "selectionchanged"
-        // event, and if so use that rather that doing it in
-        // here in the extension
-        page.get_editor().selection_changed.connect(() => {
-                selection_changed(page);
-            });
         page.user_message_received.connect(on_page_message_received);
     }
 
