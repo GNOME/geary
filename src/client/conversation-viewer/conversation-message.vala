@@ -666,7 +666,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /**
      * Adds a set of internal resources to web_view.
      *
-     * @see add_internal_resource
+     * @see Components.WebView.add_internal_resources
      */
     public void add_internal_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
         if (this.web_view == null)
