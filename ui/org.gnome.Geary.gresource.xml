@@ -20,9 +20,10 @@
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-log-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-system-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">composer-editor.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">composer-editor-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-headerbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-link-popover.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-widget.ui</file>
     <file compressed="true">composer-web-view.css</file>
     <file compressed="true">composer-web-view.js</file>

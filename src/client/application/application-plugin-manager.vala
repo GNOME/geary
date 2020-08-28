@@ -427,7 +427,7 @@ public class Application.PluginManager : GLib.Object {
             if (entry != null) {
                 entry.insert_at_cursor(plain_text);
             } else {
-                this.backing.editor.insert_text(plain_text);
+                this.backing.editor.body.insert_text(plain_text);
             }
         }
 
@@ -450,7 +450,7 @@ public class Application.PluginManager : GLib.Object {
         public void append_menu_item(Plugin.Actionable menu_item) {
             if (this.menu_items == null) {
                 this.menu_items = new GLib.Menu();
-                this.backing.insert_menu_section(this.menu_items);
+                this.backing.editor.insert_menu_section(this.menu_items);
             }
             this.menu_items.append(
                 menu_item.label,
@@ -494,7 +494,7 @@ public class Application.PluginManager : GLib.Object {
             }
 
             this.action_bar.show_all();
-            this.backing.add_action_bar(this.action_bar);
+            this.backing.editor.add_action_bar(this.action_bar);
         }
 
         private Gtk.Widget? widget_for_item(Plugin.ActionBar.Item item) {

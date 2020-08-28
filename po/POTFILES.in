@@ -60,6 +60,7 @@ src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-box.vala
 src/client/composer/composer-container.vala
+src/client/composer/composer-editor.vala
 src/client/composer/composer-email-entry.vala
 src/client/composer/composer-embed.vala
 src/client/composer/composer-headerbar.vala
@@ -445,9 +446,10 @@ ui/accounts_editor_remove_pane.ui
 ui/accounts_editor_servers_pane.ui
 ui/application-main-window.ui
 ui/certificate_warning_dialog.glade
+ui/composer-editor.ui
+ui/composer-editor-menus.ui
 ui/composer-headerbar.ui
 ui/composer-link-popover.ui
-ui/composer-menus.ui
 ui/composer-widget.ui
 ui/components-attachment-pane.ui
 ui/components-attachment-pane-menus.ui

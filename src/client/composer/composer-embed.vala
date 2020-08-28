@@ -147,9 +147,10 @@ public class Composer.Embed : Gtk.EventBox, Container {
                     // Outer scroller didn't use the complete delta,
                     // so work out what to do with the remainder.
 
-                    int editor_height = this.composer.editor.get_allocated_height();
-                    int editor_preferred = this.composer.editor.preferred_height;
-                    int scrolled_height = this.outer_scroller.get_allocated_height();
+                    var body = this.composer.editor.body;
+                    int editor_height = body.get_allocated_height();
+                    int editor_preferred = body.preferred_height;
+                    int scrolled_height = body.get_allocated_height();
 
                     if (alloc.height < scrolled_height &&
                         editor_height < editor_preferred) {
