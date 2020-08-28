@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -61,15 +61,35 @@ public class Util.JS.Test : TestCase {
         var value = new JSC.Value.array_from_garray(this.context, null);
         assert_equal(
             value_to_variant(value).print(true),
-            "@av []"
+            "()"
         );
+
         var array = new GLib.GenericArray<JSC.Value>();
         array.add(new JSC.Value.string(this.context, "test"));
         value = new JSC.Value.array_from_garray(this.context, array);
         assert_equal(
             value_to_variant(value).print(true),
-            "[<'test'>]"
+            "['test']"
         );
+
+        array = new GLib.GenericArray<JSC.Value>();
+        array.add(new JSC.Value.string(this.context, "test1"));
+        array.add(new JSC.Value.string(this.context, "test2"));
+        value = new JSC.Value.array_from_garray(this.context, array);
+        assert_equal(
+            value_to_variant(value).print(true),
+            "['test1', 'test2']"
+        );
+
+        array = new GLib.GenericArray<JSC.Value>();
+        array.add(new JSC.Value.string(this.context, "test"));
+        array.add(new JSC.Value.boolean(this.context, true));
+        value = new JSC.Value.array_from_garray(this.context, array);
+        assert_equal(
+            value_to_variant(value).print(true),
+            "('test', true)"
+        );
+
         value = new JSC.Value.object(this.context, null, null);
         assert_equal(
             value_to_variant(value).print(true),
@@ -80,7 +100,7 @@ public class Util.JS.Test : TestCase {
         );
         assert_equal(
             value_to_variant(value).print(true),
-            "{'test': <<true>>}"
+            "{'test': <true>}"
         );
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017,2019 Michael James Gratton <mike@vee.net>
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -23,6 +23,64 @@ namespace Util.JS {
          * A {@link JS.Value} was not of the expected type.
          */
         TYPE
+    }
+
+    /** Supported types of JSC values. */
+    public enum JscType {
+
+        /** Specifies an unsupported value type. */
+        UNKNOWN,
+
+        /** Specifies a JavaScript `undefined` value. */
+        UNDEFINED,
+
+        /** Specifies a JavaScript `null` value. */
+        NULL,
+        FUNCTION,
+        STRING,
+        NUMBER,
+        BOOLEAN,
+        ARRAY,
+        CONSTRUCTOR,
+        OBJECT;
+
+        /**
+         * Determines the type of a JSC value.
+         *
+         * Returns the type of the given value, or {@link UNKNOWN} if
+         * it could not be determined.
+         */
+        public static JscType to_type(JSC.Value value) {
+            if (value.is_undefined()) {
+                return UNDEFINED;
+            }
+            if (value.is_null()) {
+                return NULL;
+            }
+            if (value.is_string()) {
+                return STRING;
+            }
+            if (value.is_number()) {
+                return NUMBER;
+            }
+            if (value.is_boolean()) {
+                return BOOLEAN;
+            }
+            if (value.is_array()) {
+                return ARRAY;
+            }
+            if (value.is_object()) {
+                return OBJECT;
+            }
+            if (value.is_function()) {
+                return FUNCTION;
+            }
+            if (value.is_constructor()) {
+                return CONSTRUCTOR;
+            }
+            return UNKNOWN;
+        }
+
     }
 
     /**
@@ -132,60 +190,80 @@ namespace Util.JS {
      *
      * Simple value objects (string, number, and Boolean values),
      * arrays of these, and objects with these types as properties are
-     * supported. Arrays are converted to arrays of variants, and
-     * objects to dictionaries containing string keys and variant
-     * values. Null or undefined values are returned as an empty maybe
-     * variant type, since it is not possible to determine the actual
-     * type.
+     * supported. Arrays containing objects of the same type are
+     * converted to arrays, otherwise they are converted to tuples,
+     * empty arrays are converted to the unit tuple, and objects are
+     * converted to vardict containing property names as keys and
+     * values. Null and undefined values are returned as an empty
+     * maybe variant type, since it is not possible to determine the
+     * actual type.
      *
      * Throws a type error if the given value's type is not supported.
      */
     public inline GLib.Variant value_to_variant(JSC.Value value)
         throws Error {
-        if (value.is_null() || value.is_undefined()) {
-            return new GLib.Variant.maybe(GLib.VariantType.VARIANT, null);
-        }
-        if (value.is_boolean()) {
-            return new GLib.Variant.boolean(value.to_boolean());
-        }
-        if (value.is_number()) {
-            return new GLib.Variant.double(value.to_double());
-        }
-        if (value.is_string()) {
-            return new GLib.Variant.string(value.to_string());
-        }
-        if (value.is_array()) {
+        GLib.Variant? variant = null;
+        switch (JscType.to_type(value)) {
+        case UNDEFINED:
+        case NULL:
+            variant = new GLib.Variant.maybe(GLib.VariantType.VARIANT, null);
+            break;
+
+        case STRING:
+            variant = new GLib.Variant.string(value.to_string());
+            break;
+
+        case NUMBER:
+            variant = new GLib.Variant.double(value.to_double());
+            break;
+
+        case BOOLEAN:
+            variant = new GLib.Variant.boolean(value.to_boolean());
+            break;
+
+        case ARRAY:
             int len = to_int32(value.object_get_property("length"));
-            GLib.Variant[] values = new GLib.Variant[len];
-            for (int i = 0; i < len; i++) {
-                values[i] = new GLib.Variant.variant(
-                    value_to_variant(value.object_get_property_at_index(i))
-                );
+            if (len == 0) {
+                variant = new GLib.Variant.tuple({});
+            } else {
+                JSC.Value element = value.object_get_property_at_index(0);
+                var first_type = JscType.to_type(element);
+                var all_same_type = true;
+                var values = new GLib.Variant[len];
+                values[0] = value_to_variant(element);
+                for (int i = 1; i < len; i++) {
+                    element = value.object_get_property_at_index(i);
+                    values[i] = value_to_variant(element);
+                    all_same_type &= (first_type == JscType.to_type(element));
+                }
+                if (!all_same_type) {
+                    variant = new GLib.Variant.tuple(values);
+                } else {
+                    variant = new GLib.Variant.array(
+                        values[0].get_type(), values
+                    );
+                }
             }
-            return new GLib.Variant.array(GLib.VariantType.VARIANT, values);
-        }
-        if (value.is_object()) {
+            break;
+
+        case OBJECT:
             GLib.VariantDict dict = new GLib.VariantDict();
             string[] names = value.object_enumerate_properties();
             if (names != null) {
                 foreach (var name in names) {
-                    try {
-                        dict.insert_value(
-                            name,
-                            new GLib.Variant.variant(
-                                value_to_variant(
-                                    value.object_get_property(name)
-                                )
-                            )
-                        );
-                    } catch (Error.TYPE err) {
-                        // ignored
-                    }
+                    dict.insert_value(
+                        name,
+                        value_to_variant(value.object_get_property(name))
+                    );
                 }
             }
-            return dict.end();
+            variant = dict.end();
+            break;
+
+        default:
+            throw new Error.TYPE("Unsupported JS type: %s", value.to_string());
         }
-        throw new Error.TYPE("Unsupported JS type: %s", value.to_string());
+        return variant;
     }
 
     /**
