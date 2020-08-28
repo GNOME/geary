@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -9,7 +9,7 @@
 public class ConversationWebView : Components.WebView {
 
 
-    private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
+    private const string DECEPTIVE_LINK_CLICKED = "deceptive_link_clicked";
 
     // Key codes we don't forward on to the super class on key press
     // since we want to override them elsewhere, especially
@@ -221,48 +221,47 @@ public class ConversationWebView : Components.WebView {
     }
 
     private void init() {
-        register_message_handler(
+        register_message_callback(
             DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
         );
 
         this.notify["preferred-height"].connect(() => queue_resize());
     }
 
-    private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
-        try {
-            JSC.Value object = result.get_js_value();
-            uint reason = (uint) Util.JS.to_int32(
-                Util.JS.get_property(object, "reason")
-            );
+    private void on_deceptive_link_clicked(GLib.Variant? parameters) {
+        var dict = new GLib.VariantDict(parameters);
+        uint reason = (uint) dict.lookup_value(
+            "reason", GLib.VariantType.DOUBLE
+        ).get_double();
 
-            string href = Util.JS.to_string(
-                Util.JS.get_property(object, "href")
-            );
+        string href = dict.lookup_value(
+            "href", GLib.VariantType.STRING
+        ).get_string();
 
-            string text = Util.JS.to_string(
-                Util.JS.get_property(object, "text")
-            );
+        string text = dict.lookup_value(
+            "text", GLib.VariantType.STRING
+        ).get_string();
 
-            JSC.Value js_location = Util.JS.get_property(object, "location");
+        Gdk.Rectangle location = Gdk.Rectangle();
+        var location_dict = new GLib.VariantDict(
+            dict.lookup_value("location", GLib.VariantType.VARDICT)
+        );
+        location.x = (int) location_dict.lookup_value(
+            "x", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.y = (int) location_dict.lookup_value(
+            "y", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.width = (int) location_dict.lookup_value(
+            "width", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.height = (int) location_dict.lookup_value(
+            "height", GLib.VariantType.DOUBLE
+        ).get_double();
 
-            Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "x")
-            );
-            location.y = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "y")
-            );
-            location.width = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "width")
-            );
-            location.height = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "height")
-            );
-
-            deceptive_link_clicked((DeceptiveText) reason, text, href, location);
-        } catch (Util.JS.Error err) {
-            debug("Could not get deceptive link param: %s", err.message);
-        }
+        deceptive_link_clicked(
+            (DeceptiveText) reason, text, href, location
+        );
     }
 
 }

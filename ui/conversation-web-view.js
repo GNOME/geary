@@ -26,6 +26,8 @@ ConversationPageState.prototype = {
     init: function() {
         PageState.prototype.init.apply(this, []);
 
+        this._deceptiveLinkClicked = MessageSender("deceptive_link_clicked");
+
         let state = this;
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A" &&
@@ -267,7 +269,7 @@ ConversationPageState.prototype = {
             let reason = ConversationPageState.isDeceptiveText(text, href);
             if (reason != ConversationPageState.NOT_DECEPTIVE) {
                 cancelClick = true;
-                window.webkit.messageHandlers.deceptiveLinkClicked.postMessage({
+                this._deceptiveLinkClicked({
                     reason: reason,
                     text: text,
                     href: href,
