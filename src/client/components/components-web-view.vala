@@ -195,9 +195,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
 
-    /** Delegate for UserContentManager message callbacks. */
-    public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
-
     /**
      * Delegate for message handler callbacks.
      *
@@ -279,8 +276,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
-    private Gee.List<ulong> registered_message_handlers =
-        new Gee.LinkedList<ulong>();
     private Gee.Map<string,MessageCallable> message_handlers =
         new Gee.HashMap<string,MessageCallable>();
 
@@ -357,7 +352,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * The new view will use the same WebProcess, settings and content
      * manager as the given related view's.
      *
-     * @see WebKit.WebView.with_related_view
+     * @see WebKit.WebView.WebView.with_related_view
      */
     protected WebView.with_related_view(Application.Configuration config,
                                         WebView related) {
@@ -375,10 +370,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     public override void destroy() {
-        foreach (ulong id in this.registered_message_handlers) {
-            this.user_content_manager.disconnect(id);
-        }
-        this.registered_message_handlers.clear();
         this.message_handlers.clear();
         base.destroy();
     }
@@ -568,25 +559,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             }
         }
         return ret_value;
-    }
-
-    /**
-     * Convenience function for registering and connecting JS messages.
-     */
-    protected inline void register_message_handler(string name,
-                                                   JavaScriptMessageHandler handler) {
-        // XXX can't use the delegate directly, see b.g.o Bug
-        // 604781. However the workaround below creates a circular
-        // reference, causing WebView instances to leak. So to
-        // work around that we need to record handler ids and
-        // disconnect them when being destroyed.
-        ulong id = this.user_content_manager.script_message_received[name].connect(
-            (result) => { handler(result); }
-        );
-        this.registered_message_handlers.add(id);
-        if (!this.user_content_manager.register_script_message_handler(name)) {
-            debug("Failed to register script message handler: %s", name);
-        }
     }
 
     /**
