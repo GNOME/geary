@@ -365,56 +365,6 @@ namespace Util.JS {
     }
 
     /**
-     * Escapes a string so as to be safe to use as a JS string literal.
-     *
-     * This does not append opening or closing quotes.
-     */
-    public string escape_string(string value) {
-        StringBuilder builder = new StringBuilder.sized(value.length);
-        for (int i = 0; i < value.length; i++) {
-            if (value.valid_char(i)) {
-                unichar c = value.get_char(i);
-                switch (c) {
-                case '\x00':
-                    builder.append("\x00");
-                    break;
-                case '\'':
-                    builder.append("\\\'");
-                    break;
-                case '"':
-                    builder.append("\\\"");
-                    break;
-                case '\\':
-                    builder.append("\\\\");
-                    break;
-                case '\n':
-                    builder.append("\\n");
-                    break;
-                case '\r':
-                    builder.append("\\r");
-                    break;
-                case '\x0b':
-                    builder.append("\x0b");
-                    break;
-                case '\t':
-                    builder.append("\\t");
-                    break;
-                case '\b':
-                    builder.append("\\b");
-                    break;
-                case '\f':
-                    builder.append("\\f");
-                    break;
-                default:
-                    builder.append_unichar(c);
-                    break;
-                }
-            }
-        }
-        return (string) builder.data;
-    }
-
-    /**
      * Convenience method for returning a new Callable instance.
      */
     public Callable callable(string base_name) {

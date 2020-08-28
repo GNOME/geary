@@ -13,7 +13,6 @@ public class Util.JS.Test : TestCase {
 
     public Test() {
         base("Util.JS.Test");
-        add_test("escape_string", escape_string);
         add_test("to_variant", to_variant);
         add_test("to_value", to_value);
     }
@@ -24,16 +23,6 @@ public class Util.JS.Test : TestCase {
 
     public override void tear_down() throws GLib.Error {
         this.context = null;
-    }
-
-    public void escape_string() throws GLib.Error {
-        assert(Util.JS.escape_string("\n") == """\n""");
-        assert(Util.JS.escape_string("\r") == """\r""");
-        assert(Util.JS.escape_string("\t") == """\t""");
-        assert(Util.JS.escape_string("\'") == """\'""");
-        assert(Util.JS.escape_string("\"") == """\"""");
-
-        assert(Util.JS.escape_string("something…\n") == """something…\n""");
     }
 
     public void to_variant() throws GLib.Error {
