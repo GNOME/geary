@@ -409,6 +409,7 @@ public class Application.Client : Gtk.Application {
         );
 
         MainWindow.add_accelerators(this);
+        Composer.Editor.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
         Components.PreferencesWindow.add_accelerators(this);
