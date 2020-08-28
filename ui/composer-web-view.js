@@ -123,7 +123,6 @@ ComposerPageState.prototype = {
 
         // Focus within the HTML document
         document.body.focus();
-        this.updateFocusClass(this.bodyPart);
 
         // Set text cursor at appropriate position
         let cursor = document.getElementById("cursormarker");
@@ -353,30 +352,6 @@ ComposerPageState.prototype = {
                 this.cursorContext = newContext;
                 this._cursorContextChanged(newContext.encode());
             }
-        }
-
-        while (cursor != null) {
-            let parent = cursor.parentNode;
-            if (parent == document.body) {
-                this.updateFocusClass(cursor);
-                break;
-            }
-            cursor = parent;
-        }
-    },
-    /**
-     * Work around WebKit note yet supporting :focus-inside pseudoclass.
-     */
-    updateFocusClass: function(newFocus) {
-        if (this.focusedPart != null) {
-            this.focusedPart.classList.remove("geary-focus");
-            this.focusedPart = null;
-        }
-        if (newFocus == this.bodyPart ||
-            newFocus == this.signaturePart ||
-            newFocus == this.quotePart) {
-            this.focusedPart = newFocus;
-            this.focusedPart.classList.add("geary-focus");
         }
     },
     containedInPart: function(target) {

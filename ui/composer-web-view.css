@@ -43,12 +43,12 @@ body > div#geary-quote {
   padding: 6px !important;
 }
 
-body > div.geary-focus {
+body > div:focus-within {
   background-color: white;
 }
 
-body > div#geary-signature.geary-focus,
-body > div#geary-quote.geary-focus {
+body > div#geary-signature:focus-within,
+body > div#geary-quote:focus-within {
   outline: 1px dashed #ccc !important;
 }
 

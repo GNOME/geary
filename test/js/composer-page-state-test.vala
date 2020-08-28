@@ -11,7 +11,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
         """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div><div id="geary-signature" dir="auto"></div>""";
     public const string DIRTY_BODY_TEMPLATE =
         """
-<div id="geary-body" dir="auto" class="geary-focus" contenteditable="true">%s<div><br></div><div><br></div></div>
+<div id="geary-body" dir="auto" contenteditable="true">%s<div><br></div><div><br></div></div>
 <div id="geary-signature" class="geary-no-display" dir="auto" contenteditable="true"></div>
 """;
     public const string CLEAN_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
@@ -227,7 +227,7 @@ some text
         }
     }
 
-    public void clean_content() throws Error {
+    public void clean_content() throws GLib.Error {
         // XXX split these up into multiple tests
         load_body_fixture("""
 http://example1.com
@@ -257,20 +257,12 @@ unknown://example6.com
 I can send email through smtp.gmail.com:587 or through <a href="https://www.gmail.com/">https://www.gmail.com/</a>
 """;
 
-        try {
-            run_javascript("geary.cleanContent();");
-            string result = Util.JS.to_string(
-                run_javascript("window.document.body.innerHTML;")
-                .get_js_value()
-            );
-            assert(result == DIRTY_BODY_TEMPLATE.printf(expected));
-        } catch (Util.JS.Error err) {
-            print("Util.JS.Error: %s\n", err.message);
-            assert_not_reached();
-        } catch (Error err) {
-            print("WKError: %s\n", err.message);
-            assert_not_reached();
-        }
+        run_javascript("geary.cleanContent();");
+        string result = Util.JS.to_string(
+            run_javascript("window.document.body.innerHTML;")
+            .get_js_value()
+        );
+        assert_equal(result, DIRTY_BODY_TEMPLATE.printf(expected));
     }
 
     public void get_html() throws Error {
