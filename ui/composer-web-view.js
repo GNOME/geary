@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -34,6 +34,9 @@ ComposerPageState.prototype = {
         this.selections = new Map();
         this.nextSelectionId = 0;
         this.cursorContext = null;
+
+        this._cursorContextChanged = MessageSender("cursor_context_changed");
+        this._dragDropReceived = MessageSender("drag_drop_received");
 
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
@@ -99,7 +102,9 @@ ComposerPageState.prototype = {
         }, true);
 
         // Handle file drag & drop
-        document.body.addEventListener("drop", state.handleFileDrop, true);
+        document.body.addEventListener("drop", function(e) {
+            state.handleFileDrop(e);
+        }, true);
         document.body.addEventListener("allowDrop", function(e) {
             ev.preventDefault();
         }, true);
@@ -346,9 +351,7 @@ ComposerPageState.prototype = {
             let newContext = new EditContext(cursor);
             if (!newContext.equals(this.cursorContext)) {
                 this.cursorContext = newContext;
-                window.webkit.messageHandlers.cursorContextChanged.postMessage(
-                    newContext.encode()
-                );
+                this._cursorContextChanged(newContext.encode());
             }
         }
 
@@ -396,13 +399,14 @@ ComposerPageState.prototype = {
                 continue;
 
             const reader = new FileReader();
+            const state = this;
             reader.onload = (function(filename, imageType) { return function(loadEvent) {
                 // Remove prefixed file type and encoding type
                 var parts = loadEvent.target.result.split(",");
                 if (parts.length < 2)
                     return;
 
-                window.webkit.messageHandlers.dragDropReceived.postMessage({
+                state._dragDropReceived({
                     fileName: encodeURIComponent(filename),
                     fileType: imageType,
                     content: parts[1]

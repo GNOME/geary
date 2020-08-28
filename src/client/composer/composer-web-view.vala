@@ -33,8 +33,8 @@ public class Composer.WebView : Components.WebView {
     private const string SPACER = "<div><br /></div>";
 
     // WebKit message handler names
-    private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
-    private const string DRAG_DROP_RECEIVED = "dragDropReceived";
+    private const string CURSOR_CONTEXT_CHANGED = "cursor_context_changed";
+    private const string DRAG_DROP_RECEIVED = "drag_drop_received";
 
     /**
      * Encapsulates editing-related state for a specific DOM node.
@@ -152,8 +152,8 @@ public class Composer.WebView : Components.WebView {
         this.user_content_manager.add_style_sheet(WebView.app_style);
         this.user_content_manager.add_script(WebView.app_script);
 
-        register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
-        register_message_handler(DRAG_DROP_RECEIVED, on_drag_drop_received);
+        register_message_callback(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
+        register_message_callback(DRAG_DROP_RECEIVED, on_drag_drop_received);
 
         // XXX this is a bit of a hack given the docs for is_empty,
         // above
@@ -530,50 +530,43 @@ public class Composer.WebView : Components.WebView {
         return ret;
     }
 
-    private void on_cursor_context_changed(WebKit.JavascriptResult result) {
-        try {
-            cursor_context_changed(
-                new EditContext(Util.JS.to_string(result.get_js_value()))
-            );
-        } catch (Util.JS.Error err) {
-            debug("Could not get text cursor style: %s", err.message);
+    private void on_cursor_context_changed(GLib.Variant? parameters) {
+        if (parameters != null && parameters.classify() == STRING) {
+            cursor_context_changed(new EditContext(parameters as string));
+        } else {
+            warning("Could not get text cursor style");
         }
     }
 
     /**
      *  Handle a dropped image
      */
-    private void on_drag_drop_received(WebKit.JavascriptResult result) {
+    private void on_drag_drop_received(GLib.Variant? parameters) {
+        var dict = new GLib.VariantDict(parameters);
+        string file_name = dict.lookup_value(
+            "fileName", GLib.VariantType.STRING
+        ).get_string();
+        string file_name_unescaped = GLib.Uri.unescape_string(file_name);
 
-        try {
-            JSC.Value object = result.get_js_value();
-            string filename = Util.JS.to_string(
-                Util.JS.get_property(object, "fileName")
-            );
-            string filename_unescaped = GLib.Uri.unescape_string(filename);
+        string file_type = dict.lookup_value(
+            "fileType", GLib.VariantType.STRING
+        ).get_string();
 
-            string file_type = Util.JS.to_string(
-                Util.JS.get_property(object, "fileType")
-            );
+        string content_base64 = dict.lookup_value(
+            "content", GLib.VariantType.STRING
+        ).get_string();
+        uint8[] image = GLib.Base64.decode(content_base64);
 
-            string content_base64 = Util.JS.to_string(
-                Util.JS.get_property(object, "content")
-            );
-            uint8[] image = GLib.Base64.decode(content_base64);
+        if (image.length == 0) {
+            warning("%s is empty", file_name);
+            return;
+        }
 
-            if (image.length == 0) {
-                warning("%s is empty", filename);
-                return;
-            }
-
-            // A simple check to see if the file looks like an image. A problem here
-            // will be this accepting types which won't be supported by WebKit
-            // or recipients.
-            if (file_type.index_of("image/") == 0) {
-                image_file_dropped(filename_unescaped, file_type, image);
-            }
-        } catch (Util.JS.Error err) {
-            debug("Could not get deceptive link param: %s", err.message);
+        // A simple check to see if the file looks like an image. A problem here
+        // will be this accepting types which won't be supported by WebKit
+        // or recipients.
+        if (file_type.index_of("image/") == 0) {
+            image_file_dropped(file_name_unescaped, file_type, image);
         }
     }
 }
