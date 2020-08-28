@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2019 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -31,12 +31,12 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private const string MESSAGE_EXCEPTION_NAME = "__exception__";
 
     // WebKit message handler names
-    private const string COMMAND_STACK_CHANGED = "commandStackChanged";
-    private const string CONTENT_LOADED = "contentLoaded";
-    private const string DOCUMENT_MODIFIED = "documentModified";
-    private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
-    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
-    private const string SELECTION_CHANGED = "selectionChanged";
+    private const string COMMAND_STACK_CHANGED = "command_stack_changed";
+    private const string CONTENT_LOADED = "content_loaded";
+    private const string DOCUMENT_MODIFIED = "document_modified";
+    private const string PREFERRED_HEIGHT_CHANGED = "preferred_height_changed";
+    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remote_image_load_blocked";
+    private const string SELECTION_CHANGED = "selection_changed";
 
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
@@ -605,22 +605,22 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                 warning("Web process crashed: %s", reason.to_string());
             });
 
-        register_message_handler(
+        register_message_callback(
             COMMAND_STACK_CHANGED, on_command_stack_changed
         );
-        register_message_handler(
+        register_message_callback(
             CONTENT_LOADED, on_content_loaded
         );
-        register_message_handler(
+        register_message_callback(
             DOCUMENT_MODIFIED, on_document_modified
         );
-        register_message_handler(
+        register_message_callback(
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
         );
-        register_message_handler(
+        register_message_callback(
             REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
         );
-        register_message_handler(
+        register_message_callback(
             SELECTION_CHANGED, on_selection_changed
         );
 
@@ -783,12 +783,12 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         return false;
     }
 
-    private void on_preferred_height_changed(WebKit.JavascriptResult result) {
+    private void on_preferred_height_changed(GLib.Variant? parameters) {
         double height = this.webkit_reported_height;
-        try {
-            height = Util.JS.to_double(result.get_js_value());
-        } catch (Util.JS.Error err) {
-            debug("Could not get preferred height: %s", err.message);
+        if (parameters != null && parameters.classify() == DOUBLE) {
+            height = parameters.get_double();
+        } else {
+            warning("Could not get JS preferred height");
         }
 
         if (this.webkit_reported_height != height) {
@@ -797,40 +797,39 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
-    private void on_command_stack_changed(WebKit.JavascriptResult result) {
-        try {
-            string[] values =
-                Util.JS.to_string(result.get_js_value()).split(",");
-            command_stack_changed(values[0] == "true", values[1] == "true");
-        } catch (Util.JS.Error err) {
-            debug("Could not get command stack state: %s", err.message);
+    private void on_command_stack_changed(GLib.Variant? parameters) {
+        if (parameters != null &&
+            parameters.is_container() &&
+            parameters.n_children() == 2) {
+            GLib.Variant can_undo = parameters.get_child_value(0);
+            GLib.Variant can_redo = parameters.get_child_value(1);
+            command_stack_changed(
+                can_undo.classify() == BOOLEAN && can_undo.get_boolean(),
+                can_redo.classify() == BOOLEAN && can_redo.get_boolean()
+            );
+        } else {
+            warning("Could not get JS command stack state");
         }
     }
 
-    private void on_document_modified(WebKit.JavascriptResult result) {
+    private void on_document_modified(GLib.Variant? parameters) {
         document_modified();
     }
 
-    private void on_remote_image_load_blocked(WebKit.JavascriptResult result) {
+    private void on_remote_image_load_blocked(GLib.Variant? parameters) {
         remote_image_load_blocked();
     }
 
-    private void on_content_loaded(WebKit.JavascriptResult result) {
+    private void on_content_loaded(GLib.Variant? parameters) {
         this.is_content_loaded = true;
         content_loaded();
     }
 
-    private void on_selection_changed(WebKit.JavascriptResult result) {
-        try {
-            bool has_selection = Util.JS.to_bool(result.get_js_value());
-            // Avoid firing multiple notifies if the value hasn't
-            // changed
-            if (this.has_selection != has_selection) {
-                this.has_selection = has_selection;
-            }
-            selection_changed(has_selection);
-        } catch (Util.JS.Error err) {
-            debug("Could not get selection content: %s", err.message);
+    private void on_selection_changed(GLib.Variant? parameters) {
+        if (parameters != null && parameters.classify() == BOOLEAN) {
+            selection_changed(parameters.get_boolean());
+        } else {
+            warning("Could not get JS selection value");
         }
     }
 
