@@ -306,7 +306,7 @@ This is the second line.
 
         string message_data = message.get_rfc822_buffer(SMTP_FORMAT).to_string();
         assert_true("To: Test <test@example.com>\r\n" in message_data);
-        assert_false("bcc" in message_data.down());
+        assert_false("bcc" in message_data.ascii_down());
     }
 
     public void get_rfc822_buffer_long_ascii_line() throws GLib.Error {
