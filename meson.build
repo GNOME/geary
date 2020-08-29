@@ -53,7 +53,7 @@ valac = meson.get_compiler('vala')
 target_vala = '0.48.6'
 target_glib = '2.64'
 target_gtk = '3.24.7'
-target_webkit = '2.26'
+target_webkit = '2.28'
 
 if not valac.version().version_compare('>=' + target_vala)
   error('Vala does not meet minimum required version: ' + target_vala)
