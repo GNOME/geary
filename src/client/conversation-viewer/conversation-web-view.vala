@@ -118,20 +118,27 @@ public class ConversationWebView : ClientWebView {
         // first term
 
         uint found = 0;
+        bool finished = false;
 
         SourceFunc callback = this.highlight_search_terms.callback;
         ulong found_handler = controller.found_text.connect((count) => {
-                found = count;
-                callback();
+                if (!finished) {
+                    found = count;
+                    callback();
+                }
             });
         ulong not_found_handler = controller.failed_to_find_text.connect(() => {
-                callback();
+                if (!finished) {
+                    callback();
+                }
             });
         ulong cancelled_handler = cancellable.cancelled.connect(() => {
-                // Do this at idle since per the docs for
-                // GLib.Cancellable.disconnect, disconnecting a
-                // handler from within a handler causes a deadlock.
-                GLib.Idle.add(() => callback());
+                if (!finished) {
+                    // Do this at idle since per the docs for
+                    // GLib.Cancellable.disconnect, disconnecting a
+                    // handler from within a handler causes a deadlock.
+                    GLib.Idle.add(() => callback());
+                }
             });
 
         controller.search(
@@ -143,6 +150,7 @@ public class ConversationWebView : ClientWebView {
 
         yield;
 
+        finished = true;
         controller.disconnect(found_handler);
         controller.disconnect(not_found_handler);
         cancellable.disconnect(cancelled_handler);
