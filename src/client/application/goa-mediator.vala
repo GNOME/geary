@@ -50,11 +50,8 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
                                          Geary.ServiceInformation service,
                                          Cancellable? cancellable)
         throws GLib.Error {
-        // XXX have to call the sync version of this since the async
-        // version seems to be broken. See
-        // https://gitlab.gnome.org/GNOME/vala/issues/709
-        this.handle.get_account().call_ensure_credentials_sync(
-            null, cancellable
+        yield this.handle.get_account().call_ensure_credentials(
+            cancellable, null
         );
 
         bool loaded = false;
@@ -62,22 +59,22 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
 
         switch (get_auth_method()) {
         case OAUTH2:
-            this.handle.get_oauth2_based().call_get_access_token_sync(
-                out token, null, cancellable
+            yield this.handle.get_oauth2_based().call_get_access_token(
+                cancellable, out token, null
             );
             break;
 
         case PASSWORD:
             switch (service.protocol) {
             case Geary.Protocol.IMAP:
-                this.handle.get_password_based().call_get_password_sync(
-                    "imap-password", out token, cancellable
+                yield this.handle.get_password_based().call_get_password(
+                    "imap-password", cancellable, out token
                 );
                 break;
 
             case Geary.Protocol.SMTP:
-                this.handle.get_password_based().call_get_password_sync(
-                    "smtp-password", out token, cancellable
+                yield this.handle.get_password_based().call_get_password(
+                    "smtp-password", cancellable, out token
                 );
                 break;
 
