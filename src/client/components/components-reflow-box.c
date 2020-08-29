@@ -451,8 +451,8 @@ components_reflow_box_class_init (ComponentsReflowBoxClass *klass)
    */
   props[PROP_SPACING] =
     g_param_spec_uint ("spacing",
-                       _("Spacing"),
-                       _("Spacing between children"),
+                       "Spacing",
+                       "Spacing between children",
                        0,
                        G_MAXUINT,
                        0,
@@ -467,8 +467,8 @@ components_reflow_box_class_init (ComponentsReflowBoxClass *klass)
    */
   props[PROP_ROW_SPACING] =
     g_param_spec_uint ("row-spacing",
-                       _("Row spacing"),
-                       _("Spacing between rows of children"),
+                       "Row spacing",
+                       "Spacing between rows of children",
                        0,
                        G_MAXUINT,
                        0,
