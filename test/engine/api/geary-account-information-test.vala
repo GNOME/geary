@@ -13,6 +13,7 @@ class Geary.AccountInformationTest : TestCase {
         add_test("test_save_sent_defaults", test_save_sent_defaults);
         add_test("test_sender_mailboxes", test_sender_mailboxes);
         add_test("test_service_label", test_service_label);
+        add_test("folder_steps_accessors", folder_steps_accessors);
     }
 
     public void test_save_sent_defaults() throws GLib.Error {
@@ -117,6 +118,29 @@ class Geary.AccountInformationTest : TestCase {
         test.incoming.host = "not-mail.other.com";
         test.outgoing.host = "not-mail.other.com";
         assert_equal(test.service_label, "other.com");
+    }
+
+    public void folder_steps_accessors() throws GLib.Error {
+        AccountInformation test = new_information();
+
+        assert_collection(test.get_folder_steps_for_use(NONE)).is_empty();
+        assert_collection(test.get_folder_steps_for_use(ARCHIVE)).is_empty();
+        assert_collection(test.get_folder_steps_for_use(JUNK)).is_empty();
+
+        var archive = new Gee.ArrayList<string>.wrap({"Archive"});
+        test.set_folder_steps_for_use(ARCHIVE, archive);
+        assert_collection(test.get_folder_steps_for_use(ARCHIVE))
+        .is_non_empty()
+        .contains("Archive");
+
+        var junk = new Gee.ArrayList<string>.wrap({"Junk"});
+        test.set_folder_steps_for_use(JUNK, junk);
+        assert_collection(test.get_folder_steps_for_use(ARCHIVE))
+        .is_non_empty()
+        .contains("Archive");
+        assert_collection(test.get_folder_steps_for_use(JUNK))
+        .is_non_empty()
+        .contains("Junk");
     }
 
     private AccountInformation new_information(ServiceProvider provider =

@@ -182,7 +182,10 @@ public class Geary.AccountInformation : BaseObject {
     public File? data_dir { get; private set; default = null; }
 
     private Gee.Map<Folder.SpecialUse?,Gee.List<string>> special_use_paths =
-        new Gee.HashMap<Folder.SpecialUse?,Gee.List<string>>();
+        new Gee.HashMap<Folder.SpecialUse?,Gee.List<string>>(
+            (k) => GLib.int_hash(k),
+            (k1, k2) => (Folder.SpecialUse) k1 == (Folder.SpecialUse) k2
+        );
 
     private Gee.List<Geary.RFC822.MailboxAddress> mailboxes {
         get; private set;
