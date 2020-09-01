@@ -25,8 +25,8 @@ public class Geary.Imap.IdleCommand : Command {
     private GLib.Cancellable? exit_cancellable = new GLib.Cancellable();
 
 
-    public IdleCommand() {
-        base(NAME);
+    public IdleCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
         this.exit_lock = new Geary.Nonblocking.Semaphore(this.exit_cancellable);
     }
 

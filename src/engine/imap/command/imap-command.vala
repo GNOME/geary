@@ -61,6 +61,20 @@ public abstract class Geary.Imap.Command : BaseObject {
     public StatusResponse? status { get; private set; default = null; }
 
     /**
+     * A guard to allow cancelling a command before it is sent.
+     *
+     * Since IMAP does not allow commands that have been sent to the
+     * server to be cancelled, cancelling a command before sending it
+     * is the last opportunity to prevent it from being executed. A
+     * command queued to be sent will be sent as long as the
+     * connection it was queued is open and this cancellable is null
+     * or is not cancelled.
+     *
+     * @see Command.Command
+     */
+    public GLib.Cancellable? should_send { get; private set; default = null; }
+
+    /**
      * The command's arguments as parameters.
      *
      * Subclassess may append arguments to this before {@link send} is
@@ -93,11 +107,15 @@ public abstract class Geary.Imap.Command : BaseObject {
      * Constructs a new command with an unassigned tag.
      *
      * Any arguments provided here will be converted to appropriate
-     * string arguments
+     * string arguments. The given cancellable will be set as {@link
+     * should_send}.
      *
      * @see Tag
+     * @see should_send
      */
-    protected Command(string name, string[]? args = null) {
+    protected Command(string name,
+                      string[]? args,
+                      GLib.Cancellable? should_send) {
         this.tag = Tag.get_unassigned();
         this.name = name;
         if (args != null) {
@@ -105,6 +123,7 @@ public abstract class Geary.Imap.Command : BaseObject {
                 this.args.add(Parameter.get_for_string(arg));
             }
         }
+        this.should_send = should_send;
 
         this.response_timer = new TimeoutManager.seconds(
             this._response_timeout, on_response_timeout
@@ -267,6 +286,15 @@ public abstract class Geary.Imap.Command : BaseObject {
                 "%s: Command failed: %s",
                 to_brief_string(),
                 this.status.to_string()
+            );
+        }
+
+        // If everything else looks fine, but sending was cancelled,
+        // throw an error here so the caller knows that was the case.
+        if (this.should_send != null &&
+            this.should_send.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED(
+                "Sent command was cancelled: %s", to_brief_string()
             );
         }
     }

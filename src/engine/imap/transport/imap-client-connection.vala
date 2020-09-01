@@ -576,8 +576,8 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private void on_idle_timeout() {
         debug("Initiating IDLE");
         try {
-            this.send_command(new IdleCommand());
         } catch (ImapError err) {
+            this.send_command(new IdleCommand(this.open_cancellable));
             warning("Error sending IDLE: %s", err.message);
         }
     }

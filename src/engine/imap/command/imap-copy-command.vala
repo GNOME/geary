@@ -13,8 +13,10 @@ public class Geary.Imap.CopyCommand : Command {
     public const string NAME = "copy";
     public const string UID_NAME = "uid copy";
 
-    public CopyCommand(MessageSet message_set, MailboxSpecifier destination) {
-        base(message_set.is_uid ? UID_NAME : NAME);
+    public CopyCommand(MessageSet message_set,
+                       MailboxSpecifier destination,
+                       GLib.Cancellable? should_send) {
+        base(message_set.is_uid ? UID_NAME : NAME, null, should_send);
 
         this.args.add(message_set.to_parameter());
         this.args.add(destination.to_parameter());

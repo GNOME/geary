@@ -27,17 +27,21 @@ public class Geary.Imap.AuthenticateCommand : Command {
     private GLib.Cancellable error_cancellable = new GLib.Cancellable();
 
 
-    private AuthenticateCommand(string method, string data) {
-        base(NAME, { method, data });
+    private AuthenticateCommand(string method,
+                                string data,
+                                GLib.Cancellable? should_send) {
+        base(NAME, { method, data }, should_send);
         this.method = method;
         this.error_lock = new Geary.Nonblocking.Spinlock(this.error_cancellable);
     }
 
-    public AuthenticateCommand.oauth2(string user, string token) {
+    public AuthenticateCommand.oauth2(string user,
+                                      string token,
+                                      GLib.Cancellable? should_send) {
         string encoded_token = Base64.encode(
             OAUTH2_RESP.printf(user, token).data
         );
-        this(OAUTH2_METHOD, encoded_token);
+        this(OAUTH2_METHOD, encoded_token, should_send);
     }
 
     internal override async void send(Serializer ser,

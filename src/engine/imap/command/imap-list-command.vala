@@ -38,16 +38,22 @@ public class Geary.Imap.ListCommand : Command {
      *
      * See [[http://redmine.yorba.org/issues/7624]] for more information.
      */
-    public ListCommand(MailboxSpecifier mailbox, bool use_xlist, ListReturnParameter? return_param) {
-        base(use_xlist ? XLIST_NAME : NAME, { "" });
+    public ListCommand(MailboxSpecifier mailbox,
+                       bool use_xlist,
+                       ListReturnParameter? return_param,
+                       GLib.Cancellable? should_send) {
+        base(use_xlist ? XLIST_NAME : NAME, { "" }, should_send);
 
         this.args.add(mailbox.to_parameter());
         add_return_parameter(return_param);
     }
 
-    public ListCommand.wildcarded(string reference, MailboxSpecifier mailbox, bool use_xlist,
-        ListReturnParameter? return_param) {
-        base(use_xlist ? XLIST_NAME : NAME, { reference });
+    public ListCommand.wildcarded(string reference,
+                                  MailboxSpecifier mailbox,
+                                  bool use_xlist,
+                                  ListReturnParameter? return_param,
+                                  GLib.Cancellable? should_send) {
+        base(use_xlist ? XLIST_NAME : NAME, { reference }, should_send);
 
         this.args.add(mailbox.to_parameter());
         add_return_parameter(return_param);

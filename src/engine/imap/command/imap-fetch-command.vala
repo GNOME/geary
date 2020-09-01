@@ -34,9 +34,11 @@ public class Geary.Imap.FetchCommand : Command {
     public Gee.List<FetchBodyDataSpecifier> for_body_data_specifiers { get; private set;
         default = new Gee.ArrayList<FetchBodyDataSpecifier>(); }
 
-    public FetchCommand(MessageSet msg_set, Gee.List<FetchDataSpecifier>? data_items,
-        Gee.List<FetchBodyDataSpecifier>? body_data_items) {
-        base (msg_set.is_uid ? UID_NAME : NAME);
+    public FetchCommand(MessageSet msg_set,
+                        Gee.List<FetchDataSpecifier>? data_items,
+                        Gee.List<FetchBodyDataSpecifier>? body_data_items,
+                        GLib.Cancellable? should_send) {
+        base(msg_set.is_uid ? UID_NAME : NAME, null, should_send);
 
         this.args.add(msg_set.to_parameter());
 
@@ -71,8 +73,10 @@ public class Geary.Imap.FetchCommand : Command {
             for_body_data_specifiers.add_all(body_data_items);
     }
 
-    public FetchCommand.data_type(MessageSet msg_set, FetchDataSpecifier data_type) {
-        base (msg_set.is_uid ? UID_NAME : NAME);
+    public FetchCommand.data_type(MessageSet msg_set,
+                                  FetchDataSpecifier data_type,
+                                  GLib.Cancellable? should_send) {
+        base(msg_set.is_uid ? UID_NAME : NAME, null, should_send);
 
         for_data_types.add(data_type);
 
@@ -80,8 +84,10 @@ public class Geary.Imap.FetchCommand : Command {
         this.args.add(data_type.to_parameter());
     }
 
-    public FetchCommand.body_data_type(MessageSet msg_set, FetchBodyDataSpecifier body_data_specifier) {
-        base (msg_set.is_uid ? UID_NAME : NAME);
+    public FetchCommand.body_data_type(MessageSet msg_set,
+                                       FetchBodyDataSpecifier body_data_specifier,
+                                       GLib.Cancellable? should_send) {
+        base(msg_set.is_uid ? UID_NAME : NAME, null, should_send);
 
         for_body_data_specifiers.add(body_data_specifier);
 

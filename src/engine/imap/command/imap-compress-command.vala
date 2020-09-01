@@ -9,12 +9,14 @@
  */
 
 public class Geary.Imap.CompressCommand : Command {
+
     public const string NAME = "compress";
 
     public const string ALGORITHM_DEFLATE = "deflate";
 
-    public CompressCommand(string algorithm) {
-        base (NAME, { algorithm });
-    }
-}
 
+    public CompressCommand(string algorithm, GLib.Cancellable? should_send) {
+        base(NAME, { algorithm }, should_send);
+    }
+
+}

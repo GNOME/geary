@@ -18,8 +18,9 @@ public class Geary.Imap.DeleteCommand : Command {
 
     public const string NAME = "DELETE";
 
-    public DeleteCommand(MailboxSpecifier mailbox) {
-        base(NAME);
+    public DeleteCommand(MailboxSpecifier mailbox,
+                         GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
         this.args.add(mailbox.to_parameter());
     }
 

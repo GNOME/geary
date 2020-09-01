@@ -430,7 +430,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
             try {
                 debug("Sending NOOP when claiming a session");
                 yield target.send_command_async(
-                    new NoopCommand(), this.close_cancellable
+                    new NoopCommand(this.close_cancellable)
                 );
             } catch (Error err) {
                 debug("Error sending NOOP: %s", err.message);

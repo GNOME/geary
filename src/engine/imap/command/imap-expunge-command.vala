@@ -14,12 +14,13 @@ public class Geary.Imap.ExpungeCommand : Command {
     public const string NAME = "expunge";
     public const string UID_NAME = "uid expunge";
 
-    public ExpungeCommand() {
-        base(NAME);
+    public ExpungeCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
 
-    public ExpungeCommand.uid(MessageSet message_set) {
-        base(UID_NAME);
+    public ExpungeCommand.uid(MessageSet message_set,
+                              GLib.Cancellable? should_send) {
+        base(UID_NAME, null, should_send);
         assert(message_set.is_uid);
         this.args.add(message_set.to_parameter());
     }

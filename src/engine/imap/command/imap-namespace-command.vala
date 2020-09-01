@@ -17,8 +17,8 @@ public class Geary.Imap.NamespaceCommand : Command {
 
     public const string NAME = "NAMESPACE";
 
-    public NamespaceCommand() {
-        base(NAME);
+    public NamespaceCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
 
 }

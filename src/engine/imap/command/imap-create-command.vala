@@ -55,15 +55,16 @@ public class Geary.Imap.CreateCommand : Command {
         }
     }
 
-    public CreateCommand(MailboxSpecifier mailbox) {
-        base(NAME_ATOM);
+    public CreateCommand(MailboxSpecifier mailbox, GLib.Cancellable? should_send) {
+        base(NAME_ATOM, null, should_send);
         this.mailbox = mailbox;
         this.args.add(mailbox.to_parameter());
     }
 
     public CreateCommand.special_use(MailboxSpecifier mailbox,
-                                     Geary.Folder.SpecialUse use) {
-        this(mailbox);
+                                     Geary.Folder.SpecialUse use,
+                                     GLib.Cancellable? should_send) {
+        this(mailbox, should_send);
         this.use = use;
 
         MailboxAttribute? attr = get_special_folder_type(use);

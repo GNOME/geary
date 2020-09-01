@@ -97,9 +97,11 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         ClientSession session = claim_session();
         MailboxSpecifier mailbox = session.get_mailbox_for_path(path);
         bool can_create_special = session.capabilities.has_capability(Capabilities.CREATE_SPECIAL_USE);
-        CreateCommand cmd = (use != null && can_create_special)
-            ? new CreateCommand.special_use(mailbox, use)
-            : new CreateCommand(mailbox);
+        CreateCommand cmd = (
+            use != null && can_create_special
+            ? new CreateCommand.special_use(mailbox, use, cancellable)
+            : new CreateCommand(mailbox, cancellable)
+        );
 
         StatusResponse response = yield send_command_async(
             session, cmd, null, null, cancellable
@@ -187,7 +189,9 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 // Mailbox needs a SELECT
                 info_map.set(mailbox_info.mailbox, mailbox_info);
                 cmd_map.set(
-                    new StatusCommand(mailbox_info.mailbox, StatusDataType.all()),
+                    new StatusCommand(
+                        mailbox_info.mailbox, StatusDataType.all(), cancellable
+                    ),
                     mailbox_info.mailbox
                 );
             } else {
@@ -323,7 +327,10 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         if (folder.is_root) {
             // List the server root
             cmd = new ListCommand.wildcarded(
-                "", new MailboxSpecifier("%"), use_xlist, return_param
+                "", new MailboxSpecifier("%"),
+                use_xlist,
+                return_param,
+                cancellable
             );
         } else {
             // List either the given folder or its children
@@ -335,7 +342,12 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 }
                 specifier = specifier + delim + "%";
             }
-            cmd = new ListCommand(new MailboxSpecifier(specifier), use_xlist, return_param);
+            cmd = new ListCommand(
+                new MailboxSpecifier(specifier),
+                use_xlist,
+                return_param,
+                cancellable
+            );
         }
 
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
@@ -372,7 +384,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
             session,
-            new StatusCommand(mailbox, status_types),
+            new StatusCommand(mailbox, status_types, cancellable),
             null,
             status_results,
             cancellable

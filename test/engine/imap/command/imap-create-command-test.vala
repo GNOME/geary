@@ -16,7 +16,7 @@ class Geary.Imap.CreateCommandTest : TestCase {
 
     public void basic_create() throws Error {
         assert_equal(
-            new CreateCommand(new MailboxSpecifier("owatagusiam/")).to_string(),
+            new CreateCommand(new MailboxSpecifier("owatagusiam/"), null).to_string(),
             "---- create owatagusiam/"
         );
     }
@@ -25,7 +25,8 @@ class Geary.Imap.CreateCommandTest : TestCase {
         assert_equal(
             new CreateCommand.special_use(
                 new MailboxSpecifier("Everything"),
-                ALL_MAIL
+                ALL_MAIL,
+                null
             ).to_string(),
             "---- create Everything (use (\\All))"
         );

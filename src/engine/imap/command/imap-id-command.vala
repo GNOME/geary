@@ -12,8 +12,9 @@ public class Geary.Imap.IdCommand : Command {
 
     public const string NAME = "id";
 
-    public IdCommand(Gee.HashMap<string, string> fields) {
-        base(NAME);
+    public IdCommand(Gee.HashMap<string, string> fields,
+                     GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
 
         ListParameter list = new ListParameter();
         foreach (string key in fields.keys) {
@@ -24,8 +25,8 @@ public class Geary.Imap.IdCommand : Command {
         this.args.add(list);
     }
 
-    public IdCommand.nil() {
-        base(NAME);
+    public IdCommand.nil(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
         this.args.add(NilParameter.instance);
     }
 

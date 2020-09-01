@@ -9,10 +9,11 @@
  */
 
 public class Geary.Imap.StarttlsCommand : Command {
+
     public const string NAME = "STARTTLS";
 
-    public StarttlsCommand() {
-        base (NAME);
+    public StarttlsCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
-}
 
+}

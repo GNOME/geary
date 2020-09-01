@@ -290,13 +290,13 @@ class ImapConsole : Gtk.Window {
     private void capabilities(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
 
-        this.cx.send_command(new Geary.Imap.CapabilityCommand());
+        this.cx.send_command(new Geary.Imap.CapabilityCommand(null));
     }
 
-    private void noop(string cmd, string[] args) throws Error {
+    private void noop(string cmd, string[] args) throws GLib.Error {
         check_connected(cmd, args, 0, null);
 
-        this.cx.send_command(new Geary.Imap.NoopCommand());
+        this.cx.send_command(new Geary.Imap.NoopCommand(null));
     }
 
     private void connect_cmd(string cmd, string[] args) throws Error {
@@ -370,7 +370,7 @@ class ImapConsole : Gtk.Window {
     }
 
     private async void do_starttls_async() throws Error {
-        Geary.Imap.StarttlsCommand cmd = new Geary.Imap.StarttlsCommand();
+        Geary.Imap.StarttlsCommand cmd = new Geary.Imap.StarttlsCommand(null);
         this.cx.send_command(cmd);
 
         Geary.Imap.StatusResponse response = yield wait_for_response_async(cmd.tag);
@@ -394,14 +394,18 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 2, "user pass");
 
         status("Logging in...");
-        this.cx.send_command(new Geary.Imap.LoginCommand(args[0], args[1]));
+        this.cx.send_command(
+            new Geary.Imap.LoginCommand(args[0], args[1], null)
+        );
     }
 
     private void logout(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
 
         status("Logging out...");
-        this.cx.send_command(new Geary.Imap.LogoutCommand());
+        this.cx.send_command(
+            new Geary.Imap.LogoutCommand(null)
+        );
     }
 
     private void id(string cmd, string[] args) throws Error {
@@ -413,14 +417,16 @@ class ImapConsole : Gtk.Window {
         fields.set("name", "geary-console");
         fields.set("version", _VERSION);
 
-        this.cx.send_command(new Geary.Imap.IdCommand(fields));
+        this.cx.send_command(
+            new Geary.Imap.IdCommand(fields, null)
+        );
     }
 
     private void namespace(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 0, null);
 
         status("Retrieving NAMESPACE...");
-        this.cx.send_command(new Geary.Imap.NamespaceCommand());
+        this.cx.send_command(new Geary.Imap.NamespaceCommand(null));
     }
 
     private void list(string cmd, string[] args) throws Error {
@@ -437,7 +443,8 @@ class ImapConsole : Gtk.Window {
                 args[0],
                 new Geary.Imap.MailboxSpecifier(args[1]),
                 (cmd.down() == "xlist"),
-                return_param
+                return_param,
+                null
             )
         );
     }
@@ -446,7 +453,12 @@ class ImapConsole : Gtk.Window {
         check_connected(cmd, args, 1, "<mailbox>");
 
         status("Opening %s read-only".printf(args[0]));
-        this.cx.send_command(new Geary.Imap.ExamineCommand(new Geary.Imap.MailboxSpecifier(args[0])));
+        this.cx.send_command(
+            new Geary.Imap.ExamineCommand(
+                new Geary.Imap.MailboxSpecifier(args[0]),
+                null
+            )
+        );
     }
 
     private void create(string cmd, string[] args) throws Error {
@@ -455,7 +467,8 @@ class ImapConsole : Gtk.Window {
         status("Creating %s".printf(args[0]));
         this.cx.send_command(
             new Geary.Imap.CreateCommand(
-                new Geary.Imap.MailboxSpecifier(args[0])
+                new Geary.Imap.MailboxSpecifier(args[0]),
+                null
             )
         );
     }
@@ -466,7 +479,8 @@ class ImapConsole : Gtk.Window {
         status("Deleting %s".printf(args[0]));
         this.cx.send_command(
             new Geary.Imap.DeleteCommand(
-                new Geary.Imap.MailboxSpecifier(args[0])
+                new Geary.Imap.MailboxSpecifier(args[0]),
+                null
             )
         );
     }
@@ -487,7 +501,9 @@ class ImapConsole : Gtk.Window {
             data_items.add(data_type);
         }
 
-        this.cx.send_command(new Geary.Imap.FetchCommand(msg_set, data_items, null));
+        this.cx.send_command(
+            new Geary.Imap.FetchCommand(msg_set, data_items, null, null)
+        );
     }
 
     private void fetch_fields(string cmd, string[] args) throws Error {
@@ -501,8 +517,11 @@ class ImapConsole : Gtk.Window {
         Gee.List<Geary.Imap.FetchBodyDataSpecifier> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier>();
         list.add(fields);
 
-        this.cx.send_command(new Geary.Imap.FetchCommand(
-            new Geary.Imap.MessageSet.custom(args[0]), null, list));
+        this.cx.send_command(
+            new Geary.Imap.FetchCommand(
+                new Geary.Imap.MessageSet.custom(args[0]), null, list, null
+            )
+        );
     }
 
     private void append(string cmd, string[] args) throws Error {
@@ -510,8 +529,15 @@ class ImapConsole : Gtk.Window {
 
         status("Appending %s to %s".printf(args[1], args[0]));
 
-        this.cx.send_command(new Geary.Imap.AppendCommand(new Geary.Imap.MailboxSpecifier(args[0]),
-            null, null, new Geary.Memory.FileBuffer(File.new_for_path(args[1]), true)));
+        this.cx.send_command(
+            new Geary.Imap.AppendCommand(
+                new Geary.Imap.MailboxSpecifier(args[0]),
+                null,
+                null,
+                new Geary.Memory.FileBuffer(File.new_for_path(args[1]), true),
+                null
+            )
+        );
     }
 
     private void search(string cmd, string[] args) throws Error {
@@ -525,9 +551,9 @@ class ImapConsole : Gtk.Window {
 
         Geary.Imap.SearchCommand search;
         if (cmd == "uid-search")
-            search = new Geary.Imap.SearchCommand.uid(criteria);
+            search = new Geary.Imap.SearchCommand.uid(criteria, null);
         else
-            search = new Geary.Imap.SearchCommand(criteria);
+            search = new Geary.Imap.SearchCommand(criteria, null);
 
         this.cx.send_command(search);
     }
@@ -537,7 +563,9 @@ class ImapConsole : Gtk.Window {
 
         status("Closing");
 
-        this.cx.send_command(new Geary.Imap.CloseCommand());
+        this.cx.send_command(
+            new Geary.Imap.CloseCommand(null)
+        );
     }
 
     private void folder_status(string cmd, string[] args) throws Error {
@@ -551,8 +579,13 @@ class ImapConsole : Gtk.Window {
             data_items += Geary.Imap.StatusDataType.from_parameter(stringp);
         }
 
-        this.cx.send_command(new Geary.Imap.StatusCommand(new Geary.Imap.MailboxSpecifier(args[0]),
-            data_items));
+        this.cx.send_command(
+            new Geary.Imap.StatusCommand(
+                new Geary.Imap.MailboxSpecifier(args[0]),
+                data_items,
+                null
+            )
+        );
     }
 
     private void preview(string cmd, string[] args) throws Error {
@@ -567,8 +600,11 @@ class ImapConsole : Gtk.Window {
         Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier> list = new Gee.ArrayList<Geary.Imap.FetchBodyDataSpecifier>();
         list.add(preview_data_type);
 
-        this.cx.send_command(new Geary.Imap.FetchCommand(
-            new Geary.Imap.MessageSet.custom(args[0]), null, list));
+        this.cx.send_command(
+            new Geary.Imap.FetchCommand(
+                new Geary.Imap.MessageSet.custom(args[0]), null, list, null
+            )
+        );
     }
 
     private void quit(string cmd, string[] args) throws Error {
