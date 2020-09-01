@@ -58,7 +58,7 @@
       <object class="GtkButton">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="label">Cancel</property>
+        <property name="label" translatable="yes">Cancel</property>
         <property name="action_name">cmh.composer-close</property>
       </object>
     </child>
