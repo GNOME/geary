@@ -93,7 +93,7 @@ public class Geary.Imap.AuthenticateCommand : Command {
         } else {
             if (this.method != AuthenticateCommand.OAUTH2_METHOD ||
                 this.response_literal != null) {
-                cancel_send();
+                stop_serialisation();
                 throw new ImapError.INVALID(
                     "Unexpected AUTHENTICATE continuation request"
                 );
@@ -112,8 +112,8 @@ public class Geary.Imap.AuthenticateCommand : Command {
         }
     }
 
-    protected override void cancel_send() {
-        base.cancel_send();
+    protected override void stop_serialisation() {
+        base.stop_serialisation();
         this.error_cancellable.cancel();
     }
 

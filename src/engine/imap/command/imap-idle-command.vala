@@ -88,8 +88,8 @@ public class Geary.Imap.IdleCommand : Command {
         }
     }
 
-    protected override void cancel_send() {
-        base.cancel_send();
+    protected override void stop_serialisation() {
+        base.stop_serialisation();
         this.exit_cancellable.cancel();
     }
 

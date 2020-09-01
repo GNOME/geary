@@ -315,7 +315,7 @@ public abstract class Geary.Imap.Command : BaseObject {
     internal virtual void completed(StatusResponse new_status)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Duplicate status response received: %s",
                 to_brief_string(),
@@ -326,7 +326,7 @@ public abstract class Geary.Imap.Command : BaseObject {
         this.status = new_status;
         this.response_timer.reset();
         this.complete_lock.blind_notify();
-        cancel_send();
+        stop_serialisation();
 
         check_has_status();
     }
@@ -348,7 +348,7 @@ public abstract class Geary.Imap.Command : BaseObject {
     internal virtual void data_received(ServerData data)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Server data received when command already complete: %s",
                 to_brief_string(),
@@ -370,7 +370,7 @@ public abstract class Geary.Imap.Command : BaseObject {
         continuation_requested(ContinuationResponse continuation)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested when command already complete",
                 to_brief_string()
@@ -378,7 +378,7 @@ public abstract class Geary.Imap.Command : BaseObject {
         }
 
         if (this.literal_spinlock == null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested but no literals available",
                 to_brief_string()
@@ -395,19 +395,19 @@ public abstract class Geary.Imap.Command : BaseObject {
     }
 
     /**
-     * Cancels any existing serialisation in progress.
+     * Stops any existing serialisation in progress.
      *
      * When this method is called, any non I/O related process
      * blocking the blocking {@link send} must be cancelled.
      */
-    protected virtual void cancel_send() {
+    protected virtual void stop_serialisation() {
         if (this.literal_cancellable != null) {
             this.literal_cancellable.cancel();
         }
     }
 
     private void cancel(ImapError cause) {
-        cancel_send();
+        stop_serialisation();
         this.cancelled_cause = cause;
         this.response_timer.reset();
         this.complete_lock.blind_notify();
