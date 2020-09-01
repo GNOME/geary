@@ -1785,7 +1785,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             throw new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
 
         this.cx.send_command(cmd);
-        yield cmd.wait_until_complete(cancellable);
+
+        // Once a command has been sent over the wire, it can't be
+        // cancelled until a response is received, because the server
+        // will send a response back anyway and so the command needs
+        // to be around for it.
+        yield cmd.wait_until_complete(null);
 
         // This won't be null since the Command.wait_until_complete
         // will throw an error if it is.
