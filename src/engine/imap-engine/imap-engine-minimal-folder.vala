@@ -304,8 +304,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         throws GLib.Error {
         check_open("synchronise_remote");
 
-        bool have_nooped = false;
-        while (!have_nooped && !cancellable.is_cancelled()) {
+        int retries = 3;
+        while (retries > 0 && !cancellable.is_cancelled()) {
             // The normalisation process will pick up any missing
             // messages if closed, so ensure there is a remote
             // session.
@@ -323,11 +323,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // showing the Sent folder, IDLE won't be enabled and
                 // hence we won't get notified of the saved mail.
                 yield remote.send_noop(cancellable);
-                have_nooped = true;
             } catch (GLib.Error err) {
-                if (is_recoverable_failure(err)) {
+                if (is_recoverable_failure(err) && retries > 1) {
+                    // XXX In theory we should be able to just retry
+                    // this immediately, but there's a race between
+                    // the old connection being disposed and another
+                    // being obtained that can make this into an
+                    // infinite loop. So limit the maximum number of
+                    // reties and set a timeout to help aid recovery.
                     debug("Recoverable error during remote sync: %s",
                           err.message);
+                    retries--;
+                    GLib.Timeout.add_seconds(
+                        1, this.synchronise_remote.callback
+                    );
+                    yield;
                 } else {
                     throw err;
                 }
