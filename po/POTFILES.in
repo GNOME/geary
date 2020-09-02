@@ -238,7 +238,6 @@ src/engine/imap/command/imap-append-command.vala
 src/engine/imap/command/imap-capability-command.vala
 src/engine/imap/command/imap-close-command.vala
 src/engine/imap/command/imap-command.vala
-src/engine/imap/command/imap-compress-command.vala
 src/engine/imap/command/imap-copy-command.vala
 src/engine/imap/command/imap-create-command.vala
 src/engine/imap/command/imap-examine-command.vala

@@ -100,7 +100,6 @@ engine_vala_sources = files(
   'imap/command/imap-capability-command.vala',
   'imap/command/imap-close-command.vala',
   'imap/command/imap-command.vala',
-  'imap/command/imap-compress-command.vala',
   'imap/command/imap-copy-command.vala',
   'imap/command/imap-create-command.vala',
   'imap/command/imap-delete-command.vala',
