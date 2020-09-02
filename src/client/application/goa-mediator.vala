@@ -50,9 +50,23 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
                                          Geary.ServiceInformation service,
                                          Cancellable? cancellable)
         throws GLib.Error {
-        yield this.handle.get_account().call_ensure_credentials(
-            cancellable, null
-        );
+        // Per GOA docs
+        // <https://developer.gnome.org/goa/stable/ch01s03.html>:
+        // "First the application should invoke the
+        // Account.EnsureCredentials() method […] if the service
+        // returns an authorization error (say, the access token
+        // expired), the application should call
+        // Account.EnsureCredentials() again to e.g. renew the
+        // credentials."
+        Goa.Account? goa_account = this.handle.get_account();
+        if (account != null) {
+            try {
+                yield goa_account.call_ensure_credentials(cancellable, null);
+            } catch (Goa.Error.NOT_AUTHORIZED err) {
+                debug("GOA updating auth failed, retrying: %s", err.message);
+                yield goa_account.call_ensure_credentials(cancellable, null);
+            }
+        }
 
         bool loaded = false;
         string? token = null;
