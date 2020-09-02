@@ -265,6 +265,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         check_connection();
         if (new_command.should_send != null &&
             new_command.should_send.is_cancelled()) {
+            new_command.cancelled_before_send();
             throw new GLib.IOError.CANCELLED(
                 "Not queuing command, sending is cancelled: %s",
                 new_command.to_brief_string()
@@ -437,6 +438,7 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         throws GLib.Error {
         if (command.should_send != null &&
             command.should_send.is_cancelled()) {
+            command.cancelled_before_send();
             throw new GLib.IOError.CANCELLED(
                 "Not sending command, sending is cancelled: %s",
                 command.to_brief_string()
