@@ -231,6 +231,8 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
     private inline void set_reachable(bool reachable) {
+        debug("Setting reachable from %s to %s",
+              this.is_reachable.to_string(), reachable.to_string());
         // Coalesce changes to is_reachable, since Vala <= 0.34 always
         // fires notify signals on set, even if the value doesn't
         // change. 0.36 fixes that, so pull this test out when we can
