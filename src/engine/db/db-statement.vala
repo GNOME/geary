@@ -7,7 +7,7 @@
 private extern string? sqlite3_expanded_sql(Sqlite.Statement stmt);
 
 
-public class Geary.Db.Statement : Geary.Db.Context {
+public class Geary.Db.Statement : Context {
 
     public string sql {
         get { return this.stmt.sql(); }
@@ -274,5 +274,10 @@ public class Geary.Db.Statement : Geary.Db.Context {
     public override Statement? get_statement() {
         return this;
     }
-}
 
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(this, this.sql);
+    }
+
+}

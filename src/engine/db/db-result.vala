@@ -14,6 +14,7 @@ public class Geary.Db.Result : Geary.Db.Context {
     // This results in an automatic first next().
     internal Result(Statement statement, Cancellable? cancellable) throws Error {
         this.statement = statement;
+        set_logging_parent(statement);
 
         statement.was_reset.connect(on_query_finished);
         statement.bindings_cleared.connect(on_query_finished);
@@ -295,6 +296,11 @@ public class Geary.Db.Result : Geary.Db.Context {
 
     public override Result? get_result() {
         return this;
+    }
+
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(this, this.finished ? "finished" : "not finished");
     }
 
     [PrintfFormat]

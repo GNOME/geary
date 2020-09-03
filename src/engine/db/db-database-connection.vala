@@ -118,13 +118,15 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
 
     /** {@inheritDoc} */
     public Statement prepare(string sql) throws DatabaseError {
-        return new Statement(this, sql);
+        var prepared = new Statement(this, sql);
+        prepared.set_logging_parent(this);
+        return prepared;
     }
 
     /** {@inheritDoc} */
     public Result query(string sql, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        return (new Statement(this, sql)).exec(cancellable);
+        return prepare(sql).exec(cancellable);
     }
 
     /** {@inheritDoc} */
@@ -240,8 +242,9 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
         return this;
     }
 
-    public string to_string() {
-        return "[%u] %s".printf(this.cx_number, this._database.path);
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(this, "%u", this.cx_number);
     }
 
 }

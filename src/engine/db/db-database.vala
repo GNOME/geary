@@ -15,7 +15,7 @@
  * thread pool, as well as allowing multiple connections to be opened
  * for fully concurrent access.
  */
-public class Geary.Db.Database : Geary.Db.Context {
+public class Geary.Db.Database : Context {
 
 
     /** The path passed to SQLite to open a transient database. */
@@ -143,6 +143,7 @@ public class Geary.Db.Database : Geary.Db.Context {
             var cx = new DatabaseConnection(
                 this, Sqlite.OPEN_READWRITE, cancellable
             );
+            cx.set_logging_parent(this);
 
             try {
                 // drop existing test table (in case created in prior failed open)
@@ -232,6 +233,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         DatabaseConnection cx = new DatabaseConnection(
             this, sqlite_flags, cancellable
         );
+        cx.set_logging_parent(this);
         prepare_connection(cx);
         return cx;
     }
@@ -355,6 +357,18 @@ public class Geary.Db.Database : Geary.Db.Context {
         return yield job.wait_for_completion_async();
     }
 
+
+    public override Database? get_database() {
+        return this;
+    }
+
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this, "%s, is_open: %s", this.path, this.is_open.to_string()
+        );
+    }
+
     /** Adds the given job to the thread pool. */
     internal void add_async_job(TransactionAsyncJob new_job) throws Error {
         check_open();
@@ -411,7 +425,4 @@ public class Geary.Db.Database : Geary.Db.Context {
         }
     }
 
-    public override Database? get_database() {
-        return this;
-    }
 }

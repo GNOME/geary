@@ -58,8 +58,9 @@ internal class Geary.Db.TransactionConnection : Context, Connection {
         return this;
     }
 
-    public string to_string() {
-        return this.db_cx.to_string();
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(this, "");
     }
 
 }
