@@ -1036,8 +1036,6 @@ public class Application.Client : Gtk.Application {
         }
         if (options.contains(OPTION_LOG_SQL)) {
             Geary.Db.Context.enable_sql_logging = true;
-        } else {
-            Geary.Logging.suppress_domain(Geary.Db.Context.LOGGING_DOMAIN);
         }
 
         if (options.contains(OPTION_HIDDEN)) {
