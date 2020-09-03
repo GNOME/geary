@@ -30,8 +30,11 @@ public class Geary.Imap.StoreCommand : Command {
         SILENT
     }
 
-    public StoreCommand(MessageSet message_set, Gee.List<MessageFlag> flag_list, Option options) {
-        base (message_set.is_uid ? UID_NAME : NAME);
+    public StoreCommand(MessageSet message_set,
+                        Gee.List<MessageFlag> flag_list,
+                        Option options,
+                        GLib.Cancellable? should_send) {
+        base(message_set.is_uid ? UID_NAME : NAME, null, should_send);
 
         bool add_flag = (options & Option.ADD_FLAGS) != 0;
         bool silent = (options & Option.SILENT) != 0;

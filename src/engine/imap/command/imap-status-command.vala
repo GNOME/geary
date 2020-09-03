@@ -18,8 +18,10 @@ public class Geary.Imap.StatusCommand : Command {
     public const string NAME = "STATUS";
 
 
-    public StatusCommand(MailboxSpecifier mailbox, StatusDataType[] data_items) {
-        base (NAME);
+    public StatusCommand(MailboxSpecifier mailbox,
+                         StatusDataType[] data_items,
+                         GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
 
         this.args.add(mailbox.to_parameter());
 

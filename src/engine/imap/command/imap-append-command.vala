@@ -14,9 +14,12 @@ public class Geary.Imap.AppendCommand : Command {
 
     public const string NAME = "append";
 
-    public AppendCommand(MailboxSpecifier mailbox, MessageFlags? flags, InternalDate? internal_date,
-        Memory.Buffer message) {
-        base (NAME);
+    public AppendCommand(MailboxSpecifier mailbox,
+                         MessageFlags? flags,
+                         InternalDate? internal_date,
+                         Memory.Buffer message,
+                         GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
 
         this.args.add(mailbox.to_parameter());
 

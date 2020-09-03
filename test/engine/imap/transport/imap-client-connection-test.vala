@@ -11,7 +11,7 @@ class Geary.Imap.ClientConnectionTest : TestCase {
     private class TestCommand : Command {
 
         public TestCommand() {
-            base("TEST");
+            base("TEST", null, null);
         }
 
     }

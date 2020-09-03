@@ -11,10 +11,11 @@
  */
 
 public class Geary.Imap.CapabilityCommand : Command {
+
     public const string NAME = "capability";
 
-    public CapabilityCommand() {
-        base (NAME);
+    public CapabilityCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
-}
 
+}

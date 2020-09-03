@@ -9,10 +9,11 @@
  */
 
 public class Geary.Imap.LogoutCommand : Command {
+
     public const string NAME = "logout";
 
-    public LogoutCommand() {
-        base (NAME);
+    public LogoutCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
-}
 
+}

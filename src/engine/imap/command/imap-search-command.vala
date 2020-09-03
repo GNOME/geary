@@ -15,8 +15,9 @@ public class Geary.Imap.SearchCommand : Command {
     public const string NAME = "search";
     public const string UID_NAME = "uid search";
 
-    public SearchCommand(SearchCriteria criteria) {
-        base(NAME);
+    public SearchCommand(SearchCriteria criteria,
+                         GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
 
         // Extend rather than append the criteria, so the top-level
         // criterion appear in the top-level list and not as a child
@@ -24,8 +25,9 @@ public class Geary.Imap.SearchCommand : Command {
         this.args.extend(criteria);
     }
 
-    public SearchCommand.uid(SearchCriteria criteria) {
-        base(UID_NAME);
+    public SearchCommand.uid(SearchCriteria criteria,
+                             GLib.Cancellable? should_send) {
+        base(UID_NAME, null, should_send);
 
         // Extend rather than append the criteria, so the top-level
         // criterion appear in the top-level list and not as a child

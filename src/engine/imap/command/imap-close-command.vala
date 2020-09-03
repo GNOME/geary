@@ -9,10 +9,11 @@
  */
 
 public class Geary.Imap.CloseCommand : Command {
+
     public const string NAME = "close";
 
-    public CloseCommand() {
-        base (NAME);
+    public CloseCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
-}
 
+}

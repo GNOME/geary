@@ -30,7 +30,7 @@ class Geary.Imap.FetchCommandTest : TestCase {
         data_items.add(FetchDataSpecifier.UID);
 
         assert_equal(
-            new FetchCommand(this.msg_set, data_items, null).to_string(),
+            new FetchCommand(this.msg_set, data_items, null, null).to_string(),
             "---- fetch 1 uid"
         );
     }
@@ -45,7 +45,7 @@ class Geary.Imap.FetchCommandTest : TestCase {
         );
 
         assert_equal(
-            new FetchCommand(this.msg_set, null, body_items).to_string(),
+            new FetchCommand(this.msg_set, null, body_items, null).to_string(),
             "---- fetch 1 body[text]"
         );
     }
@@ -57,7 +57,7 @@ class Geary.Imap.FetchCommandTest : TestCase {
         data_items.add(FetchDataSpecifier.BODY);
 
         assert_equal(
-            new FetchCommand(this.msg_set, data_items, null).to_string(),
+            new FetchCommand(this.msg_set, data_items, null, null).to_string(),
             "---- fetch 1 (uid body)"
         );
     }
@@ -77,7 +77,7 @@ class Geary.Imap.FetchCommandTest : TestCase {
         );
 
         assert_equal(
-            new FetchCommand(this.msg_set, null, body_items).to_string(),
+            new FetchCommand(this.msg_set, null, body_items, null).to_string(),
             "---- fetch 1 (body[header] body[text])"
         );
     }
@@ -102,7 +102,7 @@ class Geary.Imap.FetchCommandTest : TestCase {
         );
 
         assert_equal(
-            new FetchCommand(this.msg_set, data_items, body_items).to_string(),
+            new FetchCommand(this.msg_set, data_items, body_items, null).to_string(),
             "---- fetch 1 (uid flags body[header] body[text])"
         );
     }

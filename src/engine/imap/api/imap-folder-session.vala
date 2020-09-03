@@ -159,7 +159,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     public async void send_noop(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield exec_commands_async(
-            Collection.single(new NoopCommand()),
+            Collection.single(new NoopCommand(cancellable)),
             null,
             null,
             cancellable
@@ -334,12 +334,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     }
 
     // Utility method for listing UIDs on the remote within the supplied range
-    public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
-        throws Error {
+    public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set,
+                                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // Although FETCH could be used, SEARCH is more efficient in returning pure UID results,
         // which is all we're interested in here
         SearchCriteria criteria = new SearchCriteria(SearchCriterion.message_set(msg_set));
-        SearchCommand cmd = new SearchCommand.uid(criteria);
+        SearchCommand cmd = new SearchCommand.uid(criteria, cancellable);
 
         Gee.Set<Imap.UID> search_results = new Gee.HashSet<Imap.UID>();
         yield exec_commands_async(
@@ -355,6 +356,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     private Gee.Collection<FetchCommand> assemble_list_commands(
         Imap.MessageSet msg_set,
         Geary.Email.Field fields,
+        GLib.Cancellable? cancellable,
         out FetchBodyDataSpecifier[]? header_specifiers,
         out FetchBodyDataSpecifier? body_specifier,
         out FetchBodyDataSpecifier? preview_specifier,
@@ -369,8 +371,13 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // pulled down, not a guarantee); if request is for NONE, that guarantees that the
         // EmailIdentifier will be set, and so fetch UIDs (which looks funny but works when
         // listing a range for contents: UID FETCH x:y UID)
-        if (!msg_set.is_uid || fields == Geary.Email.Field.NONE)
-            cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
+        if (!msg_set.is_uid || fields == Geary.Email.Field.NONE) {
+            cmds.add(
+                new FetchCommand.data_type(
+                    msg_set, FetchDataSpecifier.UID, cancellable
+                )
+            );
+        }
 
         // convert bulk of the "basic" fields into a one or two FETCH commands (some servers have
         // exhibited bugs or return NO when too many FETCH data types are combined on a single
@@ -385,7 +392,9 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
             // Add all simple data types as one FETCH command
             if (!basic_types.is_empty) {
-                cmds.add(new FetchCommand(msg_set, basic_types, null));
+                cmds.add(
+                    new FetchCommand(msg_set, basic_types, null, cancellable)
+                );
             }
 
             // Add all header field requests as separate FETCH
@@ -424,7 +433,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     if (this.quirks.fetch_header_part_no_space) {
                         header.omit_request_header_fields_space();
                     }
-                    cmds.add(new FetchCommand.body_data_type(msg_set, header));
+                    cmds.add(
+                        new FetchCommand.body_data_type(
+                            msg_set, header, cancellable
+                        )
+                    );
                 }
             }
         }
@@ -434,7 +447,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             body_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.TEXT,
                 null, -1, -1, null);
 
-            cmds.add(new FetchCommand.body_data_type(msg_set, body_specifier));
+            cmds.add(
+                new FetchCommand.body_data_type(
+                    msg_set, body_specifier, cancellable
+                )
+            );
         } else {
             body_specifier = null;
         }
@@ -453,12 +470,20 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
             preview_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
-            cmds.add(new FetchCommand.body_data_type(msg_set, preview_specifier));
+            cmds.add(
+                new FetchCommand.body_data_type(
+                    msg_set, preview_specifier, cancellable
+                )
+            );
 
             // Also get the character set to properly decode it
             preview_charset_specifier = new FetchBodyDataSpecifier.peek(
                 FetchBodyDataSpecifier.SectionPart.MIME, { 1 }, -1, -1, null);
-            cmds.add(new FetchCommand.body_data_type(msg_set, preview_charset_specifier));
+            cmds.add(
+                new FetchCommand.body_data_type(
+                    msg_set, preview_charset_specifier, cancellable
+                )
+            );
         } else {
             preview_specifier = null;
             preview_charset_specifier = null;
@@ -476,7 +501,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             if (fields.require(Geary.Email.Field.FLAGS))
                 data_types.add(FetchDataSpecifier.FLAGS);
 
-            cmds.add(new FetchCommand(msg_set, data_types, null));
+            cmds.add(new FetchCommand(msg_set, data_types, null, cancellable));
         }
 
         return cmds;
@@ -498,6 +523,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             Gee.Collection<FetchCommand> cmds = assemble_list_commands(
                 msg_set,
                 fields,
+                cancellable,
                 out header_specifiers,
                 out body_specifier,
                 out preview_specifier,
@@ -593,7 +619,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         }
 
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
-        cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
+        cmds.add(
+            new FetchCommand.data_type(
+                msg_set, FetchDataSpecifier.UID, cancellable
+            )
+        );
 
         Gee.HashMap<SequenceNumber, FetchedData> fetched =
             new Gee.HashMap<SequenceNumber, FetchedData>();
@@ -613,8 +643,9 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return map;
     }
 
-    public async void remove_email_async(Gee.List<MessageSet> msg_sets, Cancellable? cancellable)
-        throws Error {
+    public async void remove_email_async(Gee.List<MessageSet> msg_sets,
+                                         GLib.Cancellable? cancellable)
+        throws GLib.Error {
         ClientSession session = claim_session();
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);
@@ -627,7 +658,9 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             if (!msg_set.is_uid)
                 all_uid = false;
 
-            cmds.add(new StoreCommand(msg_set, flags, StoreCommand.Option.ADD_FLAGS));
+            cmds.add(
+                new StoreCommand(msg_set, flags, StoreCommand.Option.ADD_FLAGS, cancellable)
+            );
         }
 
         // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
@@ -638,10 +671,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         // shuts down, which means deleted messages return at application start.  See:
         // http://redmine.yorba.org/issues/6865
         if (all_uid && session.capabilities.supports_uidplus()) {
-            foreach (MessageSet msg_set in msg_sets)
-                cmds.add(new ExpungeCommand.uid(msg_set));
+            foreach (MessageSet msg_set in msg_sets) {
+                cmds.add(new ExpungeCommand.uid(msg_set, cancellable));
+            }
         } else {
-            cmds.add(new ExpungeCommand());
+            cmds.add(new ExpungeCommand(cancellable));
         }
 
         yield exec_commands_async(cmds, null, null, cancellable);
@@ -659,11 +693,21 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         foreach (MessageSet msg_set in msg_sets) {
-            if (msg_flags_add.size > 0)
-                cmds.add(new StoreCommand(msg_set, msg_flags_add, StoreCommand.Option.ADD_FLAGS));
+            if (msg_flags_add.size > 0) {
+                cmds.add(
+                    new StoreCommand(
+                        msg_set, msg_flags_add, ADD_FLAGS, cancellable
+                    )
+                );
+            }
 
-            if (msg_flags_remove.size > 0)
-                cmds.add(new StoreCommand(msg_set, msg_flags_remove, StoreCommand.Option.REMOVE_FLAGS));
+            if (msg_flags_remove.size > 0) {
+                cmds.add(
+                    new StoreCommand(
+                        msg_set, msg_flags_remove, REMOVE_FLAGS, cancellable
+                    )
+                );
+            }
         }
 
         yield exec_commands_async(cmds, null, null, cancellable);
@@ -671,12 +715,14 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
     // Returns a mapping of the source UID to the destination UID.  If the MessageSet is not for
     // UIDs, then null is returned.  If the server doesn't support COPYUID, null is returned.
-    public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set, FolderPath destination,
-        Cancellable? cancellable) throws Error {
+    public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set,
+                                                     FolderPath destination,
+                                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
         ClientSession session = claim_session();
 
         MailboxSpecifier mailbox = session.get_mailbox_for_path(destination);
-        CopyCommand cmd = new CopyCommand(msg_set, mailbox);
+        CopyCommand cmd = new CopyCommand(msg_set, mailbox, cancellable);
 
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
             Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
@@ -718,11 +764,12 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return null;
     }
 
-    public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria, Cancellable? cancellable)
-        throws Error {
+    public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria,
+                                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // always perform a UID SEARCH
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
-        cmds.add(new SearchCommand.uid(criteria));
+        cmds.add(new SearchCommand.uid(criteria, cancellable));
 
         Gee.Set<Imap.UID> search_results = new Gee.HashSet<Imap.UID>();
         yield exec_commands_async(cmds, null, search_results, cancellable);
@@ -1044,12 +1091,22 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         return email;
     }
 
-    // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
-    // This method does not take a cancellable; there is currently no way to tell if an email was
-    // created or not if exec_commands_async() is cancelled during the append.  For atomicity's sake,
-    // callers need to remove the returned email ID if a cancel occurred.
-    public async Geary.EmailIdentifier? create_email_async(RFC822.Message message, Geary.EmailFlags? flags,
-        DateTime? date_received) throws Error {
+    /**
+     * Stores a new message in the remote mailbox.
+     *
+     * Returns a no-message-id ImapDB.EmailIdentifier with the UID
+     * stored in it.
+     *
+     * This method does not take a cancellable; there is currently no
+     * way to tell if an email was created or not if {@link
+     * exec_commands_async} is cancelled during the append. For
+     * atomicity's sake, callers need to remove the returned email ID
+     * if a cancel occurred.
+    */
+    public async Geary.EmailIdentifier? create_email_async(RFC822.Message message,
+                                                           Geary.EmailFlags? flags,
+                                                           GLib.DateTime? date_received)
+        throws GLib.Error {
         ClientSession session = claim_session();
 
         MessageFlags? msg_flags = null;
@@ -1066,11 +1123,16 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
         MailboxSpecifier mailbox = session.get_mailbox_for_path(this.folder.path);
         AppendCommand cmd = new AppendCommand(
-            mailbox, msg_flags, internaldate, message.get_rfc822_buffer()
+            mailbox,
+            msg_flags,
+            internaldate,
+            message.get_rfc822_buffer(),
+            null
         );
 
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(
-            Geary.iterate<AppendCommand>(cmd).to_array_list(), null, null, null);
+            Geary.iterate<AppendCommand>(cmd).to_array_list(), null, null, null
+        );
 
         // Grab the response and parse out the UID, if available.
         StatusResponse response = responses.get(cmd);

@@ -16,8 +16,9 @@ public class Geary.Imap.ExamineCommand : Command {
 
     public MailboxSpecifier mailbox { get; private set; }
 
-    public ExamineCommand(MailboxSpecifier mailbox) {
-        base(NAME);
+    public ExamineCommand(MailboxSpecifier mailbox,
+                          GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
         this.mailbox = mailbox;
         this.args.add(mailbox.to_parameter());
     }

@@ -260,8 +260,17 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         yield open_channels_async();
     }
 
-    public void send_command(Command new_command) throws ImapError {
+    public void send_command(Command new_command)
+        throws ImapError, GLib.IOError.CANCELLED {
         check_connection();
+        if (new_command.should_send != null &&
+            new_command.should_send.is_cancelled()) {
+            new_command.cancelled_before_send();
+            throw new GLib.IOError.CANCELLED(
+                "Not queuing command, sending is cancelled: %s",
+                new_command.to_brief_string()
+            );
+        }
 
         this.pending_queue.send(new_command);
 
@@ -427,6 +436,14 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     // sending literals.
     private async void flush_command(Command command, Cancellable cancellable)
         throws GLib.Error {
+        if (command.should_send != null &&
+            command.should_send.is_cancelled()) {
+            command.cancelled_before_send();
+            throw new GLib.IOError.CANCELLED(
+                "Not sending command, sending is cancelled: %s",
+                command.to_brief_string()
+            );
+        }
         GLib.Error? ser_error = null;
         try {
             // Assign a new tag; Commands with pre-assigned Tags
@@ -576,8 +593,8 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private void on_idle_timeout() {
         debug("Initiating IDLE");
         try {
-            this.send_command(new IdleCommand());
-        } catch (ImapError err) {
+            this.send_command(new IdleCommand(this.open_cancellable));
+        } catch (GLib.Error err) {
             warning("Error sending IDLE: %s", err.message);
         }
     }

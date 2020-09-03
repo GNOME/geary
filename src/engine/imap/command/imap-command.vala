@@ -61,6 +61,20 @@ public abstract class Geary.Imap.Command : BaseObject {
     public StatusResponse? status { get; private set; default = null; }
 
     /**
+     * A guard to allow cancelling a command before it is sent.
+     *
+     * Since IMAP does not allow commands that have been sent to the
+     * server to be cancelled, cancelling a command before sending it
+     * is the last opportunity to prevent it from being executed. A
+     * command queued to be sent will be sent as long as the
+     * connection it was queued is open and this cancellable is null
+     * or is not cancelled.
+     *
+     * @see Command.Command
+     */
+    public GLib.Cancellable? should_send { get; private set; default = null; }
+
+    /**
      * The command's arguments as parameters.
      *
      * Subclassess may append arguments to this before {@link send} is
@@ -78,7 +92,7 @@ public abstract class Geary.Imap.Command : BaseObject {
     private Geary.Nonblocking.Semaphore complete_lock =
         new Geary.Nonblocking.Semaphore();
 
-    private ImapError? cancelled_cause = null;
+    private GLib.Error? cancelled_cause = null;
 
     private Geary.Nonblocking.Spinlock? literal_spinlock = null;
     private GLib.Cancellable? literal_cancellable = null;
@@ -93,11 +107,15 @@ public abstract class Geary.Imap.Command : BaseObject {
      * Constructs a new command with an unassigned tag.
      *
      * Any arguments provided here will be converted to appropriate
-     * string arguments
+     * string arguments. The given cancellable will be set as {@link
+     * should_send}.
      *
      * @see Tag
+     * @see should_send
      */
-    protected Command(string name, string[]? args = null) {
+    protected Command(string name,
+                      string[]? args,
+                      GLib.Cancellable? should_send) {
         this.tag = Tag.get_unassigned();
         this.name = name;
         if (args != null) {
@@ -105,6 +123,7 @@ public abstract class Geary.Imap.Command : BaseObject {
                 this.args.add(Parameter.get_for_string(arg));
             }
         }
+        this.should_send = should_send;
 
         this.response_timer = new TimeoutManager.seconds(
             this._response_timeout, on_response_timeout
@@ -258,6 +277,16 @@ public abstract class Geary.Imap.Command : BaseObject {
             throw this.cancelled_cause;
         }
 
+        // If everything above is fine, but sending was cancelled, it
+        // must have been cancelled after being sent. Throw an error
+        // indicating this specifically.
+        if (this.should_send != null &&
+            this.should_send.is_cancelled()) {
+            throw new GLib.IOError.CANCELLED(
+                "Command was cancelled after sending: %s", to_brief_string()
+            );
+        }
+
         check_has_status();
 
         // Since this is part of the public API, perform a strict
@@ -287,7 +316,7 @@ public abstract class Geary.Imap.Command : BaseObject {
     internal virtual void completed(StatusResponse new_status)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Duplicate status response received: %s",
                 to_brief_string(),
@@ -298,9 +327,24 @@ public abstract class Geary.Imap.Command : BaseObject {
         this.status = new_status;
         this.response_timer.reset();
         this.complete_lock.blind_notify();
-        cancel_send();
+        stop_serialisation();
 
         check_has_status();
+    }
+
+    /**
+     * Marks this command as being cancelled before being sent.
+     *
+     * When this method is called, all locks will be released,
+     * including {@link wait_until_complete}, which will then throw a
+     * `GLib.IOError.CANCELLED` error.
+     */
+    internal virtual void cancelled_before_send() {
+        cancel(
+            new GLib.IOError.CANCELLED(
+                "Command was cancelled before sending: %s", to_brief_string()
+            )
+        );
     }
 
     /**
@@ -308,7 +352,7 @@ public abstract class Geary.Imap.Command : BaseObject {
      *
      * When this method is called, all locks will be released,
      * including {@link wait_until_complete}, which will then throw a
-     * `GLib.IOError.CANCELLED` error.
+     * `ImapError.NOT_CONNECTED` error.
      */
     internal virtual void disconnected(string reason) {
         cancel(new ImapError.NOT_CONNECTED("%s: %s", to_brief_string(), reason));
@@ -320,7 +364,7 @@ public abstract class Geary.Imap.Command : BaseObject {
     internal virtual void data_received(ServerData data)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Server data received when command already complete: %s",
                 to_brief_string(),
@@ -342,7 +386,7 @@ public abstract class Geary.Imap.Command : BaseObject {
         continuation_requested(ContinuationResponse continuation)
         throws ImapError {
         if (this.status != null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested when command already complete",
                 to_brief_string()
@@ -350,7 +394,7 @@ public abstract class Geary.Imap.Command : BaseObject {
         }
 
         if (this.literal_spinlock == null) {
-            cancel_send();
+            stop_serialisation();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested but no literals available",
                 to_brief_string()
@@ -367,19 +411,19 @@ public abstract class Geary.Imap.Command : BaseObject {
     }
 
     /**
-     * Cancels any existing serialisation in progress.
+     * Stops any existing serialisation in progress.
      *
      * When this method is called, any non I/O related process
      * blocking the blocking {@link send} must be cancelled.
      */
-    protected virtual void cancel_send() {
+    protected virtual void stop_serialisation() {
         if (this.literal_cancellable != null) {
             this.literal_cancellable.cancel();
         }
     }
 
-    private void cancel(ImapError cause) {
-        cancel_send();
+    private void cancel(GLib.Error cause) {
+        stop_serialisation();
         this.cancelled_cause = cause;
         this.response_timer.reset();
         this.complete_lock.blind_notify();

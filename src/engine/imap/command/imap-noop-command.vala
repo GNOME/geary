@@ -11,10 +11,11 @@
  */
 
 public class Geary.Imap.NoopCommand : Command {
+
     public const string NAME = "noop";
 
-    public NoopCommand() {
-        base (NAME);
+    public NoopCommand(GLib.Cancellable? should_send) {
+        base(NAME, null, should_send);
     }
-}
 
+}
