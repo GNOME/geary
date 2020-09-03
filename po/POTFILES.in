@@ -213,12 +213,14 @@ src/engine/common/common-message-data.vala
 src/engine/db/db.vala
 src/engine/db/db-connection.vala
 src/engine/db/db-context.vala
+src/engine/db/db-database-connection.vala
 src/engine/db/db-database-error.vala
 src/engine/db/db-database.vala
 src/engine/db/db-result.vala
 src/engine/db/db-statement.vala
 src/engine/db/db-synchronous-mode.vala
 src/engine/db/db-transaction-async-job.vala
+src/engine/db/db-transaction-connection.vala
 src/engine/db/db-transaction-outcome.vala
 src/engine/db/db-transaction-type.vala
 src/engine/db/db-versioned-database.vala

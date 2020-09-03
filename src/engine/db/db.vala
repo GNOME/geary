@@ -48,7 +48,10 @@ public enum ResetScope {
 /**
  * See Connection.exec_transaction() for more information on how this delegate is used.
  */
-public delegate TransactionOutcome TransactionMethod(Connection cx, Cancellable? cancellable) throws Error;
+public delegate TransactionOutcome TransactionMethod(
+    Connection cx,
+    GLib.Cancellable? cancellable
+) throws GLib.Error;
 
 // Used by exec_retry_locked().
 private delegate int SqliteExecOperation();

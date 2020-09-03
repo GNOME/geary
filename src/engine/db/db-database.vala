@@ -9,17 +9,12 @@
 /**
  * Represents a single SQLite database.
  *
- * Each database supports multiple {@link Connection}s that allow SQL
- * queries to be executed, however if a single connection is required
- * by an app, this class also provides convenience methods to execute
- * queries against a common ''primary'' connection.
- *
- * This class offers a number of asynchronous methods, however since
- * SQLite only supports a synchronous API, these are implemented using
- * a pool of background threads. Asynchronous transactions are
- * available via {@link exec_transaction_async}.
+ * This class provides convenience methods to execute queries for
+ * applications that do not require concurrent access to the database,
+ * and it supports executing and asynchronous transaction using a
+ * thread pool, as well as allowing multiple connections to be opened
+ * for fully concurrent access.
  */
-
 public class Geary.Db.Database : Geary.Db.Context {
 
 
@@ -62,7 +57,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         }
     }
 
-    private Connection? primary = null;
+    private DatabaseConnection? primary = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
 
@@ -145,7 +140,9 @@ public class Geary.Db.Database : Geary.Db.Context {
         // TODO: Allow the caller to specify the name of the test table, so we're not clobbering
         // theirs (however improbable it is to name a table "CorruptionCheckTable")
         if ((flags & DatabaseFlags.READ_ONLY) == 0) {
-            Connection cx = new Connection(this, Sqlite.OPEN_READWRITE, cancellable);
+            var cx = new DatabaseConnection(
+                this, Sqlite.OPEN_READWRITE, cancellable
+            );
 
             try {
                 // drop existing test table (in case created in prior failed open)
@@ -206,17 +203,18 @@ public class Geary.Db.Database : Geary.Db.Context {
     /**
      * Throws DatabaseError.OPEN_REQUIRED if not open.
      */
-    public async Connection open_connection(Cancellable? cancellable = null)
-        throws Error {
-        Connection? cx = null;
+    public async DatabaseConnection
+        open_connection(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        DatabaseConnection? cx = null;
         yield Nonblocking.Concurrent.global.schedule_async(() => {
                 cx = internal_open_connection(false, cancellable);
             }, cancellable);
         return cx;
     }
 
-    private Connection internal_open_connection(bool is_primary,
-                                                GLib.Cancellable? cancellable)
+    private DatabaseConnection internal_open_connection(bool is_primary,
+                                                        GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open();
 
@@ -231,7 +229,9 @@ public class Geary.Db.Database : Geary.Db.Context {
             sqlite_flags |= SQLITE_OPEN_URI;
         }
 
-        Connection cx = new Connection(this, sqlite_flags, cancellable);
+        DatabaseConnection cx = new DatabaseConnection(
+            this, sqlite_flags, cancellable
+        );
         prepare_connection(cx);
         return cx;
     }
@@ -247,7 +247,7 @@ public class Geary.Db.Database : Geary.Db.Context {
      *
      * Throws {@link DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public Connection get_primary_connection() throws GLib.Error {
+    public DatabaseConnection get_primary_connection() throws GLib.Error {
         if (this.primary == null)
             this.primary = internal_open_connection(true, null);
 
@@ -261,6 +261,8 @@ public class Geary.Db.Database : Geary.Db.Context {
      * Connection.exec} on the connection returned by {@link
      * get_primary_connection}. Throws {@link
      * DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see Connection.exec
      */
     public void exec(string sql, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
@@ -274,6 +276,8 @@ public class Geary.Db.Database : Geary.Db.Context {
      * Connection.exec_file} on the connection returned by {@link
      * get_primary_connection}. Throws {@link
      * DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see Connection.exec_file
      */
     public void exec_file(File file, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
@@ -287,6 +291,8 @@ public class Geary.Db.Database : Geary.Db.Context {
      * Connection.prepare} on the connection returned by {@link
      * get_primary_connection}. Throws {@link
      * DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see Connection.prepare
      */
     public Statement prepare(string sql) throws GLib.Error {
         return get_primary_connection().prepare(sql);
@@ -299,6 +305,8 @@ public class Geary.Db.Database : Geary.Db.Context {
      * Connection.query} on the connection returned by {@link
      * get_primary_connection}. Throws {@link
      * DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see Connection.query
      */
     public Result query(string sql, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
@@ -309,9 +317,11 @@ public class Geary.Db.Database : Geary.Db.Context {
      * Executes a transaction using the primary connection.
      *
      * This is a convenience method for calling {@link
-     * Connection.exec_transaction} on the connection returned by
-     * {@link get_primary_connection}. Throws {@link
+     * DatabaseConnection.exec_transaction} on the connection returned
+     * by {@link get_primary_connection}. Throws {@link
      * DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see DatabaseConnection.exec_transaction
      */
     public TransactionOutcome exec_transaction(TransactionType type,
                                                TransactionMethod cb,
@@ -325,12 +335,14 @@ public class Geary.Db.Database : Geary.Db.Context {
      *
      * Asynchronous transactions are handled via background
      * threads. The background thread opens a new connection, and
-     * calls {@link Connection.exec_transaction}; see that method for
-     * more information about coding a transaction. The only caveat is
-     * that the {@link TransactionMethod} passed to it must be
-     * thread-safe.
+     * calls {@link DatabaseConnection.exec_transaction}; see that
+     * method for more information about coding a transaction. The
+     * only caveat is that the {@link TransactionMethod} passed to it
+     * must be thread-safe.
      *
      * Throws {@link DatabaseError.OPEN_REQUIRED} if not open.
+     *
+     * @see DatabaseConnection.exec_transaction
      */
     public async TransactionOutcome exec_transaction_async(TransactionType type,
                                                            TransactionMethod cb,
@@ -367,15 +379,16 @@ public class Geary.Db.Database : Geary.Db.Context {
      * established connections before being used, such as setting
      * pragmas, custom collation functions, and so on,
      */
-    protected virtual void prepare_connection(Connection cx) throws GLib.Error {
+    protected virtual void prepare_connection(DatabaseConnection cx)
+        throws GLib.Error {
         // No-op by default;
     }
 
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
         // *never* use primary connection for threaded operations
-        Connection? cx = job.cx;
-        Error? open_err = null;
+        var cx = job.default_cx;
+        GLib.Error? open_err = null;
         if (cx == null) {
             try {
                 cx = internal_open_connection(false, job.cancellable);
@@ -386,10 +399,11 @@ public class Geary.Db.Database : Geary.Db.Context {
             }
         }
 
-        if (cx != null)
+        if (cx != null) {
             job.execute(cx);
-        else
+        } else {
             job.failed(open_err);
+        }
 
         lock (outstanding_async_jobs) {
             assert(outstanding_async_jobs > 0);
