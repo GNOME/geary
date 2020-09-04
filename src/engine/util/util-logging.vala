@@ -639,6 +639,9 @@ public class Geary.Logging.Record {
     /** The logged message, if any. */
     public string? message = null;
 
+    /** The leaf source object's type, if any. */
+    public GLib.Type? source_type = null;
+
     /** The source filename, if any. */
     public string? source_filename = null;
 
@@ -657,7 +660,7 @@ public class Geary.Logging.Record {
     /** The next log record in the buffer, if any. */
     public Record? next { get; internal set; default = null; }
 
-    private State[] states;
+    private string[] states;
     private bool filled = false;
     private bool old_log_api = false;
 
@@ -674,13 +677,24 @@ public class Geary.Logging.Record {
 
         // Since GLib.LogField only retains a weak ref to its value,
         // find and ref any values we wish to keep around.
-        this.states = new State[fields.length];
+        this.states = new string[fields.length];
         int state_count = 0;
         foreach (GLib.LogField field in fields) {
             switch (field.key) {
             case "GEARY_LOGGING_SOURCE":
-                this.states[state_count++] =
-                    ((Source) field.value).to_logging_state();
+                var state = ((Source) field.value).to_logging_state();
+                GLib.Type type = state.source.get_type();
+                if (state_count == 0) {
+                    this.source_type = type;
+                }
+                this.states[state_count++] = state.format_message();
+                if (type.is_a(typeof(Account))) {
+                    this.account = (Account) state.source;
+                } else if (type.is_a(typeof(ClientService))) {
+                    this.service = (ClientService) state.source;
+                } else if (type.is_a(typeof(Folder))) {
+                    this.folder = (Folder) state.source;
+                }
                 break;
 
             case "GLIB_DOMAIN":
@@ -720,6 +734,7 @@ public class Geary.Logging.Record {
         this.service = other.service;
         this.folder = other.folder;
         this.message = other.message;
+        this.source_type = other.source_type;
         this.source_filename = other.source_filename;
         this.source_line_number = other.source_line_number;
         this.source_function = other.source_function;
@@ -730,6 +745,7 @@ public class Geary.Logging.Record {
         // copying large record chains and code that does copy records
         // can copy only a fixed number.
         // this.next
+        this.next = null;
 
         this.states = other.states;
         this.filled = other.filled;
@@ -745,19 +761,6 @@ public class Geary.Logging.Record {
      * computationally complex and hence is not done by default.
      */
     public void fill_well_known_sources() {
-        if (!this.filled) {
-            foreach (unowned State state in this.states) {
-                GLib.Type type = state.source.get_type();
-                if (type.is_a(typeof(Account))) {
-                    this.account = (Account) state.source;
-                } else if (type.is_a(typeof(ClientService))) {
-                    this.service = (ClientService) state.source;
-                } else if (type.is_a(typeof(Folder))) {
-                    this.folder = (Folder) state.source;
-                }
-            }
-            this.filled = true;
-        }
     }
 
     /** Returns a formatted string representation of this record. */
@@ -786,7 +789,7 @@ public class Geary.Logging.Record {
         // Append in reverse so inner sources appear first
         for (int i = this.states.length - 1; i >= 0; i--) {
             str.append(" [");
-            str.append(this.states[i].format_message());
+            str.append(this.states[i]);
             str.append("]");
         }
 
@@ -804,13 +807,13 @@ public class Geary.Logging.Record {
                 str.append_c(':');
                 str.append(this.source_function.to_string());
             }
-            str.append("]");
-        } else if (this.states.length > 0) {
+            str.append("]: ");
+        } else if (this.source_type != null) {
             // Print the class name of the leaf logging source to at
             // least give a general idea of where the message came
             // from.
             str.append(" ");
-            str.append(this.states[0].source.get_type().name());
+            str.append(this.source_type.name());
             str.append(": ");
         }
 
