@@ -18,7 +18,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-02-16 20:26+0000\n"
+"POT-Creation-Date: 2020-08-26 22:55+0000\n"
 "PO-Revision-Date: 2020-02-17 11:53+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
@@ -1096,12 +1096,12 @@ msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Conversación desetiquetada como %s"
 msgstr[1] "Conversaciones desetiquetadas como %s"
 
-#: src/client/application/application-controller.vala:1222
+#: src/client/application/application-controller.vala:1223
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "No se pudo abrir la base de datos local para %s"
 
-#: src/client/application/application-controller.vala:1223
+#: src/client/application/application-controller.vala:1224
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1126,20 +1126,20 @@ msgstr ""
 "Reconstruir la base de datos destruirá todo el correo guardado de forma "
 "local y sus adjuntos. <b>El correo del servidor permanecerá intacto.</b>"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "_Rebuild"
 msgstr "_Reconstruir"
 
-#: src/client/application/application-controller.vala:1225
+#: src/client/application/application-controller.vala:1226
 msgid "E_xit"
 msgstr "_Salir"
 
-#: src/client/application/application-controller.vala:1235
+#: src/client/application/application-controller.vala:1236
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "No se puede reconstruir la base de datos para «%s»"
 
-#: src/client/application/application-controller.vala:1236
+#: src/client/application/application-controller.vala:1237
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1152,34 +1152,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1559
+#: src/client/application/application-controller.vala:1561
 #, c-format
 msgid "Email sent to %s"
 msgstr "Correo enviado a %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2642
+#: src/client/application/application-controller.vala:2656
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Correo a %s encolado para su entrega"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2706
+#: src/client/application/application-controller.vala:2720
 #, c-format
 msgid "Email to %s saved"
 msgstr "Correo a %s guardado"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2721
-#: src/client/application/application-controller.vala:2779
+#: src/client/application/application-controller.vala:2735
+#: src/client/application/application-controller.vala:2793
 msgid "Composer could not be restored"
 msgstr "No se pudo restaurar el editor"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2764
+#: src/client/application/application-controller.vala:2778
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Correo a %s descartado"
@@ -1245,7 +1245,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1834
+#: src/client/composer/composer-widget.vala:1839
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1623,79 +1623,79 @@ msgstr "¿Quiere mantener o descartar este mensaje en borrador?"
 msgid "Do you want to discard this draft message?"
 msgstr "¿Quiere descartar este mensaje en borrador?"
 
-#: src/client/composer/composer-widget.vala:1503
+#: src/client/composer/composer-widget.vala:1508
 msgid "Send message with an empty subject and body?"
 msgstr "¿Quiere enviar el mensaje sin asunto ni cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1505
+#: src/client/composer/composer-widget.vala:1510
 msgid "Send message with an empty subject?"
 msgstr "¿Quiere enviar el mensaje sin asunto?"
 
-#: src/client/composer/composer-widget.vala:1507
+#: src/client/composer/composer-widget.vala:1512
 msgid "Send message with an empty body?"
 msgstr "¿Quiere enviar el mensaje sin cuerpo?"
 
-#: src/client/composer/composer-widget.vala:1516
+#: src/client/composer/composer-widget.vala:1521
 msgid "Send message without an attachment?"
 msgstr "¿Quiere enviar el mensaje sin el archivo adjunto?"
 
-#: src/client/composer/composer-widget.vala:1820
+#: src/client/composer/composer-widget.vala:1825
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Ya se ha adjuntado «%s» para enviarlo."
 
-#: src/client/composer/composer-widget.vala:1856
-#: src/client/composer/composer-widget.vala:1906
+#: src/client/composer/composer-widget.vala:1861
+#: src/client/composer/composer-widget.vala:1911
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» es un archivo vacío."
 
-#: src/client/composer/composer-widget.vala:1894
+#: src/client/composer/composer-widget.vala:1899
 #, c-format
 msgid "“%s” could not be found."
 msgstr "No se pudo encontrar «%s»."
 
-#: src/client/composer/composer-widget.vala:1900
+#: src/client/composer/composer-widget.vala:1905
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» es una carpeta."
 
-#: src/client/composer/composer-widget.vala:1919
+#: src/client/composer/composer-widget.vala:1924
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "No se pudo abrir «%s» para lectura."
 
-#: src/client/composer/composer-widget.vala:1927
+#: src/client/composer/composer-widget.vala:1932
 msgid "Cannot add attachment"
 msgstr "No se puede adjuntar el archivo"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1984
+#: src/client/composer/composer-widget.vala:1989
 #: src/client/conversation-viewer/conversation-email.vala:559
 #: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Para:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1990
+#: src/client/composer/composer-widget.vala:1995
 #: src/client/conversation-viewer/conversation-email.vala:564
 #: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:1996
+#: src/client/composer/composer-widget.vala:2001
 #: src/client/conversation-viewer/conversation-email.vala:569
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2002
+#: src/client/composer/composer-widget.vala:2007
 msgid "Reply-To: "
 msgstr "Responder a:"
 
-#: src/client/composer/composer-widget.vala:2254
+#: src/client/composer/composer-widget.vala:2259
 msgid "Select Color"
 msgstr "Seleccionar color"
 
@@ -1704,20 +1704,20 @@ msgstr "Seleccionar color"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2439
+#: src/client/composer/composer-widget.vala:2445
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s mediante %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2495
+#: src/client/composer/composer-widget.vala:2501
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2800
+#: src/client/composer/composer-widget.vala:2806
 msgid "Images"
 msgstr "Imágenes"
 
@@ -1813,20 +1813,20 @@ msgstr "Es posible que esta dirección de correo se haya falsificado"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:438
+#: src/client/conversation-viewer/conversation-message.vala:439
 msgid "No sender"
 msgstr "Sin remitente"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:830
+#: src/client/conversation-viewer/conversation-message.vala:831
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:950
+#: src/client/conversation-viewer/conversation-message.vala:951
 msgid "Image"
 msgstr "Imagen"
 
@@ -2139,7 +2139,7 @@ msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %e de %b de %Y a las %X %p"
 
 #: src/client/util/util-email.vala:38
-#: src/engine/rfc822/rfc822-message.vala:1000
+#: src/engine/rfc822/rfc822-message.vala:1003
 msgid "(no subject)"
 msgstr "(sin asunto)"
 
@@ -2480,12 +2480,12 @@ msgstr "Elementos eliminados"
 msgid "Archive | Archives"
 msgstr "Archivo | Archivos"
 
-#: src/engine/rfc822/rfc822-message.vala:458
+#: src/engine/rfc822/rfc822-message.vala:461
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "No se pudo determinar el tipo MIME de «%s»"
 
-#: src/engine/rfc822/rfc822-message.vala:469
+#: src/engine/rfc822/rfc822-message.vala:472
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
@@ -2551,7 +2551,7 @@ msgstr "Para empezar seleccione a continuación un proveedor de correo-e"
 
 #: ui/accounts_editor_list_pane.ui:75
 msgid "Welcome to Geary"
-msgstr "Bienvenido a Geary"
+msgstr "Bienvenido/a a Geary"
 
 #. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
 #: ui/accounts_editor_remove_pane.ui:73
@@ -2686,7 +2686,6 @@ msgid "Insert the new link with this URL"
 msgstr "Insertar el enlace nuevo con este URL"
 
 #: ui/composer-link-popover.ui:43
-#| msgid "_Add"
 msgid "Add"
 msgstr "Añadir"
 
@@ -2700,7 +2699,6 @@ msgid "Update this link’s URL"
 msgstr "Actualizar el URL de este enlace"
 
 #: ui/composer-link-popover.ui:62
-#| msgid "_Update"
 msgid "Update"
 msgstr "Actualizar"
 
