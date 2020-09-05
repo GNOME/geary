@@ -28,7 +28,7 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Db";
 
     /** {@inheritDoc} */
-    public override string logging_domain {
+    public string logging_domain {
         get { return LOGGING_DOMAIN; }
     }
 
@@ -54,17 +54,12 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public Logging.State to_logging_state() {
-        Connection? cx = get_connection();
-        return new Logging.State(
-            this, (cx != null) ? cx.to_string() : "[no cx]"
-        );
-    }
-
-    /** Sets the connection's logging parent. */
     public void set_logging_parent(Logging.Source parent) {
         this._logging_parent = parent;
     }
+
+    /** {@inheritDoc} */
+    public abstract Logging.State to_logging_state();
 
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);

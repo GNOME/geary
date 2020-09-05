@@ -207,7 +207,7 @@ private class Geary.ImapDB.GC {
 
         // NOTE: VACUUM cannot happen inside a transaction, so to avoid blocking the main thread,
         // run a non-transacted command from a background thread
-        Geary.Db.Connection cx = yield db.open_connection(cancellable);
+        Geary.Db.DatabaseConnection cx = yield db.open_connection(cancellable);
         yield Nonblocking.Concurrent.global.schedule_async(() => {
             cx.exec("VACUUM", cancellable);
 

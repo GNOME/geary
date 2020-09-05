@@ -91,7 +91,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         yield base.open(flags, cancellable);
 
         // get Connection for upgrade activity
-        Connection cx = yield open_connection(cancellable);
+        DatabaseConnection cx = yield open_connection(cancellable);
 
         int db_version = cx.get_user_version_number();
         debug("VersionedDatabase.upgrade: current database schema for %s: %d",
@@ -171,7 +171,7 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
             completed_upgrade(db_version);
     }
 
-    private async void execute_upgrade(Connection cx,
+    private async void execute_upgrade(DatabaseConnection cx,
                                        int db_version,
                                        GLib.File upgrade_script,
                                        Cancellable? cancellable)

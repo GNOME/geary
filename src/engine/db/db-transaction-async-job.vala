@@ -7,7 +7,7 @@
 
 private class Geary.Db.TransactionAsyncJob : BaseObject {
 
-    internal Connection? cx { get; private set; default = null; }
+    internal DatabaseConnection? default_cx { get; private set; }
     internal Cancellable cancellable { get; private set; }
 
     private TransactionType type;
@@ -17,11 +17,11 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
     private Error? caught_err = null;
 
 
-    public TransactionAsyncJob(Connection? cx,
+    public TransactionAsyncJob(DatabaseConnection? default_cx,
                                TransactionType type,
                                TransactionMethod cb,
                                Cancellable? cancellable) {
-        this.cx = cx;
+        this.default_cx = default_cx;
         this.type = type;
         this.cb = cb;
         this.cancellable = cancellable ?? new Cancellable();
@@ -34,7 +34,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
     }
 
     // Called in background thread context
-    internal void execute(Connection cx) {
+    internal void execute(DatabaseConnection cx) {
         // execute transaction
         try {
             // possible was cancelled during interim of scheduling and execution
