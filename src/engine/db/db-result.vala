@@ -294,13 +294,13 @@ public class Geary.Db.Result : Geary.Db.Context {
         return column;
     }
 
-    public override Result? get_result() {
-        return this;
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(this, this.finished ? "finished" : "not finished");
+    }
+
+    internal override Result? get_result() {
+        return this;
     }
 
     [PrintfFormat]

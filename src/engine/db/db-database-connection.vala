@@ -255,13 +255,13 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
         return yield job.wait_for_completion_async();
     }
 
-    public override Connection? get_connection() {
-        return this;
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(this, "%u", this.cx_number);
+    }
+
+    internal override DatabaseConnection? get_connection() {
+        return this;
     }
 
 }

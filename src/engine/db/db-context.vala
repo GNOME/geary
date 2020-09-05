@@ -37,19 +37,19 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     private weak Logging.Source? _logging_parent = null;
 
 
-    public virtual Database? get_database() {
+    internal virtual Database? get_database() {
         return get_connection() != null ? get_connection().database : null;
     }
 
-    public virtual Connection? get_connection() {
+    internal virtual DatabaseConnection? get_connection() {
         return get_statement() != null ? get_statement().connection : null;
     }
 
-    public virtual Statement? get_statement() {
+    internal virtual Statement? get_statement() {
         return get_result() != null ? get_result().statement : null;
     }
 
-    public virtual Result? get_result() {
+    internal virtual Result? get_result() {
         return null;
     }
 

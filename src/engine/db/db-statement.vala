@@ -13,7 +13,7 @@ public class Geary.Db.Statement : Context {
         get { return this.stmt.sql(); }
     }
 
-    public Connection connection { get; private set; }
+    internal DatabaseConnection connection { get; private set; }
 
     internal Sqlite.Statement stmt;
 
@@ -36,9 +36,14 @@ public class Geary.Db.Statement : Context {
 
     private Gee.HashSet<Memory.Buffer> held_buffers = new Gee.HashSet<Memory.Buffer>();
 
-    internal Statement(Connection connection, string sql) throws DatabaseError {
+    internal Statement(DatabaseConnection connection, string sql)
+        throws DatabaseError {
         this.connection = connection;
-        throw_on_error("Statement.ctor", connection.db.prepare_v2(sql, -1, out stmt, null), sql);
+        throw_on_error(
+            "Statement.ctor",
+            connection.db.prepare_v2(sql, -1, out stmt, null),
+            sql
+        );
     }
 
     /** Returns SQL for the statement with bound parameters expanded. */
@@ -271,13 +276,13 @@ public class Geary.Db.Statement : Context {
         return this;
     }
 
-    public override Statement? get_statement() {
-        return this;
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(this, this.sql);
+    }
+
+    internal override Statement? get_statement() {
+        return this;
     }
 
 }

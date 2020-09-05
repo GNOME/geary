@@ -358,10 +358,6 @@ public class Geary.Db.Database : Context {
     }
 
 
-    public override Database? get_database() {
-        return this;
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(
@@ -384,6 +380,10 @@ public class Geary.Db.Database : Context {
         }
 
         this.thread_pool.add(new_job);
+    }
+
+    internal override Database? get_database() {
+        return this;
     }
 
     /**
