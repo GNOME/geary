@@ -943,17 +943,20 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.ArrayList<string> deleted_primary_keys = null;
 
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            // MessageLocationTable.ordering isn't relied on due to IMAP folder
-            // UIDs not guaranteed to be in order.
+            // MessageLocationTable.ordering isn't relied on throughout due 
+            // to IMAP folder UIDs not guaranteed to be in order. Make sure to 
+            // performance test any changes to the select queries below.
             StringBuilder sql = new StringBuilder();
             sql.append("""
                 SELECT COUNT(*)
-                FROM MessageLocationTable ml
-                INNER JOIN MessageTable m
-                INDEXED BY MessageTableInternalDateTimeTIndex
-                    ON ml.message_id = m.id
-                WHERE ml.folder_id = ?
-                AND m.internaldate_time_t >= ?
+                FROM MessageLocationTable
+                WHERE folder_id = ?
+                AND message_id IN (
+                    SELECT id
+                    FROM MessageTable
+                    INDEXED BY MessageTableInternalDateTimeTIndex
+                    WHERE internaldate_time_t >= ?
+                )
             """);
 
             Db.Statement stmt = cx.prepare(sql.str);
