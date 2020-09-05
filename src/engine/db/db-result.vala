@@ -38,10 +38,23 @@ public class Geary.Db.Result : Geary.Db.Context {
         check_cancelled("Result.next", cancellable);
 
         if (!finished) {
-            Timer timer = new Timer();
+            var timer = new GLib.Timer();
             finished = throw_on_error("Result.next", statement.stmt.step(), statement.sql) != Sqlite.ROW;
-            if (timer.elapsed() > 1.0)
-                debug("\n\nDB QUERY STEP \"%s\"\nelapsed=%lf\n\n", statement.sql, timer.elapsed());
+            var elapsed = timer.elapsed();
+            var threshold = (get_connection().busy_timeout * 1000.0) / 2.0;
+            if (threshold > 0 && elapsed > threshold) {
+                warning(
+                    "Step for \"%s\" took elapsed time: %lfs (>50%)",
+                    statement.sql,
+                    elapsed
+                );
+            } else if (elapsed > 1.0) {
+                debug(
+                    "Step for \"%s\" took elapsed time: %lfs (>1s)",
+                    statement.sql,
+                    elapsed
+                );
+            }
 
             log_result(finished ? "NO ROW" : "ROW");
         }
