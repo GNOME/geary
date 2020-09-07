@@ -61,6 +61,19 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     /** {@inheritDoc} */
     public abstract Logging.State to_logging_state();
 
+
+    protected inline void check_elapsed(string message,
+                                        GLib.Timer timer)
+        throws DatabaseError {
+        var elapsed = timer.elapsed();
+        var threshold = (get_connection().busy_timeout * 1000.0) / 2.0;
+        if (threshold > 0 && elapsed > threshold) {
+            warning("%s: elapsed time: %lfs (>50%)", message, elapsed);
+        } else if (elapsed > 1.0) {
+            debug("%s: elapsed time: %lfs (>1s)", message, elapsed);
+        }
+    }
+
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);
     }

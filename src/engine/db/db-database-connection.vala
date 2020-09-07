@@ -137,7 +137,9 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
         }
 
         check_cancelled("Connection.exec", cancellable);
-        throw_on_error("Connection.exec", db.exec(sql), sql);
+        var timer = new GLib.Timer();
+        throw_on_error("Connection.exec_file", this.db.exec(sql), sql);
+        check_elapsed("Query \"%s\"".printf(sql), timer);
     }
 
     /** {@inheritDoc} */
@@ -147,8 +149,9 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
 
         string sql;
         FileUtils.get_contents(file.get_path(), out sql);
-
-        exec(sql, cancellable);
+        var timer = new GLib.Timer();
+        throw_on_error("Connection.exec_file", this.db.exec(sql), sql);
+        check_elapsed(file.get_path(), timer);
     }
 
     /**
