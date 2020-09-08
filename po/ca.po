@@ -598,38 +598,38 @@ msgstr "Tot"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:847
 msgid "2 weeks back"
-msgstr "Fa 2 setmanes"
+msgstr "Últimes 2 setmanes"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:851
 msgid "1 month back"
-msgstr "Fa 1 mes"
+msgstr "Últim mes"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:855
 msgid "3 months back"
-msgstr "Fa 3 mesos"
+msgstr "Últims 3 mesos"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:859
 msgid "6 months back"
-msgstr "Fa 6 mesos"
+msgstr "Últims 6 mesos"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:863
 msgid "1 year back"
-msgstr "Fa 1 any"
+msgstr "Últim any"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:867
 msgid "2 years back"
-msgstr "Fa 2 anys"
+msgstr "Últims 2 anys"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:871
 msgid "4 years back"
-msgstr "Fa 4 anys"
+msgstr "Últims 4 anys"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:877
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
-msgstr[0] "%d dia enrere"
-msgstr[1] "%d dies enrere"
+msgstr[0] "Úĺtim dia"
+msgstr[1] "Últims %d dies"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
 #: src/client/application/application-main-window.vala:2027
@@ -770,7 +770,7 @@ msgstr "Compte no actualitzat: %s"
 #. locally by Geary.
 #: src/client/accounts/accounts-editor-servers-pane.vala:540
 msgid "Account source"
-msgstr "Compte origen"
+msgstr "Origen del compte"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:552
 msgid "GNOME Online Accounts"
@@ -987,7 +987,7 @@ msgstr ""
 #. / command line option is used.
 #: src/client/application/application-client.vala:1049
 msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "L'opció `-hidden` està en desús i s'eliminarà en el futur."
+msgstr "L'opció «--hidden» està en desús i s'eliminarà en el futur."
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1752,12 +1752,12 @@ msgstr "Cc:"
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
-msgstr "CCO:"
+msgstr "Cco:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
 #: src/client/composer/composer-widget.vala:2091
 msgid "Reply-To: "
-msgstr "Respon a:"
+msgstr "Respon a: "
 
 #: src/client/composer/composer-widget.vala:2343
 msgid "Select Color"
@@ -1946,7 +1946,7 @@ msgstr "Diverses converses seleccionades"
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:100
 msgid "Choosing an action will apply to all selected conversations"
-msgstr "L'elecció d'una acció s'aplicarà a totes les converses seleccionades"
+msgstr "Quan s'esculli una acció s'aplicarà a totes les converses seleccionades"
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
@@ -2943,7 +2943,7 @@ msgstr "_Per a"
 
 #: ui/composer-widget.ui:158
 msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr "Mostra els camps Cc, Bcc, and Reply-To"
+msgstr "Mostra els camps Cc, Cco, i respon a"
 
 #: ui/composer-widget.ui:219
 msgid "_Cc"
@@ -2951,7 +2951,7 @@ msgstr "_Cc"
 
 #: ui/composer-widget.ui:267
 msgid "_Bcc"
-msgstr "_Bcc"
+msgstr "_Cco"
 
 #: ui/composer-widget.ui:315
 msgid "_Reply-To"
@@ -3120,7 +3120,7 @@ msgid ""
 "or attach to a <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new bug report</a>."
 msgstr ""
-"Si el problema és greu o persisteix, copieu i envieu aquestes dades a la  <a"
+"Si el problema és greu o persisteix, copieu i envieu aquestes dades a la <a"
 " href=\"https://wiki.gnome.org/Apps/Geary/Contact\">llista de correu </a> o "
 "envieu un <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\"> "
 "informe d’error nou</a>."
