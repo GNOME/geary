@@ -67,6 +67,11 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
     private weak Database _database;
 
     /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return this._database; }
+    }
+
+    /** {@inheritDoc} */
     internal Sqlite.Database db { get { return this._db; } }
     private Sqlite.Database _db;
 
@@ -119,7 +124,6 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
     /** {@inheritDoc} */
     public Statement prepare(string sql) throws DatabaseError {
         var prepared = new Statement(this, sql);
-        prepared.set_logging_parent(this);
         return prepared;
     }
 

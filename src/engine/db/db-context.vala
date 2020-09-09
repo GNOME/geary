@@ -33,8 +33,7 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public Logging.Source? logging_parent { get { return _logging_parent; } }
-    private weak Logging.Source? _logging_parent = null;
+    public abstract Logging.Source? logging_parent { get; }
 
 
     internal virtual Database? get_database() {
@@ -51,11 +50,6 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
 
     internal virtual Result? get_result() {
         return null;
-    }
-
-    /** {@inheritDoc} */
-    public void set_logging_parent(Logging.Source parent) {
-        this._logging_parent = parent;
     }
 
     /** {@inheritDoc} */

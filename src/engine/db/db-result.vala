@@ -10,12 +10,14 @@ public class Geary.Db.Result : Geary.Db.Context {
 
     public Statement statement { get; private set; }
 
+    /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return this.statement; }
+    }
 
     // This results in an automatic first next().
     internal Result(Statement statement, Cancellable? cancellable) throws Error {
         this.statement = statement;
-        set_logging_parent(statement);
-
         statement.was_reset.connect(on_query_finished);
         statement.bindings_cleared.connect(on_query_finished);
 

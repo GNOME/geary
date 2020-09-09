@@ -12,6 +12,11 @@ public class Geary.Db.Statement : Context {
 
     public string sql { get; private set; }
 
+    /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return this.connection; }
+    }
+
     internal DatabaseConnection connection { get; private set; }
 
     internal Sqlite.Statement stmt;

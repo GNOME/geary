@@ -57,6 +57,10 @@ public class Geary.Db.Database : Context {
         }
     }
 
+    /** {@inheritDoc} */
+    public override Logging.Source? logging_parent { get { return _logging_parent; } }
+    private weak Logging.Source? _logging_parent = null;
+
     private DatabaseConnection? primary = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
@@ -143,7 +147,6 @@ public class Geary.Db.Database : Context {
             var cx = new DatabaseConnection(
                 this, Sqlite.OPEN_READWRITE, cancellable
             );
-            cx.set_logging_parent(this);
 
             try {
                 // drop existing test table (in case created in prior failed open)
@@ -233,7 +236,6 @@ public class Geary.Db.Database : Context {
         DatabaseConnection cx = new DatabaseConnection(
             this, sqlite_flags, cancellable
         );
-        cx.set_logging_parent(this);
         prepare_connection(cx);
         return cx;
     }
@@ -357,6 +359,10 @@ public class Geary.Db.Database : Context {
         return yield job.wait_for_completion_async();
     }
 
+    /** Sets the logging parent context object for this database. */
+    public void set_logging_parent(Logging.Source parent) {
+        this._logging_parent = parent;
+    }
 
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
