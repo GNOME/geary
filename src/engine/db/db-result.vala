@@ -8,7 +8,11 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool finished { get; private set; default = false; }
 
 
+    /** The statement this result was generated from. */
     public Statement statement { get; private set; }
+
+    /** The current row represented by this result. */
+    public uint64 row { get; private set; default = 0; }
 
     /** {@inheritDoc} */
     public override Logging.Source? logging_parent {
@@ -39,7 +43,8 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool next(Cancellable? cancellable = null) throws Error {
         check_cancelled("Result.next", cancellable);
 
-        if (!finished) {
+        if (!this.finished) {
+            this.row++;
             var timer = new GLib.Timer();
             this.finished = throw_on_error(
                 "Result.next", statement.stmt.step(), statement.sql
@@ -298,7 +303,12 @@ public class Geary.Db.Result : Geary.Db.Context {
 
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
-        return new Logging.State(this, this.finished ? "finished" : "not finished");
+        return new Logging.State(
+            this,
+            "%llu, %s",
+            this.row,
+            this.finished ? "finished" : "!finished"
+        );
     }
 
     internal override Result? get_result() {
@@ -306,16 +316,9 @@ public class Geary.Db.Result : Geary.Db.Context {
     }
 
     [PrintfFormat]
-    private void log_result(string fmt, ...) {
-        if (Db.Context.enable_sql_logging) {
-            Statement? stmt = get_statement();
-            if (stmt != null) {
-                debug("%s\n\t<%s>",
-                      fmt.vprintf(va_list()),
-                      (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
-            } else {
-                debug(fmt.vprintf(va_list()));
-            }
+    private inline void log_result(string fmt, ...) {
+        if (Db.Context.enable_result_logging) {
+            debug(fmt.vprintf(va_list()));
         }
     }
 
