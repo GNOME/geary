@@ -9,15 +9,16 @@ private extern string? sqlite3_expanded_sql(Sqlite.Statement stmt);
 
 public class Geary.Db.Statement : Context {
 
-    public string sql {
-        get { return this.stmt.sql(); }
-    }
+
+    public string sql { get; private set; }
 
     internal DatabaseConnection connection { get; private set; }
 
     internal Sqlite.Statement stmt;
 
     private Gee.HashMap<string, int>? column_map = null;
+    private Gee.HashSet<Memory.Buffer> held_buffers = new Gee.HashSet<Memory.Buffer>();
+
 
     /**
      * Fired when the Statement is executed the first time (after creation or after a reset).
@@ -34,11 +35,11 @@ public class Geary.Db.Statement : Context {
      */
     public signal void bindings_cleared();
 
-    private Gee.HashSet<Memory.Buffer> held_buffers = new Gee.HashSet<Memory.Buffer>();
 
     internal Statement(DatabaseConnection connection, string sql)
         throws DatabaseError {
         this.connection = connection;
+        this.sql = sql;
         throw_on_error(
             "Statement.ctor",
             connection.db.prepare_v2(sql, -1, out stmt, null),
@@ -48,13 +49,7 @@ public class Geary.Db.Statement : Context {
 
     /** Returns SQL for the statement with bound parameters expanded. */
     public string? get_expanded_sql() {
-        // Replace all this with `Sqlite.Statement.expanded_sql` is
-        // readily available. See:
-        // https://gitlab.gnome.org/GNOME/vala/merge_requests/74
-        string* sqlite = sqlite3_expanded_sql(this.stmt);
-        string? sql = sqlite;
-        Sqlite.Memory.free((void*) sqlite);
-        return sql;
+        return this.stmt.expanded_sql();
     }
 
     /**
