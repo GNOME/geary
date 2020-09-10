@@ -373,13 +373,13 @@ class Geary.App.ConversationMonitorTest : TestCase {
             .returns_object(paths);
 
         // Should not be added, since it's actually in the base folder
-        this.account.email_appended(
+        this.account.email_appended_to_folder(
             this.base_folder,
             new Gee.ArrayList<EmailIdentifier>.wrap({e2.id})
         );
 
         // Should be added, since it's an external message
-        this.account.email_appended(
+        this.account.email_appended_to_folder(
             this.other_folder,
             new Gee.ArrayList<EmailIdentifier>.wrap({e3.id})
         );
@@ -411,7 +411,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         Gee.HashMap<EmailIdentifier,EmailFlags> flags_changed =
             new Gee.HashMap<EmailIdentifier,EmailFlags>();
         flags_changed.set(e1.id, new EmailFlags.with(EmailFlags.DELETED));
-        this.account.email_flags_changed(this.base_folder, flags_changed);
+        this.account.email_flags_changed_in_folder(this.base_folder, flags_changed);
 
         this.base_folder.expect_call("list_email_by_sparse_id_async");
         this.base_folder.expect_call("list_email_by_id_async");

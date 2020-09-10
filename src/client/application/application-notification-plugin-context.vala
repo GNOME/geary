@@ -158,7 +158,7 @@ internal class Application.NotificationPluginContext :
         if (folder != null &&
             context != null &&
             !this.folder_information.has_key(folder)) {
-            folder.email_locally_appended.connect(on_email_locally_appended);
+            folder.email_appended.connect(on_email_added);
             folder.email_flags_changed.connect(on_email_flags_changed);
             folder.email_removed.connect(on_email_removed);
 
@@ -267,7 +267,7 @@ internal class Application.NotificationPluginContext :
     private void remove_folder(Geary.Folder target) {
         MonitorInformation? info = this.folder_information.get(target);
         if (info != null) {
-            target.email_locally_appended.disconnect(on_email_locally_appended);
+            target.email_appended.disconnect(on_email_added);
             target.email_flags_changed.disconnect(on_email_flags_changed);
             target.email_removed.disconnect(on_email_removed);
 
@@ -311,13 +311,13 @@ internal class Application.NotificationPluginContext :
         }
     }
 
-    private void on_email_locally_appended(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> email_ids) {
+    private void on_email_added(Geary.Folder folder,
+                                Gee.Collection<Geary.EmailIdentifier> email_ids) {
         do_process_new_email.begin(folder, email_ids);
     }
 
     private void on_email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> ids) {
+                                        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> ids) {
         retire_new_messages(folder, ids.keys);
     }
 

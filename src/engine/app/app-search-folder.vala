@@ -127,9 +127,9 @@ public class Geary.App.SearchFolder :
 
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.folders_use_changed.connect(on_folders_use_changed);
-        account.email_locally_complete.connect(on_email_locally_complete);
-        account.email_removed.connect(on_account_email_removed);
-        account.email_locally_removed.connect(on_account_email_removed);
+        account.email_appended_to_folder.connect(on_email_added);
+        account.email_inserted_into_folder.connect(on_email_added);
+        account.email_removed_from_folder.connect(on_email_removed);
 
         this.entries = new_entry_set();
         this.ids = new_id_map();
@@ -142,9 +142,9 @@ public class Geary.App.SearchFolder :
     ~SearchFolder() {
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.folders_use_changed.disconnect(on_folders_use_changed);
-        account.email_locally_complete.disconnect(on_email_locally_complete);
-        account.email_removed.disconnect(on_account_email_removed);
-        account.email_locally_removed.disconnect(on_account_email_removed);
+        account.email_appended_to_folder.disconnect(on_email_added);
+        account.email_inserted_into_folder.disconnect(on_email_added);
+        account.email_removed_from_folder.disconnect(on_email_removed);
     }
 
     /**
@@ -180,8 +180,8 @@ public class Geary.App.SearchFolder :
         this.entries = new_entry_set();
         this.ids = new_id_map();
 
-        notify_email_removed(old_ids.keys);
-        notify_email_count_changed(0, REMOVED);
+        email_removed(old_ids.keys);
+        email_count_changed(0, REMOVED);
     }
 
     /**
@@ -609,7 +609,8 @@ public class Geary.App.SearchFolder :
 
             Folder.CountChangeReason reason = CountChangeReason.NONE;
             if (removed.size > 0) {
-                notify_email_removed(removed);
+                email_removed(removed);
+                this.account.email_removed_from_folder(this, removed);
                 reason |= Folder.CountChangeReason.REMOVED;
             }
             if (added.size > 0) {
@@ -618,11 +619,12 @@ public class Geary.App.SearchFolder :
                 // append a thousand results at once and the
                 // ConversationMonitor's inability to handle that
                 // gracefully (#7464), we always use INSERTED for now.
-                notify_email_inserted(added);
+                email_inserted(added);
+                this.account.email_inserted_into_folder(this, removed);
                 reason |= Folder.CountChangeReason.INSERTED;
             }
             if (reason != CountChangeReason.NONE) {
-                notify_email_count_changed(this.entries.size, reason);
+                email_count_changed(this.entries.size, reason);
             }
             debug("Processing done, entries/ids: %d/%d", entries.size, ids.size);
         } else {
@@ -672,17 +674,17 @@ public class Geary.App.SearchFolder :
         }
     }
 
-    private void on_email_locally_complete(Folder folder,
-                                           Gee.Collection<EmailIdentifier> ids) {
+    private void on_email_added(Geary.Folder source,
+                                Gee.Collection<EmailIdentifier> ids) {
         if (this.query != null) {
-            this.append.begin(folder, ids);
+            this.append.begin(source, ids);
         }
     }
 
-    private void on_account_email_removed(Folder folder,
-                                          Gee.Collection<EmailIdentifier> ids) {
+    private void on_email_removed(Geary.Folder source,
+                                  Gee.Collection<EmailIdentifier> ids) {
         if (this.query != null) {
-            this.remove.begin(folder, ids);
+            this.remove.begin(source, ids);
         }
     }
 

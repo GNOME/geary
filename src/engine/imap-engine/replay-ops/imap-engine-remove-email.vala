@@ -41,12 +41,14 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
         if (removed_ids == null || removed_ids.size == 0)
             return ReplayOperation.Status.COMPLETED;
 
-        engine.replay_notify_email_removed(removed_ids);
+        engine.email_removed(removed_ids);
 
-        engine.replay_notify_email_count_changed(Numeric.int_floor(original_count - removed_ids.size, 0),
-            Geary.Folder.CountChangeReason.REMOVED);
+        engine.email_count_changed(
+            Numeric.int_floor(original_count - removed_ids.size, 0),
+            REMOVED
+        );
 
-        return ReplayOperation.Status.CONTINUE;
+        return CONTINUE;
     }
 
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
@@ -70,10 +72,9 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     public override async void backout_local_async() throws Error {
         if (removed_ids != null && removed_ids.size > 0) {
             yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
-            engine.replay_notify_email_inserted(removed_ids);
+            engine.email_inserted(removed_ids);
         }
-
-        engine.replay_notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
+        engine.email_count_changed(original_count, INSERTED);
     }
 
     public override string describe_state() {

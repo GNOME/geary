@@ -99,8 +99,8 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
         if (count < 0) {
             count = 0;
         }
-        engine.replay_notify_email_inserted(to_move);
-        engine.replay_notify_email_count_changed(count + to_move.size, Folder.CountChangeReason.INSERTED);
+        engine.email_inserted(to_move);
+        engine.email_count_changed(count + to_move.size, INSERTED);
     }
 
     public override string describe_state() {

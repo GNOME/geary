@@ -34,11 +34,12 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
         // if local folder is not empty, report all as being removed
         if (removed_ids != null) {
             if (removed_ids.size > 0)
-                engine.replay_notify_email_removed(removed_ids);
+                engine.email_removed(removed_ids);
 
             int new_count = Numeric.int_floor(original_count - removed_ids.size, 0);
-            if (new_count != original_count)
-                engine.replay_notify_email_count_changed(new_count, Geary.Folder.CountChangeReason.REMOVED);
+            if (new_count != original_count) {
+                engine.email_count_changed(new_count, REMOVED);
+            }
         }
 
         return ReplayOperation.Status.CONTINUE;
@@ -60,10 +61,10 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     public override async void backout_local_async() throws Error {
         if (removed_ids != null && removed_ids.size > 0) {
             yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
-            engine.replay_notify_email_inserted(removed_ids);
+            engine.email_inserted(removed_ids);
         }
 
-        engine.replay_notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
+        engine.email_count_changed(original_count, INSERTED);
     }
 
     public override string describe_state() {

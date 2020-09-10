@@ -344,7 +344,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                 this._properties.set_total((int) next_id);
                 this.email_total = (uint) next_id;
 
-                notify_email_inserted(Geary.Collection.single(id));
+                email_inserted(Geary.Collection.single(id));
                 record = yield this.data.read_record();
             }
         } catch (GLib.Error err) {
@@ -384,7 +384,7 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                     this.email.unset(id);
                     this.composed.unset(id);
                     this._properties.set_total(last);
-                    notify_email_removed(Geary.Collection.single(id));
+                    email_removed(Geary.Collection.single(id));
 
                     // Rate limit to ~30/minute for now
                     GLib.Timeout.add_seconds(2, this.send_loop.callback);

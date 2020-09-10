@@ -40,7 +40,7 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
 
         closed_semaphore.reset();
 
-        notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
+        opened(LOCAL, properties.email_total);
 
         return true;
     }
@@ -51,8 +51,8 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
 
         closed_semaphore.blind_notify();
 
-        notify_closed(Geary.Folder.CloseReason.LOCAL_CLOSE);
-        notify_closed(Geary.Folder.CloseReason.FOLDER_CLOSED);
+        closed(LOCAL_CLOSE);
+        closed(FOLDER_CLOSED);
 
         return false;
     }

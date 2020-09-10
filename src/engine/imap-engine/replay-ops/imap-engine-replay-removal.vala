@@ -10,10 +10,6 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
     private int remote_count;
     private Imap.SequenceNumber position;
 
-    public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
-    public signal void marked_email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
-    public signal void email_count_changed(int count, Folder.CountChangeReason reason);
-
 
     public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
         // Although technically a local-only operation, must treat as
@@ -133,13 +129,13 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
         if (owned_id != null) {
             Gee.List<EmailIdentifier> removed = Geary.iterate<Geary.EmailIdentifier>(owned_id).to_array_list();
             if (!marked)
-                email_removed(removed);
+                this.owner.email_removed(removed);
             else
-                marked_email_removed(removed);
+                this.owner.marked_email_removed(removed);
         }
 
         if (!marked) {
-            this.owner.replay_notify_email_count_changed(
+            this.owner.email_count_changed(
                 this.remote_count, Folder.CountChangeReason.REMOVED
             );
         }

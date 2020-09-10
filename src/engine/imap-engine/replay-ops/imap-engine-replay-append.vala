@@ -11,10 +11,6 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     private Gee.List<Imap.SequenceNumber> positions;
     private Cancellable? cancellable;
 
-    public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
-    public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
-    public signal void email_count_changed(int count, Folder.CountChangeReason reason);
-
 
     public ReplayAppend(MinimalFolder owner,
                         int remote_count,
@@ -122,13 +118,16 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
             this.remote_count, this.cancellable
         );
 
-        if (appended.size > 0)
-            email_appended(appended);
+        if (appended.size > 0) {
+            this.owner.email_appended(appended);
+        }
 
-        if (created.size > 0)
-            email_locally_appended(created);
+        if (created.size > 0) {
+            this.owner.account.email_added(created, this.owner);
+            this.owner.email_appended(created);
+        }
 
-        email_count_changed(this.remote_count, Folder.CountChangeReason.APPENDED);
+        this.owner.email_count_changed(this.remote_count, Folder.CountChangeReason.APPENDED);
 
         debug("%s do_replay_appended_message: completed, this.remote_count=%d",
               to_string(), this.remote_count);

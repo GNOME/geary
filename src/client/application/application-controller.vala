@@ -996,7 +996,6 @@ internal class Application.Controller :
         account.notify["current-status"].connect(
             on_account_status_notify
         );
-        account.email_removed.connect(on_account_email_removed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.report_problem.connect(on_report_problem);
 
@@ -1081,7 +1080,6 @@ internal class Application.Controller :
                 on_account_status_notify
             );
 
-            account.email_removed.disconnect(on_account_email_removed);
             account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
 
             Geary.Smtp.ClientService? smtp = (
@@ -1305,16 +1303,6 @@ internal class Application.Controller :
 
         context.tls_validation_prompting = false;
         update_account_status();
-    }
-
-    private void on_account_email_removed(Geary.Folder folder,
-                                          Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (folder.used_as == OUTBOX) {
-            foreach (MainWindow window in this.application.get_main_windows()) {
-                window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
-                window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            }
-        }
     }
 
     private void on_sending_started() {

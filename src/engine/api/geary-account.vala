@@ -157,10 +157,15 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public GLib.DateTime? last_storage_cleanup { get; set; }
 
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent { get { return null; } }
+
+
+    /** Emitted when the account has been opened. */
     public signal void opened();
 
+    /** Emitted when the account has been closed. */
     public signal void closed();
-
 
     /**
      * Emitted to notify the client that some problem has occurred.
@@ -226,48 +231,55 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public signal void folders_use_changed(Gee.Collection<Geary.Folder> altered);
 
     /**
-     * Fired when emails are appended to a folder in this account.
+     * Emitted when emails are appended to a folder for this account.
      */
-    public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    public signal void email_appended_to_folder(Folder folder,
+                                                Gee.Collection<EmailIdentifier> ids);
 
     /**
-     * Fired when emails are inserted to a folder in this account.
+     * Emitted when email messages are inserted into a folder for this account.
      *
      * @see Folder.email_inserted
      */
-    public signal void email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    public signal void email_inserted_into_folder(Folder folder,
+                                                  Gee.Collection<EmailIdentifier> ids);
 
     /**
-     * Fired when emails are removed from a folder in this account.
+     * Emitted when email messages are removed from a folder for this account.
      */
-    public signal void email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when emails are removed from a local folder in this account.
-     */
-    public signal void email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when one or more emails have been locally saved to a folder with
-     * the full set of Fields.
-     */
-    public signal void email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when one or more emails have been discovered (added) to the Folder, but not necessarily
-     * appended (i.e. old email pulled down due to user request or background fetching).
-     */
-    public signal void email_discovered(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    public signal void email_removed_from_folder(Folder folder,
+                                                 Gee.Collection<EmailIdentifier> ids);
 
     /**
      * Fired when the supplied email flags have changed from any folder.
      */
-    public signal void email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+    public signal void email_flags_changed_in_folder(Folder folder,
+                                                     Gee.Map<EmailIdentifier,EmailFlags> map);
 
-    /** {@inheritDoc} */
-    public Logging.Source? logging_parent { get { return null; } }
+    /**
+     * Emitted when email has been added to the account.
+     *
+     * This will be fired for one or more email messages when they are
+     * added to an the account for the first time, including the
+     * folder in they first appear.
+     */
+    public signal void email_added(Gee.Collection<EmailIdentifier> ids,
+                                   Folder containing_folder);
+
+    /**
+     * Emitted when email has been removed from the account.
+     *
+     * This will be fired for one or more email messages when they
+     * have been removed from the account, at some point (not not
+     * necessarily immediately) after they have been removed from all
+     * folders they have been present.
+     */
+    public signal void email_removed(Gee.Collection<EmailIdentifier> ids);
+
+    /**
+     * Emitted when email mesages have been fully downloaded.
+     */
+    public signal void email_complete(Gee.Collection<EmailIdentifier> ids);
 
 
     protected Account(AccountInformation information,
@@ -557,71 +569,6 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      */
     public abstract async void cleanup_storage(GLib.Cancellable? cancellable)
         throws GLib.Error;
-
-    /** Fires a {@link opened} signal. */
-    protected virtual void notify_opened() {
-        opened();
-    }
-
-    /** Fires a {@link closed} signal. */
-    protected virtual void notify_closed() {
-        closed();
-    }
-
-    /** Fires a {@link folders_available_unavailable} signal. */
-    protected virtual void
-        notify_folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
-                                             Gee.BidirSortedSet<Folder>? unavailable) {
-        folders_available_unavailable(available, unavailable);
-    }
-
-    /** Fires a {@link folders_created} signal. */
-    protected virtual void notify_folders_created(Gee.BidirSortedSet<Geary.Folder> created) {
-        folders_created(created);
-    }
-
-    /** Fires a {@link folders_deleted} signal. */
-    protected virtual void notify_folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted) {
-        folders_deleted(deleted);
-    }
-
-    /** Fires a {@link email_appended} signal. */
-    protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_appended(folder, ids);
-    }
-
-    /** Fires a {@link email_inserted} signal. */
-    protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_inserted(folder, ids);
-    }
-
-    /** Fires a {@link email_removed} signal. */
-    protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_removed(folder, ids);
-    }
-
-    /** Fires a {@link email_locally_removed} signal. */
-    protected virtual void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_removed(folder, ids);
-    }
-
-    /** Fires a {@link email_locally_complete} signal. */
-    protected virtual void notify_email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_complete(folder, ids);
-    }
-
-    /** Fires a {@link email_discovered} signal. */
-    protected virtual void notify_email_discovered(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_discovered(folder, ids);
-    }
-
-    /** Fires a {@link email_flags_changed} signal. */
-    protected virtual void notify_email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
-        email_flags_changed(folder, flag_map);
-    }
 
     /** Fires a {@link report_problem} signal for this account. */
     protected virtual void notify_report_problem(ProblemReport report) {

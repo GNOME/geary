@@ -195,8 +195,6 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
                 if (email != null) {
                     switch (conversation.get_folder_count(id)) {
                     case 0:
-                        warning("Email %s conversation %s not in any folders",
-                                id.to_string(), conversation.to_string());
                         break;
 
                     case 1:

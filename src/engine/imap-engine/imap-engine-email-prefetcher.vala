@@ -53,8 +53,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public void open() {
         this.cancellable = new Cancellable();
 
-        this.folder.email_locally_appended.connect(on_local_expansion);
-        this.folder.email_locally_inserted.connect(on_local_expansion);
+        this.folder.email_appended.connect(on_local_expansion);
+        this.folder.email_inserted.connect(on_local_expansion);
 
         // acquire here since .begin() only schedules for later
         this.active_sem.acquire();
@@ -71,8 +71,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             this.active_sem.blind_notify();
         }
 
-        this.folder.email_locally_appended.disconnect(on_local_expansion);
-        this.folder.email_locally_inserted.disconnect(on_local_expansion);
+        this.folder.email_appended.disconnect(on_local_expansion);
+        this.folder.email_inserted.disconnect(on_local_expansion);
         this.cancellable = null;
     }
 

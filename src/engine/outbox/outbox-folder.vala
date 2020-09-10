@@ -140,9 +140,9 @@ public class Geary.Outbox.Folder :
         Gee.List<EmailIdentifier> list = new Gee.ArrayList<EmailIdentifier>();
         list.add(row.outbox_id);
 
-        notify_email_appended(list);
-        notify_email_locally_appended(list);
-        notify_email_count_changed(email_count, CountChangeReason.APPENDED);
+        this.account.email_added(list, this);
+        email_inserted(list);
+        email_count_changed(email_count, CountChangeReason.APPENDED);
 
         return row.outbox_id;
     }
@@ -169,7 +169,7 @@ public class Geary.Outbox.Folder :
             }
         }
 
-        notify_email_flags_changed(changed);
+        email_flags_changed(changed);
     }
 
     public virtual async void
@@ -205,8 +205,9 @@ public class Geary.Outbox.Folder :
         if (removed.size >= 0) {
             _properties.set_total(final_count);
 
-            notify_email_removed(removed);
-            notify_email_count_changed(final_count, CountChangeReason.REMOVED);
+            email_removed(removed);
+            email_count_changed(final_count, REMOVED);
+            this.account.email_removed(removed);
         }
     }
 

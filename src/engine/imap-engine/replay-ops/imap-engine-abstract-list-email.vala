@@ -214,8 +214,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
 
         // signal
         if (created_ids.size > 0) {
-            owner.replay_notify_email_inserted(created_ids);
-            owner.replay_notify_email_locally_inserted(created_ids);
+            this.owner.account.email_added(created_ids, this.owner);
+            this.owner.email_inserted(created_ids);
         }
     }
 

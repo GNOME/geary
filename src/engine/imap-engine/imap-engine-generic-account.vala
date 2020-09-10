@@ -149,9 +149,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.last_storage_cleanup = yield this.local.fetch_last_cleanup_async(cancellable);
         this.notify["last_storage_cleanup"].connect(on_last_storage_cleanup_notify);
+        this.email_appended_to_folder.connect(on_folder_contents_altered);
+        this.email_inserted_into_folder.connect(on_folder_contents_altered);
+        this.email_removed_from_folder.connect(on_folder_contents_altered);
+        this.email_flags_changed_in_folder.connect(on_folder_contents_altered);
 
         this.open = true;
-        notify_opened();
+        opened();
 
         this.queue_operation(new LoadFolders(this, this.local));
 
@@ -179,6 +183,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             debug("Error stopping SMTP service: %s", err.message);
         }
 
+        this.email_appended_to_folder.disconnect(on_folder_contents_altered);
+        this.email_inserted_into_folder.disconnect(on_folder_contents_altered);
+        this.email_removed_from_folder.disconnect(on_folder_contents_altered);
+        this.email_flags_changed_in_folder.disconnect(on_folder_contents_altered);
+
         // Halt internal tasks early so they stop using local and
         // remote connections.
         this.refresh_folder_timer.reset();
@@ -195,11 +204,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         var locals = sort_by_path(this.local_folders.values);
         this.local_folders.clear();
-        notify_folders_available_unavailable(null, locals);
+        folders_available_unavailable(null, locals);
 
         var remotes = sort_by_path(this.remote_folders.values);
         this.remote_folders.clear();
-        notify_folders_available_unavailable(null, remotes);
+        folders_available_unavailable(null, remotes);
         foreach (var folder in remotes) {
             debug("Waiting for remote to close: %s", folder.to_string());
             yield folder.wait_for_close_async();
@@ -220,7 +229,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             yield local.close_async(cancellable);
         } finally {
             this.open = false;
-            notify_closed();
+            closed();
         }
     }
 
@@ -535,7 +544,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             );
         }
         this.local_folders.set(path, local);
-        notify_folders_available_unavailable(
+        folders_available_unavailable(
             sort_by_path(Collection.single(local)), null
         );
     }
@@ -549,7 +558,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 "Unknown folder: %s", path.to_string()
             );
         }
-        notify_folders_available_unavailable(
+        folders_available_unavailable(
             null, sort_by_path(Collection.single(local))
         );
         this.local_folders.unset(path);
@@ -694,9 +703,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
 
         if (!built_folders.is_empty) {
-            notify_folders_available_unavailable(built_folders, null);
+            folders_available_unavailable(built_folders, null);
             if (!are_existing) {
-                notify_folders_created(built_folders);
+                folders_created(built_folders);
             }
         }
 
@@ -778,8 +787,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
 
         if (!removed.is_empty) {
-            notify_folders_available_unavailable(null, removed);
-            notify_folders_deleted(removed);
+            folders_available_unavailable(null, removed);
+            folders_deleted(removed);
         }
 
         return removed;
@@ -864,63 +873,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * for all others (including Inbox) it will.
      */
     protected abstract MinimalFolder new_folder(ImapDB.Folder local_folder);
-
-    /** {@inheritDoc} */
-    protected override void
-        notify_folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
-                                             Gee.BidirSortedSet<Folder>? unavailable) {
-        base.notify_folders_available_unavailable(available, unavailable);
-        if (available != null) {
-            foreach (Geary.Folder folder in available) {
-                folder.email_appended.connect(notify_email_appended);
-                folder.email_inserted.connect(notify_email_inserted);
-                folder.email_removed.connect(notify_email_removed);
-                folder.email_locally_removed.connect(notify_email_locally_removed);
-                folder.email_locally_complete.connect(notify_email_locally_complete);
-                folder.email_flags_changed.connect(notify_email_flags_changed);
-            }
-        }
-        if (unavailable != null) {
-            foreach (Geary.Folder folder in unavailable) {
-                folder.email_appended.disconnect(notify_email_appended);
-                folder.email_inserted.disconnect(notify_email_inserted);
-                folder.email_removed.disconnect(notify_email_removed);
-                folder.email_locally_removed.disconnect(notify_email_locally_removed);
-                folder.email_locally_complete.disconnect(notify_email_locally_complete);
-                folder.email_flags_changed.disconnect(notify_email_flags_changed);
-            }
-        }
-    }
-
-    /** {@inheritDoc} */
-    protected override void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        base.notify_email_appended(folder, ids);
-        schedule_unseen_update(folder);
-    }
-
-    /** {@inheritDoc} */
-    protected override void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        base.notify_email_inserted(folder, ids);
-        schedule_unseen_update(folder);
-    }
-
-    /** {@inheritDoc} */
-    protected override void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        base.notify_email_removed(folder, ids);
-        schedule_unseen_update(folder);
-    }
-
-    /** {@inheritDoc} */
-    protected override void notify_email_locally_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        base.notify_email_locally_removed(folder, ids);
-    }
-
-    /** {@inheritDoc} */
-    protected override void notify_email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
-        base.notify_email_flags_changed(folder, flag_map);
-        schedule_unseen_update(folder);
-    }
 
     /**
      * Hooks up and queues an {@link UpdateRemoteFolders} operation.
@@ -1128,6 +1080,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 this.refresh_folder_timer.reset();
             }
         }
+    }
+
+    private void on_folder_contents_altered(Folder folder) {
+        schedule_unseen_update(folder);
     }
 
     private void on_last_storage_cleanup_notify() {

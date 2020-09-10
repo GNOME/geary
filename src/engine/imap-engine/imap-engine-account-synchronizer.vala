@@ -329,8 +329,10 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
                 yield local_folder.detach_emails_before_timestamp(max_epoch,
                                                                   cancellable);
             if (detached_ids != null) {
-                this.account.email_locally_removed(this.folder, detached_ids);
-                this.folder.email_locally_removed(detached_ids);
+                this.folder.email_removed(detached_ids);
+                this.folder.account.email_removed_from_folder(
+                    this.folder, detached_ids
+                );
 
                 // Ensure a foreground GC is queued so any email now
                 // folderless will be reaped
@@ -502,8 +504,10 @@ private class Geary.ImapEngine.TruncateToEpochFolderSync : FolderSync {
                 yield local_folder.detach_emails_before_timestamp(max_epoch,
                                                                   cancellable);
             if (detached_ids != null) {
-                this.account.email_locally_removed(this.folder, detached_ids);
-                this.folder.email_locally_removed(detached_ids);
+                this.folder.email_removed(detached_ids);
+                this.folder.account.email_removed_from_folder(
+                    this.folder, detached_ids
+                );
                 this.post_idle_detach_op.messages_detached();
             }
         }

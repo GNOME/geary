@@ -365,52 +365,34 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public signal void closed(CloseReason reason);
 
     /**
-     * Fired when email has been appended to the list of messages in the folder.
+     * Fired when email has been appended to the folder.
      *
-     * The {@link EmailIdentifier} for all appended messages is supplied as a signal parameter.
+     * The {@link EmailIdentifier} for all appended messages is
+     * supplied as a signal parameter. The messages have been added to
+     * the "top" of the vector of messages, for example, newly
+     * delivered email.
      *
-     * @see email_locally_appended
+     * @see email_inserted
      */
-    public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    public virtual signal void email_appended(Gee.Collection<EmailIdentifier> ids) {
+        this.account.email_appended_to_folder(this, ids);
+    }
 
     /**
-     * Fired when previously unknown messages have been appended to the list of email in the folder.
+     * Fired when email has been inserted into the folder.
      *
-     * This is similar to {@link email_appended}, but that signal lists ''all'' messages appended
-     * to the folder.  email_locally_appended only reports email that have not been downloaded
-     * prior to the database (and not removed permanently since).  Hence, an email that is removed
-     * from the folder and returned later will not be listed here (unless it was removed from the
-     * local store in the meantime).
+     * The {@link EmailIdentifier} for all inserted messages is
+     * supplied as a signal parameter. Inserted messages are not added
+     * to the "top" of the vector of messages, but rather into the
+     * middle or beginning. This can happen for a number of reasons,
+     * including vector expansion, but note that newly received
+     * messages are appended and notified via {@link email_appended}.
      *
      * @see email_appended
      */
-    public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when email has been inserted into the list of messages in the folder.
-     *
-     * The {@link EmailIdentifier} for all inserted messages is supplied as a signal parameter.
-     * Inserted messages are not added to the "top" of the vector of messages, but rather into
-     * the middle or beginning.  This can happen for a number of reasons.  Newly received messages
-     * are appended.
-     *
-     * @see email_locally_inserted
-     */
-    public signal void email_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when previously unknown messages have been appended to the list of email in the folder.
-     *
-     * This is similar to {@link email_inserted}, but that signal lists ''all'' messages inserted
-     * to the folder.  email_locally_inserted only reports email that have not been downloaded
-     * prior to the database (and not removed permanently since).  Hence, an email that is removed
-     * from the folder and returned later will not be listed here (unless it was removed from the
-     * local store in the meantime).
-     *
-     * @see email_inserted
-     * @see email_locally_inserted
-     */
-    public signal void email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    public virtual signal void email_inserted(Gee.Collection<EmailIdentifier> ids) {
+        this.account.email_inserted_into_folder(this, ids);
+    }
 
     /**
      * Fired when email has been removed (deleted or moved) from the folder.
@@ -423,32 +405,26 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      * known locally (and therefore the caller could not have record of).  If this happens, this
      * signal will ''not'' fire, although {@link email_count_changed} will.
      */
-    public signal void email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when emails are removed from the local folder.
-     */
-    public signal void email_locally_removed(Gee.Collection<Geary.EmailIdentifier> ids);
-
-    /**
-     * Fired when the total count of email in a folder has changed in any way.
-     *
-     * Note that this signal will fire after {@link email_appended}, {@link email_locally_appended},
-     * and {@link email_removed} (although see the note at email_removed).
-     */
-    public signal void email_count_changed(int new_count, CountChangeReason reason);
+    public virtual signal void email_removed(Gee.Collection<EmailIdentifier> ids) {
+        this.account.email_removed_from_folder(this, ids);
+    }
 
     /**
      * Fired when the supplied email flags have changed, whether due to local action or reported by
      * the server.
      */
-    public signal void email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map);
+    public virtual signal void email_flags_changed(Gee.Map<EmailIdentifier,EmailFlags> map) {
+        this.account.email_flags_changed_in_folder(this, map);
+    }
 
     /**
-     * Fired when one or more emails have been locally saved with the full set
-     * of Fields.
+     * Fired when the total count of email in a folder has changed in any way.
+     *
+     * Note that this signal will fire after {@link email_appended},
+     * and {@link email_removed} (although see the note at
+     * email_removed).
      */
-    public signal void email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
+    public signal void email_count_changed(int new_count, CountChangeReason reason);
 
     /**
     * Fired when the folder's special use has changed.
@@ -458,56 +434,6 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     */
     public signal void use_changed(SpecialUse old_use, SpecialUse new_use);
 
-
-    protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
-        opened(state, count);
-    }
-
-    protected virtual void notify_open_failed(Geary.Folder.OpenFailed failure, Error? err) {
-        open_failed(failure, err);
-    }
-
-    protected virtual void notify_closed(Geary.Folder.CloseReason reason) {
-        closed(reason);
-    }
-
-    protected virtual void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_appended(ids);
-    }
-
-    protected virtual void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_appended(ids);
-    }
-
-    protected virtual void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_inserted(ids);
-    }
-
-    protected virtual void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_inserted(ids);
-    }
-
-    protected virtual void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_removed(ids);
-    }
-
-    protected virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
-        email_count_changed(new_count, reason);
-    }
-
-    protected virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
-        Geary.EmailFlags> flag_map) {
-        email_flags_changed(flag_map);
-    }
-
-    protected virtual void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_complete(ids);
-    }
-
-    protected virtual void notify_use_changed(SpecialUse old_use,
-                                              SpecialUse new_use) {
-        use_changed(old_use, new_use);
-    }
 
     /** Determines if a folder has been opened, and if so in which way. */
     public abstract OpenState get_open_state();

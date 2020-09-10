@@ -66,7 +66,7 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
                     yield this.owner.local_folder.fetch_email_async(
                         id, NONE, NONE, null
                     );
-                    this.owner.replay_notify_email_flags_changed(changed_map);
+                    this.owner.email_flags_changed(changed_map);
                 } catch (EngineError.NOT_FOUND err) {
                     //fine
                 }

@@ -121,10 +121,11 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
 
         Geary.Email email = list[0];
         if (created_or_merged.get(email)) {
-            Gee.Collection<Geary.EmailIdentifier> ids
-                = Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list();
-            engine.replay_notify_email_inserted(ids);
-            engine.replay_notify_email_locally_inserted(ids);
+            var ids = Geary.iterate<Geary.EmailIdentifier>(
+                email.id
+            ).to_array_list();
+            engine.account.email_added(ids, this.engine);
+            engine.email_inserted(ids);
         }
 
         // Finally, pull again from the local database, to get the

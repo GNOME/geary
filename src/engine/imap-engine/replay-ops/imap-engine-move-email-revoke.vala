@@ -41,11 +41,10 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
             count = 0;
         }
 
-        engine.replay_notify_email_inserted(revoked);
-        engine.replay_notify_email_count_changed(count + revoked.size,
-            Geary.Folder.CountChangeReason.INSERTED);
+        engine.email_inserted(revoked);
+        engine.email_count_changed(count + revoked.size, INSERTED);
 
-        return ReplayOperation.Status.COMPLETED;
+        return COMPLETED;
     }
 
     public override string describe_state() {

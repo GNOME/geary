@@ -319,15 +319,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         this.base_folder.email_appended.connect(on_folder_email_appended);
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
-        this.base_folder.email_locally_complete.connect(on_folder_email_complete);
         this.base_folder.email_removed.connect(on_folder_email_removed);
-        this.base_folder.email_locally_removed.connect(on_folder_email_removed);
         this.base_folder.opened.connect(on_folder_opened);
-        this.base_folder.account.email_appended.connect(on_account_email_appended);
-        this.base_folder.account.email_inserted.connect(on_account_email_inserted);
-        this.base_folder.account.email_locally_complete.connect(on_account_email_complete);
-        this.base_folder.account.email_removed.connect(on_account_email_removed);
-        this.base_folder.account.email_flags_changed.connect(on_account_email_flags_changed);
+        this.base_folder.account.email_appended_to_folder.connect(on_account_email_appended);
+        this.base_folder.account.email_inserted_into_folder.connect(on_account_email_inserted);
+        this.base_folder.account.email_removed_from_folder.connect(on_account_email_removed);
+        this.base_folder.account.email_flags_changed_in_folder.connect(on_account_email_flags_changed);
 
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
@@ -668,15 +665,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         throws Error {
         this.base_folder.email_appended.disconnect(on_folder_email_appended);
         this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
-        this.base_folder.email_locally_complete.disconnect(on_folder_email_complete);
         this.base_folder.email_removed.disconnect(on_folder_email_removed);
-        this.base_folder.email_locally_removed.disconnect(on_folder_email_removed);
         this.base_folder.opened.disconnect(on_folder_opened);
-        this.base_folder.account.email_appended.disconnect(on_account_email_appended);
-        this.base_folder.account.email_inserted.disconnect(on_account_email_inserted);
-        this.base_folder.account.email_locally_complete.disconnect(on_account_email_complete);
-        this.base_folder.account.email_removed.disconnect(on_account_email_removed);
-        this.base_folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
+        this.base_folder.account.email_appended_to_folder.disconnect(on_account_email_appended);
+        this.base_folder.account.email_inserted_into_folder.disconnect(on_account_email_inserted);
+        this.base_folder.account.email_removed_from_folder.disconnect(on_account_email_removed);
+        this.base_folder.account.email_flags_changed_in_folder.disconnect(on_account_email_flags_changed);
 
         // Cancel outstanding ops so they don't block the queue closing
         this.operation_cancellable.cancel();
@@ -838,12 +832,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         this.queue.add(new AppendOperation(this, appended));
     }
 
-    private void on_folder_email_complete(Gee.Collection<EmailIdentifier> completed) {
-        // InsertOperation will add the emails only if they are after
-        // the earliest, which is what we want here.
-        this.queue.add(new InsertOperation(this, completed));
-    }
-
     private void on_folder_email_inserted(Gee.Collection<EmailIdentifier> inserted) {
         this.queue.add(new InsertOperation(this, inserted));
     }
@@ -856,16 +844,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
                                            Gee.Collection<EmailIdentifier> added) {
         if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, added));
-        }
-    }
-
-    private void on_account_email_complete(Folder folder,
-                                           Gee.Collection<EmailIdentifier> inserted) {
-        // ExternalAppendOperation will check to determine if the
-        // email is relevant for some existing conversation before
-        // adding it, which is what we want here.
-        if (folder != this.base_folder) {
-            this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
 

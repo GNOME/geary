@@ -47,13 +47,13 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
         if (prepared_for_move == null || prepared_for_move.size == 0)
             return ReplayOperation.Status.COMPLETED;
 
-        engine.replay_notify_email_removed(prepared_for_move);
-
-        engine.replay_notify_email_count_changed(
+        engine.email_removed(prepared_for_move);
+        engine.email_count_changed(
             Numeric.int_floor(count - prepared_for_move.size, 0),
-            Folder.CountChangeReason.REMOVED);
+            REMOVED
+        );
 
-        return ReplayOperation.Status.COMPLETED;
+        return COMPLETED;
     }
 
     public override string describe_state() {
