@@ -9,8 +9,7 @@
 /**
  * A folder for storing outgoing mail.
  */
-public class Geary.Outbox.Folder :
-    Geary.AbstractLocalFolder,
+public class Geary.Outbox.Folder : Geary.Folder,
     Geary.FolderSupport.Create,
     Geary.FolderSupport.Mark,
     Geary.FolderSupport.Remove {
@@ -75,35 +74,15 @@ public class Geary.Outbox.Folder :
     }
 
     private weak Account _account;
-    private weak ImapDB.Account local;
-    private Db.Database? db = null;
+    private Db.Database db = null;
     private FolderProperties _properties = new FolderProperties(0, 0);
     private int64 next_ordering = 0;
 
 
-    internal Folder(Account account, FolderRoot root, ImapDB.Account local) {
+    internal Folder(Account account, FolderRoot root, Db.Database db) {
         this._account = account;
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
-        this.local = local;
-    }
-
-    public override async bool open_async(Geary.Folder.OpenFlags open_flags,
-                                          GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        bool opened = yield base.open_async(open_flags, cancellable);
-        if (opened) {
-            this.db = this.local.db;
-        }
-        return opened;
-    }
-
-    public override async bool close_async(GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        bool closed = yield base.close_async(cancellable);
-        if (closed) {
-            this.db = null;
-        }
-        return closed;
+        this.db = db;
     }
 
     public virtual async Geary.EmailIdentifier?
@@ -112,8 +91,6 @@ public class Geary.Outbox.Folder :
                            GLib.DateTime? date_received,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         int email_count = 0;
         OutboxRow? row = null;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
@@ -153,7 +130,6 @@ public class Geary.Outbox.Folder :
                          EmailFlags? flags_to_remove,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
         Gee.Map<Geary.EmailIdentifier,EmailFlags> changed =
             new Gee.HashMap<Geary.EmailIdentifier,EmailFlags>();
 
@@ -176,8 +152,6 @@ public class Geary.Outbox.Folder :
         remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         Gee.List<Geary.EmailIdentifier> removed = new Gee.ArrayList<Geary.EmailIdentifier>();
         int final_count = 0;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
@@ -216,7 +190,6 @@ public class Geary.Outbox.Folder :
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
-        check_open();
         var contains = new Gee.HashSet<Geary.EmailIdentifier>();
         yield db.exec_transaction_async(
             RO,
@@ -246,8 +219,6 @@ public class Geary.Outbox.Folder :
                                Geary.Folder.ListFlags flags,
                                GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         EmailIdentifier? initial_id = _initial_id as EmailIdentifier;
         if (_initial_id != null && initial_id == null) {
             throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
@@ -332,8 +303,6 @@ public class Geary.Outbox.Folder :
                                       Geary.Folder.ListFlags flags,
                                       GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (Geary.EmailIdentifier id in ids) {
@@ -360,8 +329,6 @@ public class Geary.Outbox.Folder :
                           Geary.Folder.ListFlags flags,
                           GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         EmailIdentifier? outbox_id = id as EmailIdentifier;
         if (outbox_id == null)
             throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());

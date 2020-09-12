@@ -13,8 +13,7 @@
  * search, then collects search results and presents them via the
  * folder interface.
  */
-public class Geary.App.SearchFolder :
-    AbstractLocalFolder, FolderSupport.Remove {
+public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
 
 
     /** Number of messages to include in the initial search. */
@@ -360,23 +359,8 @@ public class Geary.App.SearchFolder :
                 FolderSupport.Remove? removable = folder as FolderSupport.Remove;
                 if (removable != null) {
                     Gee.Collection<EmailIdentifier> ids = folders_to_ids.get(path);
-
                     debug("Search folder removing %d emails from %s", ids.size, folder.to_string());
-
-                    bool open = false;
-                    try {
-                        yield folder.open_async(NONE, cancellable);
-                        open = true;
-                        yield removable.remove_email_async(ids, cancellable);
-                    } finally {
-                        if (open) {
-                            try {
-                                yield folder.close_async();
-                            } catch (Error e) {
-                                debug("Error closing folder %s: %s", folder.to_string(), e.message);
-                            }
-                        }
-                    }
+                    yield removable.remove_email_async(ids, cancellable);
                 }
             }
         }
