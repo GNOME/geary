@@ -148,7 +148,6 @@ src/client/util/util-migrate.vala
 src/client/web-process/web-process-extension.vala
 src/console/main.vala
 src/engine/api/geary.vala
-src/engine/api/geary-abstract-local-folder.vala
 src/engine/api/geary-account-information.vala
 src/engine/api/geary-account.vala
 src/engine/api/geary-aggregated-folder-properties.vala
@@ -182,6 +181,7 @@ src/engine/api/geary-named-flag.vala
 src/engine/api/geary-named-flags.vala
 src/engine/api/geary-problem-report.vala
 src/engine/api/geary-progress-monitor.vala
+src/engine/api/geary-remote-folder.vala
 src/engine/api/geary-revokable.vala
 src/engine/api/geary-search-query.vala
 src/engine/api/geary-service-information.vala

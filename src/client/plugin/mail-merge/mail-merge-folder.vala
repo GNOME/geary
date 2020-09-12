@@ -8,7 +8,7 @@
 /**
  * Plugin to Fill in and send email templates using a spreadsheet.
  */
-public class MailMerge.Folder : Geary.AbstractLocalFolder {
+public class MailMerge.Folder : Geary.Folder {
 
 
     private class EmailIdentifier : Geary.EmailIdentifier {
@@ -172,6 +172,12 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
     }
 
 
+    /** Cancels loading if in progress and stops sending. */
+    public void close() {
+        this.loading.cancel();
+        set_sending(false);
+    }
+
     /** Starts or stops the folder sending mail. */
     public void set_sending(bool is_sending) {
         if (is_sending && !this.is_sending) {
@@ -181,17 +187,6 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
             this.sending.cancel();
             this.sending = new GLib.Cancellable();
         }
-    }
-
-    /** {@inheritDoc} */
-    public override async bool close_async(GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        var is_closing = yield base.close_async(cancellable);
-        if (is_closing) {
-            this.loading.cancel();
-            set_sending(false);
-        }
-        return is_closing;
     }
 
     /** {@inheritDoc} */
@@ -212,7 +207,6 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                           Geary.Folder.ListFlags flags,
                           GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
         var email = this.email.get(id);
         if (email == null) {
             throw new Geary.EngineError.NOT_FOUND(
@@ -229,8 +223,6 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                                Geary.Folder.ListFlags flags,
                                GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
-
         var initial = initial_id as EmailIdentifier;
         if (initial_id != null && initial == null) {
             throw new Geary.EngineError.BAD_PARAMETERS(
@@ -278,7 +270,6 @@ public class MailMerge.Folder : Geary.AbstractLocalFolder {
                                       Geary.Folder.ListFlags flags,
                                       GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open();
         Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
         foreach (var id in ids) {
             var email = this.email.get(id);

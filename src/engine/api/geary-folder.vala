@@ -18,40 +18,15 @@
  * sending), or as a representation of those found in a mailbox on a
  * remote mail server, such as those provided by an IMAP server. Email
  * messages are represented by the {@link Email} class, and many
- * folder methods will return collections of these. For folders that
- * represent a remote mailbox, the mailbox's email are cached locally,
- * and the set of cached messages may be a subset of those available
- * in the mailbox, depending on an account's settings. Email messages
- * may be partially cached, in the case of a new message having just
+ * folder methods will return collections of these.
+ *
+ * Folders that represent a remote folder extend {@link
+ * RemoteFolder}. These cache the remote folder's email locally, and
+ * the set of cached messages may be a subset of those available in
+ * the mailbox, depending on an account's settings. Email messages may
+ * be partially cached, in the case of a new message having just
  * arrived or a message with many large attachments that was not
  * completely downloaded.
- *
- * Folder objects must be opened (with {@link open_async} before using
- * most of its methods and should be closed with {@link close_async}
- * when completed, even if a previous method call has failed with an
- * IOError. Folders offer various open states indicating when its
- * "local" (disk or database) connection and "remote" (network)
- * connections are ready.  Generally the local connection opens first
- * and the remote connection takes time to establish. When in this
- * state, Folder's methods still operate, but will only return locally
- * stored information.
- *
- * The set of locally stored messages is called the folder's
- * ''vector'', and contains generally the most recent message in the
- * mailbox at the upper end, back through to some older message at the
- * start or lower end of the vector. Thus the ordering of the vector
- * is the ''natural'' ordering, based on the order in which messages
- * were appended to the folder, not when messages were sent or some
- * other criteria. For remote-backed folders, the engine will maintain
- * the vector in accordance with the value of {@link
- * AccountInformation.prefetch_period_days}, however the start of the
- * vector will be extended back past that over time and in response to
- * certain operations that cause the vector to be ''expanded'' ---
- * that is for additional messages to be loaded from the remote
- * server, extending the vector. The upper end of the vector is
- * similarly extended as new messages are appended to the folder by
- * another on the server or in response to user operations such as
- * moving a message.
  *
  * This class only offers a small selection of guaranteed
  * functionality (in particular, the ability to list its {@link
@@ -120,109 +95,12 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
 
     }
 
-
-    /**
-     * Indicates if a folder has been opened, and if so in which way.
-     */
-    public enum OpenState {
-
-        /**
-         * Indicates the folder has not been opened.
-         *
-         * Either no call to {@link open_async} has yet been made, or
-         * an equal number of calls to {@link close_async} have also
-         * been made.
-         */
-        CLOSED,
-
-        /**
-         * Indicates the folder has been opened locally only.
-         *
-         * The folder has been opened by a call to {@link open_async},
-         * but if the folder is backed by a remote mailbox, a
-         * connection to the remote mailbox has not yet been
-         * established.
-         */
-        LOCAL,
-
-        /**
-         * Indicates the folder has been opened with a remote connection.
-         *
-         * The folder has been opened by a call to {@link open_async},
-         * and a connection to the remote mailbox has also been
-         * made. Local-only folders will never reach this state.
-         */
-        REMOTE;
-    }
-
-    public enum OpenFailed {
-        LOCAL_ERROR,
-        REMOTE_ERROR,
-    }
-
-    /**
-     * Provides the reason why the folder is closing or closed when the {@link closed} signal
-     * is fired.
-     *
-     * The closed signal will be fired multiple times after a Folder is opened.  It is fired
-     * after the remote and local sessions close for various reasons, and fires once and only
-     * once when the folder is completely closed.
-     *
-     * LOCAL_CLOSE or LOCAL_ERROR is only called once, depending on the situation determining the
-     * value.  The same is true for REMOTE_CLOSE and REMOTE_ERROR.  A REMOTE_ERROR can trigger
-     * a LOCAL_CLOSE and vice-versa.  The values may be called in any order.
-     *
-     * When the local and remote stores have closed (either normally or due to errors), FOLDER_CLOSED
-     * will be sent.
-     */
-    public enum CloseReason {
-        LOCAL_CLOSE,
-        LOCAL_ERROR,
-        REMOTE_CLOSE,
-        REMOTE_ERROR,
-        FOLDER_CLOSED;
-
-        public bool is_error() {
-            return (this == LOCAL_ERROR) || (this == REMOTE_ERROR);
-        }
-    }
-
     [Flags]
     public enum CountChangeReason {
         NONE = 0,
         APPENDED,
         INSERTED,
         REMOVED
-    }
-
-    /**
-     * Flags that modify the behavior of {@link open_async}.
-     */
-    [Flags]
-    public enum OpenFlags {
-        /** If only //NONE// is set, the folder will be opened normally. */
-        NONE = 0,
-
-        /**
-         * Do not delay opening a connection to the server.
-         *
-         * This has no effect for folders that are not backed by a
-         * remote server.
-         *
-         * @see open_async
-         */
-        NO_DELAY;
-
-        /** Determines if any one of the given //flags// are set. */
-        public bool is_any_set(OpenFlags flags) {
-            return (this & flags) != 0;
-        }
-
-        /** Determines all of the given //flags// are set. */
-        public bool is_all_set(OpenFlags flags) {
-            return (this & flags) == flags;
-        }
-
     }
 
     /**
@@ -301,68 +179,10 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public abstract SpecialUse used_as { get; }
 
-    /** Monitor for notifying of progress when opening the folder. */
-    public abstract Geary.ProgressMonitor opening_monitor { get; }
-
     /** {@inheritDoc} */
     public Logging.Source? logging_parent {
         get { return this.account; }
     }
-
-    /**
-     * Fired when the folder moves through stages of being opened.
-     *
-     * It will fire at least once if the folder successfully opens,
-     * with the {@link OpenState} indicating what has been opened and
-     * the count indicating the number of messages in the folder. it
-     * may fire additional times as remote sessions are established
-     * and re-established after being lost.
-     *
-     * If //state// is {@link OpenState.LOCAL}, the local store for
-     * the folder has opened and the count reflects the number of
-     * messages in the local store.
-     *
-     * If //state// is {@link OpenState.REMOTE}, it indicates both the
-     * local store and a remote session has been established, and the
-     * count reflects the number of messages on the remote. This
-     * signal will not be fired with this value for a local-only folder.
-     *
-     * This signal will never fire with {@link OpenState.CLOSED} as a
-     * parameter.
-     *
-     * @see get_open_state
-     */
-    public signal void opened(OpenState state, int count);
-
-    /**
-     * Fired when {@link open_async} fails for one or more reasons.
-     *
-     * See open_async and {@link opened} for more information on how
-     * opening a Folder works, in particular how open_async may return
-     * immediately although the remote has not completely opened.
-     * This signal may be called in the context of, or after
-     * completion of, open_async.  It will ''not'' be called after
-     * {@link close_async} has completed, however.
-     *
-     * Note that this signal may be fired ''and'' open_async throw an
-     * Error.
-     *
-     * This signal may be fired more than once before the Folder is
-     * closed, especially in the case of a remote session
-     */
-    public signal void open_failed(OpenFailed failure, Error? err);
-
-    /**
-     * Fired when the Folder is closed, either by the caller or due to
-     * errors in the local or remote store(s).
-     *
-     * It will fire a number of times: to report how the local store
-     * closed (gracefully or due to error), how the remote closed
-     * (similarly) and finally with {@link CloseReason.FOLDER_CLOSED}.
-     * The first two may come in either order; the third is always the
-     * last.
-     */
-    public signal void closed(CloseReason reason);
 
     /**
      * Fired when email has been appended to the folder.
@@ -435,131 +255,8 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
     public signal void use_changed(SpecialUse old_use, SpecialUse new_use);
 
 
-    /** Determines if a folder has been opened, and if so in which way. */
-    public abstract OpenState get_open_state();
-
     /**
-     * Marks the folder's operations as being required for use.
-     *
-     * A folder object must be opened before most operations may be
-     * performed on it. Depending on the folder implementation this
-     * might entail opening a network connection or setting the
-     * connection to a particular state, opening a file or database,
-     * and so on. In general, a Folder's local store should open
-     * immediately, hence if this call returns with error, {@link
-     * get_open_state} should return {@link OpenState.LOCAL}.
-     *
-     * For folders that are backed by a remote mailbox, it may take
-     * time for a remote connection to be established (if ever), and
-     * so it is possible for this method to complete even though a
-     * remote connection is not available. In this case the folder's
-     * state and the email messages the its contains are backed by a
-     * local cache, and may not reflect the full state of the remote
-     * mailbox. Hence both folder and email state may subsequently be
-     * changed (such as their position) after the remote connection
-     * has been established and the local and remote stores have been
-     * synchronised. Use signals such as {@link email_appended} to be
-     * notified of such changes.
-     *
-     * Connecting to the {@link opened} signal can be used to be
-     * notified when a remote connection has been established. Making
-     * a method call on a folder that requires accessing the remote
-     * mailbox before {@link OpenState.REMOTE} has been sent via this
-     * signal will result in that call blocking until the remote is
-     * open, the folder closes, or an error occurs. However it is also
-     * possible for some methods to return early without waiting,
-     * depending on prior information of the folder. See {@link
-     * list_email_by_id_async} for special notes on its
-     * operation.
-     *
-     * In some cases, establishing a remote connection may be
-     * performed lazily, that is only when first needed. If however
-     * {@link OpenFlags.NO_DELAY} is passed as an argument it will
-     * instead force an immediate opening of the remote
-     * connection. This still will not occur in the context of the
-     * this method all call, but it will ensure the a connection is
-     * initiated immediately. Since establishing remote connections is
-     * costly, use this only when it's known that remote calls or
-     * remote notifications to the Folder are imminent or monitoring
-     * the Folder is vital (such as with the Inbox).
-     *
-     * If the Folder has been opened by a call to this method
-     * previously, an internal open count is incremented and the
-     * method returns. There are no other side-effects. This means
-     * it's possible for the open_flags parameter to be ignored. See
-     * the returned result for more information.
-     *
-     * A Folder may safely be reopened after it has been closed. This
-     * allows for Folder objects to be emitted by the Account object
-     * cheaply, but the client should only have a few open at a time,
-     * as each may represent an expensive resource (such as a network
-     * connection).
-     *
-     * If there is an error while opening, "open-failed" will be
-     * fired.  (See that signal for more information on how many times
-     * it may fire, and when.)  To prevent the Folder from going into
-     * a halfway state, it will immediately schedule a close_async()
-     * to cleanup, and those associated signals will be fired as well.
-     *
-     * Returns false if already opened.
-     */
-    public abstract async bool open_async(OpenFlags open_flags,
-                                          Cancellable? cancellable = null)
-        throws Error;
-
-    /**
-     * Marks one use of the folder's operations as being completed.
-     *
-     * The folder must be closed when operations on it are concluded.
-     * Depending on the implementation this might entail closing a
-     * network connection or reverting it to another state, or closing
-     * file handles or database connections.
-     *
-     * If the folder is open, an internal open count is decremented.
-     * If it remains above zero, the method returns with no other
-     * side-effects.  If it decrements to zero, the folder will start
-     * to close tearing down network connections, closing files, and
-     * so-forth. The {@link closed} signal can be used to be notified
-     * of progress closing the folder.  Use {@link
-     * wait_for_close_async} to block until the folder is completely
-     * closed.
-     *
-     * Returns true if the open count decrements to zero and the
-     * folder is closing, or if it is already closed.
-     *
-     * @see open_async
-     */
-    public abstract async bool close_async(Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Wait for the {@link Folder} to fully close.
-     *
-     * This will ''always'' block until the folder is closed, even if
-     * it's not open.
-     */
-    public abstract async void wait_for_close_async(Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Synchronises the local folder with the remote mailbox.
-     *
-     * If backed by a remote folder, this ensures that the end of the
-     * vector is up to date with the end of the remote mailbox, and
-     * that all messages in the vector satisfy the minimum
-     * requirements for being used by the engine.
-     *
-     * The folder must be opened prior to attempting this operation.
-     */
-    public abstract async void synchronise_remote(GLib.Cancellable? cancellable)
-        throws GLib.Error;
-
-    /**
-     * Determines the email identifiers that are contained in the folder.
-     *
-     * The returned collection will be a subset of the given input
-     * collection that contains an input identifier only if that
-     * identifier belongs to an email contained by the folder.
-     *
-     * The Folder must be opened prior to attempting this operation.
+     * Determines which of the given identifiers are contained by the folder.
      */
     public abstract async Gee.Collection<EmailIdentifier> contains_identifiers(
         Gee.Collection<EmailIdentifier> ids,

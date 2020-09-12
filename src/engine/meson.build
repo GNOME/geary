@@ -1,7 +1,6 @@
 # Geary engine
 engine_vala_sources = files(
   'api/geary.vala',
-  'api/geary-abstract-local-folder.vala',
   'api/geary-account.vala',
   'api/geary-account-information.vala',
   'api/geary-aggregated-folder-properties.vala',
@@ -35,6 +34,7 @@ engine_vala_sources = files(
   'api/geary-named-flags.vala',
   'api/geary-problem-report.vala',
   'api/geary-progress-monitor.vala',
+  'api/geary-remote-folder.vala',
   'api/geary-revokable.vala',
   'api/geary-search-query.vala',
   'api/geary-service-information.vala',

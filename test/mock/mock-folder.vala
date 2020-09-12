@@ -26,10 +26,6 @@ public class Mock.Folder : Geary.Folder,
         get { return this._used_as; }
     }
 
-    public override Geary.ProgressMonitor opening_monitor {
-        get { return this._opening_monitor; }
-    }
-
     protected Gee.Queue<ValaUnit.ExpectedCall> expected {
         get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
     }
@@ -52,37 +48,6 @@ public class Mock.Folder : Geary.Folder,
         this._path = path;
         this._used_as = used_as;
         this._opening_monitor = monitor;
-    }
-
-    public override Geary.Folder.OpenState get_open_state() {
-        return Geary.Folder.OpenState.CLOSED;
-    }
-
-    public override async bool open_async(Geary.Folder.OpenFlags open_flags,
-                                          GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        return yield boolean_call_async(
-            "open_async",
-            { int_arg(open_flags), cancellable },
-            false
-        );
-    }
-
-    public override async bool close_async(GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        return yield boolean_call_async(
-            "close_async", { cancellable }, false
-        );
-    }
-
-    public override async void wait_for_close_async(GLib.Cancellable? cancellable = null)
-    throws GLib.Error {
-        throw new Geary.EngineError.UNSUPPORTED("Mock method");
-    }
-
-    public override async void synchronise_remote(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        void_call("synchronise_remote", { cancellable });
     }
 
     public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
