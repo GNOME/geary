@@ -71,7 +71,6 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
      */
     public override async void start(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        yield this.outbox.open_async(Folder.OpenFlags.NONE, cancellable);
         yield this.fill_outbox_queue(cancellable);
         notify_started();
     }
@@ -90,7 +89,6 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
             GLib.Idle.add(this.stop.callback);
             yield;
         }
-        yield this.outbox.close_async(cancellable);
     }
 
     /**
@@ -385,44 +383,17 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         }
 
         RFC822.Message raw = message.get_message();
-        bool open = false;
-        try {
-            yield create.open_async(NO_DELAY, cancellable);
-            open = true;
-            yield create.create_email_async(raw, null, null, cancellable);
-            yield wait_for_message(create, message, cancellable);
-        } finally {
-            if (open) {
-                try {
-                    yield create.close_async(null);
-                } catch (Error e) {
-                    debug("Error closing folder %s: %s", create.to_string(), e.message);
-                }
-            }
-        }
+        yield create.create_email_async(raw, null, null, cancellable);
+        yield wait_for_message(create, message, cancellable);
     }
 
     private async void sync_sent_mail(Geary.Email message,
                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.Folder sent = this.owner.get_special_folder(SENT);
-        if (sent != null) {
-            bool open = false;
-            try {
-                yield sent.open_async(NO_DELAY, cancellable);
-                open = true;
-                yield sent.synchronise_remote(cancellable);
-                yield wait_for_message(sent, message, cancellable);
-            } finally {
-                if (open) {
-                    try {
-                        yield sent.close_async(null);
-                    } catch (Error e) {
-                        debug("Error closing folder %s: %s",
-                              sent.to_string(), e.message);
-                    }
-                }
-            }
+        var remote_sent = this.owner.get_special_folder(SENT) as RemoteFolder;
+        if (remote_sent != null) {
+            yield remote_sent.synchronise(cancellable);
+            yield wait_for_message(remote_sent, message, cancellable);
         }
     }
 

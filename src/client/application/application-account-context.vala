@@ -15,7 +15,7 @@ public class Application.AccountContext : Geary.BaseObject {
     public Geary.Account account { get; private set; }
 
     /** The account's Inbox folder */
-    public Geary.Folder? inbox = null;
+    public Geary.RemoteFolder? inbox = null;
 
     /** The account's search folder */
     public Geary.App.SearchFolder search = null;

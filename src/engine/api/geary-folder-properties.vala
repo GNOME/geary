@@ -39,7 +39,7 @@ public abstract class Geary.FolderProperties : BaseObject {
     public Trillian supports_children { get; protected set; }
 
     /**
-     * Returns a {@link Trillian} indicating if {@link Folder.open_async} can succeed remotely.
+     * Returns a {@link Trillian} indicating if a folder can be opened remotely.
      */
     public Trillian is_openable { get; protected set; }
 

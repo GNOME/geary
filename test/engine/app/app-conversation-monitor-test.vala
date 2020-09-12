@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2018-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -12,16 +12,24 @@ class Geary.App.ConversationMonitorTest : TestCase {
     AccountInformation? account_info = null;
     Mock.Account? account = null;
     FolderRoot? folder_root = null;
-    Mock.Folder? base_folder = null;
+    Mock.RemoteFolder? base_folder = null;
     Mock.Folder? other_folder = null;
 
 
     public ConversationMonitorTest() {
         base("Geary.App.ConversationMonitorTest");
-        add_test("start_stop_monitoring", start_stop_monitoring);
-        add_test("open_error", open_error);
-        add_test("close_during_open_error", close_during_open_error);
-        add_test("close_after_open_error", close_after_open_error);
+        add_test(
+            "start_stop_monitoring_remote_not_started",
+            start_stop_monitoring_remote_not_started
+        );
+        add_test(
+            "start_stop_monitoring_remote_already_started",
+            start_stop_monitoring_remote_already_started
+        );
+        add_test(
+            "start_stop_monitoring_local",
+            start_stop_monitoring_local
+        );
         add_test("load_single_message", load_single_message);
         add_test("load_multiple_messages", load_multiple_messages);
         add_test("load_related_message", load_related_message);
@@ -40,12 +48,14 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
         this.account = new Mock.Account(this.account_info);
         this.folder_root = new FolderRoot("#test", false);
-        this.base_folder = new Mock.Folder(
+        this.base_folder = new Mock.RemoteFolder(
             this.account,
             null,
             this.folder_root.get_child("base"),
             NONE,
-            null
+            null,
+            false,
+            false
         );
         this.other_folder = new Mock.Folder(
             this.account,
@@ -64,9 +74,18 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.account = null;
     }
 
-    public void start_stop_monitoring() throws Error {
+    public void start_stop_monitoring_remote_not_started() throws GLib.Error {
+        var test_article = new Mock.RemoteFolder(
+            this.account,
+            null,
+            this.folder_root.get_child("base"),
+            NONE,
+            null,
+            false,
+            false
+        );
         ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Email.Field.NONE, 10
+            test_article, Email.Field.NONE, 10
         );
         Cancellable test_cancellable = new Cancellable();
 
@@ -75,12 +94,12 @@ class Geary.App.ConversationMonitorTest : TestCase {
         monitor.scan_started.connect(() => { saw_scan_started = true; });
         monitor.scan_completed.connect(() => { saw_scan_completed = true; });
 
-        this.base_folder.expect_call("open_async");
-        this.base_folder.expect_call("list_email_by_id_async");
-        this.base_folder.expect_call("close_async");
+        test_article.expect_call("start_monitoring");
+        test_article.expect_call("list_email_by_id_async");
+        test_article.expect_call("stop_monitoring");
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, this.async_completion
+            test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 
@@ -97,89 +116,93 @@ class Geary.App.ConversationMonitorTest : TestCase {
         assert_true(saw_scan_started, "scan_started not fired");
         assert_true(saw_scan_completed, "scan_completed not fired");
 
-        this.base_folder.assert_expectations();
+        test_article.assert_expectations();
     }
 
-    public void open_error() throws Error {
-        ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Email.Field.NONE, 10
+    public void start_stop_monitoring_remote_already_started()
+        throws GLib.Error {
+        var test_article = new Mock.RemoteFolder(
+            this.account,
+            null,
+            this.folder_root.get_child("base"),
+            NONE,
+            null,
+            true,
+            false
         );
+        ConversationMonitor monitor = new ConversationMonitor(
+            test_article, Email.Field.NONE, 10
+        );
+        Cancellable test_cancellable = new Cancellable();
 
-        ValaUnit.ExpectedCall open = this.base_folder
-            .expect_call("open_async")
-            .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
+        bool saw_scan_started = false;
+        bool saw_scan_completed = false;
+        monitor.scan_started.connect(() => { saw_scan_started = true; });
+        monitor.scan_completed.connect(() => { saw_scan_completed = true; });
+
+        test_article.expect_call("list_email_by_id_async");
 
         monitor.start_monitoring.begin(
-            NONE, null, this.async_completion
+            test_cancellable, this.async_completion
         );
-        try {
-            monitor.start_monitoring.end(async_result());
-            assert_not_reached();
-        } catch (Error err) {
-            assert_error(open.throw_error, err);
+        monitor.start_monitoring.end(async_result());
+
+        // Process all of the async tasks arising from the open
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
         }
 
-        assert_false(monitor.is_monitoring, "is monitoring");
-
-        this.base_folder.assert_expectations();
-    }
-
-    public void close_during_open_error() throws GLib.Error {
-        ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Email.Field.NONE, 10
+        monitor.stop_monitoring.begin(
+            test_cancellable, this.async_completion
         );
-
-        ValaUnit.ExpectedCall open = this.base_folder
-            .expect_call("open_async")
-            .async_call(PAUSE)
-            .throws(new GLib.IOError.CANCELLED("Mock error"));
-        this.base_folder
-            .expect_call("close_async")
-            .throws(new EngineError.ALREADY_CLOSED("Mock error"));
-
-        var start_waiter = new ValaUnit.AsyncResultWaiter(this.main_loop);
-        monitor.start_monitoring.begin(NONE, null, start_waiter.async_completion);
-
-        var stop_waiter = new ValaUnit.AsyncResultWaiter(this.main_loop);
-        monitor.stop_monitoring.begin(null, stop_waiter.async_completion);
-
-        open.async_resume();
-        try {
-            monitor.start_monitoring.end(start_waiter.async_result());
-            assert_not_reached();
-        } catch (GLib.Error err) {
-            assert_error(open.throw_error, err);
-        }
-
-        // base_folder.close_async should not be called, so should not
-        // throw an error
-        monitor.stop_monitoring.end(stop_waiter.async_result());
-    }
-
-    public void close_after_open_error() throws GLib.Error {
-        ConversationMonitor monitor = new ConversationMonitor(
-            this.base_folder, Email.Field.NONE, 10
-        );
-
-        ValaUnit.ExpectedCall open = this.base_folder
-            .expect_call("open_async")
-            .throws(new EngineError.SERVER_UNAVAILABLE("Mock error"));
-        this.base_folder
-            .expect_call("close_async")
-            .throws(new EngineError.ALREADY_CLOSED("Mock error"));
-
-        monitor.start_monitoring.begin(NONE, null, this.async_completion);
-        try {
-            monitor.start_monitoring.end(async_result());
-            assert_not_reached();
-        } catch (GLib.Error err) {
-            assert_error(open.throw_error, err);
-        }
-
-        // base_folder.close_async should not be called, so should not
-        // throw an error
-        monitor.stop_monitoring.begin(null, this.async_completion);
         monitor.stop_monitoring.end(async_result());
+
+        assert_true(saw_scan_started, "scan_started not fired");
+        assert_true(saw_scan_completed, "scan_completed not fired");
+
+        test_article.assert_expectations();
+    }
+
+    public void start_stop_monitoring_local()
+        throws GLib.Error {
+        var test_article = new Mock.Folder(
+            this.account,
+            null,
+            this.folder_root.get_child("base"),
+            NONE,
+            null
+        );
+        ConversationMonitor monitor = new ConversationMonitor(
+            test_article, Email.Field.NONE, 10
+        );
+        Cancellable test_cancellable = new Cancellable();
+
+        bool saw_scan_started = false;
+        bool saw_scan_completed = false;
+        monitor.scan_started.connect(() => { saw_scan_started = true; });
+        monitor.scan_completed.connect(() => { saw_scan_completed = true; });
+
+        test_article.expect_call("list_email_by_id_async");
+
+        monitor.start_monitoring.begin(
+            test_cancellable, this.async_completion
+        );
+        monitor.start_monitoring.end(async_result());
+
+        // Process all of the async tasks arising from the open
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
+        }
+
+        monitor.stop_monitoring.begin(
+            test_cancellable, this.async_completion
+        );
+        monitor.stop_monitoring.end(async_result());
+
+        assert_true(saw_scan_started, "scan_started not fired");
+        assert_true(saw_scan_completed, "scan_completed not fired");
+
+        test_article.assert_expectations();
     }
 
     public void load_single_message() throws Error {
@@ -306,7 +329,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         // Close the monitor to cancel the final load so it does not
         // error out during later tests
-        this.base_folder.expect_call("close_async");
+        this.base_folder.expect_call("stop_monitoring");
         monitor.stop_monitoring.begin(
             null, this.async_completion
         );
@@ -332,12 +355,10 @@ class Geary.App.ConversationMonitorTest : TestCase {
         ConversationMonitor monitor = setup_monitor({e1}, paths);
         assert_equal<int?>(monitor.size, 1, "Initial conversation count");
 
-        this.other_folder.expect_call("open_async");
         this.other_folder.expect_call("list_email_by_sparse_id_async")
             .returns_object(new Gee.ArrayList<Email>.wrap({e3}));
         this.other_folder.expect_call("list_email_by_sparse_id_async")
             .returns_object(new Gee.ArrayList<Email>.wrap({e3}));
-        this.other_folder.expect_call("close_async");
 
         // ExternalAppendOperation's blacklist check
         this.account.expect_call("get_special_folder");
@@ -467,7 +488,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
          *           - get_containing_folders_async
          */
 
-        this.base_folder.expect_call("open_async");
+        this.base_folder.expect_call("start_monitoring");
         ValaUnit.ExpectedCall list_call = this.base_folder
             .expect_call("list_email_by_id_async")
             .returns_object(new Gee.ArrayList<Email>.wrap(base_folder_email));
@@ -542,7 +563,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         }
 
         monitor.start_monitoring.begin(
-            NONE, test_cancellable, this.async_completion
+            test_cancellable, this.async_completion
         );
         monitor.start_monitoring.end(async_result());
 

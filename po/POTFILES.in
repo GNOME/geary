@@ -150,7 +150,6 @@ src/console/main.vala
 src/engine/api/geary.vala
 src/engine/api/geary-account-information.vala
 src/engine/api/geary-account.vala
-src/engine/api/geary-aggregated-folder-properties.vala
 src/engine/api/geary-attachment.vala
 src/engine/api/geary-base-object.vala
 src/engine/api/geary-client-service.vala
@@ -312,7 +311,6 @@ src/engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 src/engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
 src/engine/imap-engine/replay-ops/imap-engine-replay-update.vala
 src/engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
-src/engine/imap-engine/replay-ops/imap-engine-user-close.vala
 src/engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 src/engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 src/engine/imap/message/imap-data-format.vala

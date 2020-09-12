@@ -55,9 +55,11 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             this.monitor.base_folder.properties.email_total
         );
 
+        var remote = this.monitor.base_folder as RemoteFolder;
         if (loaded < num_to_load &&
             this.monitor.can_load_more &&
-            this.monitor.base_folder.get_open_state() == REMOTE) {
+            remote != null &&
+            remote.is_monitoring) {
             // Not enough were loaded locally, but the remote seems to
             // be online and it looks like there and there might be
             // some more on the remote, so go see if there are any.

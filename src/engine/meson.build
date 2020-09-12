@@ -3,7 +3,6 @@ engine_vala_sources = files(
   'api/geary.vala',
   'api/geary-account.vala',
   'api/geary-account-information.vala',
-  'api/geary-aggregated-folder-properties.vala',
   'api/geary-attachment.vala',
   'api/geary-base-object.vala',
   'api/geary-client-service.vala',
@@ -222,7 +221,6 @@ engine_vala_sources = files(
   'imap-engine/replay-ops/imap-engine-replay-removal.vala',
   'imap-engine/replay-ops/imap-engine-replay-update.vala',
   'imap-engine/replay-ops/imap-engine-server-search-email.vala',
-  'imap-engine/replay-ops/imap-engine-user-close.vala',
   'imap-engine/yahoo/imap-engine-yahoo-account.vala',
   'imap-engine/yahoo/imap-engine-yahoo-folder.vala',
 

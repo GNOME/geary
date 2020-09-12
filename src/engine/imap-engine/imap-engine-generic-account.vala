@@ -92,7 +92,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         imap.set_logging_parent(this);
         this.imap = imap;
 
-        smtp.outbox = new Outbox.Folder(this, local_folder_root, local);
+        smtp.outbox = new Outbox.Folder(this, local_folder_root, local.db);
         smtp.report_problem.connect(notify_report_problem);
         smtp.set_logging_parent(this);
         this.smtp = smtp;
@@ -211,7 +211,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         folders_available_unavailable(null, remotes);
         foreach (var folder in remotes) {
             debug("Waiting for remote to close: %s", folder.to_string());
-            yield folder.wait_for_close_async();
+            yield ((MinimalFolder) folder).close();
         }
 
         // Close IMAP service manager now that folders are closed
@@ -690,7 +690,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             FolderPath path = db_folder.get_path();
             if (!this.remote_folders.has_key(path)) {
                 MinimalFolder folder = new_folder(db_folder);
-                folder.report_problem.connect(notify_report_problem);
                 if (folder.used_as == NONE) {
                     var use = this.information.get_folder_use_for_path(path);
                     if (use != NONE) {
@@ -1461,8 +1460,9 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
     }
 
     public override async void execute(GLib.Cancellable cancellable) throws GLib.Error {
-        GenericAccount account = (GenericAccount) this.account;
-        if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
+        var account = (GenericAccount) this.account;
+        var folder = (MinimalFolder) this.folder;
+        if (!folder.is_monitoring) {
             Imap.AccountSession? remote = yield account.claim_account_session(
                 cancellable
             );
@@ -1477,7 +1477,7 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
                 // local_folder since we are only using its properties,
                 // and the properties were loaded when the folder was
                 // first instantiated.
-                ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+                ImapDB.Folder local_folder = folder.local_folder;
 
                 if (remote_folder.properties.have_contents_changed(
                         local_folder.get_properties(),

@@ -162,64 +162,34 @@ private abstract class Geary.ImapEngine.FolderSync : FolderOperation {
 
     protected GLib.DateTime sync_max_epoch { get; private set; }
 
-    private Folder.OpenFlags open_flags;
-    private GLib.Cancellable? closed_cancellable = null;
-
 
     internal FolderSync(GenericAccount account,
                         MinimalFolder folder,
-                        GLib.DateTime sync_max_epoch,
-                        Folder.OpenFlags open_flags) {
+                        GLib.DateTime sync_max_epoch) {
         base(account, folder);
         this.sync_max_epoch = sync_max_epoch;
-        this.open_flags = open_flags;
-        this.folder.closed.connect(on_folder_close);
-    }
-
-    ~FolderSync() {
-        weak Geary.Folder? folder = this.folder;
-        if (folder != null) {
-            this.folder.closed.disconnect(on_folder_close);
-        }
     }
 
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
-        // Stash the cancellable so the op can cancel the sync if the
-        // folder closes.
-        this.closed_cancellable = cancellable;
+        debug("Synchronising");
 
-        bool was_opened = false;
-        MinimalFolder minimal = (MinimalFolder) this.folder;
+        // Determine the earliest date we should be synchronising
+        // back to
+        DateTime actual_max_epoch;
+        if (this.account.information.prefetch_period_days >= 0) {
+            actual_max_epoch = new DateTime.now_local();
+            actual_max_epoch = actual_max_epoch.add_days(
+                0 - account.information.prefetch_period_days
+            );
+        } else {
+            actual_max_epoch = this.sync_max_epoch;
+        }
+
         try {
-            yield minimal.open_async(this.open_flags, cancellable);
-            was_opened = true;
-
-            debug("Synchronising");
-            // Determine the earliest date we should be synchronising
-            // back to
-            DateTime actual_max_epoch;
-            if (this.account.information.prefetch_period_days >= 0) {
-                actual_max_epoch = new DateTime.now_local();
-                actual_max_epoch = actual_max_epoch.add_days(
-                    0 - account.information.prefetch_period_days
-                );
-            } else {
-                actual_max_epoch = this.sync_max_epoch;
-            }
-
             yield sync_folder(actual_max_epoch, cancellable);
         } catch (GLib.IOError.CANCELLED err) {
             // All good
-        } catch (EngineError.ALREADY_CLOSED err) {
-            // Failed to open the folder, which could be because the
-            // network went away, or because the remote folder went
-            // away. Either way don't bother reporting it.
-            debug(
-                "Folder failed to open %s: %s",
-                minimal.to_string(),
-                err.message
-            );
         } catch (GLib.Error err) {
             this.account.report_problem(
                 new ServiceProblemReport(
@@ -229,45 +199,11 @@ private abstract class Geary.ImapEngine.FolderSync : FolderOperation {
                 )
             );
         }
-
-        // Clear this now so that the wait for close below doesn't get
-        // cancelled as the folder closes.
-        this.closed_cancellable = null;
-
-        if (was_opened) {
-            try {
-                // don't pass in the Cancellable; really need this
-                // to complete in all cases
-                if (yield this.folder.close_async(null)) {
-                    // The folder was actually closing, so wait
-                    // for it here to completely close so that its
-                    // session has a chance to exit IMAP Selected
-                    // state when released, allowing the next sync
-                    // op to reuse the same session. Here we
-                    // definitely want to use the cancellable so
-                    // the wait can be interrupted.
-                    yield this.folder.wait_for_close_async(cancellable);
-                }
-            } catch (Error err) {
-                debug(
-                    "%s: Error closing folder %s: %s",
-                    this.account.to_string(),
-                    this.folder.to_string(),
-                    err.message
-                    );
-            }
-        }
     }
 
     protected abstract async void sync_folder(GLib.DateTime max_epoch,
                                               GLib.Cancellable cancellable)
         throws GLib.Error;
-
-    private void on_folder_close() {
-        if (this.closed_cancellable != null) {
-            this.closed_cancellable.cancel();
-        }
-    }
 
 }
 
@@ -285,13 +221,14 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderSync {
     internal RefreshFolderSync(GenericAccount account,
                                MinimalFolder folder,
                                GLib.DateTime sync_max_epoch) {
-        base(account, folder, sync_max_epoch, NO_DELAY);
+        base(account, folder, sync_max_epoch);
     }
 
     protected override async void sync_folder(GLib.DateTime max_epoch,
                                               GLib.Cancellable cancellable)
         throws GLib.Error {
-        yield this.folder.synchronise_remote(cancellable);
+        var remote = (RemoteFolder) this.folder as RemoteFolder;
+        yield remote.synchronise(cancellable);
     }
 
 }
@@ -489,7 +426,7 @@ private class Geary.ImapEngine.TruncateToEpochFolderSync : FolderSync {
                                        MinimalFolder folder,
                                        DateTime sync_max_epoch,
                                        IdleGarbageCollection? post_idle_detach_op) {
-        base(account, folder, sync_max_epoch, NONE);
+        base(account, folder, sync_max_epoch);
         this.post_idle_detach_op = post_idle_detach_op;
     }
 

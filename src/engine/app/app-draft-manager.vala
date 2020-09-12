@@ -215,41 +215,17 @@ public class Geary.App.DraftManager : BaseObject {
         this.create_support =  (FolderSupport.Create) save_to;
         this.remove_support = (FolderSupport.Remove) save_to;
 
-        this.drafts_folder.closed.connect(on_folder_closed);
-
-        yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
-
-        // if drafts folder doesn't return the identifier of newly
-        // created emails, then this object can't do it's work
-        // ... wait until open to check for this, to be absolutely
-        // sure
-        //
-        // Since open_async returns before a remote connection is
-        // made, need to wait for it here to ensure
-        var engine = this.drafts_folder as ImapEngine.MinimalFolder;
-        if (engine != null) {
-            yield engine.claim_remote_session(cancellable);
-        }
+        // if drafts folder doesn't return the identifier of newly created emails, then this object
+        // can't do it's work ... wait until open to check for this, to be absolutely sure
         if (drafts_folder.properties.create_never_returns_id) {
-            try {
-                yield drafts_folder.close_async();
-            } catch (Error err) {
-                // ignore
-            }
-
-            throw new EngineError.UNSUPPORTED("%s: Drafts folder %s does not return created mail ID",
-                to_string(), drafts_folder.to_string());
+            throw new EngineError.UNSUPPORTED(
+                "%s: Drafts folder %s does not return created mail ID",
+                to_string(), drafts_folder.to_string()
+            );
         }
 
         // start the operation message loop, which ensures commands are handled in orderly fashion
         operation_loop_async.begin();
-    }
-
-    private void on_folder_closed(Folder.CloseReason reason) {
-        if (reason == Folder.CloseReason.FOLDER_CLOSED) {
-            fatal(new EngineError.SERVER_UNAVAILABLE("%s: Unexpected drafts folder closed (%s)",
-                to_string(), reason.to_string()));
-        }
     }
 
     /**
@@ -282,11 +258,6 @@ public class Geary.App.DraftManager : BaseObject {
                 // fall through
             }
         }
-
-        // Disconnect before closing, as signal handler is for unexpected closes
-        drafts_folder.closed.disconnect(on_folder_closed);
-
-        yield drafts_folder.close_async(cancellable);
     }
 
     private void check_open() throws EngineError {
@@ -375,18 +346,6 @@ public class Geary.App.DraftManager : BaseObject {
         // watch for CLOSE
         if (op.op_type == OperationType.CLOSE)
             return false;
-
-        // make sure there's a folder to work with
-        if (this.drafts_folder == null ||
-            this.drafts_folder.get_open_state() == CLOSED) {
-            fatal(
-                new EngineError.SERVER_UNAVAILABLE(
-                    "%s: premature drafts folder close", to_string()
-                )
-            );
-
-            return false;
-        }
 
         // at this point, only operation left is PUSH
         assert(op.op_type == OperationType.PUSH);

@@ -1101,13 +1101,9 @@ internal class Application.Controller :
             context.cancellable.cancel();
 
             // Explicitly close the inbox since we explicitly open it
-            Geary.Folder? inbox = context.inbox;
+            Geary.RemoteFolder? inbox = context.inbox;
             if (inbox != null) {
-                try {
-                    yield inbox.close_async(null);
-                } catch (Error close_inbox_err) {
-                    debug("Unable to close monitored inbox: %s", close_inbox_err.message);
-                }
+                inbox.stop_monitoring();
                 context.inbox = null;
             }
 
@@ -1366,12 +1362,11 @@ internal class Application.Controller :
             foreach (var folder in available) {
                 if (Controller.should_add_folder(available, folder)) {
                     if (folder.used_as == INBOX) {
-                        if (account_context.inbox == null) {
-                            account_context.inbox = folder;
+                        if (account_context.inbox != null) {
+                            account_context.inbox.stop_monitoring();
                         }
-                        folder.open_async.begin(
-                            NO_DELAY, account_context.cancellable
-                        );
+                        account_context.inbox = folder as Geary.RemoteFolder;
+                        account_context.inbox.start_monitoring();
                     }
 
                     var folder_context = new FolderContext(folder);
@@ -2136,26 +2131,11 @@ private class Application.MoveEmailCommand : RevokableCommand {
     protected override async Geary.Revokable
         execute_impl(GLib.Cancellable cancellable)
         throws GLib.Error {
-        bool open = false;
-        try {
-            yield this.source.open_async(
-                Geary.Folder.OpenFlags.NO_DELAY, cancellable
-            );
-            open = true;
-            return yield this.source.move_email_async(
-                this.email,
-                this.destination.path,
-                cancellable
-            );
-        } finally {
-            if (open) {
-                try {
-                    yield this.source.close_async(null);
-                } catch (GLib.Error err) {
-                    // ignored
-                }
-            }
-        }
+        return yield this.source.move_email_async(
+            this.email,
+            this.destination.path,
+            cancellable
+        );
     }
 
 }
@@ -2231,24 +2211,9 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
     protected override async Geary.Revokable
         execute_impl(GLib.Cancellable cancellable)
         throws GLib.Error {
-        bool open = false;
-        try {
-            yield this.source.open_async(
-                Geary.Folder.OpenFlags.NO_DELAY, cancellable
-            );
-            open = true;
-            return yield this.source.archive_email_async(
-                this.email, cancellable
-            );
-        } finally {
-            if (open) {
-                try {
-                    yield this.source.close_async(null);
-                } catch (GLib.Error err) {
-                    // ignored
-                }
-            }
-        }
+        return yield this.source.archive_email_async(
+            this.email, cancellable
+        );
     }
 
 }
@@ -2282,24 +2247,9 @@ private class Application.CopyEmailCommand : EmailCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool open = false;
-        try {
-            yield this.source.open_async(
-                Geary.Folder.OpenFlags.NO_DELAY, cancellable
-            );
-            open = true;
-            yield this.source.copy_email_async(
-                this.email, this.destination.path, cancellable
-            );
-        } finally {
-            if (open) {
-                try {
-                    yield this.source.close_async(null);
-                } catch (GLib.Error err) {
-                    // ignored
-                }
-            }
-        }
+        yield this.source.copy_email_async(
+            this.email, this.destination.path, cancellable
+        );
     }
 
     public override async void undo(GLib.Cancellable? cancellable)
@@ -2356,22 +2306,7 @@ private class Application.DeleteEmailCommand : EmailCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool open = false;
-        try {
-            yield this.target.open_async(
-                Geary.Folder.OpenFlags.NO_DELAY, cancellable
-            );
-            open = true;
-            yield this.target.remove_email_async(this.email, cancellable);
-        } finally {
-            if (open) {
-                try {
-                    yield this.target.close_async(null);
-                } catch (GLib.Error err) {
-                    // ignored
-                }
-            }
-        }
+        yield this.target.remove_email_async(this.email, cancellable);
     }
 
     public override async void undo(GLib.Cancellable? cancellable)
@@ -2401,22 +2336,7 @@ private class Application.EmptyFolderCommand : Command {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool open = false;
-        try {
-            yield this.target.open_async(
-                Geary.Folder.OpenFlags.NO_DELAY, cancellable
-            );
-            open = true;
-            yield this.target.empty_folder_async(cancellable);
-        } finally {
-            if (open) {
-                try {
-                    yield this.target.close_async(null);
-                } catch (GLib.Error err) {
-                    // ignored
-                }
-            }
-        }
+        yield this.target.empty_folder_async(cancellable);
     }
 
     public override async void undo(GLib.Cancellable? cancellable)

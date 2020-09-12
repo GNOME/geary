@@ -303,12 +303,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
      * folder, but not subsequently when scanning for new messages. To
      * cancel any such operations, simply close the monitor via {@link
      * stop_monitoring}.
-     *
-     * @param open_flags See {@link Geary.Folder}
-     * @param cancellable Passed to the folder open operation
      */
-    public async bool start_monitoring(Folder.OpenFlags open_flags,
-                                       GLib.Cancellable? cancellable)
+    public async bool start_monitoring(GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (this.is_monitoring)
             return false;
@@ -320,7 +316,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         this.base_folder.email_appended.connect(on_folder_email_appended);
         this.base_folder.email_inserted.connect(on_folder_email_inserted);
         this.base_folder.email_removed.connect(on_folder_email_removed);
-        this.base_folder.opened.connect(on_folder_opened);
         this.base_folder.account.email_appended_to_folder.connect(on_account_email_appended);
         this.base_folder.account.email_inserted_into_folder.connect(on_account_email_inserted);
         this.base_folder.account.email_removed_from_folder.connect(on_account_email_removed);
@@ -333,31 +328,15 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         // monitor is closed while it is opening, the folder open is
         // also cancelled
         GLib.Cancellable opening = new GLib.Cancellable();
+        this.operation_cancellable.cancelled.connect(() => opening.cancel());
         if (cancellable != null) {
             cancellable.cancelled.connect(() => opening.cancel());
         }
-        this.operation_cancellable.cancelled.connect(() => opening.cancel());
 
-        try {
-            yield this.base_folder.open_async(open_flags, opening);
+        var remote = this.base_folder as RemoteFolder;
+        if (remote != null && !remote.is_monitoring) {
+            remote.start_monitoring();
             this.base_was_opened = true;
-        } catch (GLib.Error err) {
-            // This check is needed since ::stop_monitoring may have
-            // been called while this call is waiting for the folder
-            // to finish opening. If so, we're already disconnected
-            // and don't need to do it again.
-            if (this.is_monitoring) {
-                try {
-                    yield stop_monitoring_internal(null);
-                } catch (GLib.Error stop_error) {
-                    warning(
-                        "Error cleaning up after folder open error: %s", err.message
-                    );
-                }
-            }
-
-            this.is_monitoring = false;
-            throw err;
         }
 
         // Now the folder is open, start the queue running. The here
@@ -372,12 +351,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     /**
      * Stops monitoring for new messages and closes the base folder.
      *
-     * Returns a result code that is semantically identical to the
-     * result of {@link Geary.Folder.close_async}.
-     *
      * The //cancellable// parameter will be used when waiting for
      * internal monitor operations to complete, but will not prevent
      * attempts to close the base folder.
+     *
+     * Returns true if the monitor was actively monitoring, else
+     * false.
      */
     public async bool stop_monitoring(GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -385,7 +364,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         if (this.is_monitoring) {
             // Set now to prevent reentrancy during yield or signal
             this.is_monitoring = false;
-            is_closing = yield stop_monitoring_internal(cancellable);
+            yield stop_monitoring_internal(cancellable);
+            is_closing = true;
         }
         return is_closing;
     }
@@ -551,56 +531,36 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     internal async void external_load_by_sparse_id(Folder folder,
                                                    Gee.Collection<EmailIdentifier> ids,
                                                    Folder.ListFlags flags)
-        throws Error {
-        bool opened = false;
-
-        Gee.List<Geary.Email>? emails = null;
-        try {
-            yield folder.open_async(
-                Geary.Folder.OpenFlags.NONE, this.operation_cancellable
-            );
-            opened = true;
-
-            // First just get the bare minimum we need to determine if we even
-            // care about the messages.
-            emails = yield folder.list_email_by_sparse_id_async(
+        throws GLib.Error {
+        // First just get the bare minimum we need to determine if we even
+        // care about the messages.
+        Gee.List<Geary.Email>? emails =
+            yield folder.list_email_by_sparse_id_async(
                 ids, Geary.Email.Field.REFERENCES, flags, this.operation_cancellable
             );
-            if (emails != null) {
-                Gee.HashSet<Geary.EmailIdentifier> relevant_ids =
-                    new Gee.HashSet<Geary.EmailIdentifier>();
-                foreach (Geary.Email email in emails) {
-                    Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-                    if (ancestors != null &&
-                        Geary.traverse<RFC822.MessageID>(ancestors).any(id => conversations.has_message_id(id)))
-                        relevant_ids.add(email.id);
-                }
-
-                // List the relevant messages again with the full set of fields, to
-                // make sure when we load them from the database we have all the
-                // data we need.
-                if (!relevant_ids.is_empty) {
-                    emails = yield folder.list_email_by_sparse_id_async(
-                        relevant_ids, required_fields, flags, this.operation_cancellable
-                    );
-                } else {
-                    emails = null;
+        if (emails != null) {
+            var relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
+            foreach (var email in emails) {
+                Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
+                if (ancestors != null &&
+                    Geary.traverse<RFC822.MessageID>(ancestors).any(id => conversations.has_message_id(id))) {
+                    relevant_ids.add(email.id);
                 }
             }
 
-            yield folder.close_async(null);
-            opened = false;
-        } catch (Error err) {
-            if (opened) {
-                // Always try to close the opened folder
-                try {
-                    yield folder.close_async(null);
-                } catch (Error close_err) {
-                    warning("Error closing folder %s: %s",
-                            folder.to_string(), close_err.message);
-                }
+            // List the relevant messages again with the full set of
+            // fields, to make sure when we load them from the
+            // database we have all the data we need.
+            if (!relevant_ids.is_empty) {
+                emails = yield folder.list_email_by_sparse_id_async(
+                    relevant_ids,
+                    required_fields,
+                    flags,
+                    this.operation_cancellable
+                );
+            } else {
+                emails = null;
             }
-            throw err;
         }
 
         if (emails != null && !emails.is_empty) {
@@ -661,12 +621,11 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         email_flags_changed(conversation, email);
     }
 
-    private async bool stop_monitoring_internal(GLib.Cancellable? cancellable)
-        throws Error {
+    private async void stop_monitoring_internal(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         this.base_folder.email_appended.disconnect(on_folder_email_appended);
         this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
         this.base_folder.email_removed.disconnect(on_folder_email_removed);
-        this.base_folder.opened.disconnect(on_folder_opened);
         this.base_folder.account.email_appended_to_folder.disconnect(on_account_email_appended);
         this.base_folder.account.email_inserted_into_folder.disconnect(on_account_email_inserted);
         this.base_folder.account.email_removed_from_folder.disconnect(on_account_email_removed);
@@ -675,35 +634,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         // Cancel outstanding ops so they don't block the queue closing
         this.operation_cancellable.cancel();
 
-        // Keep track of errors stopping the queue but continue, since
-        // the cleanup below needs to occur.
-        Error? close_err = null;
-        try {
-            yield this.queue.stop_processing_async(cancellable);
-        } catch (Error err) {
-            close_err = err;
-        }
-
-        bool closing = false;
         if (this.base_was_opened) {
-            try {
-                closing = yield this.base_folder.close_async(null);
-            } catch (GLib.Error err) {
-                if (close_err == null) {
-                    close_err = err;
-                } else {
-                    warning(
-                        "Unable to close monitored folder %s: %s",
-                        this.base_folder.to_string(), err.message
-                    );
-                }
-            }
+            ((Geary.RemoteFolder) this.base_folder).stop_monitoring();
+            this.base_was_opened = false;
         }
 
-        if (close_err != null)
-            throw close_err;
-
-        return closing;
+        yield this.queue.stop_processing_async(cancellable);
     }
 
     private async void process_email_async(Gee.Collection<Geary.Email>? emails,
@@ -821,11 +757,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         debug("expand_conversations completed: %d email ids (%d found)",
               needed_message_ids.size, needed_messages.size);
-    }
-
-    private void on_folder_opened(Geary.Folder.OpenState state, int count) {
-        if (state == Geary.Folder.OpenState.REMOTE)
-            this.queue.add(new ReseedOperation(this));
     }
 
     private void on_folder_email_appended(Gee.Collection<EmailIdentifier> appended) {

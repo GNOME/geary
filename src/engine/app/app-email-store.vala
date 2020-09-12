@@ -112,33 +112,18 @@ public class Geary.App.EmailStore : BaseObject {
         next_folder_for_operation(AsyncFolderOperation operation,
                                   Gee.MultiMap<FolderPath,EmailIdentifier> folders_to_ids)
         throws GLib.Error {
-        bool best_is_open = false;
-        int best_count = 0;
         Geary.FolderPath? best = null;
+        int best_count = 0;
         foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
             Folder folder = this.account.get_folder(path);
-            if (!folder.get_type().is_a(operation.folder_type))
-                continue;
-
-            int count = folders_to_ids.get(path).size;
-            if (count == 0)
-                continue;
-
-            if (folder.get_open_state() == Geary.Folder.OpenState.REMOTE) {
-                if (!best_is_open) {
-                    best_is_open = true;
-                    best_count = 0;
+            if (folder.get_type().is_a(operation.folder_type)) {
+                int count = folders_to_ids.get(path).size;
+                if (count > best_count) {
+                    best_count = count;
+                    best = path;
                 }
-            } else if (best_is_open) {
-                continue;
-            }
-
-            if (count > best_count) {
-                best_count = count;
-                best = path;
             }
         }
-
         return best;
     }
 
@@ -163,31 +148,8 @@ public class Geary.App.EmailStore : BaseObject {
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
             assert(ids.size > 0);
 
-            bool open = false;
-            Gee.Collection<Geary.EmailIdentifier>? used_ids = null;
-            GLib.Error? op_error = null;
-            try {
-                yield folder.open_async(Folder.OpenFlags.NONE, cancellable);
-                open = true;
-                used_ids = yield operation.execute_async(folder, ids, cancellable);
-            } catch (GLib.Error err) {
-                op_error = err;
-            }
-
-            if (open) {
-                try {
-                    // Don't use the cancellable here, if it's been opened
-                    // we need to try to close it.
-                    yield folder.close_async(null);
-                } catch (Error e) {
-                    warning("Error closing folder %s: %s",
-                            folder.to_string(), e.message);
-                }
-            }
-
-            if (op_error != null) {
-                throw op_error;
-            }
+            Gee.Collection<Geary.EmailIdentifier>? used_ids =
+                yield operation.execute_async(folder, ids, cancellable);
 
             // We don't want to operate on any mails twice.
             if (used_ids != null) {

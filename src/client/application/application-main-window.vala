@@ -719,7 +719,6 @@ public class Application.MainWindow :
                     this.selected_folder, true
                 );
 
-                this.progress_monitor.remove(this.selected_folder.opening_monitor);
                 this.selected_folder.properties.notify.disconnect(update_headerbar);
                 this.selected_folder = null;
             }
@@ -774,7 +773,6 @@ public class Application.MainWindow :
             // loading conversations.
 
             if (to_select != null) {
-                this.progress_monitor.add(to_select.opening_monitor);
                 to_select.properties.notify.connect(update_headerbar);
 
                 this.conversations = new Geary.App.ConversationMonitor(
@@ -1605,7 +1603,6 @@ public class Application.MainWindow :
         to_open.conversations_removed.connect(on_conversation_count_changed);
 
         to_open.start_monitoring.begin(
-            NO_DELAY,
             cancellable,
             (obj, res) => {
                 try {
