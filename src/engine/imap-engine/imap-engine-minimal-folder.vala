@@ -1,9 +1,9 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -17,16 +17,13 @@
  * queue ensures that message state changes caused by server messages
  * are interleaved correctly with local operations.
  *
- * The remote folder connection is not always automatically
- * established, depending on flags passed to `open_async`. In any case
- * the remote connection may go away if the network changes while the
- * folder is still held open. In this case, the folder's remote
- * connection is reestablished when the a `ready` signal is received
- * from the IMAP stack, i.e. when connectivity to the server has been
- * restored.
+ * A remote folder connection is not automatically established, only
+ * if monitoring or as needed for other folder operations.
  */
-private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
-    Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
+private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
+    FolderSupport.Copy,
+    FolderSupport.Mark,
+    FolderSupport.Move {
 
 
     private const int FLAG_UPDATE_TIMEOUT_SEC = 2;
@@ -36,16 +33,26 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
 
 
-    public override Account account { get { return _account; } }
+    /** {@inheritDoc} */
+    public override Account account {
+        get { return this._account; }
+    }
+    private weak GenericAccount _account;
 
-    public override FolderProperties properties { get { return _properties; } }
+    /** {@inheritDoc} */
+    public override FolderProperties properties {
+        get { return this._properties; }
+    }
+    private FolderProperties _properties;
 
+    /** {@inheritDoc} */
     public override FolderPath path {
         get {
             return local_folder.get_path();
         }
     }
 
+    /** {@inheritDoc} */
     public override Folder.SpecialUse used_as {
         get {
             return this._used_as;
@@ -53,50 +60,40 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
     private Folder.SpecialUse _used_as;
 
-    private ProgressMonitor _opening_monitor =
-        new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
-    public override Geary.ProgressMonitor opening_monitor {
-        get {
-            return _opening_monitor;
-        }
+    /** {@inheritDoc} */
+    public override bool is_monitoring {
+        get { return this._is_monitoring; }
+    }
+    private bool _is_monitoring = false;
+
+    /** {@inheritDoc} */
+    public override bool is_fully_expanded {
+        get { return this._is_fully_expanded; }
+    }
+    private bool _is_fully_expanded = false;
+
+    /** Determines if there is currently a remote session. */
+    internal bool is_remote_open {
+        get { return this.remote_session != null; }
     }
 
     /** The IMAP database representation of the folder. */
     internal ImapDB.Folder local_folder { get; private set; }
 
     internal ReplayQueue? replay_queue { get; private set; default = null; }
+
     internal ContactHarvester harvester { get; private set; }
 
-    private weak GenericAccount _account;
-    private Geary.AggregatedFolderProperties _properties =
-        new Geary.AggregatedFolderProperties(false, false);
     private EmailPrefetcher email_prefetcher;
 
-    private int open_count = 0;
-    private Folder.OpenFlags open_flags = OpenFlags.NONE;
-    private Cancellable? open_cancellable = null;
-    private Nonblocking.Mutex lifecycle_mutex = new Nonblocking.Mutex();
-    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-
+    private GLib.Cancellable remote_cancellable = new GLib.Cancellable();
     private Imap.FolderSession? remote_session = null;
-    private Nonblocking.Mutex remote_mutex = new Nonblocking.Mutex();
-    private Nonblocking.ReportingSemaphore<bool> remote_wait_semaphore =
-        new Nonblocking.ReportingSemaphore<bool>(false);
-    private TimeoutManager remote_open_timer;
+    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
 
     private TimeoutManager update_flags_timer;
 
     private TimeoutManager refresh_unseen_timer;
 
-
-    /**
-     * Called when the folder is closing (and not reestablishing a connection) and will be flushing
-     * the replay queue.  Subscribers may add ReplayOperations to the list, which will be enqueued
-     * before the queue is flushed.
-     *
-     * Note that this is ''not'' fired if the queue is not being flushed.
-     */
-    public signal void closing(Gee.List<ReplayOperation> final_ops);
 
     /**
      * Fired when an {@link EmailIdentifier} that was marked for removal is actually reported as
@@ -111,9 +108,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      */
     public signal void marked_email_removed(Gee.Collection<Geary.EmailIdentifier> removed);
 
-    /** Emitted to notify the account that some problem has occurred. */
-    internal signal void report_problem(Geary.ProblemReport problem);
-
 
     public MinimalFolder(GenericAccount account,
                          ImapDB.Folder local_folder,
@@ -123,13 +117,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.local_folder.email_complete.connect(on_email_complete);
 
         this._used_as = use;
-        this._properties.add(local_folder.get_properties());
+        this._properties = local_folder.get_properties();
+
+        this.replay_queue = new ReplayQueue(this);
+        this.replay_queue.remotely_executed.connect(this.on_remote_status_check);
+
         this.email_prefetcher = new EmailPrefetcher(this);
         update_harvester();
-
-        this.remote_open_timer = new TimeoutManager.seconds(
-            FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => { this.open_remote_session.begin(); }
-        );
 
         this.update_flags_timer = new TimeoutManager.seconds(
             FLAG_UPDATE_TIMEOUT_SEC, on_update_flags
@@ -142,15 +136,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Notify now to ensure that wait_for_close_async does not
         // block if never opened.
         this.closed_semaphore.blind_notify();
-    }
-
-    ~MinimalFolder() {
-        if (open_count > 0)
-            warning("Folder %s destroyed without closing", to_string());
-    }
-
-    protected virtual void notify_closing(Gee.List<ReplayOperation> final_ops) {
-        closing(final_ops);
     }
 
     public override void set_used_as_custom(bool enabled)
@@ -183,110 +168,33 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     /** {@inheritDoc} */
-    public override Geary.Folder.OpenState get_open_state() {
-        if (this.open_count == 0)
-            return Geary.Folder.OpenState.CLOSED;
-
-        return (this.remote_session != null)
-           ? Geary.Folder.OpenState.REMOTE
-           : Geary.Folder.OpenState.LOCAL;
+    public override void start_monitoring() {
+        this._is_monitoring = true;
+        this._account.imap.notify["current-status"].connect(
+            this.on_remote_status_check
+        );
+        on_remote_status_check();
     }
 
     /** {@inheritDoc} */
-    public override async bool open_async(Folder.OpenFlags open_flags,
-                                          Cancellable? cancellable = null)
-        throws Error {
-        // Claim the lifecycle_mutex here so we don't try to re-open when
-        // the folder is in the middle of being closed.
-        bool opening = false;
-        Error? open_err = null;
-        try {
-            int token = yield this.lifecycle_mutex.claim_async(cancellable);
-            try {
-                opening = yield open_locked(open_flags, cancellable);
-            } catch (Error err) {
-                open_err = err;
-            }
-            this.lifecycle_mutex.release(ref token);
-        } catch (Error err) {
-            // oh well
-        }
-
-        if (open_err != null) {
-            throw open_err;
-        }
-
-        return opening;
-    }
-
-    /**
-     * Returns a valid IMAP folder session when one is available.
-     *
-     * Implementations may use this to acquire an IMAP session for
-     * performing folder-related work. The call will wait until a
-     * connection is established then return the session.
-     *
-     * The session returned is guaranteed to be open upon return,
-     * however may close afterwards due to this folder closing, or the
-     * network connection going away.
-     *
-     * The folder must have been opened before calling this method.
-     */
-    public async Imap.FolderSession claim_remote_session(Cancellable? cancellable = null)
-        throws Error {
-        check_open("claim_remote_session");
-        debug("Claiming folder session");
-
-
-        // If remote has not yet been opened and we are not in the
-        // process of closing the folder, open a session right away.
-        if (this.remote_session == null && !this.open_cancellable.is_cancelled()) {
-            this.open_remote_session.begin();
-        }
-
-        if (!yield this.remote_wait_semaphore.wait_for_result_async(cancellable))
-            throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
-
-        return this.remote_session;
+    public override void stop_monitoring() {
+        this._is_monitoring = false;
+        this._account.imap.notify["current-status"].disconnect(
+            this.on_remote_status_check
+        );
+        this.check_remote_session.begin();
     }
 
     /** {@inheritDoc} */
-    public override async bool close_async(Cancellable? cancellable = null)
-        throws Error {
-        check_open("close_async");
-        debug("Scheduling folder close");
-        // Although it's inefficient in the case of just decrementing
-        // the open count, pass all requests to close via the replay
-        // queue so that other operations queued are interleaved in an
-        // expected way, the same code path can be used to both test
-        // and decrement the open count, and that the decrement can be
-        // used under the same lock as actually closing the folder,
-        // making it essentially an atomic operation.
-        UserClose op = new UserClose(this, cancellable);
-        this.replay_queue.schedule(op);
-        yield op.wait_for_ready_async(cancellable);
-        return op.is_closing.is_certain();
-    }
-
-    /** {@inheritDoc} */
-    public override async void wait_for_close_async(Cancellable? cancellable = null)
-        throws Error {
-        yield this.closed_semaphore.wait_async(cancellable);
-    }
-
-    /** {@inheritDoc} */
-    public override async void synchronise_remote(GLib.Cancellable? cancellable)
+    public override async void synchronise(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        check_open("synchronise_remote");
-
         bool have_nooped = false;
         int retries = 3;
         while (!have_nooped && !cancellable.is_cancelled()) {
             // The normalisation process will pick up any missing
             // messages if closed, so ensure there is a remote
             // session.
-            Imap.FolderSession? remote =
-                yield claim_remote_session(cancellable);
+            var remote = yield claim_remote_session(cancellable);
 
             try {
                 // Send a NOOP so the server can return an untagged
@@ -312,7 +220,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                     debug("Recoverable error during remote sync: %s",
                           err.message);
                     GLib.Timeout.add_seconds(
-                        1, this.synchronise_remote.callback
+                        1, this.synchronise.callback
                     );
                     yield;
                 } else {
@@ -329,21 +237,151 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Finally, wait for the prefetcher to have finished
         // downloading the new mail.
         yield this.email_prefetcher.active_sem.wait_async(cancellable);
+
+        // Close the remote if no longer needed
+        yield check_remote_session();
     }
 
-    // used by normalize_folders() during the normalization process; should not be used elsewhere
-    private async void detach_all_emails_async(Cancellable? cancellable) throws Error {
-        Gee.List<Email>? all = yield local_folder.list_email_by_id_async(null, -1,
-            Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
+    /** {@inheritDoc} */
+    public override async void expand_vector(GLib.Cancellable? cancellable)
+        throws GLib.Error {
 
-        yield local_folder.detach_all_emails_async(cancellable);
+    }
 
-        if (all != null && all.size > 0) {
-            Gee.List<EmailIdentifier> ids =
-                traverse<Email>(all).map<EmailIdentifier>((email) => email.id).to_array_list();
-            email_removed(ids);
-            email_count_changed(0, Folder.CountChangeReason.REMOVED);
+    /**
+     * Shuts down the folder in preparation for account close.
+     */
+    internal async void close() throws GLib.Error {
+        yield this.replay_queue.close_async(true);
+        yield close_remote_session();
+        yield this.closed_semaphore.wait_async(null);
+    }
+
+    /**
+     * Returns a valid IMAP folder session if one is available.
+     */
+    internal async Imap.FolderSession claim_remote_session(
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        debug("Claiming folder session");
+        if (this.remote_session == null) {
+            yield this.open_remote_session(cancellable);
         }
+        return this.remote_session;
+    }
+
+    private async void check_remote_session() {
+        bool can_be_connected = (
+            this._account.imap.current_status == CONNECTED
+        );
+        bool should_be_connected = (
+            this.is_monitoring || this.replay_queue.has_remote_operation
+        );
+        try {
+            if (can_be_connected && should_be_connected) {
+                debug("Remote should be open");
+                yield this.open_remote_session();
+            } else {
+                debug("Remote should be closed");
+                yield this.close_remote_session();
+            }
+        } catch (GLib.Error err) {
+            this._account.report_problem(
+                new ServiceProblemReport(
+                    this._account.information,
+                    this._account.imap.configuration,
+                    err
+                )
+            );
+        }
+    }
+
+    private async void open_remote_session(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        lock (this.remote_session) {
+            if (this.remote_session == null) {
+                yield open_remote_locked(cancellable);
+                debug("Remote opened");
+            }
+        }
+    }
+
+    // Should only be called when remote_mutex is locked, i.e. use
+    // open_remote_session()
+    private async void open_remote_locked(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        var union_cancellable = new GLib.Cancellable();
+        this.remote_cancellable = new GLib.Cancellable();
+        this.remote_cancellable.cancelled.connect(() => union_cancellable.cancel());
+        if (cancellable != null) {
+            cancellable.cancelled.connect(() => union_cancellable.cancel());
+        }
+
+        // Reset to force waiting again in `close()`
+        this.closed_semaphore.reset();
+
+        // Reset unseen count refresh since it will be updated when
+        // the remote opens - it's only used when the folder isn't
+        // being monitored.
+        this.refresh_unseen_timer.reset();
+
+        // Start up the email prefetcher now so it catches signals
+        // emitted during normalisation.
+        this.email_prefetcher.open();
+
+        // Let's get connected!
+
+        Imap.FolderSession? session = yield this._account.claim_folder_session(
+            this.path, union_cancellable
+        );
+
+        // Replay signals need to be hooked up before normalisation to
+        // avoid there being a race between that and new messages
+        // arriving, being removed, etc. This is safe since
+        // normalisation only issues FETCH commands for messages based
+        // on the state of the remote right after being selected, so
+        // any untagged EXIST and FETCH responses will be handled
+        // later by their replay ops, and no untagged EXPUNGE
+        // responses will be received since they are forbidden to be
+        // issued for FETCH commands.
+        session.appended.connect(on_remote_appended);
+        session.updated.connect(on_remote_updated);
+        session.removed.connect(on_remote_removed);
+
+        try {
+            yield normalize_folders(session, union_cancellable);
+
+            // Update the local folder's totals and UID values after
+            // normalisation, so it does not mistake the remote's current
+            // state with our previous state
+            yield this.local_folder.update_folder_select_examine(
+                session.folder.properties, union_cancellable
+            );
+        } catch (GLib.Error err) {
+            session.appended.disconnect(on_remote_appended);
+            session.updated.disconnect(on_remote_updated);
+            session.removed.disconnect(on_remote_removed);
+            yield this._account.release_folder_session(session);
+            throw err;
+        }
+
+        // All done, can now hook up the session to the folder
+        this.remote_session = session;
+        session.disconnected.connect(on_remote_disconnected);
+
+        // Enable IDLE now that the local and remote folders are in
+        // sync. Can't do this earlier since we might get untagged
+        // EXPUNGE responses during normalisation, which would be
+        // Bad™. Do it in the background to avoid delay notifying
+        session.enable_idle.begin(union_cancellable);
+
+        // Let the replay queue start processing remote ops again
+        this.replay_queue.start_remote();
+
+        // Update flags once the remote has opened. We will receive
+        // notifications of changes as long as the session remains
+        // open, so only need to do this once
+        this.update_flags_timer.start();
     }
 
     /**
@@ -353,8 +391,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      * overview of the process
      */
     private async void normalize_folders(Geary.Imap.FolderSession session,
-                                         Cancellable cancellable)
-        throws Error {
+                                         GLib.Cancellable cancellable)
+        throws GLib.Error {
         debug("Begin normalizing remote and local folders");
 
         Geary.Imap.FolderProperties local_properties = this.local_folder.get_properties();
@@ -412,10 +450,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // any flags that may have changed
         ImapDB.EmailIdentifier? local_earliest_id = yield local_folder.get_earliest_id_async(cancellable);
         ImapDB.EmailIdentifier? local_latest_id = yield local_folder.get_latest_id_async(cancellable);
-
-        // verify still open; this is required throughout after each yield, as a close_async() can
-        // come in ay any time since this does not run in the context of open_async()
-        check_open("normalize_folders (local earliest/latest UID)");
 
         // if no earliest UID, that means no messages in local store, so nothing to update
         if (local_earliest_id == null || local_latest_id == null) {
@@ -509,15 +543,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (local_uids == null)
             local_uids = new Gee.HashSet<Imap.UID>();
 
-        check_open("normalize_folders (list local)");
-
         // Do the same on the remote ... make non-null for ease of use later
         Gee.Set<Imap.UID>? remote_uids = yield session.list_uids_async(
             new Imap.MessageSet.uid_range(first_uid, last_uid), cancellable);
         if (remote_uids == null)
             remote_uids = new Gee.HashSet<Imap.UID>();
-
-        check_open("normalize_folders (list remote)");
 
         debug("Loaded local (%d) and remote (%d) UIDs, normalizing...",
               local_uids.size, remote_uids.size);
@@ -580,8 +610,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             }
         }
 
-        check_open("normalize_folders (list remote appended/inserted required fields)");
-
         // store new messages and add IDs to the appended/discovered
         // EmailIdentifier buckets
         var appended_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
@@ -616,8 +644,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             debug("Finished creating/merging %d emails", created_or_merged.size);
         }
 
-        check_open("normalize_folders (created/merged appended/inserted emails)");
-
         // Convert removed UIDs into EmailIdentifiers and detach immediately
         Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
         if (removed_uids.size > 0) {
@@ -627,8 +653,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 yield local_folder.detach_multiple_emails_async(removed_ids, cancellable);
             }
         }
-
-        check_open("normalize_folders (removed emails)");
 
         // remove any extant remove markers, as everything is accounted for now, except for those
         // waiting to be removed in the queue
@@ -692,414 +716,56 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         debug("Completed normalize_folder");
     }
 
+    // used by normalize_folders() during the normalization process; should not be used elsewhere
+    private async void detach_all_emails_async(Cancellable? cancellable) throws Error {
+        Gee.List<Email>? all = yield local_folder.list_email_by_id_async(null, -1,
+            Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
+
+        yield local_folder.detach_all_emails_async(cancellable);
+
+        if (all != null && all.size > 0) {
+            Gee.List<EmailIdentifier> ids =
+                traverse<Email>(all).map<EmailIdentifier>((email) => email.id).to_array_list();
+            email_removed(ids);
+            email_count_changed(0, Folder.CountChangeReason.REMOVED);
+        }
+    }
+
     /**
      * Closes the folder and the remote session.
      *
      * This should only be called from the replay queue.
      */
-    internal async bool close_internal(Folder.CloseReason local_reason,
-                                       Folder.CloseReason remote_reason,
-                                       Cancellable? cancellable) {
-        bool is_closing = false;
-        try {
-            int token = yield this.lifecycle_mutex.claim_async(cancellable);
-            // Don't ever decrement to zero here,
-            // close_internal_locked will do that later when it's
-            // appropriate to do so, after having flushed the replay
-            // queue. For the same reason, if we're actually going to
-            // do the close here, we need to hold the lock until it's
-            // done so that it's not possible to re-open half way
-            // through.
-            if (this.open_count == 1) {
-                is_closing = true;
-                this.close_internal_locked.begin(
-                    local_reason, remote_reason, cancellable,
-                    (obj, res) => {
-                        this.close_internal_locked.end(res);
-                        try {
-                            this.lifecycle_mutex.release(ref token);
-                        } catch (Error err) {
-                            // oh well
-                        }
-                    }
-                );
-            } else {
-                if (this.open_count > 1) {
-                    this.open_count -= 1;
-                } else {
-                    is_closing = true;
-                }
-                this.lifecycle_mutex.release(ref token);
+    private async void close_remote_session() {
+        lock (this.remote_session) {
+            if (this.remote_session != null) {
+                yield this.close_remote_locked();
+                debug("Remote closed");
             }
-        } catch (Error err) {
-            // oh well
         }
-        return is_closing;
     }
 
     /**
      * Unhooks the IMAP folder session and returns it to the account.
      */
-    private async void close_remote_session(Folder.CloseReason remote_reason) {
-        // Since the remote session has is/has gone away, we need to
-        // let waiters know. In the case of the folder being closed,
-        // notify that no more remotes will ever come back, otherwise
-        // reset the semaphore to keep them waiting, in case it does.
-        //
-        // We use open_cancellable to determine if the folder is open
-        // since that is cancelled before the replay queue is flushed,
-        // and open_count is only set to zero only afterwards. This is
-        // important since we need to let replay queue ops that are
-        // being flushed know if the session goes away so they wake
-        // up.
-        if (this.open_cancellable.is_cancelled()) {
-            notify_remote_waiters(false);
-        } else {
-            this.remote_wait_semaphore.reset();
-        }
+    private async void close_remote_locked() {
+        // Stop any internal tasks from running
+        this.remote_cancellable.cancel();
+        this.email_prefetcher.close();
+        this.update_flags_timer.reset();
+        this.replay_queue.stop_remote();
 
-        Imap.FolderSession? session = this.remote_session;
+        var session = this.remote_session;
         this.remote_session = null;
         if (session != null) {
             session.appended.disconnect(on_remote_appended);
             session.updated.disconnect(on_remote_updated);
             session.removed.disconnect(on_remote_removed);
             session.disconnected.disconnect(on_remote_disconnected);
-            this._properties.remove(session.folder.properties);
             yield this._account.release_folder_session(session);
-
-            closed(remote_reason);
-        }
-    }
-
-    // Must be called when lifecycle_mutex is locked, i.e. from
-    // open_async().
-    private async bool open_locked(Folder.OpenFlags open_flags,
-                                   Cancellable cancellable)
-        throws Error {
-        if (this.open_count++ > 0) {
-            // even if opened or opening, or if forcing a re-open,
-            // respect the NO_DELAY flag
-            if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
-                // add NO_DELAY flag if it forces an open
-                if (this.remote_session == null)
-                    this.open_flags |= OpenFlags.NO_DELAY;
-
-                this.open_remote_session.begin();
-            }
-            return false;
         }
 
-        // first open gets to name the flags, but see note above
-        this.open_flags = open_flags;
-
-        // reset to force waiting in wait_for_close_async()
-        this.closed_semaphore.reset();
-
-        // reset unseen count refresh since it will be updated when
-        // the remote opens
-        this.refresh_unseen_timer.reset();
-
-        // Construct objects needed when open
-        this.open_cancellable = new Cancellable();
-        this.replay_queue = new ReplayQueue(this);
-
-        // Notify the email prefetcher
-        this.email_prefetcher.open();
-
-        // notify about the local open
-        opened(LOCAL, this.local_folder.get_properties().email_total);
-
-        // Unless NO_DELAY is set, do NOT open the remote side here;
-        // wait for a folder session to be claimed ... this allows for
-        // fast local-only operations to occur, local-only either
-        // because (a) the folder has all the information required
-        // (for a list or fetch operation), or (b) the operation was
-        // de facto local-only.  In particular, EmailStore will open
-        // and close lots of folders, causing a lot of connection
-        // setup and teardown
-        //
-        // However, we want to eventually open, otherwise if there's
-        // no user interaction (i.e. a second account Inbox they don't
-        // manipulate), no remote connection will ever be made,
-        // meaning that folder normalization never happens and
-        // unsolicited notifications never arrive
-        this._account.imap.notify["current-status"].connect(
-            on_remote_status_notify
-        );
-        if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
-            this.open_remote_session.begin();
-        } else {
-            this.remote_open_timer.start();
-        }
-
-        debug("Folder opened");
-        return true;
-    }
-
-    /**
-     * Closes the folder regardless of the open count.
-     *
-     * This only useful when an unrecoverable error has occurred. No
-     * cancellable argument is provided since the close must complete.
-     */
-    private async void force_close(Folder.CloseReason local_reason,
-                                   Folder.CloseReason remote_reason) {
-        try {
-            int token = yield this.lifecycle_mutex.claim_async(null);
-            // Check we actually need to do the close in case the
-            // folder was in the process of closing anyway
-            if (this.open_count > 0) {
-                yield close_internal_locked(local_reason, remote_reason, null);
-            }
-            this.lifecycle_mutex.release(ref token);
-        } catch (Error err) {
-            // oh well
-        }
-    }
-
-    // Must be called when lifecycle_mutex is locked, i.e. from
-    // close_internal() or force_close().
-    private async void close_internal_locked(Folder.CloseReason local_reason,
-                                             Folder.CloseReason remote_reason,
-                                             Cancellable? cancellable) {
-        debug("Folder closing");
-
-        // Ensure we don't attempt to start opening a remote while
-        // closing
-        this._account.imap.notify["current-status"].disconnect(
-            on_remote_status_notify
-        );
-        this.remote_open_timer.reset();
-
-        // Stop any internal tasks from running
-        this.open_cancellable.cancel();
-        this.email_prefetcher.close();
-        this.update_flags_timer.reset();
-
-        // Once we get to this point, either there will be a remote
-        // session open already, or none will ever get opened - no
-        // more attempts to open a session will be made. We can't
-        // block access to any remote session here however since
-        // pending replay operations may need it still. Instead, rely
-        // on the replay queue itself to reject any new operations
-        // being queued once we close it.
-
-        // Only flush pending operations if the remote is open (if
-        // closed they will deadlock waiting for one to open), and if
-        // this is a "clean" close, that is not forced due to error.
-        bool flush_pending = (
-            this.remote_session != null &&
-            !local_reason.is_error() &&
-            !remote_reason.is_error()
-        );
-
-        if (flush_pending) {
-            // Since we are flushing the queue, gather operations
-            // from Revokables to give them a chance to schedule their
-            // commit operations before going down
-            Gee.List<ReplayOperation> final_ops = new Gee.ArrayList<ReplayOperation>();
-            notify_closing(final_ops);
-            foreach (ReplayOperation op in final_ops)
-                replay_queue.schedule(op);
-        }
-
-        // Close the replay queues; if a "clean" close, flush pending
-        // operations so everything gets a chance to run; if forced
-        // close, drop everything outstanding
-        debug("Closing replay queue for (flush_pending=%s): %s",
-              flush_pending.to_string(), this.replay_queue.to_string());
-        try {
-            yield this.replay_queue.close_async(flush_pending);
-            debug("Closed replay queue: %s", this.replay_queue.to_string());
-        } catch (Error err) {
-            warning("Error closing replay queue: %s", err.message);
-        }
-
-        // Actually close the remote folder
-        yield close_remote_session(remote_reason);
-
-        // Since both the remote session and replay queue have shut
-        // down, we can reset the folder's internal state.
-        this.remote_wait_semaphore.reset();
-        this.replay_queue = null;
-        this.open_cancellable = null;
-        this.open_flags = OpenFlags.NONE;
-
-        // Officially marks the folder as closed. Beyond this point it
-        // may start to re-open again if open_async is called.
-        this.open_count = 0;
-
-        // need to call these every time, even if remote was not fully
-        // opened, as some callers rely on order of signals
-        closed(local_reason);
-        closed(CloseReason.FOLDER_CLOSED);
-
-        // Notify waiting tasks
         this.closed_semaphore.blind_notify();
-
-        debug("Folder closed");
-    }
-
-    /**
-     * Establishes a new IMAP session, normalising local and remote folders.
-     */
-    private async void open_remote_session() {
-        try {
-            int token = yield this.remote_mutex.claim_async(this.open_cancellable);
-
-            // Ensure we are open already and guard against someone
-            // else having called this just before we did.
-            if (this.open_count > 0 &&
-                this._account.imap.current_status == CONNECTED &&
-                this.remote_session == null) {
-
-                this.opening_monitor.notify_start();
-                yield open_remote_session_locked(this.open_cancellable);
-                this.opening_monitor.notify_finish();
-            }
-
-            this.remote_mutex.release(ref token);
-        } catch (Error err) {
-            // Lock error
-        }
-    }
-
-    // Should only be called when remote_mutex is locked, i.e. use open_remote_session()
-    private async void open_remote_session_locked(Cancellable? cancellable) {
-        debug("Opening remote session");
-
-        // Note that any IOError.CANCELLED errors caught below do not
-        // cause any error signals to be fired and do not force
-        // closing the folder, because the only time opening the
-        // session is cancelled is when the folder is already being
-        // closed, which is the desired result.
-
-        // Don't try to re-open again
-        this.remote_open_timer.reset();
-
-        // Phase 1: Acquire a new session
-
-        Imap.FolderSession? session = null;
-        try {
-            session = yield this._account.claim_folder_session(
-                this.path, cancellable
-            );
-        } catch (IOError.CANCELLED err) {
-            // Fine, just bail out
-            return;
-        } catch (EngineError.NOT_FOUND err) {
-            debug("Remote folder not found, forcing closed");
-            yield force_close(
-                CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
-            );
-            return;
-        } catch (ImapError.NOT_SUPPORTED err) {
-            debug("Remote folder not selectable, forcing closed");
-            yield force_close(
-                CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
-            );
-            return;
-        } catch (Error err) {
-            ErrorContext context = new ErrorContext(err);
-            if (!is_recoverable_failure(err)) {
-                debug("Unrecoverable failure opening remote, forcing closed: %s",
-                      context.format_full_error());
-                yield force_close(
-                    CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
-                );
-            } else {
-                debug("Recoverable error opening remote: %s",
-                      context.format_full_error());
-                open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
-            }
-            return;
-        }
-
-        // Phase 2: Update local state based on the remote session
-
-        // Replay signals need to be hooked up before normalisation to
-        // avoid there being a race between that and new messages
-        // arriving, being removed, etc. This is safe since
-        // normalisation only issues FETCH commands for messages based
-        // on the state of the remote right after being selected, so
-        // any untagged EXIST and FETCH responses will be handled
-        // later by their replay ops, and no untagged EXPUNGE
-        // responses will be received since they are forbidden to be
-        // issued for FETCH commands.
-        //
-        // Note we don't need to unhook from these signals if an error
-        // occurs below since they won't be called once the session
-        // has been released.
-        session.appended.connect(on_remote_appended);
-        session.updated.connect(on_remote_updated);
-        session.removed.connect(on_remote_removed);
-
-        try {
-            yield normalize_folders(session, cancellable);
-        } catch (Error err) {
-            // Normalisation failed, so we have a pretty serious
-            // problem and should not try to use the folder further,
-            // unless the open was simply cancelled. So clean up, and
-            // force the folder closed.
-            yield this._account.release_folder_session(session);
-            if (!(err is IOError.CANCELLED)) {
-                Folder.CloseReason local_reason = CloseReason.LOCAL_ERROR;
-                Folder.CloseReason remote_reason = CloseReason.REMOTE_CLOSE;
-                if (!is_remote_error(err)) {
-                    open_failed(OpenFailed.LOCAL_ERROR, err);
-                } else {
-                    open_failed(OpenFailed.REMOTE_ERROR, err);
-                    local_reason =  CloseReason.LOCAL_CLOSE;
-                    remote_reason = CloseReason.REMOTE_ERROR;
-                }
-                yield force_close(local_reason, remote_reason);
-            }
-            return;
-        }
-
-        // Update the local folder's totals and UID values after
-        // normalisation, so it does not mistake the remote's current
-        // state with our previous state
-        try {
-            yield local_folder.update_folder_select_examine(
-                session.folder.properties, cancellable
-            );
-        } catch (Error err) {
-            // Database failed, which is also a pretty serious
-            // problem, so handle as per above.
-            yield this._account.release_folder_session(session);
-            if (!(err is IOError.CANCELLED)) {
-                open_failed(Folder.OpenFailed.LOCAL_ERROR, err);
-                yield force_close(CloseReason.LOCAL_ERROR, CloseReason.REMOTE_CLOSE);
-            }
-            return;
-        }
-
-        // All done, can now hook up the session to the folder
-        this.remote_session = session;
-        this._properties.add(session.folder.properties);
-        session.disconnected.connect(on_remote_disconnected);
-
-        // Enable IDLE now that the local and remote folders are in
-        // sync. Can't do this earlier since we might get untagged
-        // EXPUNGE responses during normalisation, which would be
-        // Bad™. Do it in the background to avoid delay notifying
-        session.enable_idle.begin(cancellable);
-
-        // Phase 3: Notify tasks waiting for the connection
-
-        // notify any subscribers with similar information
-        opened(REMOTE, session.folder.properties.email_total);
-
-        // notify any threads of execution waiting for the remote
-        // folder to open that the result of that operation is ready
-        notify_remote_waiters(true);
-
-        // Update flags once the remote has opened. We will receive
-        // notifications of changes as long as the session remains
-        // open, so only need to do this once
-        this.update_flags_timer.start();
     }
 
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
@@ -1120,7 +786,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             positions.add(new Imap.SequenceNumber(pos));
 
         if (positions.size > 0) {
-            // We don't pass in open_cancellable here since we want
+            // We don't pass in remote_cancellable here since we want
             // the op to still run when closing and flushing the queue
             this.replay_queue.schedule_server_notification(
                 new ReplayAppend(this, remote_count, positions, null)
@@ -1163,7 +829,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
-        check_open("contains_identifiers");
         return yield this.local_folder.contains_identifiers(ids, cancellable);
     }
 
@@ -1174,7 +839,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        check_open("list_email_by_id_async");
         check_flags("list_email_by_id_async", flags);
         if (initial_id != null)
             check_id("list_email_by_id_async", initial_id);
@@ -1195,7 +859,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public async override Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
-        check_open("list_email_by_sparse_id_async");
         check_flags("list_email_by_sparse_id_async", flags);
         check_ids("list_email_by_sparse_id_async", ids);
 
@@ -1216,7 +879,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
-        check_open("fetch_email_async");
         check_flags("fetch_email_async", flags);
         check_id("fetch_email_async", id);
 
@@ -1240,7 +902,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         expunge_email_async(Gee.Collection<Geary.EmailIdentifier> to_expunge,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
-        check_open("expunge_email_async");
         check_ids("expunge_email_async", to_expunge);
 
         RemoveEmail remove = new RemoveEmail(
@@ -1254,8 +915,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     protected async void expunge_all_async(Cancellable? cancellable = null) throws Error {
-        check_open("expunge_all_async");
-
         EmptyFolder op = new EmptyFolder(this, cancellable);
         this.replay_queue.schedule(op);
         yield op.wait_for_ready_async(cancellable);
@@ -1266,11 +925,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         yield this.replay_queue.checkpoint(cancellable);
 
         yield this._account.local.db.run_gc(NONE, null, cancellable);
-    }
-
-    private void check_open(string method) throws EngineError {
-        if (open_count == 0)
-            throw new EngineError.OPEN_REQUIRED("%s failed: folder %s is not open", method, to_string());
     }
 
     private void check_flags(string method, Folder.ListFlags flags) throws EngineError {
@@ -1296,7 +950,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                          Geary.EmailFlags? flags_to_remove,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open("mark_email_async");
         check_ids("mark_email_async", to_mark);
 
         MarkEmail mark = new MarkEmail(
@@ -1330,7 +983,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                               Geary.FolderPath destination,
                               GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open("copy_email_uids_async");
         check_ids("copy_email_uids_async", to_copy);
 
         // watch for copying to this folder, which is treated as a no-op
@@ -1355,7 +1007,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         Geary.FolderPath destination,
         Cancellable? cancellable = null)
     throws Error {
-        check_open("move_email_async");
         check_ids("move_email_async", to_move);
 
         // watch for moving to this folder, which is treated as a no-op
@@ -1378,24 +1029,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    public void schedule_op(ReplayOperation op) throws Error {
-        check_open("schedule_op");
-
-        replay_queue.schedule(op);
-    }
-
-    public async void exec_op_async(ReplayOperation op, Cancellable? cancellable) throws Error {
-        schedule_op(op);
-        yield op.wait_for_ready_async(cancellable);
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(
             this,
-            "%s, open_count=%d, remote_opened=%s",
+            "%s, remote_opened=%s",
             this.path.to_string(),
-            this.open_count,
             (this.remote_session != null).to_string()
         );
     }
@@ -1404,19 +1043,30 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      * Schedules a refresh of the unseen count for the folder.
      *
      * This will only refresh folders that are not open, since if they
-     * are open or opening, they will already be updated. Hence it is safe to be called on closed folders.
+     * are open or opening, they will already be updated. Hence it is
+     * safe to be called on closed folders.
      */
     internal void refresh_unseen() {
-        if (this.open_count == 0) {
+        if (!this.is_remote_open) {
             this.refresh_unseen_timer.start();
         }
+    }
+
+    internal void schedule_op(ReplayOperation op) throws GLib.Error {
+        this.replay_queue.schedule(op);
+    }
+
+    internal async void exec_op_async(ReplayOperation op,
+                                      GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.replay_queue.schedule(op);
+        yield op.wait_for_ready_async(cancellable);
     }
 
     // TODO: A proper public search mechanism; note that this always round-trips to the remote,
     // doesn't go through the replay queue, and doesn't deal with messages marked for deletion
     internal async Geary.Email? find_earliest_email_async(DateTime datetime,
         Geary.EmailIdentifier? before_id, Cancellable? cancellable) throws Error {
-        check_open("find_earliest_email_async");
         if (before_id != null)
             check_id("find_earliest_email_async", before_id);
 
@@ -1438,9 +1088,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         ServerSearchEmail op = new ServerSearchEmail(this, criteria, Geary.Email.Field.NONE,
             cancellable);
-
-        // need to check again due to the yield in the above conditional block
-        check_open("find_earliest_email_async.schedule operation");
 
         replay_queue.schedule(op);
 
@@ -1465,7 +1112,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                            DateTime? date_received,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        check_open("create_email_async");
         CreateEmail op = new CreateEmail(
             this, rfc822, flags, date_received, cancellable
         );
@@ -1484,17 +1130,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         } else {
             // The server didn't return a UID for the new email, so do
             // a sync now to ensure it shows up immediately.
-            yield synchronise_remote(cancellable);
+            yield synchronise(cancellable);
         }
         return op.created_id;
-    }
-
-    private inline void notify_remote_waiters(bool successful) {
-        try {
-            this.remote_wait_semaphore.notify_result(successful, null);
-        } catch (Error err) {
-            // Can't happen because semaphore has no cancellable
-        }
     }
 
     /**
@@ -1505,7 +1143,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
         Geary.EmailIdentifier? lowest = null;
-        while (get_open_state() != Geary.Folder.OpenState.CLOSED) {
+        while (this.remote_session != null) {
             Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
                 lowest, chunk_size,
                 Geary.Email.Field.FLAGS,
@@ -1582,7 +1220,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     private void on_update_flags() {
         this.update_flags.begin(
-            this.open_cancellable,
+            this.remote_cancellable,
             (obj, res) => {
                 try {
                     this.update_flags.end(res);
@@ -1595,10 +1233,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    private void on_remote_status_notify() {
-        if (this._account.imap.current_status == CONNECTED) {
-            this.open_remote_session.begin();
-        }
+    private void on_remote_status_check() {
+        this.check_remote_session.begin();
     }
 
     private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
@@ -1606,20 +1242,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Need to close the remote session immediately to avoid a
         // race with it opening again
-        Geary.Folder.CloseReason remote_reason = is_error
-            ? Geary.Folder.CloseReason.REMOTE_ERROR
-            : Geary.Folder.CloseReason.REMOTE_CLOSE;
         this.close_remote_session.begin(
-            remote_reason,
             (obj, res) => {
                 this.close_remote_session.end(res);
                 // Once closed, if we are closing because an error
                 // occurred, but the folder is still open and so is
                 // the pool, try re-establishing the connection.
-                if (is_error &&
-                    this._account.imap.current_status == CONNECTED &&
-                    !this.open_cancellable.is_cancelled()) {
-                    this.open_remote_session.begin();
+                if (is_error && !this.remote_cancellable.is_cancelled()) {
+                    this.check_remote_session.begin();
                 }
             });
     }
