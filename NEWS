@@ -1,3 +1,75 @@
+Version 3.38
+~~~~~~~~~~~~
+Released: 2020-09-13
+
+Enhancements included in this release:
+ * Clean up email in database older than the storage preference
+ * New Preferences window pane for managing plugins
+ * New Email Templates plugin
+ * New Mail Merge plugin
+ * New Sent Sound plugin
+ * New Unity Messaging Menu plugin
+ * Reduced number of spurious problem report info bars
+ * Improved ordering of folders in the folder list
+ * Spam folder renamed to Junk
+ * Composer formatting toolbar initially hidden for new installs
+ * Desktop mail notifications now show contact photos
+ * Improved server compatibility
+ * Numerous bug fixes and user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to those who contributed code fixes and enhancements to this
+release:
+ * Adwait Rawat
+ * Andres Salomon
+ * Björn Daase
+ * Chris Heywood
+ * Daniel Kahn Gillmor
+ * Diego Escalante Urrelo
+ * Federico Bruni
+ * Guillaume Ayoub
+ * hkdb
+ * James Westman
+ * Jan Tojnar
+ * Jonatan Pålsson
+ * Jordan Petridis
+ * Oliver Giles
+ * Rico Tzschichholz
+ * Thibault Martin
+
+Thanks also to all who contributed translations for the user
+interface:
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Asier Sarasua Garmendia (eu)
+ * Ask Hjorth Larsen (da)
+ * Baurzhan Muftakhidinov (kk)
+ * Bruce Cowan (en_GB)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Dušan Kazik (sk)
+ * Efstathios Iosifidis (el)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Fabio Tomat (fur)
+ * Federico Bruni (it)
+ * Goran Vidović (hr)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * sicklylife (ja)
+ * Thibault Martin (fr)
+ * Yuri Chornoivan (uk)
+
+And for the user manual:
+ * Andre Klapper (it)
+ * Jordi Mas (ca)
+ * Piotr Drąg (pl)
+ * Yuri Chornoivan (uk)
+
 Version 3.37.92
 ~~~~~~~~~~~~~~~
 Released: 2020-09-06
