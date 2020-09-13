@@ -224,7 +224,6 @@ client_internal_header_fixup = custom_target(
 client_dep = declare_dependency(
   link_with: [
     client_lib,
-    sqlite3_unicodesn_lib
   ],
   include_directories: include_directories('.')
 )
@@ -235,9 +234,6 @@ client_internal_dep = declare_dependency(
   link_args: [
     '-L' + client_build_dir,
     '-l' + client_package
-  ],
-  link_with: [
-    sqlite3_unicodesn_lib,
   ],
   include_directories: include_directories('.'),
   sources: client_internal_header_fixup

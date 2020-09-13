@@ -179,6 +179,7 @@ engine_vala_sources = files(
   'imap-db/imap-db-gc.vala',
   'imap-db/imap-db-message-row.vala',
   'imap-db/imap-db-search-query.vala',
+  'imap-db/imap-db-sqlite.c',
 
   'imap-engine/imap-engine.vala',
   'imap-engine/imap-engine-account-operation.vala',
@@ -386,7 +387,6 @@ engine_internal_header_fixup = custom_target(
 engine_dep = declare_dependency(
   link_with: [
     engine_lib,
-    sqlite3_unicodesn_lib
   ],
   include_directories: include_directories('.')
 )
@@ -397,9 +397,6 @@ engine_internal_dep = declare_dependency(
   link_args: [
     '-L' + engine_build_dir,
     '-lgeary-engine'
-  ],
-  link_with: [
-    sqlite3_unicodesn_lib,
   ],
   include_directories: include_directories('.'),
   sources: engine_internal_header_fixup

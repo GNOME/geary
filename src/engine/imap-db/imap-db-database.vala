@@ -7,7 +7,7 @@
 
 [CCode (cname = "g_utf8_collate_key")]
 extern string utf8_collate_key(string data, ssize_t len);
-extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
+extern int sqlite3_register_legacy_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
@@ -73,6 +73,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
     private bool new_db = false;
+    private bool is_open_in_progress = false;
 
     private GC? gc = null;
     private Cancellable gc_cancellable = new Cancellable();
@@ -93,7 +94,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      */
     public new async void open(Db.DatabaseFlags flags, Cancellable? cancellable)
         throws Error {
+        this.is_open_in_progress = true;
         yield base.open(flags, cancellable);
+        this.is_open_in_progress = false;
         yield run_gc(NONE, null, cancellable);
     }
 
@@ -251,10 +254,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 yield post_upgrade_encode_folder_names(cancellable);
             break;
 
-            case 11:
-                yield post_upgrade_add_search_table(cancellable);
-            break;
-
             case 12:
                 yield post_upgrade_populate_internal_date_time_t(cancellable);
             break;
@@ -281,10 +280,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
             case 22:
                 yield post_upgrade_rebuild_attachments(cancellable);
-            break;
-
-            case 23:
-                yield post_upgrade_add_tokenizer_table(cancellable);
             break;
         }
     }
@@ -315,67 +310,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 }
                 return Geary.Db.TransactionOutcome.COMMIT;
             }, cancellable);
-    }
-
-    // Version 11.
-    private async void post_upgrade_add_search_table(Cancellable? cancellable)
-        throws Error {
-        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
-                string stemmer = find_appropriate_search_stemmer();
-                debug("Creating search table using %s stemmer", stemmer);
-
-                // This can't go in the .sql file because its schema (the stemmer
-                // algorithm) is determined at runtime.
-                cx.exec("""
-                    CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
-                    body,
-                    attachment,
-                    subject,
-                    from_field,
-                    receivers,
-                    cc,
-                    bcc,
-
-                    tokenize=unicodesn "stemmer=%s",
-                    prefix="2,4,6,8,10",
-                );
-                """.printf(stemmer));
-                return Geary.Db.TransactionOutcome.COMMIT;
-            }, cancellable);
-    }
-
-    private string find_appropriate_search_stemmer() {
-        // Unfortunately, the stemmer library only accepts the full language
-        // name for the stemming algorithm.  This translates between the user's
-        // preferred language ISO 639-1 code and our available stemmers.
-        // FIXME: the available list here is determined by what's included in
-        // src/sqlite3-unicodesn/CMakeLists.txt.  We should pass that list in
-        // instead of hardcoding it here.
-        foreach (string l in Intl.get_language_names()) {
-            switch (l) {
-                case "da": return "danish";
-                case "nl": return "dutch";
-                case "en": return "english";
-                case "fi": return "finnish";
-                case "fr": return "french";
-                case "de": return "german";
-                case "hu": return "hungarian";
-                case "it": return "italian";
-                case "no": return "norwegian";
-                case "pt": return "portuguese";
-                case "ro": return "romanian";
-                case "ru": return "russian";
-                case "es": return "spanish";
-                case "sv": return "swedish";
-                case "tr": return "turkish";
-            }
-        }
-
-        // Default to English because it seems to be on average the language
-        // most likely to be present in emails, regardless of the user's
-        // language setting.  This is not an exact science, and search results
-        // should be ok either way in most cases.
-        return "english";
     }
 
     // Versions 12 and 18.
@@ -635,25 +569,6 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             }, cancellable);
     }
 
-    // Version 23
-    private async void post_upgrade_add_tokenizer_table(Cancellable? cancellable)
-        throws Error {
-        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
-                string stemmer = find_appropriate_search_stemmer();
-                debug("Creating tokenizer table using %s stemmer", stemmer);
-
-                // These can't go in the .sql file because its schema (the stemmer
-                // algorithm) is determined at runtime.
-                cx.exec("""
-                    CREATE VIRTUAL TABLE TokenizerTable USING fts3tokenize(
-                        unicodesn,
-                        "stemmer=%s"
-                    );
-                """.printf(stemmer));
-                return Db.TransactionOutcome.COMMIT;
-            }, cancellable);
-    }
-
     /**
      * Determines if the database's FTS table indexes are valid.
      */
@@ -706,7 +621,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         cx.set_foreign_keys(true);
         cx.set_recursive_triggers(true);
         cx.set_synchronous(Db.SynchronousMode.NORMAL);
-        sqlite3_unicodesn_register_tokenizer(cx.db);
+
+        if (this.is_open_in_progress) {
+            // Register a tokenizer with old "unicodesn" name so that
+            // upgrades for existing databases that still reference it
+            // don't fail.
+            sqlite3_register_legacy_tokenizer(cx.db);
+        }
 
         if (cx.db.create_function(
                 UTF8_CASE_INSENSITIVE_FN,
