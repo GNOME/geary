@@ -105,11 +105,13 @@ libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tne
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
-# Libunwind system dependencies above ensures appropriate versions,
-# but this declared dependency is what we actually build against so we
-# can include the custom VAPI correctly. We need to add unwind_lib to
-# the search path for these so Flatpak builds can find the C lib.
+# System dependencies above ensures appropriate versions for the
+# following libraries, but the declared dependency is what we actually
+# build against so we can include the custom VAPI correctly.
+
 if libunwind_dep.found()
+  # We need to add native lib to the search path for these so Flatpak
+  # builds can find it.
   unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
   libunwind = declare_dependency(
      dependencies: [
