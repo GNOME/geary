@@ -93,6 +93,7 @@ libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libpeas_gtk = dependency('libpeas-gtk-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
+libstemmer_dep = cc.find_library('stemmer')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
   'libunwind', version: '>= 1.1', required: get_option('libunwind')
@@ -121,6 +122,13 @@ if libunwind_dep.found()
      ],
    )
 endif
+
+libstemmer = declare_dependency(
+  dependencies: [
+    valac.find_library('libstemmer', dirs: [vapi_dir]),
+    libstemmer_dep,
+  ],
+)
 
 # Optional dependencies
 appstream_util = find_program('appstream-util', required: false)

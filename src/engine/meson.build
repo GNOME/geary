@@ -323,6 +323,7 @@ engine_dependencies = [
   glib,
   gmime,
   libmath,
+  libstemmer,
   libxml,
   posix,
   sqlite
