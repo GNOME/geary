@@ -25,6 +25,8 @@ sql_files = [
   'version-024.sql',
   'version-025.sql',
   'version-026.sql',
+  'version-027.sql',
+  'version-028.sql',
 ]
 
 install_data(sql_files,
