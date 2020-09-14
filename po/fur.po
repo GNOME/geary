@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-08-29 01:59+0000\n"
-"PO-Revision-Date: 2020-09-08 16:21+0200\n"
+"POT-Creation-Date: 2020-09-13 04:23+0000\n"
+"PO-Revision-Date: 2020-09-14 21:31+0200\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <fur@li.org>\n"
 "Language: fur\n"
@@ -232,6 +232,8 @@ msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
+"Al abilite lis scurtis pes azions e-mail che no àn bisugne de pression di "
+"<Ctrl> par emulâ chês dopradis di Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:82
 msgid "Languages that shall be used in the spell checker"
@@ -242,16 +244,23 @@ msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
 msgstr ""
+"Une liste di localizazions POSIX, cuntune liste vueide si disabilite il "
+"control ortografic e cuntune liste nule si dopre lis lenghis predefinidis "
+"dal scritori."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Languages that are displayed in the spell checker popover"
 msgstr ""
+"Lis lenghis che a vegnin mostradis intal ricuadri a comparse dal control "
+"ortografic"
 
 #: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
+"Liste di lenghis che a vegnin simpri mostradis intal ricuadri a comparse dal "
+"control ortografic."
 
 #: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Notify of new mail at startup"
@@ -285,6 +294,7 @@ msgstr ""
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
+"I valôrs ametûts a son “exact”, “conservative”, “aggressive”, e “horizon”."
 
 #: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Zoom of conversation viewer"
@@ -304,13 +314,15 @@ msgstr "La ultime dimension regjistrade dal barcon dal redatôr distacât."
 
 #: desktop/org.gnome.Geary.gschema.xml:132
 msgid "Undo sending email delay"
-msgstr ""
+msgstr "Anule ritart di spedizion e-mail"
 
 #: desktop/org.gnome.Geary.gschema.xml:133
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr ""
+"Il numar di seconts di spietâ prime di inviâ une e-mail. Met a zero o mancul "
+"par disabilitâ."
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
@@ -320,7 +332,7 @@ msgstr ""
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
-msgstr ""
+msgstr "La lungjece temporâl in seconts che si à di mostrâ lis notifichis."
 
 #: desktop/org.gnome.Geary.gschema.xml:146
 msgid "List of optional plugins"
@@ -332,12 +344,13 @@ msgstr "I plugin listâts achì a vignaran cjariâts al inviament."
 
 #: desktop/org.gnome.Geary.gschema.xml:152
 msgid "Whether we migrated the old settings"
-msgstr ""
+msgstr "Indiche se o ven migrât lis impostazions vecjis"
 
 #: desktop/org.gnome.Geary.gschema.xml:153
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
+"Fals par controlâ il vecjo scheme “org.yorba.geary” e copiâ i siei valôrs."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -772,11 +785,11 @@ msgstr "Salve pueste inviade sul servidôr"
 #: src/client/accounts/accounts-editor-servers-pane.vala:961
 #, c-format
 msgid "%s using OAuth2"
-msgstr ""
+msgstr "%s doprant OAuth2"
 
 #: src/client/accounts/accounts-editor-servers-pane.vala:971
 msgid "Use receiving server login"
-msgstr ""
+msgstr "Dopre acès dal servidôr di ricezion"
 
 #. Translators: File name used in save chooser when saving
 #. attachments that do not otherwise have a name.
@@ -822,12 +835,12 @@ msgstr "Visite il sît web di Geary"
 #. / Command line option
 #: src/client/application/application-client.vala:97
 msgid "Print debug logging"
-msgstr ""
+msgstr "Stampe i regjistris di debug"
 
 #. / Command line option
 #: src/client/application/application-client.vala:100
 msgid "Start with the main window hidden (deprecated)"
-msgstr ""
+msgstr "Partìs cul barcon principâl platât (deplorât)"
 
 #. / Command line option
 #: src/client/application/application-client.vala:103
@@ -960,13 +973,13 @@ msgstr "Fabio Tomat <f.t.public@gmail.com>, 2020"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1047
+#: src/client/application/application-client.vala:1045
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "La opzion `--hidden` e je deplorade e un doman e vignarà gjavade."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1080
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argoment di program no ricognossût: “%s”"
@@ -1322,7 +1335,7 @@ msgstr "Salve come"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/accounts_editor_servers_pane.ui:17
+#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
 msgid "Cancel"
 msgstr "Anule"
 
@@ -2208,10 +2221,8 @@ msgstr "Compile e invie modei di e-mail doprant un sfuei di calcul"
 #. Translators: Info bar label for starting sending a mail
 #. merge
 #: src/client/plugin/mail-merge/mail-merge.vala:118
-#, fuzzy
-#| msgid "StartTLS"
 msgid "Start"
-msgstr "StartTLS"
+msgstr "Scomence"
 
 #. Translators: Info bar label for pausing sending a mail
 #. merge
@@ -2379,21 +2390,21 @@ msgstr "%A"
 #. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:218
 msgid "%a, %b %-e, %Y at %l:%M %P"
-msgstr ""
+msgstr "%a, %-e di %b dal %Y aes %l:%M %P"
 
 #. / 24 hours format for the datetime that a message being
 #. / replied to was received See
 #. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:224
 msgid "%a, %b %-e, %Y at %H:%M"
-msgstr ""
+msgstr "%a, %-e di %b dal %Y aes %H:%M"
 
 #. / Format for the datetime that a message being replied to
 #. / was received See
 #. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:230
 msgid "%a, %b %-e, %Y at %X"
-msgstr ""
+msgstr "%a, %-e di %b dal %Y aes %X"
 
 #. Translators: Label used when an email has a missing or
 #. an empty subject
@@ -2426,7 +2437,7 @@ msgstr[1] "%s e altris %d"
 #: src/client/util/util-email.vala:193
 #, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr ""
+msgstr "Ai %1$s, %2$s al/e à scrit:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
@@ -2721,7 +2732,6 @@ msgstr ""
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1030
-#, fuzzy
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Scovacere | Refudum | Bidon"
 
@@ -2811,7 +2821,7 @@ msgstr "Account"
 
 #: ui/accounts_editor_list_pane.ui:62
 msgid "To get started, select an email provider below."
-msgstr ""
+msgstr "Par scomençâ, selezione un furnidôr di e-mail chi sot."
 
 #: ui/accounts_editor_list_pane.ui:75
 msgid "Welcome to Geary"
@@ -2855,27 +2865,27 @@ msgstr "_No sta fidâti di chest servidôr"
 
 #: ui/composer-editor.ui:100
 msgid "Bold text"
-msgstr ""
+msgstr "Test neret"
 
 #: ui/composer-editor.ui:124
 msgid "Italic text"
-msgstr ""
+msgstr "Test corsîf"
 
 #: ui/composer-editor.ui:148
 msgid "Underline text"
-msgstr ""
+msgstr "Test sotlineât"
 
 #: ui/composer-editor.ui:172
 msgid "Strikethrough text"
-msgstr ""
+msgstr "Test stricât"
 
 #: ui/composer-editor.ui:205
 msgid "Insert bulleted list"
-msgstr ""
+msgstr "Inserìs liste pontade"
 
 #: ui/composer-editor.ui:229
 msgid "Insert numbered list"
-msgstr ""
+msgstr "Inserìs liste numerade"
 
 #: ui/composer-editor.ui:262
 msgid "Indent or quote text"
@@ -2887,7 +2897,7 @@ msgstr ""
 
 #: ui/composer-editor.ui:315
 msgid "Remove text formatting"
-msgstr ""
+msgstr "Gjave formatazion dal test"
 
 #: ui/composer-editor.ui:334
 msgid "Change font type"
@@ -2915,7 +2925,7 @@ msgstr "Cambie dimension dal caratar"
 
 #: ui/composer-editor.ui:447
 msgid "Insert or update text link"
-msgstr ""
+msgstr "Inserìs o inzorne il colegament dal test"
 
 #: ui/composer-editor.ui:471
 msgid "Insert an image"
@@ -3034,7 +3044,7 @@ msgstr "Salve e siere"
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:42
 msgid "Insert the new link with this URL"
-msgstr ""
+msgstr "Inserìs il gnûf colegament cun chest URL"
 
 #: ui/composer-link-popover.ui:43
 msgid "Add"
@@ -3047,7 +3057,7 @@ msgstr "URL colegament"
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:61
 msgid "Update this link’s URL"
-msgstr ""
+msgstr "Inzorne chest URL dal link"
 
 #: ui/composer-link-popover.ui:62
 msgid "Update"
@@ -3127,7 +3137,7 @@ msgstr "Detais:"
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:19 ui/problem-details-dialog.ui:24
 msgid "Search for matching log entries"
-msgstr ""
+msgstr "Cîr vôs di regjistri corispondentis"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:35
@@ -3143,7 +3153,7 @@ msgstr ""
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:81 ui/problem-details-dialog.ui:51
 msgid "Save logs entries and details"
-msgstr ""
+msgstr "Salve vôs dai regjistris e detais"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
@@ -3182,10 +3192,8 @@ msgstr "Cjarie simpri lis imagjins rimotis"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:264
-#, fuzzy
-#| msgid "Email address"
 msgid "Deceptive email address"
-msgstr "Direzion e-mail"
+msgstr "Direzion e-mail ingjanose"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
@@ -3245,7 +3253,6 @@ msgstr "Sposte messaç te _Scovacere"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
-#| msgid "Autoselect next message"
 msgid "_Delete message…"
 msgstr "_Elimine messaç…"
 
@@ -3256,23 +3263,23 @@ msgstr "_Viôt sorzint"
 
 #: ui/conversation-message-link-popover.ui:54
 msgid "But actually goes to:"
-msgstr ""
+msgstr "Ma invezit al va su:"
 
 #: ui/conversation-message-link-popover.ui:84
 msgid "The link appears to go to:"
-msgstr ""
+msgstr "Al semee che il colegament al ledi su:"
 
 #: ui/conversation-message-link-popover.ui:96
 msgid "Deceptive link found"
-msgstr ""
+msgstr "Colegament ingjanôs cjatât"
 
 #: ui/conversation-message-link-popover.ui:111
 msgid "The email sender may be leading you to the wrong web site."
-msgstr ""
+msgstr "Il mitent de e-mail al podarès puartâti su sîts web sbaliâts."
 
 #: ui/conversation-message-link-popover.ui:124
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr ""
+msgstr "Se no si è sigûrs, contatâ il mitent e domandâ prime di continuâ."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
@@ -3611,27 +3618,27 @@ msgstr "Modifiche cun test formatât"
 #: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
 msgid "Paste without formatting"
-msgstr ""
+msgstr "Tache cence formatazion"
 
 #: ui/gtk/help-overlay.ui:475
 msgctxt "shortcut window"
 msgid "Bold text"
-msgstr ""
+msgstr "Met test in neret"
 
 #: ui/gtk/help-overlay.ui:482
 msgctxt "shortcut window"
 msgid "Italicize text"
-msgstr ""
+msgstr "Met test in corsîf"
 
 #: ui/gtk/help-overlay.ui:489
 msgctxt "shortcut window"
 msgid "Underline text"
-msgstr ""
+msgstr "Sotlinie il test"
 
 #: ui/gtk/help-overlay.ui:496
 msgctxt "shortcut window"
 msgid "Strike text"
-msgstr ""
+msgstr "Striche il test"
 
 #: ui/gtk/help-overlay.ui:503
 msgctxt "shortcut window"
@@ -3711,7 +3718,7 @@ msgstr "_Autentiche"
 
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
-msgstr ""
+msgstr "Inzornament di Geary in vore…"
 
 #~ msgid "mail-send"
 #~ msgstr "mail-send"
