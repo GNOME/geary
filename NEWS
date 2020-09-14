@@ -1,3 +1,16 @@
+Version 3.38.0.1
+~~~~~~~~~~~~~~~~
+Released: 2020-09-15
+
+Notable changes included in this release:
+
+* Ensure recent SQL migration scripts are installed
+
+Thanks to those who contributed translations for the online help
+manual:
+
+* Jordi Mas (ca)
+
 Version 3.38
 ~~~~~~~~~~~~
 Released: 2020-09-13
