@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-09-13 04:23+0000\n"
-"PO-Revision-Date: 2020-09-14 21:31+0200\n"
+"POT-Creation-Date: 2020-09-14 19:33+0000\n"
+"PO-Revision-Date: 2020-09-15 07:19+0200\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <fur@li.org>\n"
 "Language: fur\n"
@@ -288,7 +288,7 @@ msgstr "Vêr par scrivi lis e-mail in HTML; fals pal test sempliç."
 
 #: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Advisory strategy for full-text searching"
-msgstr ""
+msgstr "Strategjie consultive pe ricercje di tescj complets"
 
 #: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
@@ -326,7 +326,7 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
-msgstr ""
+msgstr "Timp di visualizazion des notifichis"
 
 #: desktop/org.gnome.Geary.gschema.xml:140
 msgid ""
@@ -580,7 +580,7 @@ msgstr "Discjarie pueste"
 #: src/client/accounts/accounts-editor-edit-pane.vala:822
 #, c-format
 msgid "Change download period back to: %s"
-msgstr ""
+msgstr "Tornâ al precedent periodi di discjariament: %s"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:843
 msgid "Everything"
@@ -850,18 +850,18 @@ msgstr "Abilite l'ispetôr WebKitGTK intes viodudis web"
 #. / Command line option
 #: src/client/application/application-client.vala:106
 msgid "Log conversation monitoring"
-msgstr ""
+msgstr "Regjistre il monitorament des conversazions"
 
 #. / Command line option
 #: src/client/application/application-client.vala:109
 msgid "Log IMAP network deserialization"
-msgstr ""
+msgstr "Regjistre la deserializazion de rêt IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
 #: src/client/application/application-client.vala:113
 msgid "Log folder normalization"
-msgstr ""
+msgstr "Regjistre la sincronizazion de cartele"
 
 #. / Command line option
 #: src/client/application/application-client.vala:116
@@ -873,7 +873,7 @@ msgstr "Regjistre ativitât di rêt IMAP"
 #. / also be called the IMAP events queue.
 #: src/client/application/application-client.vala:121
 msgid "Log IMAP replay queue"
-msgstr ""
+msgstr "Regjistre la code di events IMAP"
 
 #. / Command line option
 #: src/client/application/application-client.vala:124
@@ -897,10 +897,8 @@ msgstr "Vierç un gnûf barcon"
 
 #. / Command line option
 #: src/client/application/application-client.vala:135
-#, fuzzy
-#| msgid "Failed to store certificate"
 msgid "Revoke all pinned TLS server certificates"
-msgstr "No si è rivâts a archiviâ il certificât"
+msgstr "Revoche ducj i certificâts di servidôr TLS fissâts"
 
 #. / Command line option
 #: src/client/application/application-client.vala:138
@@ -2268,10 +2266,8 @@ msgid "Messaging Menu"
 msgstr "Menù di messaç"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
-#, fuzzy
-#| msgid "Show notifications for new mail"
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr "Mostre lis notifichis pe gnove pueste"
+msgstr "Al mostre lis notifichis di gnove pueste tal menù dai messaçs di Unity"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2838,6 +2834,8 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
+"Gjavant un account si lu gjavarà di Geary e si eliminarà dal computer i dâts "
+"e-mail te cache locâl, ma no dal gjestôr/furnidôr dal servizi."
 
 #: ui/accounts_editor_remove_pane.ui:122
 msgid "Remove account"
@@ -2889,11 +2887,11 @@ msgstr "Inserìs liste numerade"
 
 #: ui/composer-editor.ui:262
 msgid "Indent or quote text"
-msgstr ""
+msgstr "Indentâ o citâ test"
 
 #: ui/composer-editor.ui:286
 msgid "Un-indent or unquote text"
-msgstr ""
+msgstr "Gjavâ la indintidure o la citazion dal test"
 
 #: ui/composer-editor.ui:315
 msgid "Remove text formatting"
@@ -3128,6 +3126,10 @@ msgid ""
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
 msgstr ""
+"Se il probleme al è grivi o al persist, salve e invie chescj detais a un dai "
+"<a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">canâi di contat</a> o "
+"zonte suntune <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
+"\">gnove segnalazion di erôr</a>."
 
 #: ui/components-inspector-error-view.ui:47
 msgid "Details:"
@@ -3142,12 +3144,12 @@ msgstr "Cîr vôs di regjistri corispondentis"
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:35
 msgid "Toggle appending new log entries"
-msgstr ""
+msgstr "Ativâ/disativâ la zonte di gnovis vôs di regjistri"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:55
 msgid "Add a marker entry to the log"
-msgstr ""
+msgstr "Zonte une vôs-marcadôr al regjistri"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
@@ -3423,7 +3425,7 @@ msgstr "Bute vie conversazions"
 #: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
 msgctxt "shortcut window"
 msgid "Junk conversations"
-msgstr ""
+msgstr "Conversazions malvoludis"
 
 #: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
 msgctxt "shortcut window"
@@ -3526,11 +3528,9 @@ msgid "Select next/previous conversation"
 msgstr "Selezione la prossime/precedente conversazion"
 
 #: ui/gtk/help-overlay.ui:248
-#, fuzzy
-#| msgid "Autoselect next message"
 msgctxt "shortcut window"
 msgid "Focus next/previous message"
-msgstr "Selezione in automatic il prossim messaç"
+msgstr "Met a fûc (il stât atîf) il prossim/precedent messaç"
 
 #: ui/gtk/help-overlay.ui:260
 msgid "Single-key Shortcuts"
