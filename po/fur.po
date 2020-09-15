@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-09-14 19:33+0000\n"
-"PO-Revision-Date: 2020-09-15 07:19+0200\n"
+"PO-Revision-Date: 2020-09-15 07:51+0200\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <fur@li.org>\n"
 "Language: fur\n"
@@ -2491,7 +2491,7 @@ msgstr "Inviade"
 
 #: src/client/util/util-i18n.vala:280
 msgid "Starred"
-msgstr "Preferidis"
+msgstr "Preferide"
 
 #: src/client/util/util-i18n.vala:283
 msgid "Important"
