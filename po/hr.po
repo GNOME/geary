@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2020-09-13 04:23+0000\n"
-"PO-Revision-Date: 2020-09-16 01:03+0200\n"
+"PO-Revision-Date: 2020-09-16 01:16+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/geary/language/"
 "hr/)\n"
@@ -1212,3 +1212,2867 @@ msgstr "Račun je prijavio nevaljanu lozinku prijave."
 #: src/client/application/application-main-window.vala:558
 msgid "Retry login, you will be prompted for your password"
 msgstr "Ponovno se prijavite, biti ćete upisani za novu lozinku"
+
+#. Translators: An info bar status label
+#: src/client/application/application-main-window.vala:565
+msgid "Security problem"
+msgstr "Sigurnosni problem"
+
+#. Translators: An info bar description label
+#: src/client/application/application-main-window.vala:567
+msgid "An account has reported an untrusted server."
+msgstr "Račun je prijavio nepouzdanog poslužitelja."
+
+#. Translators: An info bar button label
+#: src/client/application/application-main-window.vala:570
+msgid "Check"
+msgstr "Provjeri"
+
+#. Translators: An info bar button tool-tip
+#: src/client/application/application-main-window.vala:574
+msgid "Check the security details for the connection"
+msgstr "Provjeri sigurnosne pojedinosti za povezivanje"
+
+#. / Translators: Main window title, first string
+#. / substitution being the currently selected folder name,
+#. / the second being the selected account name.
+#: src/client/application/application-main-window.vala:617
+#, c-format
+msgid "%s — %s"
+msgstr "%s — %s"
+
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
+#: src/client/application/application-main-window.vala:996
+#: src/client/folder-list/folder-list-account-branch.vala:43
+msgid "Labels"
+msgstr "Oznake"
+
+#: src/client/application/application-main-window.vala:1293
+#, c-format
+msgid "Empty all email from your %s folder?"
+msgstr "Želite li isprazniti svu e-poštu iz vaše %s mape?"
+
+#: src/client/application/application-main-window.vala:1294
+msgid "This removes the email from Geary and your email server."
+msgstr "Ovo uklanja e-poštu iz Gearya i vaših poslužitelja e-pošte."
+
+#: src/client/application/application-main-window.vala:1295
+msgid "This cannot be undone."
+msgstr "Ovo se ne može poništiti."
+
+#: src/client/application/application-main-window.vala:1296
+#, c-format
+msgid "Empty %s"
+msgstr "Isprazni %s"
+
+#. / Translators: Primary text for a confirmation dialog
+#: src/client/application/application-main-window.vala:1353
+msgid "Do you want to permanently delete this conversation?"
+msgid_plural "Do you want to permanently delete these conversations?"
+msgstr[0] "Želite li trajno obrisati ovaj razgovor?"
+msgstr[1] "Želite li trajno obrisati ove razgovore?"
+msgstr[2] "Želite li trajno obrisati ove razgovore?"
+
+#: src/client/application/application-main-window.vala:1358
+#: src/client/application/application-main-window.vala:1373
+msgid "Delete"
+msgstr "Obriši"
+
+#. / Translators: Primary text for a confirmation dialog
+#: src/client/application/application-main-window.vala:1368
+msgid "Do you want to permanently delete this message?"
+msgid_plural "Do you want to permanently delete these messages?"
+msgstr[0] "Želite li trajno obrisati ovu poruku?"
+msgstr[1] "Želite li trajno obrisati ove poruke?"
+msgstr[2] "Želite li trajno obrisati ove poruke?"
+
+#: src/client/application/application-main-window.vala:1691
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
+
+#. Translators: The first argument will be a
+#. description of the document type, the second will
+#. be a human-friendly size string. For example:
+#. Document (100.9MB)
+#. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
+#: src/client/components/components-attachment-pane.vala:107
+#: src/client/composer/composer-widget.vala:1784
+#, c-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: src/client/components/components-attachment-pane.vala:379
+msgid "Are you sure you want to open these attachments?"
+msgstr "Sigurno želite otvoriti ove privitke?"
+
+#: src/client/components/components-attachment-pane.vala:380
+msgid ""
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Privitci mogu oštetiti vaš sustav ako ih otvorite.  Otvorite samo datoteke "
+"od pouzdanih korisnika."
+
+#: src/client/components/components-attachment-pane.vala:381
+msgid "Don’t _ask me again"
+msgstr "Ne _pitaj me ponovno"
+
+#: src/client/components/components-inspector.vala:78
+msgid "Inspector"
+msgstr "_Inspektor"
+
+#. / Translators: Title for Inspector logs pane
+#. / Translators: Title for problem report dialog logs pane
+#: src/client/components/components-inspector.vala:93
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:101
+msgid "Logs"
+msgstr "Zapisi"
+
+#. / Translators: Title for Inspector system system information pane
+#. / Translators: Title for problem report system information
+#. / pane
+#: src/client/components/components-inspector.vala:97
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:104
+msgid "System"
+msgstr "Sustav"
+
+#. Button label for saving problem report information
+#: src/client/components/components-inspector.vala:226
+#: src/client/components/components-inspector.vala:229
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:220
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:223
+#: ui/problem-details-dialog.ui:47
+msgid "Save As"
+msgstr "Spremi kao"
+
+#: src/client/components/components-inspector.vala:230
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:224
+#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
+msgid "Cancel"
+msgstr "Odustani"
+
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:124
+msgid "_Automatically select next message"
+msgstr "_Automatski odaberi slijedeću poruku"
+
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:134
+msgid "_Display conversation preview"
+msgstr "_Prikaži pregled razgovora"
+
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:144
+msgid "Use _three pane view"
+msgstr "Koristi _pogled stabla"
+
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:154
+msgid "Use _single key email shortcuts"
+msgstr "Koristi _prečace jednom tipkom za e-poštu"
+
+#: src/client/components/components-preferences-window.vala:156
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<Ctrl>"
+msgstr ""
+"Omogući prečace tipkovnice za radnje e-pošte koje ne zahtijevaju pritisak na "
+"<Ctrl>"
+
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:167
+msgid "_Watch for new mail when closed"
+msgstr "_Nadgledaj novu e-poštu kada se zatvori"
+
+#. / Translators: Preferences tooltip
+#: src/client/components/components-preferences-window.vala:171
+msgid "Geary will keep running after all windows are closed"
+msgstr "Geary će nastaviti biti pokrenut nakon što se svi prozori zatvore"
+
+#. / Translators: Preferences page title
+#: src/client/components/components-preferences-window.vala:189
+msgid "Preferences"
+msgstr "Osobitosti"
+
+#. / Translators: Preferences page title
+#: src/client/components/components-preferences-window.vala:250
+msgid "Plugins"
+msgstr "Priključci"
+
+#. Translators: Info bar title for a generic account
+#. problem.
+#: src/client/components/components-problem-report-info-bar.vala:36
+msgid "Account problem"
+msgstr "Problem s računom"
+
+#. Translators: Info bar sub-title for a generic account
+#. problem. String substitution is the account name.
+#: src/client/components/components-problem-report-info-bar.vala:40
+#, c-format
+msgid "Geary has encountered a problem with %s."
+msgstr "Geary je naišao na problem s %s."
+
+#. Translators: Info bar sub-title for a generic
+#. account problem. String substitution is the
+#. account name.
+#: src/client/components/components-problem-report-info-bar.vala:53
+#, c-format
+msgid "Geary encountered a problem checking mail for %s."
+msgstr "Geary je naišao na problem pri provjeri e-pošte na %s."
+
+#. Translators: Tooltip label for Retry button
+#: src/client/components/components-problem-report-info-bar.vala:57
+msgid "Try reconnecting"
+msgstr "Pokušajte se ponovno povezati"
+
+#. Translators: Info bar title for an outgoing
+#. account problem. String substitution is the
+#. account name
+#: src/client/components/components-problem-report-info-bar.vala:65
+#, c-format
+msgid "Geary encountered a problem sending email for %s."
+msgstr "Geary je naišao na problem pri slanju e-pošte na %s."
+
+#. Translators: Tooltip label for Retry button
+#: src/client/components/components-problem-report-info-bar.vala:69
+msgid "Retry sending queued messages"
+msgstr "Pokušaj ponovno poslati poruke na čekanju"
+
+#. Translators: Info bar title for a generic application
+#. problem.
+#: src/client/components/components-problem-report-info-bar.vala:76
+msgid "Geary has encountered a problem"
+msgstr "Geary je naišao na problem"
+
+#. Translators: Info bar sub-title for a generic
+#. application problem.
+#: src/client/components/components-problem-report-info-bar.vala:80
+msgid "Please report the details if it persists."
+msgstr "Prijavite pojedinosti ako se problem nastavi."
+
+#. Translators: Button label for viewing technical details
+#. for a problem report.
+#: src/client/components/components-problem-report-info-bar.vala:94
+msgid "_Details"
+msgstr "_Pojedinosti"
+
+#. Translators: Tooltip for viewing technical details for
+#. a problem report.
+#: src/client/components/components-problem-report-info-bar.vala:97
+msgid "View technical details about the error"
+msgstr "Prikaži tehničke pojedinosti o grešci"
+
+#. Translators: Button label for retrying a server
+#. connection
+#: src/client/components/components-problem-report-info-bar.vala:103
+msgid "_Retry"
+msgstr "_Pokušaj ponovno"
+
+#. / Translators: Search entry placeholder text
+#: src/client/components/components-search-bar.vala:12
+#: src/client/folder-list/folder-list-search-branch.vala:53
+#: src/client/util/util-i18n.vala:298
+msgid "Search"
+msgstr "Pretraga"
+
+#. / Translators: Search entry tooltip
+#: src/client/components/components-search-bar.vala:32
+msgid "Search all mail in account for keywords"
+msgstr "Pretraži svu e-poštu u računu po ključnim riječima"
+
+#. / Translators: Search entry placeholder, string
+#. / replacement is the name of an account
+#: src/client/components/components-search-bar.vala:81
+#: src/client/folder-list/folder-list-search-branch.vala:54
+#, c-format
+msgid "Search %s account"
+msgstr "Pretraži %s račun"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but one is not provided.
+#: src/client/components/components-validator.vala:394
+msgid "An email address is required"
+msgstr "Potrebna je adresa e-pošte"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. email address to be entered, but the address is invalid.
+#: src/client/components/components-validator.vala:398
+msgid "Not a valid email address"
+msgstr "Adresa e-pošte nije valjana"
+
+#. Translators: Tooltip used when an entry requires a valid,
+#. resolvable server name to be entered, but one is not
+#. provided.
+#: src/client/components/components-validator.vala:444
+msgid "A server name is required"
+msgstr "Potreban je naziv poslužitelja"
+
+#. Translators: Tooltip used when an entry requires a valid
+#. server name to be entered, but it was unable to be
+#. looked-up in the DNS.
+#: src/client/components/components-validator.vala:449
+msgid "Could not look up server name"
+msgstr "Nemoguća pretraga naziva poslužitelja"
+
+#: src/client/components/main-toolbar.vala:116
+msgid "Mark conversation"
+msgid_plural "Mark conversations"
+msgstr[0] "Označi razgovor"
+msgstr[1] "Označi razgovore"
+msgstr[2] "Označi razgovore"
+
+#: src/client/components/main-toolbar.vala:121
+msgid "Add label to conversation"
+msgid_plural "Add label to conversations"
+msgstr[0] "Dodaj oznaku razgovoru"
+msgstr[1] "Dodaj oznaku razgovorima"
+msgstr[2] "Dodaj oznaku razgovorima"
+
+#: src/client/components/main-toolbar.vala:126
+msgid "Move conversation"
+msgid_plural "Move conversations"
+msgstr[0] "Premjesti razgovor"
+msgstr[1] "Premjesti razgovore"
+msgstr[2] "Premjesti razgovore"
+
+#: src/client/components/main-toolbar.vala:131
+msgid "Archive conversation"
+msgid_plural "Archive conversations"
+msgstr[0] "Arhiviraj razgovor"
+msgstr[1] "Arhiviraj razgovore"
+msgstr[2] "Arhiviraj razgovore"
+
+#: src/client/components/main-toolbar.vala:142
+msgid "Move conversation to Trash"
+msgid_plural "Move conversations to Trash"
+msgstr[0] "Premjesti razgovor u smeće"
+msgstr[1] "Premjesti razgovore u smeće"
+msgstr[2] "Premjesti razgovore u smeće"
+
+#: src/client/components/main-toolbar.vala:152
+msgid "Delete conversation"
+msgid_plural "Delete conversations"
+msgstr[0] "Obriši razgovor"
+msgstr[1] "Obriši razgovore"
+msgstr[2] "Obriši razgovore"
+
+#. / Displayed in the space-limited status bar while a message is in the process of being sent.
+#: src/client/components/status-bar.vala:26
+msgid "Sending…"
+msgstr "Slanje…"
+
+#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
+#: src/client/components/status-bar.vala:29
+msgid "Error sending email"
+msgstr "Greška pri slanju e-pošte"
+
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: src/client/components/status-bar.vala:33
+msgid "Error saving sent mail"
+msgstr "Greška pri spremanju e-pošte"
+
+#: src/client/components/stock.vala:18
+msgid "_OK"
+msgstr "_U redu"
+
+#: src/client/components/stock.vala:19
+#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: ui/password-dialog.glade:196
+msgid "_Cancel"
+msgstr "_Odustani"
+
+#: src/client/components/stock.vala:21
+msgid "_About"
+msgstr "_O"
+
+#: src/client/components/stock.vala:22
+msgid "_Add"
+msgstr "_Dodaj"
+
+#: src/client/components/stock.vala:23
+msgid "_Close"
+msgstr "_Zatvori"
+
+#: src/client/components/stock.vala:24
+msgid "_Discard"
+msgstr "_Odbaci"
+
+#: src/client/components/stock.vala:25 ui/main-toolbar-menus.ui:42
+msgid "_Help"
+msgstr "_Priručnik"
+
+#: src/client/components/stock.vala:26
+#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: ui/components-attachment-pane-menus.ui:7
+msgid "_Open"
+msgstr "_Otvori"
+
+#: src/client/components/stock.vala:27 ui/main-toolbar-menus.ui:32
+msgid "_Preferences"
+msgstr "_Osobitosti"
+
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
+msgid "_Print…"
+msgstr "_Ispis…"
+
+#: src/client/components/stock.vala:29
+msgid "_Quit"
+msgstr "_Zatvori"
+
+#: src/client/components/stock.vala:30
+msgid "_Remove"
+msgstr "_Ukloni"
+
+#: src/client/components/stock.vala:31
+#: ui/components-attachment-pane-menus.ui:11
+msgid "_Save"
+msgstr "_Spremi"
+
+#: src/client/components/stock.vala:32
+msgid "_Keep"
+msgstr "_Zadrži"
+
+#: src/client/composer/composer-editor.vala:675
+msgid "Select Color"
+msgstr "Odabir boje"
+
+#: src/client/composer/composer-link-popover.vala:139
+msgid "Link URL is not correctly formatted, e.g. http://example.com"
+msgstr "URL poveznice nije pravilno oblikovan, npr. http://primjer.hr"
+
+#: src/client/composer/composer-link-popover.vala:146
+msgid "Invalid link URL"
+msgstr "Nevaljani URL poveznice"
+
+#: src/client/composer/composer-link-popover.vala:146
+msgid "Invalid email address"
+msgstr "Nevaljana adresa e-pošte"
+
+#. / Translators: Title for an empty composer window
+#: src/client/composer/composer-widget.vala:32
+msgid "New Message"
+msgstr "Nova poruka"
+
+#: src/client/composer/composer-widget.vala:167
+msgid "Saved"
+msgstr "Spremljeno"
+
+#: src/client/composer/composer-widget.vala:168
+msgid "Saving"
+msgstr "Spremanje"
+
+#: src/client/composer/composer-widget.vala:169
+msgid "Error saving"
+msgstr "Greška spremanja"
+
+#: src/client/composer/composer-widget.vala:170
+msgid "Press Backspace to delete quote"
+msgstr "Pritisni Backspace za brisanje citata"
+
+#. Translators: This is list of keywords, separated by pipe ("|")
+#. characters, that suggest an attachment; since this is full-word
+#. checking, include all variants of each word. No spaces are
+#. allowed. The words will be converted to lower case based on
+#. locale and English versions included automatically.
+#: src/client/composer/composer-widget.vala:186
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr "privitak|priloži|privitci|prilažem|prilaganja|privitci|priloženo"
+
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. Keep, Discard or Cancel.
+#: src/client/composer/composer-widget.vala:862
+msgid "Do you want to keep or discard this draft message?"
+msgstr "Želite li zadržati ili odbaciti ovu skicu poruke?"
+
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. only Discard or Cancel.
+#: src/client/composer/composer-widget.vala:888
+msgid "Do you want to discard this draft message?"
+msgstr "Želite li odbaciti ovu skicu poruke?"
+
+#: src/client/composer/composer-widget.vala:1440
+msgid "Send message with an empty subject and body?"
+msgstr "Pošalji poruku s praznim predmetom i sadržajem?"
+
+#: src/client/composer/composer-widget.vala:1442
+msgid "Send message with an empty subject?"
+msgstr "Pošalji poruku bez predmeta?"
+
+#: src/client/composer/composer-widget.vala:1444
+msgid "Send message with an empty body?"
+msgstr "Pošalji poruku sadržaja?"
+
+#: src/client/composer/composer-widget.vala:1453
+msgid "Send message without an attachment?"
+msgstr "Pošalji poruku bez privitka?"
+
+#: src/client/composer/composer-widget.vala:1772
+#, c-format
+msgid "“%s” already attached for delivery."
+msgstr "\"%s\" je već priložen za dostavu."
+
+#: src/client/composer/composer-widget.vala:1804
+#: src/client/composer/composer-widget.vala:1854
+#, c-format
+msgid "“%s” is an empty file."
+msgstr "\"%s\" je prazna datoteka."
+
+#: src/client/composer/composer-widget.vala:1842
+#, c-format
+msgid "“%s” could not be found."
+msgstr "%s se ne može pronaći."
+
+#: src/client/composer/composer-widget.vala:1848
+#, c-format
+msgid "“%s” is a folder."
+msgstr "\"%s\" je mapa."
+
+#: src/client/composer/composer-widget.vala:1867
+#, c-format
+msgid "“%s” could not be opened for reading."
+msgstr "\"%s\" je nemoguće otvoriti za čitanje."
+
+#: src/client/composer/composer-widget.vala:1875
+msgid "Cannot add attachment"
+msgstr "Nemoguće dodavanje privitka"
+
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: src/client/composer/composer-widget.vala:1946
+msgid "Images"
+msgstr "Slike"
+
+#. Translators: Human-readable version of the RFC 822 To header
+#: src/client/composer/composer-widget.vala:2010
+#: src/client/conversation-viewer/conversation-email.vala:542
+#: src/client/util/util-email.vala:249 ui/conversation-message.ui:312
+msgid "To:"
+msgstr "Prima:"
+
+#. Translators: Human-readable version of the RFC 822 CC header
+#: src/client/composer/composer-widget.vala:2016
+#: src/client/conversation-viewer/conversation-email.vala:547
+#: src/client/util/util-email.vala:254 ui/conversation-message.ui:357
+msgid "Cc:"
+msgstr "Prima kopiju:"
+
+#. Translators: Human-readable version of the RFC 822 BCC header
+#: src/client/composer/composer-widget.vala:2022
+#: src/client/conversation-viewer/conversation-email.vala:552
+#: ui/conversation-message.ui:402
+msgid "Bcc:"
+msgstr "Prima tajnu kopiju:"
+
+#. Translators: Human-readable version of the RFC 822 Reply-To header
+#: src/client/composer/composer-widget.vala:2028
+msgid "Reply-To: "
+msgstr "Odgovor na: "
+
+#. Displayed in the From dropdown to indicate an
+#. "alternate email address" for an account.  The first
+#. printf argument will be the alternate email address,
+#. and the second will be the account's primary email
+#. address.
+#: src/client/composer/composer-widget.vala:2146
+#, c-format
+msgid "%1$s via %2$s"
+msgstr "%1$s putem %2$s"
+
+#: src/client/composer/spell-check-popover.vala:125
+msgid "Remove this language from the preferred list"
+msgstr "Ukloni ovaj jezik iz popisa željenih"
+
+#: src/client/composer/spell-check-popover.vala:129
+msgid "Add this language to the preferred list"
+msgstr "Dodaj ovaj jezik na popis željenih"
+
+#: src/client/composer/spell-check-popover.vala:225
+msgid "Search for more languages"
+msgstr "Pretraži više jezika"
+
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:339
+msgid "Move conversation to _Trash"
+msgid_plural "Move conversations to _Trash"
+msgstr[0] "Premjesti razgovor u _smeće"
+msgstr[1] "Premjesti razgovore u _smeće"
+msgstr[2] "Premjesti razgovore u _smeće"
+
+#. / Translators: Context menu item
+#: src/client/conversation-list/conversation-list-view.vala:351
+msgid "_Delete conversation"
+msgid_plural "_Delete conversations"
+msgstr[0] "_Obriši razgovor"
+msgstr[1] "_Obriši razgovore"
+msgstr[2] "_Obriši razgovore"
+
+#: src/client/conversation-list/conversation-list-view.vala:364
+#: ui/main-toolbar-menus.ui:5
+msgid "Mark as _Read"
+msgstr "Označi kao _pročitano"
+
+#: src/client/conversation-list/conversation-list-view.vala:372
+#: ui/main-toolbar-menus.ui:9
+msgid "Mark as _Unread"
+msgstr "Označi kao _nepročitano"
+
+#: src/client/conversation-list/conversation-list-view.vala:380
+#: ui/main-toolbar-menus.ui:17
+msgid "U_nstar"
+msgstr "Uklo_ni oznaku"
+
+#: src/client/conversation-list/conversation-list-view.vala:387
+#: ui/main-toolbar-menus.ui:13
+msgid "_Star"
+msgstr "_Označi"
+
+#. Translators: Menu item to reply to a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:396
+#: ui/conversation-email-menus.ui:9
+msgid "_Reply"
+msgstr "_Odgovori"
+
+#: src/client/conversation-list/conversation-list-view.vala:402
+msgid "R_eply All"
+msgstr "O_dgovori svima"
+
+#. Translators: Menu item to forward a specific message.
+#: src/client/conversation-list/conversation-list-view.vala:408
+#: ui/conversation-email-menus.ui:21
+msgid "_Forward"
+msgstr "_Proslijedi"
+
+#: src/client/conversation-list/formatted-conversation-data.vala:18
+msgid "Me"
+msgstr "Ja"
+
+#. Translators: Human-readable version of the RFC 822 From header
+#: src/client/conversation-viewer/conversation-email.vala:537
+#: src/client/util/util-email.vala:240
+msgid "From:"
+msgstr "Šalje:"
+
+#. Translators: Human-readable version of the RFC 822 Date header
+#: src/client/conversation-viewer/conversation-email.vala:557
+#: src/client/util/util-email.vala:245
+msgid "Date:"
+msgstr "Datum:"
+
+#. Translators: Human-readable version of the RFC 822 Subject header
+#: src/client/conversation-viewer/conversation-email.vala:567
+#: src/client/util/util-email.vala:243
+msgid "Subject:"
+msgstr "Predmet:"
+
+#: src/client/conversation-viewer/conversation-message.vala:128
+msgid "This email address may have been forged"
+msgstr "Ova adresa e-pošte može biti zaboravljena"
+
+#. Translators: Label text displayed when there are too
+#. many email addresses to be shown by default in an
+#. email's header, but they are all being shown anyway.
+#: src/client/conversation-viewer/conversation-message.vala:234
+msgid "Show less"
+msgstr "Prikaži manje"
+
+#. Translators: Label text displayed when there are
+#. too many email addresses to be shown by default in
+#. an email's header. The string substitution is the
+#. number of extra email to be shown.
+#: src/client/conversation-viewer/conversation-message.vala:260
+#, c-format
+msgid "%d more…"
+msgstr "%d više…"
+
+#. Compact headers. These are partially done here and partially
+#. in load_contacts.
+#. Translators: This is displayed in place of the from address
+#. when the message has no from address.
+#: src/client/conversation-viewer/conversation-message.vala:529
+msgid "No sender"
+msgstr "Bez pošiljatelja"
+
+#. Translators: This separates multiple 'from'
+#. addresses in the compact header for a message.
+#: src/client/conversation-viewer/conversation-message.vala:920
+msgid ", "
+msgstr ", "
+
+#. Translators: This string is used as the HTML IMG ALT
+#. attribute value when displaying an inline image in an email
+#. that did not specify a file name. E.g. <IMG ALT="Image" ...
+#: src/client/conversation-viewer/conversation-message.vala:1040
+msgid "Image"
+msgstr "Slika"
+
+#. Translators: Info bar status message
+#: src/client/conversation-viewer/conversation-message.vala:1305
+msgid "Remote images not shown"
+msgstr "Udaljene slike nisu prikazane"
+
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1307
+msgid "Only show remote images from senders you trust."
+msgstr "Samo prikaži udaljene slike od pošiljatelja kojima vjerujete."
+
+#. Translators: Info bar button label
+#: src/client/conversation-viewer/conversation-message.vala:1311
+msgid "Show"
+msgstr "Prikaži"
+
+#. Translators: Info bar button label
+#: src/client/conversation-viewer/conversation-message.vala:1315
+msgid "Always show from sender"
+msgstr "Uvijek prikaži pošiljatelja"
+
+#. Translators: Title label for placeholder when no
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:83
+msgid "No conversations selected"
+msgstr "Nema odabranih razgovora"
+
+#. Translators: Sub-title label for placeholder when no
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:87
+msgid "Selecting a conversation from the list will display it here"
+msgstr "Odabir razgovora s popisa prikazati će ga ovdje"
+
+#. Translators: Title label for placeholder when multiple
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:96
+msgid "Multiple conversations selected"
+msgstr "Više razgovora je odabrano"
+
+#. Translators: Sub-title label for placeholder when multiple
+#. conversations have been selected.
+#: src/client/conversation-viewer/conversation-viewer.vala:100
+msgid "Choosing an action will apply to all selected conversations"
+msgstr "Odabir radnje će se primijeniti na sve odabrane razgovore"
+
+#. Translators: Title label for placeholder when no
+#. conversations have exist in a folder.
+#. Translators: Title label for placeholder when no
+#. conversations have been found in a search.
+#: src/client/conversation-viewer/conversation-viewer.vala:109
+#: src/client/conversation-viewer/conversation-viewer.vala:122
+msgid "No conversations found"
+msgstr "Nema pronađenih razgovora"
+
+#. Translators: Sub-title label for placeholder when no
+#. conversations have exist in a folder.
+#: src/client/conversation-viewer/conversation-viewer.vala:113
+msgid "This folder does not contain any conversations"
+msgstr "Ova mapa ne sadrži nikakave razgovore"
+
+#. Translators: Sub-title label for placeholder when no
+#. conversations have been found in a search.
+#: src/client/conversation-viewer/conversation-viewer.vala:126
+msgid "Your search returned no results, try refining your search terms"
+msgstr "Vaša pretraga nema rezultata, pokušajte promijeniti izraz pretrage"
+
+#: src/client/dialogs/attachment-dialog.vala:25
+msgid "Choose a file"
+msgstr "Odaberi datoteku"
+
+#: src/client/dialogs/attachment-dialog.vala:25
+msgid "_Attach"
+msgstr "_Privitak"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:36
+#, c-format
+msgid "Untrusted Connection: %s"
+msgstr "Nesigurno povezivanje: %s"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:38
+#, c-format
+msgid "The identity of the %s mail server at %s:%u could not be verified."
+msgstr "Identitet %s poslužitelja e-pošte na %s:%u ne može se potvrditi."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:48
+msgid ""
+"Selecting “Trust This Server” or “Always Trust This Server” may cause your "
+"username and password to be transmitted insecurely."
+msgstr ""
+"Odabirom \"Vjeruj ovom poslužitelju\" ili \"Uvijek vjeruj ovom poslužitelju"
+"\" može prouzrokovati da vaše ime i lozinka budu preneseni nesigurno."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:56
+msgid ""
+"Selecting “Don’t Trust This Server” will cause Geary not to access this "
+"server."
+msgstr ""
+"Odabirom \"Ne vjeruj ovom poslužitelju\" može prouzrokovati uskraćivanje "
+"pristupa ovom poslužitelju."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:58
+msgid "Geary will not add or update this email account."
+msgstr "Geary neće dodati ili nadopuniti ovaj račun e-pošte."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:63
+msgid ""
+"Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
+"account."
+msgstr ""
+"Odabirom \"Ne vjeruj ovom poslužitelju\" može prouzrokovati zaustavljanje "
+"pristupa ovom računu."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:69
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr ""
+"Kontaktirajte svojeg administratora ili pošaljite e-poštu vašem pružatelju "
+"internet usluge ako imate bilo kakvo pitanje o ovim problemima."
+
+#: src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server’s certificate is not signed by a known authority"
+msgstr ""
+"Vjerodajnica poslužitelja nije potpisana od strane poznatog izdavatelja"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server’s identity does not match the identity in the certificate"
+msgstr ""
+"Identitet poslužitelja se ne podudara s očekivanim identitetom u vjerodajnici"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server’s certificate has expired"
+msgstr "Vjerodajnica poslužitelja je istekla"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server’s certificate has not been activated"
+msgstr "Vjerodajnica poslužitelja nije aktivirana"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server’s certificate has been revoked and is now invalid"
+msgstr "Vjerodajnica poslužitelja je opozvana i nije valjana"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "The server’s certificate is considered insecure"
+msgstr "Vjerodajnica poslužitelja se smatra nesigurnom"
+
+#: src/client/dialogs/certificate-warning-dialog.vala:94
+msgid "An error has occurred processing the server’s certificate"
+msgstr "Greška se dogodila pri obradi vjerodajnice poslužitelja"
+
+#. / Translators: Title for problem report dialog error
+#. / information pane
+#. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:99
+#: ui/problem-details-dialog.ui:17
+msgid "Details"
+msgstr "Pojediosti"
+
+#. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
+#. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
+#. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
+#: src/client/dialogs/password-dialog.vala:16
+msgid "Geary requires your email password to continue"
+msgstr "Geary zahtijeva vašu lozinku e-pošte za nastavak"
+
+#. Translators: Label displaying total number of email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:42
+#, c-format
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d poruka"
+msgstr[1] "%d poruke"
+msgstr[2] "%d poruka"
+
+#. Translators: Label displaying number of unread email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:52
+#, c-format
+msgid "%d unread"
+msgid_plural "%d unread"
+msgstr[0] "%d nepročitana"
+msgstr[1] "%d nepročitane"
+msgstr[2] "%d nepročitanih"
+
+#. Translators: This string represents the divider between two
+#. messages: "n messages" and "n unread", shown in the folder
+#. list as a tooltip.  Please use your languages conventions
+#. for combining the two, i.e. a comma (",") for English; "6
+#. messages, 3 unread"
+#: src/client/folder-list/folder-list-folder-entry.vala:60
+#, c-format
+msgid "%s, %s"
+msgstr "%s, %s"
+
+#: src/client/folder-list/folder-list-inboxes-branch.vala:14
+msgid "Inboxes"
+msgstr "Pretinci"
+
+#: src/client/folder-list/folder-list-search-branch.vala:59
+#, c-format
+msgid "%d result"
+msgid_plural "%d results"
+msgstr[0] "%d rezultat"
+msgstr[1] "%d rezultata"
+msgstr[2] "%d rezultata"
+
+#. / Notification body when a message as been received
+#. / and other unread messages have not been
+#. / seen. First string substitution is the message
+#. / subject and the second is the number of unseen
+#. / messages
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:138
+#, c-format
+msgid ""
+"%s\n"
+"(%d other new message)"
+msgid_plural ""
+"%s\n"
+"(%d other new messages)"
+msgstr[0] ""
+"%s\n"
+"(%d druga nova poruka)"
+msgstr[1] ""
+"%s\n"
+"(%d druge nove poruke)"
+msgstr[2] ""
+"%s\n"
+"(%d drugih novih poruka)"
+
+#. / Notification body when multiple messages have been
+#. / received at the same time and other unseen messages
+#. / exist. String substitution is the number of new
+#. / messages that have arrived.
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:157
+#, c-format
+msgid "%d new message"
+msgid_plural "%d new messages"
+msgstr[0] "%d nova poruka"
+msgstr[1] "%d nove poruke"
+msgstr[2] "%d novih poruka"
+
+#. / Notification body when multiple messages have been
+#. / received at the same time and some unseen messages
+#. / already exist. String substitution is the message
+#. / above with the number of new messages that have
+#. / arrived, number substitution is the total number
+#. / of unseen messages.
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:167
+#, c-format
+msgid "%s, %d new message total"
+msgid_plural "%s, %d new messages total"
+msgstr[0] "%s, %d nova poruka ukupno"
+msgstr[1] "%s, %d nove poruke ukupno"
+msgstr[2] "%s, %d novih poruka ukupno"
+
+#. / Notification title when new messages have been
+#. / received
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:282
+msgid "New message"
+msgid_plural "New messages"
+msgstr[0] "Nova poruka"
+msgstr[1] "Nova poruka"
+msgstr[2] "Nova poruka"
+
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+msgid "Email Templates"
+msgstr "Predlošci e-pošte"
+
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+msgid "Create reusable templates for sending email"
+msgstr "Stvori ponovno upotrebljive predloške za slanje e-pošte"
+
+#. Translators: Templates folder name alternatives. Separate names
+#. using a vertical bar and put the most common localized name to
+#. the front for the default. English names do not need to be
+#. included.
+#: src/client/plugin/email-templates/email-templates.vala:29
+#: src/client/plugin/mail-merge/mail-merge.vala:29
+msgid "Templates | Template Mail | Template Email | Template E-Mail"
+msgstr "Predlošci | Predložak pošte | Predložak e-pošte"
+
+#. Translators: The name of the folder used to
+#. store email templates
+#: src/client/plugin/email-templates/email-templates.vala:201
+msgid "Templates"
+msgstr "Predlošci"
+
+#. Translators: Info bar button label for creating a
+#. new email template
+#: src/client/plugin/email-templates/email-templates.vala:282
+msgid "New"
+msgstr "Novi"
+
+#. Translators: Infobar status label for an email template
+#: src/client/plugin/email-templates/email-templates.vala:293
+msgid "Message template"
+msgstr "Predložak poruke"
+
+#. Translators: Info bar button label for sending an
+#. email template
+#: src/client/plugin/email-templates/email-templates.vala:297
+msgid "Send"
+msgstr "Pošalji"
+
+#. Translators: Info bar button label for editing an
+#. existing email template
+#. Translators: Info bar button label for editing a draft
+#. email
+#: src/client/plugin/email-templates/email-templates.vala:305
+#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/special-folders/special-folders.vala:187
+msgid "Edit"
+msgstr "Uredi"
+
+#. / Translators: Menu item label for invoking mail
+#. / merge in composer
+#. / Translators: File chooser title after invoking mail
+#. / merge in composer
+#. Translators: The name of the folder used to
+#. display merged email
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.vala:288
+#: src/client/plugin/mail-merge/mail-merge.vala:389
+#: src/client/plugin/mail-merge/mail-merge.vala:488
+msgid "Mail Merge"
+msgstr "Spoji poštu"
+
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+msgid "Fill in and send email templates using a spreadsheet"
+msgstr "Popuni i pošalji predloške e-pošte koristeći proračunsku tablicu"
+
+#. Translators: Info bar label for starting sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:118
+msgid "Start"
+msgstr "Pokretanje"
+
+#. Translators: Info bar label for pausing sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:130
+msgid "Pause"
+msgstr "Pauza"
+
+#. Translators: Info bar description for the mail merge
+#. folder. The first string substitution the number of email
+#. already sent, the second is the total number to send.
+#: src/client/plugin/mail-merge/mail-merge.vala:240
+#, c-format
+msgid "Sent %u of %u"
+msgid_plural "Sent %u of %u"
+msgstr[0] "Poslana %u od %u"
+msgstr[1] "Poslano %u od %u"
+msgstr[2] "Poslano %u od %u"
+
+#. Translators: Infobar status label for an email mail merge
+#. template
+#: src/client/plugin/mail-merge/mail-merge.vala:324
+msgid "Mail merge template"
+msgstr "Predložak spajanja pošte"
+
+#. Translators: Info bar button label for performing a
+#. mail-merge on an email template
+#: src/client/plugin/mail-merge/mail-merge.vala:328
+msgid "Merge"
+msgstr "Spoji"
+
+#. / Translators: Action bar menu button label for
+#. / mail-merge plugin
+#: src/client/plugin/mail-merge/mail-merge.vala:377
+msgid "Insert field"
+msgstr "Umetni polje"
+
+#. / Translators: File chooser filer label
+#: src/client/plugin/mail-merge/mail-merge.vala:396
+msgid "Comma separated values (CSV)"
+msgstr "Vrijednosti odvojene zarezom (CSV)"
+
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+msgid "Messaging Menu"
+msgstr "Izbornik razmjene poruka"
+
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+msgid "Displays Unity Messaging Menu notifications for new email"
+msgstr "Prikazuje Unity izbornik razmjene poruka za obavijesti o novoj e-pošti"
+
+#: src/client/plugin/messaging-menu/messaging-menu.vala:79
+#, c-format
+msgid "%s — New Messages"
+msgstr "%s — Nove poruke"
+
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+msgid "Sent Sound"
+msgstr "Zvuk slanja"
+
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+msgid "Plays the desktop sent-mail sound when an email is sent"
+msgstr "Reproducira zvuk slanja radnog okruženja kad je poruka poslana"
+
+#. Translators: Info bar button label for emptying
+#. trash/spam folders
+#: src/client/plugin/special-folders/special-folders.vala:167
+msgid "Empty"
+msgstr "Isprazni"
+
+#. Translators: Info bar status message for a draft email
+#: src/client/plugin/special-folders/special-folders.vala:179
+msgid "Draft message"
+msgstr "Skica poruke"
+
+#. Translators: Info bar status description for a draft
+#. email
+#: src/client/plugin/special-folders/special-folders.vala:182
+msgid "This message has not yet been sent."
+msgstr "Ova poruka još nije poslana."
+
+#. Translators: Info bar status message for an sent but
+#. unsaved email
+#: src/client/plugin/special-folders/special-folders.vala:198
+msgid "Message not saved"
+msgstr "Poruka nije spremljena"
+
+#. Translators: Info bar status description for a sent but
+#. unsaved email
+#: src/client/plugin/special-folders/special-folders.vala:201
+msgid "This message was sent, but has not been saved to your account."
+msgstr "Ova poruka je poslana, ali još nije spremljena na vašem računu."
+
+#. / Datetime format for 12-hour time, i.e. 8:31 am
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:69
+msgid "%l:%M %P"
+msgstr "%H:%M"
+
+#. / Datetime format for 24-hour time, i.e. 16:35
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:72
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / Date format for dates within the current year, i.e. Nov 8
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:79
+msgid "%b %-e"
+msgstr "%-e. %b"
+
+#. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:84
+msgid "%B %-e, %Y %-l:%M %P"
+msgstr "%-e. %B, %Y %H:%M"
+
+#. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:87
+msgid "%B %-e, %Y %-H:%M"
+msgstr "%-e. %B, %Y %-H:%M"
+
+#. / Verbose datetime format for the locale default (full month, day and time)
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:90
+msgctxt "Default full date"
+msgid "%B %-e, %Y %-l:%M %P"
+msgstr "%-e. %B, %Y %H:%M"
+
+#: src/client/util/util-date.vala:159
+msgid "Now"
+msgstr "Sada"
+
+#: src/client/util/util-date.vala:162
+#, c-format
+msgid "%dm ago"
+msgid_plural "%dm ago"
+msgstr[0] "%d minuta prije"
+msgstr[1] "%d minute prije"
+msgstr[2] "%d minuta prije"
+
+#: src/client/util/util-date.vala:166
+#, c-format
+msgid "%dh ago"
+msgid_plural "%dh ago"
+msgstr[0] "%d sat prije"
+msgstr[1] "%d sata prije"
+msgstr[2] "%d sati prije"
+
+#: src/client/util/util-date.vala:173
+msgid "Yesterday"
+msgstr "Jučer"
+
+#. / Date format that shows the weekday (Monday, Tuesday, ...)
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:178
+#, c-format
+msgid "%A"
+msgstr "%A"
+
+#. / 12 hours format for datetime that a message being replied
+#. / to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:218
+msgid "%a, %b %-e, %Y at %l:%M %P"
+msgstr "%a, %-e. %b, %Y u %H:%M"
+
+#. / 24 hours format for the datetime that a message being
+#. / replied to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:224
+msgid "%a, %b %-e, %Y at %H:%M"
+msgstr "%a, %-e. %b, %Y u %H:%M"
+
+#. / Format for the datetime that a message being replied to
+#. / was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:230
+msgid "%a, %b %-e, %Y at %X"
+msgstr "%a, %-e. %b, %Y u %H:%M"
+
+#. Translators: Label used when an email has a missing or
+#. an empty subject
+#: src/client/util/util-email.vala:50
+msgid "(No subject)"
+msgstr "(Bez predmeta)"
+
+#. / Translators: This is shown for displaying a list of email
+#. / recipients that happens to be empty, i.e. contains no
+#. / email addresses.
+#: src/client/util/util-email.vala:148
+msgid "(No recipients)"
+msgstr "(Bez primatelja)"
+
+#. / Translators: This is used for displaying a short
+#. / list of email recipients lists with two or more
+#. / addresses. The first (string) substitution is
+#. / address of the first, the second substitution is
+#. / the number of n - 1 remaining recipients.
+#: src/client/util/util-email.vala:160
+#, c-format
+msgid "%s and %d other"
+msgid_plural "%s and %d others"
+msgstr[0] "%s i %d preostali"
+msgstr[1] "%s i %d preostala"
+msgstr[2] "%s i %d preostalih"
+
+#. / The quoted header for a message being replied to.
+#. / %1$s will be substituted for the date, and %2$s will be substituted for
+#. / the original sender.
+#: src/client/util/util-email.vala:193
+#, c-format
+msgid "On %1$s, %2$s wrote:"
+msgstr "Dana %1$s, %2$s je napisao:"
+
+#. / The quoted header for a message being replied to (in case the date is not known).
+#. / %s will be replaced by the original sender.
+#: src/client/util/util-email.vala:200
+#, c-format
+msgid "%s wrote:"
+msgstr "%s je napisao:"
+
+#. / The quoted header for a message being replied to (in case the sender is not known).
+#. / %s will be replaced by the original date
+#: src/client/util/util-email.vala:206
+#, c-format
+msgid "On %s:"
+msgstr "Dana %s:"
+
+#: src/client/util/util-email.vala:235
+msgid "---------- Forwarded message ----------"
+msgstr "---------- Proslijeđena poruka ----------"
+
+#: src/client/util/util-files.vala:16
+msgid "bytes"
+msgstr "bajta"
+
+#: src/client/util/util-files.vala:19
+msgctxt "Abbreviation for terabyte"
+msgid "TB"
+msgstr "TB"
+
+#: src/client/util/util-files.vala:22
+msgctxt "Abbreviation for gigabyte"
+msgid "GB"
+msgstr "GB"
+
+#: src/client/util/util-files.vala:25
+msgctxt "Abbreviation for megabyte"
+msgid "MB"
+msgstr "MB"
+
+#: src/client/util/util-files.vala:28
+msgctxt "Abbreviation for kilobyte"
+msgid "KB"
+msgstr "KB"
+
+#: src/client/util/util-i18n.vala:271
+msgid "Inbox"
+msgstr "Pristigla pošta"
+
+#: src/client/util/util-i18n.vala:274
+msgid "Drafts"
+msgstr "Skice"
+
+#: src/client/util/util-i18n.vala:277
+msgid "Sent"
+msgstr "Poslano"
+
+#: src/client/util/util-i18n.vala:280
+msgid "Starred"
+msgstr "Označeno"
+
+#: src/client/util/util-i18n.vala:283
+msgid "Important"
+msgstr "Bitno"
+
+#: src/client/util/util-i18n.vala:286
+msgid "All Mail"
+msgstr "Sva pošta"
+
+#: src/client/util/util-i18n.vala:289
+msgid "Junk"
+msgstr "Neželjena pošta"
+
+#: src/client/util/util-i18n.vala:292
+msgid "Trash"
+msgstr "Smeće"
+
+#: src/client/util/util-i18n.vala:295
+msgid "Outbox"
+msgstr "Odlazna pošta"
+
+#: src/client/util/util-i18n.vala:301
+msgid "Archive"
+msgstr "Arhiva"
+
+#. Map of possibly translated search operator names and values
+#. to English/internal names and values. We include the
+#. English version anyway so that when translations provide a
+#. localised version of the operator names but have not also
+#. translated the user manual, the English version in the
+#. manual still works.
+#. Can be typed in the search box like "attachment:file.txt"
+#. to find messages with attachments with a particular name.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:130
+msgctxt "Search operator"
+msgid "attachment"
+msgstr "privitak"
+
+#. Can be typed in the search box like
+#. "bcc:johndoe@example.com" to find messages bcc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:139
+msgctxt "Search operator"
+msgid "bcc"
+msgstr "prima-tajnu-kopiju"
+
+#. Can be typed in the search box like "body:word" to find
+#. "word" only if it occurs in the body of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:147
+msgctxt "Search operator"
+msgid "body"
+msgstr "sadržaj"
+
+#. Can be typed in the search box like
+#. "cc:johndoe@example.com" to find messages cc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:156
+msgctxt "Search operator"
+msgid "cc"
+msgstr "prima-kopiju"
+
+#. Can be typed in the search box like
+#. "from:johndoe@example.com" to find messages from a
+#. particular sender.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:165
+msgctxt "Search operator"
+msgid "from"
+msgstr "šalje"
+
+#. Can be typed in the search box like "is:unread" to find
+#. messages that are read, unread, or starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:173
+msgctxt "Search operator"
+msgid "is"
+msgstr "je"
+
+#. Can be typed in the search box like "subject:word" to find
+#. "word" only if it occurs in the subject of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary
+#. User Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:181
+msgctxt "Search operator"
+msgid "subject"
+msgstr "predmet"
+
+#. Can be typed in the search box like
+#. "to:johndoe@example.com" to find messages received by a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:190
+msgctxt "Search operator"
+msgid "to"
+msgstr "za"
+
+#. Can be typed in the search box after "to:", "cc:" and
+#. "bcc:" e.g.: "to:me". Matches conversations that are
+#. addressed to the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:211
+msgctxt "Search operator value - mail addressed to the user"
+msgid "me"
+msgstr "mene"
+
+#. Can be typed in the search box after "from:" i.e.:
+#. "from:me". Matches conversations were sent by the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:223
+msgctxt "Search operator value - mail sent by the user"
+msgid "me"
+msgstr "mene"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:read". Matches conversations that are flagged as read.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:235
+msgctxt "'is:' search operator value"
+msgid "read"
+msgstr "pročitano"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:starred". Matches conversations that are flagged as
+#. starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:246
+msgctxt "'is:' search operator value"
+msgid "starred"
+msgstr "označeno"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:unread". Matches conversations that are flagged unread.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: src/engine/imap-db/imap-db-search-query.vala:256
+msgctxt "'is:' search operator value"
+msgid "unread"
+msgstr "nepročitano"
+
+#. List of general possible folder names to match for the
+#. Draft mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:996
+msgid "Drafts | Draft"
+msgstr "Skice | Skica"
+
+#. List of general possible folder names to match for the
+#. Sent mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1005
+msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
+msgstr "Pošalji | Pošalji e-poštu | pošalji poštu"
+
+#. The localised name(s) of the Sent folder name as used
+#. by MS Outlook/Exchange.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1010
+msgctxt "Outlook localised name"
+msgid "Sent Items"
+msgstr "Stavke slanja"
+
+#. List of general possible folder names to match for the
+#. Junk/Spam mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
+msgid ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
+msgstr "Neželjena pošta | Neželjena e-pošta | Grupna pošta | Grupna e-pošta"
+
+#. List of general possible folder names to match for the
+#. Trash mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
+msgid "Trash | Rubbish | Rubbish Bin"
+msgstr "Smeće | Koš za smeće"
+
+#. The localised name(s) of the Trash folder name as used
+#. by MS Outlook/Exchange.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1035
+msgctxt "Outlook localised name"
+msgid "Deleted Items"
+msgstr "Obrisane stavke"
+
+#. List of general possible folder names to match for the
+#. Archive mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
+msgid "Archive | Archives"
+msgstr "Arhiva | Arhive"
+
+#: src/engine/rfc822/rfc822-message.vala:528
+#, c-format
+msgid "Could not determine mime type for “%s”."
+msgstr "Nemoguće otkrivanje mime vrste za “%s”."
+
+#: src/engine/rfc822/rfc822-message.vala:539
+#, c-format
+msgid "Could not determine content type for mime type “%s” on “%s”."
+msgstr "Nemoguće otkrivanje vrste sadržaja za mime vrstu “%s” na “%s”."
+
+#: src/engine/rfc822/rfc822-message.vala:1013
+msgid "(no subject)"
+msgstr "(bez predmeta)"
+
+#: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:126
+msgid "Add an account"
+msgstr "Dodaj račun"
+
+#: ui/accounts_editor_add_pane.ui:53
+msgid "_Create"
+msgstr "_Stvori"
+
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
+msgid "Receiving"
+msgstr "Primanje"
+
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
+msgid "Sending"
+msgstr "Slanje"
+
+#: ui/accounts_editor_edit_pane.ui:8
+msgid "Edit Account"
+msgstr "Uredi račun"
+
+#: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
+msgid "Account Name"
+msgstr "Naziv računa"
+
+#: ui/accounts_editor_edit_pane.ui:124
+msgid "Email addresses"
+msgstr "Adrese e-pošte"
+
+#: ui/accounts_editor_edit_pane.ui:164
+msgid "Signature"
+msgstr "Potpis"
+
+#: ui/accounts_editor_edit_pane.ui:201
+msgid "Settings"
+msgstr "Postavke"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:243 ui/accounts_editor_servers_pane.ui:8
+msgid "Server Settings"
+msgstr "Postavke poslužitelja"
+
+#. This is the remove account button in the account settings.
+#: ui/accounts_editor_edit_pane.ui:258 ui/accounts_editor_remove_pane.ui:23
+msgid "Remove Account"
+msgstr "Ukloni račun"
+
+#: ui/accounts_editor_edit_pane.ui:262 ui/accounts_editor_remove_pane.ui:27
+msgid "Remove this account from Geary"
+msgstr "Ukloni ovaj račun iz Gearya"
+
+#: ui/accounts_editor_list_pane.ui:8
+msgid "Accounts"
+msgstr "Računi"
+
+#: ui/accounts_editor_list_pane.ui:62
+msgid "To get started, select an email provider below."
+msgstr "Kako bi započeli, odaberite račun ispod."
+
+#: ui/accounts_editor_list_pane.ui:75
+msgid "Welcome to Geary"
+msgstr "Dobrodošli u Geary"
+
+#. This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.
+#: ui/accounts_editor_remove_pane.ui:73
+#, c-format
+msgid "Confirm removing: %s"
+msgstr "Potvrdi uklanjanje: %s"
+
+#: ui/accounts_editor_remove_pane.ui:91
+msgid ""
+"Removing an account will remove it from Geary and delete locally cached "
+"email data from your computer, but not from your service provider."
+msgstr ""
+"Uklanjanje računa će ga ukloniti iz Gearya i obrisati lokalno spremljene "
+"podatke e-pošte s vašeg računala, ali ne i iz poslužitelja vaših pružatelja "
+"usluge e-pošte."
+
+#: ui/accounts_editor_remove_pane.ui:122
+msgid "Remove account"
+msgstr "Ukloni račun"
+
+#: ui/accounts_editor_servers_pane.ui:47
+msgid "Apply"
+msgstr "Primjeni"
+
+#: ui/certificate_warning_dialog.glade:7
+msgid "Untrusted Connection"
+msgstr "Nepouzdano povezivanje"
+
+#: ui/certificate_warning_dialog.glade:29
+msgid "_Always Trust This Server"
+msgstr "_Uvijek vjeruj ovom poslužitelju"
+
+#: ui/certificate_warning_dialog.glade:43
+msgid "_Trust This Server"
+msgstr "_Vjeruj ovom poslužitelju"
+
+#: ui/certificate_warning_dialog.glade:57
+msgid "_Don’t Trust This Server"
+msgstr "_Ne vjeruj ovom poslužitelju"
+
+#: ui/composer-editor.ui:100
+msgid "Bold text"
+msgstr "Podebljni tekst"
+
+#: ui/composer-editor.ui:124
+msgid "Italic text"
+msgstr "Ukošeni tekst"
+
+#: ui/composer-editor.ui:148
+msgid "Underline text"
+msgstr "Podvučeni tekst"
+
+#: ui/composer-editor.ui:172
+msgid "Strikethrough text"
+msgstr "Precrtani tekst"
+
+#: ui/composer-editor.ui:205
+msgid "Insert bulleted list"
+msgstr "Umetni popis simbolima"
+
+#: ui/composer-editor.ui:229
+msgid "Insert numbered list"
+msgstr "Umetni brojčani popis"
+
+#: ui/composer-editor.ui:262
+msgid "Indent or quote text"
+msgstr "Odlomak ili citat teksta"
+
+#: ui/composer-editor.ui:286
+msgid "Un-indent or unquote text"
+msgstr "Ukloni odlomak ili citat teksta"
+
+#: ui/composer-editor.ui:315
+msgid "Remove text formatting"
+msgstr "Ukloni oblikovanje teksta"
+
+#: ui/composer-editor.ui:334
+msgid "Change font type"
+msgstr "Promijeni vrstu pisma"
+
+#: ui/composer-editor.ui:349
+msgid "Sans Serif"
+msgstr "Sans Serif"
+
+#: ui/composer-editor.ui:360
+msgid "Serif"
+msgstr "Serif"
+
+#: ui/composer-editor.ui:371
+msgid "Fixed Width"
+msgstr "Nepromjenjiva širina"
+
+#: ui/composer-editor.ui:397
+msgid "Change font color"
+msgstr "Promijeni boju pisma"
+
+#: ui/composer-editor.ui:412
+msgid "Change font size"
+msgstr "Promijeni veličinu pisma"
+
+#: ui/composer-editor.ui:447
+msgid "Insert or update text link"
+msgstr "Umetni ili nadopuni tekst poveznice"
+
+#: ui/composer-editor.ui:471
+msgid "Insert an image"
+msgstr "Umetni sliku"
+
+#: ui/composer-editor.ui:513
+msgid "Undo last edit"
+msgstr "Poništi posljednje uređivanje"
+
+#: ui/composer-editor.ui:537
+msgid "Redo last edit"
+msgstr "Ponovi posljednje uređivanje"
+
+#: ui/composer-editor.ui:566 ui/composer-editor.ui:591
+msgid "Attach a file"
+msgstr "Dodaj privitak"
+
+#: ui/composer-editor.ui:615
+msgid "Add original attachments"
+msgstr "Dodaj izvorne privitke"
+
+#: ui/composer-editor.ui:660
+msgid "More options"
+msgstr "Više mogućnosti"
+
+#: ui/composer-editor.ui:680
+msgid "Show formatting toolbar"
+msgstr "Prikaži alatnu traku oblikovanja"
+
+#: ui/composer-editor.ui:698
+msgid "Select spell checking languages"
+msgstr "Odaberi jezike za provjeru pravopisa"
+
+#: ui/composer-editor.ui:723
+msgid "S_ans Serif"
+msgstr "S_ans Serif"
+
+#: ui/composer-editor.ui:728
+msgid "S_erif"
+msgstr "S_erif"
+
+#: ui/composer-editor.ui:733
+msgid "_Fixed Width"
+msgstr "_Nepromjenjiva širina"
+
+#: ui/composer-editor.ui:743
+msgid "_Small"
+msgstr "_Mala"
+
+#: ui/composer-editor.ui:748
+msgid "_Medium"
+msgstr "_Srednja"
+
+#: ui/composer-editor.ui:753
+msgid "Lar_ge"
+msgstr "Veli_ka"
+
+#: ui/composer-editor.ui:763
+msgid "_Rich Text"
+msgstr "_Obogaćeni tekst"
+
+#: ui/composer-editor.ui:768
+msgid "_Plain Text"
+msgstr "_Obični tekst"
+
+#: ui/composer-editor-menus.ui:8
+msgid "_Undo"
+msgstr "_Poništi"
+
+#: ui/composer-editor-menus.ui:12
+msgid "_Redo"
+msgstr "_Ponovi"
+
+#: ui/composer-editor-menus.ui:18 ui/composer-editor-menus.ui:36
+msgid "Cu_t"
+msgstr "Iz_reži"
+
+#: ui/composer-editor-menus.ui:22 ui/composer-editor-menus.ui:40
+#: ui/conversation-message-menus.ui:37
+msgid "_Copy"
+msgstr "_Kopiraj"
+
+#: ui/composer-editor-menus.ui:26 ui/composer-editor-menus.ui:44
+msgid "_Paste"
+msgstr "_Zalijepi"
+
+#: ui/composer-editor-menus.ui:30
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Zalijepi _bez oblikovanja"
+
+#: ui/composer-editor-menus.ui:50
+msgid "Select _All"
+msgstr "Odaberi _sve"
+
+#: ui/composer-editor-menus.ui:57 ui/conversation-message-menus.ui:43
+msgid "_Inspect…"
+msgstr "_Provjeri…"
+
+#: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
+msgid "Detach the composer from the window"
+msgstr "Odvoji sastavljača od prozora"
+
+#: ui/composer-headerbar.ui:135
+msgid "_Send"
+msgstr "_Pošalji"
+
+#: ui/composer-headerbar.ui:162
+msgid "Discard and Close"
+msgstr "Odbaci i zatvori"
+
+#: ui/composer-headerbar.ui:186
+msgid "Save and Close"
+msgstr "Spremi i zatvori"
+
+#. Note that this button and the Update button will never be shown at the same time to the user.
+#: ui/composer-link-popover.ui:42
+msgid "Insert the new link with this URL"
+msgstr "Umetni novu poveznicu s ovim URL-om"
+
+#: ui/composer-link-popover.ui:43
+msgid "Add"
+msgstr "Dodaj"
+
+#: ui/composer-link-popover.ui:47
+msgid "Link URL"
+msgstr "URL poveznice"
+
+#. Note that this button and the Insert button will never be shown at the same time to the user.
+#: ui/composer-link-popover.ui:61
+msgid "Update this link’s URL"
+msgstr "Nadopuni ovu URL poveznicu"
+
+#: ui/composer-link-popover.ui:62
+msgid "Update"
+msgstr "Nadopuni"
+
+#: ui/composer-link-popover.ui:75
+msgid "Delete this link"
+msgstr "Obriši ovu poveznicu"
+
+#. Geary account mail will be sent from
+#: ui/composer-widget.ui:61
+msgid "_From"
+msgstr "_Šalje"
+
+#. Address(es) e-mail is to be sent to
+#: ui/composer-widget.ui:131
+msgid "_To"
+msgstr "_Prima"
+
+#: ui/composer-widget.ui:159
+msgid "Show Cc, Bcc, and Reply-To fields"
+msgstr "Prikaži polja Kopija, Tajna kopija i Odgovor na"
+
+#: ui/composer-widget.ui:220
+msgid "_Cc"
+msgstr "_Prima kopiju"
+
+#: ui/composer-widget.ui:268
+msgid "_Bcc"
+msgstr "_Prima tajnu kopiju"
+
+#: ui/composer-widget.ui:316
+msgid "_Reply-To"
+msgstr "_Odgovor na"
+
+#: ui/composer-widget.ui:373
+msgid "_Subject"
+msgstr "_Predmet"
+
+#: ui/composer-widget.ui:446
+msgid "Drop files here"
+msgstr "Ovdje ispustite datoteke"
+
+#: ui/composer-widget.ui:462
+msgid "To add them as attachments"
+msgstr "Kako bi ih dodali kao privitke"
+
+#: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
+msgid "Select all attachments"
+msgstr "Odaberi sve privitke"
+
+#: ui/components-attachment-pane.ui:66
+msgid "Save selected attachments"
+msgstr "Spremi odabrane privitke"
+
+#: ui/components-attachment-pane.ui:85
+msgid "Open selected attachments"
+msgstr "Otvori odabrane privitke"
+
+#: ui/components-attachment-pane-menus.ui:17
+msgid "Save _All"
+msgstr "Odaberi _sve"
+
+#: ui/components-inspector-error-view.ui:31
+msgid ""
+"If the problem is serious or persists, please save and send these details to "
+"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
+"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">new bug report</a>."
+msgstr ""
+"Ako je problem ozbiljan i nastavi se, spremite i pošaljite ove pojedinosti "
+"na <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kanal kontakta</a> "
+"ili priložite kao <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
+"\">novi izvještaj greške</a>."
+
+#: ui/components-inspector-error-view.ui:47
+msgid "Details:"
+msgstr "Pojedinosti:"
+
+#. Tooltip for inspector button
+#. Tooltip for problem report button
+#: ui/components-inspector.ui:19 ui/problem-details-dialog.ui:24
+msgid "Search for matching log entries"
+msgstr "Pretraži podudaranje u unosima zapisa"
+
+#. Tooltip for inspector button
+#: ui/components-inspector.ui:35
+msgid "Toggle appending new log entries"
+msgstr "Uklj/Isklj dodavanje novih unosa zapisa"
+
+#. Tooltip for inspector button
+#: ui/components-inspector.ui:55
+msgid "Add a marker entry to the log"
+msgstr "Dodaj unos oznake u zapis"
+
+#. Tooltip for inspector button
+#. Tooltip for problem report button
+#: ui/components-inspector.ui:81 ui/problem-details-dialog.ui:51
+msgid "Save logs entries and details"
+msgstr "Spremi unose zapisa i pojedinosti"
+
+#. Tooltip for inspector button
+#. Tooltip for problem report button
+#: ui/components-inspector.ui:101 ui/problem-details-dialog.ui:67
+msgid "Copy to clipboard"
+msgstr "Kopiraj u međuspremnik"
+
+#. Tooltip for inspector button
+#: ui/components-inspector.ui:121
+msgid "Clears all log entries"
+msgstr "Ukloni sve unose zapisa"
+
+#: ui/conversation-contact-popover.ui:146
+msgid "New Conversation…"
+msgstr "Novi razgovor…"
+
+#: ui/conversation-contact-popover.ui:159
+msgid "Copy Email Address"
+msgstr "Kopiraj adresu e-pošte"
+
+#: ui/conversation-contact-popover.ui:182
+msgid "Save in Contacts…"
+msgstr "Spremi u kontakte…"
+
+#: ui/conversation-contact-popover.ui:195
+msgid "Show Conversations"
+msgstr "Prikaži razgovore"
+
+#: ui/conversation-contact-popover.ui:208
+msgid "Open in Contacts"
+msgstr "Otvori u kontaktima"
+
+#: ui/conversation-contact-popover.ui:221
+msgid "Always Load Remote Images"
+msgstr "Uvijek učitaj udaljene slike"
+
+#. Title label on contact popover
+#: ui/conversation-contact-popover.ui:264
+msgid "Deceptive email address"
+msgstr "Obmanjujuća adresa e-pošte"
+
+#. Contact popover label
+#: ui/conversation-contact-popover.ui:294
+msgid "This email address is:"
+msgstr "Adresa ove e-pošte je:"
+
+#. Contact popover label
+#: ui/conversation-contact-popover.ui:319
+msgid "But was forged as:"
+msgstr "Ali je zaboravljena kao:"
+
+#. Contact popover label
+#: ui/conversation-contact-popover.ui:344
+msgid "The sender may not be trustworthy"
+msgstr "Pošiljatelj možda nije pouzdan"
+
+#: ui/conversation-email.ui:27
+msgid "Save all attachments"
+msgstr "Spremi sve privitke"
+
+#. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
+#: ui/conversation-email.ui:50
+msgid "Mark this message as starred"
+msgstr "Označi ovu poruku sa zvjezdicom"
+
+#. Note: The application will never show this button at the same time as star_button, one will always be hidden.
+#: ui/conversation-email.ui:72
+msgid "Mark this message as not starred"
+msgstr "Označi ovu poruku bez zvjezdice"
+
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
+msgid "Reply to _All"
+msgstr "Odgovori _svima"
+
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
+msgid "_Mark Read"
+msgstr "_Označi kao pročitano"
+
+#: ui/conversation-email-menus.ui:36
+msgid "_Mark Unread"
+msgstr "_Označi kao nepročitano"
+
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
+msgid "Mark Unread From _Here"
+msgstr "Označi kao nepročitano od _ovdje"
+
+#. Translators: Menu item to move a single, specific message
+#. to the trash folder
+#: ui/conversation-email-menus.ui:50
+msgid "Move message to _Trash"
+msgstr "Premjesti poruku u _smeće"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+msgid "_Delete message…"
+msgstr "_Obriši poruku…"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
+msgid "_View Source"
+msgstr "_Pogledaj izvor"
+
+#: ui/conversation-message-link-popover.ui:54
+msgid "But actually goes to:"
+msgstr "Ali u stvari usmjerava na:"
+
+#: ui/conversation-message-link-popover.ui:84
+msgid "The link appears to go to:"
+msgstr "Čini se da ova poveznica usmjerava na:"
+
+#: ui/conversation-message-link-popover.ui:96
+msgid "Deceptive link found"
+msgstr "Obmanjujuća poveznica pronađena"
+
+#: ui/conversation-message-link-popover.ui:111
+msgid "The email sender may be leading you to the wrong web site."
+msgstr "Pošiljatelj e-pošte možda vas usmjerava na pogrešnu web stranicu."
+
+#: ui/conversation-message-link-popover.ui:124
+msgid "If unsure, contact the sender and ask before continuing."
+msgstr "Ako niste sigurni, kontaktirajte pošiljatelja prije slanja."
+
+#: ui/conversation-message-menus.ui:7
+msgid "_Open Link"
+msgstr "_Otvori poveznicu"
+
+#: ui/conversation-message-menus.ui:11
+msgid "Copy Link _Address"
+msgstr "Kopiraj _adresu poveznice"
+
+#: ui/conversation-message-menus.ui:17
+msgid "_New Conversation…"
+msgstr "_Novi razgovor…"
+
+#: ui/conversation-message-menus.ui:21
+msgid "Copy Email _Address"
+msgstr "Kopiraj adresu _e-pošte"
+
+#: ui/conversation-message-menus.ui:27
+msgid "Save _Image As…"
+msgstr "Spremi _sliku kao…"
+
+#: ui/conversation-message-menus.ui:33
+msgid "_Select All"
+msgstr "_Odaberi sve"
+
+#: ui/conversation-message.ui:63
+msgid "From <email>"
+msgstr "Posalo <email>"
+
+#: ui/conversation-message.ui:79 ui/conversation-message.ui:178
+msgid "1/1/1970\t"
+msgstr "1/1/1970\t"
+
+#: ui/conversation-message.ui:102
+msgid "Preview body text."
+msgstr "Pregled sadržaja teksta."
+
+#: ui/conversation-message.ui:202
+msgid "Sent by:"
+msgstr "Poslao:"
+
+#: ui/conversation-message.ui:247
+msgid "Reply to:"
+msgstr "Odgovor na:"
+
+#: ui/conversation-message.ui:291
+msgid "Subject"
+msgstr "Predmet"
+
+#: ui/conversation-viewer.ui:60
+msgid "Find in conversation"
+msgstr "Pretraži u razgovoru"
+
+#: ui/conversation-viewer.ui:75
+msgid "Find the previous occurrence of the search string."
+msgstr "Pretraži prijašnje pojavljivanje izraza pretrage."
+
+#: ui/conversation-viewer.ui:96
+msgid "Find the next occurrence of the search string."
+msgstr "Pretraži sljedeće pojavljivanje izraza pretrage."
+
+#: ui/find_bar.glade:66
+msgid "Find:"
+msgstr "Pretraži:"
+
+#: ui/find_bar.glade:89
+msgid "_Previous"
+msgstr "_Prijašnje"
+
+#: ui/find_bar.glade:107
+msgid "_Next"
+msgstr "_Sljedeće"
+
+#: ui/find_bar.glade:125
+msgid "_Case sensitive"
+msgstr "Velika/Mala slova"
+
+#: ui/find_bar.glade:145
+msgid "label"
+msgstr "natpis"
+
+#: ui/gtk/help-overlay.ui:9
+msgid "Conversation Shortcuts"
+msgstr "Prečaci razgovora"
+
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:377
+msgctxt "shortcut window"
+msgid "Actions"
+msgstr "Radnje"
+
+#: ui/gtk/help-overlay.ui:17
+msgctxt "shortcut window"
+msgid "New conversation"
+msgstr "Novi razgovor"
+
+#: ui/gtk/help-overlay.ui:24
+msgctxt "shortcut window"
+msgid "Reply to sender"
+msgstr "Odgovori pošiljatelju"
+
+#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:281
+msgctxt "shortcut window"
+msgid "Reply to all"
+msgstr "Odgovori svima"
+
+#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:288
+msgctxt "shortcut window"
+msgid "Forward"
+msgstr "Proslijedi"
+
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:295
+msgctxt "shortcut window"
+msgid "Un-mark/mark read"
+msgstr "Označi/Ukloni oznaku pročitano"
+
+#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:302
+msgctxt "shortcut window"
+msgid "Mark/un-mark starred"
+msgstr "Označi/Ukloni oznaku zvjezdice"
+
+#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:309
+msgctxt "shortcut window"
+msgid "Archive conversations"
+msgstr "Arhiviraj razgovore"
+
+#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:326
+msgctxt "shortcut window"
+msgid "Move conversations"
+msgstr "Premjesti razgovore"
+
+#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:333
+msgctxt "shortcut window"
+msgid "Label conversations"
+msgstr "Natpis razgovora"
+
+#: ui/gtk/help-overlay.ui:80
+msgctxt "shortcut window"
+msgid "Trash conversations"
+msgstr "Premjesti razgovore u smeće"
+
+#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
+msgctxt "shortcut window"
+msgid "Junk conversations"
+msgstr "Premjesti razgovore u neželjenu poštu"
+
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
+msgctxt "shortcut window"
+msgid "Delete conversations"
+msgstr "Obriši razgovore"
+
+#: ui/gtk/help-overlay.ui:104
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Pretraga"
+
+#: ui/gtk/help-overlay.ui:108
+msgctxt "shortcut window"
+msgid "Search for conversations"
+msgstr "Pretraži razgovore"
+
+#: ui/gtk/help-overlay.ui:115 ui/gtk/help-overlay.ui:354
+msgctxt "shortcut window"
+msgid "Find in current conversation"
+msgstr "Pretraži u trenutnom razgovoru"
+
+#: ui/gtk/help-overlay.ui:141
+msgctxt "shortcut window"
+msgid "Undo"
+msgstr "Vrati"
+
+#: ui/gtk/help-overlay.ui:145
+msgctxt "shortcut window"
+msgid "Undo the last action"
+msgstr "Vrati posljednju radnju"
+
+#: ui/gtk/help-overlay.ui:152
+msgctxt "shortcut window"
+msgid "Redo the last action"
+msgstr "Ponovi posljednju radnju"
+
+#: ui/gtk/help-overlay.ui:161
+msgctxt "shortcut window"
+msgid "View"
+msgstr "Pogled"
+
+#: ui/gtk/help-overlay.ui:165
+msgctxt "shortcut window"
+msgid "Zoom in"
+msgstr "Uvećaj"
+
+#: ui/gtk/help-overlay.ui:172
+msgctxt "shortcut window"
+msgid "Zoom out"
+msgstr "Umanji"
+
+#: ui/gtk/help-overlay.ui:179
+msgctxt "shortcut window"
+msgid "Reset zoom"
+msgstr "Izvorni pogled"
+
+#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:404
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Općenito"
+
+#: ui/gtk/help-overlay.ui:192
+msgctxt "shortcut window"
+msgid "Show help"
+msgstr "Prikaži priručnik"
+
+#: ui/gtk/help-overlay.ui:199
+msgctxt "shortcut window"
+msgid "Show keyboard shortcuts"
+msgstr "Prikaži prečace tipkovnice"
+
+#: ui/gtk/help-overlay.ui:206
+msgctxt "shortcut window"
+msgid "Open a new window"
+msgstr "Otvori novi prozor"
+
+#: ui/gtk/help-overlay.ui:213
+msgctxt "shortcut window"
+msgid "Close the current window"
+msgstr "Zatvori trenutni prozor"
+
+#: ui/gtk/help-overlay.ui:220
+msgctxt "shortcut window"
+msgid "Quit the application"
+msgstr "Zatvori aplikaciju"
+
+#: ui/gtk/help-overlay.ui:229
+msgctxt "shortcut window"
+msgid "Keyboard navigation"
+msgstr "Upravljanje tipkovnicom"
+
+#: ui/gtk/help-overlay.ui:233
+msgctxt "shortcut window"
+msgid "Go to next/previous pane"
+msgstr "Idi na prijašnji/sljedeći okvir"
+
+#: ui/gtk/help-overlay.ui:241
+msgctxt "shortcut window"
+msgid "Select next/previous conversation"
+msgstr "Odaberi prijašnji/sljedeći razgovor"
+
+#: ui/gtk/help-overlay.ui:248
+msgctxt "shortcut window"
+msgid "Focus next/previous message"
+msgstr "Fokusiraj prijašnju/sljedeću poruku"
+
+#: ui/gtk/help-overlay.ui:260
+msgid "Single-key Shortcuts"
+msgstr "Prečaci jednom tipkom"
+
+#: ui/gtk/help-overlay.ui:265
+msgctxt "shortcut window"
+msgid "Single-key shortcuts (if enabled)"
+msgstr "Prečaci jednom tipkom (ako je omogućeno)"
+
+#: ui/gtk/help-overlay.ui:274
+msgctxt "shortcut window"
+msgid "Reply to sender "
+msgstr "Odgovori pošiljatelju "
+
+#: ui/gtk/help-overlay.ui:361
+msgctxt "shortcut window"
+msgid "Select next/previous conversations"
+msgstr "Odaberi prijašnje/sljedeće razgovore"
+
+#: ui/gtk/help-overlay.ui:373
+msgid "Composer Shortcuts"
+msgstr "Prečaci sastavljača"
+
+#: ui/gtk/help-overlay.ui:381
+msgctxt "shortcut window"
+msgid "Send"
+msgstr "Pošalji"
+
+#: ui/gtk/help-overlay.ui:388
+msgctxt "shortcut window"
+msgid "Add attachment"
+msgstr "Dodaj privitak"
+
+#: ui/gtk/help-overlay.ui:395
+msgctxt "shortcut window"
+msgid "Detach the composer"
+msgstr "Odvoji sastavljača"
+
+#: ui/gtk/help-overlay.ui:408
+msgctxt "shortcut window"
+msgid "Close composer window"
+msgstr "Zatvori prozor sastavljača"
+
+#: ui/gtk/help-overlay.ui:415
+msgctxt "shortcut window"
+msgid "Detach composer window"
+msgstr "Odvoji prozor sastavljača"
+
+#: ui/gtk/help-overlay.ui:422
+msgctxt "shortcut window"
+msgid "Editing"
+msgstr "Uređivanje"
+
+#: ui/gtk/help-overlay.ui:427
+msgctxt "shortcut window"
+msgid "Move selection to the clipboard"
+msgstr "Premjesti odabir u međuspremnik"
+
+#: ui/gtk/help-overlay.ui:434
+msgctxt "shortcut window"
+msgid "Copy selection to clipboard"
+msgstr "Kopiraj odabir u međuspremnik"
+
+#: ui/gtk/help-overlay.ui:441
+msgctxt "shortcut window"
+msgid "Paste from the clipboard"
+msgstr "Zalijepi iz međuspremnika"
+
+#: ui/gtk/help-overlay.ui:448
+msgctxt "shortcut window"
+msgid "Quote text"
+msgstr "Citiraj tekst"
+
+#: ui/gtk/help-overlay.ui:455
+msgctxt "shortcut window"
+msgid "Unquote text"
+msgstr "Ukloni citat teksta"
+
+#: ui/gtk/help-overlay.ui:464
+msgctxt "shortcut window"
+msgid "Rich text editing"
+msgstr "Uređivanje obogaćenog teksta"
+
+#: ui/gtk/help-overlay.ui:468
+msgctxt "shortcut window"
+msgid "Paste without formatting"
+msgstr "Zalijepi bez oblikovanja"
+
+#: ui/gtk/help-overlay.ui:475
+msgctxt "shortcut window"
+msgid "Bold text"
+msgstr "Podebljni tekst"
+
+#: ui/gtk/help-overlay.ui:482
+msgctxt "shortcut window"
+msgid "Italicize text"
+msgstr "Ukošeni tekst"
+
+#: ui/gtk/help-overlay.ui:489
+msgctxt "shortcut window"
+msgid "Underline text"
+msgstr "Podvučeni tekst"
+
+#: ui/gtk/help-overlay.ui:496
+msgctxt "shortcut window"
+msgid "Strike text"
+msgstr "Precrtani tekst"
+
+#: ui/gtk/help-overlay.ui:503
+msgctxt "shortcut window"
+msgid "Remove formatting"
+msgstr "Ukloni oblikovanje"
+
+#: ui/gtk/help-overlay.ui:510
+msgctxt "shortcut window"
+msgid "Insert an image"
+msgstr "Umetni sliku"
+
+#: ui/gtk/help-overlay.ui:517
+msgctxt "shortcut window"
+msgid "Insert a link"
+msgstr "Umetni poveznicu"
+
+#: ui/main-toolbar.ui:24
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "Sastavljanje poruke"
+
+#: ui/main-toolbar.ui:62
+msgid "Toggle search bar"
+msgstr "Uklj/Isklj traku pretrage"
+
+#: ui/main-toolbar.ui:114
+msgid "Reply"
+msgstr "Odgovori"
+
+#: ui/main-toolbar.ui:137
+msgid "Reply All"
+msgstr "Odgovori svima"
+
+#: ui/main-toolbar.ui:160
+msgid "Forward"
+msgstr "Proslijedi"
+
+#: ui/main-toolbar.ui:265
+msgid "Toggle find bar"
+msgstr "Uklj/Isklj traku pretrage"
+
+#: ui/main-toolbar.ui:286
+msgid "_Archive"
+msgstr "_Arhiva"
+
+#: ui/main-toolbar-menus.ui:21
+msgid "Toggle as _Junk"
+msgstr "Označi kao _neželjenu poštu"
+
+#: ui/main-toolbar-menus.ui:28
+msgid "_Accounts"
+msgstr "_Računi"
+
+#: ui/main-toolbar-menus.ui:36
+msgid "_Keyboard Shortcuts"
+msgstr "_Prečaci tipkovnice"
+
+#: ui/main-toolbar-menus.ui:47
+msgid "_About Geary"
+msgstr "_O Gearyu"
+
+#: ui/password-dialog.glade:74
+msgid "SMTP Credentials"
+msgstr "SMTP vjerodajnice"
+
+#: ui/password-dialog.glade:91
+msgid "Username"
+msgstr "Korisničko ime"
+
+#: ui/password-dialog.glade:152
+msgid "_Remember password"
+msgstr "_Zapamti lozinku"
+
+#: ui/password-dialog.glade:210
+msgid "_Authenticate"
+msgstr "_Ovjera"
+
+#: ui/upgrade_dialog.glade:60
+msgid "Geary update in progress…"
+msgstr "Geary nadopuna u tijeku…"
+
+#~ msgid "Log periodic activity"
+#~ msgstr "Zapisuj povremene aktivnosti"
+
+#~ msgid "Log IMAP network serialization"
+#~ msgstr "Zapisuj serijalizaciju IMAP mreže"
+
+#~ msgid "Desktop Notifications"
+#~ msgstr "Obavijesti radne površine"
+
+#~ msgid "Displays desktop notifications when new email is delivered"
+#~ msgstr "Obavijest radnog okruženja o dostavi nove pošte"
+
+#~ msgid "Folder Highlight"
+#~ msgstr "Naglašavanje mape"
+
+#~ msgid "Highlights folders that have newly delivered mail"
+#~ msgstr "Naglasi mape koje imaju novo dostavljenu e-poštu"
+
+#~ msgid "Notification Badge"
+#~ msgstr "Značka obavijesti"
+
+#~ msgid "Displays a dock badge showing the number of new messages"
+#~ msgstr ""
+#~ "Prikazuje značku obavijesti u doku na kojoj se prikazuje broj novih poruka"
+
+#~ msgid "Special Folders"
+#~ msgstr "Posebne mape"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Find in current conversations"
+#~ msgstr "Pretraži u trenutnim razgovorima"
+
+#~ msgid "mail-send"
+#~ msgstr "mail-send"
+
+#~ msgid "@appid@"
+#~ msgstr "@appid@"
+
+#~ msgid "Sent Mail"
+#~ msgstr "Slanje pošte"
+
+#~ msgid "Spam"
+#~ msgstr "Neželjena pošta"
+
+#~ msgid ""
+#~ "Your computer does not appear to be connected to the Internet.\n"
+#~ "You will not be able to send or receive email until it is re-connected."
+#~ msgstr ""
+#~ "Čini se da vaše računalo nema pristup internetu.\n"
+#~ "Nećete moći slati ili primati e-poštu dok se ponovno ne povežete s "
+#~ "internetom."
+
+#~ msgid ""
+#~ "An account has reported an untrusted server.\n"
+#~ "Please check the server configuration and try again."
+#~ msgstr ""
+#~ "Račun je prijavio nepouzdanog poslužitelja.\n"
+#~ "Provjerite postavke poslužitelja i pokušajte ponovno."
+
+#~ msgid ""
+#~ "An account has reported an incorrect login or password.\n"
+#~ "Please check your login name and try again."
+#~ msgstr ""
+#~ "Račun je prijavio nevaljanu lozinku prijave.\n"
+#~ "Provjerite svoje ime prijave i pokušajte ponovno."
+
+#~ msgid "From"
+#~ msgstr "Šalje"
+
+#~ msgid "Edit Draft"
+#~ msgstr "Uredi skicu"
+
+#~ msgid "Empty _Spam…"
+#~ msgstr "Isprazni _neželjenu poštu…"
+
+#~ msgid "Empty _Trash…"
+#~ msgstr "Isprazni _smeće…"
+
+#~ msgid "%a, %b %-e, %Y at %-l:%M %p"
+#~ msgstr "%a, %-e. %b, %Y u %H:%M %p"
+
+#~ msgctxt "Default clock format"
+#~ msgid "%l:%M %P"
+#~ msgstr "%H:%M"
+
+#~ msgid "%x"
+#~ msgstr "%x"
+
+#~ msgid "Allow inspection of WebView"
+#~ msgstr "Dozvoliti inspekciju WebView-a"
+
+#~ msgid "Bold (Ctrl+B)"
+#~ msgstr "Zadebljano (Ctrl+B)"
+
+#~ msgid "C_olor"
+#~ msgstr "B_oja"
+
+#~ msgid "Failed to open default text editor."
+#~ msgstr "Nije bilo moguće otvoriti podrazumijevani uređivač teksta"
+
+#~ msgid "Failed to parse command line options: %s\n"
+#~ msgstr "Nije bilo moguće izvršiti opcije komandne linije: %s\n"
+
+#~ msgid "Indexing %s account"
+#~ msgstr "Indeksiranje %s računa"
+
+#~ msgid "Italic (Ctrl+I)"
+#~ msgstr "Kurziv (Ctrl+I)"
+
+#~ msgid "Log network deserialization"
+#~ msgstr "Bilježi serijalizaciju mreže"
+
+#~ msgid "Log network serialization"
+#~ msgstr "Logiranje mrežne serijalizacije"
+
+#~ msgid "Mark as S_pam"
+#~ msgstr "Označi kao S_pam"
+
+#~ msgid "Mark as not S_pam"
+#~ msgstr "Označi da nije S_pam"
+
+#~ msgid "Open"
+#~ msgstr "Otvaranje"
+
+#~ msgid "Output debugging information"
+#~ msgstr "Ispis informacije o debugiranju"
+
+#~ msgid "Please report comments, suggestions and bugs to:"
+#~ msgstr "Molimo, šaljite vaše komentare, prijedloge i bugove na:"
+
+#~ msgid "Quote text  (Ctrl+])"
+#~ msgstr "Citiraj tekst (Ctrl+])"
+
+#~ msgid "Reading"
+#~ msgstr "Čitanje"
+
+#~ msgid "Search all mail in account for keywords (Ctrl+S)"
+#~ msgstr "Pretraži svu poštu unutar računa po ključnim riječima (Ctrl+S)"
+
+#~ msgid "Strikethrough (Ctrl+K)"
+#~ msgstr "Precrtano (Ctrl+K)"
+
+#~ msgid "Underline (Ctrl+U)"
+#~ msgstr "Podcrtano (Ctrl+U)"
+
+#~ msgid "_Play notification sounds"
+#~ msgstr "_Zvuk napomena"
+
+#~ msgid "        &#8226; Connection error.\n"
+#~ msgstr "        &#8226; Greška spajanja.\n"
+
+#~ msgid "        &#8226; Email address already added to Geary.\n"
+#~ msgstr "        &#8226; Adresa e-pošte je već dodana u Geary.\n"
+
+#~ msgid "        &#8226; IMAP connection error.\n"
+#~ msgstr "        &#8226; Greška IMAP spajanja.\n"
+
+#~ msgid "        &#8226; IMAP username or password incorrect.\n"
+#~ msgstr "        &#8226; IMAP korisničko ime i lozinka netočni.\n"
+
+#~ msgid "        &#8226; Invalid account nickname.\n"
+#~ msgstr "        &#8226; Neispravan nadimak računa.\n"
+
+#~ msgid "        &#8226; SMTP connection error.\n"
+#~ msgstr "        &#8226; Greška SMTP konekcije.\n"
+
+#~ msgid "        &#8226; SMTP username or password incorrect.\n"
+#~ msgstr "        &#8226; SMTP korisničko ime i lozinka netočni.\n"
+
+#~ msgid "        &#8226; Username or password incorrect.\n"
+#~ msgstr "        &#8226; Korisničko ime i lozinka netočni.\n"
+
+#~ msgid " (Invalid?)"
+#~ msgstr " (Neispravno?)"
+
+#~ msgid "%i matches"
+#~ msgstr "%i rezultata"
+
+#~ msgid "%i matches (wrapped)"
+#~ msgstr "%i rezultata (označeno)"
+
+#~ msgid "%u read messages"
+#~ msgstr "%u pročitanih poruka"
+
+#~ msgid "Archive conversation (Delete, Backspace, A)"
+#~ msgstr "Arhiviranje razgovora (Delete, Bakspace, A)"
+
+#~ msgid "Archive conversations (Delete, Backspace, A)"
+#~ msgstr "Arhiviranje razgovora (Delete, Bakspace, A)"
+
+#~ msgid "Copy _Link"
+#~ msgstr "Kopiranje _linka"
+
+#~ msgid "Copyright 2011-2013 Yorba Foundation"
+#~ msgstr "Copyright 2011-2013 Yorba Foundation"
+
+#~ msgid "Delete conversation (Delete, Backspace, A)"
+#~ msgstr "Brisanje razgovora (Delete, Bakspace, A)"
+
+#~ msgid "Delete conversations (Delete, Backspace, A)"
+#~ msgstr "Brisanje razgovora (Delete, Bakspace, A)"
+
+#~ msgid "Do you want to discard the unsaved message?"
+#~ msgstr "Želite li zaista odbaciti ovu poruku?"
+
+#~ msgid "E_mail address:"
+#~ msgstr "Adrese e-pošte:"
+
+#~ msgid "Encr_yption:"
+#~ msgstr "E_nkripcija:"
+
+#~ msgid "Encrypt_ion:"
+#~ msgstr "Enkripc_ija:"
+
+#~ msgid "IMAP Credentials"
+#~ msgstr "IMAP prijava"
+
+#~ msgid "Large"
+#~ msgstr "Veliko"
+
+#~ msgid "Link (Ctrl+L)"
+#~ msgstr "Link (Ctrl+L)"
+
+#~ msgid "Mail Client"
+#~ msgstr "Klijent za e-mail"
+
+#~ msgid "Medium"
+#~ msgstr "Srednje"
+
+#~ msgid "N_ame:"
+#~ msgstr "I_me:"
+
+#~ msgid "N_ickname:"
+#~ msgstr "Nad_imak"
+
+#~ msgid "No search results found."
+#~ msgstr "Nema rezultata unutar pretrage."
+
+#~ msgid "P_ort:"
+#~ msgstr "P_ort:"
+
+#~ msgid "Pass_word:"
+#~ msgstr "_Lozinka:"
+
+#~ msgid "Password:"
+#~ msgstr "Lozinka:"
+
+#~ msgid "Por_t:"
+#~ msgstr "Por_t:"
+
+#~ msgid "Port:"
+#~ msgstr "Port:"
+
+#~ msgid "Real name:"
+#~ msgstr "Stvarno ime:"
+
+#~ msgid "SSL"
+#~ msgstr "SSL"
+
+#~ msgid "SSL/TLS encryption:"
+#~ msgstr "SSL/TLS enkripcija:"
+
+#~ msgid "S_ervice:"
+#~ msgstr "Servis:"
+
+#~ msgid "Se_rver:"
+#~ msgstr "Se_rver:"
+
+#~ msgid "Ser_ver:"
+#~ msgstr "Ser_ver:"
+
+#~ msgid "Server:"
+#~ msgstr "Server:"
+
+#~ msgid "Service:"
+#~ msgstr "Usluga:"
+
+#~ msgid "Small"
+#~ msgstr "Malo"
+
+#~ msgid ""
+#~ "The version number of the local mail database is formatted for a newer "
+#~ "version of Geary. Unfortunately, the database cannot be \"rolled back\" "
+#~ "to work with this version of Geary.\n"
+#~ "\n"
+#~ "Please install the latest version of Geary and try again."
+#~ msgstr ""
+#~ "Broj verzije lokalne baze podataka e-pošte je formatiran za noviju "
+#~ "inačicu Gearyija. Na žalost, bazu podataka nije moguće \"vratiti natrag\" "
+#~ "za rad sa ovom inačicom Gearyija.\n"
+#~ "\n"
+#~ "Molimo instalirajte najnoviju inačicu Gearyija i pokušajte ponovo."
+
+#~ msgid "Unrecognized command line option \"%s\"\n"
+#~ msgstr "Nepoznata opcija komandne linije \"%s\"\n"
+
+#~ msgid "User_name:"
+#~ msgstr "Korisničko _ime::"
+
+#~ msgid "_Center"
+#~ msgstr "_Centar"
+
+#~ msgid "_Donate"
+#~ msgstr "_Doniraj"
+
+#~ msgid "_Justify"
+#~ msgstr "_Poravnanje"
+
+#~ msgid "_Left"
+#~ msgstr "_Lijevo"
+
+#~ msgid "_Mark as..."
+#~ msgstr "_Označi kao..."
+
+#~ msgid "_Password:"
+#~ msgstr "_Lozinka:"
+
+#~ msgid "_Right"
+#~ msgstr "_Desno"
+
+#~ msgid "_Username:"
+#~ msgstr "_Korisničko ime:"
+
+#~ msgid "attach|enclosed|enclosing|cover letter"
+#~ msgstr "priloži|uloži|uloženo|naslovi pismo"
+
+#~ msgid "none"
+#~ msgstr "nema"
