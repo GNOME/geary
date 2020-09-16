@@ -425,10 +425,17 @@
       </packing>
     </child>
   </template>
-  <object class="HdyHeaderGroup" id="header_group">
+  <object class="HdyHeaderGroup" id="conversations_header_group">
+    <property name="decorate-all" bind-source="conversations_leaflet" bind-property="folded" bind-flags="sync-create"/>
     <headerbars>
       <headerbar name="folder_header"/>
       <headerbar name="conversations_header"/>
+    </headerbars>
+  </object>
+  <object class="HdyHeaderGroup" id="header_group">
+    <property name="decorate-all" bind-source="MainToolbar" bind-property="folded" bind-flags="sync-create"/>
+    <headerbars>
+      <headerbar name="conversations_header_group"/>
       <headerbar name="conversation_header"/>
     </headerbars>
   </object>
