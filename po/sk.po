@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-08-29 01:59+0000\n"
-"PO-Revision-Date: 2020-09-16 13:28+0200\n"
+"POT-Creation-Date: 2020-09-19 08:49+0000\n"
+"PO-Revision-Date: 2020-09-21 13:51+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak <gnome-sk-list@gnome.org>\n"
 "Language: sk\n"
@@ -212,6 +212,8 @@ msgstr "Automaticky vybrať ďalšiu správu"
 #: desktop/org.gnome.Geary.gschema.xml:63
 msgid "True if we should autoselect the next available conversation."
 msgstr ""
+"Nastavte na True, ak by sme mali automaticky vybrať nasledujúci dostupný "
+"rozhovor."
 
 #: desktop/org.gnome.Geary.gschema.xml:68
 msgid "Display message previews"
@@ -219,7 +221,7 @@ msgstr "Zobraziť náhľady správ"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
 msgid "True if we should display a short preview of each message."
-msgstr ""
+msgstr "Nastavte na True, ak by sme mali zobraziť krátky náhľad každej správy."
 
 #: desktop/org.gnome.Geary.gschema.xml:74
 msgid "Use single key shortcuts"
@@ -261,7 +263,7 @@ msgstr "Nastavením na True, bude oznamovaná nová pošta po spustení."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Ask when opening an attachment"
-msgstr ""
+msgstr "Opýtať sa pri otváraní prílohy"
 
 #: desktop/org.gnome.Geary.gschema.xml:103
 msgid "True to ask when opening an attachment."
@@ -290,7 +292,7 @@ msgstr "Priblíženie prehliadača konverzácií"
 
 #: desktop/org.gnome.Geary.gschema.xml:121
 msgid "The zoom to apply on the conservation view."
-msgstr ""
+msgstr "Priblíženie, ktoré sa má použiť pre zobrazenie rozhovorov."
 
 #: desktop/org.gnome.Geary.gschema.xml:126
 msgid "Size of detached composer window"
@@ -298,7 +300,7 @@ msgstr "Veľkosť odpojeného okna tvorcu správ"
 
 #: desktop/org.gnome.Geary.gschema.xml:127
 msgid "The last recorded size of the detached composer window."
-msgstr ""
+msgstr "Posledná zaznamenaná veľkosť odpojeného okna tvorcu správ."
 
 #: desktop/org.gnome.Geary.gschema.xml:132
 msgid "Undo sending email delay"
@@ -314,13 +316,15 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:139
 msgid "Brief notification display time"
-msgstr ""
+msgstr "Doba zobrazenia stručného oznámenia"
 
 #: desktop/org.gnome.Geary.gschema.xml:140
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
+"Dĺžka trvania v sekundách, počas ktorého by mali byť zobrazované stručné "
+"oznámenia."
 
 #: desktop/org.gnome.Geary.gschema.xml:146
 msgid "List of optional plugins"
@@ -958,13 +962,13 @@ msgstr "Dušan Kazik <prescott66@gmail.com>"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1047
+#: src/client/application/application-client.vala:1045
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Voľba „--hidden“ je zastaraná a bude v budúcnosti odstránená."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1080
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný parameter programu: „%s“"
@@ -1140,21 +1144,21 @@ msgstr ""
 #: src/client/application/application-controller.vala:1501
 #, c-format
 msgid "Email sent to %s"
-msgstr "Email pre %s bol odoslaný"
+msgstr "Email pre príjemcu %s bol odoslaný"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2491
 #, c-format
 msgid "Email to %s queued for delivery"
-msgstr "Email pre %s bol zaradený do fronty na doručenie"
+msgstr "Email pre príjemcu %s bol zaradený do fronty na doručenie"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2555
 #, c-format
 msgid "Email to %s saved"
-msgstr "Email pre %s bol uložený"
+msgstr "Email pre príjemcu %s bol uložený"
 
 #. / Translators: A label for an in-app notification.
 #: src/client/application/application-controller.vala:2570
@@ -1167,7 +1171,7 @@ msgstr "Nepodarilo sa obnoviť tvorcu správ"
 #: src/client/application/application-controller.vala:2613
 #, c-format
 msgid "Email to %s discarded"
-msgstr "Email pre %s bol zahodený"
+msgstr "Email pre príjemcu %s bol zahodený"
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:540
@@ -1334,7 +1338,7 @@ msgstr "Uložiť ako"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/accounts_editor_servers_pane.ui:17
+#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
 msgid "Cancel"
 msgstr "Zrušiť"
 
@@ -2185,7 +2189,6 @@ msgstr "Vytvára opakovane použiteľné šablóny na odosielanie emailov"
 #. included.
 #: src/client/plugin/email-templates/email-templates.vala:29
 #: src/client/plugin/mail-merge/mail-merge.vala:29
-#| msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
 msgstr "Šablóny | Poštová šablóna | Šablóna emailu | Šablóna e-mailu"
 
@@ -2195,11 +2198,12 @@ msgstr "Šablóny | Poštová šablóna | Šablóna emailu | Šablóna e-mailu"
 msgid "Templates"
 msgstr "Šablóny"
 
+# DK: šablóna
 #. Translators: Info bar button label for creating a
 #. new email template
 #: src/client/plugin/email-templates/email-templates.vala:282
 msgid "New"
-msgstr "Nový"
+msgstr "Nová"
 
 #. Translators: Infobar status label for an email template
 #: src/client/plugin/email-templates/email-templates.vala:293
@@ -2233,11 +2237,11 @@ msgstr "Upraviť"
 #: src/client/plugin/mail-merge/mail-merge.vala:389
 #: src/client/plugin/mail-merge/mail-merge.vala:488
 msgid "Mail Merge"
-msgstr ""
+msgstr "Zlúčenie pošty"
 
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
 msgid "Fill in and send email templates using a spreadsheet"
-msgstr ""
+msgstr "Vyplní šablóny emailov na odoslanie pomocou tabuľkového súboru"
 
 #. Translators: Info bar label for starting sending a mail
 #. merge
@@ -2258,21 +2262,21 @@ msgstr "Pozastaviť"
 #, c-format
 msgid "Sent %u of %u"
 msgid_plural "Sent %u of %u"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Odoslaných %u emailov z %u"
+msgstr[1] "Odoslaný %u email z %u"
+msgstr[2] "Odoslané %u emaily z %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
 #: src/client/plugin/mail-merge/mail-merge.vala:324
 msgid "Mail merge template"
-msgstr ""
+msgstr "Šablóna pre zlúčenie pošty"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
 #: src/client/plugin/mail-merge/mail-merge.vala:328
 msgid "Merge"
-msgstr ""
+msgstr "Zlúčiť"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
@@ -2290,10 +2294,8 @@ msgid "Messaging Menu"
 msgstr "Ponuka správ"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
-#, fuzzy
-#| msgid "Show notifications for new mail"
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr "Zobraziť upozornenia pre novú poštu"
+msgstr "Zobrazí oznámenia pre novú poštu v ponuke správ prostredia Unity"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2301,14 +2303,12 @@ msgid "%s — New Messages"
 msgstr "%s — Nové správy"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
-#, fuzzy
-#| msgid "not found"
 msgid "Sent Sound"
-msgstr "nenájdené"
+msgstr "Zvuk po odoslaní"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
 msgid "Plays the desktop sent-mail sound when an email is sent"
-msgstr ""
+msgstr "Prehrá systémový zvuk po odoslaní emailu"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
@@ -3190,7 +3190,7 @@ msgstr "Prepne pridávanie nových položiek záznamu"
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:55
 msgid "Add a marker entry to the log"
-msgstr ""
+msgstr "Pridá značku do záznamu"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
@@ -3237,10 +3237,8 @@ msgstr "Vždy načítať vzdialené obrázky"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:264
-#, fuzzy
-#| msgid "Remove email address"
 msgid "Deceptive email address"
-msgstr "Odstráni emailové adresy"
+msgstr "Podvodná emailová adresa"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:294
@@ -3662,12 +3660,9 @@ msgid "Unquote text"
 msgstr "Zrušenie citácie textu"
 
 #: ui/gtk/help-overlay.ui:464
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Rich text mode"
 msgctxt "shortcut window"
 msgid "Rich text editing"
-msgstr "Formátovanie textu"
+msgstr "Úprava formátovaného textu"
 
 #: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
