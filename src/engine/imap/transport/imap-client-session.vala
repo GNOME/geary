@@ -599,6 +599,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             }
             if (ns == null) {
                 // fall back to the default personal namespace
+                if (this.personal_namespaces.is_empty) {
+                    throw new ImapError.UNAVAILABLE("No personal namespace");
+                }
                 ns = this.personal_namespaces[0];
             }
 
