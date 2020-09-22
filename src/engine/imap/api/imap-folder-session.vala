@@ -127,7 +127,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
      */
     public async void enable_idle(Cancellable? cancellable)
         throws Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         int token = yield this.cmd_mutex.claim_async(cancellable);
         Error? cmd_err = null;
         try {
@@ -303,7 +303,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                             Gee.Set<Imap.UID>? search_results,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         Gee.Map<Command, StatusResponse>? responses = null;
         int token = yield this.cmd_mutex.claim_async(cancellable);
 
@@ -648,7 +648,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     public async void remove_email_async(Gee.List<MessageSet> msg_sets,
                                          GLib.Cancellable? cancellable)
         throws GLib.Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         flags.add(MessageFlag.DELETED);
 
@@ -721,7 +721,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                                                      FolderPath destination,
                                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
 
         MailboxSpecifier mailbox = session.get_mailbox_for_path(destination);
         CopyCommand cmd = new CopyCommand(msg_set, mailbox, cancellable);
@@ -1164,12 +1164,12 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
      * Returns a valid IMAP client session for use by this object.
      *
      * In addition to the checks made by {@link
-     * SessionObject.claim_session}, this method also ensures that the
+     * SessionObject.get_session}, this method also ensures that the
      * IMAP session is in the SELECTED state for the correct mailbox.
      */
-    protected override ClientSession claim_session()
+    protected override ClientSession get_session()
         throws ImapError {
-        var session = base.claim_session();
+        var session = base.get_session();
         if (session.get_protocol_state() != SELECTED &&
             !this.mailbox.equal_to(session.selected_mailbox)) {
             throw new ImapError.NOT_CONNECTED(

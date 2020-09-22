@@ -90,7 +90,7 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
      * or has been closed, or because the connection to the server was
      * lost.
      */
-    protected virtual ClientSession claim_session()
+    protected virtual ClientSession get_session()
         throws ImapError {
         if (this.session == null ||
             this.session.get_protocol_state() == NOT_CONNECTED) {
