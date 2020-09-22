@@ -83,16 +83,20 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
     }
 
     /**
-     * Obtains IMAP session the server for use by this object.
+     * Returns a valid IMAP client session for use by this object.
      *
-     * @throws ImapError.NOT_CONNECTED if the session with the server
-     * server has been dropped via {@link close}, or because
-     * the connection was lost.
+     * @throws ImapError.NOT_CONNECTED if the client session has been
+     * dropped via {@link close}, if the client session is logging out
+     * or has been closed, or because the connection to the server was
+     * lost.
      */
     protected ClientSession claim_session()
         throws ImapError {
-        if (this.session == null) {
-            throw new ImapError.NOT_CONNECTED("IMAP object has no session");
+        if (this.session == null ||
+            this.session.get_protocol_state() == NOT_CONNECTED) {
+            throw new ImapError.NOT_CONNECTED(
+                "IMAP object has no session or is not connected"
+            );
         }
         return this.session;
     }
