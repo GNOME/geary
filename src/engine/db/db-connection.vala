@@ -18,7 +18,7 @@
  * A connection will be automatically closed when its last reference
  * is dropped.
  */
-public interface Geary.Db.Connection : Context {
+public interface Geary.Db.Connection : BaseObject {
 
     private const string PRAGMA_FOREIGN_KEYS = "foreign_keys";
     private const string PRAGMA_RECURSIVE_TRIGGERS = "recursive_triggers";
@@ -278,7 +278,8 @@ public interface Geary.Db.Connection : Context {
      *
      * @see exec
      */
-    public abstract Result query(string sql, GLib.Cancellable? cancellable = null)
+    public abstract Result query(string sql,
+                                 GLib.Cancellable? cancellable = null)
         throws GLib.Error;
 
     /**
