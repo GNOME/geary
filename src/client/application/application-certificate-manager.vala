@@ -68,14 +68,28 @@ public class Application.CertificateManager : GLib.Object {
                 !Geary.String.is_empty(Gcr.pkcs11_get_trust_store_uri()) &&
                 Gcr.pkcs11_get_trust_lookup_uris().length > 0
             );
-            debug("GCR slot URIs found: %s", has_uris.to_string());
+            if (has_uris) {
+                debug("GCR slot URIs found: %s", has_uris.to_string());
+            } else {
+                warning(
+                    "No GCR slot URIs found, GCR certificate pinning unavailable"
+                );
+            }
         }
 
         bool has_rw_store = false;
         if (has_uris) {
             Gck.Slot? store = Gcr.pkcs11_get_trust_store_slot();
-            has_rw_store = !store.has_flags(CKF_WRITE_PROTECTED);
-            debug("GCR store is R/W: %s", has_rw_store.to_string());
+            if (store != null) {
+                has_rw_store = !store.has_flags(CKF_WRITE_PROTECTED);
+                debug("GCR store is R/W: %s", has_rw_store.to_string());
+            } else {
+                warning("No GCR store found, GCR certificate pinning unavailable");
+            }
+
+            if (!has_rw_store) {
+                warning("GCR store is not RW, GCR certificate pinning unavailable");
+            }
         }
 
         return has_rw_store;
