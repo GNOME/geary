@@ -40,7 +40,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_METADATA_COUNT = 100;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
     private const int REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT = 500;
-    private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
+    private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 10;
     private const int OLD_MSG_DETACH_BATCH_SIZE = 1000;
 
     // When old messages beyond the period set in the account preferences are removed this number 

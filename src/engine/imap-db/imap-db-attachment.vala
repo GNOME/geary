@@ -245,7 +245,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
         }
 
         // Ensure they're dead, Jim.
-        Db.Statement stmt = new Db.Statement(cx, """
+        Db.Statement stmt = cx.prepare("""
             DELETE FROM MessageAttachmentTable WHERE message_id = ?
         """);
         stmt.bind_rowid(0, message_id);

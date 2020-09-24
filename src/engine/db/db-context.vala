@@ -16,16 +16,25 @@
 public abstract class Geary.Db.Context : BaseObject, Logging.Source {
 
 
+    /** The GLib logging domain used by this class. */
+    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Db";
+
+
     /**
-     * Determines if SQL queries and results will be logged.
+     * Determines if SQL queries will be logged.
      *
-     * This will cause extremely verbose logging, so enable with care.
+     * This will cause verbose logging, so enable with care.
      */
     public static bool enable_sql_logging = false;
 
 
-    /** The GLib logging domain used by this class. */
-    public const string LOGGING_DOMAIN = Logging.DOMAIN + ".Db";
+    /**
+     * Determines if SQL results will be logged.
+     *
+     * This will cause extremely verbose logging, so enable with extra care.
+     */
+    public static bool enable_result_logging = false;
+
 
     /** {@inheritDoc} */
     public string logging_domain {
@@ -33,33 +42,40 @@ public abstract class Geary.Db.Context : BaseObject, Logging.Source {
     }
 
     /** {@inheritDoc} */
-    public Logging.Source? logging_parent { get { return _logging_parent; } }
-    private weak Logging.Source? _logging_parent = null;
+    public abstract Logging.Source? logging_parent { get; }
 
 
-    public virtual Database? get_database() {
+    internal virtual Database? get_database() {
         return get_connection() != null ? get_connection().database : null;
     }
 
-    public virtual Connection? get_connection() {
+    internal virtual DatabaseConnection? get_connection() {
         return get_statement() != null ? get_statement().connection : null;
     }
 
-    public virtual Statement? get_statement() {
+    internal virtual Statement? get_statement() {
         return get_result() != null ? get_result().statement : null;
     }
 
-    public virtual Result? get_result() {
+    internal virtual Result? get_result() {
         return null;
     }
 
     /** {@inheritDoc} */
-    public void set_logging_parent(Logging.Source parent) {
-        this._logging_parent = parent;
-    }
-
-    /** {@inheritDoc} */
     public abstract Logging.State to_logging_state();
+
+
+    protected inline void check_elapsed(string message,
+                                        GLib.Timer timer)
+        throws DatabaseError {
+        var elapsed = timer.elapsed();
+        var threshold = (get_connection().busy_timeout * 1000.0) / 2.0;
+        if (threshold > 0 && elapsed > threshold) {
+            warning("%s: elapsed time: %lfs (>50%)", message, elapsed);
+        } else if (elapsed > 1.0) {
+            debug("%s: elapsed time: %lfs (>1s)", message, elapsed);
+        }
+    }
 
     protected inline int throw_on_error(string? method, int result, string? raw = null) throws DatabaseError {
         return Db.throw_on_error(this, method, result, raw);
