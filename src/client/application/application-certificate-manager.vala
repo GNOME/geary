@@ -74,8 +74,10 @@ public class Application.CertificateManager : GLib.Object {
         bool has_rw_store = false;
         if (has_uris) {
             Gck.Slot? store = Gcr.pkcs11_get_trust_store_slot();
-            has_rw_store = !store.has_flags(CKF_WRITE_PROTECTED);
-            debug("GCR store is R/W: %s", has_rw_store.to_string());
+            if (store != null) {
+                has_rw_store = !store.has_flags(CKF_WRITE_PROTECTED);
+                debug("GCR store is R/W: %s", has_rw_store.to_string());
+            }
         }
 
         return has_rw_store;
