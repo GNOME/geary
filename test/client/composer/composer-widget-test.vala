@@ -92,6 +92,7 @@ public class Composer.WidgetTest : TestCase {
         add_test("load_empty_body", load_empty_body);
         add_test("load_empty_body_to", load_empty_body_to);
         add_test("load_mailto", load_mailto);
+        add_test("load_mailto_empty", load_mailto_empty);
         add_test("load_context_edit", load_context_edit);
         add_test("load_context_reply_sender", load_context_reply_sender);
         add_test("load_context_reply_sender_with_reply_to", load_context_reply_sender_with_reply_to);
@@ -162,6 +163,15 @@ public class Composer.WidgetTest : TestCase {
         widget.load_mailto.end(async_result());
 
         assert_equal(widget.to, "mailto@example.com");
+    }
+
+    public void load_mailto_empty() throws GLib.Error {
+        var widget = new Widget(this.application, this.config, this.account);
+
+        widget.load_mailto.begin("mailto:", this.async_completion);
+        widget.load_mailto.end(async_result());
+
+        assert_equal(widget.to, "");
     }
 
     public void load_context_edit() throws GLib.Error {
