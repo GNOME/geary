@@ -483,11 +483,10 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         };
 
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
-        fsm.set_logging(false);
     }
 
     ~ClientSession() {
-        switch (fsm.get_state()) {
+        switch (fsm.state) {
             case State.NOT_CONNECTED:
             case State.CLOSED:
                 // no problem-o
@@ -782,7 +781,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
     private bool on_greeting_timeout() {
         // if still in CONNECTING state, the greeting never arrived
-        if (fsm.get_state() == State.CONNECTING)
+        if (fsm.state == State.CONNECTING)
             fsm.issue(Event.TIMEOUT);
 
         return false;
@@ -1645,12 +1644,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         return (this.selected_mailbox == null)
             ? new Logging.State(
                 this,
-                this.fsm.get_state_string(fsm.get_state())
+                this.fsm.get_state_string(fsm.state)
             )
             : new Logging.State(
                 this,
                 "%s:%s selected %s",
-                this.fsm.get_state_string(fsm.get_state()),
+                this.fsm.get_state_string(fsm.state),
                 this.selected_mailbox.to_string(),
                 this.selected_readonly ? "RO" : "RW"
             );

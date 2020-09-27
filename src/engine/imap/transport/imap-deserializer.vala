@@ -294,7 +294,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
     /** {@inheritDoc} */
     public Logging.State to_logging_state() {
-        return new Logging.State(this, fsm.get_state_string(fsm.get_state()));
+        return new Logging.State(this, fsm.get_state_string(fsm.state));
     }
 
     /** Sets the connection's logging parent. */
@@ -429,7 +429,7 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
     }
 
     private Mode get_mode() {
-        switch (fsm.get_state()) {
+        switch (fsm.state) {
             case State.LITERAL_DATA:
                 return Mode.BLOCK;
 
