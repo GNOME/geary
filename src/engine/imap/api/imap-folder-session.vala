@@ -1170,7 +1170,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     protected override ClientSession get_session()
         throws ImapError {
         var session = base.get_session();
-        if (session.get_protocol_state() != SELECTED &&
+        if (session.protocol_state != SELECTED &&
             !this.mailbox.equal_to(session.selected_mailbox)) {
             throw new ImapError.NOT_CONNECTED(
                 "IMAP object no longer SELECTED for %s",

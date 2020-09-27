@@ -252,7 +252,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         if (!disconnect) {
             // If the session has a mailbox selected, close it before
             // adding it back to the pool
-            ClientSession.ProtocolState proto = session.get_protocol_state();
+            ClientSession.ProtocolState proto = session.protocol_state;
             if (proto == ClientSession.ProtocolState.SELECTED ||
                 proto == ClientSession.ProtocolState.SELECTING) {
                 // always close mailbox to return to authorized state
@@ -263,7 +263,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
                           session.to_string(), imap_error.message);
                     disconnect = true;
                 }
-                if (session.get_protocol_state() != AUTHORIZED) {
+                if (session.protocol_state != AUTHORIZED) {
                     // Closing it didn't leave it in the desired
                     // state, so drop it
                     disconnect = true;
@@ -393,7 +393,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
     /** Determines if a session is valid, disposing of it if not. */
     private async bool check_session(ClientSession target, bool claiming) {
         bool valid = false;
-        switch (target.get_protocol_state()) {
+        switch (target.protocol_state) {
         case ClientSession.ProtocolState.AUTHORIZED:
         case ClientSession.ProtocolState.CLOSING_MAILBOX:
             valid = true;
@@ -472,7 +472,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
 
         // Only bother tracking disconnects and enabling keeping alive
         // now the session is properly established.
-        new_session.disconnected.connect(on_disconnected);
+        new_session.notify["disconnected"].connect(on_session_disconnected);
         new_session.enable_keepalives(selected_keepalive_sec,
                                       unselected_keepalive_sec,
                                       selected_with_idle_keepalive_sec);
@@ -509,7 +509,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
     }
 
     private async void disconnect_session(ClientSession session) {
-        if (session.get_protocol_state() != NOT_CONNECTED) {
+        if (session.protocol_state != NOT_CONNECTED) {
             debug("Logging out session: %s", session.to_string());
             // No need to remove it after logging out, the
             // disconnected handler will do that for us.
@@ -548,21 +548,27 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         }
 
         if (removed) {
-            session.disconnected.disconnect(on_disconnected);
+            session.notify["disconnected"].connect(on_session_disconnected);
         }
         return removed;
     }
 
-    private void on_disconnected(ClientSession session,
-                                 ClientSession.DisconnectReason reason) {
-        debug(
-            "Session disconnected: %s: %s",
-            session.to_string(), reason.to_string()
-        );
-        this.remove_session_async.begin(
-            session,
-            (obj, res) => { this.remove_session_async.end(res); }
-        );
+    private void on_session_disconnected(GLib.Object source,
+                                         GLib.ParamSpec param) {
+        var session = source as ClientSession;
+        if (session != null &&
+            session.protocol_state == NOT_CONNECTED &&
+            session.disconnected != null) {
+            debug(
+                "Session disconnected: %s: %s",
+                session.to_string(),
+                session.disconnected.to_string()
+            );
+            this.remove_session_async.begin(
+                session,
+                (obj, res) => { this.remove_session_async.end(res); }
+            );
+        }
     }
 
 }
