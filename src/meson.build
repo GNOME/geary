@@ -72,7 +72,7 @@ web_process = library('geary-web-process',
     webkit2gtk_web_extension,
   ],
   include_directories: config_h_dir,
-  vala_args: client_vala_args,
+  vala_args: geary_vala_args,
   c_args: geary_c_args,
   install: true,
   install_dir: web_extensions_dir
