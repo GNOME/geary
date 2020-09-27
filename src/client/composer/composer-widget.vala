@@ -785,10 +785,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     /** Detaches the composer and opens it in a new window. */
-    public void detach() {
+    public void detach(Application.Client application) {
         Gtk.Widget? focused_widget = null;
-        var application = this.container.top_window.application as Application.Client;
-
         if (this.container != null) {
             focused_widget = this.container.top_window.get_focus();
             this.container.close();
@@ -2374,7 +2372,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_detach() {
-        detach();
+        detach(this.container.top_window.application as Application.Client);
     }
 
     private void on_add_attachment() {
