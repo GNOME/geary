@@ -100,6 +100,8 @@ public class FormattedConversationData : Geary.BaseObject {
     public Geary.Email? preview { get; private set; default = null; }
 
     private Application.Configuration config;
+
+    private Gtk.Settings? gtk;
     private Pango.FontDescription font;
 
     private Geary.App.Conversation? conversation = null;
@@ -115,13 +117,13 @@ public class FormattedConversationData : Geary.BaseObject {
                                      Geary.Email preview,
                                      Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
         this.config = config;
+        this.gtk = Gtk.Settings.get_default();
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
         this.use_to = conversation.base_folder.used_as.is_outgoing();
 
-        this.font = Pango.FontDescription.from_string(
-            this.config.gnome_interface.get_string("font-name")
-        );
+        this.gtk.notify["gtk-font-name"].connect(this.update_font);
+        update_font();
 
         // Load preview-related data.
         update_date_string();
@@ -470,6 +472,14 @@ public class FormattedConversationData : Geary.BaseObject {
         Pango.Rectangle? logical_rect;
         layout_preview.get_pixel_extents(out ink_rect, out logical_rect);
         return ink_rect;
+    }
+
+    private void update_font() {
+        var name = "Cantarell 11";
+        if (this.gtk != null) {
+            name = this.gtk.gtk_font_name;
+        }
+        this.font = Pango.FontDescription.from_string(name);
     }
 
 }
