@@ -9,7 +9,8 @@
 /**
  * Collects application state related to a single folder.
  */
-public class Application.FolderContext : Geary.BaseObject {
+public class Application.FolderContext : Geary.BaseObject,
+    Gee.Comparable<FolderContext> {
 
 
     /** Specifies different kinds of displayable email counts. */
@@ -39,6 +40,10 @@ public class Application.FolderContext : Geary.BaseObject {
         this.folder = folder;
         this.folder.use_changed.connect(() => update());
         update();
+    }
+
+    public int compare_to(FolderContext other) {
+        return this.folder.path.compare_to(other.folder.path);
     }
 
     private void update() {
