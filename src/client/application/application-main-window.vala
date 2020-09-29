@@ -1010,7 +1010,12 @@ public class Application.MainWindow :
             to_add.commands.undone.connect(on_command_undo);
             to_add.commands.redone.connect(on_command_redo);
 
-            add_folders(to_add.get_folders());
+            // Sort the folders so FolderListTree adds them all
+            // correctly
+            var added = new Gee.TreeSet<FolderContext>();
+            added.add_all(to_add.get_folders());
+
+            add_folders(added);
             this.accounts.add(to_add);
         }
     }
