@@ -31,6 +31,7 @@ public class Application.MainWindow :
     public const string ACTION_TOGGLE_JUNK = "toggle-conversation-junk";
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
+    public const string ACTION_NAVIGATION_BACK = "navigation-back";
 
     private const ActionEntry[] EDIT_ACTIONS = {
         { Action.Edit.UNDO, on_undo },
@@ -42,6 +43,7 @@ public class Application.MainWindow :
 
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
+        { ACTION_NAVIGATION_BACK, focus_previous_pane},
         // Message actions
         { ACTION_REPLY_CONVERSATION, on_reply_conversation },
         { ACTION_REPLY_ALL_CONVERSATION, on_reply_all_conversation },
