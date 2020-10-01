@@ -39,7 +39,7 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
      */
     protected SessionObject(ClientSession session) {
         this.session = session;
-        this.session.disconnected.connect(on_disconnected);
+        this.session.notify["protocol-state"].connect(on_session_state_change);
     }
 
     ~SessionObject() {
@@ -63,7 +63,9 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
         this.session = null;
 
         if (old_session != null) {
-            old_session.disconnected.disconnect(on_disconnected);
+            old_session.notify["protocol-state"].disconnect(
+                on_session_state_change
+            );
         }
 
         return old_session;
@@ -83,25 +85,37 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
     }
 
     /**
-     * Obtains IMAP session the server for use by this object.
+     * Returns a valid IMAP client session for use by this object.
      *
-     * @throws ImapError.NOT_CONNECTED if the session with the server
-     * server has been dropped via {@link close}, or because
-     * the connection was lost.
+     * @throws ImapError.NOT_CONNECTED if the client session has been
+     * dropped via {@link close}, if the client session is logging out
+     * or has been closed, or because the connection to the server was
+     * lost.
      */
-    protected ClientSession claim_session()
+    protected virtual ClientSession get_session()
         throws ImapError {
-        if (this.session == null) {
-            throw new ImapError.NOT_CONNECTED("IMAP object has no session");
+        if (this.session == null ||
+            this.session.protocol_state == NOT_CONNECTED) {
+            throw new ImapError.NOT_CONNECTED(
+                "IMAP object has no session or is not connected"
+            );
         }
         return this.session;
     }
 
-    private void on_disconnected(ClientSession.DisconnectReason reason) {
-        debug("Disconnected %s", reason.to_string());
-
-        close();
-        disconnected(reason);
+    private void on_session_state_change() {
+        if (this.session != null &&
+            this.session.protocol_state == NOT_CONNECTED) {
+            // Disconnect reason will null when the session is being
+            // logged out but the logout command has not yet been
+            // completed.
+            var reason = (
+                this.session.disconnected ??
+                ClientSession.DisconnectReason.LOCAL_CLOSE
+            );
+            close();
+            disconnected(reason);
+        }
     }
 
 }

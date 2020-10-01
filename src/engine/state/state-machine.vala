@@ -5,13 +5,20 @@
  */
 
 public class Geary.State.Machine : BaseObject {
+
+    /** The state machine's current state. */
+    public uint state { get; private set; }
+
+    /** Determines if the state machine crashes your app when mis-configured. */
+    public bool abort_on_no_transition { get; set; default = true; }
+
+    /** Determines if transition logging is enabled. */
+    public bool logging { get; private set; default = false; }
+
     private Geary.State.MachineDescriptor descriptor;
-    private uint state;
     private Mapping[,] transitions;
     private unowned Transition? default_transition;
     private bool locked = false;
-    private bool abort_on_no_transition = true;
-    private bool logging = false;
     private unowned PostTransition? post_transition = null;
     private void *post_user = null;
     private Object? post_object = null;
@@ -39,26 +46,6 @@ public class Geary.State.Machine : BaseObject {
         }
     }
 
-    public uint get_state() {
-        return state;
-    }
-
-    public bool get_abort_on_no_transition() {
-        return abort_on_no_transition;
-    }
-
-    public void set_abort_on_no_transition(bool abort) {
-        abort_on_no_transition = abort;
-    }
-
-    public void set_logging(bool logging) {
-        this.logging = logging;
-    }
-
-    public bool is_logging() {
-        return logging;
-    }
-
     public uint issue(uint event, void *user = null, Object? object = null, Error? err = null) {
         assert(event < descriptor.event_count);
         assert(state < descriptor.state_count);
@@ -70,7 +57,7 @@ public class Geary.State.Machine : BaseObject {
             string msg = "%s: No transition defined for %s@%s".printf(to_string(),
                 descriptor.get_event_string(event), descriptor.get_state_string(state));
 
-            if (get_abort_on_no_transition())
+            if (this.abort_on_no_transition)
                 error(msg);
             else
                 critical(msg);
@@ -96,7 +83,7 @@ public class Geary.State.Machine : BaseObject {
         }
         locked = false;
 
-        if (is_logging())
+        if (this.logging)
             message("%s: %s", to_string(), get_transition_string(old_state, event, state));
 
         // Perform post-transition if registered

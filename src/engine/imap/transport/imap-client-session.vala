@@ -90,7 +90,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-3]]
      *
-     * @see get_protocol_state
+     * @see protocol_state
      */
     public enum ProtocolState {
         NOT_CONNECTED,
@@ -230,6 +230,55 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         "Geary.Imap.ClientSession", State.NOT_CONNECTED, State.COUNT, Event.COUNT,
         state_to_string, event_to_string);
 
+
+    /**
+     * Returns the current IMAP protocol state for the session.
+     */
+    public ProtocolState protocol_state {
+        get {
+            var state = ProtocolState.NOT_CONNECTED;
+            switch (fsm.state) {
+            case State.NOT_CONNECTED:
+            case State.LOGOUT:
+            case State.CLOSED:
+                state = NOT_CONNECTED;
+                break;
+
+            case State.NOAUTH:
+                state = UNAUTHORIZED;
+                break;
+
+            case State.AUTHORIZED:
+                state = AUTHORIZED;
+                break;
+
+            case State.SELECTED:
+                state = SELECTED;
+                break;
+
+            case State.CONNECTING:
+                state = CONNECTING;
+                break;
+
+            case State.AUTHORIZING:
+                state = AUTHORIZING;
+                break;
+
+            case State.SELECTING:
+                state = SELECTING;
+                break;
+
+            case State.CLOSING_MAILBOX:
+                state = CLOSING_MAILBOX;
+                break;
+            }
+            return state;
+        }
+    }
+
+    /** Specifies the reason the session was disconnected, if any. */
+    public DisconnectReason? disconnected { get; private set; default = null; }
+
     /**
      * Set of IMAP extensions reported as being supported by the server.
      *
@@ -329,9 +378,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     //
     // Connection state changes
     //
-
-    /** Emitted when the session is disconnected for any reason. */
-    public signal void disconnected(DisconnectReason reason);
 
     /** Emitted when an IMAP command status response is received. */
     public signal void status_response_received(StatusResponse status_response);
@@ -482,19 +528,25 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             new Geary.State.Mapping(State.CLOSED, Event.RECV_ERROR, Geary.State.nop),
         };
 
-        fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
-        fsm.set_logging(false);
+        this.fsm = new Geary.State.Machine(
+            machine_desc,
+            mappings,
+            on_ignored_transition
+        );
+        this.fsm.notify["state"].connect(
+            () => this.notify_property("protocol_state")
+        );
     }
 
     ~ClientSession() {
-        switch (fsm.get_state()) {
+        switch (fsm.state) {
             case State.NOT_CONNECTED:
             case State.CLOSED:
                 // no problem-o
             break;
 
             default:
-                warning("ClientSession ref dropped while still active");
+                GLib.warning("ClientSession ref dropped while still active");
         }
     }
 
@@ -599,6 +651,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             }
             if (ns == null) {
                 // fall back to the default personal namespace
+                if (this.personal_namespaces.is_empty) {
+                    throw new ImapError.UNAVAILABLE("No personal namespace");
+                }
                 ns = this.personal_namespaces[0];
             }
 
@@ -632,43 +687,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             }
         }
         return delim;
-    }
-
-    /**
-     * Returns the current {@link ProtocolState} of the {@link ClientSession} and, if selected,
-     * the current mailbox.
-     */
-    public ProtocolState get_protocol_state() {
-        switch (fsm.get_state()) {
-            case State.NOT_CONNECTED:
-            case State.LOGOUT:
-            case State.CLOSED:
-                return ProtocolState.NOT_CONNECTED;
-
-            case State.NOAUTH:
-                return ProtocolState.UNAUTHORIZED;
-
-            case State.AUTHORIZED:
-                return ProtocolState.AUTHORIZED;
-
-            case State.SELECTED:
-                return ProtocolState.SELECTED;
-
-            case State.CONNECTING:
-                return ProtocolState.CONNECTING;
-
-            case State.AUTHORIZING:
-                return ProtocolState.AUTHORIZING;
-
-            case State.SELECTING:
-                return ProtocolState.SELECTING;
-
-            case State.CLOSING_MAILBOX:
-                return ProtocolState.CLOSING_MAILBOX;
-
-            default:
-                assert_not_reached();
-        }
     }
 
     // Some commands require waiting for a completion response in order to shift the state machine's
@@ -779,7 +797,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
 
     private bool on_greeting_timeout() {
         // if still in CONNECTING state, the greeting never arrived
-        if (fsm.get_state() == State.CONNECTING)
+        if (fsm.state == State.CONNECTING)
             fsm.issue(Event.TIMEOUT);
 
         return false;
@@ -1195,7 +1213,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     public void enable_idle()
         throws GLib.Error {
         if (this.is_idle_supported) {
-            switch (get_protocol_state()) {
+            switch (this.protocol_state) {
             case ProtocolState.AUTHORIZING:
             case ProtocolState.AUTHORIZED:
             case ProtocolState.SELECTED:
@@ -1216,7 +1234,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         unschedule_keepalive();
 
         uint seconds;
-        switch (get_protocol_state()) {
+        switch (this.protocol_state) {
             case ProtocolState.NOT_CONNECTED:
             case ProtocolState.CONNECTING:
                 return;
@@ -1553,10 +1571,11 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         MachineParams params = (MachineParams) object;
 
         assert(params.cmd is LogoutCommand);
-        if (!reserve_state_change_cmd(params, state, event))
-            return state;
+        if (reserve_state_change_cmd(params, state, event)) {
+            state = State.LOGOUT;
+        }
 
-        return State.LOGOUT;
+        return state;
     }
 
     private uint on_logging_out_recv_status(uint state,
@@ -1623,7 +1642,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
 
         drop_connection();
-        disconnected(DisconnectReason.LOCAL_CLOSE);
+        this.disconnected = DisconnectReason.LOCAL_CLOSE;
 
         if (disconnect_err != null)
             throw disconnect_err;
@@ -1642,12 +1661,12 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         return (this.selected_mailbox == null)
             ? new Logging.State(
                 this,
-                this.fsm.get_state_string(fsm.get_state())
+                this.fsm.get_state_string(fsm.state)
             )
             : new Logging.State(
                 this,
                 "%s:%s selected %s",
-                this.fsm.get_state_string(fsm.get_state()),
+                this.fsm.get_state_string(fsm.state),
                 this.selected_mailbox.to_string(),
                 this.selected_readonly ? "RO" : "RW"
             );
@@ -1659,6 +1678,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     }
 
     private async void do_disconnect(DisconnectReason reason) {
+        this.disconnected = reason;
+
         try {
             yield this.cx.disconnect_async();
         } catch (GLib.Error err) {
@@ -1666,7 +1687,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
 
         drop_connection();
-        disconnected(reason);
     }
 
     //
