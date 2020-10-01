@@ -916,6 +916,8 @@ public class Application.MainWindow :
             } else {
                 this.conversation_viewer.do_compose(composer);
             }
+            // Show the correct leaflet
+            this.main_leaflet.set_visible_child_name("conversation");
         }
     }
 

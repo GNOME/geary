@@ -64,6 +64,8 @@ public class MainToolbar : Hdy.Leaflet {
     [GtkChild]
     private Hdy.HeaderGroup header_group;
 
+    Gtk.SizeGroup conversation_group;
+
     private bool show_trash_button = true;
 
     // Load these at construction time
@@ -98,16 +100,22 @@ public class MainToolbar : Hdy.Leaflet {
     }
 
     public void set_conversation_header(Gtk.HeaderBar header) {
-        conversation_header.hide();
+        remove(conversation_header);
         this.header_group.add_gtk_header_bar(header);
         header.hexpand = true;
+        conversation_group.remove_widget(conversation_header);
+        conversation_group.add_widget(header);
         add(header);
+        child_set(header, "name", "conversation", null);
     }
 
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
         this.header_group.remove_gtk_header_bar(header);
-        conversation_header.show();
+        conversation_group.remove_widget(header);
+        conversation_group.add_widget(conversation_header);
+        add(conversation_header);
+        child_set(conversation_header, "name", "conversation", null);
     }
 
     public void update_trash_button(bool show_trash) {
@@ -125,6 +133,7 @@ public class MainToolbar : Hdy.Leaflet {
         conversations_group.add_widget(conversations_header);
         conversations_separator_group.add_widget(conversations_separator);
         conversation_group.add_widget(conversation_header);
+        this.conversation_group = conversation_group;
     }
 
     public void add_to_swipe_groups(Hdy.SwipeGroup conversations_group,
