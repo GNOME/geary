@@ -44,17 +44,17 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
         assert_true(
@@ -148,13 +148,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.login_async.begin(
             new Credentials(PASSWORD, "test", "password"),
@@ -162,11 +162,11 @@ class Geary.Imap.ClientSessionTest : TestCase {
             this.async_completion
         );
         test_article.login_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == AUTHORIZED);
+        assert_true(test_article.protocol_state == AUTHORIZED);
 
         test_article.disconnect_async.begin(null, this.async_completion);
         test_article.disconnect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
         assert_true(
@@ -185,17 +185,17 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.logout_async.begin(null, this.async_completion);
         test_article.logout_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
         assert_true(
@@ -216,13 +216,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.login_async.begin(
             new Credentials(PASSWORD, "test", "password"),
@@ -230,11 +230,11 @@ class Geary.Imap.ClientSessionTest : TestCase {
             this.async_completion
         );
         test_article.login_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == AUTHORIZED);
+        assert_true(test_article.protocol_state == AUTHORIZED);
 
         test_article.logout_async.begin(null, this.async_completion);
         test_article.logout_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         TestServer.Result result = this.server.wait_for_script(this.main_loop);
         assert_true(
@@ -261,13 +261,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
@@ -305,13 +305,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
@@ -368,13 +368,13 @@ class Geary.Imap.ClientSessionTest : TestCase {
         this.server.add_script_line(WAIT_FOR_DISCONNECT, "");
 
         var test_article = new ClientSession(new_endpoint(), new Quirks());
-        assert_true(test_article.get_protocol_state() == NOT_CONNECTED);
+        assert_true(test_article.protocol_state == NOT_CONNECTED);
 
         test_article.connect_async.begin(
             CONNECT_TIMEOUT, null, this.async_completion
         );
         test_article.connect_async.end(async_result());
-        assert_true(test_article.get_protocol_state() == UNAUTHORIZED);
+        assert_true(test_article.protocol_state == UNAUTHORIZED);
 
         test_article.initiate_session_async.begin(
             new Credentials(PASSWORD, "test", "password"),
