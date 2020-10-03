@@ -33,7 +33,7 @@ endif
 
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
-if reference_tracking
+if get_option('ref_tracking').enabled()
   geary_vala_args += [ '--define=REF_TRACKING' ]
 endif
 
@@ -157,7 +157,7 @@ foreach dir : valadoc_vapi_dirs
   valadoc_vapidir_args += '--vapidir=@0@'.format(dir)
 endforeach
 
-if enable_valadoc
+if valadoc.found()
   docs = custom_target('valadoc',
     build_by_default: true,
     depends: [client_lib, engine_lib],

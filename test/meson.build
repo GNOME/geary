@@ -118,7 +118,7 @@ test_engine_dependencies += engine_dependencies
 
 test_engine_vala_args = geary_vala_args
 
-if get_option('tnef-support')
+if libytnef.found()
   test_engine_dependencies += libytnef
   test_engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
