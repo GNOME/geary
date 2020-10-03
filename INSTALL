@@ -15,6 +15,28 @@ repository:
 A convenience Makefile for development only is also provided. To use
 it, simply invoke make from the top-level directory.
 
+Build profiles
+--------------
+
+Geary can be built using a number of different build profiles, which
+determine things like the application id, the location of stored data,
+the name of the application and other visual elements that distinguish
+release builds from other types.
+
+These can be set at build configuration time using the Meson `setup`
+and `configure` commands, using the standard `-Dprofile=…` option. See
+the `profile` option in `meson_options.txt` for the current list of
+supported types.
+
+Maintainers must select the `release` build profile when packaging
+non-test release builds, otherwise Geary will using branding and data
+locations intended for development only.
+
+Note that setting the profile does not alter such things as cmopiler
+options, use the standard Meson `--buildtype` argument for that.
+
+If built from
+
 Dependencies
 ------------
 
@@ -94,5 +116,5 @@ the initial configuration step:
     meson --prefix=/usr -C build
 
 ---
-Copyright 2016 Software Freedom Conservancy Inc.  
-Copyright 2018 Michael Gratton <mike@vee.net>
+Copyright © 2016 Software Freedom Conservancy Inc.  
+Copyright © 2018-2020 Michael Gratton <mike@vee.net>

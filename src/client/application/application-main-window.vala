@@ -487,7 +487,7 @@ public class Application.MainWindow :
         load_config(application.config);
         restore_saved_window_state();
 
-        if (_PROFILE != "") {
+        if (_PROFILE != "release") {
             this.get_style_context().add_class("devel");
         }
 

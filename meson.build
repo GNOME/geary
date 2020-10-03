@@ -4,16 +4,26 @@ project('geary', [ 'vala', 'c' ],
   meson_version: '>= 0.50',
 )
 
-# Build type
-if get_option('profile') == 'development'
-  profile = '.Devel'
+# Determine the type of build
+profile = get_option('profile')
+appid_suffix = ''
+name_suffix = ''
+if profile == 'auto'
+  if run_command('[', '-d', '.git', ']').returncode() == 0
+    profile = 'development'
+  else
+    error('No build profile specified, see INSTALL')
+  endif
+endif
+
+if profile == 'development'
+  appid_suffix = '.Devel'
   name_suffix = ' (Development)'
-elif get_option('profile') == 'beta'
-  profile = '.Beta'
+elif profile == 'beta'
+  appid_suffix = '.Beta'
   name_suffix = ' (Beta)'
-else
-  profile = ''
-  name_suffix = ''
+elif profile != 'release'
+  error('Unknown build profile specified, see INSTALL')
 endif
 
 # Configurable install dirs
@@ -120,7 +130,7 @@ libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', require
 #
 
 # Build variables
-geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_id = 'org.gnome.Geary@0@'.format(appid_suffix)
 geary_version = meson.project_version()
 revno = get_option('revno')
 if revno == ''

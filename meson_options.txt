@@ -5,8 +5,12 @@
 option(
   'profile',
   type: 'combo',
-  value: 'default',
-  choices: ['default','development','beta'],
+  choices: [
+    'auto',
+    'development',
+    'beta',
+    'release'
+  ],
   description: 'Specifies the application type to be built'
 )
 option(
