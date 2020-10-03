@@ -12,7 +12,7 @@ if profile == 'auto'
   if run_command('[', '-d', '.git', ']').returncode() == 0
     profile = 'development'
   else
-    error('No build profile specified, see INSTALL')
+    error('No build profile specified, see BUILDING.md')
   endif
 endif
 
@@ -23,7 +23,7 @@ elif profile == 'beta'
   appid_suffix = '.Beta'
   name_suffix = ' (Beta)'
 elif profile != 'release'
-  error('Unknown build profile specified, see INSTALL')
+  error('Unknown build profile specified, see BUILDING.md')
 endif
 
 # Configurable install dirs

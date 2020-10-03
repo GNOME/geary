@@ -17,11 +17,12 @@ for more information.
 
 ![Geary displaying a conversation](https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png)
 
-Installation & Licensing
-------------------------
+Building & Licensing
+--------------------
 
-Please consult the [INSTALL](./INSTALL) and [COPYING](./COPYING) files
-for more information.
+Please consult the [BUILDING.md](./BUILDING.md) and
+[COPYING](./COPYING) files for more information about building Geary
+and the licence granted by its copyright holders for redistribution.
 
 Getting in Touch
 ----------------
