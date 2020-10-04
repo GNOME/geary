@@ -875,7 +875,7 @@ public class Application.MainWindow :
      */
     internal void show_composer(Composer.Widget composer) {
         if (this.has_composer) {
-            composer.detach();
+            composer.detach(this.application);
         } else {
             // See if the currently displayed conversation contains
             // any of the composer's referred emails (preferring the

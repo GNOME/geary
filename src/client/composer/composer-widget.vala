@@ -575,8 +575,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.has_prefix(MAILTO_URI_PREFIX)) {
             // Parse the mailto link.
+            string? email = null;
             string[] parts = mailto.substring(MAILTO_URI_PREFIX.length).split("?", 2);
-            string email = Uri.unescape_string(parts[0]);
+            if (parts.length > 0) {
+                email = Uri.unescape_string(parts[0]);
+            }
             string[] params = parts.length == 2 ? parts[1].split("&") : new string[0];
             foreach (string param in params) {
                 string[] param_parts = param.split("=", 2);
@@ -587,14 +590,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
 
             // Assemble the headers.
-            if (email.length > 0 && headers.contains("to"))
+            if (!Geary.String.is_empty_or_whitespace(email) &&
+                headers.contains("to")) {
                 this.to = "%s,%s".printf(
                     email, Geary.Collection.first(headers.get("to"))
                 );
-            else if (email.length > 0)
+            } else if (!Geary.String.is_empty_or_whitespace(email)) {
                 this.to = email;
-            else if (headers.contains("to"))
+            } else if (headers.contains("to")) {
                 this.to = Geary.Collection.first(headers.get("to"));
+            }
 
             if (headers.contains("cc"))
                 this.cc = Geary.Collection.first(headers.get("cc"));
@@ -780,10 +785,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     /** Detaches the composer and opens it in a new window. */
-    public void detach() {
+    public void detach(Application.Client application) {
         Gtk.Widget? focused_widget = null;
-        var application = this.container.top_window.application as Application.Client;
-
         if (this.container != null) {
             focused_widget = this.container.top_window.get_focus();
             this.container.close();
@@ -2369,7 +2372,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_detach() {
-        detach();
+        detach(this.container.top_window.application as Application.Client);
     }
 
     private void on_add_attachment() {
