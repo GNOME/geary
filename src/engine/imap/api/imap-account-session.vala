@@ -45,7 +45,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      */
     public async FolderPath get_default_personal_namespace(Cancellable? cancellable)
     throws Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         Gee.List<Namespace> personal = session.get_personal_namespaces();
         if (personal.is_empty) {
             throw new ImapError.INVALID("No personal namespace found");
@@ -69,7 +69,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     public bool is_folder_path_valid(FolderPath? path) throws GLib.Error {
         bool is_valid = false;
         if (path != null) {
-            ClientSession session = claim_session();
+            ClientSession session = get_session();
             try {
                 session.get_mailbox_for_path(path);
                 is_valid = true;
@@ -94,7 +94,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                                           Geary.Folder.SpecialUse? use,
                                           Cancellable? cancellable)
     throws Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         MailboxSpecifier mailbox = session.get_mailbox_for_path(path);
         bool can_create_special = session.capabilities.has_capability(Capabilities.CREATE_SPECIAL_USE);
         CreateCommand cmd = (
@@ -125,7 +125,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     public async Imap.Folder fetch_folder_async(FolderPath path,
                                                 Cancellable? cancellable)
         throws Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         Imap.Folder? folder = this.folders.get(path);
         if (folder == null) {
             Gee.List<MailboxInformation>? mailboxes = yield send_list_async(
@@ -169,7 +169,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         fetch_child_folders_async(FolderPath parent,
                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
-        ClientSession session = claim_session();
+        ClientSession session = get_session();
         Gee.List<Imap.Folder> children = new Gee.ArrayList<Imap.Folder>();
         Gee.List<MailboxInformation> mailboxes = yield send_list_async(
             session, parent, true, cancellable
