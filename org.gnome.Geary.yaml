@@ -14,7 +14,7 @@
 app-id: org.gnome.Geary.Devel
 branch: master
 runtime: org.gnome.Platform
-runtime-version: master
+runtime-version: "3.38"
 sdk: org.gnome.Sdk
 command: geary
 
@@ -152,7 +152,7 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/evolution-data-server.git
-        branch: master
+        branch: gnome-3-38
     cleanup:
       - /lib/cmake
       - /lib/evolution-data-server/*-backends
@@ -242,4 +242,4 @@ modules:
     sources:
       - type: git
         url: https://gitlab.gnome.org/GNOME/geary.git
-        branch: mainline
+        branch: gnome-3-38
