@@ -9,7 +9,7 @@
 /**
  * A connection to the database for transactions.
  */
-internal class Geary.Db.TransactionConnection : Context, Connection {
+internal class Geary.Db.TransactionConnection : BaseObject, Connection {
 
 
     /** {@inheritDoc} */
@@ -52,15 +52,6 @@ internal class Geary.Db.TransactionConnection : Context, Connection {
         throws GLib.Error {
         this.transaction_log += file.get_uri();
         this.db_cx.exec_file(file, cancellable);
-    }
-
-    public override Connection? get_connection() {
-        return this;
-    }
-
-    /** {@inheritDoc} */
-    public override Logging.State to_logging_state() {
-        return new Logging.State(this, "");
     }
 
 }

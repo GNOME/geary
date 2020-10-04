@@ -8,14 +8,20 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool finished { get; private set; default = false; }
 
 
+    /** The statement this result was generated from. */
     public Statement statement { get; private set; }
 
+    /** The current row represented by this result. */
+    public uint64 row { get; private set; default = 0; }
+
+    /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return this.statement; }
+    }
 
     // This results in an automatic first next().
     internal Result(Statement statement, Cancellable? cancellable) throws Error {
         this.statement = statement;
-        set_logging_parent(statement);
-
         statement.was_reset.connect(on_query_finished);
         statement.bindings_cleared.connect(on_query_finished);
 
@@ -37,13 +43,14 @@ public class Geary.Db.Result : Geary.Db.Context {
     public bool next(Cancellable? cancellable = null) throws Error {
         check_cancelled("Result.next", cancellable);
 
-        if (!finished) {
-            Timer timer = new Timer();
-            finished = throw_on_error("Result.next", statement.stmt.step(), statement.sql) != Sqlite.ROW;
-            if (timer.elapsed() > 1.0)
-                debug("\n\nDB QUERY STEP \"%s\"\nelapsed=%lf\n\n", statement.sql, timer.elapsed());
-
-            log_result(finished ? "NO ROW" : "ROW");
+        if (!this.finished) {
+            this.row++;
+            var timer = new GLib.Timer();
+            this.finished = throw_on_error(
+                "Result.next", statement.stmt.step(), statement.sql
+            ) != Sqlite.ROW;
+            check_elapsed("Result.next", timer);
+            log_result(this.finished ? "NO ROW" : "ROW");
         }
 
         return !finished;
@@ -294,26 +301,24 @@ public class Geary.Db.Result : Geary.Db.Context {
         return column;
     }
 
-    public override Result? get_result() {
+    /** {@inheritDoc} */
+    public override Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "%llu, %s",
+            this.row,
+            this.finished ? "finished" : "!finished"
+        );
+    }
+
+    internal override Result? get_result() {
         return this;
     }
 
-    /** {@inheritDoc} */
-    public override Logging.State to_logging_state() {
-        return new Logging.State(this, this.finished ? "finished" : "not finished");
-    }
-
     [PrintfFormat]
-    private void log_result(string fmt, ...) {
-        if (Db.Context.enable_sql_logging) {
-            Statement? stmt = get_statement();
-            if (stmt != null) {
-                debug("%s\n\t<%s>",
-                      fmt.vprintf(va_list()),
-                      (stmt != null) ? "%.100s".printf(stmt.sql) : "no sql");
-            } else {
-                debug(fmt.vprintf(va_list()));
-            }
+    private inline void log_result(string fmt, ...) {
+        if (Db.Context.enable_result_logging) {
+            debug(fmt.vprintf(va_list()));
         }
     }
 

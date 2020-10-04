@@ -79,6 +79,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base(config, imap, smtp);
 
         this.local = local;
+        this.local.db.set_logging_parent(this);
+
         this.contact_store = new ContactStoreImpl(local.db);
 
         imap.min_pool_size = IMAP_MIN_POOL_SIZE;

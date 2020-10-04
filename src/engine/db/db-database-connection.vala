@@ -67,6 +67,11 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
     private weak Database _database;
 
     /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return this._database; }
+    }
+
+    /** {@inheritDoc} */
     internal Sqlite.Database db { get { return this._db; } }
     private Sqlite.Database _db;
 
@@ -118,9 +123,10 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
 
     /** {@inheritDoc} */
     public Statement prepare(string sql) throws DatabaseError {
-        var prepared = new Statement(this, sql);
-        prepared.set_logging_parent(this);
-        return prepared;
+        if (Db.Context.enable_sql_logging) {
+            debug(sql);
+        }
+        return new Statement(this, sql);
     }
 
     /** {@inheritDoc} */
@@ -132,23 +138,28 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
     /** {@inheritDoc} */
     public void exec(string sql, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        if (Db.Context.enable_sql_logging) {
-            debug("exec:\n\t%s", sql);
-        }
-
         check_cancelled("Connection.exec", cancellable);
-        throw_on_error("Connection.exec", db.exec(sql), sql);
+        if (Db.Context.enable_sql_logging) {
+            debug(sql);
+        }
+        var timer = new GLib.Timer();
+        throw_on_error("Connection.exec_file", this.db.exec(sql), sql);
+        check_elapsed("Query \"%s\"".printf(sql), timer);
     }
 
     /** {@inheritDoc} */
     public void exec_file(GLib.File file, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_cancelled("Connection.exec_file", cancellable);
+        if (Db.Context.enable_sql_logging) {
+            debug(file.get_path());
+        }
 
         string sql;
         FileUtils.get_contents(file.get_path(), out sql);
-
-        exec(sql, cancellable);
+        var timer = new GLib.Timer();
+        throw_on_error("Connection.exec_file", this.db.exec(sql), sql);
+        check_elapsed(file.get_path(), timer);
     }
 
     /**
@@ -255,13 +266,13 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
         return yield job.wait_for_completion_async();
     }
 
-    public override Connection? get_connection() {
-        return this;
-    }
-
     /** {@inheritDoc} */
     public override Logging.State to_logging_state() {
         return new Logging.State(this, "%u", this.cx_number);
+    }
+
+    internal override DatabaseConnection? get_connection() {
+        return this;
     }
 
 }
