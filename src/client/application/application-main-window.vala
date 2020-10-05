@@ -1797,7 +1797,20 @@ public class Application.MainWindow :
 
     private void focus_next_pane() {
         var focus = get_focus();
-        if (focus != null) {
+
+        if (main_leaflet.folded) {
+            if (main_leaflet.visible_child_name == "conversations") {
+                if (conversations_leaflet.folded &&
+                    conversations_leaflet.visible_child_name == "folder" ||
+                    focus == this.folder_list) {
+                    conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    focus = this.conversation_list_view;
+                } else {
+                    main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    focus = this.conversation_viewer.visible_child;
+                }
+            }
+        } else if (focus != null) {
             if (focus == this.folder_list ||
                 focus.is_ancestor(this.folder_list)) {
                 focus = this.conversation_list_view;
@@ -1819,7 +1832,25 @@ public class Application.MainWindow :
 
     private void focus_previous_pane() {
         var focus = get_focus();
-        if (focus != null) {
+
+        if (main_leaflet.folded) {
+            if (main_leaflet.visible_child_name == "conversations") {
+                if (conversations_leaflet.folded) {
+                    if (conversations_leaflet.visible_child_name == "conversations") {
+                        conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                        focus = this.folder_list;
+                    }
+                } else {
+                    if (focus == this.conversation_list_view)
+                        focus = this.folder_list;
+                    else
+                        focus = this.conversation_list_view;
+                }
+            } else {
+                main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                focus = this.conversation_list_view;
+            }
+        } else if (focus != null) {
             if (focus == this.folder_list ||
                 focus.is_ancestor(this.folder_list)) {
                 focus = this.conversation_viewer.visible_child;
