@@ -37,9 +37,16 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             num_to_load = MAX_FILL_COUNT;
         }
 
-        int loaded = yield this.monitor.load_by_id_async(
-            this.monitor.window_lowest, num_to_load, LOCAL_ONLY
-        );
+        int loaded = 0;
+
+        try {
+            loaded = yield this.monitor.load_by_id_async(
+                this.monitor.window_lowest, num_to_load, LOCAL_ONLY
+            );
+        } catch (EngineError.NOT_FOUND err) {
+            debug("Stale FillWindowOperation: %s", err.message);
+            return;
+        }
 
         debug(
             "Filled %d of %d locally, window: %d, total: %d",
@@ -61,9 +68,14 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             // Load the max amount if going to the trouble of talking
             // to the remote.
             num_to_load = MAX_FILL_COUNT;
-            loaded = yield this.monitor.load_by_id_async(
-                this.monitor.window_lowest, num_to_load, FORCE_UPDATE
-            );
+            try {
+                loaded = yield this.monitor.load_by_id_async(
+                    this.monitor.window_lowest, num_to_load, FORCE_UPDATE
+                );
+            } catch (EngineError.NOT_FOUND err) {
+                debug("Stale FillWindowOperation: %s", err.message);
+                return;
+            }
 
             debug(
                 "Filled %d of %d from the remote, window: %d, total: %d",
