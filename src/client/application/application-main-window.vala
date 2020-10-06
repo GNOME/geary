@@ -2143,17 +2143,16 @@ public class Application.MainWindow :
             focus_next_pane();
     }
 
-    private void on_conversation_activated(Geary.App.Conversation activated) {
-        if (main_leaflet.folded) {
-            focus_next_pane();
-        }
-        /* TODO: find correct UX for opening the conversation in a new window
-        if (this.selected_folder != null) {
+    private void on_conversation_activated(Geary.App.Conversation activated, bool single) {
+        if (single) {
+            if (main_leaflet.folded)
+                focus_next_pane();
+        } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
                     this.selected_folder,
                     this.conversation_list_view.copy_selected()
-                );
+                    );
             } else {
                 // TODO: Determine how to map between conversations
                 // and drafts correctly.
@@ -2166,7 +2165,6 @@ public class Application.MainWindow :
                 );
             }
         }
-        */
     }
 
     private void on_find_in_conversation_action() {
