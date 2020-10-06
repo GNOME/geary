@@ -29,6 +29,8 @@
                 <property name="can_focus">True</property>
                 <property name="can_swipe_back">True</property>
                 <property name="transition_type">over</property>
+                <signal name="notify::visible-child" handler="on_main_leaflet_visible_child_changed" swapped="no"/>
+                <signal name="notify::child-transition-running" handler="on_main_leaflet_visible_child_changed" swapped="no"/>
                 <child>
                   <object class="HdyLeaflet" id="conversations_leaflet">
                     <property name="visible">True</property>

@@ -1955,6 +1955,17 @@ public class Application.MainWindow :
         return Gdk.EVENT_STOP;
     }
 
+    [GtkCallback]
+    private void on_main_leaflet_visible_child_changed() {
+        if (main_leaflet.child_transition_running)
+            return;
+
+        if (main_leaflet.visible_child_name == "conversations" && main_leaflet.folded)
+            if (this.conversation_viewer.current_composer != null) {
+                this.conversation_viewer.current_composer.activate_close_action();
+            }
+    }
+
     private void on_offline_infobar_response() {
         this.info_bars.remove(this.offline_infobar);
     }

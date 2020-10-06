@@ -1361,6 +1361,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
+    /* Activate the close action */
+    public void activate_close_action() {
+        this.actions.activate_action(ACTION_CLOSE, null);
+    }
+
     internal void set_mode(PresentationMode new_mode) {
         this.current_mode = new_mode;
         this.header.set_mode(new_mode);
