@@ -1230,6 +1230,7 @@ public class Application.MainWindow :
         this.folder_list.folder_selected.connect(on_folder_selected);
         this.folder_list.move_conversation.connect(on_move_conversation);
         this.folder_list.copy_conversation.connect(on_copy_conversation);
+        this.folder_list.folder_activated.connect(on_folder_activated);
         this.folder_list_scrolled.add(this.folder_list);
 
         // Conversation list
@@ -2135,7 +2136,16 @@ public class Application.MainWindow :
         }
     }
 
+    private void on_folder_activated(Geary.Folder? folder) {
+        if (folder != null)
+            focus_next_pane();
+    }
+
     private void on_conversation_activated(Geary.App.Conversation activated) {
+        if (main_leaflet.folded) {
+            focus_next_pane();
+        }
+        /* TODO: find correct UX for opening the conversation in a new window
         if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
@@ -2154,6 +2164,7 @@ public class Application.MainWindow :
                 );
             }
         }
+        */
     }
 
     private void on_find_in_conversation_action() {

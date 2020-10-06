@@ -16,6 +16,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
 
     public signal void folder_selected(Geary.Folder? folder);
+    public signal void folder_activated(Geary.Folder? folder);
     public signal void copy_conversation(Geary.Folder folder);
     public signal void move_conversation(Geary.Folder folder);
 
@@ -30,7 +31,9 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     public Tree() {
         base(TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE, drop_handler);
         base_ref();
+        set_activate_on_single_click(true);
         entry_selected.connect(on_entry_selected);
+        entry_activated.connect(on_entry_activated);
 
         // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
         // remove it.
@@ -84,6 +87,13 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         if (entry != null) {
             this.selected = entry.folder;
             folder_selected(entry.folder);
+        }
+    }
+
+    private void on_entry_activated(Sidebar.SelectableEntry selectable) {
+        AbstractFolderEntry? entry = selectable as AbstractFolderEntry;
+        if (entry != null) {
+            folder_activated(entry.folder);
         }
     }
 

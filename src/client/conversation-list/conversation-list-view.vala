@@ -42,6 +42,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
+        set_activate_on_single_click(true);
 
         this.config = config;
 
