@@ -1811,8 +1811,11 @@ public class Application.MainWindow :
                     conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_list_view;
                 } else {
-                    main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
-                    focus = this.conversation_viewer.visible_child;
+                    if (this.main_toolbar.selected_conversations == 1 &&
+                        this.selected_folder.properties.email_total > 0) {
+                        main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                        focus = this.conversation_viewer.visible_child;
+                    }
                 }
             }
         } else if (focus != null) {
