@@ -351,6 +351,8 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.Overlay overlay;
 
+    private Components.ConversationActionBar action_bar;
+
     private Components.InfoBarStack info_bars =
         new Components.InfoBarStack(SINGLE);
 
@@ -1308,6 +1310,12 @@ public class Application.MainWindow :
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
         this.status_bar.show_all();
+
+        // Action bar
+        this.action_bar = new Components.ConversationActionBar();
+        this.conversation_list_box.add_with_properties(action_bar,
+                                                       "pack-type", Gtk.PackType.END,
+                                                       "position", 0);
     }
 
     /** {@inheritDoc} */
@@ -1740,6 +1748,17 @@ public class Application.MainWindow :
         );
 
         this.update_context_dependent_actions.begin(sensitive);
+        switch (count) {
+            case NONE:
+                    conversation_actions.take_ownership(null);
+                break;
+            case SINGLE:
+                this.main_toolbar.add_conversation_actions(this.conversation_actions);
+                break;
+            case MULTIPLE:
+                this.action_bar.add_conversation_actions(this.conversation_actions);
+                break;
+        }
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
