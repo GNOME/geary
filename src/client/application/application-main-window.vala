@@ -284,6 +284,9 @@ public class Application.MainWindow :
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
 
+    // Actions in the Conversation HeaderBar or ActionBar
+    private Components.ConversationActions conversation_actions;
+
     public Components.InfoBarStack conversation_list_info_bars {
         get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
     }
@@ -692,10 +695,10 @@ public class Application.MainWindow :
             // selected model.
 
             if (this.selected_folder != null) {
-                this.main_toolbar.copy_folder_menu.enable_disable_folder(
+                this.conversation_actions.copy_folder_menu.enable_disable_folder(
                     this.selected_folder, true
                 );
-                this.main_toolbar.move_folder_menu.enable_disable_folder(
+                this.conversation_actions.move_folder_menu.enable_disable_folder(
                     this.selected_folder, true
                 );
 
@@ -740,9 +743,10 @@ public class Application.MainWindow :
 
             update_conversation_actions(NONE);
             update_title();
-            this.main_toolbar.update_trash_button(
+            this.conversation_actions.update_trash_button(
                 !this.is_shift_down && this.selected_folder_supports_trash
             );
+
             this.conversation_viewer.show_loading();
             this.previous_selection_was_interactive = is_interactive;
 
@@ -779,10 +783,10 @@ public class Application.MainWindow :
                 this.conversation_list_view.set_model(conversations_model);
 
                 // disable copy/move to the new folder
-                this.main_toolbar.copy_folder_menu.enable_disable_folder(
+                this.conversation_actions.copy_folder_menu.enable_disable_folder(
                     to_select, false
                 );
-                this.main_toolbar.move_folder_menu.enable_disable_folder(
+                this.conversation_actions.move_folder_menu.enable_disable_folder(
                     to_select, false
                 );
 
@@ -1090,8 +1094,8 @@ public class Application.MainWindow :
         foreach (var context in to_add) {
             this.folder_list.add_folder(context);
             if (context.folder.account == this.selected_account) {
-                this.main_toolbar.copy_folder_menu.add_folder(context.folder);
-                this.main_toolbar.move_folder_menu.add_folder(context.folder);
+                this.conversation_actions.copy_folder_menu.add_folder(context.folder);
+                this.conversation_actions.move_folder_menu.add_folder(context.folder);
             }
             context.folder.use_changed.connect(on_use_changed);
         }
@@ -1111,8 +1115,8 @@ public class Application.MainWindow :
 
             folder.use_changed.disconnect(on_use_changed);
             if (folder.account == this.selected_account) {
-                this.main_toolbar.copy_folder_menu.remove_folder(folder);
-                this.main_toolbar.move_folder_menu.remove_folder(folder);
+                this.conversation_actions.copy_folder_menu.remove_folder(folder);
+                this.conversation_actions.move_folder_menu.remove_folder(folder);
             }
             this.folder_list.remove_folder(context);
         }
@@ -1228,6 +1232,7 @@ public class Application.MainWindow :
         this.search_bar.search_text_changed.connect(on_search);
         this.conversation_list_box.pack_start(this.search_bar, false, false, 0);
 
+
         // Folder list
         this.folder_list.folder_selected.connect(on_folder_selected);
         this.folder_list.move_conversation.connect(on_move_conversation);
@@ -1261,6 +1266,16 @@ public class Application.MainWindow :
         this.conversation_size_group.add_widget(this.conversation_viewer);
         this.main_leaflet.add_with_properties(this.conversation_viewer, "name", "conversation", null);
 
+
+        // Setup conversation actions
+        this.conversation_actions = new Components.ConversationActions();
+        this.conversation_actions.move_folder_menu.folder_selected.connect(on_move_conversation);
+        this.conversation_actions.copy_folder_menu.folder_selected.connect(on_copy_conversation);
+        this.conversation_actions.bind_property("find-open",
+                                                this.conversation_viewer.conversation_find_bar,
+                                                "search-mode-enabled",
+                                                BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
         // Main toolbar
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
@@ -1270,12 +1285,8 @@ public class Application.MainWindow :
                                              this.conversation_size_group);
         this.main_toolbar.add_to_swipe_groups(this.conversations_swipe_group,
                                               this.conversation_swipe_group);
-        this.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
-        this.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        this.main_toolbar.bind_property("find-open", this.conversation_viewer.conversation_find_bar,
-                "search-mode-enabled", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (config.desktop_environment == UNITY) {
             this.main_toolbar.show_close_button = false;
             this.main_layout.pack_start(main_toolbar, false, true, 0);
@@ -1285,6 +1296,8 @@ public class Application.MainWindow :
             titlebar.add(this.main_toolbar);
             set_titlebar(titlebar);
         }
+
+        this.main_toolbar.add_conversation_actions(this.conversation_actions);
 
         this.main_layout.pack_start(this.info_bars, false, true, 0);
 
@@ -1462,8 +1475,8 @@ public class Application.MainWindow :
     private void select_account(Geary.Account? account) {
         if (this.selected_account != account) {
             if (this.selected_account != null) {
-                this.main_toolbar.copy_folder_menu.clear();
-                this.main_toolbar.move_folder_menu.clear();
+                this.conversation_actions.copy_folder_menu.clear();
+                this.conversation_actions.move_folder_menu.clear();
             }
 
             this.selected_account = account;
@@ -1471,8 +1484,8 @@ public class Application.MainWindow :
 
             if (account != null) {
                 foreach (Geary.Folder folder in account.list_folders()) {
-                    this.main_toolbar.copy_folder_menu.add_folder(folder);
-                    this.main_toolbar.move_folder_menu.add_folder(folder);
+                    this.conversation_actions.copy_folder_menu.add_folder(folder);
+                    this.conversation_actions.move_folder_menu.add_folder(folder);
                 }
             }
 
@@ -1494,7 +1507,7 @@ public class Application.MainWindow :
         // setting it again.
         this.conversation_list_view.select_conversations(to_select);
 
-        this.main_toolbar.selected_conversations = to_select.size;
+        this.conversation_actions.selected_conversations = to_select.size;
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
             case 0:
@@ -1707,13 +1720,13 @@ public class Application.MainWindow :
         bool move_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Move)
         );
-        this.main_toolbar.move_message_button.set_sensitive(move_enabled);
+        this.conversation_actions.move_message_button.set_sensitive(move_enabled);
         get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
 
         bool copy_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Copy)
         );
-        this.main_toolbar.copy_message_button.set_sensitive(copy_enabled);
+        this.conversation_actions.copy_message_button.set_sensitive(copy_enabled);
         get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
 
         get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
@@ -1782,7 +1795,7 @@ public class Application.MainWindow :
 
     private void set_shift_key_down(bool down) {
         this.is_shift_down = down;
-        this.main_toolbar.update_trash_button(
+        this.conversation_actions.update_trash_button(
             !down && this.selected_folder_supports_trash
         );
     }
@@ -1811,7 +1824,7 @@ public class Application.MainWindow :
                     conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_list_view;
                 } else {
-                    if (this.main_toolbar.selected_conversations == 1 &&
+                    if (this.conversation_actions.selected_conversations == 1 &&
                         this.selected_folder.properties.email_total > 0) {
                         main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                         focus = this.conversation_viewer.visible_child;
@@ -2215,11 +2228,11 @@ public class Application.MainWindow :
     }
 
     private void on_show_copy_menu() {
-        this.main_toolbar.copy_message_button.clicked();
+        this.conversation_actions.copy_message_button.clicked();
     }
 
     private void on_show_move_menu() {
-        this.main_toolbar.move_message_button.clicked();
+        this.conversation_actions.move_message_button.clicked();
     }
 
     private void on_conversation_up() {

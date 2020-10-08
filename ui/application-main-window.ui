@@ -111,7 +111,7 @@
                             <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="pack_type">end</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
