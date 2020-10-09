@@ -13,6 +13,7 @@
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-conversation-header-bar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-conversation-action-bar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-conversation-actions.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-in-app-notification.ui</file>

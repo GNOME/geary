@@ -158,37 +158,9 @@
       </packing>
     </child>
     <child>
-      <object class="GtkHeaderBar" id="conversation_header">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="hexpand">True</property>
+      <object class="ComponentsConversationHeaderBar" id="conversation_header">
         <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
-        <child>
-          <object class="GtkButton" id="conversation_back">
-            <property name="can_focus">False</property>
-            <property name="receives_default">False</property>
-            <property name="valign">center</property>
-            <property name="use-underline">True</property>
-            <property name="visible" bind-source="MainToolbar" bind-property="folded" bind-flags="sync-create"/>
-            <property name="action_name">win.navigation-back</property>
-            <style>
-              <class name="image-button"/>
-            </style>
-            <child internal-child="accessible">
-              <object class="AtkObject" id="a11y-conversation-back">
-                <property name="accessible-name" translatable="yes">Back</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImage" id="conversation_back_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">go-previous-symbolic</property>
-                <property name="icon_size">1</property>
-              </object>
-            </child>
-          </object>
-        </child>
+        <property name="folded" bind-source="MainToolbar" bind-property="folded" bind-flags="sync-create"/>
       </object>
       <packing>
         <property name="name">conversation</property>

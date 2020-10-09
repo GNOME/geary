@@ -137,6 +137,24 @@
                     <property name="navigatable">False</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkBox" id="conversation_viewer_box">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="ComponentsConversationActionBar" id="conversation_viewer_action_bar">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="pack_type">end</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="name">conversation</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
