@@ -740,7 +740,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             );
             add_recipients_and_ids(type, full_context);
             complete_quote = Util.Email.quote_email_for_reply(
-                full_context, quote, this.config.clock_format, HTML
+                full_context, quote, HTML
             );
             if (!Geary.String.is_empty(quote)) {
                 this.top_posting = false;
@@ -1291,12 +1291,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // Always use reply styling, since forward styling doesn't
         // work for inline quotes
         this.editor.body.insert_html(
-            Util.Email.quote_email_for_reply(
-                referred,
-                to_quote,
-                this.config.clock_format,
-                Geary.RFC822.TextFormat.HTML
-            )
+            Util.Email.quote_email_for_reply(referred, to_quote, HTML)
         );
     }
 
