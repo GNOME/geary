@@ -892,6 +892,15 @@ public class Application.Client : Gtk.Application {
     }
 
     private MainWindow new_main_window(bool select_first_inbox) {
+        // Work around warning caused by GNOME/libhandy#305 which
+        // makes it a pita to run with G_DEBUG=fatal-warnings. Remove
+        // once the fix for that issue has been released and packaged.
+        GLib.Test.expect_message(
+            "GLib-GObject",
+            LEVEL_WARNING,
+            "g_object_weak_unref: couldn't find weak ref *"
+        );
+
         MainWindow window = new MainWindow(this);
         this.controller.register_window(window);
         window.focus_in_event.connect(on_main_window_focus_in);
