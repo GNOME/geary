@@ -68,6 +68,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     public signal void conversation_removed(ConversationListBox list);
 
 
+    static construct {
+        set_css_name("geary-conversation-viewer");
+    }
+
     /**
      * Constructs a new conversation view instance.
      */

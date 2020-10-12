@@ -12,12 +12,23 @@
   border-left-width: 0;
   border-top-width: 0;
   border-right-width: 0;
+  min-width: 300px;
 }
 .geary-conversation-frame > border {
   border-left-width: 0;
   border-top-width: 0;
   border-right-width: 0;
+  min-width: 360px;
 }
+
+treeview.sidebar {
+  border: none;
+}
+
+geary-conversation-viewer {
+  min-width: 360px;
+}
+
 /* For 3-pane mode only */
 .geary-sidebar-pane-separator.vertical .conversation-frame > border {
   border-bottom-width: 0;

@@ -17,6 +17,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
+    private Gtk.GestureMultiPress gesture;
 
     // Determines if the next folder scan should avoid selecting a
     // conversation when autoselect is enabled
@@ -26,7 +27,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
 
     // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
-    public signal void conversation_activated(Geary.App.Conversation activated);
+    public signal void conversation_activated(Geary.App.Conversation activated, bool single = false);
 
     public virtual signal void load_more() {
         enable_load_more = false;
@@ -52,11 +53,13 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_updated.connect(on_style_changed);
-        row_activated.connect(on_row_activated);
 
         notify["vadjustment"].connect(on_vadjustment_changed);
 
+        key_press_event.connect(on_key_press);
         button_press_event.connect(on_button_press);
+        gesture = new Gtk.GestureMultiPress(this);
+        gesture.pressed.connect(on_gesture_pressed);
 
         // Set up drag and drop.
         Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
@@ -267,6 +270,53 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         }
 
         return parent.get_vadjustment();
+    }
+
+    private void on_gesture_pressed(int n_press, double x, double y) {
+        if (gesture.get_current_button() != Gdk.BUTTON_PRIMARY)
+            return;
+
+        Gtk.TreePath? path;
+        get_path_at_pos((int) x, (int) y, out path, null, null, null);
+
+        // If the user clicked in an empty area, do nothing.
+        if (path == null)
+            return;
+
+        Geary.App.Conversation? c = get_model().get_conversation_at_path(path);
+        if (c == null)
+            return;
+
+        Gdk.Event event = gesture.get_last_event(gesture.get_current_sequence());
+        Gdk.ModifierType modifiers = Gtk.accelerator_get_default_mod_mask();
+
+        Gdk.ModifierType state_mask;
+        event.get_state(out state_mask);
+
+        if ((state_mask & modifiers) == 0 && n_press == 1) {
+            conversation_activated(c, true);
+        } else if ((state_mask & modifiers) == Gdk.ModifierType.SHIFT_MASK && n_press == 2) {
+            conversation_activated(c);
+        }
+    }
+
+    private bool on_key_press(Gdk.EventKey event) {
+        if (this.selected.size != 1)
+            return false;
+
+        Geary.App.Conversation? c = this.selected.to_array()[0];
+        if (c == null)
+            return false;
+
+        Gdk.ModifierType modifiers = Gtk.accelerator_get_default_mod_mask();
+
+        if (event.keyval == Gdk.Key.Return ||
+            event.keyval == Gdk.Key.ISO_Enter ||
+            event.keyval == Gdk.Key.KP_Enter ||
+            event.keyval == Gdk.Key.space ||
+            event.keyval == Gdk.Key.KP_Space)
+            conversation_activated(c, !((event.state & modifiers) == Gdk.ModifierType.SHIFT_MASK));
+        return false;
     }
 
     private bool on_button_press(Gdk.EventButton event) {
@@ -573,12 +623,6 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     private bool refresh_path(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
         model.row_changed(path, iter);
         return false;
-    }
-
-    private void on_row_activated(Gtk.TreePath path) {
-        Geary.App.Conversation? c = get_model().get_conversation_at_path(path);
-        if (c != null)
-            conversation_activated(c);
     }
 
     // Enable/disable hover effect on all selected cells.

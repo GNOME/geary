@@ -80,6 +80,8 @@ public class Sidebar.Tree : Gtk.TreeView {
 
     public signal void entry_selected(Sidebar.SelectableEntry selectable);
 
+    public signal void entry_activated(Sidebar.SelectableEntry selectable);
+
     public signal void selected_entry_removed(Sidebar.SelectableEntry removed);
 
     public signal void branch_added(Sidebar.Branch branch);
@@ -296,6 +298,15 @@ public class Sidebar.Tree : Gtk.TreeView {
 
     public virtual bool accept_cursor_changed() {
         return true;
+    }
+
+    public override void row_activated(Gtk.TreePath path, Gtk.TreeViewColumn column) {
+      EntryWrapper? wrapper = get_wrapper_at_path(path);
+      if (wrapper != null) {
+          Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
+          if (selectable != null)
+              entry_activated(selectable);
+      }
     }
 
     public override void cursor_changed() {
