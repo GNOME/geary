@@ -213,6 +213,14 @@ public class Application.Client : Gtk.Application {
     }
 
     /**
+     * Determines if Geary appears to be running under Flatpak.
+     *
+     * If this returns `true`, then the application instance
+     * appears to be running inside a Flatpak sandbox.
+     */
+    public bool is_flatpak_sandboxed { get; private set; }
+
+    /**
      * The global controller for this application instance.
      *
      * This will be non-null in the primary application instance, only
@@ -317,6 +325,7 @@ public class Application.Client : Gtk.Application {
         );
         this.add_main_option_entries(OPTION_ENTRIES);
         this.window_removed.connect_after(on_window_removed);
+        this.is_flatpak_sandboxed = GLib.FileUtils.test("/.flatpak-info", EXISTS);
     }
 
     public override bool local_command_line(ref unowned string[] args,
