@@ -57,6 +57,10 @@ finish-args:
   # Migrate GSettings into the sandbox
   - "--metadata=X-DConf=migrate-path=/org/gnome/Geary/"
 
+  # Migrate Geary settings from other release versions
+  - "--filesystem=~/.config/geary:ro"
+  - "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro"
+
   # Let view source keep on working as-sis for now. Bug 779311. */
   - "--filesystem=/tmp"
 

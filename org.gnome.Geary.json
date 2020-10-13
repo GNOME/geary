@@ -25,6 +25,8 @@
         "--talk-name=org.gnome.evolution.dataserver.Sources5",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
         "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
+        "--filesystem=~/.config/geary:ro",
+        "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro",
         "--filesystem=/tmp"
     ],
     "cleanup": [
