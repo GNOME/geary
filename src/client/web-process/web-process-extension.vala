@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -13,9 +13,9 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
     bool logging_enabled = data.get_boolean();
 
     Geary.Logging.init();
-    GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
     if (logging_enabled) {
-        Geary.Logging.log_to(stdout);
+        GLib.Log.set_writer_func(Geary.Logging.default_log_writer);
+        Geary.Logging.log_to(GLib.stdout);
     }
 
     debug("Initialising...");
@@ -30,27 +30,26 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
  */
 public class GearyWebExtension : Object {
 
+    private const string PAGE_STATE_OBJECT_NAME = "geary";
+
+    // Keep these in sync with Components.WebView
+    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
+    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+
     private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
+
+    private const string EXTENSION_CLASS_VAR = "_GearyWebExtension";
+    private const string EXTENSION_CLASS_SEND = "send";
+    private const string REMOTE_LOAD_VAR = "_gearyAllowRemoteResourceLoads";
 
     private WebKit.WebExtension extension;
 
 
     public GearyWebExtension(WebKit.WebExtension extension) {
         this.extension = extension;
-        extension.page_created.connect((extension, web_page) => {
-                web_page.console_message_sent.connect(on_console_message);
-                web_page.send_request.connect(on_send_request);
-                // XXX investigate whether the earliest supported
-                // version of WK supports the DOM "selectionchanged"
-                // event, and if so use that rather that doing it in
-                // here in the extension
-                web_page.get_editor().selection_changed.connect(() => {
-                    selection_changed(web_page);
-                });
-            });
+        extension.page_created.connect(on_page_created);
     }
 
-    // XXX Conditionally enable while we still depend on WK2 <2.12
     private void on_console_message(WebKit.WebPage page,
                                     WebKit.ConsoleMessage message) {
         string source = message.get_source_id();
@@ -77,7 +76,10 @@ public class GearyWebExtension : Object {
             if (should_load_remote_images(page)) {
                 should_load = true;
             } else {
-                remote_image_load_blocked(page);
+                page.send_message_to_view.begin(
+                    new WebKit.UserMessage("remote_image_load_blocked", null),
+                    null
+                );
             }
         }
 
@@ -89,14 +91,7 @@ public class GearyWebExtension : Object {
         WebKit.Frame frame = page.get_main_frame();
         JSC.Context context = frame.get_js_context();
         try {
-            JSC.Value ret = execute_script(
-                context,
-                "geary.allowRemoteImages",
-                GLib.Log.FILE,
-                GLib.Log.METHOD,
-                GLib.Log.LINE
-            );
-            should_load = Util.JS.to_bool(ret);
+            should_load = Util.JS.to_bool(context.get_value(REMOTE_LOAD_VAR));
         } catch (GLib.Error err) {
             debug(
                 "Error checking PageState::allowRemoteImages: %s",
@@ -106,52 +101,172 @@ public class GearyWebExtension : Object {
         return should_load;
     }
 
-    private void remote_image_load_blocked(WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        try {
-            execute_script(
-                context,
-                "geary.remoteImageLoadBlocked();",
-                GLib.Log.FILE,
-                GLib.Log.METHOD,
-                GLib.Log.LINE
-            );
-        } catch (Error err) {
-            debug(
-                "Error calling PageState::remoteImageLoadBlocked: %s",
-                err.message
-            );
+    private WebKit.UserMessage to_exception_message(string? name,
+                                                    string? message,
+                                                    string? backtrace = null,
+                                                    string? source = null,
+                                                    int line_number = -1,
+                                                    int column_number = -1) {
+        var detail = new GLib.VariantDict();
+        if (name != null) {
+            detail.insert_value("name", new GLib.Variant.string(name));
         }
-    }
-
-    private void selection_changed(WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        try {
-            execute_script(
-                context,
-                "geary.selectionChanged();",
-                GLib.Log.FILE,
-                GLib.Log.METHOD,
-                GLib.Log.LINE
-            );
-        } catch (Error err) {
-            debug("Error calling PageStates::selectionChanged: %s", err.message);
+        if (message != null) {
+            detail.insert_value("message", new GLib.Variant.string(message));
         }
-    }
-
-    private JSC.Value execute_script(JSC.Context context,
-                                     string script,
-                                     string file_name,
-                                     string method_name,
-                                     int line_number)
-        throws Util.JS.Error {
-        JSC.Value ret = context.evaluate_with_source_uri(
-            script, -1, "geary:%s/%s".printf(file_name, method_name), line_number
+        if (backtrace != null) {
+            detail.insert_value("backtrace", new GLib.Variant.string(backtrace));
+        }
+        if (source != null) {
+            detail.insert_value("source", new GLib.Variant.string(source));
+        }
+        if (line_number > 0) {
+            detail.insert_value("line_number", new GLib.Variant.uint32(line_number));
+        }
+        if (column_number > 0) {
+            detail.insert_value("column_number", new GLib.Variant.uint32(column_number));
+        }
+        return new WebKit.UserMessage(
+            MESSAGE_EXCEPTION_NAME,
+            detail.end()
         );
-        Util.JS.check_exception(context);
-        return ret;
+    }
+
+    private void on_page_created(WebKit.WebExtension extension,
+                                 WebKit.WebPage page) {
+        WebKit.Frame frame = page.get_main_frame();
+        JSC.Context context = frame.get_js_context();
+
+        var extension_class = context.register_class(
+            this.get_type().name(),
+            null,
+            null,
+            null
+        );
+        extension_class.add_method(
+            EXTENSION_CLASS_SEND,
+            (instance, values) => {
+                return this.on_page_send_message(page, values);
+            },
+            GLib.Type.NONE
+        );
+        context.set_value(
+            EXTENSION_CLASS_VAR,
+            new JSC.Value.object(context, extension_class, extension_class)
+        );
+
+        context.set_value(
+            REMOTE_LOAD_VAR,
+            new JSC.Value.boolean(context, false)
+        );
+
+        page.console_message_sent.connect(on_console_message);
+        page.send_request.connect(on_send_request);
+        page.user_message_received.connect(on_page_message_received);
+    }
+
+    private bool on_page_message_received(WebKit.WebPage page,
+                                          WebKit.UserMessage message) {
+        WebKit.Frame frame = page.get_main_frame();
+        JSC.Context context = frame.get_js_context();
+        JSC.Value page_state = context.get_value(PAGE_STATE_OBJECT_NAME);
+
+        try {
+            JSC.Value[]? call_param = null;
+            GLib.Variant? message_param = message.parameters;
+            if (message_param != null) {
+                if (message_param.is_container()) {
+                    size_t len = message_param.n_children();
+                    call_param = new JSC.Value[len];
+                    for (size_t i = 0; i < len; i++) {
+                        call_param[i] = Util.JS.variant_to_value(
+                            context,
+                            message_param.get_child_value(i)
+                        );
+                    }
+                } else {
+                    call_param = {
+                        Util.JS.variant_to_value(context, message_param)
+                    };
+                }
+            }
+
+            JSC.Value ret = page_state.object_invoke_methodv(
+                message.name, call_param
+            );
+
+            // Must send a reply, even for void calls, otherwise
+            // WebKitGTK will complain. So return a message return
+            // rain hail or shine.
+            // https://bugs.webkit.org/show_bug.cgi?id=215880
+
+            JSC.Exception? thrown = context.get_exception();
+            if (thrown != null) {
+                message.send_reply(
+                    to_exception_message(
+                        thrown.get_name(),
+                        thrown.get_message(),
+                        thrown.get_backtrace_string(),
+                        thrown.get_source_uri(),
+                        (int) thrown.get_line_number(),
+                        (int) thrown.get_column_number()
+                    )
+                );
+            } else {
+                message.send_reply(
+                    new WebKit.UserMessage(
+                        MESSAGE_RETURN_VALUE_NAME,
+                        Util.JS.value_to_variant(ret)
+                    )
+                );
+            }
+        } catch (GLib.Error err) {
+            debug("Failed to handle message: %s", err.message);
+        }
+
+        return true;
+    }
+
+    private bool on_page_send_message(WebKit.WebPage page,
+                                      GLib.GenericArray<JSC.Value> args) {
+        WebKit.UserMessage? message = null;
+        if (args.length > 0) {
+            var name = args.get(0).to_string();
+            GLib.Variant? parameters = null;
+            if (args.length > 1) {
+                JSC.Value param_value = args.get(1);
+                try {
+                    int len = Util.JS.to_int32(
+                        param_value.object_get_property("length")
+                    );
+                    if (len == 1) {
+                        parameters = Util.JS.value_to_variant(
+                            param_value.object_get_property_at_index(0)
+                        );
+                    } else if (len > 1) {
+                        parameters = Util.JS.value_to_variant(param_value);
+                    }
+                } catch (Util.JS.Error err) {
+                    message = to_exception_message(
+                        this.get_type().name(), err.message
+                    );
+                }
+            }
+            if (message == null) {
+                message = new WebKit.UserMessage(name, parameters);
+            }
+        }
+        if (message == null) {
+            var log_message = "Not enough parameters for JS call to %s.%s()".printf(
+                EXTENSION_CLASS_VAR,
+                EXTENSION_CLASS_SEND
+            );
+            debug(log_message);
+            message = to_exception_message(this.get_type().name(), log_message);
+        }
+
+        page.send_message_to_view.begin(message, null);
+        return true;
     }
 
 }

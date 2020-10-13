@@ -1,15 +1,15 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationWebView : ClientWebView {
+public class ConversationWebView : Components.WebView {
 
 
-    private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
+    private const string DECEPTIVE_LINK_CLICKED = "deceptive_link_clicked";
 
     // Key codes we don't forward on to the super class on key press
     // since we want to override them elsewhere, especially
@@ -41,10 +41,10 @@ public class ConversationWebView : ClientWebView {
 
     public static new void load_resources()
         throws Error {
-        ConversationWebView.app_script = ClientWebView.load_app_script(
+        ConversationWebView.app_script = Components.WebView.load_app_script(
             "conversation-web-view.js"
         );
-        ConversationWebView.app_stylesheet = ClientWebView.load_app_stylesheet(
+        ConversationWebView.app_stylesheet = Components.WebView.load_app_stylesheet(
             "conversation-web-view.css"
         );
     }
@@ -56,36 +56,51 @@ public class ConversationWebView : ClientWebView {
     );
 
 
+    /**
+     * Constructs a new web view for displaying an email message body.
+     *
+     * A new WebKitGTK WebProcess will be constructed for this view.
+     */
     public ConversationWebView(Application.Configuration config) {
         base(config);
+        init();
+
+        // These only need to be added when creating a new WebProcess,
+        // not when sharing one
         this.user_content_manager.add_script(ConversationWebView.app_script);
         this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
+    }
 
-        register_message_handler(
-            DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
-        );
-
-        this.notify["preferred-height"].connect(() => queue_resize());
+    /**
+     * Constructs a new web view for displaying an email message body.
+     *
+     * The WebKitGTK WebProcess will be shared with the related view's
+     * process.
+     */
+    internal ConversationWebView.with_related_view(
+        Application.Configuration config,
+        ConversationWebView related
+    ) {
+        base.with_related_view(config, related);
+        init();
     }
 
     /**
      * Returns the current selection, for prefill as find text.
      */
     public async string? get_selection_for_find() throws Error{
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getSelectionForFind"), null
+        return yield call_returning<string?>(
+            Util.JS.callable("getSelectionForFind"), null
         );
-        return Util.JS.to_string(result);
     }
 
     /**
      * Returns the current selection, for quoting in a message.
      */
     public async string? get_selection_for_quoting() throws Error {
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getSelectionForQuoting"), null
+        return yield call_returning<string?>(
+            Util.JS.callable("getSelectionForQuoting"), null
         );
-        return Util.JS.to_string(result);
     }
 
     /**
@@ -93,10 +108,9 @@ public class ConversationWebView : ClientWebView {
      */
     public async int? get_anchor_target_y(string anchor_body)
         throws GLib.Error {
-        JSC.Value result = yield call(
-            Util.JS.callable("geary.getAnchorTargetY").string(anchor_body), null
+        return yield call_returning<int?>(
+            Util.JS.callable("getAnchorTargetY").string(anchor_body), null
         );
-        return (int) Util.JS.to_int32(result);
     }
 
     /**
@@ -206,41 +220,48 @@ public class ConversationWebView : ClientWebView {
         minimum_height = natural_height = 0;
     }
 
-    private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
-        try {
-            JSC.Value object = result.get_js_value();
-            uint reason = (uint) Util.JS.to_int32(
-                Util.JS.get_property(object, "reason")
-            );
+    private void init() {
+        register_message_callback(
+            DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
+        );
 
-            string href = Util.JS.to_string(
-                Util.JS.get_property(object, "href")
-            );
+        this.notify["preferred-height"].connect(() => queue_resize());
+    }
 
-            string text = Util.JS.to_string(
-                Util.JS.get_property(object, "text")
-            );
+    private void on_deceptive_link_clicked(GLib.Variant? parameters) {
+        var dict = new GLib.VariantDict(parameters);
+        uint reason = (uint) dict.lookup_value(
+            "reason", GLib.VariantType.DOUBLE
+        ).get_double();
 
-            JSC.Value js_location = Util.JS.get_property(object, "location");
+        string href = dict.lookup_value(
+            "href", GLib.VariantType.STRING
+        ).get_string();
 
-            Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "x")
-            );
-            location.y = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "y")
-            );
-            location.width = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "width")
-            );
-            location.height = Util.JS.to_int32(
-                Util.JS.get_property(js_location, "height")
-            );
+        string text = dict.lookup_value(
+            "text", GLib.VariantType.STRING
+        ).get_string();
 
-            deceptive_link_clicked((DeceptiveText) reason, text, href, location);
-        } catch (Util.JS.Error err) {
-            debug("Could not get deceptive link param: %s", err.message);
-        }
+        Gdk.Rectangle location = Gdk.Rectangle();
+        var location_dict = new GLib.VariantDict(
+            dict.lookup_value("location", GLib.VariantType.VARDICT)
+        );
+        location.x = (int) location_dict.lookup_value(
+            "x", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.y = (int) location_dict.lookup_value(
+            "y", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.width = (int) location_dict.lookup_value(
+            "width", GLib.VariantType.DOUBLE
+        ).get_double();
+        location.height = (int) location_dict.lookup_value(
+            "height", GLib.VariantType.DOUBLE
+        ).get_double();
+
+        deceptive_link_clicked(
+            (DeceptiveText) reason, text, href, location
+        );
     }
 
 }

@@ -1,6 +1,6 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
+public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -26,13 +26,17 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
 
+    // Keep these in sync with GearyWebExtension
+    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
+    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+
     // WebKit message handler names
-    private const string COMMAND_STACK_CHANGED = "commandStackChanged";
-    private const string CONTENT_LOADED = "contentLoaded";
-    private const string DOCUMENT_MODIFIED = "documentModified";
-    private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
-    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
-    private const string SELECTION_CHANGED = "selectionChanged";
+    private const string COMMAND_STACK_CHANGED = "command_stack_changed";
+    private const string CONTENT_LOADED = "content_loaded";
+    private const string DOCUMENT_MODIFIED = "document_modified";
+    private const string PREFERRED_HEIGHT_CHANGED = "preferred_height_changed";
+    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remote_image_load_blocked";
+    private const string SELECTION_CHANGED = "selection_changed";
 
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
@@ -65,7 +69,6 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private static WebKit.UserStyleSheet? user_stylesheet = null;
 
     private static WebKit.UserScript? script = null;
-    private static WebKit.UserScript? allow_remote_images = null;
 
 
     /**
@@ -76,23 +79,18 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
-#if HAS_WEBKIT_SHARED_PROC
-        // Use a shared process so we don't spawn N WebProcess instances
-        // when showing N messages in a conversation.
-        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
-#endif
         // Use the doc viewer model since each web view instance only
         // ever shows a single HTML document.
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 
         context.register_uri_scheme("cid", (req) => {
-                ClientWebView? view = req.get_web_view() as ClientWebView;
+                WebView? view = req.get_web_view() as WebView;
                 if (view != null) {
                     view.handle_cid_request(req);
                 }
             });
         context.register_uri_scheme("geary", (req) => {
-                ClientWebView? view = req.get_web_view() as ClientWebView;
+                WebView? view = req.get_web_view() as WebView;
                 if (view != null) {
                     view.handle_internal_request(req);
                 }
@@ -113,25 +111,22 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
                 update_spellcheck(context, config);
             });
 
-        ClientWebView.default_context = context;
+        WebView.default_context = context;
     }
 
     /**
-     * Loads static resources used by ClientWebView.
+     * Loads static resources used by WebView.
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
-        ClientWebView.script = load_app_script(
-            "client-web-view.js"
-        );
-        ClientWebView.allow_remote_images = load_app_script(
-            "client-web-view-allow-remote-images.js"
+        WebView.script = load_app_script(
+            "components-web-view.js"
         );
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
             GLib.File stylesheet = user_dir.get_child(name);
             try {
-                ClientWebView.user_stylesheet = load_user_stylesheet(stylesheet);
+                WebView.user_stylesheet = load_user_stylesheet(stylesheet);
                 break;
             } catch (GLib.IOError.NOT_FOUND err) {
                 // All good, try the next one or just exit
@@ -200,8 +195,23 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     }
 
 
-    /** Delegate for UserContentManager message callbacks. */
-    public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
+    /**
+     * Delegate for message handler callbacks.
+     *
+     * @see register_message_callback
+     */
+    protected delegate void MessageCallback(GLib.Variant? parameters);
+
+    // Work around for not being able to put delegates in a Gee collection.
+    private class MessageCallable {
+
+        public unowned MessageCallback handler;
+
+        public MessageCallable(MessageCallback handler) {
+            this.handler = handler;
+        }
+
+    }
 
     /**
      * Determines if the view's content has been fully loaded.
@@ -266,8 +276,8 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
-    private Gee.List<ulong> registered_message_handlers =
-        new Gee.LinkedList<ulong>();
+    private Gee.Map<string,MessageCallable> message_handlers =
+        new Gee.HashMap<string,MessageCallable>();
 
     private double webkit_reported_height = 0;
 
@@ -299,8 +309,9 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public signal void remote_image_load_blocked();
 
 
-    protected ClientWebView(Application.Configuration config,
-                            WebKit.UserContentManager? custom_manager = null) {
+    protected WebView(Application.Configuration config,
+                      WebKit.UserContentManager? custom_manager = null,
+                      WebView? related = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
@@ -321,70 +332,45 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
-        content_manager.add_script(ClientWebView.script);
-        if (ClientWebView.user_stylesheet != null) {
-            content_manager.add_style_sheet(ClientWebView.user_stylesheet);
+        content_manager.add_script(WebView.script);
+        if (WebView.user_stylesheet != null) {
+            content_manager.add_style_sheet(WebView.user_stylesheet);
         }
 
         Object(
-            web_context: ClientWebView.default_context,
+            settings: setts,
             user_content_manager: content_manager,
-            settings: setts
+            web_context: WebView.default_context
         );
         base_ref();
-
-        // XXX get the allow prefix from the extension somehow
-
-        this.decide_policy.connect(on_decide_policy);
-        this.web_process_terminated.connect((reason) => {
-                warning("Web process crashed: %s", reason.to_string());
-            });
-
-        register_message_handler(
-            COMMAND_STACK_CHANGED, on_command_stack_changed
-        );
-        register_message_handler(
-            CONTENT_LOADED, on_content_loaded
-        );
-        register_message_handler(
-            DOCUMENT_MODIFIED, on_document_modified
-        );
-        register_message_handler(
-            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
-        );
-        register_message_handler(
-            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
-        );
-        register_message_handler(
-            SELECTION_CHANGED, on_selection_changed
-        );
-
-        // Manage zoom level, ensure it's sane
-        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
-        if (this.zoom_level < ZOOM_MIN) {
-            this.zoom_level = ZOOM_MIN;
-        } else if (this.zoom_level > ZOOM_MAX) {
-            this.zoom_level = ZOOM_MAX;
-        }
-        this.scroll_event.connect(on_scroll_event);
-
-        // Watch desktop font settings
-        Settings system_settings = config.gnome_interface;
-        system_settings.bind("document-font-name", this,
-                             "document-font", SettingsBindFlags.DEFAULT);
-        system_settings.bind("monospace-font-name", this,
-                             "monospace-font", SettingsBindFlags.DEFAULT);
+        init(config);
     }
 
-    ~ClientWebView() {
+    /**
+     * Constructs a new web view with a new shared WebProcess.
+     *
+     * The new view will use the same WebProcess, settings and content
+     * manager as the given related view's.
+     *
+     * @see WebKit.WebView.WebView.with_related_view
+     */
+    protected WebView.with_related_view(Application.Configuration config,
+                                        WebView related) {
+        Object(
+            related_view: related,
+            settings: related.get_settings(),
+            user_content_manager: related.user_content_manager
+        );
+        base_ref();
+        init(config);
+    }
+
+    ~WebView() {
         base_unref();
     }
 
     public override void destroy() {
-        foreach (ulong id in this.registered_message_handlers) {
-            this.user_content_manager.disconnect(id);
-        }
-        this.registered_message_handlers.clear();
+        this.message_handlers.clear();
         base.destroy();
     }
 
@@ -400,9 +386,7 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * Returns the view's content as an HTML string.
      */
     public async string? get_html() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getHtml"), null)
-        );
+        return yield call_returning<string?>(Util.JS.callable("getHtml"), null);
     }
 
     /**
@@ -433,20 +417,14 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      * effect.
      */
     public void allow_remote_image_loading() {
-        // Use a separate script here since we need to update the
-        // value of window.geary.allow_remote_image_loading after it
-        // was first created by client-web-view.js (which is loaded at
-        // the start of page load), but before the page load is
-        // started (so that any remote images present are actually
-        // loaded).
-        this.user_content_manager.add_script(ClientWebView.allow_remote_images);
+        this.run_javascript.begin("_gearyAllowRemoteResourceLoads = true", null);
     }
 
     /**
      * Load any remote images previously that were blocked.
      */
     public void load_remote_images() {
-        this.call.begin(Util.JS.callable("geary.loadRemoteImages"), null);
+        this.call_void.begin(Util.JS.callable("loadRemoteImages"), null);
     }
 
     /**
@@ -491,40 +469,192 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     public new async void set_editable(bool enabled,
                                        Cancellable? cancellable)
         throws Error {
-        yield call(
-            Util.JS.callable("geary.setEditable").bool(enabled), cancellable
+        yield call_void(
+            Util.JS.callable("setEditable").bool(enabled), cancellable
         );
     }
 
     /**
      * Invokes a {@link Util.JS.Callable} on this web view.
+     *
+     * This calls the given callable on the `geary` object for the
+     * current view, any returned value are ignored.
      */
-    protected async JSC.Value call(Util.JS.Callable target,
+    protected async void call_void(Util.JS.Callable target,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-        WebKit.JavascriptResult result = yield run_javascript(
-            target.to_string(), cancellable
-        );
-        return result.get_js_value();
+        yield call_impl(target, cancellable);
     }
 
     /**
-     * Convenience function for registering and connecting JS messages.
+     * Invokes a {@link Util.JS.Callable} on this web view.
+     *
+     * This calls the given callable on the `geary` object for the
+     * current view. The value returned by the call is returned by
+     * this method.
+     *
+     * The type parameter `T` must match the type returned by the
+     * call, else an error is thrown. Only simple nullable value types
+     * are supported for T, for more complex return types (arrays,
+     * dictionaries, etc) specify {@link GLib.Variant} for `T` and
+     * manually parse that.
      */
-    protected inline void register_message_handler(string name,
-                                                   JavaScriptMessageHandler handler) {
-        // XXX can't use the delegate directly, see b.g.o Bug
-        // 604781. However the workaround below creates a circular
-        // reference, causing ClientWebView instances to leak. So to
-        // work around that we need to record handler ids and
-        // disconnect them when being destroyed.
-        ulong id = this.user_content_manager.script_message_received[name].connect(
-            (result) => { handler(result); }
-        );
-        this.registered_message_handlers.add(id);
-        if (!this.user_content_manager.register_script_message_handler(name)) {
-            debug("Failed to register script message handler: %s", name);
+    protected async T call_returning<T>(Util.JS.Callable target,
+                                        GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        WebKit.UserMessage? response = yield call_impl(target, cancellable);
+        if (response == null) {
+            throw new Util.JS.Error.TYPE(
+                "Method call %s did not return a value", target.to_string()
+            );
         }
+        GLib.Variant? param = response.parameters;
+        T ret_value = null;
+        var ret_type = typeof(T);
+        if (ret_type == typeof(GLib.Variant)) {
+            ret_value = param;
+        } else {
+            if (param != null && param.get_type().is_maybe()) {
+                param = param.get_maybe();
+            }
+            if (param != null) {
+                // Since these replies are coming from JS via
+                // Util.JS.value_to_variant, they will only be one of
+                // string, double, bool, array or dict
+                var param_type = param.classify();
+                if (ret_type == typeof(string) && param_type == STRING) {
+                    ret_value = param.get_string();
+                } else if (ret_type == typeof(bool) && param_type == BOOLEAN) {
+                    ret_value = (bool?) param.get_boolean();
+                } else if (ret_type == typeof(int) && param_type == DOUBLE) {
+                    ret_value = (int?) ((int) param.get_double());
+                } else if (ret_type == typeof(short) && param_type == DOUBLE) {
+                    ret_value = (short?) ((short) param.get_double());
+                } else if (ret_type == typeof(char) && param_type == DOUBLE) {
+                    ret_value = (char?) ((char) param.get_double());
+                } else if (ret_type == typeof(long) && param_type == DOUBLE) {
+                    ret_value = (long?) ((long) param.get_double());
+                } else if (ret_type == typeof(int64) && param_type == DOUBLE) {
+                    ret_value = (int64?) ((int64) param.get_double());
+                } else if (ret_type == typeof(uint) && param_type == DOUBLE) {
+                    ret_value = (uint?) ((uint) param.get_double());
+                } else if (ret_type == typeof(uchar) && param_type == DOUBLE) {
+                    ret_value = (uchar?) ((uchar) param.get_double());
+                } else if (ret_type == typeof(ushort) && param_type == DOUBLE) {
+                    ret_value = (ushort?) ((ushort) param.get_double());
+                } else if (ret_type == typeof(ulong) && param_type == DOUBLE) {
+                    ret_value = (ulong?) ((ulong) param.get_double());
+                } else if (ret_type == typeof(uint64) && param_type == DOUBLE) {
+                    ret_value = (uint64?) ((uint64) param.get_double());
+                } else if (ret_type == typeof(double) && param_type == DOUBLE) {
+                    ret_value = (double?) param.get_double();
+                } else if (ret_type == typeof(float) && param_type == DOUBLE) {
+                    ret_value = (float?) ((float) param.get_double());
+                } else {
+                    throw new Util.JS.Error.TYPE(
+                        "%s is not a supported type for %s",
+                        ret_type.name(), param_type.to_string()
+                    );
+                }
+            }
+        }
+        return ret_value;
+    }
+
+    /**
+     * Registers a callback for a specific WebKit user message.
+     */
+    protected void register_message_callback(string name,
+                                             MessageCallback handler) {
+        this.message_handlers.set(name, new MessageCallable(handler));
+    }
+
+    private void init(Application.Configuration config) {
+        // XXX get the allow prefix from the extension somehow
+
+        this.decide_policy.connect(on_decide_policy);
+        this.web_process_terminated.connect((reason) => {
+                warning("Web process crashed: %s", reason.to_string());
+            });
+
+        register_message_callback(
+            COMMAND_STACK_CHANGED, on_command_stack_changed
+        );
+        register_message_callback(
+            CONTENT_LOADED, on_content_loaded
+        );
+        register_message_callback(
+            DOCUMENT_MODIFIED, on_document_modified
+        );
+        register_message_callback(
+            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
+        );
+        register_message_callback(
+            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+        );
+        register_message_callback(
+            SELECTION_CHANGED, on_selection_changed
+        );
+
+        this.user_message_received.connect(this.on_message_received);
+
+        // Manage zoom level, ensure it's sane
+        config.bind(Application.Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        if (this.zoom_level < ZOOM_MIN) {
+            this.zoom_level = ZOOM_MIN;
+        } else if (this.zoom_level > ZOOM_MAX) {
+            this.zoom_level = ZOOM_MAX;
+        }
+        this.scroll_event.connect(on_scroll_event);
+
+        // Watch desktop font settings
+        Settings system_settings = config.gnome_interface;
+        system_settings.bind("document-font-name", this,
+                             "document-font", SettingsBindFlags.DEFAULT);
+        system_settings.bind("monospace-font-name", this,
+                             "monospace-font", SettingsBindFlags.DEFAULT);
+    }
+
+    private async WebKit.UserMessage? call_impl(Util.JS.Callable target,
+                                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        WebKit.UserMessage? response = yield send_message_to_page(
+            target.to_message(), cancellable
+        );
+        if (response != null) {
+            var response_name = response.name;
+            if (response_name == MESSAGE_EXCEPTION_NAME) {
+                var exception = new GLib.VariantDict(response.parameters);
+                var name = exception.lookup_value("name", GLib.VariantType.STRING) as string;
+                var message = exception.lookup_value("message", GLib.VariantType.STRING) as string;
+                var backtrace = exception.lookup_value("backtrace_string", GLib.VariantType.STRING) as string;
+                var source = exception.lookup_value("source_uri", GLib.VariantType.STRING) as string;
+                var line = exception.lookup_value("line_number", GLib.VariantType.UINT32);
+                var column = exception.lookup_value("column_number", GLib.VariantType.UINT32);
+
+                var log_message = "Method call %s raised %s exception at %s:%d:%d: %s".printf(
+                    target.to_string(),
+                    name ?? "unknown",
+                    source ?? "unknown",
+                    (line != null ? (int) line.get_uint32() : -1),
+                    (column != null ? (int) column.get_uint32() : -1),
+                    message ?? "unknown"
+                );
+                debug(log_message);
+                if (backtrace != null) {
+                    debug(backtrace);
+                }
+
+                throw new Util.JS.Error.EXCEPTION(log_message);
+            } else if (response_name != MESSAGE_RETURN_VALUE_NAME) {
+                throw new Util.JS.Error.TYPE(
+                    "Method call %s returned unknown name: %s",
+                    target.to_string(),
+                    response_name
+                );
+            }
+        }
+        return response;
     }
 
     private void handle_cid_request(WebKit.URISchemeRequest request) {
@@ -625,12 +755,12 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         return false;
     }
 
-    private void on_preferred_height_changed(WebKit.JavascriptResult result) {
+    private void on_preferred_height_changed(GLib.Variant? parameters) {
         double height = this.webkit_reported_height;
-        try {
-            height = Util.JS.to_double(result.get_js_value());
-        } catch (Util.JS.Error err) {
-            debug("Could not get preferred height: %s", err.message);
+        if (parameters != null && parameters.classify() == DOUBLE) {
+            height = parameters.get_double();
+        } else {
+            warning("Could not get JS preferred height");
         }
 
         if (this.webkit_reported_height != height) {
@@ -639,41 +769,64 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
-    private void on_command_stack_changed(WebKit.JavascriptResult result) {
-        try {
-            string[] values =
-                Util.JS.to_string(result.get_js_value()).split(",");
-            command_stack_changed(values[0] == "true", values[1] == "true");
-        } catch (Util.JS.Error err) {
-            debug("Could not get command stack state: %s", err.message);
+    private void on_command_stack_changed(GLib.Variant? parameters) {
+        if (parameters != null &&
+            parameters.is_container() &&
+            parameters.n_children() == 2) {
+            GLib.Variant can_undo = parameters.get_child_value(0);
+            GLib.Variant can_redo = parameters.get_child_value(1);
+            command_stack_changed(
+                can_undo.classify() == BOOLEAN && can_undo.get_boolean(),
+                can_redo.classify() == BOOLEAN && can_redo.get_boolean()
+            );
+        } else {
+            warning("Could not get JS command stack state");
         }
     }
 
-    private void on_document_modified(WebKit.JavascriptResult result) {
+    private void on_document_modified(GLib.Variant? parameters) {
         document_modified();
     }
 
-    private void on_remote_image_load_blocked(WebKit.JavascriptResult result) {
+    private void on_remote_image_load_blocked(GLib.Variant? parameters) {
         remote_image_load_blocked();
     }
 
-    private void on_content_loaded(WebKit.JavascriptResult result) {
+    private void on_content_loaded(GLib.Variant? parameters) {
         this.is_content_loaded = true;
         content_loaded();
     }
 
-    private void on_selection_changed(WebKit.JavascriptResult result) {
-        try {
-            bool has_selection = Util.JS.to_bool(result.get_js_value());
-            // Avoid firing multiple notifies if the value hasn't
-            // changed
-            if (this.has_selection != has_selection) {
-                this.has_selection = has_selection;
-            }
-            selection_changed(has_selection);
-        } catch (Util.JS.Error err) {
-            debug("Could not get selection content: %s", err.message);
+    private void on_selection_changed(GLib.Variant? parameters) {
+        if (parameters != null && parameters.classify() == BOOLEAN) {
+            selection_changed(parameters.get_boolean());
+        } else {
+            warning("Could not get JS selection value");
         }
+    }
+
+    private bool on_message_received(WebKit.UserMessage message) {
+        if (message.name == MESSAGE_EXCEPTION_NAME) {
+            var detail = new GLib.VariantDict(message.parameters);
+            var name = detail.lookup_value("name", GLib.VariantType.STRING) as string;
+            var log_message = detail.lookup_value("message", GLib.VariantType.STRING) as string;
+            warning(
+                "Error sending message from JS: %s: %s",
+                name ?? "unknown",
+                log_message ?? "unknown"
+            );
+        } else if (this.message_handlers.has_key(message.name)) {
+            debug(
+                "Message received: %s(%s)",
+                message.name,
+                message.parameters != null ? message.parameters.print(true) : ""
+            );
+            MessageCallable callback = this.message_handlers.get(message.name);
+            callback.handler(message.parameters);
+        } else {
+            warning("Message with unknown handler received: %s", message.name);
+        }
+        return true;
     }
 
 }

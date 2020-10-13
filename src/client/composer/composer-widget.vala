@@ -1252,7 +1252,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         email.inline_files.set_all(this.inline_files);
         email.cid_files.set_all(this.cid_files);
 
-        email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
+        email.img_src_prefix = Components.WebView.INTERNAL_URL_PREFIX;
 
         try {
             email.body_text = yield this.editor.body.get_text();
@@ -1450,15 +1450,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             confirmation = _("Send message with an empty subject?");
         } else if (!has_body && !has_attachment) {
             confirmation = _("Send message with an empty body?");
-        } else if (!has_attachment &&
-                   yield this.editor.body.contains_attachment_keywords(
-                       string.join(
-                           "|",
-                           ATTACHMENT_KEYWORDS,
-                           ATTACHMENT_KEYWORDS_LOCALISED
-                       ),
-                       this.subject)) {
-            confirmation = _("Send message without an attachment?");
+        } else if (!has_attachment) {
+            var keywords = string.join(
+                "|", ATTACHMENT_KEYWORDS, ATTACHMENT_KEYWORDS_LOCALISED
+            );
+            var contains = yield this.editor.body.contains_attachment_keywords(
+                keywords, this.subject
+            );
+            if (contains != null && contains) {
+                confirmation = _("Send message without an attachment?");
+            }
         }
         if (confirmation != null) {
             ConfirmationDialog dialog = new ConfirmationDialog(container.top_window,
@@ -1924,7 +1925,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         string unique_filename;
                         add_inline_part(byte_buffer, filename, out unique_filename);
                         this.editor.body.insert_image(
-                            ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+                            Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                         );
                     } catch (Error error) {
                         this.application.report_problem(
@@ -1964,7 +1965,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     string unique_filename;
                     add_inline_part(file_buffer, path, out unique_filename);
                     this.editor.body.insert_image(
-                        ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+                        Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                     );
                 } catch (Error err) {
                     attachment_failed(err.message);
@@ -2459,7 +2460,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         this.editor.body.insert_image(
-            ClientWebView.INTERNAL_URL_PREFIX + unique_filename
+            Components.WebView.INTERNAL_URL_PREFIX + unique_filename
         );
     }
 

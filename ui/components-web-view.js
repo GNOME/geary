@@ -1,12 +1,12 @@
 /*
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright © 2016-2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Application logic for ClientWebView and subclasses.
+ * Application logic for Components.WebView and subclasses.
  */
 
 let PageState = function() {
@@ -14,12 +14,17 @@ let PageState = function() {
 };
 PageState.prototype = {
     init: function() {
-        this.allowRemoteImages = false;
         this.isLoaded = false;
         this.undoEnabled = false;
         this.redoEnabled = false;
         this.hasSelection = false;
         this.lastPreferredHeight = 0;
+
+        this._selectionChanged = MessageSender("selection_changed");
+        this._contentLoaded = MessageSender("content_loaded");
+        this._preferredHeightChanged = MessageSender("preferred_height_changed");
+        this._commandStackChanged = MessageSender("command_stack_changed");
+        this._documentModified = MessageSender("document_modified");
 
         let state = this;
 
@@ -38,6 +43,10 @@ PageState.prototype = {
 
         document.addEventListener("DOMContentLoaded", function(e) {
             state.loaded();
+        });
+
+        document.addEventListener("selectionchange", function(e) {
+            state.selectionChanged();
         });
 
         // Coalesce multiple calls to updatePreferredHeight using a
@@ -88,6 +97,8 @@ PageState.prototype = {
         window.addEventListener("transitionend", function(e) {
             queuePreferredHeightUpdate();
         }, false); // load does not bubble
+
+        this.testResult = null;
     },
     getPreferredHeight: function() {
         // Return the scroll height of the HTML element since the BODY
@@ -105,10 +116,10 @@ PageState.prototype = {
         // be vaguegly correct when notifying of the HTML load
         // completing.
         this.updatePreferredHeight();
-        window.webkit.messageHandlers.contentLoaded.postMessage(null);
+        this._contentLoaded();
     },
     loadRemoteImages: function() {
-        this.allowRemoteImages = true;
+        window._gearyAllowRemoteResourceLoads = true;
         let images = document.getElementsByTagName("IMG");
         for (let i = 0; i < images.length; i++) {
             let img = images.item(i);
@@ -140,9 +151,6 @@ PageState.prototype = {
     stopBodyObserver: function() {
         this.bodyObserver.disconnect();
     },
-    remoteImageLoadBlocked: function() {
-        window.webkit.messageHandlers.remoteImageLoadBlocked.postMessage(null);
-    },
     /**
      * Sends "preferredHeightChanged" message if it has changed.
      */
@@ -159,9 +167,7 @@ PageState.prototype = {
         // shrink again, leading to visual flicker.
         if (this.isLoaded && height > 0 && height != this.lastPreferredHeight) {
             this.lastPreferredHeight = height;
-            window.webkit.messageHandlers.preferredHeightChanged.postMessage(
-                height
-            );
+            this._preferredHeightChanged(height);
         }
     },
     checkCommandStack: function() {
@@ -171,19 +177,38 @@ PageState.prototype = {
         if (canUndo != this.undoEnabled || canRedo != this.redoEnabled) {
             this.undoEnabled = canUndo;
             this.redoEnabled = canRedo;
-            window.webkit.messageHandlers.commandStackChanged.postMessage(
-                this.undoEnabled + "," + this.redoEnabled
-            );
+            this._commandStackChanged(this.undoEnabled, this.redoEnabled);
         }
     },
     documentModified: function(element) {
-        window.webkit.messageHandlers.documentModified.postMessage(null);
+        this._documentModified();
     },
     selectionChanged: function() {
         let hasSelection = !window.getSelection().isCollapsed;
         if (this.hasSelection != hasSelection) {
             this.hasSelection = hasSelection;
-            window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
+            this._selectionChanged(hasSelection);
         }
+    },
+    // Methods below are for unit tests.
+    testVoid: function() {
+        this.testResult = "void";
+    },
+    testReturn: function(value) {
+        this.testResult = value;
+        return value;
+    },
+    testThrow: function(value) {
+        this.testResult = value;
+        throw this.testResult;
     }
+};
+
+let MessageSender = function(name) {
+    return function() {
+        // Since typeof(arguments) == 'object', convert to an array so
+        // that Components.WebView.MessageCallback callbacks get
+        // arrays or tuples rather than dicts as arguments
+        _GearyWebExtension.send(name, Array.from(arguments));
+    };
 };

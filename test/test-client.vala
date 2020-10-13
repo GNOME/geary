@@ -53,10 +53,10 @@ int main(string[] args) {
     client.add_suite(new Application.CertificateManagerTest().suite);
     client.add_suite(new Application.ClientTest().suite);
     client.add_suite(new Application.ConfigurationTest().suite);
-    client.add_suite(new ClientWebViewTest().suite);
+    client.add_suite(new Components.WebViewTest().suite);
+    client.add_suite(new Components.ValidatorTest().suite);
     client.add_suite(new Composer.WebViewTest().suite);
     client.add_suite(new Composer.WidgetTest().suite);
-    client.add_suite(new Components.ValidatorTest().suite);
     client.add_suite(new Util.Avatar.Test().suite);
     client.add_suite(new Util.Cache.Test().suite);
     client.add_suite(new Util.Email.Test().suite);
@@ -64,7 +64,7 @@ int main(string[] args) {
 
     TestSuite js = new TestSuite("js");
 
-    js.add_suite(new ClientPageStateTest().suite);
+    js.add_suite(new Components.PageStateTest().suite);
     js.add_suite(new Composer.PageStateTest().suite);
     js.add_suite(new ConversationPageStateTest().suite);
 

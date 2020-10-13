@@ -82,9 +82,9 @@ test_client_sources = [
   'client/application/application-certificate-manager-test.vala',
   'client/application/application-client-test.vala',
   'client/application/application-configuration-test.vala',
-  'client/components/client-web-view-test.vala',
-  'client/components/client-web-view-test-case.vala',
   'client/components/components-validator-test.vala',
+  'client/components/components-web-view-test-case.vala',
+  'client/components/components-web-view-test.vala',
   'client/composer/composer-web-view-test.vala',
   'client/composer/composer-widget-test.vala',
   'client/util/util-avatar-test.vala',
@@ -92,7 +92,7 @@ test_client_sources = [
   'client/util/util-email-test.vala',
   'client/util/util-js-test.vala',
 
-  'js/client-page-state-test.vala',
+  'js/components-page-state-test.vala',
   'js/composer-page-state-test.vala',
   'js/conversation-page-state-test.vala',
 

@@ -9,7 +9,7 @@
 /**
  * A WebView for editing messages in the composer.
  */
-public class Composer.WebView : ClientWebView {
+public class Composer.WebView : Components.WebView {
 
     /** HTML id used for the main text section of the message body. */
     public const string BODY_HTML_ID = "geary-body";
@@ -33,8 +33,8 @@ public class Composer.WebView : ClientWebView {
     private const string SPACER = "<div><br /></div>";
 
     // WebKit message handler names
-    private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
-    private const string DRAG_DROP_RECEIVED = "dragDropReceived";
+    private const string CURSOR_CONTEXT_CHANGED = "cursor_context_changed";
+    private const string DRAG_DROP_RECEIVED = "drag_drop_received";
 
     /**
      * Encapsulates editing-related state for a specific DOM node.
@@ -112,10 +112,10 @@ public class Composer.WebView : ClientWebView {
 
     public static new void load_resources()
         throws Error {
-        WebView.app_style = ClientWebView.load_app_stylesheet(
+        WebView.app_style = Components.WebView.load_app_stylesheet(
             "composer-web-view.css"
         );
-        WebView.app_script = ClientWebView.load_app_script(
+        WebView.app_script = Components.WebView.load_app_script(
             "composer-web-view.js"
         );
     }
@@ -152,8 +152,8 @@ public class Composer.WebView : ClientWebView {
         this.user_content_manager.add_style_sheet(WebView.app_style);
         this.user_content_manager.add_script(WebView.app_script);
 
-        register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
-        register_message_handler(DRAG_DROP_RECEIVED, on_drag_drop_received);
+        register_message_callback(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
+        register_message_callback(DRAG_DROP_RECEIVED, on_drag_drop_received);
 
         // XXX this is a bit of a hack given the docs for is_empty,
         // above
@@ -202,8 +202,8 @@ public class Composer.WebView : ClientWebView {
      * Returns the view's content as HTML without being cleaned.
      */
     public async string? get_html_for_draft() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getHtml").bool(false), null)
+        return yield call_returning<string?>(
+            Util.JS.callable("getHtml").bool(false), null
         );
     }
 
@@ -213,8 +213,8 @@ public class Composer.WebView : ClientWebView {
     public void set_rich_text(bool enabled) {
         this.is_rich_text = enabled;
         if (this.is_content_loaded) {
-            this.call.begin(
-                Util.JS.callable("geary.setRichText").bool(enabled), null
+            this.call_void.begin(
+                Util.JS.callable("setRichText").bool(enabled), null
             );
         }
     }
@@ -223,14 +223,14 @@ public class Composer.WebView : ClientWebView {
      * Undoes the last edit operation.
      */
     public void undo() {
-        this.call.begin(Util.JS.callable("geary.undo"), null);
+        this.call_void.begin(Util.JS.callable("undo"), null);
     }
 
     /**
      * Redoes the last undone edit operation.
      */
     public void redo() {
-        this.call.begin(Util.JS.callable("geary.redo"), null);
+        this.call_void.begin(Util.JS.callable("redo"), null);
     }
 
     /**
@@ -239,9 +239,9 @@ public class Composer.WebView : ClientWebView {
      * Returns an id to be used to refer to the selection in
      * subsequent calls.
      */
-    public async string save_selection() throws Error {
-        return Util.JS.to_string(
-            yield call(Util.JS.callable("geary.saveSelection"), null)
+    public async string? save_selection() throws Error {
+        return yield call_returning<string?>(
+            Util.JS.callable("saveSelection"), null
         );
     }
 
@@ -249,9 +249,7 @@ public class Composer.WebView : ClientWebView {
      * Removes a saved selection.
      */
     public void free_selection(string id) {
-        this.call.begin(
-            Util.JS.callable("geary.freeSelection").string(id), null
-        );
+        this.call_void.begin(Util.JS.callable("freeSelection").string(id), null);
     }
 
     /**
@@ -357,9 +355,9 @@ public class Composer.WebView : ClientWebView {
      * will be inserted wrapping the selection.
      */
     public void insert_link(string href, string selection_id) {
-        this.call.begin(
+        this.call_void.begin(
             Util.JS.callable(
-                "geary.insertLink"
+                "insertLink"
             ).string(href).string(selection_id),
             null
         );
@@ -373,8 +371,8 @@ public class Composer.WebView : ClientWebView {
      * unlinked section.
      */
     public void delete_link(string selection_id) {
-        this.call.begin(
-            Util.JS.callable("geary.deleteLink").string(selection_id),
+        this.call_void.begin(
+            Util.JS.callable("deleteLink").string(selection_id),
             null
         );
     }
@@ -396,23 +394,23 @@ public class Composer.WebView : ClientWebView {
      * Indents the line at the current text cursor location.
      */
     public void indent_line() {
-        this.call.begin(Util.JS.callable("geary.indentLine"), null);
+        this.call_void.begin(Util.JS.callable("indentLine"), null);
     }
 
     public void insert_olist() {
-        this.call.begin(Util.JS.callable("geary.insertOrderedList"), null);
+        this.call_void.begin(Util.JS.callable("insertOrderedList"), null);
     }
 
     public void insert_ulist() {
-        this.call.begin(Util.JS.callable("geary.insertUnorderedList"), null);
+        this.call_void.begin(Util.JS.callable("insertUnorderedList"), null);
     }
 
     /**
      * Updates the signature block if it has not been deleted.
      */
     public new void update_signature(string signature) {
-        this.call.begin(
-            Util.JS.callable("geary.updateSignature").string(signature), null
+        this.call_void.begin(
+            Util.JS.callable("updateSignature").string(signature), null
         );
     }
 
@@ -420,22 +418,21 @@ public class Composer.WebView : ClientWebView {
      * Removes the quoted message (if any) from the composer.
      */
     public void delete_quoted_message() {
-        this.call.begin(Util.JS.callable("geary.deleteQuotedMessage"), null);
+        this.call_void.begin(Util.JS.callable("deleteQuotedMessage"), null);
     }
 
     /**
      * Determines if the editor content contains an attachment keyword.
      */
-    public async bool contains_attachment_keywords(string keyword_spec,
-                                                   string subject) {
+    public async bool? contains_attachment_keywords(string keyword_spec,
+                                                    string subject) {
         try {
-            return Util.JS.to_bool(
-                yield call(
-                    Util.JS.callable("geary.containsAttachmentKeyword")
-                    .string(keyword_spec)
-                    .string(subject),
-                    null)
-                );
+            return yield call_returning<bool?>(
+                Util.JS.callable("containsAttachmentKeyword")
+                .string(keyword_spec)
+                .string(subject),
+                null
+            );
         } catch (Error err) {
             debug("Error checking or attachment keywords: %s", err.message);
             return false;
@@ -449,7 +446,7 @@ public class Composer.WebView : ClientWebView {
      * this.
      */
     public async void clean_content() throws Error {
-        this.call.begin(Util.JS.callable("geary.cleanContent"), null);
+        this.call_void.begin(Util.JS.callable("cleanContent"), null);
     }
 
     /**
@@ -459,10 +456,10 @@ public class Composer.WebView : ClientWebView {
         const int MAX_BREAKABLE_LEN = 72; // F=F recommended line limit
         const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
 
-        string body_text = Util.JS.to_string(
-            yield call(Util.JS.callable("geary.getText"), null)
+        string? body_text = yield call_returning<string?>(
+            Util.JS.callable("getText"), null
         );
-        string[] lines = body_text.split("\n");
+        string[] lines = (body_text ?? "").split("\n");
         GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
         foreach (string line in lines) {
             // Strip trailing whitespace, so it doesn't look like a
@@ -533,50 +530,43 @@ public class Composer.WebView : ClientWebView {
         return ret;
     }
 
-    private void on_cursor_context_changed(WebKit.JavascriptResult result) {
-        try {
-            cursor_context_changed(
-                new EditContext(Util.JS.to_string(result.get_js_value()))
-            );
-        } catch (Util.JS.Error err) {
-            debug("Could not get text cursor style: %s", err.message);
+    private void on_cursor_context_changed(GLib.Variant? parameters) {
+        if (parameters != null && parameters.classify() == STRING) {
+            cursor_context_changed(new EditContext(parameters as string));
+        } else {
+            warning("Could not get text cursor style");
         }
     }
 
     /**
      *  Handle a dropped image
      */
-    private void on_drag_drop_received(WebKit.JavascriptResult result) {
+    private void on_drag_drop_received(GLib.Variant? parameters) {
+        var dict = new GLib.VariantDict(parameters);
+        string file_name = dict.lookup_value(
+            "fileName", GLib.VariantType.STRING
+        ).get_string();
+        string file_name_unescaped = GLib.Uri.unescape_string(file_name);
 
-        try {
-            JSC.Value object = result.get_js_value();
-            string filename = Util.JS.to_string(
-                Util.JS.get_property(object, "fileName")
-            );
-            string filename_unescaped = GLib.Uri.unescape_string(filename);
+        string file_type = dict.lookup_value(
+            "fileType", GLib.VariantType.STRING
+        ).get_string();
 
-            string file_type = Util.JS.to_string(
-                Util.JS.get_property(object, "fileType")
-            );
+        string content_base64 = dict.lookup_value(
+            "content", GLib.VariantType.STRING
+        ).get_string();
+        uint8[] image = GLib.Base64.decode(content_base64);
 
-            string content_base64 = Util.JS.to_string(
-                Util.JS.get_property(object, "content")
-            );
-            uint8[] image = GLib.Base64.decode(content_base64);
+        if (image.length == 0) {
+            warning("%s is empty", file_name);
+            return;
+        }
 
-            if (image.length == 0) {
-                warning("%s is empty", filename);
-                return;
-            }
-
-            // A simple check to see if the file looks like an image. A problem here
-            // will be this accepting types which won't be supported by WebKit
-            // or recipients.
-            if (file_type.index_of("image/") == 0) {
-                image_file_dropped(filename_unescaped, file_type, image);
-            }
-        } catch (Util.JS.Error err) {
-            debug("Could not get deceptive link param: %s", err.message);
+        // A simple check to see if the file looks like an image. A problem here
+        // will be this accepting types which won't be supported by WebKit
+        // or recipients.
+        if (file_type.index_of("image/") == 0) {
+            image_file_dropped(file_name_unescaped, file_type, image);
         }
     }
 }
