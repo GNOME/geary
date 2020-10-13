@@ -88,14 +88,6 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="3.40" date="">
-      <description>
-        <p>Enhancements included in this release:</p>
-        <ul>
-          <li>Conversation loading performance improvements</li>
-        </ul>
-      </description>
-    </release>
     <release version="3.38" date="2020-09-13">
       <description>
         <p>Enhancements included in this release:</p>
