@@ -936,7 +936,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Adds an info bar to the given email, if any. */
     public void add_email_info_bar(Geary.EmailIdentifier id,
-                                   Gtk.InfoBar info_bar) {
+                                   Components.InfoBar info_bar) {
         var row = this.email_rows.get(id);
         if (row != null) {
             row.view.primary_message.info_bars.add(info_bar);
@@ -945,7 +945,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Adds an info bar to the given email, if any. */
     public void remove_email_info_bar(Geary.EmailIdentifier id,
-                                      Gtk.InfoBar info_bar) {
+                                      Components.InfoBar info_bar) {
         var row = this.email_rows.get(id);
         if (row != null) {
             row.view.primary_message.info_bars.remove(info_bar);

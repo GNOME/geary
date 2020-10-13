@@ -889,7 +889,7 @@ public class Application.MainWindow :
     }
 
     /** Displays an infobar in the window. */
-    public void show_info_bar(Gtk.InfoBar info_bar) {
+    public void show_info_bar(Components.InfoBar info_bar) {
         if (!this.info_bars.has_current) {
             this.info_bars.add(info_bar);
         }

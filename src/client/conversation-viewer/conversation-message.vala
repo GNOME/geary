@@ -380,7 +380,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     [GtkChild]
     private Gtk.ProgressBar body_progress;
 
-    private Gtk.InfoBar? remote_images_info_bar = null;
+    private Components.InfoBar? remote_images_info_bar = null;
 
     private Gtk.Widget? body_placeholder = null;
 
@@ -1460,7 +1460,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
     }
 
-    private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
+    private void on_remote_images_response(Components.InfoBar info_bar, int response_id) {
         switch (response_id) {
         case 1:
             // Show images for the message

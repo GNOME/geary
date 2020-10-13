@@ -62,6 +62,10 @@ geary-conversation-viewer {
   border-right-width: 0;
 }
 
+infobar flowboxchild {
+	padding: 0px;
+}
+
 /* FolderPopover */
 
 row.geary-folder-popover-list-row {

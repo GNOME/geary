@@ -6,7 +6,7 @@
  */
 
 /**
- * A stack-like widget for displaying Gtk InfoBar widgets.
+ * A stack-like widget for displaying Components.InfoBar widgets.
  *
  * The stack ensures only one info bar is shown at once, shows a frame
  * around the info bar, and manages revealing and hiding itself and
@@ -40,7 +40,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     }
 
 
-    private class SingletonQueue : Gee.AbstractQueue<Gtk.InfoBar> {
+    private class SingletonQueue : Gee.AbstractQueue<Components.InfoBar> {
 
         public override bool read_only {
             get { return false; }
@@ -62,10 +62,10 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             get { return (this.element != null) ? 0 : 1; }
         }
 
-        private Gtk.InfoBar? element = null;
+        private Components.InfoBar? element = null;
 
 
-        public override bool add(Gtk.InfoBar to_add) {
+        public override bool add(Components.InfoBar to_add) {
             var added = false;
             if (this.element != to_add) {
                 this.element = to_add;
@@ -78,20 +78,20 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             this.element = null;
         }
 
-        public override bool contains(Gtk.InfoBar other) {
+        public override bool contains(Components.InfoBar other) {
             return (this.element == other);
         }
 
-        public override Gee.Iterator<Gtk.InfoBar> iterator() {
+        public override Gee.Iterator<Components.InfoBar> iterator() {
             // This sucks but it won't ever be used so oh well
             return (
                 this.element == null
-                ? Gee.Collection.empty<Gtk.InfoBar>().iterator()
+                ? Gee.Collection.empty<Components.InfoBar>().iterator()
                 : Geary.Collection.single(this.element).iterator()
             );
         }
 
-        public override bool remove(Gtk.InfoBar to_remove) {
+        public override bool remove(Components.InfoBar to_remove) {
             var removed = false;
             if (this.element == to_remove) {
                 this.element = null;
@@ -100,11 +100,11 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             return removed;
         }
 
-        public override Gtk.InfoBar peek() {
+        public override Components.InfoBar peek() {
             return this.element;
         }
 
-        public override Gtk.InfoBar poll() {
+        public override Components.InfoBar poll() {
             var element = this.element;
             this.element = null;
             return element;
@@ -126,7 +126,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * @see algorithm
      * @see StackType.PRIORITY_QUEUE
      */
-    public static int priority_queue_comparator(Gtk.InfoBar a, Gtk.InfoBar b) {
+    public static int priority_queue_comparator(Components.InfoBar a, Components.InfoBar b) {
         return (
             b.get_data<int>(PRIORITY_QUEUE_KEY) -
             a.get_data<int>(PRIORITY_QUEUE_KEY)
@@ -150,11 +150,11 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     }
 
     /** Returns the currently displayed info bar, if any. */
-    public Gtk.InfoBar? current_info_bar {
-        get { return get_child() as Gtk.InfoBar; }
+    public Components.InfoBar? current_info_bar {
+        get { return get_child() as Components.InfoBar; }
     }
 
-    private Gee.Queue<Gtk.InfoBar> available;
+    private Gee.Queue<Components.InfoBar> available;
     private int last_allocated_height = 0;
 
 
@@ -175,7 +175,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * stack constructed, the info bar may or may not be revealed
      * immediately.
      */
-    public new void add(Gtk.InfoBar to_add) {
+    public new void add(Components.InfoBar to_add) {
         if (this.available.offer(to_add)) {
             update();
         }
@@ -188,7 +188,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * replaced with the next info bar added. If the only info bar
      * present is removed, the stack also hides itself.
      */
-    public new void remove(Gtk.InfoBar to_remove) {
+    public new void remove(Components.InfoBar to_remove) {
         if (this.available.remove(to_remove)) {
             update();
         }
@@ -234,7 +234,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             this.available = new SingletonQueue();
             break;
         case PRIORITY_QUEUE:
-            this.available = new Gee.PriorityQueue<Gtk.InfoBar>(
+            this.available = new Gee.PriorityQueue<Components.InfoBar>(
                 InfoBarStack.priority_queue_comparator
             );
             break;
