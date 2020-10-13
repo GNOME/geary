@@ -19,20 +19,13 @@ namespace Util.Migrate {
      * It also appends a "primary_email" key to the new configuration file to reliaby keep
      * track of the user's email address.
      */
-    public static void xdg_config_dir(File user_data_dir, File user_config_dir) throws Error {
+    public static void xdg_config_dir(GLib.File user_config_dir,
+                                      GLib.File user_data_dir)
+        throws GLib.Error {
         File new_config_dir;
         File old_data_dir;
         File new_config_file;
         File old_config_file;
-
-        // Create ~/.config/geary
-        try {
-            user_config_dir.make_directory_with_parents();
-        } catch (Error err) {
-            // The user may have already created the directory, so don't throw EXISTS.
-            if (!(err is IOError.EXISTS))
-                throw err;
-        }
 
         // Return if Geary has never been run (~/.local/share/geary does not exist).
         if (!user_data_dir.query_exists())

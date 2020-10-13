@@ -171,11 +171,15 @@ internal class Application.Controller :
             this.application.get_app_plugins_dir()
         );
 
+        // Create standard config directory
+        try {
+            config_dir.make_directory_with_parents();
+        } catch (GLib.IOError.EXISTS err) {
+            // fine
+        }
+
         // Migrate configuration if necessary.
-        Util.Migrate.xdg_config_dir(
-            this.application.get_user_data_directory(),
-            this.application.get_user_config_directory()
-        );
+        Util.Migrate.xdg_config_dir(config_dir, data_dir);
 
         // Hook up cert, accounts and credentials machinery
 
