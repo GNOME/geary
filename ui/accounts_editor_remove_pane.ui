@@ -7,105 +7,112 @@
     <property name="can_focus">False</property>
     <property name="valign">center</property>
     <child>
-      <object class="GtkGrid">
+      <object class="HdyClamp">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="valign">start</property>
-        <property name="vexpand">True</property>
-        <property name="row_spacing">32</property>
-        <child>
-          <object class="GtkButtonBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="remove_button">
-                <property name="label" translatable="yes" comments="This is the remove account button in the account settings.">Remove Account</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
-                <signal name="clicked" handler="on_remove_button_clicked" swapped="no"/>
-                <style>
-                  <class name="destructive-action"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <style>
-              <class name="geary-settings"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
+        <property name="margin">24</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="row_spacing">6</property>
-            <property name="column_spacing">18</property>
+            <property name="valign">start</property>
+            <property name="vexpand">True</property>
+            <property name="row_spacing">32</property>
             <child>
-              <object class="GtkImage">
+              <object class="GtkButtonBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">dialog-warning-symbolic</property>
-                <property name="icon_size">6</property>
+                <property name="layout_style">end</property>
+                <child>
+                  <object class="GtkButton" id="remove_button">
+                    <property name="label" translatable="yes" comments="This is the remove account button in the account settings.">Remove Account</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
+                    <signal name="clicked" handler="on_remove_button_clicked" swapped="no"/>
+                    <style>
+                      <class name="destructive-action"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <style>
+                  <class name="geary-settings"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="row_spacing">6</property>
+                <property name="column_spacing">18</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">dialog-warning-symbolic</property>
+                    <property name="icon_size">6</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="height">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="warning_label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="vexpand">True</property>
+                    <property name="label" translatable="yes" comments="This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.">Confirm removing: %s</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                    <style>
+                      <class name="title"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Removing an account will remove it from Geary and delete locally cached email data from your computer, but not from your service provider.</property>
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-                <property name="height">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkLabel" id="warning_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="vexpand">True</property>
-                <property name="label" translatable="yes" comments="This title is shown to users when confirming if they want to remove an account. The string substitution is replaced with the account's name.">Confirm removing: %s</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-                <style>
-                  <class name="title"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">Removing an account will remove it from Geary and delete locally cached email data from your computer, but not from your service provider.</property>
-                <property name="wrap">True</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
+            <style>
+              <class name="geary-accounts-editor-pane-content"/>
+            </style>
           </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
         </child>
-        <style>
-          <class name="geary-accounts-editor-pane-content"/>
-        </style>
       </object>
       <packing>
         <property name="left_attach">0</property>
