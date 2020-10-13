@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-namespace Migrate {
+namespace Util.Migrate {
     private const string GROUP = "AccountInformation";
     private const string PRIMARY_EMAIL_KEY = "primary_email";
     private const string SETTINGS_FILENAME = Accounts.Manager.SETTINGS_FILENAME;

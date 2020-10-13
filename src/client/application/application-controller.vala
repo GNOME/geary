@@ -171,8 +171,10 @@ internal class Application.Controller :
         );
 
         // Migrate configuration if necessary.
-        Migrate.xdg_config_dir(this.application.get_user_data_directory(),
-                               this.application.get_user_config_directory());
+        Util.Migrate.xdg_config_dir(
+            this.application.get_user_data_directory(),
+            this.application.get_user_config_directory()
+        );
 
         // Hook up cert, accounts and credentials machinery
 

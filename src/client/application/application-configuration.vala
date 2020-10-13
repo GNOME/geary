@@ -146,7 +146,7 @@ public class Application.Configuration : Geary.BaseObject {
         settings = new Settings(schema_id);
         gnome_interface = new Settings("org.gnome.desktop.interface");
 
-        Migrate.old_app_config(settings);
+        Util.Migrate.old_app_config(settings);
 
         this.bind(SINGLE_KEY_SHORTCUTS, this, SINGLE_KEY_SHORTCUTS);
     }
