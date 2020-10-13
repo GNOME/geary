@@ -182,6 +182,9 @@ internal class Application.Controller :
 
         // Migrate configuration if necessary.
         Util.Migrate.xdg_config_dir(config_dir, data_dir);
+        Util.Migrate.release_config(
+            application.get_config_search_path(), config_dir
+        );
 
         // Hook up cert, accounts and credentials machinery
 

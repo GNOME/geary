@@ -859,6 +859,34 @@ public class Application.Client : Gtk.Application {
     }
 
     /**
+     * Returns a set of paths of possible config locations.
+     *
+     * This is useful only for migrating configuration from
+     * non-Flatpak to Flatpak or release-builds to non-release builds.
+     */
+    internal GLib.File[] get_config_search_path() {
+        var paths = new GLib.File[] {};
+        var home = GLib.File.new_for_path(GLib.Environment.get_home_dir());
+        paths += home.get_child(
+            ".config"
+        ).get_child(
+            "geary"
+        );
+        paths += home.get_child(
+            ".var"
+        ).get_child(
+            "app"
+        ).get_child(
+            "org.gnome.Geary"
+        ).get_child(
+            "config"
+        ).get_child(
+            "geary"
+        );
+        return paths;
+    }
+
+    /**
      * Displays an error notification.
      *
      * Use _very_ sparingly.
