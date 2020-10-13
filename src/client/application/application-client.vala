@@ -43,6 +43,11 @@ public class Application.Client : Gtk.Application {
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
     public const string BUILD_ROOT_DIR = _BUILD_ROOT_DIR;
 
+    // keep these in sync with meson_options.txt
+    public const string PROFILE_RELEASE = "release";
+    public const string PROFILE_BETA = "beta";
+    public const string PROFILE_DEVEL = "development";
+
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
