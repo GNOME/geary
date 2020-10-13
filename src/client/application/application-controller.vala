@@ -125,6 +125,9 @@ internal class Application.Controller :
         this.application = application;
         this.controller_open = cancellable;
 
+        GLib.File config_dir = application.get_user_config_directory();
+        GLib.File data_dir = application.get_user_data_directory();
+
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
         // custom icons)
@@ -139,9 +142,7 @@ internal class Application.Controller :
             this.application.get_web_extensions_dir(),
             this.application.get_user_cache_directory().get_child("web-resources")
         );
-        Components.WebView.load_resources(
-            this.application.get_user_config_directory()
-        );
+        Components.WebView.load_resources(config_dir);
         Composer.WebView.load_resources();
         ConversationWebView.load_resources();
         Accounts.SignatureWebView.load_resources();
@@ -179,7 +180,7 @@ internal class Application.Controller :
         // Hook up cert, accounts and credentials machinery
 
         this.certificate_manager = yield new Application.CertificateManager(
-            this.application.get_user_data_directory().get_child("pinned-certs"),
+            config_dir.get_child("pinned-certs"),
             cancellable
         );
 
@@ -189,8 +190,8 @@ internal class Application.Controller :
 
         this.account_manager = new Accounts.Manager(
             libsecret,
-            this.application.get_user_config_directory(),
-            this.application.get_user_data_directory()
+            config_dir,
+            data_dir
         );
         this.account_manager.account_added.connect(
             on_account_added
