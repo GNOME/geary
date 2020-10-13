@@ -4,23 +4,26 @@ project('geary', [ 'vala', 'c' ],
   meson_version: '>= 0.50',
 )
 
-# Build-time configuration options
-enable_valadoc = get_option('valadoc')
-install_contractor_file = get_option('contractor')
-iso_3166_xml = get_option('iso_3166_xml')
-iso_639_xml = get_option('iso_639_xml')
-reference_tracking = get_option('ref_tracking')
+# Determine the type of build
+profile = get_option('profile')
+appid_suffix = ''
+name_suffix = ''
+if profile == 'auto'
+  if run_command('[', '-d', '.git', ']').returncode() == 0
+    profile = 'development'
+  else
+    error('No build profile specified, see BUILDING.md')
+  endif
+endif
 
-# Build type
-if get_option('profile') == 'development'
-  profile = '.Devel'
+if profile == 'development'
+  appid_suffix = '.Devel'
   name_suffix = ' (Development)'
-elif get_option('profile') == 'beta'
-  profile = '.Beta'
+elif profile == 'beta'
+  appid_suffix = '.Beta'
   name_suffix = ' (Beta)'
-else
-  profile = ''
-  name_suffix = ''
+elif profile != 'release'
+  error('Unknown build profile specified, see BUILDING.md')
 endif
 
 # Configurable install dirs
@@ -92,13 +95,13 @@ libpeas_gtk = dependency('libpeas-gtk-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
-  'libunwind', version: '>= 1.1', required: not get_option('libunwind_optional')
+  'libunwind', version: '>= 1.1', required: get_option('libunwind')
 )
 libunwind_generic_dep = dependency(
-  'libunwind-generic', version: '>= 1.1', required: not get_option('libunwind_optional')
+  'libunwind-generic', version: '>= 1.1', required: get_option('libunwind')
 )
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
-libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef-support'))
+libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef'))
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
@@ -127,7 +130,7 @@ libmessagingmenu_dep = dependency('messaging-menu', version: '>= 12.10', require
 #
 
 # Build variables
-geary_id = 'org.gnome.Geary@0@'.format(profile)
+geary_id = 'org.gnome.Geary@0@'.format(appid_suffix)
 geary_version = meson.project_version()
 revno = get_option('revno')
 if revno == ''
@@ -153,27 +156,31 @@ endif
 # Build glue
 #
 
+valadoc = find_program('valadoc', required: get_option('valadoc'))
+
 vala_unit_proj = subproject(
   'vala-unit',
   default_options: [
     'install=false',
-    'valadoc=@0@'.format(enable_valadoc)
+    'valadoc=@0@'.format(valadoc.found())
   ]
 )
 vala_unit_dep = vala_unit_proj.get_variable('vala_unit_dep')
 
-if enable_valadoc
-  valadoc = find_program('valadoc')
-endif
-
 # Language detection
+
 iso_codes_dir = iso_codes.get_pkgconfig_variable('prefix')/'share'/'xml'/'iso-codes'
+
+iso_639_xml = get_option('iso_639_xml')
 if iso_639_xml == ''
   iso_639_xml = iso_codes_dir / 'iso_639.xml'
 endif
+
+iso_3166_xml = get_option('iso_3166_xml')
 if iso_3166_xml == ''
   iso_3166_xml = iso_codes_dir / 'iso_3166.xml'
 endif
+
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
 # Post-install scripts

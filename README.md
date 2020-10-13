@@ -6,7 +6,7 @@ Geary: Send and receive email
 
 Geary is an email application built around conversations, for the
 GNOME 3 desktop. It allows you to read, find and send email with a
-straightforward, modern interface.
+straight-forward, modern interface.
 
 Visit https://wiki.gnome.org/Apps/Geary for more information.
 
@@ -17,11 +17,12 @@ for more information.
 
 ![Geary displaying a conversation](https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png)
 
-Installation & Licensing
-------------------------
+Building & Licensing
+--------------------
 
-Please consult the [INSTALL](./INSTALL) and [COPYING](./COPYING) files
-for more information.
+Please consult the [BUILDING.md](./BUILDING.md) and
+[COPYING](./COPYING) files for more information about building Geary
+and the licence granted by its copyright holders for redistribution.
 
 Getting in Touch
 ----------------
@@ -30,7 +31,8 @@ Getting in Touch
  * Support and discussion: See the `geary` tag on [GNOME Discourse](https://discourse.gnome.org/tags/c/applications/7/geary)
  * Matrix channel: [#geary:gnome.org](https://gnome.element.io/#/room/#geary:gnome.org)
 
-**Code Of Conduct**
+Code Of Conduct
+---------------
 
 We follow the [Contributor Covenant](./code-of-conduct.md) as our
 Code of Conduct. All communications in project spaces are expected to
@@ -47,5 +49,5 @@ Want to help improve Geary? Here are some ways to contribute:
  * Donate:        https://wiki.gnome.org/Apps/Geary/Donate
 
 ---
-Copyright 2016 Software Freedom Conservancy Inc.  
-Copyright 2017-2020 Michael Gratton <mike@vee.net>
+Copyright © 2016 Software Freedom Conservancy Inc.  
+Copyright © 2017-2020 Michael Gratton <mike@vee.net>

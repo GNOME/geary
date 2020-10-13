@@ -77,7 +77,7 @@ endif
 # Contractor file (Elementary OS)
 #
 
-if install_contractor_file
+if get_option('contractor').enabled()
   # Call msgfmt manually since gettext won't otherwise translate the
   # Description field. See merge req !50.
   msgfmt = find_program('msgfmt')

@@ -1,11 +1,22 @@
 #
 # General build options
 #
+
 option(
-  'contractor',
-  type: 'boolean',
-  value: false,
-  description: 'Whether to install the contractor file (Elementary OS-specific).'
+  'profile',
+  type: 'combo',
+  choices: [
+    'auto',
+    'development',
+    'beta',
+    'release'
+  ],
+  description: 'Specifies the application type to be built'
+)
+option(
+  'revno',
+  type: 'string',
+  description: 'Custom revision string (default extracted from "git describe")'
 )
 option(
   'iso_639_xml',
@@ -20,40 +31,42 @@ option(
   description: 'Full path to the ISO 3166 XML file.'
 )
 option(
-  'libunwind_optional',
-  type: 'boolean',
-  value: false,
-  description: 'Determines if libunwind is required.'
-)
-option(
-  'tnef-support',
-  type: 'boolean',
-  value: true,
-  description: 'Whether to support TNEF attachments (requires libytnef).'
-)
-option(
   'valadoc',
-  type: 'boolean',
-  value: false,
-  description: 'Whether to build the documentation (requires valadoc).'
+  type: 'feature',
+  value: 'auto',
+  description: 'Build API documentation'
 )
 
+#
 # Development options
-option(
-  'profile',
-  type: 'combo',
-  value: 'default',
-  choices: ['default','development','beta'],
-  description: 'Specifies the application type to be built'
-)
+#
+
 option(
   'ref_tracking',
-  type: 'boolean',
-  value: false,
-  description: 'Whether to use explicit reference tracking.'
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable Geary.BaseObject reference tracking'
+)
+
+#
+# Optional features
+#
+
+option(
+  'contractor',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Install an Elementary OS a contractor file'
 )
 option(
-  'revno',
-  type: 'string',
-  description: 'Custom revision string (default extracted from "git describe")'
+  'libunwind',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Use libunwind for back traces in problem reports.'
+)
+option(
+  'tnef',
+  type: 'feature',
+  value: 'enabled',
+  description: 'Support Microsoft-proprietary TNEF attachments.'
 )

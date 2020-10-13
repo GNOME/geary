@@ -349,7 +349,7 @@ if libunwind_dep.found()
   ]
 endif
 
-if get_option('tnef-support')
+if libytnef.found()
   engine_dependencies += libytnef
   engine_vala_args += [
     '-D', 'WITH_TNEF_SUPPORT'
