@@ -125,8 +125,8 @@ internal class Application.Controller :
         this.application = application;
         this.controller_open = cancellable;
 
-        GLib.File config_dir = application.get_user_config_directory();
-        GLib.File data_dir = application.get_user_data_directory();
+        GLib.File config_dir = application.get_home_config_directory();
+        GLib.File data_dir = application.get_home_data_directory();
 
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
@@ -140,7 +140,9 @@ internal class Application.Controller :
         Components.WebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
-            this.application.get_user_cache_directory().get_child("web-resources")
+            this.application.get_home_cache_directory().get_child(
+                "web-resources"
+            )
         );
         Components.WebView.load_resources(config_dir);
         Composer.WebView.load_resources();

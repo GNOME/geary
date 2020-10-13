@@ -759,22 +759,22 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    /** Returns the application's base user configuration directory. */
-    public GLib.File get_user_config_directory() {
+    /** Returns the application's base home configuration directory. */
+    public GLib.File get_home_config_directory() {
         return GLib.File.new_for_path(
             Environment.get_user_config_dir()
         ).get_child("geary");
     }
 
-    /** Returns the application's base user cache directory. */
-    public GLib.File get_user_cache_directory() {
+    /** Returns the application's base home cache directory. */
+    public GLib.File get_home_cache_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_cache_dir()
         ).get_child("geary");
     }
 
-    /** Returns the application's base user data directory. */
-    public GLib.File get_user_data_directory() {
+    /** Returns the application's base home data directory. */
+    public GLib.File get_home_data_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_data_dir()
         ).get_child("geary");
