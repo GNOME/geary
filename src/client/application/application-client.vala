@@ -777,21 +777,21 @@ public class Application.Client : Gtk.Application {
     public GLib.File get_home_config_directory() {
         return GLib.File.new_for_path(
             Environment.get_user_config_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
     /** Returns the application's base home cache directory. */
     public GLib.File get_home_cache_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_cache_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
     /** Returns the application's base home data directory. */
     public GLib.File get_home_data_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_data_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
     /** Returns the application's base static resources directory. */
@@ -1186,6 +1186,22 @@ public class Application.Client : Gtk.Application {
         } catch (GLib.Error error) {
             warning("Could not load CSS: %s", error.message);
         }
+    }
+
+    private string get_geary_home_dir_name() {
+        // Return the standard name if running a release build or
+        // running under Flatpak, otherwise append the build profile
+        // as a suffix so (e.g.) devel builds don't mess with release
+        // build's config and databases.
+        //
+        // Note that non-release Flatpak builds already have their own
+        // separate directories since they have different app ids, and
+        // hence don't need the suffix.
+        return (
+            _PROFILE == PROFILE_RELEASE || this.is_flatpak_sandboxed
+            ? "geary"
+            : "geary-" + _PROFILE
+        );
     }
 
     private void on_activate_about() {
