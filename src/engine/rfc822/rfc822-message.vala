@@ -494,7 +494,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
             FileQueryInfoFlags.NONE
         );
 
-        GMime.Part part = new GMime.Part.with_type("text", "plain");
+        GMime.Part part = new GMime.Part();
         part.set_disposition(disposition.serialize());
         part.set_filename(file.get_basename());
 
@@ -504,10 +504,26 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         );
         part.set_content_type(content_type);
 
+        // Always use a binary encoding since even when attaching
+        // text/plain parts, the line ending must always be preserved
+        // and this is not possible without a binary encoding. See
+        // https://gitlab.gnome.org/GNOME/geary/-/issues/1001
+        //
+        // TODO: The actual content encoding should be set based on
+        // the IMAP/SMTP server's supported encoding. For example, if
+        // 8-bit or binary is supported, then those should be used
+        // instead of Base64.
+        part.set_content_encoding(BASE64);
+
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
+        part.set_content(
+            new GMime.DataWrapper.with_stream(
+                stream, GMime.ContentEncoding.BINARY
+            )
+        );
 
-        return yield finalise_attachment_part(stream, part, content_type, cancellable);
+        return part;
     }
 
     /**
@@ -540,50 +556,29 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                 );
         }
 
-        GMime.Part part = new GMime.Part.with_type("text", "plain");
+        GMime.Part part = new GMime.Part();
         part.set_disposition(disposition.serialize());
         part.set_filename(basename);
         part.set_content_type(content_type);
 
-        GMime.StreamMem stream = Utils.create_stream_mem(buffer);
-
-        return yield finalise_attachment_part(stream, part, content_type, cancellable);
-    }
-
-    /**
-     * Set encoding and content object on GMime part
-     */
-    private async GMime.Part finalise_attachment_part(GMime.Stream stream,
-                                                      GMime.Part part,
-                                                      GMime.ContentType content_type,
-                                                      GLib.Cancellable? cancellable)
-        throws GLib.Error {
-
-        // Text parts should be scanned fully to determine best
-        // (i.e. most compact) transport encoding to use, but
-        // that's usually fine since they tend to be
-        // small. Non-text parts are nearly always going to be
-        // binary, so we just assume they require Base64.
+        // Always use a binary encoding since even when attaching
+        // text/plain parts, the line ending must always be preserved
+        // and this is not possible without a binary encoding. See
+        // https://gitlab.gnome.org/GNOME/geary/-/issues/1001
         //
-        // XXX We should be setting the content encoding lazily
-        // though because if sending via a MTA that supports 8-bit
-        // or binary transfer modes, we can avoid using a content
-        // encoding altogether.
-        GMime.ContentEncoding encoding = BASE64;
-        if (content_type.is_type("text", Mime.ContentType.WILDCARD)) {
-            encoding = yield Utils.get_best_encoding(
-                stream,
-                GMime.EncodingConstraint.7BIT,
-                cancellable
-            );
-        }
+        // TODO: The actual content encoding should be set based on
+        // the IMAP/SMTP server's supported encoding. For example, if
+        // 8-bit or binary is supported, then those should be used
+        // instead of Base64.
+        part.set_content_encoding(BASE64);
 
-        part.set_content_encoding(encoding);
+        GMime.StreamMem stream = Utils.create_stream_mem(buffer);
         part.set_content(
             new GMime.DataWrapper.with_stream(
                 stream, GMime.ContentEncoding.BINARY
             )
         );
+
         return part;
     }
 
