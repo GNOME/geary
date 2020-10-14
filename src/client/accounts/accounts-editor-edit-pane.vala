@@ -217,7 +217,28 @@ internal class Accounts.EditorEditPane :
     [GtkCallback]
     private void on_remove_account_clicked() {
         if (!this.editor.accounts.is_goa_account(account)) {
-            this.editor.push(new EditorRemovePane(this.editor, this.account));
+            var button = new Gtk.Button.with_mnemonic(_("Remove Account"));
+            button.get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
+            button.show();
+
+            var dialog = new Gtk.MessageDialog(this.editor,
+            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+            Gtk.MessageType.WARNING,
+            Gtk.ButtonsType.NONE,
+            _("Remove Account: %s"),
+            account.primary_mailbox.address);
+            dialog.secondary_text = _("This will remove it from Geary and delete locally cached email data from your computer. Nothing will be deleted from your service provider.");
+
+            dialog.add_button (_("_Cancel"), Gtk.ResponseType.CANCEL);
+            dialog.add_action_widget(button, Gtk.ResponseType.ACCEPT);
+
+            dialog.response.connect((response_id) => {
+                if (response_id == Gtk.ResponseType.ACCEPT)
+                    this.editor.remove_account(this.account);
+
+                dialog.destroy();
+            });
+            dialog.show();
         }
     }
 

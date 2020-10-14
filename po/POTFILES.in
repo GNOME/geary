@@ -9,7 +9,6 @@ src/client/accounts/accounts-editor.vala
 src/client/accounts/accounts-editor-add-pane.vala
 src/client/accounts/accounts-editor-edit-pane.vala
 src/client/accounts/accounts-editor-list-pane.vala
-src/client/accounts/accounts-editor-remove-pane.vala
 src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala

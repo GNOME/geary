@@ -334,6 +334,14 @@ popover.geary-editor > grid > button.geary-setting-remove {
   margin-top: 12px;
 }
 
+dialog.geary-remove-confirm .dialog-vbox {
+	margin: 12px;
+}
+
+dialog.geary-remove-confirm .dialog-action-box {
+	margin: 6px;
+}
+
 /* FolderList.Tree */
 
 treeview.sidebar:drop(active).after,
