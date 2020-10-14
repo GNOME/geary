@@ -125,6 +125,9 @@ internal class Application.Controller :
         this.application = application;
         this.controller_open = cancellable;
 
+        GLib.File config_dir = application.get_home_config_directory();
+        GLib.File data_dir = application.get_home_data_directory();
+
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
         // custom icons)
@@ -137,11 +140,11 @@ internal class Application.Controller :
         Components.WebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
-            this.application.get_user_cache_directory().get_child("web-resources")
+            this.application.get_home_cache_directory().get_child(
+                "web-resources"
+            )
         );
-        Components.WebView.load_resources(
-            this.application.get_user_config_directory()
-        );
+        Components.WebView.load_resources(config_dir);
         Composer.WebView.load_resources();
         ConversationWebView.load_resources();
         Accounts.SignatureWebView.load_resources();
@@ -170,14 +173,23 @@ internal class Application.Controller :
             this.application.get_app_plugins_dir()
         );
 
+        // Create standard config directory
+        try {
+            config_dir.make_directory_with_parents();
+        } catch (GLib.IOError.EXISTS err) {
+            // fine
+        }
+
         // Migrate configuration if necessary.
-        Migrate.xdg_config_dir(this.application.get_user_data_directory(),
-                               this.application.get_user_config_directory());
+        Util.Migrate.xdg_config_dir(config_dir, data_dir);
+        Util.Migrate.release_config(
+            application.get_config_search_path(), config_dir
+        );
 
         // Hook up cert, accounts and credentials machinery
 
         this.certificate_manager = yield new Application.CertificateManager(
-            this.application.get_user_data_directory().get_child("pinned-certs"),
+            config_dir.get_child("pinned-certs"),
             cancellable
         );
 
@@ -187,8 +199,8 @@ internal class Application.Controller :
 
         this.account_manager = new Accounts.Manager(
             libsecret,
-            this.application.get_user_config_directory(),
-            this.application.get_user_data_directory()
+            config_dir,
+            data_dir
         );
         this.account_manager.account_added.connect(
             on_account_added

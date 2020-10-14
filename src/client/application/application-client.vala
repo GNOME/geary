@@ -43,6 +43,11 @@ public class Application.Client : Gtk.Application {
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
     public const string BUILD_ROOT_DIR = _BUILD_ROOT_DIR;
 
+    // keep these in sync with meson_options.txt
+    public const string PROFILE_RELEASE = "release";
+    public const string PROFILE_BETA = "beta";
+    public const string PROFILE_DEVEL = "development";
+
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
@@ -213,6 +218,14 @@ public class Application.Client : Gtk.Application {
     }
 
     /**
+     * Determines if Geary appears to be running under Flatpak.
+     *
+     * If this returns `true`, then the application instance
+     * appears to be running inside a Flatpak sandbox.
+     */
+    public bool is_flatpak_sandboxed { get; private set; }
+
+    /**
      * The global controller for this application instance.
      *
      * This will be non-null in the primary application instance, only
@@ -317,6 +330,7 @@ public class Application.Client : Gtk.Application {
         );
         this.add_main_option_entries(OPTION_ENTRIES);
         this.window_removed.connect_after(on_window_removed);
+        this.is_flatpak_sandboxed = GLib.FileUtils.test("/.flatpak-info", EXISTS);
     }
 
     public override bool local_command_line(ref unowned string[] args,
@@ -759,25 +773,25 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    /** Returns the application's base user configuration directory. */
-    public GLib.File get_user_config_directory() {
+    /** Returns the application's base home configuration directory. */
+    public GLib.File get_home_config_directory() {
         return GLib.File.new_for_path(
             Environment.get_user_config_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
-    /** Returns the application's base user cache directory. */
-    public GLib.File get_user_cache_directory() {
+    /** Returns the application's base home cache directory. */
+    public GLib.File get_home_cache_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_cache_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
-    /** Returns the application's base user data directory. */
-    public GLib.File get_user_data_directory() {
+    /** Returns the application's base home data directory. */
+    public GLib.File get_home_data_directory() {
         return GLib.File.new_for_path(
             GLib.Environment.get_user_data_dir()
-        ).get_child("geary");
+        ).get_child(get_geary_home_dir_name());
     }
 
     /** Returns the application's base static resources directory. */
@@ -856,6 +870,34 @@ public class Application.Client : Gtk.Application {
             this.last_active_main_window = null;
             base.quit();
         }
+    }
+
+    /**
+     * Returns a set of paths of possible config locations.
+     *
+     * This is useful only for migrating configuration from
+     * non-Flatpak to Flatpak or release-builds to non-release builds.
+     */
+    internal GLib.File[] get_config_search_path() {
+        var paths = new GLib.File[] {};
+        var home = GLib.File.new_for_path(GLib.Environment.get_home_dir());
+        paths += home.get_child(
+            ".config"
+        ).get_child(
+            "geary"
+        );
+        paths += home.get_child(
+            ".var"
+        ).get_child(
+            "app"
+        ).get_child(
+            "org.gnome.Geary"
+        ).get_child(
+            "config"
+        ).get_child(
+            "geary"
+        );
+        return paths;
     }
 
     /**
@@ -1144,6 +1186,22 @@ public class Application.Client : Gtk.Application {
         } catch (GLib.Error error) {
             warning("Could not load CSS: %s", error.message);
         }
+    }
+
+    private string get_geary_home_dir_name() {
+        // Return the standard name if running a release build or
+        // running under Flatpak, otherwise append the build profile
+        // as a suffix so (e.g.) devel builds don't mess with release
+        // build's config and databases.
+        //
+        // Note that non-release Flatpak builds already have their own
+        // separate directories since they have different app ids, and
+        // hence don't need the suffix.
+        return (
+            _PROFILE == PROFILE_RELEASE || this.is_flatpak_sandboxed
+            ? "geary"
+            : "geary-" + _PROFILE
+        );
     }
 
     private void on_activate_about() {

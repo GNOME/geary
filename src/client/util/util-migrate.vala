@@ -1,10 +1,12 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
- */
+ * (version 2.1 or later). See the COPYING file in this distribution.
+n */
 
-namespace Migrate {
+namespace Util.Migrate {
     private const string GROUP = "AccountInformation";
     private const string PRIMARY_EMAIL_KEY = "primary_email";
     private const string SETTINGS_FILENAME = Accounts.Manager.SETTINGS_FILENAME;
@@ -19,20 +21,13 @@ namespace Migrate {
      * It also appends a "primary_email" key to the new configuration file to reliaby keep
      * track of the user's email address.
      */
-    public static void xdg_config_dir(File user_data_dir, File user_config_dir) throws Error {
+    public static void xdg_config_dir(GLib.File user_config_dir,
+                                      GLib.File user_data_dir)
+        throws GLib.Error {
         File new_config_dir;
         File old_data_dir;
         File new_config_file;
         File old_config_file;
-
-        // Create ~/.config/geary
-        try {
-            user_config_dir.make_directory_with_parents();
-        } catch (Error err) {
-            // The user may have already created the directory, so don't throw EXISTS.
-            if (!(err is IOError.EXISTS))
-                throw err;
-        }
 
         // Return if Geary has never been run (~/.local/share/geary does not exist).
         if (!user_data_dir.query_exists())
@@ -109,6 +104,145 @@ namespace Migrate {
         }
     }
 
+    /**
+     * Migrates configuration from release build locations.
+     *
+     * This will migrate configuration from release build locations to
+     * the current config directory, if and only if the current config
+     * directory is empty. For example, from the standard
+     * distro-package config location to the current Flatpak location,
+     * or from either to a development config location.
+     */
+    public static void release_config(GLib.File[] search_path,
+                                      GLib.File config_dir)
+        throws GLib.Error {
+        if (is_directory_empty(config_dir)) {
+            GLib.File? most_recent = null;
+            GLib.DateTime most_recent_modified = null;
+            foreach (var source in search_path) {
+                if (!source.equal(config_dir)) {
+                    GLib.DateTime? src_modified = null;
+                    try {
+                        GLib.FileInfo? src_info = source.query_info(
+                            GLib.FileAttribute.TIME_MODIFIED, 0
+                        );
+                        if (src_info != null) {
+                            src_modified =
+                                src_info.get_modification_date_time();
+                        }
+                    } catch (GLib.IOError.NOT_FOUND err) {
+                        // fine
+                    } catch (GLib.Error err) {
+                        debug(
+                            "Error querying release config dir %s: %s",
+                            source.get_path(),
+                            err.message
+                        );
+                    }
+                    if (most_recent_modified == null ||
+                        (src_modified != null &&
+                         most_recent_modified.compare(src_modified) < 0)) {
+                        most_recent = source;
+                        most_recent_modified = src_modified;
+                    }
+                }
+            }
+
+            if (most_recent != null) {
+                try {
+                    debug(
+                        "Migrating release config from %s to %s",
+                        most_recent.get_path(),
+                        config_dir.get_path()
+                    );
+                    recursive_copy(most_recent, config_dir);
+                } catch (GLib.Error err) {
+                    debug("Error migrating release config: %s", err.message);
+                }
+            }
+        }
+    }
+
+    private bool is_directory_empty(GLib.File dir) {
+        bool is_empty = true;
+        GLib.FileEnumerator? existing = null;
+        try {
+            existing = dir.enumerate_children(
+                GLib.FileAttribute.STANDARD_TYPE, 0
+            );
+        } catch (GLib.IOError.NOT_FOUND err) {
+            // fine
+        } catch (GLib.Error err) {
+            debug(
+                "Error enumerating directory %s: %s",
+                dir.get_path(),
+                err.message
+            );
+        }
+
+        if (existing != null) {
+            try {
+                is_empty = existing.next_file() == null;
+            } catch (GLib.Error err) {
+                debug(
+                    "Error getting next child in directory %s: %s",
+                    dir.get_path(),
+                    err.message
+                );
+            }
+
+            try {
+                existing.close();
+            } catch (GLib.Error err) {
+                debug(
+                    "Error closing directory enumeration %s: %s",
+                    dir.get_path(),
+                    err.message
+                );
+            }
+        }
+
+        return is_empty;
+    }
+
+    private static void recursive_copy(GLib.File src,
+                                       GLib.File dest,
+                                       GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        switch (src.query_file_type(NONE, cancellable)) {
+        case DIRECTORY:
+            try {
+                dest.make_directory(cancellable);
+            } catch (GLib.IOError.EXISTS err) {
+                // fine
+            }
+            src.copy_attributes(dest, NONE, cancellable);
+
+            GLib.FileEnumerator children = src.enumerate_children(
+                GLib.FileAttribute.STANDARD_NAME,
+                NONE,
+                cancellable
+            );
+            GLib.FileInfo? child = children.next_file(cancellable);
+            while (child != null) {
+                recursive_copy(
+                    src.get_child(child.get_name()),
+                    dest.get_child(child.get_name())
+                );
+                child = children.next_file(cancellable);
+            }
+            break;
+
+        case REGULAR:
+            src.copy(dest, NONE, cancellable);
+            break;
+
+        default:
+            // no-op
+            break;
+        }
+    }
+
     public const string OLD_APP_ID = "org.yorba.geary";
     private const string MIGRATED_CONFIG_KEY = "migrated-config";
 
@@ -137,4 +271,6 @@ namespace Migrate {
 
         newSettings.set_boolean(MIGRATED_CONFIG_KEY, true);
     }
+
+
 }
