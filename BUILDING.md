@@ -91,8 +91,8 @@ sudo dnf install meson vala desktop-file-utils enchant2-devel \
     gnome-online-accounts-devel gspell-devel gsound-devel \
     gtk3-devel iso-codes-devel itstool json-glib-devel \
     libappstream-glib-devel libgee-devel libhandy1-devel \
-    libpeas-devel libsecret-devel libunwind-devel libxml2-devel \
-    libytnef-devel sqlite-devel webkitgtk4-devel
+    libpeas-devel libsecret-devel libstemmer-devel libunwind-devel \
+    libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
 ```
 
 Installing dependencies on Ubuntu/Debian
@@ -107,8 +107,8 @@ sudo apt-get install meson build-essential valac \
     libgcr-3-dev libgee-0.8-dev libglib2.0-dev libgmime-3.0-dev \
     libgoa-1.0-dev libgspell-1-dev libgsound-dev libgtk-3-dev \
     libjson-glib-dev libhandy-1-dev libpeas-dev libsecret-1-dev \
-    libsqlite3-dev libunwind-dev libwebkit2gtk-4.0-dev libxml2-dev \
-    libytnef0-dev
+    libsqlite3-dev libstemmer-dev libunwind-dev \
+    libwebkit2gtk-4.0-dev libxml2-dev libytnef0-dev
 ```
 
 And for Ubuntu Messaging Menu integration:

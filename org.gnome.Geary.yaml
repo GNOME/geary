@@ -233,6 +233,23 @@ modules:
         branch: v1.9.3
 
   # Geary dependency
+  - name: snowball
+    buildsystem: simple
+    sources:
+      - type: git
+        url: https://github.com/snowballstem/snowball.git
+        branch: master
+      - type: patch
+        paths:
+          - build-aux/patches/shared-library.diff
+    build-commands:
+      - "make libstemmer.so -j$FLATPAK_BUILDER_N_JOBS"
+      - "install -Dm644 include/libstemmer.h /app/include/libstemmer.h"
+      - "install -Dm644 libstemmer.so.0.0.0 /app/lib/libstemmer.so.0.0.0"
+      - "ln -s libstemmer.so.0.0.0 /app/lib/libstemmer.so.0"
+      - "ln -s libstemmer.so.0 /app/lib/libstemmer.so"
+
+  # Geary dependency
   - name: sound-theme-freedesktop
     sources:
       - type: archive

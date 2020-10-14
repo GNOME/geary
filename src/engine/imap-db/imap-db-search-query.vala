@@ -318,6 +318,9 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     // A list of all search terms, regardless of search op field name
     private Gee.ArrayList<Term> all = new Gee.ArrayList<Term>();
 
+    private SnowBall.Stemmer stemmer;
+
+
     public async SearchQuery(Geary.Account owner,
                              ImapDB.Account local,
                              string query,
@@ -325,6 +328,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                              GLib.Cancellable? cancellable) {
         base(owner, query, strategy);
         this.account = local;
+        this.stemmer = new SnowBall.Stemmer(find_appropriate_search_stemmer());
 
         switch (strategy) {
             case Strategy.EXACT:
@@ -611,20 +615,19 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     }
 
     /**
-     * This method is used to convert an unquoted user-entered search terms into a stemmed search
-     * term.
+     * Converts unquoted search terms into a stemmed search term.
      *
-     * Prior experience with the Unicode Snowball stemmer indicates it's too aggressive for our
-     * tastes when coupled with prefix-matching of all unquoted terms (see
-     * https://bugzilla.gnome.org/show_bug.cgi?id=713179)   This method is part of a larger strategy
-     * designed to dampen that aggressiveness without losing the benefits of stemming entirely.
+     * Prior experience with the Snowball stemmer indicates it is too
+     * aggressive for our tastes when coupled with prefix-matching of
+     * all unquoted terms (see
+     * https://bugzilla.gnome.org/show_bug.cgi?id=713179).
      *
-     * Database upgrade 23 removes the old Snowball-stemmed FTS table and replaces it with one
-     * with no stemming (using only SQLite's "simple" tokenizer).  It also creates a "magic" SQLite
-     * table called TokenizerTable which allows for uniform queries to the Snowball stemmer, which
-     * is still installed in Geary.  Thus, we are now in the position to search for the original
-     * term and its stemmed variant, then do post-search processing to strip results which are
-     * too "greedy" due to prefix-matching the stemmed variant.
+     * This method is part of a larger strategy designed to dampen
+     * that aggressiveness without losing the benefits of stemming
+     * entirely: The database's FTS table uses no stemming, but
+     * libstemmer is used to generate stemmed search terms.
+     * Post-search processing is then to strip results which are too
+     * "greedy" due to prefix-matching the stemmed variant.
      *
      * Some heuristics are in place simply to determine if stemming should occur:
      *
@@ -647,36 +650,9 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         if (term_length < this.min_term_length_for_stemming)
             return null;
 
-        string? stemmed = null;
-        try {
-            yield this.account.db.exec_transaction_async(RO,
-                (cx, cancellable) => {
-                    Db.Statement stmt = cx.prepare("""
-                        SELECT token
-                        FROM TokenizerTable
-                        WHERE input=?
-                    """);
-                    stmt.bind_string(0, term);
-
-                    // get stemmed string; if no result, fall through
-                    Db.Result result = stmt.exec(cancellable);
-                    if (!result.finished) {
-                        stemmed = result.string_at(0);
-                    } else {
-                        debug("No stemmed term returned for \"%s\"", term);
-                    }
-                    return COMMIT;
-                }, cancellable
-            );
-        } catch (Error err) {
-            debug("Unable to query tokenizer table for stemmed term for \"%s\": %s", term, err.message);
-
-            // fall-through
-        }
-
+        string? stemmed = this.stemmer.stem(term, term.length);
         if (String.is_empty(stemmed)) {
             debug("Empty stemmed term returned for \"%s\"", term);
-
             return null;
         }
 
@@ -693,8 +669,52 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         }
 
         debug("Search processing: term -> stem is \"%s\" -> \"%s\"", term, stemmed);
-
         return stemmed;
+    }
+
+    private string find_appropriate_search_stemmer() {
+        // Unfortunately, the stemmer library only accepts the full language
+        // name for the stemming algorithm.  This translates between the user's
+        // preferred language ISO 639-1 code and our available stemmers.
+        // FIXME: the available list here is determined by what's included in
+        // src/sqlite3-unicodesn/CMakeLists.txt.  We should pass that list in
+        // instead of hardcoding it here.
+        foreach (string l in Intl.get_language_names()) {
+            switch (l) {
+                case "ar": return "arabic";
+                case "eu": return "basque";
+                case "ca": return "catalan";
+                case "da": return "danish";
+                case "nl": return "dutch";
+                case "en": return "english";
+                case "fi": return "finnish";
+                case "fr": return "french";
+                case "de": return "german";
+                case "el": return "greek";
+                case "hi": return "hindi";
+                case "hu": return "hungarian";
+                case "id": return "indonesian";
+                case "ga": return "irish";
+                case "it": return "italian";
+                case "lt": return "lithuanian";
+                case "ne": return "nepali";
+                case "no": return "norwegian";
+                case "pt": return "portuguese";
+                case "ro": return "romanian";
+                case "ru": return "russian";
+                case "sr": return "serbian";
+                case "es": return "spanish";
+                case "sv": return "swedish";
+                case "ta": return "tamil";
+                case "tr": return "turkish";
+            }
+        }
+
+        // Default to English because it seems to be on average the language
+        // most likely to be present in emails, regardless of the user's
+        // language setting.  This is not an exact science, and search results
+        // should be ok either way in most cases.
+        return "english";
     }
 
 }

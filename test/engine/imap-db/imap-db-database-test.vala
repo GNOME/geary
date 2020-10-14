@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2018 Michael Gratton <mike@vee.net>
  *
@@ -107,7 +106,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         );
         db.open.end(async_result());
 
-        assert_equal<int?>(db.get_schema_version(), 28, "Post-upgrade version");
+        assert_equal<int?>(db.get_schema_version(), 29, "Post-upgrade version");
 
         // Since schema v22 deletes the re-creates all attachments,
         // attachment 12 should no longer exist on the file system and

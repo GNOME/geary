@@ -93,6 +93,7 @@ libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libpeas_gtk = dependency('libpeas-gtk-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
+libstemmer_dep = cc.find_library('stemmer')
 libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency(
   'libunwind', version: '>= 1.1', required: get_option('libunwind')
@@ -105,11 +106,13 @@ libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tne
 posix = valac.find_library('posix')
 webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
-# Libunwind system dependencies above ensures appropriate versions,
-# but this declared dependency is what we actually build against so we
-# can include the custom VAPI correctly. We need to add unwind_lib to
-# the search path for these so Flatpak builds can find the C lib.
+# System dependencies above ensures appropriate versions for the
+# following libraries, but the declared dependency is what we actually
+# build against so we can include the custom VAPI correctly.
+
 if libunwind_dep.found()
+  # We need to add native lib to the search path for these so Flatpak
+  # builds can find it.
   unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
   libunwind = declare_dependency(
      dependencies: [
@@ -119,6 +122,13 @@ if libunwind_dep.found()
      ],
    )
 endif
+
+libstemmer = declare_dependency(
+  dependencies: [
+    valac.find_library('libstemmer', dirs: [vapi_dir]),
+    libstemmer_dep,
+  ],
+)
 
 # Optional dependencies
 appstream_util = find_program('appstream-util', required: false)
