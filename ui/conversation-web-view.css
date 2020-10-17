@@ -1,5 +1,8 @@
 /**
  * Style that is inserted into the message after it is loaded.
+ *
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
  */
 
 /*
@@ -14,17 +17,15 @@ html {
   color: black;
   background-color: white;
 
-  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
-  position: absolute !important;
-  top: 0 !important;
-  bottom: auto !important;
-  height: auto !important;
+  /* Width must always be defined by the viewport so content doesn't
+  overflow inside the WebView, height must always be defined by the
+  content so the WebView can be sized to fit exactly. */
+  width: 100vw !important;
+  height: max-content !important;
 
-  /* Fix up the width after going to absolute positioning above. */
-  width: 100%;
-
-  /* Lock down the box just enough so we don't get an incrementally
-     expanding web view */
+  /* Lock down the box sizing just enough so that the width and height
+  constraints above work as expected, and so the element's
+  scrollHeight is accurate. */
   box-sizing: border-box !important;
   margin: 0 !important;
   border-width: 0 !important;
