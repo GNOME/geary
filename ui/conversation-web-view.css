@@ -23,6 +23,15 @@ html {
   width: 100vw !important;
   height: max-content !important;
 
+  /* Despite the fact that the width must always be defined by the
+  viewport, the viewport width will be 0 if the email is loaded before
+  its WebView is laid out in the widget hierarchy. As a workaround, to
+  prevent this causing the email being squished down to is minimum
+  width and hence being stretched right out in height, set a
+  reasonable minimum width. See
+  https://gitlab.gnome.org/GNOME/geary/-/issues/283 */
+  min-width: 400px !important;
+
   /* Lock down the box sizing just enough so that the width and height
   constraints above work as expected, and so the element's
   scrollHeight is accurate. */
