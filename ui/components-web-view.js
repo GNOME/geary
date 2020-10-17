@@ -26,32 +26,30 @@ PageState.prototype = {
         this._commandStackChanged = MessageSender("command_stack_changed");
         this._documentModified = MessageSender("document_modified");
 
-        let state = this;
-
         // Set up an observer to keep track of modifications made to
         // the document when editing.
         let modifiedId = null;
-        this.bodyObserver = new MutationObserver(function(records) {
+        this.bodyObserver = new MutationObserver((records) => {
             if (modifiedId == null) {
-                modifiedId = window.setTimeout(function() {
-                    state.documentModified();
-                    state.checkCommandStack();
+                modifiedId = window.setTimeout(() => {
+                    this.documentModified();
+                    this.checkCommandStack();
                     modifiedId = null;
                 }, 1000);
             }
         });
 
         this.heightObserver = new ResizeObserver((entries) => {
-            state.updatePreferredHeight();
+            this.updatePreferredHeight();
         });
 
-        document.addEventListener("DOMContentLoaded", function(e) {
-            state.heightObserver.observe(window.document.documentElement);
-            state.loaded();
+        document.addEventListener("DOMContentLoaded", (e) => {
+            this.heightObserver.observe(window.document.documentElement);
+            this.loaded();
         });
 
-        document.addEventListener("selectionchange", function(e) {
-            state.selectionChanged();
+        document.addEventListener("selectionchange", (e) => {
+            this.selectionChanged();
         });
 
         this.testResult = null;
