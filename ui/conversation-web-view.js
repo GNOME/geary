@@ -213,7 +213,7 @@ ConversationPageState.prototype = {
             if (ConversationPageState.isDescendantOf(
                 ancestor, "DIV", "plaintext", false)) {
                 dummy.classList.add("plaintext");
-                dummy.setAttribute("style", "white-space: pre-wrap;");
+                dummy.setAttribute("style", "white-space: break-spaces;");
                 includeDummy = true;
             }
             dummy.appendChild(range.cloneContents());

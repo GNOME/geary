@@ -264,7 +264,7 @@ ComposerPageState.prototype = {
     },
     tabOut: function() {
         document.execCommand(
-            "inserthtml", false, "<span style='white-space: pre-wrap'>\t</span>"
+            "inserthtml", false, "<span style='white-space: break-spaces'>\t</span>"
         );
     },
     tabIn: function() {

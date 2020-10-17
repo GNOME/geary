@@ -15,7 +15,7 @@ class Geary.RFC822.MessageTest : TestCase {
     private const string BASIC_MULTIPART_TNEF = "basic-multipart-tnef.eml";
 
     private const string HTML_CONVERSION_TEMPLATE =
-        "<div class=\"plaintext\" style=\"white-space: pre-wrap;\">%s</div>";
+        "<div class=\"plaintext\" style=\"white-space: break-spaces;\">%s</div>";
 
     private const string BASIC_PLAIN_BODY = """This is the first line.
 
