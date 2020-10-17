@@ -41,62 +41,18 @@ PageState.prototype = {
             }
         });
 
+        this.heightObserver = new ResizeObserver((entries) => {
+            state.updatePreferredHeight();
+        });
+
         document.addEventListener("DOMContentLoaded", function(e) {
+            state.heightObserver.observe(window.document.documentElement);
             state.loaded();
         });
 
         document.addEventListener("selectionchange", function(e) {
             state.selectionChanged();
         });
-
-        // Coalesce multiple calls to updatePreferredHeight using a
-        // timeout to avoid the overhead of multiple JS messages sent
-        // to the app and hence view multiple resizes being queued.
-        let queueTimeout = null;
-        let queuePreferredHeightUpdate = function() {
-            if (queueTimeout != null) {
-                clearTimeout(queueTimeout);
-            }
-            queueTimeout = setTimeout(
-                function() { state.updatePreferredHeight(); }, 100
-            );
-        };
-
-        // Queues an update when the complete document is loaded.
-        //
-        // Note also that the delay introduced here by this last call
-        // to queuePreferredHeightUpdate when the complete document is
-        // loaded seems to be important to get an accurate idea of the
-        // final document size.
-        window.addEventListener("load", function(e) {
-            queuePreferredHeightUpdate();
-        }, true); // load does not bubble
-
-        // Queues updates for any STYLE, IMG and other loaded
-        // elements, hence handles resizing when the user later
-        // requests remote images loading.
-        document.addEventListener("load", function(e) {
-            queuePreferredHeightUpdate();
-        }, true); // load does not bubble
-
-        // Queues an update if the window changes size, e.g. if the
-        // user resized the window. Only trigger when the width has
-        // changed however since the height should only change as the
-        // body is being loaded.
-        let width = window.innerWidth;
-        window.addEventListener("resize", function(e) {
-            let currentWidth = window.innerWidth;
-            if (width != currentWidth) {
-                width = currentWidth;
-                queuePreferredHeightUpdate();
-            }
-        }, false); // load does not bubble
-
-        // Queues an update when a transition has completed, e.g. if the
-        // user resized the window
-        window.addEventListener("transitionend", function(e) {
-            queuePreferredHeightUpdate();
-        }, false); // load does not bubble
 
         this.testResult = null;
     },
