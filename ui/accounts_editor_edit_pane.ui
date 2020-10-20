@@ -8,7 +8,7 @@
     <property name="title" translatable="yes">Edit Account</property>
     <property name="subtitle" translatable="yes">Account Name</property>
     <property name="has_subtitle">False</property>
-    <property name="show_close_button">True</property>
+    <property name="show_close_button">False</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
