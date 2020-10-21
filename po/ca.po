@@ -80,7 +80,7 @@ msgid ""
 "Conversations allow you to read a complete discussion without having to find"
 " and click from message to message."
 msgstr ""
-"Les converses li permeten llegir una discussió completa sense haver de "
+"Les converses li permeten llegir una conversa completa sense haver de "
 "buscar i fer clic de missatge en missatge."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:27
@@ -994,7 +994,7 @@ msgstr "L'opció «--hidden» està en desús i s'eliminarà en el futur."
 #: src/client/application/application-client.vala:1082
 #, c-format
 msgid "Unrecognised program argument: “%s”"
-msgstr "Paràmetre no reconegut: «%s»"
+msgstr "Argument del programa no reconegut: «%s»"
 
 #. / Notification title.
 #: src/client/application/application-controller.vala:485
@@ -1342,7 +1342,7 @@ msgstr "Sistema"
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
 #: ui/problem-details-dialog.ui:42
 msgid "Save As"
-msgstr "Desa i anomena"
+msgstr "Anomena i desa"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:225
@@ -2073,7 +2073,7 @@ msgstr "Detalls"
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr ""
-"El Geary requereix la contrasenya de correu electrònic per a continuar"
+"El Geary requereix la contrasenya del correu electrònic per a continuar"
 
 #. Translators: Label displaying total number of email
 #. messages in a folder. String substitution is the actual
@@ -2226,7 +2226,7 @@ msgstr "Envia"
 #: src/client/plugin/email-templates/email-templates.vala:299
 #: src/client/plugin/special-folders/special-folders.vala:180
 msgid "Edit"
-msgstr "Edició"
+msgstr "Edita"
 
 #: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:4
 msgid "Folder Highlight"
