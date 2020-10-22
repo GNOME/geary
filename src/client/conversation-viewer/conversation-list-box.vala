@@ -284,6 +284,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             }
             protected set {
                 this._is_expanded = value;
+                notify_property("is-expanded");
             }
         }
         private bool _is_expanded = false;
@@ -301,6 +302,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         protected ConversationRow(Geary.Email? email) {
             base_ref();
             this.email = email;
+            notify["is-expanded"].connect(update_css_class);
             show();
         }
 
@@ -323,6 +325,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // allocated a size
         public void enable_should_scroll() {
             this.size_allocate.connect(on_size_allocate);
+        }
+
+        private void update_css_class() {
+            if (this.is_expanded)
+                get_style_context().add_class(EXPANDED_CLASS);
+            else
+                get_style_context().remove_class(EXPANDED_CLASS);
         }
 
         protected inline void set_style_context_class(string class_name, bool value) {
@@ -392,10 +401,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         private inline void update_row_expansion() {
             if (this.is_expanded || this.is_pinned) {
-                get_style_context().add_class(EXPANDED_CLASS);
                 this.view.expand_email();
             } else {
-                get_style_context().remove_class(EXPANDED_CLASS);
                 this.view.collapse_email();
             }
         }
@@ -436,7 +443,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             base(view.referred);
             this.view = view;
             this.is_expanded = true;
-            get_style_context().add_class(EXPANDED_CLASS);
             add(this.view);
         }
 
