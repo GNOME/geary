@@ -332,6 +332,33 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 get_style_context().add_class(EXPANDED_CLASS);
             else
                 get_style_context().remove_class(EXPANDED_CLASS);
+
+            update_previous_sibling_css_class();
+        }
+
+        // This is mostly taken form libhandy HdyExpanderRow
+        private Gtk.Widget? get_previous_sibling() {
+            if (this.parent is Gtk.Container) {
+                var siblings = this.parent.get_children();
+                unowned List<weak Gtk.Widget> l;
+                for (l = siblings; l != null && l.next != null && l.next.data != this; l = l.next);
+
+                if (l != null && l.next != null && l.next.data == this) {
+                    return l.data;
+                }
+            }
+
+            return null;
+        }
+
+        private void update_previous_sibling_css_class() {
+            var previous_sibling = get_previous_sibling();
+            if (previous_sibling != null) {
+                if (this.is_expanded)
+                    previous_sibling.get_style_context().add_class("geary-expanded-previous-sibling");
+                else
+                    previous_sibling.get_style_context().remove_class("geary-expanded-previous-sibling");
+            }
         }
 
         protected inline void set_style_context_class(string class_name, bool value) {
@@ -675,8 +702,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         this.selection_mode = NONE;
 
+        get_style_context().add_class("content");
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
+
+        /* we need to update the previous sibling style class when rows are added or removed */
+        add.connect(update_previous_sibling_css_class);
+        remove.connect(update_previous_sibling_css_class);
 
         set_adjustment(adjustment);
         set_sort_func(ConversationListBox.on_sort);
@@ -701,6 +733,30 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.email_rows.clear();
         this.mark_read_timer.reset();
         base.destroy();
+    }
+
+    // For some reason insert doesn't emit the add event
+    public new void insert(Gtk.Widget child, int position) {
+      base.insert(child, position);
+      update_previous_sibling_css_class();
+    }
+
+    // This is mostly taken form libhandy HdyExpanderRow
+    private void update_previous_sibling_css_class() {
+        var siblings = this.get_children();
+        unowned List<weak Gtk.Widget> l;
+        for (l = siblings; l != null && l.next != null && l.next.data != this; l = l.next) {
+            if (l != null && l.next != null) {
+                var row = l.next.data as ConversationRow;
+                if (row != null) {
+                    if (row.is_expanded) {
+                        l.data.get_style_context().add_class("geary-expanded-previous-sibling");
+                    } else {
+                        l.data.get_style_context().remove_class("geary-expanded-previous-sibling");
+                    }
+                }
+            }
+        }
     }
 
     public async void load_conversation(Gee.Collection<Geary.EmailIdentifier> scroll_to,
@@ -1027,6 +1083,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (initial_row is LoadingRow) {
             loading_height = Util.Gtk.get_border_box_height(initial_row);
             remove(initial_row);
+            // Adjust for the changed margin of the first row
+            var first_row = get_row_at_index(0);
+            var style = first_row.get_style_context();
+            var margin = style.get_margin(style.get_state());
+            loading_height -= margin.top;
         }
 
         // None of these will be interesting, so just add them all,
@@ -1042,11 +1103,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // same place.
             row.enable_should_scroll();
             row.should_scroll.connect(() => {
-                    listbox_adj.value += Util.Gtk.get_border_box_height(row);
+                    listbox_adj.value += (Util.Gtk.get_border_box_height(row) - loading_height);
+                    // Only adjust for the loading row going away once
+                    loading_height = 0;
                 });
-
-            // Only adjust for the loading row going away once
-            loading_height = 0;
 
             yield row.view.load_contacts();
             if (i_mail_loaded % 10 == 0)
