@@ -994,9 +994,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    /** Overrides the draft folder as a destination for saving. */
-    public async void set_save_to_override(Geary.Folder? save_to)
-        throws GLib.Error {
+    /** Overrides the folder used for saving drafts. */
+    public void set_save_to_override(Geary.Folder? save_to) {
         this.save_to = save_to;
         this.reopen_draft_manager.begin();
     }
