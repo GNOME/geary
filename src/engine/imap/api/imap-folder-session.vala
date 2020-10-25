@@ -85,8 +85,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
 
     public async FolderSession(ClientSession session,
                                Imap.Folder folder,
-                               Cancellable cancellable)
-        throws Error {
+                               GLib.Cancellable? cancellable)
+        throws GLib.Error {
         base(session);
         this.folder = folder;
         this.quirks = session.quirks;
