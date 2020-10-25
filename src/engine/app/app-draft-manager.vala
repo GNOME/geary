@@ -219,8 +219,17 @@ public class Geary.App.DraftManager : BaseObject {
 
         yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
 
-        // if drafts folder doesn't return the identifier of newly created emails, then this object
-        // can't do it's work ... wait until open to check for this, to be absolutely sure
+        // if drafts folder doesn't return the identifier of newly
+        // created emails, then this object can't do it's work
+        // ... wait until open to check for this, to be absolutely
+        // sure
+        //
+        // Since open_async returns before a remote connection is
+        // made, need to wait for it here to ensure
+        var engine = this.drafts_folder as ImapEngine.MinimalFolder;
+        if (engine != null) {
+            yield engine.claim_remote_session(cancellable);
+        }
         if (drafts_folder.properties.create_never_returns_id) {
             try {
                 yield drafts_folder.close_async();
