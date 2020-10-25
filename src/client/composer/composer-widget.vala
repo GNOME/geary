@@ -1533,6 +1533,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             : new Geary.EmailFlags()
         );
 
+        bool opened = false;
         try {
             var new_manager = yield new Geary.App.DraftManager(
                 this.sender_context.account,
@@ -1548,7 +1549,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             new_manager.fatal
                 .connect(on_draft_manager_fatal);
             this.draft_manager = new_manager;
+            opened = true;
             debug("Draft manager opened");
+        } catch (Geary.EngineError.UNSUPPORTED err) {
+            debug(
+                "Drafts folder unsupported, no drafts will be saved: %s",
+                err.message
+            );
         } catch (GLib.Error err) {
             this.header.show_save_and_close = false;
             throw err;
@@ -1556,8 +1563,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.draft_manager_opening = null;
         }
 
-        update_draft_state();
-        this.header.show_save_and_close = true;
+        this.header.show_save_and_close = opened;
+        if (opened) {
+            update_draft_state();
+        }
     }
 
     /**
