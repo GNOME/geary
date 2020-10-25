@@ -439,6 +439,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.header = new Headerbar(config);
         this.header.expand_composer.connect(on_expand_compact_headers);
+        // Hide until we know we can save drafts
+        this.header.show_save_and_close = false;
 
         // Setup drag 'n drop
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
