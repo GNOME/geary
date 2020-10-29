@@ -177,41 +177,57 @@ namespace Util.Email {
      */
     public string quote_email_for_reply(Geary.Email email,
                                         string? quote,
-                                        Util.Date.ClockFormat clock_format,
                                         Geary.RFC822.TextFormat format) {
-        if (email.body == null && quote == null)
-            return "";
-
         string quoted = "";
+        if (email.body != null || quote != null) {
+            /// GLib g_date_time_format format string for the date and
+            /// time that a message being replied to was
+            /// received. This should be roughly similar to an RFC
+            /// 822-style date header value with optional additional
+            /// punctuation for readability. Note that this date may
+            /// be sent to someone in a different locale than the
+            /// sender, so should be unambiguous (for example, do not
+            /// use mm/dd/yyyy since it could be confused with
+            /// dd/mm/yyyy) and must include the time zone.
+            string date_format = _("%a, %b %-e %Y at %X %Z");
 
-        string DATE_FORMAT = Util.Date.get_full_date(clock_format);
+            if (email.date != null && email.from != null) {
+                /// The quoted header for a message being replied to.
+                /// %1$s will be substituted for the date, and %2$s
+                /// will be substituted for the original sender.
+                string QUOTED_LABEL = _("On %1$s, %2$s wrote:");
+                quoted += QUOTED_LABEL.printf(
+                    email.date.value.format(date_format),
+                    Geary.RFC822.Utils.email_addresses_for_reply(
+                        email.from, format
+                    )
+                );
+            } else if (email.from != null) {
+                /// The quoted header for a message being replied to
+                /// (in case the date is not known).  %s will be
+                /// replaced by the original sender.
+                string QUOTED_LABEL = _("%s wrote:");
+                quoted += QUOTED_LABEL.printf(
+                    Geary.RFC822.Utils.email_addresses_for_reply(
+                        email.from, format
+                    )
+                );
+            } else if (email.date != null) {
+                /// The quoted header for a message being replied to
+                /// (in case the sender is not known).  %s will be
+                /// replaced by the original date
+                string QUOTED_LABEL = _("On %s:");
+                quoted += QUOTED_LABEL.printf(
+                    email.date.value.format(date_format)
+                );
+            }
 
-        if (email.date != null && email.from != null) {
-            /// The quoted header for a message being replied to.
-            /// %1$s will be substituted for the date, and %2$s will be substituted for
-            /// the original sender.
-            string QUOTED_LABEL = _("On %1$s, %2$s wrote:");
-            quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT),
-                                          Geary.RFC822.Utils.email_addresses_for_reply(email.from, format));
-
-        } else if (email.from != null) {
-            /// The quoted header for a message being replied to (in case the date is not known).
-            /// %s will be replaced by the original sender.
-            string QUOTED_LABEL = _("%s wrote:");
-            quoted += QUOTED_LABEL.printf(Geary.RFC822.Utils.email_addresses_for_reply(email.from, format));
-
-        } else if (email.date != null) {
-            /// The quoted header for a message being replied to (in case the sender is not known).
-            /// %s will be replaced by the original date
-            string QUOTED_LABEL = _("On %s:");
-            quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT));
-        }
-
-        quoted += "<br />";
-        try {
-            quoted += quote_body(email, quote, true, format);
-        } catch (Error err) {
-            debug("Failed to quote body for replying: %s".printf(err.message));
+            quoted += "<br />";
+            try {
+                quoted += quote_body(email, quote, true, format);
+            } catch (Error err) {
+                debug("Failed to quote body for replying: %s".printf(err.message));
+            }
         }
 
         return quoted;

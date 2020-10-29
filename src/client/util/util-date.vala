@@ -208,32 +208,4 @@ public string get_clock_format(ClockFormat clock_format) {
     return xlat_pretty_clocks[clock_format.to_index()];
 }
 
-public string get_full_date(ClockFormat clock_format) {
-    var value = "";
-    switch (clock_format) {
-    case TWELVE_HOURS:
-        /// 12 hours format for datetime that a message being replied
-        /// to was received See
-        /// http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-        value = _("%a, %b %-e, %Y at %l:%M %P");
-        break;
-    case TWENTY_FOUR_HOURS:
-        /// 24 hours format for the datetime that a message being
-        /// replied to was received See
-        /// http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-        value = _("%a, %b %-e, %Y at %H:%M");
-        break;
-    case LOCALE_DEFAULT:
-        /// Format for the datetime that a message being replied to
-        /// was received See
-        /// http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-        value = _("%a, %b %-e, %Y at %X");
-        break;
-    case TOTAL:
-        // noop
-        break;
-    }
-    return value;
-}
-
 }
