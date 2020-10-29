@@ -485,6 +485,10 @@ public class Components.NetworkAddressValidator : Validator {
                         } catch (GLib.IOError.CANCELLED err) {
                             this.validated_address = null;
                         } catch (GLib.Error err) {
+                            debug(
+                                "Error in address lookup during validation: %s",
+                                err.message
+                            );
                             this.validated_address = null;
                             update_state(Validator.Validity.INVALID, reason);
                         }
