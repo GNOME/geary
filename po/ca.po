@@ -265,7 +265,7 @@ msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
-"Llista d’idiomes que sempre es mostren a la finestra emergent del corrector "
+"Llista d'idiomes que sempre es mostren a la finestra emergent del corrector "
 "ortogràfic."
 
 #: desktop/org.gnome.Geary.gschema.xml:96
@@ -742,7 +742,7 @@ msgstr "Nom d'usuari"
 #. account
 #: src/client/accounts/accounts-editor-row.vala:542
 msgid "No login needed"
-msgstr "No s’ha d'iniciar sessió"
+msgstr "No s'ha d'iniciar sessió"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
@@ -1200,7 +1200,7 @@ msgstr "Problema amb l'inici de sessió"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:541
 msgid "An account has reported an incorrect login or password."
-msgstr "Un compte ha informat d’un nom d'usuari o contrasenya incorrecte."
+msgstr "Un compte ha informat d'un nom d'usuari o contrasenya incorrecte."
 
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:547
@@ -1216,7 +1216,7 @@ msgstr "Problema de seguretat"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:556
 msgid "An account has reported an untrusted server.."
-msgstr "Un compte ha informat d’un servidor no fiable.."
+msgstr "Un compte ha informat d'un servidor no fiable.."
 
 #. Translators: An info bar button label
 #: src/client/application/application-main-window.vala:559
@@ -1511,7 +1511,7 @@ msgstr "Cal un nom de servidor"
 #. looked-up in the DNS.
 #: src/client/components/components-validator.vala:445
 msgid "Could not look up server name"
-msgstr "No s’ha pogut cercar el nom del servidor"
+msgstr "No s'ha pogut cercar el nom del servidor"
 
 #: src/client/components/main-toolbar.vala:116
 msgid "Mark conversation"
@@ -2825,7 +2825,7 @@ msgid ""
 "Removing an account will remove it from Geary and delete locally cached "
 "email data from your computer, but not from your service provider."
 msgstr ""
-"L'eliminació d’un compte l'eliminarà del Geary i esborrarà les dades del "
+"L'eliminació d'un compte l'eliminarà del Geary i esborrarà les dades del "
 "correu a la memòria cau local de l'ordinador, però no del proveïdor de "
 "serveis."
 
@@ -3123,7 +3123,7 @@ msgstr ""
 "Si el problema és greu o persisteix, copieu i envieu aquestes dades a la <a"
 " href=\"https://wiki.gnome.org/Apps/Geary/Contact\">llista de correu </a> o "
 "envieu un <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\"> "
-"informe d’error nou</a>."
+"informe d'error nou</a>."
 
 #: ui/components-inspector-error-view.ui:49
 msgid "Details:"
@@ -3718,57 +3718,3 @@ msgstr "_Autenticació"
 msgid "Geary update in progress…"
 msgstr "Actualització del Geary en curs…"
 
-#~ msgid "Log periodic activity"
-#~ msgstr "Registra l'activitat periòdica"
-
-#~ msgid "Log IMAP network serialization"
-#~ msgstr "Registra la serialització de xarxa d'IMAP"
-
-#~ msgid "<a href=''>Show less</a>"
-#~ msgstr "<a href=''>Mostra menys</a>"
-
-#~ msgid "<a href=''>%d more…</a>"
-#~ msgstr "<a href=''>%d més…</a>"
-
-#~ msgid "Sent Mail"
-#~ msgstr "Enviats"
-
-#~ msgid "Spam"
-#~ msgstr "Correu brossa"
-
-#~ msgid ""
-#~ "Your computer does not appear to be connected to the Internet.\n"
-#~ "You will not be able to send or receive email until it is re-connected."
-#~ msgstr ""
-#~ "Sembla que el vostre ordinador no està connectat a Internet.\n"
-#~ "No podreu enviar ni rebre correus electrònics fins que us torneu a connectar."
-
-#~ msgid ""
-#~ "An account has reported an untrusted server.\n"
-#~ "Please check the server configuration and try again."
-#~ msgstr ""
-#~ "Un compte ha informat d’un servidor no fiable. \n"
-#~ "Comproveu la configuració del servidor i torneu-ho a provar."
-
-#~ msgid ""
-#~ "An account has reported an incorrect login or password.\n"
-#~ "Please check your login name and try again."
-#~ msgstr ""
-#~ "Un compte ha informat d’un nom d'usuari o contrasenya incorrecte.\n"
-#~ "Comproveu el vostre nom d’usuari i torneu-ho a provar."
-
-#~ msgid "From"
-#~ msgstr "De"
-
-#~ msgid "Edit Draft"
-#~ msgstr "Edita l'Esborrany"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Find in current conversations"
-#~ msgstr "Troba en les converses actuals"
-
-#~ msgid "Empty _Spam…"
-#~ msgstr "Buida el _correu brossa…"
-
-#~ msgid "Empty _Trash…"
-#~ msgstr "Buida la _paperera…"
