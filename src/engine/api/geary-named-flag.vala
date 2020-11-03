@@ -28,7 +28,7 @@ public class Geary.NamedFlag : BaseObject, Gee.Hashable<Geary.NamedFlag> {
         return name.down().hash();
     }
 
-    public string serialize() {
+    public string serialise() {
         return name;
     }
 
@@ -36,4 +36,3 @@ public class Geary.NamedFlag : BaseObject, Gee.Hashable<Geary.NamedFlag> {
         return name;
     }
 }
-

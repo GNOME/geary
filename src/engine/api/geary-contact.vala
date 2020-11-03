@@ -43,7 +43,7 @@ public class Geary.Contact : BaseObject {
         public string serialize() {
             string ret = "";
             foreach (NamedFlag flag in list) {
-                ret += flag.serialize() + " ";
+                ret += flag.serialise() + " ";
             }
 
             return ret.strip();

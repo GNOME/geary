@@ -90,6 +90,17 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
         return Geary.String.stri_hash(to_string());
     }
 
+    /** Formats the flags for serialising in the database. */
+    public string serialise() {
+        var builder = new GLib.StringBuilder();
+        foreach (NamedFlag flag in this.list) {
+            builder.append(flag.serialise());
+            builder.append_c(' ');
+        }
+        return builder.str;
+    }
+
+    /** Formats the flags for debugging. */
     public string to_string() {
         string ret = "[";
         foreach (NamedFlag flag in list) {
@@ -99,4 +110,3 @@ public class Geary.NamedFlags : BaseObject, Gee.Hashable<Geary.NamedFlags> {
         return ret + "]";
     }
 }
-
