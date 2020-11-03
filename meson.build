@@ -158,8 +158,10 @@ web_extensions_dir = client_lib_dir / 'web-extensions'
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
-  error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
-        + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
+  error('SQLite3 was not built with FTS3 support. See BUILDING.md for details.')
+endif
+if not cc.has_header_symbol('sqlite3.h', 'Fts5ExtensionApi', dependencies: sqlite)
+  error('SQLite3 was not built with FTS5 support. See BUILDING.md for details.')
 endif
 
 #

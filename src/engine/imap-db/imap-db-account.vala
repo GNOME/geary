@@ -670,11 +670,11 @@ private class Geary.ImapDB.Account : BaseObject {
             if (query_phrases.size != 0) {
                 sql.append("""
                     WHERE id IN (
-                        SELECT docid
+                        SELECT rowid
                         FROM MessageSearchTable
                         WHERE 1=1
                 """);
-                sql_add_query_phrases(sql, query_phrases, "INTERSECT", "docid", "");
+                sql_add_query_phrases(sql, query_phrases, "INTERSECT", "rowid", "");
                 sql.append(")");
             } else
                 sql.append(" WHERE 1=1");
@@ -980,7 +980,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     // the order of seconds, so manually perform the operation
 
                     var result = cx.prepare(
-                        "SELECT docid FROM MessageSearchTable"
+                        "SELECT rowid FROM MessageSearchTable"
                     ).exec(cancellable);
                     while (!result.finished) {
                         search_ids.add(result.rowid_at(0));
@@ -1061,7 +1061,8 @@ private class Geary.ImapDB.Account : BaseObject {
                             Email.REQUIRED_FOR_MESSAGE |
                             Email.Field.ORIGINATORS |
                             Email.Field.RECEIVERS |
-                            Email.Field.SUBJECT
+                            Email.Field.SUBJECT |
+                            Email.Field.FLAGS
                         );
 
                         Email.Field db_fields;
@@ -1417,30 +1418,30 @@ private class Geary.ImapDB.Account : BaseObject {
 
         StringBuilder sql = new StringBuilder();
         sql.append("""
-            SELECT docid, offsets(MessageSearchTable), *
+            SELECT rowid, geary_matches(MessageSearchTable), *
             FROM MessageSearchTable
-            WHERE docid IN (
+            WHERE rowid IN (
         """);
         sql_append_ids(sql, id_map.keys);
         sql.append(")");
 
-        StringBuilder condition = new StringBuilder("AND docid IN (");
+        StringBuilder condition = new StringBuilder("AND rowid IN (");
         sql_append_ids(condition, id_map.keys);
         condition.append(")");
-        sql_add_query_phrases(sql, query_phrases, "UNION", "docid, offsets(MessageSearchTable), *",
+        sql_add_query_phrases(sql, query_phrases, "UNION", "rowid, geary_matches(MessageSearchTable), *",
             condition.str);
 
         Db.Statement stmt = cx.prepare(sql.str);
         sql_bind_query_phrases(stmt, 0, query_phrases);
 
-        Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_matches = new Gee.HashMap<
-            ImapDB.EmailIdentifier, Gee.Set<string>>();
+        var search_matches =
+            new Gee.HashMap<ImapDB.EmailIdentifier,Gee.Set<string>>();
 
         Db.Result result = stmt.exec(cancellable);
         while (!result.finished) {
-            int64 docid = result.rowid_at(0);
-            assert(id_map.has_key(docid));
-            ImapDB.EmailIdentifier id = id_map.get(docid);
+            int64 rowid = result.rowid_at(0);
+            assert(id_map.has_key(rowid));
+            ImapDB.EmailIdentifier id = id_map.get(rowid);
 
             // XXX Avoid a crash when "database disk image is
             // malformed" error occurs. Remove this when the SQLite
@@ -1451,30 +1452,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 continue;
             }
 
-            // offsets() function returns a list of 4 strings that are ints indicating position
-            // and length of match string in search table corpus
-            string[] offset_array = result.nonnull_string_at(1).split(" ");
+            var matches = new Gee.HashSet<string>();
+            matches.add_all_array(result.nonnull_string_at(1).split(","));
 
-            Gee.Set<string> matches = new Gee.HashSet<string>();
-
-            int j = 0;
-            while (true) {
-                unowned string[] offset_string = offset_array[j:j+4];
-
-                int column = int.parse(offset_string[0]);
-                int byte_offset = int.parse(offset_string[2]);
-                int size = int.parse(offset_string[3]);
-
-                unowned string text = result.nonnull_string_at(column + 2);
-                matches.add(text[byte_offset : byte_offset + size].down());
-
-                j += 4;
-                if (j >= offset_array.length)
-                    break;
-            }
-
-            if (search_matches.has_key(id))
+            if (search_matches.has_key(id)) {
                 matches.add_all(search_matches.get(id));
+            }
             search_matches.set(id, matches);
 
             result.next(cancellable);

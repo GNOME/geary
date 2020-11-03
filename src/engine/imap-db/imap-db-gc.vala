@@ -433,7 +433,7 @@ private class Geary.ImapDB.GC {
 
             stmt = cx.prepare("""
                 DELETE FROM MessageSearchTable
-                WHERE docid = ?
+                WHERE rowid = ?
             """);
             stmt.bind_rowid(0, message_id);
 

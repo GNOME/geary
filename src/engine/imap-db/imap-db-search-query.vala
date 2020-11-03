@@ -18,11 +18,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     private const unichar[] SEARCH_TERM_CONTINUATION_CHARS = { '-', '_', '.', '@' };
 
     // Search operator field names, eg: "to:foo@example.com" or "is:unread"
-    private const string SEARCH_OP_ATTACHMENT = "attachment";
+    private const string SEARCH_OP_ATTACHMENT = "attachments";
     private const string SEARCH_OP_BCC = "bcc";
     private const string SEARCH_OP_BODY = "body";
     private const string SEARCH_OP_CC = "cc";
-    private const string SEARCH_OP_FROM = "from_field";
+    private const string SEARCH_OP_FROM = "\"from\"";
     private const string SEARCH_OP_IS = "is";
     private const string SEARCH_OP_SUBJECT = "subject";
     private const string SEARCH_OP_TO = "receivers";

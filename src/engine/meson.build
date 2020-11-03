@@ -176,6 +176,7 @@ engine_vala_sources = files(
   'imap-db/imap-db-database.vala',
   'imap-db/imap-db-email-identifier.vala',
   'imap-db/imap-db-folder.vala',
+  'imap-db/imap-db-fts5-matches.c',
   'imap-db/imap-db-gc.vala',
   'imap-db/imap-db-message-row.vala',
   'imap-db/imap-db-search-query.vala',

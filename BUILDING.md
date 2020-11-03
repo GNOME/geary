@@ -74,8 +74,10 @@ Building Geary requires the following major libraries and tools:
 See the `meson.build` file in the top-level directory for the complete
 list of required dependencies and minimum versions.
 
-Geary also requires SQLite to be built with the compiler flag
-`-DSQLITE_ENABLE_FTS3`.
+Geary requires SQLite is built with both FTS3 and FTS5 support. Ensure
+`--enable-fts5`, `-DSQLITE_ENABLE_FTS3` and
+`-DSQLITE_ENABLE_FTS3_PARENTHESIS` are passed to the SQLite configure
+script.
 
 All required libraries and tools are available from major Linux
 distribution's package repositories:
