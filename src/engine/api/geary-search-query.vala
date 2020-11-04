@@ -160,6 +160,14 @@ public abstract class Geary.SearchQuery : BaseObject {
         /** Determines opposite of the term is matched. */
         public bool is_negated { get; set; default = false; }
 
+        /** Determines if this term is equal to another. */
+        public virtual bool equal_to(Term other) {
+            return (
+                this.is_negated == other.is_negated &&
+                this.get_type() == other.get_type()
+            );
+        }
+
         /** Returns a string representation, for debugging. */
         public abstract string to_string();
 
@@ -237,6 +245,27 @@ public abstract class Geary.SearchQuery : BaseObject {
             this.terms.add_all(terms);
         }
 
+        public override bool equal_to(Term other) {
+            if (this == other) {
+                return true;
+            }
+            if (!base.equal_to(other)) {
+                return false;
+            }
+            var text = (EmailTextTerm) other;
+            if (this.target != text.target ||
+                this.matching_strategy != text.matching_strategy ||
+                this.terms.size != text.terms.size) {
+                return false;
+            }
+            for (int i = 0; i < this.terms.size; i++) {
+                if (this.terms[i] != text.terms[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public override string to_string() {
             var builder = new GLib.StringBuilder();
             if (this.is_negated) {
@@ -283,6 +312,16 @@ public abstract class Geary.SearchQuery : BaseObject {
             this.value = value;
         }
 
+        public override bool equal_to(Term other) {
+            if (this == other) {
+                return true;
+            }
+            if (!base.equal_to(other)) {
+                return false;
+            }
+            return this.value.equal_to(((EmailFlagTerm) other).value);
+        }
+
         public override string to_string() {
             return "%s(%s)".printf(
                 this.is_negated ? "!" : "",
@@ -317,6 +356,23 @@ public abstract class Geary.SearchQuery : BaseObject {
         this.raw = raw;
     }
 
+    /** Determines if this query's expression is equal to another's. */
+    public bool equal_to(SearchQuery other) {
+        if (this == other) {
+            return true;
+        }
+        if (this.expression.size != other.expression.size) {
+            return false;
+        }
+        for (int i = 0; i < this.expression.size; i++) {
+            if (!this.expression[i].equal_to(other.expression[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Returns a string representation of this query, for debugging. */
     public string to_string() {
         var builder = new GLib.StringBuilder();
         builder.append_printf("\"%s\": ", this.raw);
