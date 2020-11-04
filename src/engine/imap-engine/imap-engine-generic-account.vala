@@ -580,7 +580,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         string text,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
-        return new ImapDB.SearchQuery(expression, text, this.stemmer);
+        return new FtsSearchQuery(expression, text, this.stemmer);
     }
 
     public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(

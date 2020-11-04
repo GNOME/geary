@@ -585,7 +585,7 @@ private class Geary.ImapDB.Account : BaseObject {
         debug("Search query: %s", q.to_string());
 
         check_open();
-        ImapDB.SearchQuery query = check_search_query(q);
+        FtsSearchQuery query = check_search_query(q);
 
         // Do this outside of transaction to catch invalid search ids up-front
         string? search_ids_sql = get_search_ids_sql(search_ids);
@@ -696,7 +696,7 @@ private class Geary.ImapDB.Account : BaseObject {
     public async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery q,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         check_open();
-        ImapDB.SearchQuery query = check_search_query(q);
+        FtsSearchQuery query = check_search_query(q);
 
         Gee.Set<string>? search_matches = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -1223,7 +1223,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // not per key-value
     public Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> do_get_search_matches(
         Db.Connection cx,
-        ImapDB.SearchQuery query,
+        FtsSearchQuery query,
         Gee.Map<int64?, ImapDB.EmailIdentifier> id_map,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
@@ -1327,8 +1327,8 @@ private class Geary.ImapDB.Account : BaseObject {
         }
     }
 
-    private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
-        ImapDB.SearchQuery? query = q as ImapDB.SearchQuery;
+    private FtsSearchQuery check_search_query(Geary.SearchQuery q) throws Error {
+        var query = q as FtsSearchQuery;
         if (query == null) {
             throw new EngineError.BAD_PARAMETERS("Geary.SearchQuery not associated with %s", name);
         }

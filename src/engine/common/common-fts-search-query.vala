@@ -7,9 +7,9 @@
  */
 
 /**
- * Internal implementation of {@link Geary.SearchQuery}.
+ * A search query implementation that provides full-text search.
  */
-private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
+internal class Geary.FtsSearchQuery : Geary.SearchQuery {
 
 
     private const string EMAIL_TEXT_STEMMED_TERMS = "geary-stemmed-terms";
@@ -22,9 +22,9 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     private unowned SnowBall.Stemmer stemmer;
 
 
-    public SearchQuery(Gee.List<Term> expression,
-                       string raw,
-                       SnowBall.Stemmer stemmer) {
+    public FtsSearchQuery(Gee.List<Term> expression,
+                          string raw,
+                          SnowBall.Stemmer stemmer) {
         base(expression, raw);
         this.stemmer = stemmer;
 

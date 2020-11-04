@@ -67,6 +67,7 @@ engine_vala_sources = files(
 
   'common/common-contact-harvester.vala',
   'common/common-contact-store-impl.vala',
+  'common/common-fts-search-query.vala',
   'common/common-message-data.vala',
 
   'db/db.vala',
@@ -179,7 +180,6 @@ engine_vala_sources = files(
   'imap-db/imap-db-fts5-matches.c',
   'imap-db/imap-db-gc.vala',
   'imap-db/imap-db-message-row.vala',
-  'imap-db/imap-db-search-query.vala',
   'imap-db/imap-db-sqlite.c',
 
   'imap-engine/imap-engine.vala',

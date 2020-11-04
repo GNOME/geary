@@ -5,17 +5,17 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.ImapDB.SearchQueryTest : TestCase {
+public class Geary.FtsSearchQueryTest : TestCase {
 
 
     private GLib.File? tmp_dir = null;
     private Geary.AccountInformation? config = null;
-    private Account? account = null;
+    private ImapDB.Account? account = null;
     private SnowBall.Stemmer? stemmer = null;
 
 
-    public SearchQueryTest() {
-        base("Geary.ImapDB.SearchQueryTest");
+    public FtsSearchQueryTest() {
+        base("Geary.FtsSearchQueryTest");
         add_test("email_text_terms", email_text_terms);
         add_test("email_text_terms_stemmed", email_text_terms_stemmed);
         add_test("email_text_terms_specific", email_text_terms_specific);
@@ -25,7 +25,7 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
 
     public override void set_up() throws GLib.Error {
         this.tmp_dir = GLib.File.new_for_path(
-            GLib.DirUtils.make_tmp("geary-imap-db-search-query-test-XXXXXX")
+            GLib.DirUtils.make_tmp("geary-common-fts-search-query-test-XXXXXX")
         );
 
         this.config = new Geary.AccountInformation(
@@ -35,7 +35,7 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
             new Geary.RFC822.MailboxAddress(null, "test@example.com")
         );
 
-        this.account = new Account(
+        this.account = new ImapDB.Account(
             config,
             this.tmp_dir,
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
@@ -212,16 +212,17 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
         search_with_both.exec(null);
     }
 
-    private SearchQuery new_search_query(Geary.SearchQuery.Term[] ops, string raw)
+    private FtsSearchQuery new_search_query(Geary.SearchQuery.Term[] ops,
+                                            string raw)
         throws GLib.Error {
-        return new SearchQuery(
+        return new FtsSearchQuery(
             new Gee.ArrayList<Geary.SearchQuery.Term>.wrap(ops),
             raw,
             this.stemmer
         );
     }
 
-    private void assert_queries(SearchQuery query) throws GLib.Error {
+    private void assert_queries(FtsSearchQuery query) throws GLib.Error {
         var search = query.get_search_query(
             this.account.db.get_primary_connection(),
             null,
