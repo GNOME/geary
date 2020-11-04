@@ -17,6 +17,8 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
     internal bool has_stemmed_terms { get; private set; default = false; }
 
+    private bool is_all_negated = true;
+
     private unowned SnowBall.Stemmer stemmer;
 
 
@@ -26,18 +28,21 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         base(expression, raw);
         this.stemmer = stemmer;
 
-        // Pre-stem search terms up front since the stemmed form is
-        // needed in a few different places
         foreach (var term in this.expression) {
             // Use this brittle form of type checking for performance
             // (both here and further below in the class) - the Engine
             // controls the Term hierarchy the needed assumptions can
             // be made
             if (term.get_type() == typeof(EmailTextTerm)) {
+                // Pre-stem search terms up front since the stemmed
+                // form is needed in a few different places
                 var text = (EmailTextTerm) term;
                 if (text.matching_strategy.is_stemming_enabled()) {
                     stem_search_terms(text);
                 }
+            }
+            if (!term.is_negated) {
+                this.is_all_negated = false;
             }
         }
     }
@@ -52,10 +57,26 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     ) throws GLib.Error {
         var sql = new GLib.StringBuilder();
 
+        // Select distinct since messages may exist in more than one
+        // folder.
         sql.append("""
-                SELECT DISTINCT mst.rowid
-                FROM MessageSearchTable as mst
+                SELECT DISTINCT mt.id""");
+        // FTS5 queries cannot be all negated terms. If not then join
+        // here and filter as usual, if so then exclude via subselect
+        // further below instead.
+        if (!this.is_all_negated) {
+            sql.append("""
+                FROM MessageSearchTable AS mst
                 INNER JOIN MessageTable AS mt ON mt.id = mst.rowid""");
+        } else {
+            sql.append("""
+                FROM MessageTable AS mt""");
+        }
+        // If excluding folderless messages, an inner join on
+        // MessageLocationTable will cause them to be excluded
+        // automatically. Otherwise a left join always required to
+        // exclude messages marked for deletion, even if there are no
+        // folder exclusions.
         if (exclude_folderless) {
             sql.append("""
                 INNER JOIN MessageLocationTable AS mlt ON mt.id = mlt.message_id""");
@@ -67,6 +88,8 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         var conditions_added = false;
         sql.append("""
                 WHERE""");
+
+        // Folder exclusions
         if (excluded_folder_ids_sql != null) {
             sql.append_printf(
                 " mlt.folder_id NOT IN (%s)",
@@ -74,27 +97,48 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
             );
             conditions_added = true;
         }
-        conditions_added = sql_add_term_conditions(sql, conditions_added);
+
+        // FTS match exclusions
+        if (!this.is_all_negated) {
+            conditions_added = sql_add_term_conditions(sql, conditions_added);
+        } else {
+            if (conditions_added) {
+                sql.append(" AND");
+            }
+            sql.append(
+                " mt.id NOT IN (SELECT mst.rowid FROM MessageSearchTable as mst WHERE "
+            );
+            sql_add_term_conditions(sql, false);
+            sql.append_c(')');
+            conditions_added = true;
+        }
+
+        // Email id exclusions
         if (!String.is_empty(search_ids_sql)) {
             if (conditions_added) {
                 sql.append(" AND");
             }
-            sql.append(""" id IN (%s)""".printf(search_ids_sql));
+            sql.append(""" mt.id IN (%s)""".printf(search_ids_sql));
         }
+
+        // Marked as deleted (but not folderless) exclusions
         if (conditions_added) {
             sql.append(" AND");
         }
-        // Exclude deleted messages, but not folderless messages
         sql.append(" mlt.remove_marker IN (0, null)");
+
+        // Ordering
         sql.append("""
                 ORDER BY mt.internaldate_time_t DESC""");
+
+        // Limit exclusions
         if (limit > 0) {
             sql.append("""
                 LIMIT ? OFFSET ?""");
         }
 
         Db.Statement stmt = cx.prepare(sql.str);
-        int bind_index = sql_bind_term_conditions(stmt, false, 0);
+        int bind_index = sql_bind_term_conditions(stmt, 0);
         if (limit > 0) {
             stmt.bind_int(bind_index++, limit);
             stmt.bind_int(bind_index++, offset);
@@ -118,7 +162,7 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
         sql_add_term_conditions(sql, false);
 
         Db.Statement stmt = cx.prepare(sql.str);
-        sql_bind_term_conditions(stmt, true, 0);
+        sql_bind_term_conditions(stmt, 0);
         return stmt;
     }
 
@@ -187,32 +231,71 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
                 sql.append(" AND");
             }
             have_added_sql_condition = true;
-            var is_first_match_term = true;
             sql.append(" MessageSearchTable MATCH '");
+
+            // Add all non-negated terms first, since NOT in FTS5 is a
+            // binary operator (not unary, FFS), and hence all negated
+            // clauses must follow a positive operator and a single
+            // NOT clause. For example, for positive terms a,c and
+            // negated terms b,d, the match value must be structured
+            // as: (a AND c) NOT (b AND d)
+
+            var is_first_positive_term = true;
             foreach (var term in this.expression) {
-                if (!is_first_match_term) {
-                    sql.append(" AND");
+                if (!term.is_negated) {
+                    if (is_first_positive_term) {
+                        sql.append(" (");
+                    } else {
+                        sql.append(" AND");
+                    }
+                    sql_add_term_condition(sql, term);
+                    is_first_positive_term = false;
                 }
-
-                if (term.is_negated) {
-                    sql.append(" NOT");
-                }
-
-                if (term.get_type() == typeof(EmailTextTerm)) {
-                    sql_add_email_text_term_conditions((EmailTextTerm) term, sql);
-                } else if (term.get_type() == typeof(EmailFlagTerm)) {
-                    sql.append(" ({flags} : \"' || ? || '\")");
-                }
-
-                is_first_match_term = false;
             }
+            if (!is_first_positive_term) {
+                sql.append_c(')');
+            }
+
+            var is_first_negated_term = true;
+            foreach (var term in this.expression) {
+                if (term.is_negated) {
+                    if (is_first_negated_term) {
+                        // If all negated, there won't be any positive
+                        // terms above, and the MATCH will be used as
+                        // an exclusion instead, so the NOT operator
+                        // is not required.
+                        if (!this.is_all_negated) {
+                            sql.append(" NOT (");
+                        } else {
+                            sql.append(" (");
+                        }
+                    } else {
+                        sql.append(" AND");
+                    }
+                    sql_add_term_condition(sql, term);
+                    is_first_negated_term = false;
+                }
+            }
+            if (!is_first_negated_term) {
+                sql.append_c(')');
+            }
+
             sql.append("'");
         }
         return have_added_sql_condition;
     }
 
-    private void sql_add_email_text_term_conditions(EmailTextTerm text,
-                                                    GLib.StringBuilder sql) {
+    private inline void sql_add_term_condition(GLib.StringBuilder sql,
+                                               Term term) {
+        if (term.get_type() == typeof(EmailTextTerm)) {
+            sql_add_email_text_term_conditions((EmailTextTerm) term, sql);
+        } else if (term.get_type() == typeof(EmailFlagTerm)) {
+            sql.append(" ({flags} : \"' || ? || '\")");
+        }
+    }
+
+    private inline void sql_add_email_text_term_conditions(EmailTextTerm text,
+                                                           GLib.StringBuilder sql) {
         var target = "";
         switch (text.target) {
         case ALL:
@@ -261,27 +344,44 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     }
 
     private int sql_bind_term_conditions(Db.Statement sql,
-                                         bool text_only,
                                          int index)
         throws Geary.DatabaseError {
         int next_index = index;
+        // Per sql_add_term_conditions, add all non-negated terms
+        // first before adding any negated terms.
         foreach (var term in this.expression) {
-            var type = term.get_type();
-            if (type == typeof(EmailTextTerm)) {
-                var text = (EmailTextTerm) term;
-                var stemmed_terms = text.get_data<Gee.List<string?>>(
-                    EMAIL_TEXT_STEMMED_TERMS
-                );
-                for (int i = 0; i < text.terms.size; i++) {
-                    sql.bind_string(next_index++, text.terms[i]);
-                    if (stemmed_terms != null && stemmed_terms[i] != null) {
-                        sql.bind_string(next_index++, stemmed_terms[i]);
-                    }
-                }
-            } else if (type == typeof(EmailFlagTerm)) {
-                var flag = (EmailFlagTerm) term;
-                sql.bind_string(next_index++, flag.value.serialise());
+            if (!term.is_negated) {
+                next_index = sql_bind_term_condition(sql, term, next_index);
             }
+        }
+        foreach (var term in this.expression) {
+            if (term.is_negated) {
+                next_index = sql_bind_term_condition(sql, term, next_index);
+            }
+        }
+        return next_index;
+    }
+
+    private inline int sql_bind_term_condition(Db.Statement sql,
+                                               Term term,
+                                               int index)
+        throws Geary.DatabaseError {
+        int next_index = index;
+        var type = term.get_type();
+        if (type == typeof(EmailTextTerm)) {
+            var text = (EmailTextTerm) term;
+            var stemmed_terms = text.get_data<Gee.List<string?>>(
+                EMAIL_TEXT_STEMMED_TERMS
+            );
+            for (int i = 0; i < text.terms.size; i++) {
+                sql.bind_string(next_index++, text.terms[i]);
+                if (stemmed_terms != null && stemmed_terms[i] != null) {
+                    sql.bind_string(next_index++, stemmed_terms[i]);
+                }
+            }
+        } else if (type == typeof(EmailFlagTerm)) {
+            var flag = (EmailFlagTerm) term;
+            sql.bind_string(next_index++, flag.value.serialise());
         }
         return next_index;
     }

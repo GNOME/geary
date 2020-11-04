@@ -163,6 +163,11 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
         );
         assert_queries(unread);
 
+        var read_term = new Geary.SearchQuery.EmailFlagTerm(Geary.EmailFlags.UNREAD);
+        read_term.is_negated = true;
+        var read = new_search_query({ read_term }, "is:read");
+        assert_queries(read);
+
         var flagged = new_search_query(
             { new Geary.SearchQuery.EmailFlagTerm(Geary.EmailFlags.FLAGGED)},
             "is:flagged"
