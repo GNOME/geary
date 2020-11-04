@@ -543,36 +543,6 @@ private class Geary.ImapDB.Account : BaseObject {
         return (messages.size == 0 ? null : messages);
     }
 
-    private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases,
-        string operator, string columns, string condition) {
-        bool is_first_field = true;
-        foreach (string field in query_phrases.keys) {
-            if (!is_first_field)
-                sql.append_printf("""
-                    %s
-                    SELECT %s
-                    FROM MessageSearchTable
-                    WHERE %s
-                    MATCH ?
-                    %s
-                """, operator, columns, field, condition);
-            else
-                sql.append_printf(" AND %s MATCH ?", field);
-            is_first_field = false;
-        }
-    }
-
-    private int sql_bind_query_phrases(Db.Statement stmt, int start_index,
-        Gee.HashMap<string, string> query_phrases) throws Geary.DatabaseError {
-        int i = start_index;
-        // This relies on the keys being returned in the same order every time
-        // from the same map.  It might not be guaranteed, but I feel pretty
-        // confident it'll work unless you change the map in between.
-        foreach (string field in query_phrases.keys)
-            stmt.bind_string(i++, query_phrases.get(field));
-        return i - start_index;
-    }
-
     // Append each id in the collection to the StringBuilder, in a format
     // suitable for use in an SQL statement IN (...) clause.
     private void sql_append_ids(StringBuilder s, Gee.Iterable<int64?> ids) {
@@ -612,91 +582,24 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
         throws Error {
 
-        debug("Search terms, offset/limit: %s %d/%d",
-              q.to_string(), offset, limit);
+        debug("Search query: %s", q.to_string());
 
         check_open();
         ImapDB.SearchQuery query = check_search_query(q);
 
-        Gee.HashMap<string, string> query_phrases = query.get_query_phrases();
-        Gee.Map<Geary.NamedFlag, bool> removal_conditions = query.get_removal_conditions();
-        if (query_phrases.size == 0 && removal_conditions.is_empty)
-            return null;
-
-        foreach (string? field in query.get_fields()) {
-            debug(" - Field \"%s\" terms:", field);
-            foreach (SearchQuery.Term? term in query.get_search_terms(field)) {
-                if (term != null) {
-                    debug("    - \"%s\": %s, %s",
-                          term.original,
-                          term.parsed,
-                          term.stemmed
-                    );
-                    debug("      SQL terms:");
-                    foreach (string sql in term.sql) {
-                        debug("       - \"%s\"", sql);
-                    }
-                }
-            }
-        }
-
         // Do this outside of transaction to catch invalid search ids up-front
         string? search_ids_sql = get_search_ids_sql(search_ids);
 
-        bool strip_greedy = query.should_strip_greedy_results();
         Gee.List<EmailIdentifier> matching_ids =
             new Gee.LinkedList<EmailIdentifier>();
         Gee.Map<EmailIdentifier,Gee.Set<string>>? search_matches = null;
 
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            string blacklisted_ids_sql = do_get_blacklisted_message_ids_sql(
-                folder_blacklist, cx, cancellable);
-
-            // Every mutation of this query we could think of has been tried,
-            // and this version was found to minimize running time.  We
-            // discovered that just doing a JOIN between the MessageTable and
-            // MessageSearchTable was causing a full table scan to order the
-            // results.  When it's written this way, and we force SQLite to use
-            // the correct index (not sure why it can't figure it out on its
-            // own), it cuts the running time roughly in half of how it was
-            // before.  The short version is: modify with extreme caution.  See
-            // <http://redmine.yorba.org/issues/7372>.
-            StringBuilder sql = new StringBuilder();
-            sql.append("""
-                SELECT id
-                FROM MessageTable
-                INDEXED BY MessageTableInternalDateTimeTIndex
-            """);
-            if (query_phrases.size != 0) {
-                sql.append("""
-                    WHERE id IN (
-                        SELECT rowid
-                        FROM MessageSearchTable
-                        WHERE 1=1
-                """);
-                sql_add_query_phrases(sql, query_phrases, "INTERSECT", "rowid", "");
-                sql.append(")");
-            } else
-                sql.append(" WHERE 1=1");
-
-            if (blacklisted_ids_sql != "")
-                sql.append(" AND id NOT IN (%s)".printf(blacklisted_ids_sql));
-            if (!Geary.String.is_empty(search_ids_sql))
-                sql.append(" AND id IN (%s)".printf(search_ids_sql));
-            sql.append(" ORDER BY internaldate_time_t DESC");
-            if (limit > 0)
-                sql.append(" LIMIT ? OFFSET ?");
-
-            Db.Statement stmt = cx.prepare(sql.str);
-            int bind_index = sql_bind_query_phrases(stmt, 0, query_phrases);
-            if (limit > 0) {
-                stmt.bind_int(bind_index++, limit);
-                stmt.bind_int(bind_index++, offset);
-            }
-
-            Gee.HashMap<int64?, ImapDB.EmailIdentifier> id_map = new Gee.HashMap<int64?, ImapDB.EmailIdentifier>(
+        yield db.exec_transaction_async(RO, (cx) => {
+            var id_map = new Gee.HashMap<int64?, ImapDB.EmailIdentifier>(
                 Collection.int64_hash_func, Collection.int64_equal_func);
-
+            Db.Statement stmt = query.get_search_query(
+                cx, search_ids_sql, folder_blacklist, limit, offset, cancellable
+            );
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 message_id = result.int64_at(0);
@@ -707,8 +610,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 result.next(cancellable);
             }
 
-
-            if (strip_greedy && !id_map.is_empty) {
+            if (query.has_stemmed_terms && !id_map.is_empty) {
                 search_matches = do_get_search_matches(
                     cx, query, id_map, cancellable
                 );
@@ -719,52 +621,12 @@ private class Geary.ImapDB.Account : BaseObject {
 
         debug("Matching emails found: %d", matching_ids.size);
 
-        if (!removal_conditions.is_empty) {
-            yield strip_removal_conditions(
-                query, matching_ids, removal_conditions, cancellable
-            );
-        }
-
-        if (strip_greedy && search_matches != null) {
+        if (query.has_stemmed_terms && search_matches != null) {
             strip_greedy_results(query, matching_ids, search_matches);
         }
 
         debug("Final search matches: %d", matching_ids.size);
         return matching_ids.is_empty ? null : matching_ids;
-    }
-
-    // Strip out from the given collection any email that matches the
-    // given removal conditions
-    private async void strip_removal_conditions(ImapDB.SearchQuery query,
-                                                Gee.Collection<EmailIdentifier> matches,
-                                                Gee.Map<Geary.NamedFlag,bool> conditions,
-                                                GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        Email.Field required_fields = Geary.Email.Field.FLAGS;
-        Gee.Iterator<EmailIdentifier> iter = matches.iterator();
-
-        yield db.exec_transaction_async(RO, (cx) => {
-                while (iter.next()) {
-                    ImapDB.EmailIdentifier id = iter.get();
-                    MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                        cx, id.message_id, required_fields, null, cancellable
-                    );
-                    Geary.EmailFlags? flags = row.get_generic_email_flags();
-                    if (flags != null) {
-                        foreach (Gee.Map.Entry<NamedFlag,bool> condition
-                                 in conditions.entries) {
-                            if (flags.contains(condition.key) == condition.value) {
-                                iter.remove();
-                                break;
-                            }
-                        }
-                    } else {
-                        iter.remove();
-                    }
-                }
-                return Db.TransactionOutcome.DONE;
-            }, cancellable
-        );
     }
 
     // Strip out from the given collection of matching ids and results
@@ -774,46 +636,46 @@ private class Geary.ImapDB.Account : BaseObject {
                                       Gee.Collection<EmailIdentifier> matches,
                                       Gee.Map<EmailIdentifier,Gee.Set<string>> results) {
         int prestripped_results = matches.size;
-        Gee.Iterator<EmailIdentifier> iter = matches.iterator();
-        while (iter.next()) {
-            // For each matched string in this message, retain the message in the search results
-            // if it prefix-matches any of the straight-up parsed terms or matches a stemmed
-            // variant (with only max. difference in their lengths allowed, i.e. not a "greedy"
-            // match)
-            EmailIdentifier id = iter.get();
-            bool good_match_found = false;
-            Gee.Set<string>? result = results.get(id);
-            if (result != null) {
-                foreach (string match in result) {
-                    foreach (SearchQuery.Term term in query.get_all_terms()) {
-                        // if prefix-matches parsed term, then don't strip
-                        if (match.has_prefix(term.parsed)) {
-                            good_match_found = true;
-                            break;
-                        }
+        // Gee.Iterator<EmailIdentifier> iter = matches.iterator();
+        // while (iter.next()) {
+        //     // For each matched string in this message, retain the message in the search results
+        //     // if it prefix-matches any of the straight-up parsed terms or matches a stemmed
+        //     // variant (with only max. difference in their lengths allowed, i.e. not a "greedy"
+        //     // match)
+        //     EmailIdentifier id = iter.get();
+        //     bool good_match_found = false;
+        //     Gee.Set<string>? result = results.get(id);
+        //     if (result != null) {
+        //         foreach (string match in result) {
+        //             foreach (SearchQuery.Term term in query.get_all_terms()) {
+        //                 // if prefix-matches parsed term, then don't strip
+        //                 if (match.has_prefix(term.parsed)) {
+        //                     good_match_found = true;
+        //                     break;
+        //                 }
 
-                        // if prefix-matches stemmed term w/o doing so
-                        // greedily, then don't strip
-                        if (term.stemmed != null && match.has_prefix(term.stemmed)) {
-                            int diff = match.length - term.stemmed.length;
-                            if (diff <= query.max_difference_match_stem_lengths) {
-                                good_match_found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+        //                 // if prefix-matches stemmed term w/o doing so
+        //                 // greedily, then don't strip
+        //                 if (term.stemmed != null && match.has_prefix(term.stemmed)) {
+        //                     int diff = match.length - term.stemmed.length;
+        //                     if (diff <= query.max_difference_match_stem_lengths) {
+        //                         good_match_found = true;
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //         }
 
-                if (good_match_found) {
-                    break;
-                }
-            }
+        //         if (good_match_found) {
+        //             break;
+        //         }
+        //     }
 
-            if (!good_match_found) {
-                iter.remove();
-                matches.remove(id);
-            }
-        }
+        //     if (!good_match_found) {
+        //         iter.remove();
+        //         matches.remove(id);
+        //     }
+        // }
 
         debug("Stripped %d emails from search for [%s] due to greedy stem matching",
               prestripped_results - matches.size, query.raw);
@@ -831,12 +693,15 @@ private class Geary.ImapDB.Account : BaseObject {
             foreach (ImapDB.EmailIdentifier id in ids)
                 id_map.set(id.message_id, id);
 
-            Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? match_map =
-                do_get_search_matches(cx, query, id_map, cancellable);
-            if (match_map == null || match_map.size == 0)
+            Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? match_map = null;
+            if (!id_map.is_empty) {
+                match_map = do_get_search_matches(cx, query, id_map, cancellable);
+            }
+            if (match_map == null || match_map.size == 0) {
                 return Db.TransactionOutcome.DONE;
+            }
 
-            if (query.should_strip_greedy_results()) {
+            if (query.has_stemmed_terms) {
                 strip_greedy_results(query, ids, match_map);
             }
 
@@ -1219,68 +1084,6 @@ private class Geary.ImapDB.Account : BaseObject {
         return !result.finished;
     }
 
-    // Turn the collection of folder paths into actual folder ids.  As a
-    // special case, if "folderless" or orphan emails are to be blacklisted,
-    // set the out bool to true.
-    private Gee.Collection<int64?> do_get_blacklisted_folder_ids(Gee.Collection<Geary.FolderPath?>? folder_blacklist,
-        Db.Connection cx, out bool blacklist_folderless, Cancellable? cancellable) throws Error {
-        blacklist_folderless = false;
-        Gee.ArrayList<int64?> ids = new Gee.ArrayList<int64?>();
-
-        if (folder_blacklist != null) {
-            foreach (Geary.FolderPath? folder_path in folder_blacklist) {
-                if (folder_path == null) {
-                    blacklist_folderless = true;
-                } else {
-                    int64 id;
-                    do_fetch_folder_id(cx, folder_path, true, out id, cancellable);
-                    if (id != Db.INVALID_ROWID)
-                        ids.add(id);
-                }
-            }
-        }
-
-        return ids;
-    }
-
-    // Return a parameterless SQL statement that selects any message ids that
-    // are in a blacklisted folder.  This is used as a sub-select for the
-    // search query to omit results from blacklisted folders.
-    private string do_get_blacklisted_message_ids_sql(Gee.Collection<Geary.FolderPath?>? folder_blacklist,
-        Db.Connection cx, Cancellable? cancellable) throws Error {
-        bool blacklist_folderless;
-        Gee.Collection<int64?> blacklisted_ids = do_get_blacklisted_folder_ids(
-            folder_blacklist, cx, out blacklist_folderless, cancellable);
-
-        StringBuilder sql = new StringBuilder();
-        if (blacklisted_ids.size > 0) {
-            sql.append("""
-                SELECT message_id
-                FROM MessageLocationTable
-                WHERE remove_marker = 0
-                    AND folder_id IN (
-            """);
-            sql_append_ids(sql, blacklisted_ids);
-            sql.append(")");
-
-            if (blacklist_folderless)
-                sql.append(" UNION ");
-        }
-        if (blacklist_folderless) {
-            sql.append("""
-                SELECT id
-                FROM MessageTable
-                WHERE id NOT IN (
-                    SELECT message_id
-                    FROM MessageLocationTable
-                    WHERE remove_marker = 0
-                )
-            """);
-        }
-
-        return sql.str;
-    }
-
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
     private Gee.Set<Geary.FolderPath>?
@@ -1406,42 +1209,22 @@ private class Geary.ImapDB.Account : BaseObject {
 
     // Not using a MultiMap because when traversing want to process all values at once per iteration,
     // not per key-value
-    public Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? do_get_search_matches(Db.Connection cx,
-        ImapDB.SearchQuery query, Gee.Map<int64?, ImapDB.EmailIdentifier> id_map, Cancellable? cancellable)
-        throws Error {
-        if (id_map.size == 0)
-            return null;
+    public Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> do_get_search_matches(
+        Db.Connection cx,
+        ImapDB.SearchQuery query,
+        Gee.Map<int64?, ImapDB.EmailIdentifier> id_map,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        var search_ids_sql = new GLib.StringBuilder();
+        sql_append_ids(search_ids_sql, id_map.keys);
 
-        Gee.HashMap<string, string> query_phrases = query.get_query_phrases();
-        if (query_phrases.size == 0)
-            return null;
-
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
-            SELECT rowid, geary_matches(MessageSearchTable), *
-            FROM MessageSearchTable
-            WHERE rowid IN (
-        """);
-        sql_append_ids(sql, id_map.keys);
-        sql.append(")");
-
-        StringBuilder condition = new StringBuilder("AND rowid IN (");
-        sql_append_ids(condition, id_map.keys);
-        condition.append(")");
-        sql_add_query_phrases(sql, query_phrases, "UNION", "rowid, geary_matches(MessageSearchTable), *",
-            condition.str);
-
-        Db.Statement stmt = cx.prepare(sql.str);
-        sql_bind_query_phrases(stmt, 0, query_phrases);
-
-        var search_matches =
-            new Gee.HashMap<ImapDB.EmailIdentifier,Gee.Set<string>>();
-
-        Db.Result result = stmt.exec(cancellable);
+        var search_matches = new Gee.HashMap<ImapDB.EmailIdentifier,Gee.Set<string>>();
+        Db.Result result = query.get_match_query(
+            cx, search_ids_sql.str
+        ).exec(cancellable);
         while (!result.finished) {
-            int64 rowid = result.rowid_at(0);
-            assert(id_map.has_key(rowid));
-            ImapDB.EmailIdentifier id = id_map.get(rowid);
+            int64 docid = result.rowid_at(0);
+            ImapDB.EmailIdentifier id = id_map.get(docid);
 
             // XXX Avoid a crash when "database disk image is
             // malformed" error occurs. Remove this when the SQLite
@@ -1502,8 +1285,9 @@ private class Geary.ImapDB.Account : BaseObject {
 
     private ImapDB.SearchQuery check_search_query(Geary.SearchQuery q) throws Error {
         ImapDB.SearchQuery? query = q as ImapDB.SearchQuery;
-        if (query == null || query.account != this)
+        if (query == null) {
             throw new EngineError.BAD_PARAMETERS("Geary.SearchQuery not associated with %s", name);
+        }
 
         return query;
     }
