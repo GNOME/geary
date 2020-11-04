@@ -153,27 +153,29 @@ public class Geary.App.SearchFolder :
      */
     public async void search(SearchQuery query, GLib.Cancellable? cancellable)
         throws GLib.Error {
-        int result_mutex_token = yield result_mutex.claim_async();
+        if (this.query == null || !this.query.equal_to(query)) {
+            int result_mutex_token = yield result_mutex.claim_async();
 
-        clear();
+            clear();
 
-        if (cancellable != null) {
-            GLib.Cancellable @internal = this.executing;
-            cancellable.cancelled.connect(() => { @internal.cancel(); });
-        }
+            if (cancellable != null) {
+                GLib.Cancellable @internal = this.executing;
+                cancellable.cancelled.connect(() => { @internal.cancel(); });
+            }
 
-        this.query = query;
-        GLib.Error? error = null;
-        try {
-            yield do_search_async(null, null, this.executing);
-        } catch(Error e) {
-            error = e;
-        }
+            this.query = query;
+            GLib.Error? error = null;
+            try {
+                yield do_search_async(null, null, this.executing);
+            } catch(Error e) {
+                error = e;
+            }
 
-        result_mutex.release(ref result_mutex_token);
+            result_mutex.release(ref result_mutex_token);
 
-        if (error != null) {
-            throw error;
+            if (error != null) {
+                throw error;
+            }
         }
     }
 
