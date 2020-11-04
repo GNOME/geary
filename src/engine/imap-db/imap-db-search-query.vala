@@ -319,18 +319,19 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     // A list of all search terms, regardless of search op field name
     private Gee.ArrayList<Term> all = new Gee.ArrayList<Term>();
 
-    private SnowBall.Stemmer stemmer;
+    private unowned SnowBall.Stemmer stemmer;
 
 
     public async SearchQuery(Geary.Account owner,
                              ImapDB.Account local,
                              Gee.Collection<Geary.SearchQuery.Term> expression,
                              string raw,
+                             SnowBall.Stemmer stemmer,
                              Geary.SearchQuery.Strategy strategy,
                              GLib.Cancellable? cancellable) {
         base(expression, raw);
         this.account = local;
-        this.stemmer = new SnowBall.Stemmer(find_appropriate_search_stemmer());
+        this.stemmer = stemmer;
 
         switch (strategy) {
             case Strategy.EXACT:
@@ -672,51 +673,6 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
 
         debug("Search processing: term -> stem is \"%s\" -> \"%s\"", term, stemmed);
         return stemmed;
-    }
-
-    private string find_appropriate_search_stemmer() {
-        // Unfortunately, the stemmer library only accepts the full language
-        // name for the stemming algorithm.  This translates between the user's
-        // preferred language ISO 639-1 code and our available stemmers.
-        // FIXME: the available list here is determined by what's included in
-        // src/sqlite3-unicodesn/CMakeLists.txt.  We should pass that list in
-        // instead of hardcoding it here.
-        foreach (string l in Intl.get_language_names()) {
-            switch (l) {
-                case "ar": return "arabic";
-                case "eu": return "basque";
-                case "ca": return "catalan";
-                case "da": return "danish";
-                case "nl": return "dutch";
-                case "en": return "english";
-                case "fi": return "finnish";
-                case "fr": return "french";
-                case "de": return "german";
-                case "el": return "greek";
-                case "hi": return "hindi";
-                case "hu": return "hungarian";
-                case "id": return "indonesian";
-                case "ga": return "irish";
-                case "it": return "italian";
-                case "lt": return "lithuanian";
-                case "ne": return "nepali";
-                case "no": return "norwegian";
-                case "pt": return "portuguese";
-                case "ro": return "romanian";
-                case "ru": return "russian";
-                case "sr": return "serbian";
-                case "es": return "spanish";
-                case "sv": return "swedish";
-                case "ta": return "tamil";
-                case "tr": return "turkish";
-            }
-        }
-
-        // Default to English because it seems to be on average the language
-        // most likely to be present in emails, regardless of the user's
-        // language setting.  This is not an exact science, and search results
-        // should be ok either way in most cases.
-        return "english";
     }
 
 }
