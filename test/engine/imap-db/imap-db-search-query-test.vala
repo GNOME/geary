@@ -20,6 +20,7 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
         add_test("email_text_terms_stemmed", email_text_terms_stemmed);
         add_test("email_text_terms_specific", email_text_terms_specific);
         add_test("email_flag_terms", email_flag_terms);
+        add_test("excluded_folders", excluded_folders);
     }
 
     public override void set_up() throws GLib.Error {
@@ -169,6 +170,43 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
         assert_queries(flagged);
     }
 
+    public void excluded_folders() throws GLib.Error {
+        var query = new_search_query(
+            { new Geary.SearchQuery.EmailTextTerm(ALL, EXACT, "test")},
+            "test"
+        );
+
+        var search_with_excluded_ids = query.get_search_query(
+            this.account.db.get_primary_connection(),
+            null,
+            "10,20,30,40",
+            false,
+            10,
+            0
+        );
+        search_with_excluded_ids.exec(null);
+
+        var search_with_exclude_folderless = query.get_search_query(
+            this.account.db.get_primary_connection(),
+            null,
+            null,
+            true,
+            10,
+            0
+        );
+        search_with_exclude_folderless.exec(null);
+
+        var search_with_both = query.get_search_query(
+            this.account.db.get_primary_connection(),
+            null,
+            "10,20,30,40",
+            true,
+            10,
+            0
+        );
+        search_with_both.exec(null);
+    }
+
     private SearchQuery new_search_query(Geary.SearchQuery.Term[] ops, string raw)
         throws GLib.Error {
         return new SearchQuery(
@@ -183,9 +221,9 @@ public class Geary.ImapDB.SearchQueryTest : TestCase {
             this.account.db.get_primary_connection(),
             null,
             null,
-            0,
+            false,
             10,
-            null
+            0
         );
         search.exec(null);
 

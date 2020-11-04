@@ -578,7 +578,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     public async Gee.Collection<Geary.EmailIdentifier>? search_async(Geary.SearchQuery q,
-        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? excluded_folders = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
         throws Error {
 
@@ -595,10 +595,22 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Map<EmailIdentifier,Gee.Set<string>>? search_matches = null;
 
         yield db.exec_transaction_async(RO, (cx) => {
+            string? excluded_folder_ids_sql = null;
+            bool exclude_folderless = false;
+            if (excluded_folders != null) {
+                excluded_folder_ids_sql = do_get_excluded_folder_ids(
+                    excluded_folders, cx, out exclude_folderless, cancellable
+                );
+            }
+
             var id_map = new Gee.HashMap<int64?, ImapDB.EmailIdentifier>(
                 Collection.int64_hash_func, Collection.int64_equal_func);
             Db.Statement stmt = query.get_search_query(
-                cx, search_ids_sql, folder_blacklist, limit, offset, cancellable
+                cx,
+                search_ids_sql,
+                excluded_folder_ids_sql,
+                exclude_folderless,
+                limit, offset
             );
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
@@ -1275,6 +1287,38 @@ private class Geary.ImapDB.Account : BaseObject {
                 this.attachments_dir, GLib.Priority.DEFAULT, cancellable
             );
         }
+    }
+
+    // Turn the collection of folder paths into actual folder ids.  As a
+    // special case, if "folderless" or orphan emails are to be excluded,
+    // set the out bool to true.
+    private string do_get_excluded_folder_ids(
+        Gee.Collection<Geary.FolderPath?> excluded_folder,
+        Db.Connection cx,
+        out bool exclude_folderless,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        exclude_folderless = false;
+
+        var ids = new GLib.StringBuilder();
+        var is_first = true;
+        foreach (Geary.FolderPath? folder_path in excluded_folder) {
+            if (folder_path == null) {
+                exclude_folderless = true;
+            } else {
+                int64 id;
+                do_fetch_folder_id(cx, folder_path, true, out id, cancellable);
+                if (id != Db.INVALID_ROWID) {
+                    if (!is_first) {
+                        ids.append_c(',');
+                    }
+                    ids.append(id.to_string());
+                    is_first = false;
+                }
+            }
+        }
+
+        return ids.str;
     }
 
     private inline void check_open() throws GLib.Error {

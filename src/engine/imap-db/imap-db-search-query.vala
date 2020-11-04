@@ -45,19 +45,35 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
     internal Db.Statement get_search_query(
         Db.Connection cx,
         string? search_ids_sql,
-        Gee.Collection<Geary.FolderPath>? folder_blacklist,
+        string? excluded_folder_ids_sql,
+        bool exclude_folderless,
         int limit,
-        int offset,
-        GLib.Cancellable? cancellable
+        int offset
     ) throws GLib.Error {
         var sql = new GLib.StringBuilder();
-        var conditions_added = false;
 
         sql.append("""
-            SELECT mst.rowid
-            FROM MessageSearchTable as mst
-            INNER JOIN MessageTable AS mt ON mt.id = mst.rowid
-            WHERE""");
+                SELECT DISTINCT mst.rowid
+                FROM MessageSearchTable as mst
+                INNER JOIN MessageTable AS mt ON mt.id = mst.rowid""");
+        if (exclude_folderless) {
+            sql.append("""
+                INNER JOIN MessageLocationTable AS mlt ON mt.id = mlt.message_id""");
+        } else {
+            sql.append("""
+                LEFT JOIN MessageLocationTable AS mlt ON mt.id = mlt.message_id""");
+        }
+
+        var conditions_added = false;
+        sql.append("""
+                WHERE""");
+        if (excluded_folder_ids_sql != null) {
+            sql.append_printf(
+                " mlt.folder_id NOT IN (%s)",
+                excluded_folder_ids_sql
+            );
+            conditions_added = true;
+        }
         conditions_added = sql_add_term_conditions(sql, conditions_added);
         if (!String.is_empty(search_ids_sql)) {
             if (conditions_added) {
@@ -65,6 +81,11 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
             }
             sql.append(""" id IN (%s)""".printf(search_ids_sql));
         }
+        if (conditions_added) {
+            sql.append(" AND");
+        }
+        // Exclude deleted messages, but not folderless messages
+        sql.append(" mlt.remove_marker IN (0, null)");
         sql.append("""
                 ORDER BY mt.internaldate_time_t DESC""");
         if (limit > 0) {
