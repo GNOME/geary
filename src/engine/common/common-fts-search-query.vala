@@ -22,7 +22,7 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
     private unowned SnowBall.Stemmer stemmer;
 
 
-    public FtsSearchQuery(Gee.List<Term> expression,
+    public FtsSearchQuery(Gee.List<SearchQuery.Term> expression,
                           string raw,
                           SnowBall.Stemmer stemmer) {
         base(expression, raw);
@@ -33,10 +33,10 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
             // (both here and further below in the class) - the Engine
             // controls the Term hierarchy the needed assumptions can
             // be made
-            if (term.get_type() == typeof(EmailTextTerm)) {
+            if (term.get_type() == typeof(SearchQuery.EmailTextTerm)) {
                 // Pre-stem search terms up front since the stemmed
                 // form is needed in a few different places
-                var text = (EmailTextTerm) term;
+                var text = (SearchQuery.EmailTextTerm) term;
                 if (text.matching_strategy.is_stemming_enabled()) {
                     stem_search_terms(text);
                 }
@@ -199,7 +199,7 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
      *
      * Otherwise, the stem for the term is returned.
      */
-    private void stem_search_terms(EmailTextTerm text) {
+    private void stem_search_terms(SearchQuery.EmailTextTerm text) {
         var stemmed_terms = new Gee.ArrayList<string?>();
         foreach (var term in text.terms) {
             int term_length = term.length;
@@ -286,15 +286,15 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
     }
 
     private inline void sql_add_term_condition(GLib.StringBuilder sql,
-                                               Term term) {
-        if (term.get_type() == typeof(EmailTextTerm)) {
-            sql_add_email_text_term_conditions((EmailTextTerm) term, sql);
-        } else if (term.get_type() == typeof(EmailFlagTerm)) {
+                                               SearchQuery.Term term) {
+        if (term.get_type() == typeof(SearchQuery.EmailTextTerm)) {
+            sql_add_email_text_term_conditions((SearchQuery.EmailTextTerm) term, sql);
+        } else if (term.get_type() == typeof(SearchQuery.EmailFlagTerm)) {
             sql.append(" ({flags} : \"' || ? || '\")");
         }
     }
 
-    private inline void sql_add_email_text_term_conditions(EmailTextTerm text,
+    private inline void sql_add_email_text_term_conditions(SearchQuery.EmailTextTerm text,
                                                            GLib.StringBuilder sql) {
         var target = "";
         switch (text.target) {
@@ -363,13 +363,13 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
     }
 
     private inline int sql_bind_term_condition(Db.Statement sql,
-                                               Term term,
+                                               SearchQuery.Term term,
                                                int index)
         throws Geary.DatabaseError {
         int next_index = index;
         var type = term.get_type();
-        if (type == typeof(EmailTextTerm)) {
-            var text = (EmailTextTerm) term;
+        if (type == typeof(SearchQuery.EmailTextTerm)) {
+            var text = (SearchQuery.EmailTextTerm) term;
             var stemmed_terms = text.get_data<Gee.List<string?>>(
                 EMAIL_TEXT_STEMMED_TERMS
             );
@@ -379,8 +379,8 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
                     sql.bind_string(next_index++, stemmed_terms[i]);
                 }
             }
-        } else if (type == typeof(EmailFlagTerm)) {
-            var flag = (EmailFlagTerm) term;
+        } else if (type == typeof(SearchQuery.EmailFlagTerm)) {
+            var flag = (SearchQuery.EmailFlagTerm) term;
             sql.bind_string(next_index++, flag.value.serialise());
         }
         return next_index;
