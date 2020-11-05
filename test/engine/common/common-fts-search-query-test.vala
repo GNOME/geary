@@ -19,8 +19,8 @@ public class Geary.FtsSearchQueryTest : TestCase {
         add_test("email_text_terms", email_text_terms);
         add_test("email_text_terms_stemmed", email_text_terms_stemmed);
         add_test("email_text_terms_specific", email_text_terms_specific);
+        add_test("email_text_terms_disjunction", email_text_terms_disjunction);
         add_test("email_flag_terms", email_flag_terms);
-        add_test("excluded_folders", excluded_folders);
     }
 
     public override void set_up() throws GLib.Error {
@@ -156,6 +156,28 @@ public class Geary.FtsSearchQueryTest : TestCase {
         assert_queries(conflicting_property_and_term);
     }
 
+    public void email_text_terms_disjunction() throws GLib.Error {
+        var multiple_all = new_search_query(
+            {
+                new Geary.SearchQuery.EmailTextTerm.disjunction(
+                    ALL, EXACT, new Gee.ArrayList<string>.wrap({ "foo", "bar" })
+                )
+            },
+            "(foo|bar)"
+        );
+        assert_queries(multiple_all);
+
+        var multiple_subject = new_search_query(
+            {
+                new Geary.SearchQuery.EmailTextTerm.disjunction(
+                    ALL, EXACT, new Gee.ArrayList<string>.wrap({ "foo", "bar" })
+                )
+            },
+            "subject:(foo|bar)"
+        );
+        assert_queries(multiple_subject);
+    }
+
     public void email_flag_terms() throws GLib.Error {
         var unread = new_search_query(
             { new Geary.SearchQuery.EmailFlagTerm(Geary.EmailFlags.UNREAD)},
@@ -175,11 +197,26 @@ public class Geary.FtsSearchQueryTest : TestCase {
         assert_queries(flagged);
     }
 
-    public void excluded_folders() throws GLib.Error {
-        var query = new_search_query(
-            { new Geary.SearchQuery.EmailTextTerm(ALL, EXACT, "test")},
-            "test"
+    private FtsSearchQuery new_search_query(Geary.SearchQuery.Term[] ops,
+                                            string raw)
+        throws GLib.Error {
+        return new FtsSearchQuery(
+            new Gee.ArrayList<Geary.SearchQuery.Term>.wrap(ops),
+            raw,
+            this.stemmer
         );
+    }
+
+    private void assert_queries(FtsSearchQuery query) throws GLib.Error {
+        var search = query.get_search_query(
+            this.account.db.get_primary_connection(),
+            null,
+            null,
+            false,
+            10,
+            0
+        );
+        search.exec(null);
 
         var search_with_excluded_ids = query.get_search_query(
             this.account.db.get_primary_connection(),
@@ -210,28 +247,6 @@ public class Geary.FtsSearchQueryTest : TestCase {
             0
         );
         search_with_both.exec(null);
-    }
-
-    private FtsSearchQuery new_search_query(Geary.SearchQuery.Term[] ops,
-                                            string raw)
-        throws GLib.Error {
-        return new FtsSearchQuery(
-            new Gee.ArrayList<Geary.SearchQuery.Term>.wrap(ops),
-            raw,
-            this.stemmer
-        );
-    }
-
-    private void assert_queries(FtsSearchQuery query) throws GLib.Error {
-        var search = query.get_search_query(
-            this.account.db.get_primary_connection(),
-            null,
-            null,
-            false,
-            10,
-            0
-        );
-        search.exec(null);
 
         var match = query.get_match_query(
             this.account.db.get_primary_connection(),

@@ -324,23 +324,33 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
             break;
         }
 
+        sql.append(" (");
+
         var values = text.terms;
         var stemmed_values = text.get_data<Gee.List<string?>>(
             EMAIL_TEXT_STEMMED_TERMS
         );
+        var is_first_disjunct = true;
         for (int i = 0; i < values.size; i++) {
+            if (!is_first_disjunct) {
+                sql.append(" OR");
+            }
             if (target != "") {
-                sql.append_printf(" ({%s} :", target);
+                sql.append_printf("{%s} :", target);
             }
             if (stemmed_values != null && stemmed_values[i] != null) {
-                sql.append(" \"' || ? || '\"* OR \"' || ? || '\"*");
-            } else {
+                // Original is not a prefix match, stemmed is
+                sql.append(" \"' || ? || '\" OR \"' || ? || '\"*");
+            } else if (text.matching_strategy != EXACT) {
+                // A regular match, do a suffix match
                 sql.append(" \"' || ? || '\"*");
+            } else {
+                // EXACT is not a prefix match
+                sql.append(" \"' || ? || '\"");
             }
-            if (target != "") {
-                sql.append_c(')');
-            }
+            is_first_disjunct = false;
         }
+        sql.append_c(')');
     }
 
     private int sql_bind_term_conditions(Db.Statement sql,
