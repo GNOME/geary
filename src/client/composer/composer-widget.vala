@@ -439,6 +439,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         this.header = new Headerbar(config);
         this.header.expand_composer.connect(on_expand_compact_headers);
+        // Hide until we know we can save drafts
+        this.header.show_save_and_close = false;
 
         // Setup drag 'n drop
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
@@ -971,7 +973,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.header.set_sensitive(enabled);
 
         if (enabled) {
-            this.open_draft_manager.begin(this.saved_id, null);
+            var current_account = this.sender_context.account;
+            this.open_draft_manager.begin(
+                this.saved_id,
+                (obj, res) => {
+                    try {
+                        this.open_draft_manager.end(res);
+                    } catch (GLib.Error error) {
+                        this.application.report_problem(
+                            new Geary.AccountProblemReport(
+                                current_account.information, error
+                            )
+                        );
+                    }
+                }
+            );
         } else {
             if (this.container != null) {
                 this.container.close();
@@ -980,11 +996,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    /** Overrides the draft folder as a destination for saving. */
-    public async void set_save_to_override(Geary.Folder? save_to)
-        throws GLib.Error {
+    /** Overrides the folder used for saving drafts. */
+    public void set_save_to_override(Geary.Folder? save_to) {
         this.save_to = save_to;
-        yield reopen_draft_manager();
+        this.reopen_draft_manager.begin();
     }
 
     /**
@@ -1418,11 +1433,21 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             is_body_complete
         );
 
-        try {
-            yield open_draft_manager(this.saved_id);
-        } catch (Error e) {
-            debug("Could not open draft manager: %s", e.message);
-        }
+        var current_account = this.sender_context.account;
+        this.open_draft_manager.begin(
+            this.saved_id,
+            (obj, res) => {
+                try {
+                    this.open_draft_manager.end(res);
+                } catch (GLib.Error error) {
+                    this.application.report_problem(
+                        new Geary.AccountProblemReport(
+                            current_account.information, error
+                        )
+                    );
+                }
+            }
+        );
     }
 
     private async bool should_send() {
@@ -1496,6 +1521,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /**
      * Creates and opens the composer's draft manager.
+     *
+     * Note that since the draft manager may block until a remote
+     * connection is open, this method may likewise do so. Hence this
+     * method typically needs to be called from the main loop as a
+     * background async task using the `begin` async call form.
      */
     private async void open_draft_manager(Geary.EmailIdentifier? editing_draft_id)
         throws GLib.Error {
@@ -1528,6 +1558,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             : new Geary.EmailFlags()
         );
 
+        bool opened = false;
         try {
             var new_manager = yield new Geary.App.DraftManager(
                 this.sender_context.account,
@@ -1543,7 +1574,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             new_manager.fatal
                 .connect(on_draft_manager_fatal);
             this.draft_manager = new_manager;
+            opened = true;
             debug("Draft manager opened");
+        } catch (Geary.EngineError.UNSUPPORTED err) {
+            debug(
+                "Drafts folder unsupported, no drafts will be saved: %s",
+                err.message
+            );
         } catch (GLib.Error err) {
             this.header.show_save_and_close = false;
             throw err;
@@ -1551,20 +1588,30 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.draft_manager_opening = null;
         }
 
-        update_draft_state();
-        this.header.show_save_and_close = true;
+        this.header.show_save_and_close = opened;
+        if (opened) {
+            update_draft_state();
+        }
     }
 
     /**
      * Closes current draft manager, if any, then opens a new one.
      */
-    private async void reopen_draft_manager()
-        throws GLib.Error {
+    private async void reopen_draft_manager() {
         // Discard the draft, if any, since it may be on a different
         // account
-        yield close_draft_manager(DISCARD);
-        yield open_draft_manager(null);
-        yield save_draft();
+        var current_account = this.sender_context.account;
+        try {
+            yield close_draft_manager(DISCARD);
+            yield open_draft_manager(null);
+            yield save_draft();
+        } catch (GLib.Error error) {
+            this.application.report_problem(
+                new Geary.AccountProblemReport(
+                    current_account.information, error
+                )
+            );
+        }
     }
 
     private async void close_draft_manager(DraftPolicy draft_policy)
@@ -2240,20 +2287,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.update_signature.begin(null);
                 load_entry_completions();
 
-                var current_account = this.sender_context.account;
-                this.reopen_draft_manager.begin(
-                    (obj, res) => {
-                        try {
-                            this.reopen_draft_manager.end(res);
-                        } catch (GLib.Error error) {
-                            this.application.report_problem(
-                                new Geary.AccountProblemReport(
-                                    current_account.information, error
-                                )
-                            );
-                        }
-                    }
-                );
+                this.reopen_draft_manager.begin();
             }
         }
     }

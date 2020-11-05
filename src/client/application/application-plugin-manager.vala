@@ -402,19 +402,7 @@ public class Application.PluginManager : GLib.Object {
         public void save_to_folder(Plugin.Folder? location) {
             var engine = this.application.globals.folders.to_engine_folder(location);
             if (engine != null && engine.account == this.backing.sender_context.account) {
-                this.backing.set_save_to_override.begin(
-                    engine,
-                    (obj, res) => {
-                        try {
-                            this.backing.set_save_to_override.end(res);
-                        } catch (GLib.Error err) {
-                            debug(
-                                "Error setting folder for saving: %s",
-                                err.message
-                            );
-                        }
-                    }
-                );
+                this.backing.set_save_to_override(engine);
             }
         }
 
