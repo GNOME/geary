@@ -26,7 +26,7 @@
  * @see Account.new_search_query
  * @see Account.local_search_async
  * @see Account.get_search_matches_async
- * @see App.SearchFolder.search
+ * @see App.SearchFolder.update_query
  */
 
 public abstract class Geary.SearchQuery : BaseObject {
