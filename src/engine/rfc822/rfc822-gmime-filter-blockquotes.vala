@@ -59,7 +59,7 @@ private class Geary.RFC822.FilterBlockquotes : GMime.Filter {
         if (!initial_element) {
             // We set the style explicitly so it will be set in HTML emails.  We also give it a
             // class so users can customize the style in the viewer.
-            insert_string("<div class=\"plaintext\" style=\"white-space: pre-wrap;\">", ref out_index);
+            insert_string("<div class=\"plaintext\" style=\"white-space: break-spaces;\">", ref out_index);
             initial_element = true;
         }
 

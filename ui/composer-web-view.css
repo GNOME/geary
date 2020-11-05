@@ -60,6 +60,6 @@ blockquote {
 }
 
 pre {
-  white-space: pre-wrap;
+  white-space: break-spaces;
   margin: 0;
 }
