@@ -968,7 +968,7 @@ public class Application.MainWindow :
         return closed;
     }
 
-    internal async void start_search(string query_text, bool is_interactive) {
+    internal void start_search(string query_text, bool is_interactive) {
         var context = get_selected_account_context();
         if (context != null) {
             // Stop any search in progress
@@ -986,10 +986,9 @@ public class Application.MainWindow :
                     this.application.config.get_search_strategy(),
                     context.account.information
                 );
-                var query = yield context.account.new_search_query(
+                var query = context.account.new_search_query(
                     expr_factory.parse_query(query_text),
-                    query_text,
-                    cancellable
+                    query_text
                 );
                 this.folder_list.set_search(
                     this.application.engine, context.search
@@ -2219,7 +2218,7 @@ public class Application.MainWindow :
         if (Geary.String.is_empty_or_whitespace(text)) {
             stop_search(true);
         } else {
-            this.start_search.begin(text, true);
+            this.start_search(text, true);
         }
     }
 

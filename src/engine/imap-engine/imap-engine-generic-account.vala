@@ -575,10 +575,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async SearchQuery new_search_query(
+    public override SearchQuery new_search_query(
         Gee.List<SearchQuery.Term> expression,
-        string text,
-        GLib.Cancellable? cancellable
+        string text
     ) throws GLib.Error {
         return new FtsSearchQuery(expression, text, this.stemmer);
     }

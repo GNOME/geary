@@ -514,10 +514,9 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     /**
      * Create a new search query for this account.
      */
-    public abstract async SearchQuery new_search_query(
+    public abstract SearchQuery new_search_query(
         Gee.List<SearchQuery.Term> expression,
-        string text,
-        GLib.Cancellable? cancellable
+        string text
     ) throws GLib.Error;
 
     /**
