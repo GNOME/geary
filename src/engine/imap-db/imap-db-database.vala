@@ -7,6 +7,7 @@
 
 [CCode (cname = "g_utf8_collate_key")]
 extern string utf8_collate_key(string data, ssize_t len);
+extern int sqlite3_register_fts5_tokeniser(Sqlite.Database db);
 extern int sqlite3_register_fts5_matches(Sqlite.Database db);
 extern int sqlite3_register_legacy_tokenizer(Sqlite.Database db);
 
@@ -630,8 +631,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             sqlite3_register_legacy_tokenizer(cx.db);
         }
 
-        // Register custom `geary_matches()` FTS5 function to obtain
-        // matching tokens from FTS queries.
+        // Register custom FTS5 tokeniser that uses ICU to correctly
+        // segment at both Latin and on-Latin (e.g. CJK, Thai) word
+        // boundaries.
+        sqlite3_register_fts5_tokeniser(cx.db);
+
+        // Register custom `geary_matches()` FTS5 function that
+        // obtains matching tokens from FTS queries.
         sqlite3_register_fts5_matches(cx.db);
 
         if (cx.db.create_function(

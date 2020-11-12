@@ -14,6 +14,6 @@ CREATE VIRTUAL TABLE MessageSearchTable USING fts5(
     bcc,
     flags,
 
-    tokenize="unicode61 remove_diacritics 2",
+    tokenize="geary_tokeniser",
     prefix="2,4,6,8,10"
 )

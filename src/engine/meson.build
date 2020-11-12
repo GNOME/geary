@@ -178,6 +178,7 @@ engine_vala_sources = files(
   'imap-db/imap-db-email-identifier.vala',
   'imap-db/imap-db-folder.vala',
   'imap-db/imap-db-fts5-matches.c',
+  'imap-db/imap-db-fts5-tokeniser.c',
   'imap-db/imap-db-gc.vala',
   'imap-db/imap-db-message-row.vala',
   'imap-db/imap-db-sqlite.c',
@@ -324,6 +325,7 @@ engine_dependencies = [
   gio,
   glib,
   gmime,
+  icu,
   libmath,
   libstemmer,
   libxml,
@@ -337,10 +339,17 @@ endif
 
 engine_build_dir = meson.current_build_dir()
 
+engine_c_args = geary_c_args
+engine_vala_args = geary_vala_args
+
+# Suppress SQLite loadable module init code
+engine_c_args += [
+  '-D', 'SQLITE_CORE',
+]
+
 # Generate internal VAPI for unit testing. See Meson issue
 # https://github.com/mesonbuild/meson/issues/1781 for official
 # internal VAPI support.
-engine_vala_args = geary_vala_args
 engine_vala_args += [
   '--internal-header=@0@/geary-engine-internal.h'.format(engine_build_dir),
   '--internal-vapi=@0@/geary-engine-internal.vapi'.format(engine_build_dir)
@@ -364,7 +373,7 @@ engine_lib = static_library('geary-engine',
   dependencies: engine_dependencies,
   include_directories: config_h_dir,
   vala_args: engine_vala_args,
-  c_args: geary_c_args,
+  c_args: engine_c_args,
 )
 
 # Dummy target to tell Meson about the internal VAPI given the
@@ -401,4 +410,15 @@ engine_internal_dep = declare_dependency(
   ],
   include_directories: include_directories('.'),
   sources: engine_internal_header_fixup
+)
+
+# Compile a loadable library containing the custom tokeniser so SQLite
+# command line app can still be used.
+tokeniser_lib = shared_library('geary-tokeniser',
+  files('imap-db/imap-db-fts5-tokeniser.c'),
+  dependencies: [ glib, icu, sqlite ],
+  c_args: [
+    # Enable GLib structured logging
+    '-DG_LOG_USE_STRUCTURED',
+  ],
 )

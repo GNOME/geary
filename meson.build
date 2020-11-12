@@ -85,6 +85,7 @@ goa = dependency('goa-1.0')
 gsound = dependency('gsound')
 gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
+icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
@@ -127,6 +128,15 @@ libstemmer = declare_dependency(
   dependencies: [
     valac.find_library('libstemmer', dirs: [vapi_dir]),
     libstemmer_dep,
+  ],
+)
+
+# Faux ICU dependency to prevent ICU being passed to valac as a
+# package by meson
+icu = declare_dependency(
+  dependencies: [
+    cc.find_library('icuuc'),
+    cc.find_library('icudata'),
   ],
 )
 
