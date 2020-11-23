@@ -72,8 +72,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     private bool mask_entry_selected_signal = false;
     private weak EntryWrapper? selected_wrapper = null;
     private Gtk.Menu? default_context_menu = null;
-    private bool expander_called_manually = false;
-    private int expander_special_count = 0;
     private bool is_internal_drag_in_progress = false;
     private Sidebar.Entry? internal_drag_source_entry = null;
     private Gtk.TreeRowReference? old_path_ref = null;
@@ -129,9 +127,6 @@ public class Sidebar.Tree : Gtk.TreeView {
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.BROWSE);
         selection.set_select_function(on_selection);
-
-        test_expand_row.connect(on_toggle_row);
-        test_collapse_row.connect(on_toggle_row);
 
         // It Would Be Nice if the target entries and actions were gleaned by querying each
         // Sidebar.Entry as it was added, but that's a tad too complicated for our needs
@@ -358,7 +353,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
 
     public void toggle_branch_expansion(Gtk.TreePath path, bool expand_all) {
-        expander_called_manually = true;
         if (is_row_expanded(path))
             collapse_row(path);
         else
@@ -366,7 +360,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
 
     public bool expand_to_entry(Sidebar.Entry entry) {
-        expander_called_manually = true;
         EntryWrapper? wrapper = get_wrapper(entry);
         if (wrapper == null)
             return false;
@@ -377,7 +370,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
 
     public void expand_to_first_child(Sidebar.Entry entry) {
-        expander_called_manually = true;
         EntryWrapper? wrapper = get_wrapper(entry);
         if (wrapper == null)
             return;
@@ -806,42 +798,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     private bool popup_default_context_menu(Gdk.EventButton event) {
         if (default_context_menu != null)
             default_context_menu.popup_at_pointer(event);
-        return true;
-    }
-
-    public bool on_toggle_row(Gtk.TreeIter iter, Gtk.TreePath path) {
-        // Determine whether to allow the row to toggle
-        EntryWrapper? wrapper = get_wrapper_at_iter(iter);
-        if (wrapper == null) {
-            return false; // don't affect things
-        }
-
-        // Most of the time, only allow manual toggles
-        bool should_allow_toggle = expander_called_manually;
-
-        // Cancel out the manual flag
-        expander_called_manually = false;
-
-        // If we are an expanded parent entry with content
-        if (is_row_expanded(path) && store.iter_has_child(iter) && wrapper.entry is Sidebar.SelectableEntry) {
-            // We are taking a special action
-            expander_special_count++;
-            if (expander_special_count == 1) {
-                // Workaround that prevents arrows from double-toggling
-                return true;
-            } else {
-                // Toggle only if non-manual, as opposed to the usual behavior
-                should_allow_toggle = !should_allow_toggle;
-            }
-        } else {
-            // Reset the special behavior count
-            expander_special_count = 0;
-        }
-
-        if (should_allow_toggle) {
-            return false;
-        }
-        // Prevent branch expansion toggle
         return true;
     }
 
