@@ -62,6 +62,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     );
 
     private Gtk.IconTheme? icon_theme;
+    private Gtk.TreeViewColumn text_column;
     private Gtk.CellRendererText text_renderer;
     private unowned ExternalDropHandler drop_handler;
     private Gtk.Entry? text_entry = null;
@@ -94,7 +95,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         icon_theme = theme;
         get_style_context().add_class("sidebar");
 
-        Gtk.TreeViewColumn text_column = new Gtk.TreeViewColumn();
+        text_column = new Gtk.TreeViewColumn();
         text_column.set_expand(true);
         Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
         text_column.pack_start(icon_renderer, false);
@@ -109,16 +110,23 @@ public class Sidebar.Tree : Gtk.TreeView {
         append_column(text_column);
 
         // Count column.
-        Gtk.TreeViewColumn count_column = new Gtk.TreeViewColumn();
+        Gtk.TreeViewColumn end_column = new Gtk.TreeViewColumn();
         SidebarCountCellRenderer unread_renderer = new SidebarCountCellRenderer();
-        count_column.pack_start(unread_renderer, false);
-        count_column.add_attribute(unread_renderer, "counter", Columns.COUNTER);
-        append_column(count_column);
+        end_column.set_cell_data_func(unread_renderer, counter_renderer_function);
+        end_column.pack_start(unread_renderer, false);
+        end_column.add_attribute(unread_renderer, "counter", Columns.COUNTER);
+
+        // Expander arrows.
+        SidebarExpanderRenderer expander_renderer = new SidebarExpanderRenderer(this);
+        expander_renderer.toggle.connect(toggle_branch_expansion);
+        end_column.set_cell_data_func(expander_renderer, expander_renderer_function);
+        end_column.pack_start(expander_renderer, false);
+        append_column(end_column);
 
         set_headers_visible(false);
         set_enable_search(false);
         set_search_column(-1);
-        set_show_expanders(true);
+        set_show_expanders(false);
         set_reorderable(false);
         set_enable_tree_lines(false);
         set_grid_lines(Gtk.TreeViewGridLines.NONE);
@@ -163,12 +171,17 @@ public class Sidebar.Tree : Gtk.TreeView {
         renderer.visible = !(wrapper.entry is Sidebar.Header);
     }
 
+    public void expander_renderer_function(Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        renderer.visible = renderer.is_expander;
+    }
+
     public void counter_renderer_function(Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
         EntryWrapper? wrapper = get_wrapper_at_iter(iter);
         if (wrapper == null) {
             return;
         }
-        renderer.visible = !(wrapper.entry is Sidebar.Header);
+        var counter_renderer = renderer as SidebarCountCellRenderer;
+        renderer.visible = counter_renderer != null && counter_renderer.counter > 0;
     }
 
     private void on_drag_begin(Gdk.DragContext ctx) {
@@ -296,11 +309,16 @@ public class Sidebar.Tree : Gtk.TreeView {
     }
 
     public override void row_activated(Gtk.TreePath path, Gtk.TreeViewColumn column) {
+      if (column != text_column)
+        return;
+
       EntryWrapper? wrapper = get_wrapper_at_path(path);
       if (wrapper != null) {
           Sidebar.SelectableEntry? selectable = wrapper.entry as Sidebar.SelectableEntry;
           if (selectable != null)
               entry_activated(selectable);
+          else
+              toggle_branch_expansion (path);
       }
     }
 
@@ -352,11 +370,11 @@ public class Sidebar.Tree : Gtk.TreeView {
         }
     }
 
-    public void toggle_branch_expansion(Gtk.TreePath path, bool expand_all) {
+    private void toggle_branch_expansion(Gtk.TreePath path) {
         if (is_row_expanded(path))
             collapse_row(path);
         else
-            expand_row(path, expand_all);
+            expand_row(path, false);
     }
 
     public bool expand_to_entry(Sidebar.Entry entry) {
@@ -823,13 +841,6 @@ public class Sidebar.Tree : Gtk.TreeView {
                 return base.button_press_event(event);
             }
 
-            // Enable single click to toggle tree entries (bug 4985)
-            if (wrapper.entry is Sidebar.ExpandableEntry
-                || wrapper.entry is Sidebar.InternalDropTargetEntry) {
-                // all labels are InternalDropTargetEntries
-                toggle_branch_expansion(path, false);
-            }
-
             // Is this a click on an already-highlighted tree item?
             if ((old_path_ref != null) && (old_path_ref.get_path() != null)
                 && (old_path_ref.get_path().compare(path) == 0)) {
@@ -872,7 +883,7 @@ public class Sidebar.Tree : Gtk.TreeView {
             case "KP_Enter":
                 Gtk.TreePath? path = get_current_path();
                 if (path != null)
-                    toggle_branch_expansion(path, false);
+                    toggle_branch_expansion(path);
 
                 return true;
 

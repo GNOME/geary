@@ -137,6 +137,7 @@ client_vala_sources = files(
   'sidebar/sidebar-common.vala',
   'sidebar/sidebar-count-cell-renderer.vala',
   'sidebar/sidebar-entry.vala',
+  'sidebar/sidebar-expander-renderer.vala',
   'sidebar/sidebar-tree.vala',
 
   'util/util-avatar.vala',

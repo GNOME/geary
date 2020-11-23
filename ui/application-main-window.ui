@@ -52,7 +52,6 @@
                             <property name="shadow_type">in</property>
                             <child>
                               <object class="GtkScrolledWindow" id="folder_list_scrolled">
-                                <property name="width_request">100</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hscrollbar_policy">never</property>
