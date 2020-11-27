@@ -257,7 +257,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 // too many email addresses to be shown by default in
                 // an email's header. The string substitution is the
                 // number of extra email to be shown.
-                _("%d more…").printf(this.children - SHORT_RESULTS)
+                ngettext("%d more…", "%d more…", this.children - SHORT_RESULTS).printf(this.children - SHORT_RESULTS)
             );
         }
 
