@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-10-12 10:41+0000\n"
-"PO-Revision-Date: 2020-10-13 16:47+0300\n"
+"POT-Creation-Date: 2020-11-22 08:43+0000\n"
+"PO-Revision-Date: 2020-11-29 02:55+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -792,130 +792,130 @@ msgid "Visit the Geary web site"
 msgstr "Geary web sitesini ziyaret et"
 
 #. / Command line option
-#: src/client/application/application-client.vala:97
+#: src/client/application/application-client.vala:102
 msgid "Print debug logging"
 msgstr "Hata ayıklama günlüğünü yazdır"
 
 #. / Command line option
-#: src/client/application/application-client.vala:100
+#: src/client/application/application-client.vala:105
 msgid "Start with the main window hidden (deprecated)"
 msgstr "Ana pencere gizlenmiş olarak başlat (terk edildi)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:103
+#: src/client/application/application-client.vala:108
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Web görünümünde WebKitGTK İnceleyicisiʼni etkinleştir"
 
 #. / Command line option
-#: src/client/application/application-client.vala:106
+#: src/client/application/application-client.vala:111
 msgid "Log conversation monitoring"
 msgstr "Konuşma gözetimini kayda al"
 
 #. / Command line option
-#: src/client/application/application-client.vala:109
+#: src/client/application/application-client.vala:114
 msgid "Log IMAP network deserialization"
 msgstr "IMAP ağ serisizleştirmeyi kayda al"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:113
+#: src/client/application/application-client.vala:118
 msgid "Log folder normalization"
 msgstr "Klasör düzgelemeyi kayda al"
 
 #. / Command line option
-#: src/client/application/application-client.vala:116
+#: src/client/application/application-client.vala:121
 msgid "Log IMAP network activity"
 msgstr "IMAP ağ etkinliğini günlükle"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:126
 msgid "Log IMAP replay queue"
 msgstr "IMAP tekrar sırasını kayda al"
 
 #. / Command line option
-#: src/client/application/application-client.vala:124
+#: src/client/application/application-client.vala:129
 msgid "Log SMTP network activity"
 msgstr "SMTP ağ etkinliğini günlükle"
 
 #. / Command line option
-#: src/client/application/application-client.vala:127
+#: src/client/application/application-client.vala:132
 msgid "Log database queries (generates lots of messages)"
 msgstr "Veri tabanı sorgularını kayda al (birçok ileti oluşturur)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:130
+#: src/client/application/application-client.vala:135
 msgid "Perform a graceful quit"
 msgstr "Hoş bir çıkış gerçekleştir"
 
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:137
 msgid "Open a new window"
 msgstr "Yeni pencere aç"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:140
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Tüm imlenmiş TLS sunucu sertifikalarını geçersizleştir"
 
 #. / Command line option
-#: src/client/application/application-client.vala:138
+#: src/client/application/application-client.vala:143
 msgid "Display program version"
 msgstr "Uygulama sürümünü göster"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:262
+#: src/client/application/application-client.vala:275
 msgid "Geary version"
 msgstr "Geary sürümü"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:264
+#: src/client/application/application-client.vala:277
 msgid "Geary revision"
 msgstr "Geary düzeltisi"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:266
+#: src/client/application/application-client.vala:279
 msgid "GTK version"
 msgstr "GTK sürümü"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:273
+#: src/client/application/application-client.vala:286
 msgid "GLib version"
 msgstr "GLib sürümü"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:280
+#: src/client/application/application-client.vala:293
 msgid "WebKitGTK version"
 msgstr "WebKitGTK sürümü"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:287
+#: src/client/application/application-client.vala:300
 msgid "Desktop environment"
 msgstr "Masaüstü ortamı"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:289
+#: src/client/application/application-client.vala:302
 #: src/client/components/components-attachment-pane.vala:91
 msgid "Unknown"
 msgstr "Bilinmiyor"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:306
 msgid "Distribution name"
 msgstr "Dağıtım adı"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:298
+#: src/client/application/application-client.vala:311
 msgid "Distribution release"
 msgstr "Dağıtım sürümü"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:303
+#: src/client/application/application-client.vala:316
 msgid "Installation prefix"
 msgstr "Kurulum ön eki"
 
-#: src/client/application/application-client.vala:559
+#: src/client/application/application-client.vala:573
 #, c-format
 msgid "About %s"
 msgstr "%s hakkında"
@@ -923,7 +923,7 @@ msgstr "%s hakkında"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:563
+#: src/client/application/application-client.vala:577
 msgid "translator-credits"
 msgstr ""
 "Emin Tufan Çetin <etcetin@gmail.com>\n"
@@ -933,36 +933,36 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1045
+#: src/client/application/application-client.vala:1096
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "`--hidden` seçeneği terk edilmiştir ve gelecekte kaldırılacaktır."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1078
+#: src/client/application/application-client.vala:1129
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Tanınmayan program argümanı: “%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:479
+#: src/client/application/application-controller.vala:490
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "%s için e-posta gönderilirken sorun oluştu"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:483
+#: src/client/application/application-controller.vala:494
 msgid "Email will not be sent until re-connected"
 msgstr "Yeniden bağlanana dek e-posta gönderilmeyecek"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:582
+#: src/client/application/application-controller.vala:593
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Konuşma(lar) imlendi"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:588
+#: src/client/application/application-controller.vala:599
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Konuşmaların imi kaldırıldı"
@@ -970,8 +970,8 @@ msgstr[0] "Konuşmaların imi kaldırıldı"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:614
-#: src/client/application/application-controller.vala:698
+#: src/client/application/application-controller.vala:625
+#: src/client/application/application-controller.vala:709
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -982,29 +982,29 @@ msgstr[0] "Konuşma(lar) şuraya taşındı: %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:622
-#: src/client/application/application-controller.vala:644
+#: src/client/application/application-controller.vala:633
+#: src/client/application/application-controller.vala:655
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
 msgstr[0] "Konuşma(lar) şuraya geri yüklendi: %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:665
+#: src/client/application/application-controller.vala:676
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Konuşma(lar) arşivlendi"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:721
+#: src/client/application/application-controller.vala:732
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "İleti(ler) şuraya geri yüklendi: %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:742
+#: src/client/application/application-controller.vala:753
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "İleti(ler) arşivlendi"
@@ -1012,7 +1012,7 @@ msgstr[0] "İleti(ler) arşivlendi"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:777
+#: src/client/application/application-controller.vala:788
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1021,7 +1021,7 @@ msgstr[0] "İleti(ler) şuraya taşındı: %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:805
+#: src/client/application/application-controller.vala:816
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1030,18 +1030,18 @@ msgstr[0] "Konuşma(lar) %s olarak etiketlendi"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:813
+#: src/client/application/application-controller.vala:824
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Konuşma(lar) %s olarak etiketlenmedi"
 
-#: src/client/application/application-controller.vala:1320
+#: src/client/application/application-controller.vala:1331
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "%s için veri tabanı açılamadı"
 
-#: src/client/application/application-controller.vala:1321
+#: src/client/application/application-controller.vala:1332
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1065,20 +1065,20 @@ msgstr ""
 "Veri tabanının yeniden inşa edilmesi tüm yerel e-postaları ve eklerini yok "
 "edecektir.<b>Sizin sunucunuzdaki postalar etkilenmeyecektir.</b>"
 
-#: src/client/application/application-controller.vala:1323
+#: src/client/application/application-controller.vala:1334
 msgid "_Rebuild"
 msgstr "_Yeniden oluştur"
 
-#: src/client/application/application-controller.vala:1323
+#: src/client/application/application-controller.vala:1334
 msgid "E_xit"
 msgstr "Ç_ık"
 
-#: src/client/application/application-controller.vala:1333
+#: src/client/application/application-controller.vala:1344
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "“%s” için veri tabanı yeniden oluşturulamadı"
 
-#: src/client/application/application-controller.vala:1334
+#: src/client/application/application-controller.vala:1345
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1091,34 +1091,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1501
+#: src/client/application/application-controller.vala:1512
 #, c-format
 msgid "Email sent to %s"
 msgstr "Şun(lar)a eposta gönderildi: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2491
+#: src/client/application/application-controller.vala:2502
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Şun(lar)a gidecek eposta iletim sırasında: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2555
+#: src/client/application/application-controller.vala:2566
 #, c-format
 msgid "Email to %s saved"
 msgstr "Şun(lar)a gidecek eposta kaydedildi: %s"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2570
-#: src/client/application/application-controller.vala:2628
+#: src/client/application/application-controller.vala:2581
+#: src/client/application/application-controller.vala:2639
 msgid "Composer could not be restored"
 msgstr "Oluşturucu kurtarılamadı"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2613
+#: src/client/application/application-controller.vala:2624
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Şun(lar)a gidecek eposta gözden çıkarıldı: %s"
@@ -1230,7 +1230,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1792
+#: src/client/composer/composer-widget.vala:1835
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1604,92 +1604,92 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:865
+#: src/client/composer/composer-widget.vala:867
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Bu iletiyi saklamak mı yoksa gözden çıkarmak mı istersiniz?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:891
+#: src/client/composer/composer-widget.vala:893
 msgid "Do you want to discard this draft message?"
 msgstr "Bu taslak iletiyi gözden çıkarmak istiyor musunuz?"
 
-#: src/client/composer/composer-widget.vala:1448
+#: src/client/composer/composer-widget.vala:1468
 msgid "Send message with an empty subject and body?"
 msgstr "İleti konusu ve gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1450
+#: src/client/composer/composer-widget.vala:1470
 msgid "Send message with an empty subject?"
 msgstr "İleti konusu olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1452
+#: src/client/composer/composer-widget.vala:1472
 msgid "Send message with an empty body?"
 msgstr "İleti, ileti gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1461
+#: src/client/composer/composer-widget.vala:1481
 msgid "Send message without an attachment?"
 msgstr "İleti eki olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1780
+#: src/client/composer/composer-widget.vala:1823
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” gönderim için zaten eklendi."
 
-#: src/client/composer/composer-widget.vala:1812
-#: src/client/composer/composer-widget.vala:1862
+#: src/client/composer/composer-widget.vala:1855
+#: src/client/composer/composer-widget.vala:1905
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” boş bir dosya."
 
-#: src/client/composer/composer-widget.vala:1850
+#: src/client/composer/composer-widget.vala:1893
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” bulunamadı."
 
-#: src/client/composer/composer-widget.vala:1856
+#: src/client/composer/composer-widget.vala:1899
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” bir klasör."
 
-#: src/client/composer/composer-widget.vala:1875
+#: src/client/composer/composer-widget.vala:1918
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” okuma için açılamadı."
 
-#: src/client/composer/composer-widget.vala:1883
+#: src/client/composer/composer-widget.vala:1926
 msgid "Cannot add attachment"
 msgstr "Eklenti eklenemiyor"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:1954
+#: src/client/composer/composer-widget.vala:1997
 msgid "Images"
 msgstr "Resimler"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2018
+#: src/client/composer/composer-widget.vala:2061
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:249 ui/conversation-message.ui:312
+#: src/client/util/util-email.vala:265 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Kime:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2024
+#: src/client/composer/composer-widget.vala:2067
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:254 ui/conversation-message.ui:357
+#: src/client/util/util-email.vala:270 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2030
+#: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2036
+#: src/client/composer/composer-widget.vala:2079
 msgid "Reply-To: "
 msgstr "Şuna Yanıtla: "
 
@@ -1698,7 +1698,7 @@ msgstr "Şuna Yanıtla: "
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2154
+#: src/client/composer/composer-widget.vala:2197
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%2$s aracılığıyla %1$s"
@@ -1769,19 +1769,19 @@ msgstr "Ben"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:537
-#: src/client/util/util-email.vala:240
+#: src/client/util/util-email.vala:256
 msgid "From:"
 msgstr "Gönderen:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
 #: src/client/conversation-viewer/conversation-email.vala:557
-#: src/client/util/util-email.vala:245
+#: src/client/util/util-email.vala:261
 msgid "Date:"
 msgstr "Tarih:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
 #: src/client/conversation-viewer/conversation-email.vala:567
-#: src/client/util/util-email.vala:243
+#: src/client/util/util-email.vala:259
 msgid "Subject:"
 msgstr "Konu:"
 
@@ -1809,64 +1809,64 @@ msgstr "%d diğer…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:529
+#: src/client/conversation-viewer/conversation-message.vala:556
 msgid "No sender"
 msgstr "Gönderen yok"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:920
+#: src/client/conversation-viewer/conversation-message.vala:1049
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1040
+#: src/client/conversation-viewer/conversation-message.vala:1171
 msgid "Image"
 msgstr "Resim"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1305
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Uzaktaki resimler gösterilmiyor"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1307
+#: src/client/conversation-viewer/conversation-message.vala:1444
 msgid "Only show remote images from senders you trust."
 msgstr "Yalnızca güvendiğiniz göndericilerden gelen uzak resimleri göster."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1311
+#: src/client/conversation-viewer/conversation-message.vala:1448
 msgid "Show"
 msgstr "Göster"
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1315
+#: src/client/conversation-viewer/conversation-message.vala:1452
 msgid "Always show from sender"
 msgstr "Gönderenden her zaman göster"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:87
+#: src/client/conversation-viewer/conversation-viewer.vala:95
 msgid "No conversations selected"
 msgstr "Konuşma seçilmedi"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:91
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Listeden bir ileti seçtiğinizde burada gösterilecek"
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:108
 msgid "Multiple conversations selected"
 msgstr "Birden çok konuşma seçildi"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:112
 msgid "Choosing an action will apply to all selected conversations"
 msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır"
 
@@ -1874,20 +1874,20 @@ msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır"
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:113
-#: src/client/conversation-viewer/conversation-viewer.vala:126
+#: src/client/conversation-viewer/conversation-viewer.vala:121
+#: src/client/conversation-viewer/conversation-viewer.vala:134
 msgid "No conversations found"
 msgstr "Konuşma bulunamadı"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:117
+#: src/client/conversation-viewer/conversation-viewer.vala:125
 msgid "This folder does not contain any conversations"
 msgstr "Bu klasör herhangi bir konuşma içermiyor"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:130
+#: src/client/conversation-viewer/conversation-viewer.vala:138
 msgid "Your search returned no results, try refining your search terms"
 msgstr "Aramanız sonuçsuz kaldı, arama terimlerinizi arıtmayı deneyin"
 
@@ -2299,27 +2299,6 @@ msgstr "Dün"
 msgid "%A"
 msgstr "%A"
 
-#. / 12 hours format for datetime that a message being replied
-#. / to was received See
-#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:218
-msgid "%a, %b %-e, %Y at %l:%M %P"
-msgstr "%a, %b %-e, %Y / %l:%M %P"
-
-#. / 24 hours format for the datetime that a message being
-#. / replied to was received See
-#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:224
-msgid "%a, %b %-e, %Y at %H:%M"
-msgstr "%a, %b %-e, %Y / %H:%M"
-
-#. / Format for the datetime that a message being replied to
-#. / was received See
-#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:230
-msgid "%a, %b %-e, %Y at %X"
-msgstr "%a, %b %-e, %Y / %X"
-
 #. Translators: Label used when an email has a missing or
 #. an empty subject
 #: src/client/util/util-email.vala:50
@@ -2344,35 +2323,50 @@ msgid "%s and %d other"
 msgid_plural "%s and %d others"
 msgstr[0] "%s ve %d diğer"
 
+#. / GLib g_date_time_format format string for the date and
+#. / time that a message being replied to was
+#. / received. This should be roughly similar to an RFC
+#. / 822-style date header value with optional additional
+#. / punctuation for readability. Note that this date may
+#. / be sent to someone in a different locale than the
+#. / sender, so should be unambiguous (for example, do not
+#. / use mm/dd/yyyy since it could be confused with
+#. / dd/mm/yyyy) and must include the time zone.
+#: src/client/util/util-email.vala:192
+msgid "%a, %b %-e %Y at %X %Z"
+msgstr "%a, %b %-e %Y %X %Z"
+
 #. / The quoted header for a message being replied to.
-#. / %1$s will be substituted for the date, and %2$s will be substituted for
-#. / the original sender.
-#: src/client/util/util-email.vala:193
+#. / %1$s will be substituted for the date, and %2$s
+#. / will be substituted for the original sender.
+#: src/client/util/util-email.vala:198
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%1$s tarihinde, %2$s yazdı:"
 
-#. / The quoted header for a message being replied to (in case the date is not known).
-#. / %s will be replaced by the original sender.
-#: src/client/util/util-email.vala:200
+#. / The quoted header for a message being replied to
+#. / (in case the date is not known).  %s will be
+#. / replaced by the original sender.
+#: src/client/util/util-email.vala:209
 #, c-format
 msgid "%s wrote:"
 msgstr "%s yazdı:"
 
-#. / The quoted header for a message being replied to (in case the sender is not known).
-#. / %s will be replaced by the original date
-#: src/client/util/util-email.vala:206
+#. / The quoted header for a message being replied to
+#. / (in case the sender is not known).  %s will be
+#. / replaced by the original date
+#: src/client/util/util-email.vala:219
 #, c-format
 msgid "On %s:"
 msgstr "%s tarihinde:"
 
-#: src/client/util/util-email.vala:235
+#: src/client/util/util-email.vala:251
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Yönlendirilen ileti ----------"
 
 #: src/client/util/util-files.vala:16
 msgid "bytes"
-msgstr "byte"
+msgstr "bayt"
 
 #: src/client/util/util-files.vala:19
 msgctxt "Abbreviation for terabyte"
@@ -2661,17 +2655,17 @@ msgstr "Silinen Ögeler"
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
-#: src/engine/rfc822/rfc822-message.vala:528
+#: src/engine/rfc822/rfc822-message.vala:544
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s” için mime türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:539
+#: src/engine/rfc822/rfc822-message.vala:555
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%2$s” üstündeki “%1$s” mime türü için içerik türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:1013
+#: src/engine/rfc822/rfc822-message.vala:1008
 msgid "(no subject)"
 msgstr "(konu yok)"
 
@@ -3638,6 +3632,12 @@ msgstr "_Kimlik Doğrula"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi sürüyor…"
+
+#~ msgid "%a, %b %-e, %Y at %l:%M %P"
+#~ msgstr "%a, %b %-e, %Y / %l:%M %P"
+
+#~ msgid "%a, %b %-e, %Y at %H:%M"
+#~ msgstr "%a, %b %-e, %Y / %H:%M"
 
 #~ msgid "Position of folder list pane"
 #~ msgstr "Klasör listesi bölmesinin konumu"
