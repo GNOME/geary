@@ -6,15 +6,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary gnome-3-38\n"
-"POT-Creation-Date: 2020-11-01 12:18+0000\n"
-"PO-Revision-Date: 2020-11-10 13:25+0700\n"
+"POT-Creation-Date: 2020-11-22 08:43+0000\n"
+"PO-Revision-Date: 2020-12-03 21:55+0700\n"
+"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome-l10n-id@googlegroups.com>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: id\n"
-"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -28,27 +28,24 @@ msgstr "Akun"
 
 #. (itstool) path: section/title
 #: C/accounts.page:13
-#, fuzzy
 msgid "Accounts Editor"
-msgstr "Editor Akun"
+msgstr "Penyunting Akun"
 
 #. (itstool) path: section/p
 #: C/accounts.page:15
-#, fuzzy
 msgid ""
 "Your email accounts can be added, updated, and removed using the "
 "<em>accounts editor</em>. To open it, click Geary’s application menu button "
 "in the main window above the folder list, then click <gui>Accounts</gui> in "
 "the pop-up menu."
 msgstr ""
-"Akun email Anda dapat ditambahkan, diperbarui, dan dihapus menggunakan "
-"<em>editor akun</em>. Untuk membukanya, klik tombol menu aplikasi Geary di "
-"jendela utama di atas daftar folder, lalu <gui>klik Akun</gui> di menu pop-"
-"up."
+"Akun surel Anda dapat ditambahkan, diperbarui, dan dihapus menggunakan "
+"<em>penyunting akun</em>. Untuk membukanya, klik tombol menu aplikasi Geary "
+"di jendela utama di atas daftar folder, lalu klik <gui>Akun</gui> di menu "
+"pop-up."
 
 #. (itstool) path: section/p
 #: C/accounts.page:20
-#, fuzzy
 msgid ""
 "To change the order that accounts are displayed in the folder list, click "
 "and drag the handle for an account in the accounts editor, or focus an "
@@ -56,36 +53,33 @@ msgid ""
 "keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
 "currently selected account."
 msgstr ""
-"Untuk mengubah urutan bahwa akun ditampilkan di daftar folder, klik dan "
-"seret gagang untuk akun di editor akun, atau fokuskan akun dengan <key>Tab</"
-"key>, lalu gunakan <keyseq> <key>Ctrl</key><key>↑ dan</key> </keyseq> "
-"<keyseq> <key>Ctrl</key><key>↓</key> </keyseq> untuk memposisikan ulang akun "
+"Untuk mengubah urutan menampilkan akun di daftar folder, klik dan seret "
+"gagang untuk akun di penyunting akun, atau fokuskan akun dengan <key>Tab</"
+"key>, lalu gunakan <keyseq><key>Ctrl</key><key>↑</key></keyseq> dan "
+"<keyseq><key>Ctrl</key><key>↓</key></keyseq> untuk memposisikan ulang akun "
 "yang saat ini dipilih."
 
 #. (itstool) path: section/title
 #: C/accounts.page:29
-#, fuzzy
 msgid "Adding accounts"
 msgstr "Menambahkan akun"
 
 #. (itstool) path: section/p
 #: C/accounts.page:31
-#, fuzzy
 msgid ""
 "Geary will automatically use any email accounts you have added via the "
 "<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
 "have any accounts added to <app>Online Accounts</app>, you will be prompted "
 "to add an account the first time you run Geary."
 msgstr ""
-"Geary akan secara otomatis menggunakan akun email apa pun yang telah Anda "
-"tambahkan melalui panel <app>Akun Online</app> pengaturan <app>GNOME</app>. "
-"Jika Anda tidak memiliki akun apa pun yang ditambahkan <app>ke Akun Online,</"
-"app>Anda akan diminta untuk menambahkan akun saat pertama kali Anda "
-"menjalankan Geary."
+"Geary akan secara otomatis menggunakan akun surel apa pun yang telah Anda "
+"tambahkan melalui panel <app>Akun Daring</app> dari <app>Pengaturan GNOME</"
+"app>. Jika Anda tidak memiliki akun apa pun yang ditambahkan ke <app>Akun "
+"Daring</app>, Anda akan diminta untuk menambahkan akun saat pertama kali "
+"Anda menjalankan Geary."
 
 #. (itstool) path: section/p
 #: C/accounts.page:37
-#, fuzzy
 msgid ""
 "To add additional accounts, open the accounts editor, then choose the "
 "appropriate email provider from the list at the bottom of the window. For "
@@ -95,50 +89,47 @@ msgid ""
 "Geary. Once entered, click <gui>Create</gui> and the account information "
 "will be checked and then added."
 msgstr ""
-"Untuk menambahkan akun tambahan, buka editor akun, lalu pilih penyedia email "
-"yang sesuai dari daftar di bagian bawah jendela. Untuk penyedia yang "
-"didukung <app>oleh Akun Online</app>, Pengaturan <app>GNOME</app> akan "
+"Untuk menambahkan akun tambahan, buka penyunting akun, lalu pilih penyedia "
+"surel yang sesuai dari daftar di bagian bawah jendela. Untuk penyedia yang "
+"didukung oleh <app>Akun Daring</app>, <app>Pengaturan GNOME</app> akan "
 "dibuka dan Anda akan dimintai informasi akun Anda di sana. Untuk penyedia "
-"email lain, Anda akan dimintai informasi akun Anda oleh Geary. Setelah "
-"dimasukkan, <gui>klik Buat</gui> dan informasi akun akan diperiksa lalu "
+"surel lain, Anda akan dimintai informasi akun Anda oleh Geary. Setelah "
+"dimasukkan, klik <gui>Buat</gui> dan informasi akun akan diperiksa lalu "
 "ditambahkan."
 
 #. (itstool) path: section/title
 #: C/accounts.page:48
-#, fuzzy
 msgid "Updating existing accounts"
 msgstr "Memperbarui akun yang sudah ada"
 
 #. (itstool) path: section/p
 #: C/accounts.page:50
-#, fuzzy
 msgid ""
 "To update existing accounts, open the accounts editor and choose the account "
 "you wish to update. Geary will display settings for the account. From there, "
 "you can add and remove additional sender email addresses, edit your email "
 "signature, and various other settings."
 msgstr ""
-"Untuk memperbarui akun yang sudah ada, buka editor akun dan pilih akun yang "
-"ingin Anda perbarui. Geary akan menampilkan pengaturan untuk akun tersebut. "
-"Dari sana, Anda dapat menambahkan dan menghapus alamat email pengirim "
-"tambahan, mengedit tanda tangan email Anda, dan berbagai pengaturan lainnya."
+"Untuk memperbarui akun yang sudah ada, buka penyunting akun dan pilih akun "
+"yang ingin Anda perbarui. Geary akan menampilkan pengaturan untuk akun "
+"tersebut. Dari sana, Anda dapat menambahkan dan menghapus alamat surel "
+"pengirim tambahan, menyunting tanda tangan surel Anda, dan berbagai "
+"pengaturan lainnya."
 
 #. (itstool) path: section/p
 #: C/accounts.page:56
-#, fuzzy
 msgid ""
 "The <gui>Download mail</gui> setting allows you to configure how much mail "
 "Geary will download and store locally. Geary can only use locally available "
 "mail when displaying and searching for conversations."
 msgstr ""
-"Pengaturan <gui>Unduh email</gui> memungkinkan Anda untuk mengonfigurasi "
-"berapa banyak email yang akan diunduh dan disimpan Geary secara lokal. Geary "
-"hanya dapat menggunakan email yang tersedia secara lokal saat menampilkan "
+"Pengaturan <gui>Unduh surat</gui> memungkinkan Anda untuk mengonfigurasi "
+"berapa banyak surel yang akan diunduh dan disimpan Geary secara lokal. Geary "
+"hanya dapat menggunakan surat yang tersedia secara lokal saat menampilkan "
 "dan mencari percakapan."
 
 #. (itstool) path: section/p
 #: C/accounts.page:61
-#, fuzzy
 msgid ""
 "To edit the server settings for the account, scroll to the bottom of the "
 "window and click <gui>Server Settings</gui>. The server settings will be "
@@ -148,64 +139,60 @@ msgid ""
 "Settings</app> cannot have their server name, security, login, or password "
 "settings changed."
 msgstr ""
-"Untuk mengedit pengaturan server untuk akun, gulir ke bagian bawah jendela "
-"dan klik <gui>Pengaturan Server.</gui> Setelan peladen akan ditampilkan dan "
-"Anda bisa mengklik untuk mengeditnya. Setelah selesai, klik <gui>Terapkan</"
-"gui> dan Geary akan memeriksa pengaturan, lalu perbarui akun. Perhatikan "
-"bahwa akun yang ditambahkan melalui panel <app>Akun Online pengaturan</app> "
-"<app>GNOME tidak dapat</app> mengubah nama server, keamanan, login, atau "
-"kata sandi mereka."
+"Untuk menyunting pengaturan server bagi akun, gulir ke bagian bawah jendela "
+"dan klik <gui>Pengaturan Server</gui>. Setelan server akan ditampilkan dan "
+"Anda bisa mengklik untuk menyuntingnya. Setelah selesai, klik <gui>Terapkan</"
+"gui> dan Geary akan memeriksa pengaturan, lalu memperbarui akun. Perhatikan "
+"bahwa akun yang ditambahkan melalui panel <app>Akun Daring</app> dari "
+"<app>Pengaturan GNOME</app> tidak dapat mengubah nama server, keamanan, "
+"login, atau kata sandi mereka."
 
 #. (itstool) path: section/p
 #: C/accounts.page:70
-#, fuzzy
 msgid ""
 "The <gui>Save draft email on server</gui> checkbox controls whether the "
 "composer will save copies of email messages being written in the "
 "<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
 "messages when closing the composer."
 msgstr ""
-"Kotak <gui>centang Simpan draf email</gui> di server mengontrol apakah "
-"komposer akan menyimpan salinan pesan email yang sedang ditulis di folder "
-"Draf. <gui>Drafts</gui> Jika tidak dipilih, Anda tidak akan dapat menyimpan "
-"pesan draf saat menutup komposer."
+"Kotak centang <gui>Simpan draf surel di server</gui> mengontrol apakah "
+"komposer akan menyimpan salinan pesan surel yang sedang ditulis di folder "
+"<gui>Drafts</gui>. Jika tidak dipilih, Anda tidak akan dapat menyimpan pesan "
+"draf saat menutup komposer."
 
 #. (itstool) path: section/p
 #: C/accounts.page:75
-#, fuzzy
 msgid ""
 "The <gui>Save sent email on server</gui> checkbox controls whether Geary "
 "will save copies of email that have been sent to the <gui>Sent</gui> folder. "
 "If de-selected, you will no be able to see any email messages you have sent, "
 "unless your server automatically saves them for you."
 msgstr ""
-"Kotak <gui>centang Simpan email terkirim</gui> di server mengontrol apakah "
-"Geary akan menyimpan salinan email yang telah dikirim ke folder "
-"<gui>Terkirim.</gui> Jika tidak dipilih, Anda tidak akan dapat melihat pesan "
-"email apa pun yang telah Anda kirim, kecuali server Anda secara otomatis "
-"menyimpannya untuk Anda."
+"Kotak centang <gui>Simpan surel terkirim di server</gui> mengontrol apakah "
+"Geary akan menyimpan salinan surel yang telah dikirim ke folder <gui>Sent</"
+"gui>. Jika tidak dipilih, Anda tidak akan dapat melihat pesan surel apa pun "
+"yang telah Anda kirim, kecuali server Anda secara otomatis menyimpannya "
+"untuk Anda."
 
 #. (itstool) path: section/title
 #: C/accounts.page:83
-#, fuzzy
 msgid "Removing accounts"
 msgstr "Menghapus akun"
 
 #. (itstool) path: section/p
 #: C/accounts.page:85
-#, fuzzy
 msgid ""
 "Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
 "Settings</app> must also be removed from there. To do so, open <app>Online "
 "Accounts</app>, select the account, and click <gui>Remove</gui>."
 msgstr ""
-"Akun yang ditambahkan melalui panel <app>Akun Online</app> Pengaturan "
-"<app>GNOME juga</app> harus dihapus dari sana. Untuk melakukannya, buka "
-"<app>Akun Online</app>, pilih akun, dan klik <gui>Hapus.</gui>"
+"Akun yang ditambahkan melalui panel <app>Akun Daring</app> dari "
+"<app>Pengaturan GNOME</app> juga harus dihapus dari sana. Untuk "
+"melakukannya, buka <app>Akun Daring</app>, pilih akun, dan klik <gui>Hapus</"
+"gui>."
 
 #. (itstool) path: section/p
 #: C/accounts.page:90
-#, fuzzy
 msgid ""
 "To remove an account added via Geary, open the accounts editor and choose "
 "the account you wish to remove. Geary will display settings for the account. "
@@ -215,23 +202,21 @@ msgid ""
 "<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
 "key><key>U</key></keyseq>."
 msgstr ""
-"Untuk menghapus akun yang ditambahkan melalui Geary, buka editor akun dan "
-"pilih akun yang ingin Anda hapus. Geary akan menampilkan pengaturan untuk "
-"akun tersebut. Gulir ke bagian bawah jendela dan klik <gui>Hapus Akun.</gui> "
-"Anda akan diminta untuk mengonfirmasi menghapus akun. Setelah dikonfirmasi, "
-"jika Anda berubah pikiran, Anda masih bisa membatalkan penghapusan akun "
-"dengan mengklik <gui>Batalkan di</gui> pemberitahuan popup, atau dengan "
-"mengetik <keyseq> <key>Ctrl</key><key>U</key></keyseq>."
+"Untuk menghapus akun yang ditambahkan melalui Geary, buka penyunting akun "
+"dan pilih akun yang ingin Anda hapus. Geary akan menampilkan pengaturan "
+"untuk akun tersebut. Gulir ke bagian bawah jendela dan klik <gui>Hapus Akun</"
+"gui>. Anda akan diminta untuk mengonfirmasi menghapus akun. Setelah "
+"dikonfirmasi, jika Anda berubah pikiran, Anda masih bisa membatalkan "
+"penghapusan akun dengan mengklik <gui>Batalkan</gui> di pemberitahuan popup, "
+"atau dengan mengetik <keyseq><key>Ctrl</key><key>U</key></keyseq>."
 
 #. (itstool) path: page/title
 #: C/archive.page:8
-#, fuzzy
 msgid "Archive, trash and delete messages"
 msgstr "Mengarsipkan, membuang, dan menghapus pesan"
 
 #. (itstool) path: page/p
 #: C/archive.page:10
-#, fuzzy
 msgid ""
 "Geary lets you archive messages if your server supports it. Clicking the "
 "<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
@@ -240,15 +225,14 @@ msgid ""
 "email organised by moving old and replied-to email out of the way."
 msgstr ""
 "Geary memungkinkan Anda mengarsipkan pesan jika server mendukungnya. "
-"Mengklik tombol <gui style=\"button\">toolbar Arsip</gui> memindahkan "
-"percakapan dari folder saat ini ke folder Arsip <gui>untuk</gui> sebagian "
-"besar layanan email, atau ke Semua <gui>Email</gui> untuk GMail. Pengarsipan "
-"membantu menjaga email Anda terorganisir dengan memindahkan email lama dan "
-"balasan keluar dari jalan."
+"Mengklik tombol bilah alat <gui style=\"button\">Arsip</gui> memindahkan "
+"percakapan dari folder saat ini ke folder <gui>Arsip</gui> bagi sebagian "
+"besar layanan surel, atau ke <gui>Semua Surel</gui> untuk GMail. "
+"Mengarsipkan membantu menjaga surel Anda terorganisir dengan memindahkan "
+"surel lama dan balasan agar tidak menghalangi."
 
 #. (itstool) path: page/p
 #: C/archive.page:17
-#, fuzzy
 msgid ""
 "To move conversations to the <gui>Trash</gui> folder, select them and click "
 "the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
@@ -257,33 +241,31 @@ msgid ""
 "or open the conversation in the <gui>Trash</gui> folder and click <gui style="
 "\"button\">Delete</gui> there."
 msgstr ""
-"Untuk memindahkan percakapan ke folder <gui>Tong</gui> Sampah, pilih "
-"percakapan tersebut dan klik <gui style=\"button\">tombol Toolbar</gui> "
-"sampah. Untuk menghapus percakapan secara permanen, tahan <key>Shift</key> "
-"dan klik <gui style=\"button\">tombol Hapus</gui> yang muncul menggantikan "
-"tombol <gui>Tong Sampah,</gui> atau buka percakapan di folder <gui>Sampah "
-"dan</gui> klik Hapus <gui style=\"button\">di</gui> sana."
+"Untuk memindahkan percakapan ke folder <gui>Tong Sampah</gui>, pilih "
+"percakapan tersebut dan klik tombol bilah alat <gui style=\"button\">Tong "
+"Sampah</gui>. Untuk menghapus percakapan secara permanen, tahan <key>Shift</"
+"key> dan klik tombol <gui style=\"button\">Hapus</gui> yang muncul "
+"menggantikan tombol <gui>Tong Sampah</gui>, atau buka percakapan di folder "
+"<gui>Tong Sampah</gui> dan klik <gui style=\"button\">Hapus</gui> di sana."
 
 #. (itstool) path: note/title
 #: C/archive.page:26
-#, fuzzy
 msgid "Undoing changes"
 msgstr "Membatalkan perubahan"
 
 #. (itstool) path: note/p
 #: C/archive.page:27
-#, fuzzy
 msgid ""
 "Note that you can always undo archiving or trashing a message if you change "
 "your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification "
 "that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open "
 "the folder, find the message, then move it back to your <gui>Inbox</gui>"
 msgstr ""
-"Perhatikan bahwa Anda selalu dapat membatalkan pengarsipan atau "
-"menghancurkan pesan jika Anda berubah pikiran. Klik <gui style=\"button"
-"\">Batalkan</gui> pada pemberitahuan pop-up yang muncul, atau ketik <keyseq> "
-"<key>Ctrl</key><key>Z</key></keyseq>, atau buka folder, temukan pesan, lalu "
-"pindahkan kembali ke Kotak Masuk <gui>Anda</gui>"
+"Perhatikan bahwa Anda selalu dapat membatalkan pengarsipan atau memindahkan "
+"pesan ke tong sampah jika Anda berubah pikiran. Klik <gui style=\"button"
+"\">Batalkan</gui> pada pemberitahuan pop-up yang muncul, atau ketik "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq>, atau buka folder, temukan "
+"pesan, lalu pindahkan kembali ke <gui>Inbox</gui> Anda."
 
 #. (itstool) path: page/p
 #: C/archive.page:34
@@ -307,49 +289,43 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
-#, fuzzy
 msgid "Need help with Geary?"
 msgstr "Butuh bantuan dengan Geary?"
 
 #. (itstool) path: section/title
 #: C/bugs.page:13
-#, fuzzy
 msgid "Getting support"
 msgstr "Mendapatkan dukungan"
 
 #. (itstool) path: section/p
 #: C/bugs.page:15
-#, fuzzy
 msgid ""
 "If you are having trouble using Geary, please <link href=\"https://wiki."
 "gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
 "about the problem."
 msgstr ""
 "Jika Anda mengalami masalah menggunakan Geary, <link href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\"> silakan hubungi komunitas Geary tentang "
-"masalah tersebut."
+"gnome.org/Apps/Geary/Contact\">silakan hubungi</link> komunitas Geary "
+"tentang masalah tersebut."
 
 #. (itstool) path: section/title
 #: C/bugs.page:21
-#, fuzzy
 msgid "Reporting bugs"
 msgstr "Melaporkan bug"
 
 #. (itstool) path: section/p
 #: C/bugs.page:23
-#, fuzzy
 msgid ""
 "If you suspect you have found a bug in Geary, please follow the <link href="
 "\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
 "guidelines</link> so the problem can be diagnosed and fixed."
 msgstr ""
 "Jika Anda menduga Anda telah menemukan bug di Geary, silakan ikuti <link "
-"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\"> pedoman pelaporan "
-"kutu sehingga masalah dapat didiagnosis dan diperbaiki."
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">pedoman pelaporan "
+"kutu</link> sehingga masalah dapat didiagnosis dan diperbaiki."
 
 #. (itstool) path: section/p
 #: C/bugs.page:28
-#, fuzzy
 msgid ""
 "To help diagnose the problem as fast as possible, please include the "
 "following information:"
@@ -359,48 +335,38 @@ msgstr ""
 
 #. (itstool) path: item/p
 #: C/bugs.page:32
-#, fuzzy
 msgid "Geary version and installation method (Package? Flathub? Source code?)"
-msgstr ""
-"Versi geary dan metode instalasi (Paket? Flathub, apa yang terjadi? Kode "
-"sumber?)"
+msgstr "Versi Geary dan metode instalasi (Paket? Flathub? Kode sumber?)"
 
 #. (itstool) path: item/p
 #: C/bugs.page:34
-#, fuzzy
 msgid "Your desktop (GNOME? KDE? Something else?)"
-msgstr "Desktop Anda (GNOME? Kde? Sesuatu yang lain?)"
+msgstr "Desktop Anda (GNOME? KDE? Yang lain?)"
 
 #. (itstool) path: item/p
 #: C/bugs.page:35
-#, fuzzy
 msgid ""
 "Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
 msgstr ""
-"Sistem operasi dan versi Anda (Ubuntu 16.04? Fedora 28? Menggulung Anda "
-"sendiri?)"
+"Sistem operasi dan versi Anda (Ubuntu 16.04? Fedora 28? Buatan Anda sendiri?)"
 
 #. (itstool) path: item/p
 #: C/bugs.page:37
-#, fuzzy
 msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
-msgstr "Penyedia email (Gmail, Yahoo!, Outlook.com, atau orang lain?)"
+msgstr "Penyedia surel (Gmail, Yahoo!, Outlook.com, atau orang lain?)"
 
 #. (itstool) path: item/p
 #: C/bugs.page:39
-#, fuzzy
 msgid "Steps to reproduce the bug"
 msgstr "Langkah-langkah untuk mereproduksi bug"
 
 #. (itstool) path: item/p
 #: C/bugs.page:40
-#, fuzzy
 msgid "What happened?"
 msgstr "Apa yang terjadi?"
 
 #. (itstool) path: item/p
 #: C/bugs.page:41
-#, fuzzy
 msgid "What did you expect to happen?"
 msgstr "Apa yang Anda harapkan terjadi?"
 
@@ -418,13 +384,11 @@ msgstr ""
 
 #. (itstool) path: page/title
 #: C/contributing.page:10
-#, fuzzy
 msgid "Contribute to Geary"
 msgstr "Berkontribusi pada Geary"
 
 #. (itstool) path: page/p
 #: C/contributing.page:12
-#, fuzzy
 msgid ""
 "Want to help improve Geary? There are a number of ways you can contribute:"
 msgstr ""
@@ -432,46 +396,42 @@ msgstr ""
 
 #. (itstool) path: item/p
 #: C/contributing.page:16
-#, fuzzy
 msgid ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
 "reporting</link>—report new bugs or request new features"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Pelaporan bug—"
-"laporkan bug baru atau minta fitur baru"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Pelaporan "
+"bug</link>—laporkan bug baru atau meminta fitur baru"
 
 #. (itstool) path: item/p
 #: C/contributing.page:19
-#, fuzzy
 msgid ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
 "link>—translate Geary’s user interface and user manual into new languages"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Menerjemahkan—"
-"menerjemahkan antarmuka pengguna dan manual pengguna Geary ke dalam bahasa "
-"baru"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Menerjemahkan</"
+"link>—menerjemahkan antarmuka pengguna dan manual pengguna Geary ke dalam "
+"bahasa baru"
 
 #. (itstool) path: item/p
 #: C/contributing.page:20
-#, fuzzy
 msgid ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
 "link>—fix bugs and add new features"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Pengembangan—"
-"perbaiki bug dan tambahkan fitur baru"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Pengembangan</"
+"link>—memperbaiki bug dan tambahkan fitur baru"
 
 #. (itstool) path: page/p
 #: C/contributing.page:23
-#, fuzzy
 msgid ""
 "See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
 "link> for more information and options for contributing financially to "
 "Geary's development."
 msgstr ""
-"Lihat <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\"> wiki "
-"untuk informasi lebih lanjut dan opsi untuk berkontribusi secara finansial "
-"untuk pengembangan Geary."
+"Lihat <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">wiki</"
+"link> untuk informasi lebih lanjut dan opsi untuk berkontribusi secara "
+"finansial untuk pengembangan Geary."
 
 #. (itstool) path: page/title
 #: C/index.page:6
@@ -490,98 +450,88 @@ msgstr "Menggunakan Geary"
 
 #. (itstool) path: section/title
 #: C/index.page:20
-#, fuzzy
 msgid "Contributing and getting support"
 msgstr "Berkontribusi dan mendapatkan dukungan"
 
 #. (itstool) path: page/title
 #: C/label.page:10
-#, fuzzy
 msgid "Label or move a conversation"
-msgstr "Memberi label atau memindahkan percakapan"
+msgstr "Melabeli atau memindahkan percakapan"
 
 #. (itstool) path: section/title
 #: C/label.page:12
-#, fuzzy
 msgid "Label a conversation"
-msgstr "Tambahkan label ke percakapan"
+msgstr "Melabeli percakapan"
 
 #. (itstool) path: section/p
 #: C/label.page:13
-#, fuzzy
 msgid ""
 "Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
 "labels correspond to labels in Gmail, or ordinary folders in other mail "
 "services."
 msgstr ""
-"Geary memungkinkan Anda menerapkan satu atau <em>beberapa label</em> ke "
-"setiap percakapan. Label geary sesuai dengan label di Gmail, atau folder "
-"biasa di layanan email lainnya."
+"Geary memungkinkan Anda menerapkan satu atau beberapa <em>label</em> ke "
+"setiap percakapan. Label Geary sesuai dengan label di Gmail, atau folder "
+"biasa di layanan surel lainnya."
 
 #. (itstool) path: section/p
 #: C/label.page:15
-#, fuzzy
 msgid ""
 "To label one or more conversations, first select the conversation(s), then "
 "do either of the following:"
 msgstr ""
-"Untuk memberi label satu atau beberapa percakapan, pertama-tama pilih "
-"percakapan, lalu lakukan salah satu hal berikut ini:"
+"Untuk memberi label satu atau beberapa percakapan, pertama pilih percakapan, "
+"lalu lakukan salah satu hal berikut ini:"
 
 #. (itstool) path: item/p
 #: C/label.page:18
-#, fuzzy
 msgid ""
 "Click the <gui>Label</gui> button on the toolbar and select a label from the "
 "resulting drop-down menu."
 msgstr ""
-"Klik <gui>tombol Label</gui> pada toolbar dan pilih label dari menu turun "
-"bawah yang dihasilkan."
+"Klik tombol <gui>Label</gui> pada bilah alat dan pilih label dari menu tarik-"
+"turun yang dihasilkan."
 
 #. (itstool) path: item/p
 #: C/label.page:20
-#, fuzzy
 msgid ""
 "Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
 "conversation list to the label in the sidebar."
 msgstr ""
 "Tahan tombol <key>Ctrl</key> dan seret percakapan dari daftar percakapan ke "
-"label di bar samping."
+"label di bilah samping."
 
 #. (itstool) path: section/title
 #: C/label.page:25
-#, fuzzy
 msgid "Move a conversation to a folder or label"
 msgstr "Memindahkan percakapan ke folder atau label"
 
 #. (itstool) path: section/p
 #: C/label.page:26
-#, fuzzy
 msgid ""
 "To move one or more conversations to a folder or label, first select the "
 "conversation(s), then do either of the following:"
 msgstr ""
 "Untuk memindahkan satu atau beberapa percakapan ke folder atau label, "
-"pertama-tama pilih percakapan, lalu lakukan salah satu hal berikut ini:"
+"pertama pilih percakapan, lalu lakukan salah satu hal berikut ini:"
 
 #. (itstool) path: item/p
 #: C/label.page:29
-#, fuzzy
 msgid ""
 "Click the <gui>Move</gui> button on the toolbar and select a folder or label "
 "from the resulting drop-down menu."
 msgstr ""
-"Klik <gui>tombol Pindahkan</gui> pada toolbar dan pilih folder atau label "
-"dari menu turun bawah yang dihasilkan."
+"Klik tombol <gui>Pindahkan</gui> pada bilah alat dan pilih folder atau label "
+"dari menu tarik-turun yang dihasilkan."
 
 #. (itstool) path: item/p
 #: C/label.page:31
-#, fuzzy
 msgid ""
 "Drag the conversation(s) from the conversation list to the folder or label "
 "in the sidebar."
 msgstr ""
-"Seret percakapan dari daftar percakapan ke folder atau label di bar samping."
+"Seret percakapan dari daftar percakapan ke folder atau label di bilah "
+"samping."
 
 #. (itstool) path: page/title
 #: C/limits.page:9
@@ -606,26 +556,23 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/limits.page:17
-#, fuzzy
 msgid ""
 "To learn more about the features we're working on and the future of Geary, "
 "please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
 "page</link>."
 msgstr ""
 "Untuk mempelajari lebih lanjut tentang fitur yang sedang kami kerjakan dan "
-"masa depan Geary, silakan kunjungi halaman <link href=\"https://wiki.gnome."
-"org/Apps/Geary\"> wiki Geary."
+"masa depan Geary, silakan kunjungi <link href=\"https://wiki.gnome.org/Apps/"
+"Geary\">halaman wiki</link> Geary."
 
 #. (itstool) path: page/title
 #. (itstool) path: section/title
 #: C/overview.page:9 C/shortcuts.page:13
-#, fuzzy
 msgid "Overview"
-msgstr "Gambaran"
+msgstr "Ringkasan"
 
 #. (itstool) path: page/p
 #: C/overview.page:11
-#, fuzzy
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -637,7 +584,6 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/overview.page:15
-#, fuzzy
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -647,7 +593,6 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/overview.page:18
-#, fuzzy
 msgid ""
 "The main Geary window is divided into several areas: The folder list, the "
 "conversation list, and the conversation viewer."
@@ -657,25 +602,22 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/overview.page:22
-#, fuzzy
 msgid "Folder list"
-msgstr "Mengambil daftar folder…"
+msgstr "Daftar folder"
 
 #. (itstool) path: section/p
 #: C/overview.page:24
-#, fuzzy
 msgid ""
 "The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
 "for your email accounts. Geary uses the term <em>label</em> for any folder "
 "that you have created to organize your email messages."
 msgstr ""
-"Daftar <em>folder</em> menampilkan semua <em>folder dan</em> label "
-"<em>untuk</em> akun email Anda. Geary menggunakan label istilah untuk "
-"<em>folder</em> apa pun yang telah Anda buat untuk mengatur pesan email Anda."
+"<em>Daftar folder</em> menampilkan semua <em>folder</em> dan <em>label</em> "
+"untuk akun surel Anda. Geary menggunakan istilah <em>label</em> bagi "
+"sebarang folder yang telah Anda buat untuk mengatur pesan surel Anda."
 
 #. (itstool) path: section/p
 #: C/overview.page:29
-#, fuzzy
 msgid ""
 "Select a folder or label to display the conversations it contains in the "
 "conversation list."
@@ -685,13 +627,11 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/overview.page:34
-#, fuzzy
 msgid "Conversation list"
 msgstr "Daftar percakapan"
 
 #. (itstool) path: section/p
 #: C/overview.page:36
-#, fuzzy
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
@@ -701,7 +641,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:40
-#, fuzzy
 msgid ""
 "Each sender’s name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
@@ -713,7 +652,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:44
-#, fuzzy
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
@@ -721,15 +659,14 @@ msgid ""
 "simply scroll down the conversation list and Geary will fetch more messages "
 "automatically."
 msgstr ""
-"Geary tidak secara otomatis mengunduh semua pesan di semua folder email "
-"Anda. Saat pertama kali mengunjungi Kotak Masuk atau folder lainnya, Geary "
+"Geary tidak secara otomatis mengunduh semua pesan di semua folder surel "
+"Anda. Saat pertama kali mengunjungi Inbox atau folder lainnya, Geary "
 "mengunduh pesan terbaru di folder tersebut. Untuk melihat lebih banyak "
 "pesan, cukup gulir ke bawah daftar percakapan dan Geary akan mengambil lebih "
 "banyak pesan secara otomatis."
 
 #. (itstool) path: section/p
 #: C/overview.page:50
-#, fuzzy
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -739,29 +676,26 @@ msgid ""
 msgstr ""
 "Beberapa perintah di Geary dapat bertindak pada sekelompok percakapan. Untuk "
 "memilih beberapa percakapan, tahan tombol <key>Ctrl</key> dan klik setiap "
-"percakapan secara aktifkan dalam daftar percakapan. Atau, klik percakapan "
+"percakapan secara bergantian dalam daftar percakapan. Atau, klik percakapan "
 "pertama dalam rentang, lalu tahan <key>Shift</key> dan klik percakapan "
 "terakhir."
 
 #. (itstool) path: section/title
 #: C/overview.page:58
-#, fuzzy
 msgid "Conversation viewer"
-msgstr "Zoom penampil percakapan"
+msgstr "Penampil percakapan"
 
 #. (itstool) path: section/p
 #: C/overview.page:60
-#, fuzzy
 msgid ""
 "The <em>conversation viewer</em> displays all email messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
-"Penampil <em>percakapan menampilkan</em> semua pesan email dalam percakapan "
+"<em>Penampil percakapan</em> menampilkan semua pesan surel dalam percakapan "
 "yang dipilih, dengan pesan tertua di bagian atas."
 
 #. (itstool) path: section/p
 #: C/overview.page:63
-#, fuzzy
 msgid ""
 "When you view a conversation, Geary collapses messages that you’ve already "
 "read. Click collapsed messages to expand them. Click an expanded message’s "
@@ -798,7 +732,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:79
-#, fuzzy
 msgid ""
 "Click the star button present on each message to mark or un-mark a message "
 "as being starred. Staring a message will mark the whole conversation as "
@@ -806,13 +739,12 @@ msgid ""
 "when returning to it."
 msgstr ""
 "Klik tombol bintang yang ada pada setiap pesan untuk menandai atau "
-"membatalkan tandai pesan sebagai bintang. Menatap pesan akan menandai "
+"membatalkan menandai pesan sebagai bintang. Membintangi pesan akan menandai "
 "seluruh percakapan seperti yang dibintangi, dan Geary akan menampilkan pesan "
 "berbintang pertama dalam percakapan ketika kembali ke sana."
 
 #. (itstool) path: section/p
 #: C/overview.page:84
-#, fuzzy
 msgid ""
 "Click the menu button present on each message to open the <em>message menu</"
 "em>, which allows you to reply and forward to a specific message, update "
@@ -826,7 +758,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:89
-#, fuzzy
 msgid ""
 "Any attachments in a message appear at the bottom of the message. Double "
 "click an attachment to open it, or use the Open and Save buttons to open and "
@@ -843,7 +774,6 @@ msgstr "Preferensi"
 
 #. (itstool) path: page/p
 #: C/preferences.page:12
-#, fuzzy
 msgid ""
 "Geary allows you to customise how it works via its <gui style=\"group"
 "\">Preferences</gui> window. To open the window, select <gui style=\"menuitem"
@@ -851,19 +781,17 @@ msgid ""
 "You can change the following options:"
 msgstr ""
 "Geary memungkinkan Anda untuk menyesuaikan cara kerjanya melalui jendela "
-"<gui style=\"group\">Preferensi.</gui> Untuk membuka jendela, <gui style="
-"\"menuitem\">pilih Preferensi</gui> dari menu aplikasi di toolbar jendela "
+"<gui style=\"group\">Preferensi</gui>. Untuk membuka jendela, pilih <gui "
+"style=\"menuitem\">Preferensi</gui> dari menu aplikasi di bilah alat jendela "
 "utama. Anda bisa mengubah opsi berikut:"
 
 #. (itstool) path: item/title
 #: C/preferences.page:19
-#, fuzzy
 msgid "<gui>Automatically select next message</gui>"
-msgstr "<gui>Otomatis pilih pesan berikutnya</gui>"
+msgstr "<gui>Otomatis memilih pesan berikutnya</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:20
-#, fuzzy
 msgid ""
 "When this option is enabled, Geary automatically selects the latest message "
 "in a folder when you enter the folder. In addition, after archiving a "
@@ -875,13 +803,11 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:26
-#, fuzzy
 msgid "<gui>Display conversation preview</gui>"
-msgstr "<gui>Tampilkan pratinjau percakapan</gui>"
+msgstr "<gui>Menampilkan pratinjau percakapan</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:27
-#, fuzzy
 msgid ""
 "Enables message previews in the conversation list. Previews show the first "
 "few lines of each message."
@@ -891,13 +817,11 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-#, fuzzy
 msgid "<gui>Use three pane view</gui>"
 msgstr "<gui>Menggunakan tampilan tiga panel</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:32
-#, fuzzy
 msgid ""
 "Show the folder list, the conversation list, and the messages side-by-side-"
 "by-side in three panes. If not selected, the folder list and conversation "
@@ -909,40 +833,36 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:38
-#, fuzzy
 msgid "<gui>Use single key email shortcuts</gui>"
-msgstr "<gui>Menggunakan pintasan email satu tombol</gui>"
+msgstr "<gui>Menggunakan pintasan surel satu tombol</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:39
-#, fuzzy
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
 "\"shortcuts\"/> for details."
 msgstr ""
-"Aktifkan pintasan keyboard untuk tindakan email yang tidak memerlukan "
-"penekanan <key>Ctrl.</key> Ini cocok dengan pintasan yang digunakan oleh "
+"Aktifkan pintasan papan ketik untuk tindakan surel yang tidak memerlukan "
+"penekanan <key>Ctrl</key>. Ini cocok dengan pintasan yang digunakan oleh "
 "GMail. Lihat <link xref=\"shortcuts\"/> untuk detailnya."
 
 #. (itstool) path: item/title
 #: C/preferences.page:44
-#, fuzzy
 msgid "<gui>Watch for new mail when closed</gui>"
-msgstr "<gui>Tonton email baru saat ditutup</gui>"
+msgstr "<gui>Amati surel baru saat ditutup</gui>"
 
 #. (itstool) path: item/p
 #: C/preferences.page:45
-#, fuzzy
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
 "and it will continue to run after you close all windows."
 msgstr ""
-"Geary akan menonton akun Anda untuk email baru bahkan ketika jendela utama "
-"tidak terbuka. Untuk melakukan ini, diam-diam akan dimulai ketika Anda masuk "
-"ke komputer Anda, dan itu akan terus berjalan setelah Anda menutup semua "
-"jendela."
+"Geary akan mengamati akun Anda untuk surel baru bahkan ketika jendela utama "
+"tidak terbuka. Untuk melakukan ini, itu akan dimulai secara diam-diam ketika "
+"Anda masuk ke komputer Anda, dan itu akan terus berjalan setelah Anda "
+"menutup semua jendela."
 
 #. (itstool) path: page/title
 #: C/search.page:10
@@ -951,7 +871,6 @@ msgstr "Pencarian"
 
 #. (itstool) path: page/p
 #: C/search.page:12
-#, fuzzy
 msgid ""
 "Geary supports a per-account full text search. To start a search, select a "
 "folder associated with the account you'd like to search against. Then click "
@@ -960,22 +879,20 @@ msgid ""
 msgstr ""
 "Geary mendukung pencarian teks lengkap per akun. Untuk memulai pencarian, "
 "pilih folder yang terkait dengan akun yang ingin Anda cari. Lalu klik kotak "
-"pencarian di bar alat (atau tekan <keyseq> <key>Ctrl</key><key>S)</key></"
-"keyseq>dan mulailah mengetik. Hasil akan muncul setelah penundaan singkat."
+"pencarian di bilah alat (atau tekan <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) dan mulailah mengetik. Hasil akan muncul setelah penundaan singkat."
 
 #. (itstool) path: page/p
 #: C/search.page:16
-#, fuzzy
 msgid ""
 "The full text search includes email text, email addresses (to, from, and "
 "cc), subject lines and attachment filenames."
 msgstr ""
-"Pencarian teks lengkap mencakup teks email, alamat email (ke, dari, dan cc), "
-"baris subjek dan nama file lampiran."
+"Pencarian teks lengkap mencakup teks surel, alamat surel (ke, dari, dan cc), "
+"baris subjek dan nama berkas lampiran."
 
 #. (itstool) path: page/p
 #: C/search.page:19
-#, fuzzy
 msgid ""
 "Keywords that match your search are highlighted in the message view. Geary "
 "will match different forms of the same word, for example searching for \"walk"
@@ -983,7 +900,7 @@ msgid ""
 msgstr ""
 "Kata kunci yang cocok dengan pencarian Anda disorot dalam tampilan pesan. "
 "Geary akan mencocokkan berbagai bentuk kata yang sama, misalnya mencari "
-"\"berjalan\" juga akan cocok dengan \"berjalan\" dan \"berjalan.\""
+"\"walk\" juga akan cocok dengan \"walking\" dan \"walked.\""
 
 #. (itstool) path: section/title
 #: C/search.page:23
@@ -992,249 +909,215 @@ msgstr "Operator pencarian"
 
 #. (itstool) path: section/p
 #: C/search.page:24
-#, fuzzy
 msgid "Geary supports the following operators to limit the scope of searches:"
 msgstr "Geary mendukung operator berikut untuk membatasi cakupan pencarian:"
 
 #. (itstool) path: td/p
 #: C/search.page:27
-#, fuzzy
 msgid "<input>attachment:<var>filename</var></input>"
-msgstr "<input>Lampiran:<var>filename</var>"
+msgstr "<input>attachment:<var>namaberkas</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:28
-#, fuzzy
 msgid "Finds messages with attachments whose name matches <var>filename</var>."
 msgstr ""
-"Menemukan pesan dengan lampiran yang namanya <var>filename</var> cocok."
+"Menemukan pesan dengan lampiran yang namanya cocok <var>namaberkas</var>."
 
 #. (itstool) path: td/p
 #: C/search.page:31
-#, fuzzy
 msgid "<input>bcc:<var>recipient</var></input>"
-msgstr "<input>Bcc:<var>recipient</var>"
+msgstr "<input>bcc:<var>penerima</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:32
-#, fuzzy
 msgid "Finds messages where <var>recipient</var> matches email BCC fields."
 msgstr ""
-"Menemukan pesan di mana <var>recipient</var> cocok dengan bidang BCC email."
+"Menemukan pesan dimana <var>penerima</var> cocok dengan bidang BCC surel."
 
 #. (itstool) path: td/p
 #: C/search.page:35
-#, fuzzy
 msgid "<input>body:<var>text</var></input>"
-msgstr "<input>Tubuh:<var>text</var>"
+msgstr "<input>body:<var>teks</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:36
-#, fuzzy
 msgid "Finds messages whose body contains <var>text</var>."
-msgstr "Menemukan pesan yang isinya berisi <var>text</var> ."
+msgstr "Menemukan pesan yang isinya berisi <var>teks</var>."
 
 #. (itstool) path: td/p
 #: C/search.page:39
-#, fuzzy
 msgid "<input>cc:<var>recipient</var></input>"
-msgstr "<input>Cc:<var>recipient</var>"
+msgstr "<input>cc:<var>penerima</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:40
-#, fuzzy
 msgid "Finds messages where <var>recipient</var> matches email CC fields."
 msgstr ""
-"Menemukan pesan di mana <var>recipient</var> cocok dengan bidang CC email."
+"Menemukan pesan dimana <var>penerima</var> cocok dengan bidang CC surel."
 
 #. (itstool) path: td/p
 #: C/search.page:43
-#, fuzzy
 msgid "<input>from:<var>sender</var></input>"
-msgstr "<input>Dari:<var>sender</var>"
+msgstr "<input>from:<var>pengirim</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:44
-#, fuzzy
 msgid "Finds messages where <var>sender</var> matches email From fields."
 msgstr ""
-"Menemukan pesan di mana <var>sender</var> cocok dengan email Dari bidang."
+"Menemukan pesan di mana <var>pengirim</var> cocok dengan surel bidang From."
 
 #. (itstool) path: td/p
 #: C/search.page:47
-#, fuzzy
 msgid "<input>is:read</input>"
-msgstr "<input>is:read"
+msgstr "<input>is:read</input>"
 
 #. (itstool) path: td/p
 #: C/search.page:48
-#, fuzzy
 msgid "Finds messages that have been marked as read."
 msgstr "Menemukan pesan yang telah ditandai sebagai sudah dibaca."
 
 #. (itstool) path: td/p
 #: C/search.page:51
-#, fuzzy
 msgid "<input>is:starred</input>"
-msgstr "<input>is:bintang"
+msgstr "<input>is:starred</input>"
 
 #. (itstool) path: td/p
 #: C/search.page:52
-#, fuzzy
 msgid "Finds messages that have been marked as starred."
 msgstr "Menemukan pesan yang telah ditandai sebagai berbintang."
 
 #. (itstool) path: td/p
 #: C/search.page:55
-#, fuzzy
 msgid "<input>is:unread</input>"
-msgstr "<input>is:belum dibaca"
+msgstr "<input>is:unread</input>"
 
 #. (itstool) path: td/p
 #: C/search.page:56
-#, fuzzy
 msgid "Finds messages that have been marked as not read."
-msgstr "Menemukan pesan yang telah ditandai sebagai tidak dibaca."
+msgstr "Menemukan pesan yang telah ditandai sebagai belum dibaca."
 
 #. (itstool) path: td/p
 #: C/search.page:59
-#, fuzzy
 msgid "<input>subject:<var>text</var></input>"
-msgstr "<input>Subjek:<var>text</var>"
+msgstr "<input>subject:<var>teks</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:60
-#, fuzzy
 msgid "Finds messages whose subject contains <var>text</var>."
-msgstr "Menemukan pesan yang subjeknya berisi <var>text</var> ."
+msgstr "Menemukan pesan yang subjeknya berisi <var>teks</var>."
 
 #. (itstool) path: td/p
 #: C/search.page:63
-#, fuzzy
 msgid "<input>to:<var>recipient</var></input>"
-msgstr "<input>Untuk:<var>recipient</var>"
+msgstr "<input>to:<var>penerima</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:64
-#, fuzzy
 msgid ""
 "Finds messages where <var>recipient</var> matches email To, CC, or BCC "
 "fields."
 msgstr ""
-"Menemukan pesan di mana <var>recipient</var> cocok dengan bidang Email "
-"Kepada, CC, atau BCC."
+"Menemukan pesan di mana <var>penerima</var> cocok dengan bidang surel To, "
+"CC, atau BCC."
 
 #. (itstool) path: section/p
 #: C/search.page:68
-#, fuzzy
 msgid ""
 "As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
 "input>, and <input>to</input> operators support <input>me</input> as their "
 "argument, which searches for the account's email address in the appropriate "
 "context."
 msgstr ""
-"Sebagai kasus khusus, <input>Bcc<input>Cc<input>dari, dan<input>dukungan "
-"operator<input>saya sebagai argumen mereka, yang mencari alamat email akun "
-"dalam konteks yang sesuai."
+"Sebagai kasus khusus, operator <input>bcc</input>, <input>cc</input>, "
+"<input>from</input>, dan <input>to</input> mendukung <input>me</input> "
+"sebagai argumen mereka, yang mencari alamat surel akun dalam konteks yang "
+"sesuai."
 
 #. (itstool) path: page/title
 #: C/shortcuts.page:10
-#, fuzzy
 msgid "Keyboard shortcuts"
 msgstr "Pintasan papan tik"
 
 #. (itstool) path: section/p
 #: C/shortcuts.page:14
-#, fuzzy
 msgid ""
 "Geary has keyboard shortcuts for most common operations. Use the built-in "
 "help to discover the full list. To open the shortcuts help, select <gui "
 "style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
 "main window's toolbar, or using the keyboard shortcuts listed below."
 msgstr ""
-"Geary memiliki pintasan keyboard untuk operasi yang paling umum. Gunakan "
+"Geary memiliki pintasan papan ketik untuk operasi yang paling umum. Gunakan "
 "bantuan bawaan untuk menemukan daftar lengkap. Untuk membuka bantuan "
-"pintasan, pilih Pintasan <gui style=\"menuitem\">Keyboard dari</gui> menu "
-"aplikasi di toolbar jendela utama, atau menggunakan pintasan keyboard yang "
-"tercantum di bawah ini."
+"pintasan, pilih <gui style=\"menuitem\">Pintasan Papan Ketik</gui> dari menu "
+"aplikasi di bilah alat jendela utama, atau menggunakan pintasan papan ketik "
+"yang tercantum di bawah ini."
 
 #. (itstool) path: section/p
 #: C/shortcuts.page:20
-#, fuzzy
 msgid ""
 "The following keyboard shortcuts can be used to access on-line help from "
 "Geary:"
 msgstr ""
-"Pintasan keyboard berikut ini dapat digunakan untuk mengakses bantuan on-"
-"line dari Geary:"
+"Pintasan papan ketik berikut ini dapat digunakan untuk mengakses bantuan "
+"daring dari Geary:"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:24
-#, fuzzy
 msgid "Display this online help manual"
-msgstr "Tampilkan manual bantuan daring ini"
+msgstr "Menampilkan manual bantuan daring ini"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:25
-#, fuzzy
 msgid "<keyseq><key>F1</key></keyseq>"
 msgstr "<keyseq><key>F1</key></keyseq>"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:28
-#, fuzzy
 msgid "Display all keyboard shortcuts"
-msgstr "Menampilkan semua pintasan keyboard"
+msgstr "Menampilkan semua pintasan papan ketik"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:29
-#, fuzzy
 msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
-msgstr "<keyseq><key>Ctrl</key><key>+</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
 
 #. (itstool) path: section/title
 #: C/shortcuts.page:37
-#, fuzzy
 msgid "Single key shortcuts"
-msgstr "Pintasan Tombol Tunggal"
+msgstr "Pintasan tombol tunggal"
 
 #. (itstool) path: section/p
 #: C/shortcuts.page:39
-#, fuzzy
 msgid ""
 "You can enable keyboard shortcuts for email actions that do not require "
 "pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
 "xref=\"preferences\"/> for details."
 msgstr ""
-"Anda bisa mengaktifkan pintasan keyboard untuk tindakan email yang tidak "
-"memerlukan penekanan <key>Ctrl.</key> Ini cocok dengan pintasan yang "
+"Anda bisa mengaktifkan pintasan papan ketik untuk tindakan surel yang tidak "
+"memerlukan penekanan <key>Ctrl</key>. Ini cocok dengan pintasan yang "
 "digunakan oleh GMail. Lihat <link xref=\"preferences\"/> untuk detailnya."
 
 #. (itstool) path: section/p
 #: C/shortcuts.page:43
-#, fuzzy
 msgid ""
 "The full list of single key shortcuts enabled by this preference can be "
 "found via the keyboard shortcuts help, above."
 msgstr ""
 "Daftar lengkap pintasan tombol tunggal yang diaktifkan oleh preferensi ini "
-"dapat ditemukan melalui bantuan pintasan keyboard, di atas."
+"dapat ditemukan melalui bantuan pintasan papan ketik, di atas."
 
 #. (itstool) path: page/title
 #: C/star.page:10
-#, fuzzy
 msgid "Star a message or mark it as read/unread"
 msgstr "Membintangi pesan atau menandainya sebagai sudah dibaca/belum dibaca"
 
 #. (itstool) path: section/title
 #: C/star.page:12
-#, fuzzy
 msgid "Star messages"
-msgstr "Pesan bintang"
+msgstr "Membintangi pesan"
 
 #. (itstool) path: section/p
 #: C/star.page:13
-#, fuzzy
 msgid ""
 "You can star messages to indicate that they're important to you. To mark a "
 "conversation with a star, click its star icon in the conversation list. You "
@@ -1248,7 +1131,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/star.page:15
-#, fuzzy
 msgid ""
 "With Gmail accounts, starred messages appear in the Starred folder in the "
 "folder list."
@@ -1258,59 +1140,52 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/star.page:18
-#, fuzzy
 msgid "Mark messages as read or unread"
 msgstr "Menandai pesan sebagai sudah dibaca atau belum dibaca"
 
 #. (itstool) path: section/p
 #: C/star.page:19
-#, fuzzy
 msgid ""
 "Geary marks messages as read automatically as you read them. To manually "
 "toggle a conversation as read or unread, click the circle icon in the "
 "conversation list."
 msgstr ""
 "Geary menandai pesan sebagai sudah dibaca secara otomatis saat Anda "
-"membacanya. Untuk beralih percakapan secara manual sebagai sudah dibaca atau "
-"belum dibaca, klik ikon lingkaran di daftar percakapan."
+"membacanya. Untuk mengalihkan percakapan secara manual sebagai sudah dibaca "
+"atau belum dibaca, klik ikon lingkaran di daftar percakapan."
 
 #. (itstool) path: section/p
 #: C/star.page:22
-#, fuzzy
 msgid ""
 "Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
 "the toolbar can be used to toggle the read status of the selected "
 "conversation(s)."
 msgstr ""
-"Secara bergantian, <gui>Tandai sebagai Belum</gui> <gui>Dibaca</gui> di menu "
-"Tandai pada toolbar dapat digunakan untuk beralih ke status baca percakapan "
-"yang dipilih."
+"Sebagai alternatif, <gui>Tandai sebagai Belum Dibaca</gui> dalam menu "
+"<gui>Tandai</gui> pada bilah alat dapat digunakan untuk beralih ke status "
+"baca percakapan yang dipilih."
 
 #. (itstool) path: section/p
 #: C/star.page:25
-#, fuzzy
 msgid ""
 "To mark an individual message as read, select <gui>Mark as Read</gui> from "
 "the dropdown menu."
 msgstr ""
 "Untuk menandai pesan individual sebagai sudah dibaca, pilih <gui>Tandai "
-"sebagai Sudah</gui> Dibaca dari menu turun bawah."
+"sebagai Sudah Dibaca</gui> dari menu tarik-turun."
 
 #. (itstool) path: page/title
 #: C/write.page:7
-#, fuzzy
 msgid "Writing new email and replying"
-msgstr "Menulis email baru dan membalas"
+msgstr "Menulis surel baru dan membalas"
 
 #. (itstool) path: section/title
 #: C/write.page:10
-#, fuzzy
 msgid "Composing and replying"
 msgstr "Menyusun dan membalas"
 
 #. (itstool) path: section/p
 #: C/write.page:12
-#, fuzzy
 msgid ""
 "To start a new email conversation, click the <gui style=\"button\">Compose</"
 "gui> button on the toolbar. Type the email address of the people to receive "
@@ -1320,23 +1195,21 @@ msgid ""
 "click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
 "key><key>Enter</key></keyseq> to send the message."
 msgstr ""
-"Untuk memulai percakapan email baru, klik <gui style=\"button\">tombol</gui> "
-"Tulis pada toolbar. Ketik alamat email orang-orang untuk menerima pesan di "
-"<gui style=\"input\">bidang</gui> Teks kepada, dan baris subjek di <gui "
-"style=\"input\">bidang</gui> Subjek. Anda kemudian dapat mengetik pesan Anda "
-"di area teks di bawah ini. Setelah pesan siap dikirim, klik Kirim <gui style="
-"\"button\">atau</gui> ketik <keyseq> <key>Ctrl</key><key>Enter</key> </"
-"keyseq> untuk mengirim pesan."
+"Untuk memulai percakapan surel baru, klik tombol <gui style=\"button"
+"\">Tulis</gui> pada bilah alat. Ketik alamat surel orang-orang yang akan "
+"menerima pesan di bidang teks <gui style=\"input\">To</gui>, dan baris "
+"subjek di bidang <gui style=\"input\">Subject</gui>. Anda kemudian dapat "
+"mengetik pesan Anda di area teks di bawah ini. Setelah pesan siap dikirim, "
+"klik <gui style=\"button\">Kirim</gui> atau ketik <keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq> untuk mengirim pesan."
 
 #. (itstool) path: note/title
 #: C/write.page:23
-#, fuzzy
 msgid "Undoing sending"
 msgstr "Membatalkan pengiriman"
 
 #. (itstool) path: note/p
 #: C/write.page:24
-#, fuzzy
 msgid ""
 "When sending an email, Geary will wait 5 seconds before delivering the "
 "message. During this time, you will be able to click <gui style=\"button"
@@ -1344,15 +1217,14 @@ msgid ""
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
 "more changes to it."
 msgstr ""
-"Saat mengirim email, Geary akan menunggu 5 detik sebelum menyampaikan pesan. "
-"Selama waktu ini, Anda akan dapat mengklik <gui style=\"button\">Batalkan "
-"pemberitahuan</gui> pop-up yang muncul atau ketik <keyseq> <key>Ctrl</"
-"key><key>Z untuk</key> </keyseq> membuka kembali email, dan membuat lebih "
+"Saat mengirim surel, Geary akan menunggu 5 detik sebelum mengirim pesan. "
+"Selama waktu ini, Anda akan dapat mengklik <gui style=\"button\">Batalkan</"
+"gui> pada pemberitahuan pop-up yang muncul atau ketik <keyseq><key>Ctrl</"
+"key><key>Z</key></keyseq>  untuk membuka kembali surel, dan membuat lebih "
 "banyak perubahan padanya."
 
 #. (itstool) path: section/p
 #: C/write.page:32
-#, fuzzy
 msgid ""
 "To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
 "and <gui style=\"input\">Reply-to</gui> fields, click the <gui style=\"input"
@@ -1362,45 +1234,42 @@ msgid ""
 "Reply-To field specifies an email address to reply to, if recipients should "
 "reply to a different email address than the sender's."
 msgstr ""
-"Untuk memperlihatkan <gui style=\"input\">bidang Cc</gui>, <gui style=\"input"
-"\">Bcc</gui>, <gui style=\"input\">dan Reply-to,</gui> klik <gui style="
-"\"input\">tombol</gui> Opsi lainnya di akhir <gui style=\"input\">bidang</"
-"gui> Kepada. Cc memungkinkan Anda mengirim salinan email ke penerima "
-"sekunder lainnya. Bcc mirip, tetapi daftar Bcc disembunyikan dari penerima. "
-"Bidang Balas-Ke menentukan alamat email untuk dibalas, jika penerima harus "
-"membalas ke alamat email yang berbeda dari alamat pengirim."
+"Untuk memperlihatkan bidang <gui style=\"input\">Cc</gui>, <gui style=\"input"
+"\">Bcc</gui>, dan <gui style=\"input\">Reply-to</gui>, klik tombol <gui "
+"style=\"input\">Opsi lainnya</gui> di akhir bidang <gui style=\"input\">To</"
+"gui>. Cc memungkinkan Anda mengirim salinan surel ke penerima sekunder "
+"lainnya. Bcc mirip, tetapi daftar Bcc disembunyikan dari penerima. Bidang "
+"Reply-To menentukan alamat surel untuk balasan, jika penerima harus membalas "
+"ke alamat surel yang berbeda dari alamat pengirim."
 
 #. (itstool) path: section/p
 #: C/write.page:41
-#, fuzzy
 msgid ""
 "When entering an email address into any of these fields, Geary will provide "
 "suggestions from your desktop address book and from previously sent and "
 "received email messages. To choose one of these suggestions, simply click on "
 "it."
 msgstr ""
-"Saat memasukkan alamat email ke salah satu bidang ini, Geary akan memberikan "
-"saran dari buku alamat desktop Anda dan dari pesan email yang dikirim dan "
-"diterima sebelumnya. Untuk memilih salah satu saran ini, cukup klik di "
-"atasnya."
+"Saat memasukkan alamat surel ke salah satu bidang ini, Geary akan memberikan "
+"saran dari buku alamat desktop Anda dan dari pesan surel yang dikirim dan "
+"diterima sebelumnya. Untuk memilih salah satu saran ini, cukup klik padanya."
 
 #. (itstool) path: section/p
 #: C/write.page:46
-#, fuzzy
 msgid ""
 "To reply to the currently selected conversation, click one of the <gui style="
 "\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui style="
 "\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
 "forwarded email composer for the latest message in the conversation."
 msgstr ""
-"Untuk membalas percakapan yang saat ini dipilih, klik salah satu tombol <gui "
-"style=\"button\">balas,</gui> <gui style=\"button\">Balas Semua</gui> <gui "
-"style=\"button\">atau Teruskan</gui> toolbar. Ini akan membuka balasan baru "
-"atau komposer email yang diteruskan untuk pesan terbaru dalam percakapan."
+"Untuk membalas percakapan yang saat ini dipilih, klik salah satu tombol "
+"bilah alat <gui style=\"button\">Balas</gui>, <gui style=\"button\">Balas "
+"Semua</gui>, atau <gui style=\"button\">Teruskan</gui>. Ini akan membuka "
+"balasan baru atau komposer surel yang diteruskan untuk pesan terbaru dalam "
+"percakapan."
 
 #. (itstool) path: section/p
 #: C/write.page:52
-#, fuzzy
 msgid ""
 "When replying, the message being replied to will be quoted and copied into "
 "the footer of the new reply. This can be deleted before typing a reply by "
@@ -1409,48 +1278,43 @@ msgid ""
 "\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
 "text will be quoted."
 msgstr ""
-"Saat membalas, pesan yang dibalas akan dikutip dan disalin ke footer balasan "
+"Saat membalas, pesan yang dibalas akan dikutip dan disalin ke kaki balasan "
 "baru. Ini dapat dihapus sebelum mengetik balasan dengan menekan "
 "<key>Backspace</key>. Atau, teks dapat dikutip secara selektif dengan "
 "memilih teks yang diinginkan dalam pesan dan mengklik <gui style=\"button"
-"\">Balas atau</gui> <gui style=\"button\">Balas Semua</gui>, hanya teks yang "
+"\">Balas</gui> atau <gui style=\"button\">Balas Semua</gui>, hanya teks yang "
 "dipilih yang akan dikutip."
 
 #. (itstool) path: section/p
 #: C/write.page:60
-#, fuzzy
 msgid ""
 "To reply to a specific email message, open the message menu in the top "
 "corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
 "<gui>Forward</gui>."
 msgstr ""
-"Untuk membalas pesan email tertentu, buka menu pesan di sudut atas pesan dan "
-"pilih Balas , <gui>Balas</gui> <gui>Semua atau Teruskan</gui> . "
-"<gui>Forward</gui>"
+"Untuk membalas pesan surel tertentu, buka menu pesan di sudut atas pesan dan "
+"pilih <gui>Balas</gui>, <gui>Balas Semua</gui>, atau <gui>Teruskan</gui>."
 
 #. (itstool) path: section/title
 #: C/write.page:66
-#, fuzzy
 msgid "Text formatting, images and attachments"
 msgstr "Pemformatan teks, gambar, dan lampiran"
 
 #. (itstool) path: section/p
 #: C/write.page:68
-#, fuzzy
 msgid ""
 "Geary's email composer lets you use text styles such as <em>bold</em> and "
 "<em>italic</em>, indent text to quote it, and links to web pages. Simply "
 "select the text and click the appropriate button on the formatting toolbar "
 "at the bottom of the composer area."
 msgstr ""
-"Komposer email Geary memungkinkan Anda menggunakan gaya teks seperti "
-"<em>teks tebal</em> <em>dan miring,</em>inden untuk mengutipnya, dan "
+"Komposer surel Geary memungkinkan Anda menggunakan gaya teks seperti "
+"<em>teks tebal</em> dan <em>miring</em>, inden untuk mengutipnya, dan "
 "menautkan ke halaman web. Cukup pilih teks dan klik tombol yang sesuai pada "
-"toolbar pemformatan di bagian bawah area komposer."
+"bilah alat pemformatan di bagian bawah area komposer."
 
 #. (itstool) path: section/p
 #: C/write.page:74
-#, fuzzy
 msgid ""
 "Bulleted and numbered lists can be inserted or removed by clicking the <gui "
 "style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
@@ -1459,15 +1323,13 @@ msgid ""
 "<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
 msgstr ""
 "Daftar berpoin dan bernomor bisa disisipkan atau dihapus dengan mengklik "
-"tombol daftar <gui style=\"button\">Berpoin dan</gui> daftar bernomor pada "
-"toolbar pemformatan. <gui style=\"button\">Bulleted list</gui> Tingkat "
-"indentasi item daftar dapat disetel menggunakan <gui style=\"button"
-"\">tombol</gui> toolbar pemformatan <gui style=\"button\">Inden dan</gui> "
-"Tidak Inden."
+"tombol daftar <gui style=\"button\">Berpoin</gui> dan <gui style=\"button"
+"\">Daftar bernomor</gui> pada bilah alat pemformatan. Tingkat indentasi item "
+"daftar dapat disetel menggunakan tombol bilah alat pemformatan <gui style="
+"\"button\">Inden</gui> dan <gui style=\"button\">Inden Keluar</gui>."
 
 #. (itstool) path: section/p
 #: C/write.page:81
-#, fuzzy
 msgid ""
 "Images can be inserted into rich text messages by clicking the <gui style="
 "\"button\">Insert Image</gui> button on the formatting toolbar and selecting "
@@ -1475,15 +1337,15 @@ msgid ""
 "application into the email body and then dropping it, or by pasting an image "
 "that has been copied to the clipboard from another application."
 msgstr ""
-"Gambar dapat dimasukkan ke dalam pesan teks kaya dengan mengklik <gui style="
-"\"button\">tombol Sisipkan</gui> Gambar pada toolbar pemformatan dan memilih "
-"gambar untuk dilampirkan, dengan menyeret gambar dari <gui>aplikasi File</"
-"gui> ke dalam isi email dan kemudian menjatuhkannya, atau dengan menempelkan "
-"gambar yang telah disalin ke clipboard dari aplikasi lain."
+"Gambar dapat dimasukkan ke dalam pesan teks kaya dengan mengklik tombol <gui "
+"style=\"button\">Sisipkan Gambar</gui> pada bilah alat pemformatan dan "
+"memilih gambar untuk dilampirkan, dengan menyeret gambar dari aplikasi "
+"<gui>Berkas</gui> ke dalam isi surel dan kemudian menjatuhkannya, atau "
+"dengan menempelkan gambar yang telah disalin ke papan klip dari aplikasi "
+"lain."
 
 #. (itstool) path: section/p
 #: C/write.page:88
-#, fuzzy
 msgid ""
 "Documents, music, videos, and other files can be attached to the email by "
 "clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
@@ -1492,31 +1354,30 @@ msgid ""
 "dropping it either on the text fields at the top of the window or on the "
 "toolbar at the bottom."
 msgstr ""
-"Dokumen, musik, video, dan file lainnya dapat dilampirkan ke email dengan "
-"mengklik <gui style=\"button\">tombol Lampirkan File</gui> di bagian bawah "
+"Dokumen, musik, video, dan berkas lainnya dapat dilampirkan ke surel dengan "
+"mengklik tombol <gui style=\"button\">Lampirkan Berkas</gui> di bagian bawah "
 "jendela komposer dan memilih dokumen untuk dilampirkan, atau dengan menyeret "
-"file dari <gui>aplikasi File</gui> ke jendela komposer, dan menjatuhkannya "
-"baik di bidang teks di bagian atas jendela atau di toolbar di bagian bawah."
+"berkas dari aplikasi <gui>Berkas</gui> ke jendela komposer, dan "
+"menjatuhkannya baik di bidang teks di bagian atas jendela atau di bilah alat "
+"di bagian bawah."
 
 #. (itstool) path: section/p
 #: C/write.page:96
-#, fuzzy
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts\"/> for details."
 msgstr ""
-"Sejumlah pintasan keyboard tersedia di komposer; lihat <link xref=\"shortcuts"
-"\"/> untuk detailnya."
+"Sejumlah pintasan papan ketik tersedia di komposer; lihat <link xref="
+"\"shortcuts\"/> untuk detailnya."
 
 #. (itstool) path: section/p
 #: C/write.page:99
-#, fuzzy
 msgid ""
 "You may specify a signature to be inserted into the footer of email in the "
 "composer via the <link xref=\"accounts\"/> dialog."
 msgstr ""
-"Anda dapat menentukan tanda tangan yang akan disisipkan ke footer email di "
-"komposer melalui <link xref=\"accounts\"/> dialog."
+"Anda dapat menentukan tanda tangan yang akan disisipkan ke footer surel di "
+"komposer melalui dialog <link xref=\"accounts\"/>."
 
 #. (itstool) path: section/title
 #: C/write.page:104
@@ -1525,16 +1386,15 @@ msgstr "Memeriksa ejaan"
 
 #. (itstool) path: section/p
 #: C/write.page:106
-#, fuzzy
 msgid ""
 "Geary supports spell-checking your composed email in one or more languages, "
 "as you type. To enable spell-checking, first ensure your computer has spell-"
 "check dictionaries installed for the desired languages. Consult your "
 "computer's help to determine how to install dictionaries if not present."
 msgstr ""
-"Geary mendukung pemeriksaan ejaan email yang Anda buat dalam satu bahasa "
+"Geary mendukung pemeriksaan ejaan surel yang Anda buat dalam satu bahasa "
 "atau lebih, saat Anda mengetik. Untuk mengaktifkan pemeriksaan ejaan, "
-"pertama-tama pastikan komputer Anda memiliki kamus pemeriksaan ejaan yang "
+"terlebih dahulu pastikan komputer Anda memiliki kamus pemeriksaan ejaan yang "
 "terinstal untuk bahasa yang diinginkan. Lihat bantuan komputer Anda untuk "
 "menentukan cara menginstal kamus jika tidak ada."
 
@@ -1550,8 +1410,8 @@ msgid ""
 "typing its name in the search box, then click the <gui style=\"button\">+</"
 "gui> button to add it."
 msgstr ""
-"Untuk memilih bahasa untuk pemeriksaan ejaan, klik <gui style=\"button"
-"\">tombol centang</gui> Ejaan pada toolbar pemformatan, dan popover pilihan "
+"Untuk memilih bahasa untuk pemeriksaan ejaan, klik tombol <gui style=\"button"
+"\">Periksa ejaan</gui> pada bilah alat pemformatan, dan popover pilihan "
 "bahasa akan muncul. Klik pada bahasa dalam daftar untuk mengaktifkan atau "
 "menonaktifkannya, dan klik tombol <gui style=\"button\">-</gui> untuk "
 "menghapusnya dari daftar. Jika bahasa tidak muncul dalam daftar, cari dengan "
@@ -1560,40 +1420,35 @@ msgstr ""
 
 #. (itstool) path: section/title
 #: C/write.page:123
-#, fuzzy
 msgid "Saving drafts and restoring discarded messages"
 msgstr "Menyimpan draf dan memulihkan pesan yang dibuang"
 
 #. (itstool) path: section/p
 #: C/write.page:125
-#, fuzzy
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type on the server after a short delay."
 msgstr ""
-"Untuk server email yang mendukung draf, Geary akan secara otomatis menyimpan "
+"Untuk server surel yang mendukung draf, Geary akan secara otomatis menyimpan "
 "pesan saat Anda mengetik di server setelah penundaan singkat."
 
 #. (itstool) path: section/p
 #: C/write.page:129
-#, fuzzy
 msgid ""
 "To edit an existing draft, select the <gui>Drafts</gui> folder in the folder "
 "list, select the message, and click \"Edit Draft\" in the conversation "
 "viewer."
 msgstr ""
-"Untuk mengedit draf yang sudah ada, pilih folder <gui>Draf</gui> di daftar "
-"folder, pilih pesan, dan klik \"Edit Draf\" di penampil percakapan."
+"Untuk mengedit draf yang sudah ada, pilih folder <gui>Drafts</gui> di daftar "
+"folder, pilih pesan, dan klik \"Sunting Draf\" di penampil percakapan."
 
 #. (itstool) path: section/p
 #: C/write.page:133
-#, fuzzy
 msgid "Geary will delete the draft when you send the message."
 msgstr "Geary akan menghapus draf ketika Anda mengirim pesan."
 
 #. (itstool) path: note/p
 #: C/write.page:136
-#, fuzzy
 msgid ""
 "If you save or discard a composed email, you can re-open it by clicking <gui "
 "style=\"button\">Undo</gui> on the pop-up notification that appears or by "
@@ -1601,22 +1456,20 @@ msgid ""
 "reopened for up to 30 minutes after they are closed. After that, you will "
 "need to re-open the message via the <gui>Drafts</gui> folder, if present."
 msgstr ""
-"Jika Anda menyimpan atau menghapus email yang disusun, Anda bisa membukanya "
-"kembali dengan <gui style=\"button\">mengklik Batalkan</gui> pada "
-"pemberitahuan pop-up yang muncul atau dengan mengetik <keyseq> <key>Ctrl</"
+"Jika Anda menyimpan atau menghapus surel yang disusun, Anda bisa membukanya "
+"kembali dengan mengklik <gui style=\"button\">Batalkan</gui> pada "
+"pemberitahuan pop-up yang muncul atau dengan mengetik <keyseq><key>Ctrl</"
 "key><key>Z</key></keyseq>. Komposer dapat dibuka kembali hingga 30 menit "
 "setelah ditutup. Setelah itu, Anda harus membuka kembali pesan melalui "
-"folder <gui>Draf,</gui> jika ada."
+"folder <gui>Drafts</gui>. jika ada."
 
 #. (itstool) path: section/title
 #: C/write.page:146
-#, fuzzy
 msgid "Plain text messages"
-msgstr "Pesan teks biasa"
+msgstr "Pesan teks polos"
 
 #. (itstool) path: section/p
 #: C/write.page:148
-#, fuzzy
 msgid ""
 "Geary can also send plain text messages. Press the <gui style=\"button"
 "\">More options</gui> button at the end of the bottom toolbar, then choose "
@@ -1624,22 +1477,21 @@ msgid ""
 "email to mailing lists that prohibit rich text (HTML) messages, or when "
 "sending email to people that do no use modern clients like Geary."
 msgstr ""
-"Geary juga dapat mengirim pesan teks biasa. Tekan tombol <gui style=\"button"
-"\">Opsi</gui> lainnya di akhir toolbar bawah, lalu pilih \"Teks Kaya\" atau "
-"\"Teks Biasa\". Mode teks biasa berguna saat mengirim email ke milis yang "
-"melarang pesan teks kaya (HTML), atau saat mengirim email ke orang yang "
+"Geary juga dapat mengirim pesan teks polos. Tekan tombol <gui style=\"button"
+"\">Opsi lainnya</gui> di akhir bilah alat bawah, lalu pilih \"Teks Kaya\" "
+"atau \"Teks Polos\". Mode teks polos berguna saat mengirim surel ke milis "
+"yang melarang pesan teks kaya (HTML), atau saat mengirim surel ke orang yang "
 "tidak menggunakan klien modern seperti Geary."
 
 #. (itstool) path: section/p
 #: C/write.page:155
-#, fuzzy
 msgid ""
 "In plain text mode, text will be automatically wrapped using soft line "
 "breaks so that it is no longer than 74 characters wide, and indented text "
 "will be wrapped and quoted using a “&gt;” character for each level of "
 "quoting."
 msgstr ""
-"Dalam mode teks biasa, teks akan dibungkus secara otomatis menggunakan "
+"Dalam mode teks polos, teks akan dibungkus secara otomatis menggunakan "
 "hentian baris lunak sehingga lebarnya tidak lebih dari 74 karakter, dan teks "
 "berindentasi akan dibungkus dan dikutip menggunakan karakter \"&gt;\" untuk "
 "setiap tingkat kutipan."
