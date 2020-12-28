@@ -268,8 +268,11 @@ src/engine/imap-db/imap-db-attachment.vala
 src/engine/imap-db/imap-db-database.vala
 src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
+src/engine/imap-db/imap-db-fts5-matches.c
+src/engine/imap-db/imap-db-fts5-tokeniser.c
 src/engine/imap-db/imap-db-gc.vala
 src/engine/imap-db/imap-db-message-row.vala
+src/engine/imap-db/imap-db-sqlite.c
 src/engine/imap-engine/gmail/imap-engine-gmail-account.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-drafts-folder.vala
