@@ -16,6 +16,8 @@ SQLITE_EXTENSION_INIT1
 #include "unicode/utf.h"
 #include "unicode/utypes.h"
 
+#define unused __attribute__((unused))
+
 // Full text search tokeniser for SQLite. This exists since SQLite's
 // existing Unicode tokeniser doesn't work with languages that don't
 // use spaces as word boundaries.
@@ -45,9 +47,9 @@ typedef struct {
 } IcuTokeniser;
 
 
-static int icu_create(void *context,
-                      const char **args,
-                      int n_args,
+static int icu_create(unused void *context,
+                      unused const char **args,
+                      unused int n_args,
                       Fts5Tokenizer **ret) {
     const UNormalizer2 *norm;
     UBreakIterator *iter;
@@ -88,7 +90,7 @@ static void icu_delete(Fts5Tokenizer *fts5_tokeniser) {
 
 static int icu_tokenise(Fts5Tokenizer *fts5_tokeniser,
                         void *context,
-                        int flags,
+                        unused int flags,
                         const char *chars,
                         int32_t chars_len,
                         int (*token_callback)(void*, int, const char*, int, int, int)) {
@@ -267,7 +269,7 @@ gboolean sqlite3_register_fts5_tokeniser(sqlite3 *db) {
 // command line SQLite tool. The name of this function must match the
 // name of the shared module.
 int sqlite3_gearytokeniser_init(sqlite3 *db,
-                                char **error_message,
+                                unused char **error_message,
                                 const sqlite3_api_routines *api) {
     g_info("Loading geary_tokeniser\n");
     SQLITE_EXTENSION_INIT2(api);

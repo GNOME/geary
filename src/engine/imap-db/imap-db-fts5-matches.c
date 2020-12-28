@@ -27,17 +27,19 @@
 #include <sqlite3.h>
 #include <glib.h>
 
+#define unused __attribute__((unused))
+
+
 typedef struct {
     int start;
     int end;
 } Offset;
 
-
 static int
 offsets_tokenizer_func (void       *data,
-                        int         flags,
-                        const char *token,
-                        int         n_token,
+                        unused int  flags,
+                        unused const char *token,
+                        unused int  n_token,
                         int         start,
                         int         end)
 {
@@ -54,7 +56,7 @@ geary_matches (const Fts5ExtensionApi  *api,
                Fts5Context             *fts_ctx,
                sqlite3_context         *ctx,
                int                      n_args,
-               sqlite3_value          **args)
+               unused sqlite3_value   **args)
 {
     GString *str;
     int rc, n_hits, i;
