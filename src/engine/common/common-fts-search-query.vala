@@ -60,18 +60,10 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
         // Select distinct since messages may exist in more than one
         // folder.
         sql.append("""
-                SELECT DISTINCT mt.id""");
-        // FTS5 queries cannot be all negated terms. If not then join
-        // here and filter as usual, if so then exclude via subselect
-        // further below instead.
-        if (!this.is_all_negated) {
-            sql.append("""
-                FROM MessageSearchTable AS mst
-                INNER JOIN MessageTable AS mt ON mt.id = mst.rowid""");
-        } else {
-            sql.append("""
-                FROM MessageTable AS mt""");
-        }
+                SELECT DISTINCT mt.id
+                FROM MessageTable AS mt
+                INDEXED BY MessageTableInternalDateTimeTIndex""");
+
         // If excluding folderless messages, an inner join on
         // MessageLocationTable will cause them to be excluded
         // automatically. Otherwise a left join always required to
@@ -99,14 +91,17 @@ internal class Geary.FtsSearchQuery : Geary.SearchQuery {
         }
 
         // FTS match exclusions
-        if (!this.is_all_negated) {
-            conditions_added = sql_add_term_conditions(sql, conditions_added);
-        } else {
+        if (!this.expression.is_empty) {
             if (conditions_added) {
                 sql.append(" AND");
             }
             sql.append(
-                " mt.id NOT IN (SELECT mst.rowid FROM MessageSearchTable as mst WHERE "
+                this.is_all_negated
+                ? " mt.id NOT IN"
+                : " mt.id IN"
+            );
+            sql.append(
+                " (SELECT mst.rowid FROM MessageSearchTable as mst WHERE "
             );
             sql_add_term_conditions(sql, false);
             sql.append_c(')');
