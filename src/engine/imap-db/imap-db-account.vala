@@ -612,6 +612,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 exclude_folderless,
                 limit, offset
             );
+            debug("Search SQL: %s", stmt.get_expanded_sql());
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 message_id = result.int64_at(0);
