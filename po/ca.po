@@ -628,7 +628,7 @@ msgstr "Últims 4 anys"
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
-msgstr[0] "Úĺtim dia"
+msgstr[0] "Últim dia"
 msgstr[1] "Últims %d dies"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
@@ -3556,7 +3556,7 @@ msgstr "Navegació per teclat"
 #: ui/gtk/help-overlay.ui:233
 msgctxt "shortcut window"
 msgid "Go to next/previous pane"
-msgstr "Vés al panell següent o anterior"
+msgstr "Ves al panell següent o anterior"
 
 #: ui/gtk/help-overlay.ui:241
 msgctxt "shortcut window"
