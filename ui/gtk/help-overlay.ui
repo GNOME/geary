@@ -4,7 +4,6 @@
     <child>
       <object class="GtkShortcutsSection">
         <property name="visible">True</property>
-        <property name="max-height">12</property>
         <property name="section-name">conversation</property>
         <property name="title" translatable="yes">Conversation Shortcuts</property>
         <child>
@@ -182,6 +181,13 @@
             </child>
           </object>
         </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkShortcutsSection">
+        <property name="visible">True</property>
+        <property name="section-name">application</property>
+        <property name="title" translatable="yes">Application Shortcuts</property>
         <child>
           <object class="GtkShortcutsGroup">
             <property name="visible">True</property>
