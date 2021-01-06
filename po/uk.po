@@ -7,13 +7,13 @@
 # furyruf <ruffian.ua@gmail.com>, 2013.
 # sp4rr0w <sasha.anpilov@gmail.com>, 2012.
 # Daniel Korostil <ted.korostiled@gmail.com>, 2014, 2016.
-# Yuri Chornoivan <yurchor@ukr.net>, 2020.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-10-29 12:58+0000\n"
-"PO-Revision-Date: 2020-10-29 20:10+0200\n"
+"POT-Creation-Date: 2021-01-06 11:01+0000\n"
+"PO-Revision-Date: 2021-01-06 15:54+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -1286,7 +1286,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1788
+#: src/client/composer/composer-widget.vala:1835
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1680,92 +1680,92 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:865
+#: src/client/composer/composer-widget.vala:867
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Хочете зберегти чи відкинути цю чернетку повідомлення?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:891
+#: src/client/composer/composer-widget.vala:893
 msgid "Do you want to discard this draft message?"
 msgstr "Хочете відкинути цю чернетку повідомлення?"
 
-#: src/client/composer/composer-widget.vala:1443
+#: src/client/composer/composer-widget.vala:1468
 msgid "Send message with an empty subject and body?"
 msgstr "Надіслати лист без теми і текстом листа?"
 
-#: src/client/composer/composer-widget.vala:1445
+#: src/client/composer/composer-widget.vala:1470
 msgid "Send message with an empty subject?"
 msgstr "Надіслати лист без теми?"
 
-#: src/client/composer/composer-widget.vala:1447
+#: src/client/composer/composer-widget.vala:1472
 msgid "Send message with an empty body?"
 msgstr "Надіслати лист без тексту?"
 
-#: src/client/composer/composer-widget.vala:1456
+#: src/client/composer/composer-widget.vala:1481
 msgid "Send message without an attachment?"
 msgstr "Надіслати лист без долучень?"
 
-#: src/client/composer/composer-widget.vala:1776
+#: src/client/composer/composer-widget.vala:1823
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "«%s» уже долучено для доставлення."
 
-#: src/client/composer/composer-widget.vala:1808
-#: src/client/composer/composer-widget.vala:1858
+#: src/client/composer/composer-widget.vala:1855
+#: src/client/composer/composer-widget.vala:1905
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» — порожній файл."
 
-#: src/client/composer/composer-widget.vala:1846
+#: src/client/composer/composer-widget.vala:1893
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Не вдалося знайти «%s»."
 
-#: src/client/composer/composer-widget.vala:1852
+#: src/client/composer/composer-widget.vala:1899
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» — тека."
 
-#: src/client/composer/composer-widget.vala:1871
+#: src/client/composer/composer-widget.vala:1918
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Не вдалося відкрити «%s» для читання."
 
-#: src/client/composer/composer-widget.vala:1879
+#: src/client/composer/composer-widget.vala:1926
 msgid "Cannot add attachment"
 msgstr "Неможливо додати долучення"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:1950
+#: src/client/composer/composer-widget.vala:1997
 msgid "Images"
 msgstr "Зображення"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2014
+#: src/client/composer/composer-widget.vala:2061
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:265 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2020
+#: src/client/composer/composer-widget.vala:2067
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:270 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Копія:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2026
+#: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Потайна копія:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2032
+#: src/client/composer/composer-widget.vala:2079
 msgid "Reply-To: "
 msgstr "Відповісти:"
 
@@ -1774,7 +1774,7 @@ msgstr "Відповісти:"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2150
+#: src/client/composer/composer-widget.vala:2197
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s через %2$s"
@@ -1884,8 +1884,13 @@ msgstr "Показати менше"
 #. number of extra email to be shown.
 #: src/client/conversation-viewer/conversation-message.vala:260
 #, c-format
+#| msgid "%d more…"
 msgid "%d more…"
-msgstr "ще %d…"
+msgid_plural "%d more…"
+msgstr[0] "і ще %d…"
+msgstr[1] "і ще %d…"
+msgstr[2] "і ще %d…"
+msgstr[3] "і ще %d…"
 
 #. Compact headers. These are partially done here and partially
 #. in load_contacts.
@@ -2463,7 +2468,6 @@ msgstr[3] "%s і ще %d"
 #. / use mm/dd/yyyy since it could be confused with
 #. / dd/mm/yyyy) and must include the time zone.
 #: src/client/util/util-email.vala:192
-#| msgid "%a, %b %-e, %Y at %X"
 msgid "%a, %b %-e %Y at %X %Z"
 msgstr "%a, %d.%b.%Y о %X %Z"
 
