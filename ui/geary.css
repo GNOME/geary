@@ -12,8 +12,16 @@
   border-left-width: 0;
   border-top-width: 0;
   border-right-width: 0;
-  min-width: 300px;
 }
+
+.geary-folder-frame {
+  min-width: 250px;
+}
+
+.geary-folder-frame .sidebar .cell {
+  padding: 9px 6px;
+}
+
 .geary-conversation-frame > border {
   border-left-width: 0;
   border-top-width: 0;
