@@ -5,6 +5,8 @@
     <property name="visible">False</property>
     <property name="halign">center</property>
     <property name="valign">start</property>
+    <property name="margin-start">12</property>
+    <property name="margin-end">12</property>
     <signal name="notify::child-revealed" handler="on_child_revealed" swapped="no"/>
     <child>
       <object class="GtkBox" id="layout">
@@ -17,18 +19,21 @@
         <child>
           <object class="GtkLabel" id="message_label">
             <property name="visible">True</property>
+            <property name="wrap">True</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="action_button">
             <property name="visible">False</property>
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="close_button">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="valign">center</property>
             <signal name="clicked" handler="close" swapped="no"/>
             <style>
               <class name="flat"/>

@@ -12,7 +12,7 @@ public class Components.ConversationActionBar : Gtk.Revealer {
     private ulong owner_notify;
 
     [GtkChild]
-    private Gtk.Box action_box;
+    public Gtk.Box action_box;
 
     public ConversationActionBar() {
     }
@@ -23,17 +23,17 @@ public class Components.ConversationActionBar : Gtk.Revealer {
      */
     public void add_conversation_actions(Components.ConversationActions actions) {
         if (actions.owner == this)
-          return;
+            return;
 
         actions.take_ownership(this);
         action_box.pack_start(actions.mark_copy_move_buttons, false, false);
         action_box.pack_end(actions.archive_trash_delete_buttons, false, false);
         reveal_child = true;
         this.owner_notify = actions.notify["owner"].connect(() => {
-           if (actions.owner != this) {
-             reveal_child = false;
-             actions.disconnect (this.owner_notify);
-           }
+            if (actions.owner != this) {
+                reveal_child = false;
+                actions.disconnect (this.owner_notify);
+            }
         });
     }
 }

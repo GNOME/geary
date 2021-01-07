@@ -334,6 +334,10 @@ public class Application.MainWindow :
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild]
+    private Gtk.Box conversation_viewer_box;
+    [GtkChild]
+    private Components.ConversationActionBar conversation_viewer_action_bar;
+    [GtkChild]
     private Gtk.SizeGroup folder_size_group;
     [GtkChild]
     private Gtk.SizeGroup folder_separator_size_group;
@@ -885,7 +889,7 @@ public class Application.MainWindow :
     }
 
     /** Displays an infobar in the window. */
-    public void show_info_bar(Gtk.InfoBar info_bar) {
+    public void show_info_bar(Components.InfoBar info_bar) {
         if (!this.info_bars.has_current) {
             this.info_bars.add(info_bar);
         }
@@ -1266,7 +1270,7 @@ public class Application.MainWindow :
 
         this.conversation_viewer.hexpand = true;
         this.conversation_size_group.add_widget(this.conversation_viewer);
-        this.main_leaflet.add_with_properties(this.conversation_viewer, "name", "conversation", null);
+        this.conversation_viewer_box.add(this.conversation_viewer);
 
 
         // Setup conversation actions
@@ -1279,7 +1283,7 @@ public class Application.MainWindow :
                                                 BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         // Main toolbar
-        this.main_toolbar = new MainToolbar(config);
+        this.main_toolbar = new MainToolbar(config, conversation_viewer_action_bar);
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
                                              this.folder_separator_size_group,
                                              this.conversations_size_group,

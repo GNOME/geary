@@ -157,7 +157,6 @@
                                 <property name="valign">baseline</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">1</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
@@ -218,7 +217,6 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
@@ -263,7 +261,6 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
@@ -328,7 +325,6 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
@@ -373,7 +369,6 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
@@ -418,7 +413,6 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>

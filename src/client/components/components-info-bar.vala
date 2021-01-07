@@ -8,9 +8,9 @@
 /**
  * A standard info bar widget with status message and description.
  */
-public class Components.InfoBar : Gtk.InfoBar {
-
-
+[GtkTemplate (ui = "/org/gnome/Geary/components-info-bar.ui")]
+public class Components.InfoBar : Gtk.Box {
+    public signal void response(int response_id);
     /**
      * A short, human-readable status message.
      *
@@ -26,11 +26,37 @@ public class Components.InfoBar : Gtk.InfoBar {
      */
     public Gtk.Label? description { get; private set; default = null; }
 
+    public bool show_close_button { get; set; default = false;}
+    public bool revealed { get; set; }
+    private Gtk.MessageType _message_type = Gtk.MessageType.OTHER;
+    public Gtk.MessageType message_type {
+        get {
+            return _message_type;
+        }
+        set {
+            _set_message_type(value);
+        }
+    }
 
     private Plugin.InfoBar? plugin = null;
     private string? plugin_action_group_name = null;
     private Gtk.Button? plugin_primary_button = null;
 
+    [GtkChild]
+    private Gtk.Revealer revealer;
+
+    [GtkChild]
+    private Gtk.Box action_area;
+
+    [GtkChild]
+    private Gtk.Box content_area;
+
+    [GtkChild]
+    private Gtk.Button close_button;
+
+    static construct {
+        set_css_name("infobar");
+    }
 
     /**
      * Constructs a new info bar.
@@ -43,6 +69,19 @@ public class Components.InfoBar : Gtk.InfoBar {
     public InfoBar(string status, string? description = null) {
         this.status = new Gtk.Label(status);
         this.status.halign = START;
+        this.status.xalign = 0;
+
+        _set_message_type(Gtk.MessageType.INFO);
+
+        this.bind_property("revealed",
+                           this.revealer,
+                           "reveal-child",
+                           BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
+        this.bind_property("show-close-button",
+                           this.close_button,
+                           "visible",
+                           BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         var attrs = new Pango.AttrList();
         attrs.change(Pango.attr_weight_new(BOLD));
@@ -57,11 +96,8 @@ public class Components.InfoBar : Gtk.InfoBar {
             this.description = new Gtk.Label(description);
             this.description.halign = START;
             this.description.valign = START;
-
-            // Set the description to be ellipsised and set and the
-            // tool-tip to be the same, in case it is too long for the
-            // info bar's width
-            this.description.ellipsize = END;
+            this.description.xalign = 0;
+            this.description.wrap = true;
             this.description.tooltip_text = description;
         }
 
@@ -85,15 +121,28 @@ public class Components.InfoBar : Gtk.InfoBar {
         this.plugin_action_group_name = action_group_name;
         this.show_close_button = plugin.show_close_button;
 
+        _message_type = Gtk.MessageType.OTHER;
+        _set_message_type(Gtk.MessageType.INFO);
+
+        this.bind_property("revealed",
+                           this.revealer,
+                           "reveal-child",
+                           BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
+        this.bind_property("show-close-button",
+                           this.close_button,
+                           "visible",
+                           BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+
         plugin.notify["status"].connect(
             () => { this.status.label = plugin.status; }
-        );
+            );
         plugin.notify["description"].connect(
             () => { this.description.label = plugin.description; }
-        );
+            );
         plugin.notify["primary-button"].connect(
             () => { this.update_plugin_primary_button(); }
-        );
+            );
 
         var secondaries = plugin.secondary_buttons.bidir_list_iterator();
         bool has_prev = secondaries.last();
@@ -108,11 +157,12 @@ public class Components.InfoBar : Gtk.InfoBar {
         show_all();
     }
 
-    /* {@inheritDoc} */
-    public override void response(int response) {
-        if (response == Gtk.ResponseType.CLOSE && this.plugin != null) {
+    [GtkCallback]
+    public void on_close_button_clicked() {
+        if (this.plugin != null) {
             this.plugin.close_activated();
         }
+        response(Gtk.ResponseType.CLOSE);
     }
 
     /* {@inheritDoc} */
@@ -120,10 +170,22 @@ public class Components.InfoBar : Gtk.InfoBar {
         this.plugin = null;
     }
 
-    // GTK 3.24.16 fixed the binding for this, but that and the VAPI
-    // change has yet to trickle down to common distros like F31
-    public new Gtk.Box get_action_area() {
-        return (Gtk.Box) base.get_action_area();
+    public Gtk.Box get_action_area() {
+        return this.action_area;
+    }
+
+    public Gtk.Box get_content_area() {
+        return this.content_area;
+    }
+
+    public Gtk.Button add_button(string button_text, int response_id) {
+        var button = new Gtk.Button.with_mnemonic(button_text);
+        button.clicked.connect(() => {
+            response(response_id);
+        });
+        get_action_area().add(button);
+        button.visible = true;
+        return button;
     }
 
     private void update_plugin_primary_button() {
@@ -162,4 +224,59 @@ public class Components.InfoBar : Gtk.InfoBar {
         return button;
     }
 
+    private void _set_message_type(Gtk.MessageType message_type) {
+        if (this._message_type != message_type) {
+            Gtk.StyleContext context = this.get_style_context();
+            const string[] type_class = {
+                Gtk.STYLE_CLASS_INFO,
+                Gtk.STYLE_CLASS_WARNING,
+                Gtk.STYLE_CLASS_QUESTION,
+                Gtk.STYLE_CLASS_ERROR,
+                null
+            };
+
+            if (type_class[this._message_type] != null)
+                context.remove_class(type_class[this._message_type]);
+
+            this._message_type = message_type;
+
+            var atk_obj = this.get_accessible();
+            if (atk_obj is Atk.Object) {
+                string name = null;
+
+                atk_obj.set_role(Atk.Role.INFO_BAR);
+
+                switch (message_type) {
+                    case Gtk.MessageType.INFO:
+                        name = _("Information");
+                        break;
+
+                    case Gtk.MessageType.QUESTION:
+                        name = _("Question");
+                        break;
+
+                    case Gtk.MessageType.WARNING:
+                        name = _("Warning");
+                        break;
+
+                    case Gtk.MessageType.ERROR:
+                        name = _("Error");
+                        break;
+
+                    case Gtk.MessageType.OTHER:
+                        break;
+
+                    default:
+                        warning("Unknown GtkMessageType %u", message_type);
+                        break;
+                }
+
+                if (name != null)
+                    atk_obj.set_name(name);
+            }
+
+            if (type_class[this._message_type] != null)
+                context.add_class(type_class[this._message_type]);
+        }
+    }
 }

@@ -532,5 +532,4 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             }
         }
     }
-
 }

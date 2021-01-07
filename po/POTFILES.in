@@ -460,6 +460,7 @@ ui/components-attachment-view.ui
 ui/components-conversation-actions.ui
 ui/components-conversation-action-bar.ui
 ui/components-in-app-notification.ui
+ui/components-info-bar.ui
 ui/components-inspector-error-view.ui
 ui/components-inspector-log-view.ui
 ui/components-inspector.ui

@@ -17,6 +17,8 @@ public class MainToolbar : Hdy.Leaflet {
     // Search bar
     public bool search_open { get; set; default = false; }
 
+    private Components.ConversationActionBar conversation_viewer_action_bar;
+
     [GtkChild]
     private Hdy.Leaflet conversations_leaflet;
 
@@ -40,18 +42,21 @@ public class MainToolbar : Hdy.Leaflet {
 
     // Conversation header elements
     [GtkChild]
-    private Gtk.HeaderBar conversation_header;
+    private Components.ConversationHeaderBar conversation_header;
 
     [GtkChild]
     private Hdy.HeaderGroup header_group;
 
     Gtk.SizeGroup conversation_group;
 
-    public MainToolbar(Application.Configuration config) {
+    public MainToolbar(Application.Configuration config,
+                       Components.ConversationActionBar action_bar) {
         if (config.desktop_environment != UNITY) {
             this.bind_property("account", this.conversations_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.conversations_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
+        this.conversation_viewer_action_bar = action_bar;
+        this.conversation_header.action_bar = action_bar;
 
         // Assemble the main/mark menus
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
@@ -61,17 +66,6 @@ public class MainToolbar : Hdy.Leaflet {
         this.main_menu_button.popover = new Gtk.Popover.from_model(null, main_menu);
         this.bind_property("search-open", this.search_conversations_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-    }
-
-    public void add_conversation_actions(Components.ConversationActions actions) {
-        if (actions.owner == this)
-          return;
-
-        actions.take_ownership(this);
-        conversation_header.pack_start(actions.mark_copy_move_buttons);
-        conversation_header.pack_start(actions.reply_forward_buttons);
-        conversation_header.pack_end(actions.find_button);
-        conversation_header.pack_end(actions.archive_trash_delete_buttons);
     }
 
     public void set_conversation_header(Gtk.HeaderBar header) {
@@ -110,5 +104,9 @@ public class MainToolbar : Hdy.Leaflet {
                                     Hdy.SwipeGroup conversation_group) {
         conversations_group.add_swipeable(this.conversations_leaflet);
         conversation_group.add_swipeable(this);
+    }
+
+    public void add_conversation_actions(Components.ConversationActions actions) {
+        conversation_header.add_conversation_actions(actions);
     }
 }
