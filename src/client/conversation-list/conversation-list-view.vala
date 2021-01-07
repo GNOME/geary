@@ -440,6 +440,14 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
                     )
                 );
             }
+            if ((conversation.base_folder.used_as != ARCHIVE) && (conversation.base_folder.used_as != ALL_MAIL)) {
+                context_menu_model.append(
+                    _("Archive conversation"),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_ARCHIVE_CONVERSATION
+                    )
+                );
+            }
 
             Menu actions_section = new Menu();
             actions_section.append(
