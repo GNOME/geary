@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2017-2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2017-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -144,6 +144,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const ActionEntry[] ACTIONS = {
         { Action.Edit.COPY,                on_copy                          },
         { Action.Window.CLOSE,             on_close                         },
+        { Action.Window.SHOW_MENU,         on_show_window_menu              },
         { ACTION_ADD_ATTACHMENT,           on_add_attachment                },
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments           },
         { ACTION_CLOSE,                    on_close                         },
@@ -2438,6 +2439,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_close() {
         conditional_close(this.container is Window);
+    }
+
+    private void on_show_window_menu() {
+        Application.MainWindow main = null;
+        if (this.container != null) {
+            main = this.container.top_window as Application.MainWindow;
+        }
+        if (main != null) {
+            main.show_window_menu();
+        }
     }
 
     private void on_discard() {

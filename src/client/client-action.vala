@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright 2019-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -44,6 +44,7 @@ namespace Action {
 
         public const string CLOSE = "close";
         public const string SHORTCUT_HELP = "show-help-overlay";
+        public const string SHOW_MENU = "show-menu";
 
 
         /** Returns the given action name prefixed with the group name. */
