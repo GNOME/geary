@@ -526,7 +526,7 @@ private abstract class Accounts.EntryRow : AddPaneRow<Gtk.Entry> {
 
         this.value.text = initial_value ?? "";
         this.value.placeholder_text = placeholder ?? "";
-        this.value.width_chars = 32;
+        this.value.width_chars = 16;
 
         this.undo = new Components.EntryUndo(this.value);
     }
