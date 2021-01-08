@@ -109,4 +109,9 @@ public class MainToolbar : Hdy.Leaflet {
     public void add_conversation_actions(Components.ConversationActions actions) {
         conversation_header.add_conversation_actions(actions);
     }
+
+    public void show_main_menu() {
+        this.main_menu_button.clicked();
+    }
+
 }

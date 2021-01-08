@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2019-2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2019-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -400,6 +400,7 @@ public class Application.Client : Gtk.Application {
         add_window_accelerators(
             Action.Window.SHORTCUT_HELP, { "<Ctrl>F1", "<Ctrl>question" }
         );
+        add_window_accelerators(Action.Window.SHOW_MENU, { "F10" });
 
         // Common edit accels
         add_edit_accelerators(Action.Edit.COPY, { "<Ctrl>C" });

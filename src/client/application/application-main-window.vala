@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2016, 2019-2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2016, 2019-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -40,10 +40,12 @@ public class Application.MainWindow :
 
     private const ActionEntry[] WINDOW_ACTIONS = {
         { Action.Window.CLOSE, on_close },
+        { Action.Window.SHOW_MENU, on_show_window_menu },
 
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
         { ACTION_NAVIGATION_BACK, focus_previous_pane},
+
         // Message actions
         { ACTION_REPLY_CONVERSATION, on_reply_conversation },
         { ACTION_REPLY_ALL_CONVERSATION, on_reply_all_conversation },
@@ -878,6 +880,17 @@ public class Application.MainWindow :
             } else {
             }
         }
+    }
+
+    /** Shows the appopriate window menu, if any. */
+    public void show_window_menu() {
+        if (this.main_leaflet.folded) {
+            this.main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        }
+        if (this.conversations_leaflet.folded) {
+            this.conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        }
+        this.main_toolbar.show_main_menu();
     }
 
     /** Displays and focuses the search bar for the window. */
@@ -2248,6 +2261,10 @@ public class Application.MainWindow :
 
     private void on_forward_conversation() {
         this.create_composer_from_viewer.begin(FORWARD);
+    }
+
+    private void on_show_window_menu() {
+        show_window_menu();
     }
 
     private void on_show_copy_menu() {
