@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-01-06 11:01+0000\n"
-"PO-Revision-Date: 2021-01-06 15:54+0200\n"
+"POT-Creation-Date: 2021-01-07 21:37+0000\n"
+"PO-Revision-Date: 2021-01-08 10:26+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -38,7 +38,7 @@ msgstr "Надіслати файли через Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:560
-#: src/client/application/application-main-window.vala:628
+#: src/client/application/application-main-window.vala:632
 msgid "Geary"
 msgstr "Geary"
 
@@ -596,12 +596,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2129
+#: src/client/application/application-main-window.vala:2133
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2112
+#: src/client/application/application-main-window.vala:2116
 msgid "Redo"
 msgstr "Повторити"
 
@@ -696,7 +696,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:574
+#: src/client/application/application-main-window.vala:578
 msgid "Login"
 msgstr "Увійти"
 
@@ -1167,61 +1167,61 @@ msgid "Email to %s discarded"
 msgstr "Повідомлення до %s відкинуто"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:560
+#: src/client/application/application-main-window.vala:564
 msgid "Working offline"
 msgstr "Працюємо у автономному режимі"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:562
+#: src/client/application/application-main-window.vala:566
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Ви не зможете надсилати або отримувати електронну пошту до відновлення "
 "з'єднання із інтернетом."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:569
+#: src/client/application/application-main-window.vala:573
 msgid "Login problem"
 msgstr "Проблеми із входом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:571
+#: src/client/application/application-main-window.vala:575
 msgid "An account has reported an incorrect login or password."
 msgstr ""
 "Сервером облікового запису повідомлено про помилкове ім'я користувача або "
 "пароль."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:578
+#: src/client/application/application-main-window.vala:582
 msgid "Retry login, you will be prompted for your password"
 msgstr ""
 "Під час повторної спроби увійти програма попросить вас ввести ваш пароль"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:585
+#: src/client/application/application-main-window.vala:589
 msgid "Security problem"
 msgstr "Проблема із захистом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:587
+#: src/client/application/application-main-window.vala:591
 msgid "An account has reported an untrusted server."
 msgstr ""
 "Механізмами роботи із обліковими записами повідомлено про ненадійність "
 "сервера."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:590
+#: src/client/application/application-main-window.vala:594
 msgid "Check"
 msgstr "Перевірити"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:594
+#: src/client/application/application-main-window.vala:598
 msgid "Check the security details for the connection"
 msgstr "Перевірте параметри захисту з'єднання"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:637
+#: src/client/application/application-main-window.vala:641
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1229,31 +1229,31 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1019
+#: src/client/application/application-main-window.vala:1023
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1337
+#: src/client/application/application-main-window.vala:1341
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1338
+#: src/client/application/application-main-window.vala:1342
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1339
+#: src/client/application/application-main-window.vala:1343
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1340
+#: src/client/application/application-main-window.vala:1344
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1397
+#: src/client/application/application-main-window.vala:1401
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1261,13 +1261,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1402
-#: src/client/application/application-main-window.vala:1417
+#: src/client/application/application-main-window.vala:1406
+#: src/client/application/application-main-window.vala:1421
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1412
+#: src/client/application/application-main-window.vala:1416
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1275,7 +1275,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1703
+#: src/client/application/application-main-window.vala:1707
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1354,6 +1354,22 @@ msgstr[0] "Вилучити спілкування"
 msgstr[1] "Вилучити спілкування"
 msgstr[2] "Вилучити спілкування"
 msgstr[3] "Вилучити спілкування"
+
+#: src/client/components/components-info-bar.vala:251
+msgid "Information"
+msgstr "Інформація"
+
+#: src/client/components/components-info-bar.vala:255
+msgid "Question"
+msgstr "Питання"
+
+#: src/client/components/components-info-bar.vala:259
+msgid "Warning"
+msgstr "Попередження"
+
+#: src/client/components/components-info-bar.vala:263
+msgid "Error"
+msgstr "Помилка"
 
 #: src/client/components/components-inspector.vala:78
 msgid "Inspector"
@@ -1746,21 +1762,21 @@ msgstr "Зображення"
 #. Translators: Human-readable version of the RFC 822 To header
 #: src/client/composer/composer-widget.vala:2061
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:265 ui/conversation-message.ui:312
+#: src/client/util/util-email.vala:265 ui/conversation-message.ui:309
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
 #: src/client/composer/composer-widget.vala:2067
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:270 ui/conversation-message.ui:357
+#: src/client/util/util-email.vala:270 ui/conversation-message.ui:353
 msgid "Cc:"
 msgstr "Копія:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
 #: src/client/composer/composer-widget.vala:2073
 #: src/client/conversation-viewer/conversation-email.vala:552
-#: ui/conversation-message.ui:402
+#: ui/conversation-message.ui:397
 msgid "Bcc:"
 msgstr "Потайна копія:"
 
@@ -1884,7 +1900,6 @@ msgstr "Показати менше"
 #. number of extra email to be shown.
 #: src/client/conversation-viewer/conversation-message.vala:260
 #, c-format
-#| msgid "%d more…"
 msgid "%d more…"
 msgid_plural "%d more…"
 msgstr[0] "і ще %d…"
@@ -3383,7 +3398,7 @@ msgstr "Ви_брати все"
 msgid "From <email>"
 msgstr "Від <email>"
 
-#: ui/conversation-message.ui:79 ui/conversation-message.ui:178
+#: ui/conversation-message.ui:79 ui/conversation-message.ui:177
 msgid "1/1/1970\t"
 msgstr "1.1.1970\t"
 
@@ -3391,15 +3406,15 @@ msgstr "1.1.1970\t"
 msgid "Preview body text."
 msgstr "Попередній перегляд текстового вмісту."
 
-#: ui/conversation-message.ui:202
+#: ui/conversation-message.ui:201
 msgid "Sent by:"
 msgstr "Відправник:"
 
-#: ui/conversation-message.ui:247
+#: ui/conversation-message.ui:245
 msgid "Reply to:"
 msgstr "Відповідати до:"
 
-#: ui/conversation-message.ui:291
+#: ui/conversation-message.ui:288
 msgid "Subject"
 msgstr "Тема"
 
@@ -3727,7 +3742,7 @@ msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Вставити посилання"
 
-#: ui/main-toolbar.ui:85 ui/main-toolbar.ui:179
+#: ui/main-toolbar.ui:85
 msgid "Back"
 msgstr "Назад"
 
