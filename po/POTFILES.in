@@ -444,7 +444,6 @@ ui/accounts_editor.ui
 ui/accounts_editor_add_pane.ui
 ui/accounts_editor_edit_pane.ui
 ui/accounts_editor_list_pane.ui
-ui/accounts_editor_remove_pane.ui
 ui/accounts_editor_servers_pane.ui
 ui/application-main-window.ui
 ui/certificate_warning_dialog.glade
@@ -458,6 +457,7 @@ ui/components-attachment-pane-menus.ui
 ui/components-attachment-view.ui
 ui/components-conversation-actions.ui
 ui/components-conversation-action-bar.ui
+ui/components-conversation-header-bar.ui
 ui/components-in-app-notification.ui
 ui/components-info-bar.ui
 ui/components-inspector-error-view.ui
