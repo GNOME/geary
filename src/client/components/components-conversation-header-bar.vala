@@ -56,6 +56,7 @@ public class Components.ConversationHeaderBar : Gtk.HeaderBar {
 
             reply_forward_buttons = actions.reply_forward_buttons;
             archive_trash_delete_buttons = actions.archive_trash_delete_buttons;
+            action_bar.reveal_child = get_allocated_width() > 600;
             update_action_bar();
             this.owner_notify = actions.notify["owner"].connect(() => {
                 if (actions.owner != this) {
