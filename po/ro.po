@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-08-27 00:32+0000\n"
-"PO-Revision-Date: 2020-08-27 10:00+0200\n"
+"POT-Creation-Date: 2020-11-10 06:27+0000\n"
+"PO-Revision-Date: 2021-01-14 12:44+0100\n"
 "Last-Translator: Florentina Mușat <emryslokadottir [at] gmail [dot] com>\n"
 "Language-Team: Gnome Romanian Translation Team\n"
 "Language: ro\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Project-Style: gnome\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
@@ -630,12 +630,12 @@ msgstr[1] "acum %d zile"
 msgstr[2] "acum %d de zile"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2061
+#: src/client/application/application-main-window.vala:2066
 msgid "Undo"
 msgstr "Anulează"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2044
+#: src/client/application/application-main-window.vala:2049
 msgid "Redo"
 msgstr "Refă"
 
@@ -963,7 +963,7 @@ msgstr "Lansarea distribuției"
 msgid "Installation prefix"
 msgstr "Prefix de instalare"
 
-#: src/client/application/application-client.vala:558
+#: src/client/application/application-client.vala:559
 #, c-format
 msgid "About %s"
 msgstr "Despre %s"
@@ -971,24 +971,24 @@ msgstr "Despre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:562
+#: src/client/application/application-client.vala:563
 msgid "translator-credits"
 msgstr ""
 "CoolGoose <melipse AT gmail DOT com>\n"
 "Corneliu Dascălu <corneliu DOT dascalu AT gmail DOT com>\n"
 "Viorel-Cătălin Răpițeanu <rapiteanu DOT catalin AT gmail DOT com>\n"
-"Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>, 2019-2020\n"
+"Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>, 2019-2021\n"
 "Florentina Mușat <emryslokadottir [at] gmail [dot] com>, 2020"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1046
+#: src/client/application/application-client.vala:1045
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "Opțiunea „--hidden” este învechită și va fi eliminată în viitor."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1079
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argument pentru program nerecunoscut: „%s”"
@@ -1254,46 +1254,46 @@ msgstr "%s — %s"
 msgid "Labels"
 msgstr "Etichete"
 
-#: src/client/application/application-main-window.vala:1293
+#: src/client/application/application-main-window.vala:1298
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Goliți toate emailurile din dosarul %s?"
 
-#: src/client/application/application-main-window.vala:1294
+#: src/client/application/application-main-window.vala:1299
 msgid "This removes the email from Geary and your email server."
 msgstr "Aceasta elimină emailul din Geary și de pe serverul de email."
 
-#: src/client/application/application-main-window.vala:1295
+#: src/client/application/application-main-window.vala:1300
 msgid "This cannot be undone."
 msgstr "Aceasta nu poate fi anulată."
 
-#: src/client/application/application-main-window.vala:1296
+#: src/client/application/application-main-window.vala:1301
 #, c-format
 msgid "Empty %s"
 msgstr "Golește %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1353
+#: src/client/application/application-main-window.vala:1358
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Doriți să ștergeți permanent această conversație?"
 msgstr[1] "Doriți să ștergeți permanent aceste conversații?"
 msgstr[2] "Doriți să ștergeți permanent aceste conversații?"
 
-#: src/client/application/application-main-window.vala:1358
-#: src/client/application/application-main-window.vala:1373
+#: src/client/application/application-main-window.vala:1363
+#: src/client/application/application-main-window.vala:1378
 msgid "Delete"
 msgstr "Șterge"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1368
+#: src/client/application/application-main-window.vala:1373
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Doriți să ștergeți permanent acest mesaj?"
 msgstr[1] "Doriți să ștergeți permanent aceste mesaje?"
 msgstr[2] "Doriți să ștergeți permanent aceste mesaje?"
 
-#: src/client/application/application-main-window.vala:1691
+#: src/client/application/application-main-window.vala:1696
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1304,7 +1304,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1989
+#: src/client/composer/composer-widget.vala:1787
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1355,7 +1355,7 @@ msgstr "Salvează ca"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/accounts_editor_servers_pane.ui:17
+#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
 msgid "Cancel"
 msgstr "Anulează"
 
@@ -1476,22 +1476,6 @@ msgstr "Vizualizează detaliile tehnice despre eroare"
 msgid "_Retry"
 msgstr "_Reîncearcă"
 
-#: src/client/components/components-reflow-box.c:454
-msgid "Spacing"
-msgstr "Spațiere"
-
-#: src/client/components/components-reflow-box.c:455
-msgid "Spacing between children"
-msgstr "Spațierea dintre copii"
-
-#: src/client/components/components-reflow-box.c:470
-msgid "Row spacing"
-msgstr "Spațierea dintre rânduri"
-
-#: src/client/components/components-reflow-box.c:471
-msgid "Spacing between rows of children"
-msgstr "Spațierea dintre rânduri de copii"
-
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
@@ -1601,7 +1585,7 @@ msgid "_OK"
 msgstr "_OK"
 
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:388
+#: src/client/plugin/mail-merge/mail-merge.vala:392
 #: ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "_Anulează"
@@ -1627,7 +1611,7 @@ msgid "_Help"
 msgstr "_Ajutor"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:387
+#: src/client/plugin/mail-merge/mail-merge.vala:391
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Deschide"
@@ -1658,6 +1642,10 @@ msgstr "_Salvează"
 msgid "_Keep"
 msgstr "_Păstrează"
 
+#: src/client/composer/composer-editor.vala:675
+msgid "Select Color"
+msgstr "Selectează culoarea"
+
 #: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "Legătura URL nu este formatată corect; ex. http://exemplu.ro"
@@ -1671,23 +1659,23 @@ msgid "Invalid email address"
 msgstr "Adresă de email nevalidă"
 
 #. / Translators: Title for an empty composer window
-#: src/client/composer/composer-widget.vala:35
+#: src/client/composer/composer-widget.vala:32
 msgid "New Message"
 msgstr "Mesaj nou"
 
-#: src/client/composer/composer-widget.vala:239
+#: src/client/composer/composer-widget.vala:167
 msgid "Saved"
 msgstr "Salvat"
 
-#: src/client/composer/composer-widget.vala:240
+#: src/client/composer/composer-widget.vala:168
 msgid "Saving"
 msgstr "Se salvează"
 
-#: src/client/composer/composer-widget.vala:241
+#: src/client/composer/composer-widget.vala:169
 msgid "Error saving"
 msgstr "Salvare eșuată"
 
-#: src/client/composer/composer-widget.vala:242
+#: src/client/composer/composer-widget.vala:170
 msgid "Press Backspace to delete quote"
 msgstr "Apăsați Backspace pentru a șterge citatul"
 
@@ -1696,7 +1684,7 @@ msgstr "Apăsați Backspace pentru a șterge citatul"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:258
+#: src/client/composer/composer-widget.vala:186
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1708,108 +1696,104 @@ msgstr ""
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:997
+#: src/client/composer/composer-widget.vala:865
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Păstrați sau renunțați la acest mesaj de tip ciornă?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:1023
+#: src/client/composer/composer-widget.vala:891
 msgid "Do you want to discard this draft message?"
 msgstr "Renunțați la acest mesaj de tip ciornă?"
 
-#: src/client/composer/composer-widget.vala:1645
+#: src/client/composer/composer-widget.vala:1443
 msgid "Send message with an empty subject and body?"
 msgstr "Trimiteți mesajul fără subiect și conținut?"
 
-#: src/client/composer/composer-widget.vala:1647
+#: src/client/composer/composer-widget.vala:1445
 msgid "Send message with an empty subject?"
 msgstr "Trimiteți mesajul fără subiect?"
 
-#: src/client/composer/composer-widget.vala:1649
+#: src/client/composer/composer-widget.vala:1447
 msgid "Send message with an empty body?"
 msgstr "Trimiteți mesajul fără conținut?"
 
-#: src/client/composer/composer-widget.vala:1658
+#: src/client/composer/composer-widget.vala:1456
 msgid "Send message without an attachment?"
 msgstr "Trimiteți mesajul fără niciun fișier atașat?"
 
-#: src/client/composer/composer-widget.vala:1977
+#: src/client/composer/composer-widget.vala:1775
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "„%s” este deja atașat pentru livrare."
 
-#: src/client/composer/composer-widget.vala:2009
-#: src/client/composer/composer-widget.vala:2059
+#: src/client/composer/composer-widget.vala:1807
+#: src/client/composer/composer-widget.vala:1857
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” este un fișier gol."
 
-#: src/client/composer/composer-widget.vala:2047
+#: src/client/composer/composer-widget.vala:1845
 #, c-format
 msgid "“%s” could not be found."
 msgstr "„%s” nu a putut fi găsit."
 
-#: src/client/composer/composer-widget.vala:2053
+#: src/client/composer/composer-widget.vala:1851
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” este un dosar."
 
-#: src/client/composer/composer-widget.vala:2072
+#: src/client/composer/composer-widget.vala:1870
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "„%s” nu a putut fi deschis pentru citire."
 
-#: src/client/composer/composer-widget.vala:2080
+#: src/client/composer/composer-widget.vala:1878
 msgid "Cannot add attachment"
 msgstr "Nu se poate atașa fișierul"
 
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: src/client/composer/composer-widget.vala:1949
+msgid "Images"
+msgstr "Imagini"
+
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2140
+#: src/client/composer/composer-widget.vala:2013
 #: src/client/conversation-viewer/conversation-email.vala:542
 #: src/client/util/util-email.vala:249 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Către:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2146
+#: src/client/composer/composer-widget.vala:2019
 #: src/client/conversation-viewer/conversation-email.vala:547
 #: src/client/util/util-email.vala:254 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2152
+#: src/client/composer/composer-widget.vala:2025
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2158
+#: src/client/composer/composer-widget.vala:2031
 msgid "Reply-To: "
 msgstr "Răspunde la: "
-
-#: src/client/composer/composer-widget.vala:2410
-msgid "Select Color"
-msgstr "Selectează culoarea"
 
 #. Displayed in the From dropdown to indicate an
 #. "alternate email address" for an account.  The first
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2599
+#: src/client/composer/composer-widget.vala:2149
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
-
-#. Translators: This is the name of the file chooser filter
-#. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2959
-msgid "Images"
-msgstr "Imagini"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
@@ -2252,7 +2236,7 @@ msgstr "Trimite"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:332
+#: src/client/plugin/mail-merge/mail-merge.vala:336
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Editare"
@@ -2264,9 +2248,9 @@ msgstr "Editare"
 #. Translators: The name of the folder used to
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
-#: src/client/plugin/mail-merge/mail-merge.vala:284
-#: src/client/plugin/mail-merge/mail-merge.vala:385
-#: src/client/plugin/mail-merge/mail-merge.vala:484
+#: src/client/plugin/mail-merge/mail-merge.vala:288
+#: src/client/plugin/mail-merge/mail-merge.vala:389
+#: src/client/plugin/mail-merge/mail-merge.vala:488
 msgid "Mail Merge"
 msgstr "Îmbină mail"
 
@@ -2289,31 +2273,34 @@ msgstr "Pauză"
 #. Translators: Info bar description for the mail merge
 #. folder. The first string substitution the number of email
 #. already sent, the second is the total number to send.
-#: src/client/plugin/mail-merge/mail-merge.vala:239
+#: src/client/plugin/mail-merge/mail-merge.vala:240
 #, c-format
 msgid "Sent %u of %u"
-msgstr "Trimis %u din %u"
+msgid_plural "Sent %u of %u"
+msgstr[0] "Trimis %u din %u"
+msgstr[1] "Trimis %u din %u"
+msgstr[2] "Trimis %u din %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:320
+#: src/client/plugin/mail-merge/mail-merge.vala:324
 msgid "Mail merge template"
 msgstr "Șablon de îmbinare email"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:328
 msgid "Merge"
 msgstr "Îmbină"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:373
+#: src/client/plugin/mail-merge/mail-merge.vala:377
 msgid "Insert field"
 msgstr "Introdu un câmp"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:396
 msgid "Comma separated values (CSV)"
 msgstr "Valori separate prin virgulă (CSV)"
 
@@ -2748,7 +2735,7 @@ msgstr "necitit"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:996
+#: src/engine/imap-engine/imap-engine-generic-account.vala:998
 msgid "Drafts | Draft"
 msgstr "Drafts | Draft | Ciorne | Ciornă"
 
@@ -2756,14 +2743,14 @@ msgstr "Drafts | Draft | Ciorne | Ciornă"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1005
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1007
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Sent | Sent Mail | Sent Email | Sent E-Mail | Trimise | Emailuri Trimise"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1010
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1012
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elemente trimise"
@@ -2772,7 +2759,7 @@ msgstr "Elemente trimise"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1022
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2784,13 +2771,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1032
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Rubbish | Rubbish Bin | Gunoi | Coșul de guni"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1035
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1037
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elemente șterse"
@@ -2799,7 +2786,7 @@ msgstr "Elemente șterse"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1047
 msgid "Archive | Archives"
 msgstr "Archive | Archives | Arhivă | Arhive"
 
@@ -2918,6 +2905,168 @@ msgstr "Am încredere în aces_t server"
 msgid "_Don’t Trust This Server"
 msgstr "Nu am încre_dere în acest server"
 
+#: ui/composer-editor.ui:100
+msgid "Bold text"
+msgstr "Text aldin"
+
+#: ui/composer-editor.ui:124
+msgid "Italic text"
+msgstr "Text italic"
+
+#: ui/composer-editor.ui:148
+msgid "Underline text"
+msgstr "Text subliniat"
+
+#: ui/composer-editor.ui:172
+msgid "Strikethrough text"
+msgstr "Text tăiat"
+
+#: ui/composer-editor.ui:205
+msgid "Insert bulleted list"
+msgstr "Introdu listă cu puncte"
+
+#: ui/composer-editor.ui:229
+msgid "Insert numbered list"
+msgstr "Introdu listă cu numere"
+
+#: ui/composer-editor.ui:262
+msgid "Indent or quote text"
+msgstr "Indentează sau citează textul"
+
+#: ui/composer-editor.ui:286
+msgid "Un-indent or unquote text"
+msgstr "Nu indenta sau cita textul"
+
+#: ui/composer-editor.ui:315
+msgid "Remove text formatting"
+msgstr "Elimină formatarea textului"
+
+#: ui/composer-editor.ui:334
+msgid "Change font type"
+msgstr "Modifică tipul de font"
+
+#: ui/composer-editor.ui:349
+msgid "Sans Serif"
+msgstr "Fără serife"
+
+#: ui/composer-editor.ui:360
+msgid "Serif"
+msgstr "Cu serife"
+
+#: ui/composer-editor.ui:371
+msgid "Fixed Width"
+msgstr "Lățime fixă"
+
+#: ui/composer-editor.ui:397
+msgid "Change font color"
+msgstr "Modifică culoarea fontului"
+
+#: ui/composer-editor.ui:412
+msgid "Change font size"
+msgstr "Modifică dimensiunea fontului"
+
+#: ui/composer-editor.ui:447
+msgid "Insert or update text link"
+msgstr "Introdu sau actualizează legătura textului"
+
+#: ui/composer-editor.ui:471
+msgid "Insert an image"
+msgstr "Introdu o imagine"
+
+#: ui/composer-editor.ui:513
+msgid "Undo last edit"
+msgstr "Refă ultima editare"
+
+#: ui/composer-editor.ui:537
+msgid "Redo last edit"
+msgstr "Repetă ultima editare"
+
+#: ui/composer-editor.ui:566 ui/composer-editor.ui:591
+msgid "Attach a file"
+msgstr "Atașează un fișier"
+
+#: ui/composer-editor.ui:615
+msgid "Add original attachments"
+msgstr "Adaugă atașamentele originale"
+
+#: ui/composer-editor.ui:660
+msgid "More options"
+msgstr "Mai multe opțiuni"
+
+#: ui/composer-editor.ui:680
+msgid "Show formatting toolbar"
+msgstr "Arată bara de unelte de formatare"
+
+#: ui/composer-editor.ui:698
+msgid "Select spell checking languages"
+msgstr "Selectați limbile pentru corectarea ortografică"
+
+#: ui/composer-editor.ui:723
+msgid "S_ans Serif"
+msgstr "Fără s_erife"
+
+#: ui/composer-editor.ui:728
+msgid "S_erif"
+msgstr "Cu s_erife"
+
+#: ui/composer-editor.ui:733
+msgid "_Fixed Width"
+msgstr "Lățime _fixă"
+
+#: ui/composer-editor.ui:743
+msgid "_Small"
+msgstr "_Mic"
+
+#: ui/composer-editor.ui:748
+msgid "_Medium"
+msgstr "_Mediu"
+
+#: ui/composer-editor.ui:753
+msgid "Lar_ge"
+msgstr "Ma_re"
+
+#: ui/composer-editor.ui:763
+msgid "_Rich Text"
+msgstr "Text cu fo_rmatare"
+
+#: ui/composer-editor.ui:768
+msgid "_Plain Text"
+msgstr "Text _simplu"
+
+#: ui/composer-editor-menus.ui:8
+msgid "_Undo"
+msgstr "An_ulează"
+
+#: ui/composer-editor-menus.ui:12
+msgid "_Redo"
+msgstr "_Refă"
+
+#: ui/composer-editor-menus.ui:18 ui/composer-editor-menus.ui:36
+msgid "Cu_t"
+msgstr "_Taie"
+
+#: ui/composer-editor-menus.ui:22 ui/composer-editor-menus.ui:40
+#: ui/conversation-message-menus.ui:37
+msgid "_Copy"
+msgstr "_Copiază"
+
+#: ui/composer-editor-menus.ui:26 ui/composer-editor-menus.ui:44
+msgid "_Paste"
+msgstr "Li_pește"
+
+#: ui/composer-editor-menus.ui:30
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Lipește _fără formatare"
+
+#: ui/composer-editor-menus.ui:50
+msgid "Select _All"
+msgstr "Selectează t_ot"
+
+#: ui/composer-editor-menus.ui:57 ui/conversation-message-menus.ui:43
+msgid "_Inspect…"
+msgstr "_Inspectează…"
+
 #: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
 msgid "Detach the composer from the window"
 msgstr "Detașează compunătorul de fereastră"
@@ -2960,40 +3109,6 @@ msgstr "Actualizează"
 msgid "Delete this link"
 msgstr "Șterge această legătură"
 
-#: ui/composer-menus.ui:8
-msgid "_Undo"
-msgstr "An_ulează"
-
-#: ui/composer-menus.ui:12
-msgid "_Redo"
-msgstr "_Refă"
-
-#: ui/composer-menus.ui:18 ui/composer-menus.ui:36
-msgid "Cu_t"
-msgstr "_Taie"
-
-#: ui/composer-menus.ui:22 ui/composer-menus.ui:40
-#: ui/conversation-message-menus.ui:37
-msgid "_Copy"
-msgstr "_Copiază"
-
-#: ui/composer-menus.ui:26 ui/composer-menus.ui:44
-msgid "_Paste"
-msgstr "Li_pește"
-
-#: ui/composer-menus.ui:30
-msgctxt "Clipboard paste as plain text"
-msgid "Paste _Without Formatting"
-msgstr "Lipește _fără formatare"
-
-#: ui/composer-menus.ui:50
-msgid "Select _All"
-msgstr "Selectează t_ot"
-
-#: ui/composer-menus.ui:57 ui/conversation-message-menus.ui:43
-msgid "_Inspect…"
-msgstr "_Inspectează…"
-
 #. Geary account mail will be sent from
 #: ui/composer-widget.ui:61
 msgid "_From"
@@ -3031,134 +3146,6 @@ msgstr "Trage fișiere aici"
 #: ui/composer-widget.ui:462
 msgid "To add them as attachments"
 msgstr "Pentru a le atașa"
-
-#: ui/composer-widget.ui:615
-msgid "Bold text"
-msgstr "Text aldin"
-
-#: ui/composer-widget.ui:639
-msgid "Italic text"
-msgstr "Text italic"
-
-#: ui/composer-widget.ui:663
-msgid "Underline text"
-msgstr "Text subliniat"
-
-#: ui/composer-widget.ui:687
-msgid "Strikethrough text"
-msgstr "Text tăiat"
-
-#: ui/composer-widget.ui:720
-msgid "Insert bulleted list"
-msgstr "Introdu listă cu puncte"
-
-#: ui/composer-widget.ui:744
-msgid "Insert numbered list"
-msgstr "Introdu listă cu numere"
-
-#: ui/composer-widget.ui:777
-msgid "Indent or quote text"
-msgstr "Indentează sau citează textul"
-
-#: ui/composer-widget.ui:801
-msgid "Un-indent or unquote text"
-msgstr "Nu indenta sau cita textul"
-
-#: ui/composer-widget.ui:830
-msgid "Remove text formatting"
-msgstr "Elimină formatarea textului"
-
-#: ui/composer-widget.ui:849
-msgid "Change font type"
-msgstr "Modifică tipul de font"
-
-#: ui/composer-widget.ui:864
-msgid "Sans Serif"
-msgstr "Fără serife"
-
-#: ui/composer-widget.ui:875
-msgid "Serif"
-msgstr "Cu serife"
-
-#: ui/composer-widget.ui:886
-msgid "Fixed Width"
-msgstr "Lățime fixă"
-
-#: ui/composer-widget.ui:912
-msgid "Change font color"
-msgstr "Modifică culoarea fontului"
-
-#: ui/composer-widget.ui:927
-msgid "Change font size"
-msgstr "Modifică dimensiunea fontului"
-
-#: ui/composer-widget.ui:962
-msgid "Insert or update text link"
-msgstr "Introdu sau actualizează legătura textului"
-
-#: ui/composer-widget.ui:986
-msgid "Insert an image"
-msgstr "Introdu o imagine"
-
-#: ui/composer-widget.ui:1028
-msgid "Undo last edit"
-msgstr "Refă ultima editare"
-
-#: ui/composer-widget.ui:1052
-msgid "Redo last edit"
-msgstr "Repetă ultima editare"
-
-#: ui/composer-widget.ui:1081 ui/composer-widget.ui:1106
-msgid "Attach a file"
-msgstr "Atașează un fișier"
-
-#: ui/composer-widget.ui:1130
-msgid "Add original attachments"
-msgstr "Adaugă atașamentele originale"
-
-#: ui/composer-widget.ui:1175
-msgid "More options"
-msgstr "Mai multe opțiuni"
-
-#: ui/composer-widget.ui:1195
-msgid "Show formatting toolbar"
-msgstr "Arată bara de unelte de formatare"
-
-#: ui/composer-widget.ui:1213
-msgid "Select spell checking languages"
-msgstr "Selectați limbile pentru corectarea ortografică"
-
-#: ui/composer-widget.ui:1273
-msgid "S_ans Serif"
-msgstr "Fără s_erife"
-
-#: ui/composer-widget.ui:1278
-msgid "S_erif"
-msgstr "Cu s_erife"
-
-#: ui/composer-widget.ui:1283
-msgid "_Fixed Width"
-msgstr "Lățime _fixă"
-
-#: ui/composer-widget.ui:1293
-msgid "_Small"
-msgstr "_Mic"
-
-#: ui/composer-widget.ui:1298
-msgid "_Medium"
-msgstr "_Mediu"
-
-#: ui/composer-widget.ui:1303
-msgid "Lar_ge"
-msgstr "Ma_re"
-
-#: ui/composer-widget.ui:1313
-msgid "_Rich Text"
-msgstr "Text cu fo_rmatare"
-
-#: ui/composer-widget.ui:1318
-msgid "_Plain Text"
-msgstr "Text _simplu"
 
 #: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
 msgid "Select all attachments"
@@ -3778,6 +3765,18 @@ msgstr "_Autentificare"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "În curs de actualizare Geary…"
+
+#~ msgid "Spacing"
+#~ msgstr "Spațiere"
+
+#~ msgid "Spacing between children"
+#~ msgstr "Spațierea dintre copii"
+
+#~ msgid "Row spacing"
+#~ msgstr "Spațierea dintre rânduri"
+
+#~ msgid "Spacing between rows of children"
+#~ msgstr "Spațierea dintre rânduri de copii"
 
 #~ msgid "Desktop Notifications"
 #~ msgstr "Înștiințări deskop"
