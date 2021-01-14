@@ -14,7 +14,6 @@ client_vala_sources = files(
   'application/application-account-context.vala',
   'application/application-account-interface.vala',
   'application/application-attachment-manager.vala',
-  'application/application-avatar-store.vala',
   'application/application-certificate-manager.vala',
   'application/application-client.vala',
   'application/application-command.vala',

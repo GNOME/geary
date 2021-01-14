@@ -60,9 +60,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkImage" id="avatar">
+                  <object class="HdyAvatar" id="avatar">
                     <property name="visible">True</property>
-                    <property name="pixel_size">48</property>
+                    <property name="can_focus">False</property>
+                    <property name="show-initials">True</property>
+                    <property name="size">48</property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>

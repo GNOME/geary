@@ -97,7 +97,7 @@ public class Plugin.DesktopNotifications :
                                                Email email
     ) throws GLib.Error {
         string title = to_notitication_title(folder.account, total);
-        Gdk.Pixbuf? icon = null;
+        GLib.Icon icon = null;
         Geary.RFC822.MailboxAddress? originator = email.get_primary_originator();
         if (originator != null) {
             ContactStore contacts =
@@ -112,19 +112,7 @@ public class Plugin.DesktopNotifications :
                 : originator.to_short_display()
             );
 
-            int window_scale = 1;
-            Gdk.Display? display = Gdk.Display.get_default();
-            if (display != null) {
-                Gdk.Monitor? monitor = display.get_primary_monitor();
-                if (monitor != null) {
-                    window_scale = monitor.scale_factor;
-                }
-            }
-            icon = yield contact.load_avatar(
-                originator,
-                global::Application.Client.AVATAR_SIZE_PIXELS * window_scale,
-                this.cancellable
-            );
+            icon = contact.avatar;
         }
 
         string body = Util.Email.strip_subject_prefixes(email);
@@ -144,10 +132,24 @@ public class Plugin.DesktopNotifications :
             );
         }
 
+        int window_scale = 1;
+        Gdk.Display? display = Gdk.Display.get_default();
+        if (display != null) {
+          Gdk.Monitor? monitor = display.get_primary_monitor();
+          if (monitor != null) {
+            window_scale = monitor.scale_factor;
+          }
+        }
+
+        var avatar = new Hdy.Avatar(32, title, true);
+        avatar.loadable_icon = icon as GLib.LoadableIcon;
+        icon = yield avatar.draw_to_pixbuf_async(32, window_scale, null);
+
         issue_arrived_notification(title, body, icon, folder, email.identifier);
     }
 
     private void notify_general(Folder folder, int total, int added) {
+        GLib.Icon icon = new GLib.ThemedIcon("%s-symbolic".printf(global::Application.Client.APP_ID));
         string title = to_notitication_title(folder.account, total);
         string body = ngettext(
             /// Notification body when multiple messages have been
@@ -170,12 +172,12 @@ public class Plugin.DesktopNotifications :
             ).printf(body, total);
         }
 
-        issue_arrived_notification(title, body, null, folder, null);
+        issue_arrived_notification(title, body, icon, folder, null);
     }
 
     private void issue_arrived_notification(string summary,
                                             string body,
-                                            Gdk.Pixbuf? icon,
+                                            GLib.Icon icon,
                                             Folder folder,
                                             EmailIdentifier? id) {
         // only one outstanding notification at a time
@@ -204,15 +206,9 @@ public class Plugin.DesktopNotifications :
     private GLib.Notification issue_notification(string id,
                                                  string summary,
                                                  string body,
-                                                 Gdk.Pixbuf? avatar,
+                                                 GLib.Icon icon,
                                                  string? action,
                                                  GLib.Variant? action_target) {
-        GLib.Icon icon = avatar;
-        if (avatar == null) {
-            icon = new GLib.ThemedIcon(
-                "%s-symbolic".printf(global::Application.Client.APP_ID)
-            );
-        }
         GLib.Notification notification = new GLib.Notification(summary);
         notification.set_body(body);
         notification.set_icon(icon);
