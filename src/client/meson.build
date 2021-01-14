@@ -192,6 +192,10 @@ client_vala_args += [
   )
 ]
 
+if webkit2gtk.version().version_compare('<2.31')
+  client_vala_args += [ '--define=WEBKIT_PLUGINS_SUPPORTED' ]
+endif
+
 # Main client application library
 client_lib = shared_library(
   client_package,
