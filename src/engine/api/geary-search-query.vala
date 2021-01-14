@@ -121,32 +121,6 @@ public abstract class Geary.SearchQuery : BaseObject {
             return max;
         }
 
-        /**
-         * Maximum difference in lengths between a matched word and the stemmed variant it matched
-         * against.
-         *
-         * This prevents long words being matched to short stem
-         * variants (which creates opportunities for greedy matching).
-         */
-        internal int get_max_difference_match_stem_lengths() {
-            var max = 0;
-            switch (this) {
-            case EXACT:
-                max = 0;
-                break;
-            case CONSERVATIVE:
-                max = 2;
-                break;
-            case AGGRESSIVE:
-                max = 3;
-                break;
-            case HORIZON:
-                max = int.MAX;
-                break;
-            }
-            return max;
-        }
-
     }
 
 

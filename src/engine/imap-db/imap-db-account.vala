@@ -633,65 +633,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
 
         debug("Matching emails found: %d", matching_ids.size);
-
-        if (query.has_stemmed_terms && search_matches != null) {
-            strip_greedy_results(query, matching_ids, search_matches);
-        }
-
-        debug("Final search matches: %d", matching_ids.size);
         return matching_ids.is_empty ? null : matching_ids;
-    }
-
-    // Strip out from the given collection of matching ids and results
-    // for any search results that only contain a hit due to "greedy"
-    // matching of the stemmed variants on all search terms.
-    private void strip_greedy_results(SearchQuery query,
-                                      Gee.Collection<EmailIdentifier> matches,
-                                      Gee.Map<EmailIdentifier,Gee.Set<string>> results) {
-        int prestripped_results = matches.size;
-        // Gee.Iterator<EmailIdentifier> iter = matches.iterator();
-        // while (iter.next()) {
-        //     // For each matched string in this message, retain the message in the search results
-        //     // if it prefix-matches any of the straight-up parsed terms or matches a stemmed
-        //     // variant (with only max. difference in their lengths allowed, i.e. not a "greedy"
-        //     // match)
-        //     EmailIdentifier id = iter.get();
-        //     bool good_match_found = false;
-        //     Gee.Set<string>? result = results.get(id);
-        //     if (result != null) {
-        //         foreach (string match in result) {
-        //             foreach (SearchQuery.Term term in query.get_all_terms()) {
-        //                 // if prefix-matches parsed term, then don't strip
-        //                 if (match.has_prefix(term.parsed)) {
-        //                     good_match_found = true;
-        //                     break;
-        //                 }
-
-        //                 // if prefix-matches stemmed term w/o doing so
-        //                 // greedily, then don't strip
-        //                 if (term.stemmed != null && match.has_prefix(term.stemmed)) {
-        //                     int diff = match.length - term.stemmed.length;
-        //                     if (diff <= query.max_difference_match_stem_lengths) {
-        //                         good_match_found = true;
-        //                         break;
-        //                     }
-        //                 }
-        //             }
-        //         }
-
-        //         if (good_match_found) {
-        //             break;
-        //         }
-        //     }
-
-        //     if (!good_match_found) {
-        //         iter.remove();
-        //         matches.remove(id);
-        //     }
-        // }
-
-        debug("Stripped %d emails from search for [%s] due to greedy stem matching",
-              prestripped_results - matches.size, query.raw);
     }
 
     public async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery q,
@@ -712,10 +654,6 @@ private class Geary.ImapDB.Account : BaseObject {
             }
             if (match_map == null || match_map.size == 0) {
                 return Db.TransactionOutcome.DONE;
-            }
-
-            if (query.has_stemmed_terms) {
-                strip_greedy_results(query, ids, match_map);
             }
 
             search_matches = new Gee.HashSet<string>();
