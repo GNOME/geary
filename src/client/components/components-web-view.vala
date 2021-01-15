@@ -296,9 +296,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** Emitted when the web view's content has changed. */
     public signal void document_modified();
 
-    /** Emitted when the view's selection has changed. */
-    public signal void selection_changed(bool has_selection);
-
     /** Emitted when a user clicks a link in the view. */
     public signal void link_activated(string uri);
 
@@ -801,7 +798,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_selection_changed(GLib.Variant? parameters) {
         if (parameters != null && parameters.classify() == BOOLEAN) {
-            selection_changed(parameters.get_boolean());
+            this.has_selection = parameters.get_boolean();
         } else {
             warning("Could not get JS selection value");
         }

@@ -499,10 +499,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         content_loaded();
     }
 
-    private void trigger_selection_changed(bool has_selection) {
-        selection_changed(has_selection);
-    }
-
     private ConversationMessage(Geary.EmailHeaderSet headers,
                                 string? preview,
                                 bool load_remote_resources,
@@ -616,13 +612,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 on_link_activated(new GLib.Variant("s", link));
             });
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
+        this.web_view.notify["has-selection"].connect(on_selection_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
         this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
-        this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
         this.web_view.content_loaded.connect(trigger_content_loaded);
-        this.web_view.selection_changed.connect(trigger_selection_changed);
         this.web_view.set_hexpand(true);
         this.web_view.set_vexpand(true);
         this.web_view.show();
@@ -1431,8 +1426,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         link_popover.popup();
     }
 
-    private void on_selection_changed(bool has_selection) {
-        set_action_enabled(ACTION_COPY_SELECTION, has_selection);
+    private void on_selection_changed() {
+        set_action_enabled(ACTION_COPY_SELECTION, this.web_view.has_selection);
+        selection_changed(this.web_view.has_selection);
     }
 
     private void on_remote_images_blocked() {
