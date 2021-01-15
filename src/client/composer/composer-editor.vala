@@ -168,7 +168,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         this.body.cursor_context_changed.connect(on_cursor_context_changed);
         this.body.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         this.body.mouse_target_changed.connect(on_mouse_target_changed);
-        this.body.selection_changed.connect(on_selection_changed);
+        this.body.notify["has-selection"].connect(on_selection_changed);
         this.body.set_hexpand(true);
         this.body.set_vexpand(true);
         this.body.show();
@@ -534,7 +534,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         get_action(Action.Edit.REDO).set_enabled(can_redo);
     }
 
-    private void on_selection_changed(bool has_selection) {
+    private void on_selection_changed() {
         update_cursor_actions();
     }
 
@@ -624,9 +624,9 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
                 // the URL entry, then the editor will lose its
                 // selection, the inset link action will become
                 // disabled, and the popover will disappear
-                this.body.selection_changed.disconnect(on_selection_changed);
+                this.body.notify["has-selection"].disconnect(on_selection_changed);
                 popover.closed.connect(() => {
-                        this.body.selection_changed.connect(on_selection_changed);
+                        this.body.notify["has-selection"].connect(on_selection_changed);
                         style.set_state(NORMAL);
                     });
 

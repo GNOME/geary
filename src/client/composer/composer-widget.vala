@@ -1145,10 +1145,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private void on_content_loaded() {
         this.update_signature.begin(null);
         if (this.can_delete_quote) {
-            this.editor.body.selection_changed.connect(
-                () => {
-                    this.can_delete_quote = false;
-                }
+            this.editor.body.notify["has-selection"].connect(
+                () => { this.can_delete_quote = false; }
             );
         }
     }
