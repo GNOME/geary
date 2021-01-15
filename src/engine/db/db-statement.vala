@@ -4,8 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private extern string? sqlite3_expanded_sql(Sqlite.Statement stmt);
-
 
 public class Geary.Db.Statement : Context {
 
@@ -47,14 +45,15 @@ public class Geary.Db.Statement : Context {
         this.sql = sql;
         throw_on_error(
             "Statement.ctor",
-            connection.db.prepare_v2(sql, -1, out stmt, null),
-            sql
+            connection.db.prepare_v2(sql, -1, out stmt, null)
         );
     }
 
     /** Returns SQL for the statement with bound parameters expanded. */
     public string? get_expanded_sql() {
-        return this.stmt.expanded_sql();
+        // The statement may be null if throw_on_error() in the ctor
+        // does actually throw an error
+        return (this.stmt != null) ? this.stmt.expanded_sql() : null;
     }
 
     /**
@@ -122,8 +121,11 @@ public class Geary.Db.Statement : Context {
      * row in the result set.  If empty, Result.finished will be true.
      */
     public Result exec(Cancellable? cancellable = null) throws Error {
-        Result results = new Result(this, cancellable);
+        if (Db.Context.enable_sql_logging) {
+            debug(this.get_expanded_sql());
+        }
 
+        Result results = new Result(this, cancellable);
         executed();
 
         return results;
@@ -136,6 +138,10 @@ public class Geary.Db.Statement : Context {
      * See Connection.last_insert_rowid.
      */
     public int64 exec_insert(Cancellable? cancellable = null) throws Error {
+        if (Db.Context.enable_sql_logging) {
+            debug(this.get_expanded_sql());
+        }
+
         new Result(this, cancellable);
         int64 rowid = connection.last_insert_rowid;
 
@@ -153,6 +159,10 @@ public class Geary.Db.Statement : Context {
      * See Connection.last_modified_rows.
      */
     public int exec_get_modified(Cancellable? cancellable = null) throws Error {
+        if (Db.Context.enable_sql_logging) {
+            debug(this.get_expanded_sql());
+        }
+
         new Result(this, cancellable);
         int modified = connection.last_modified_rows;
 

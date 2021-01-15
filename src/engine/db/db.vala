@@ -114,13 +114,19 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
         ? "(%s %s) ".printf(method, ctx.get_database().path)
         : "(%s) ".printf(ctx.get_database().path);
     string errmsg = (ctx.get_connection() != null) ? " - %s".printf(ctx.get_connection().db.errmsg()) : "";
-    string sql;
-    if (ctx.get_statement() != null)
-        sql = " (%s)".printf(ctx.get_statement().sql);
-    else if (!String.is_empty(raw))
+    string? sql = null;
+    Statement statement = ctx.get_statement();
+    if (statement != null) {
+        sql = statement.get_expanded_sql();
+        if (sql == null) {
+            sql = statement.sql;
+        }
+        sql = " (%s)".printf(sql);
+    } else if (!String.is_empty(raw)) {
         sql = " (%s)".printf(raw);
-    else
+    } else {
         sql = "";
+    }
 
     string msg = "%s[err=%d]%s%s".printf(location, result, errmsg, sql);
 

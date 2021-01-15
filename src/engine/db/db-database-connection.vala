@@ -123,9 +123,6 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
 
     /** {@inheritDoc} */
     public Statement prepare(string sql) throws DatabaseError {
-        if (Db.Context.enable_sql_logging) {
-            debug(sql);
-        }
         return new Statement(this, sql);
     }
 
