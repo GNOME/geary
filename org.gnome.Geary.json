@@ -27,6 +27,7 @@
         "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
         "--filesystem=~/.config/geary:ro",
         "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro",
+        "--filesystem=xdg-download:rw",
         "--filesystem=/tmp"
     ],
     "cleanup": [
