@@ -61,7 +61,10 @@ finish-args:
   - "--filesystem=~/.config/geary:ro"
   - "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro"
 
-  # Let view source keep on working as-sis for now. Bug 779311. */
+  # Workaround for printing to PDF until WebKitGTK supports printing
+  - "--filesystem=xdg-download:rw"
+
+  # Let view source keep on working as-sis for now. Bug 779311.
   - "--filesystem=/tmp"
 
 cleanup:
