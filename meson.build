@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '40.alpha',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.50',
+  meson_version: '>= 0.55',
 )
 
 # Determine the type of build
@@ -53,10 +53,10 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
-target_vala = '0.48.6'
-target_glib = '2.64'
-target_gtk = '3.24.7'
-target_webkit = '2.28'
+target_glib = '2.66'
+target_gtk = '3.24.23'
+target_vala = '0.48.11'
+target_webkit = '2.30'
 
 if not valac.version().version_compare('>=' + target_vala)
   error('Vala does not meet minimum required version: ' + target_vala)
