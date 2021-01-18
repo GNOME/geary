@@ -111,6 +111,13 @@ webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '
 # following libraries, but the declared dependency is what we actually
 # build against so we can include the custom VAPI correctly.
 
+icu_uc = declare_dependency(
+  dependencies: [
+    valac.find_library('icu-uc', dirs: [vapi_dir]),
+    cc.find_library('icuuc'),
+  ],
+)
+
 if libunwind_dep.found()
   # We need to add native lib to the search path for these so Flatpak
   # builds can find it.
@@ -128,15 +135,6 @@ libstemmer = declare_dependency(
   dependencies: [
     valac.find_library('libstemmer', dirs: [vapi_dir]),
     libstemmer_dep,
-  ],
-)
-
-# Faux ICU dependency to prevent ICU being passed to valac as a
-# package by meson
-icu = declare_dependency(
-  dependencies: [
-    cc.find_library('icuuc'),
-    cc.find_library('icudata'),
   ],
 )
 

@@ -325,7 +325,7 @@ engine_dependencies = [
   gio,
   glib,
   gmime,
-  icu,
+  icu_uc,
   libmath,
   libstemmer,
   libxml,
@@ -416,7 +416,7 @@ engine_internal_dep = declare_dependency(
 # command line app can still be used.
 tokeniser_lib = shared_library('geary-tokeniser',
   files('imap-db/imap-db-fts5-tokeniser.c'),
-  dependencies: [ glib, icu, sqlite ],
+  dependencies: [ glib, icu_uc, sqlite ],
   c_args: [
     # Enable GLib structured logging
     '-DG_LOG_USE_STRUCTURED',

@@ -149,6 +149,7 @@ foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
   valadoc_dep_args += dep.name()
 endforeach
+valadoc_dep_args += [ '--pkg', 'icu-uc' ]
 valadoc_dep_args += [ '--pkg', 'libstemmer' ]
 valadoc_dep_args += [ '--pkg', 'posix' ]
 
