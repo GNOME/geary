@@ -392,6 +392,13 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">True</property>
+                <property name="title" translatable="yes" context="shortcut window">Select Inbox</property>
+                <property name="accelerator">&lt;Alt&gt;1...9</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">True</property>
                 <property name="title" translatable="yes" context="shortcut window">Go to next/previous pane</property>
                 <property name="accelerator">&lt;Alt&gt;Right &lt;Alt&gt;Left</property>
               </object>

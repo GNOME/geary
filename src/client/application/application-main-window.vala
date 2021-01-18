@@ -25,6 +25,7 @@ public class Application.MainWindow :
     public const string ACTION_REPLY_ALL_CONVERSATION = "reply-all-conversation";
     public const string ACTION_REPLY_CONVERSATION = "reply-conversation";
     public const string ACTION_SEARCH = "search";
+    public const string ACTION_SELECT_INBOX = "select-inbox";
     public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
     public const string ACTION_SHOW_MARK_MENU = "show-mark-menu";
     public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
@@ -44,6 +45,7 @@ public class Application.MainWindow :
 
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
+        { ACTION_SELECT_INBOX, on_select_inbox, "i" },
         { ACTION_NAVIGATION_BACK, focus_previous_pane},
 
         // Message actions
@@ -221,6 +223,12 @@ public class Application.MainWindow :
 
 
     public static void add_accelerators(Client owner) {
+        for (int i = 1; i <= 9; i++) {
+            owner.add_window_accelerators(
+                ACTION_SELECT_INBOX+("(%d)".printf(i - 1)), { "<ALT>%d".printf(i) }
+            );
+        }
+
         // Zoom
         owner.add_window_accelerators(
             ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "<Ctrl>plus" }
@@ -2185,6 +2193,23 @@ public class Application.MainWindow :
 
     private void on_folder_selected(Geary.Folder? folder) {
         this.select_folder.begin(folder, true);
+    }
+
+    private void on_select_inbox(SimpleAction action, Variant? parameter) {
+        if (parameter != null) {
+            int account_number = parameter.get_int32();
+            try {
+                Gee.Collection<Geary.Account> accounts =
+                    this.application.engine.get_accounts();
+                if (account_number < accounts.size) {
+                    Geary.Account account = accounts.to_array()[account_number];
+                    Geary.Folder inbox = account.get_special_folder(INBOX);
+                    this.select_folder.begin(inbox, true);
+                }
+            } catch (GLib.Error error) {
+                debug("Error getting accounts");
+            }
+        }
     }
 
     private void on_search(string text) {
