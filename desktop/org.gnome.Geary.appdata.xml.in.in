@@ -88,6 +88,20 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="40.0">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Visual refresh including updated icon and interface</li>
+          <li>Add support for half-screen, portrait and small displays</li>
+          <li>Improved performance when displaying large conversations</li>
+          <li>Improved keyboard shortcuts</li>
+          <li>Improved server compatibility</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.38" date="2020-09-13">
       <description>
         <p>Enhancements included in this release:</p>

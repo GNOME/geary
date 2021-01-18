@@ -1,3 +1,16 @@
+Version 40.alpha
+~~~~~~~~~~~~~~~~
+Released: 2021-01-18
+
+An alpha-quality development release.
+
+Please see the AppStream file for updated features. Notable build
+changes included in this release:
+
+* Require a build flag to be set for releases builds and from tarballs
+* Updated build options to use meson features, be internally consistent
+* Add a dependency on the libstemmer library
+
 Version 3.38.0.1
 ~~~~~~~~~~~~~~~~
 Released: 2020-09-15
