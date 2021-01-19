@@ -84,7 +84,7 @@ internal class Application.Controller :
     // Cancelled if the controller is closed
     private GLib.Cancellable controller_open;
 
-    private UpgradeDialog upgrade_dialog;
+    private DatabaseManager database_manager;
     private Folks.IndividualAggregator folks;
 
     // List composers that have not yet been closed
@@ -134,7 +134,7 @@ internal class Application.Controller :
         IconFactory.init(application.get_resource_directory());
 
         // Create DB upgrade dialog.
-        this.upgrade_dialog = new UpgradeDialog(application);
+        this.database_manager = new DatabaseManager(application);
 
         // Initialise WebKit and WebViews
         Components.WebView.init_web_context(
@@ -977,7 +977,7 @@ internal class Application.Controller :
         );
         this.accounts.set(account.information, context);
 
-        this.upgrade_dialog.add_account(account, this.controller_open);
+        this.database_manager.add_account(account, this.controller_open);
 
         account.information.authentication_failure.connect(
             on_authentication_failure
@@ -1058,7 +1058,7 @@ internal class Application.Controller :
             // Guard against trying to close the account twice
             this.accounts.unset(account.information);
 
-            this.upgrade_dialog.remove_account(account);
+            this.database_manager.remove_account(account);
 
             // Stop updating status and showing errors when closing
             // the account - the user doesn't care any more

@@ -23,6 +23,7 @@ src/client/application/application-configuration.vala
 src/client/application/application-contact-store.vala
 src/client/application/application-contact.vala
 src/client/application/application-controller.vala
+src/client/application/application-database-manager.vala
 src/client/application/application-email-plugin-context.vala
 src/client/application/application-email-store-factory.vala
 src/client/application/application-folder-context.vala
@@ -85,7 +86,6 @@ src/client/dialogs/attachment-dialog.vala
 src/client/dialogs/certificate-warning-dialog.vala
 src/client/dialogs/dialogs-problem-details-dialog.vala
 src/client/dialogs/password-dialog.vala
-src/client/dialogs/upgrade-dialog.vala
 src/client/folder-list/folder-list-abstract-folder-entry.vala
 src/client/folder-list/folder-list-account-branch.vala
 src/client/folder-list/folder-list-folder-entry.vala
@@ -481,4 +481,3 @@ ui/main-toolbar.ui
 ui/main-toolbar-menus.ui
 ui/password-dialog.glade
 ui/problem-details-dialog.ui
-ui/upgrade_dialog.glade
