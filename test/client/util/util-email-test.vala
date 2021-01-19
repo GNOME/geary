@@ -195,18 +195,28 @@ public class Util.Email.Test : TestCase {
             this.config.get_search_strategy(),
             this.account
         );
-        test_article.language = Pango.Language.from_string("th");
 
-        var multiple = test_article.parse_query("ภาษาไทย");
-        assert_collection(multiple).size(2);
-        assert_true(multiple[0] is Geary.SearchQuery.EmailTextTerm);
-        assert_true(multiple[1] is Geary.SearchQuery.EmailTextTerm);
+        var thai = test_article.parse_query("ภาษาไทย");
+        assert_collection(thai).size(2);
+        assert_true(thai[0] is Geary.SearchQuery.EmailTextTerm);
+        assert_true(thai[1] is Geary.SearchQuery.EmailTextTerm);
         assert_collection(
-            ((Geary.SearchQuery.EmailTextTerm) multiple[0]).terms
+            ((Geary.SearchQuery.EmailTextTerm) thai[0]).terms
         ).size(1).contains("ภาษา");
         assert_collection(
-            ((Geary.SearchQuery.EmailTextTerm) multiple[1]).terms
+            ((Geary.SearchQuery.EmailTextTerm) thai[1]).terms
         ).size(1).contains("ไทย");
+
+        var chinese = test_article.parse_query("男子去");
+        assert_collection(chinese).size(2);
+        assert_true(chinese[0] is Geary.SearchQuery.EmailTextTerm);
+        assert_true(chinese[1] is Geary.SearchQuery.EmailTextTerm);
+        assert_collection(
+            ((Geary.SearchQuery.EmailTextTerm) chinese[0]).terms
+        ).size(1).contains("男子");
+        assert_collection(
+            ((Geary.SearchQuery.EmailTextTerm) chinese[1]).terms
+        ).size(1).contains("去");
     }
 
     public void multiple_search_terms() throws GLib.Error {
@@ -277,10 +287,10 @@ public class Util.Email.Test : TestCase {
 
         var simple_body = test_article.parse_query("body:hello");
         assert_collection(simple_body).size(1);
-        assert_true(simple_body[0] is Geary.SearchQuery.EmailTextTerm);
+        assert_true(simple_body[0] is Geary.SearchQuery.EmailTextTerm, "type");
         var text_body = simple_body[0] as Geary.SearchQuery.EmailTextTerm;
-        assert_true(text_body.target == BODY);
-        assert_true(text_body.matching_strategy == CONSERVATIVE);
+        assert_true(text_body.target == BODY, "target");
+        assert_true(text_body.matching_strategy == CONSERVATIVE, "strategy");
         assert_collection(text_body.terms).size(1).contains("hello");
 
         var simple_body_quoted = test_article.parse_query("body:\"hello\"");

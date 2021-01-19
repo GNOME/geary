@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2019 Michael Gratton <mike@vee.net>
+ * Copyright 2019-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -350,6 +350,10 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
     private class Tokeniser {
 
 
+        [Flags]
+        private enum CharStatus { NONE, IN_WORD, END_WORD; }
+
+
         // These characters are chosen for being commonly used to
         // continue a single word (such as extended last names,
         // i.e. "Lars-Eric") or in terms commonly searched for in an
@@ -365,7 +369,7 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
         }
 
         public bool is_at_word {
-            get { return (this.attrs[this.current_c].is_word_start == 1); }
+            get { return CharStatus.IN_WORD in this.char_status[this.current_pos]; }
         }
 
         public bool is_at_quote {
@@ -380,30 +384,51 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
         private int next_pos = 0;
 
         private unichar c = 0;
-        private int current_c = -1;
-        private Pango.LogAttr[] attrs;
+        private CharStatus[] char_status;
 
 
-        public Tokeniser(string query, Pango.Language language) {
+        public Tokeniser(string query) {
             this.query = query;
 
             // Break up search string into individual words and/or
-            // operators. Can't simply break on space or non-alphanumeric
-            // chars since some languages don't use spaces, so use Pango
-            // for its support for the Unicode UAX #29 word boundary spec.
-            this.attrs = new Pango.LogAttr[query.char_count() + 1];
-            Pango.get_log_attrs(
-                query, query.length, -1, language, this.attrs
+            // operators. Can't simply break on space or
+            // non-alphanumeric chars since some languages don't use
+            // spaces, so use ICU for its support for the Unicode UAX
+            // #29 word boundary spec and dictionary-based breaking
+            // for languages that do not use spaces for work breaks.
+
+            this.char_status = new CharStatus[query.length + 1];
+
+            var icu_err = Icu.ErrorCode.ZERO_ERROR;
+            var icu_text = Icu.Text.open_utf8(null, this.query.data, ref icu_err);
+            var word_breaker = Icu.BreakIterator.open(
+                WORD, "en", null, -1, ref icu_err
             );
+            word_breaker.set_utext(icu_text, ref icu_err);
+
+            int32 prev_index = 0;
+            var current_index = word_breaker.first();
+            var status = 0;
+            while (current_index != Icu.BreakIterator.DONE) {
+                status = word_breaker.rule_status;
+                if (!(status >= Icu.BreakIterator.WordBreak.NONE &&
+                      status < Icu.BreakIterator.WordBreak.NONE_LIMIT)) {
+                    for (int i = prev_index; i < current_index; i++) {
+                        this.char_status[i] |= IN_WORD;
+                    }
+                    this.char_status[current_index] |= END_WORD;
+                }
+
+                prev_index = current_index;
+                current_index = word_breaker.next();
+            }
 
             consume_char();
         }
 
         public void consume_char() {
             var current_pos = this.next_pos;
-            if (this.query.get_next_char(ref this.next_pos, out this.c)) {
-                this.current_c++;
-            }
+            this.query.get_next_char(ref this.next_pos, out this.c);
             this.current_pos = current_pos;
         }
 
@@ -415,13 +440,11 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
 
         public string consume_word() {
             var start = this.current_pos;
-            // the attr.is_word_end value applies to the first char
-            // after then end of a word, so need to move one past the
-            // end of the current word to determine where it ends
             consume_char();
             while (this.has_next &&
+                   this.c != OPERATOR_SEPARATOR &&
                    (this.c in CONTINUATION_CHARS ||
-                    this.attrs[this.current_c].is_word_end != 1)) {
+                    !(CharStatus.END_WORD in this.char_status[this.current_pos]))) {
                 consume_char();
             }
             return this.query.slice(start, this.current_pos);
@@ -446,10 +469,6 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
 
     public Geary.AccountInformation account { get; private set; }
 
-    public Pango.Language language {
-        get; set; default = Pango.Language.get_default();
-    }
-
     // Maps of localised search operator names and values to their
     // internal forms
     private Gee.Map<string,FactoryContext> text_operators =
@@ -470,7 +489,7 @@ public class Util.Email.SearchExpressionFactory : Geary.BaseObject {
     /** Constructs a search expression from the given query string. */
     public Gee.List<Geary.SearchQuery.Term> parse_query(string query) {
         var operands = new Gee.LinkedList<Geary.SearchQuery.Term>();
-        var tokens = new Tokeniser(query, this.language);
+        var tokens = new Tokeniser(query);
         while (tokens.has_next) {
             if (tokens.is_at_word) {
                 Geary.SearchQuery.Term? op = null;
