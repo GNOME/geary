@@ -22,6 +22,7 @@ client_vala_sources = files(
   'application/application-contact-store.vala',
   'application/application-contact.vala',
   'application/application-controller.vala',
+  'application/application-database-manager.vala',
   'application/application-email-plugin-context.vala',
   'application/application-email-store-factory.vala',
   'application/application-folder-context.vala',
@@ -104,7 +105,6 @@ client_vala_sources = files(
   'dialogs/certificate-warning-dialog.vala',
   'dialogs/dialogs-problem-details-dialog.vala',
   'dialogs/password-dialog.vala',
-  'dialogs/upgrade-dialog.vala',
 
   'folder-list/folder-list-abstract-folder-entry.vala',
   'folder-list/folder-list-account-branch.vala',

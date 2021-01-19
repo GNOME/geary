@@ -372,3 +372,13 @@ treeview.sidebar:drop(active).into {
 .geary-inspector-log-viewer .sidebar row > grid * {
   margin: 4px;
 }
+
+/* Upgrade dialog */
+
+dialog.geary-upgrade grid {
+  margin: 12px;
+}
+
+dialog.geary-upgrade label {
+  margin-top: 12px;
+}
