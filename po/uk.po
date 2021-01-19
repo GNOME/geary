@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-01-18 08:58+0000\n"
-"PO-Revision-Date: 2021-01-18 12:18+0200\n"
+"POT-Creation-Date: 2021-01-19 13:43+0000\n"
+"PO-Revision-Date: 2021-01-19 17:07+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -38,7 +38,7 @@ msgstr "Надіслати файли через Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:560
-#: src/client/application/application-main-window.vala:642
+#: src/client/application/application-main-window.vala:641
 msgid "Geary"
 msgstr "Geary"
 
@@ -622,12 +622,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2154
+#: src/client/application/application-main-window.vala:2151
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2137
+#: src/client/application/application-main-window.vala:2134
 msgid "Redo"
 msgstr "Повторити"
 
@@ -722,7 +722,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:588
+#: src/client/application/application-main-window.vala:587
 msgid "Login"
 msgstr "Увійти"
 
@@ -1192,62 +1192,75 @@ msgstr "Не вдалося відновити вміст редактора"
 msgid "Email to %s discarded"
 msgstr "Повідомлення до %s відкинуто"
 
+#. / Translators: Label for account database upgrade dialog
+#: src/client/application/application-database-manager.vala:74
+#| msgid "Geary update in progress…"
+msgid "Account update in progress"
+msgstr "Виконуємо оновлення облікового запису"
+
+#. / Translators: Window title for account database upgrade
+#. / dialog
+#: src/client/application/application-database-manager.vala:80
+#| msgid "Account name"
+msgid "Account update"
+msgstr "Оновлення облікового запису"
+
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:574
+#: src/client/application/application-main-window.vala:573
 msgid "Working offline"
 msgstr "Працюємо у автономному режимі"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:576
+#: src/client/application/application-main-window.vala:575
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Ви не зможете надсилати або отримувати електронну пошту до відновлення "
 "з'єднання із інтернетом."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:583
+#: src/client/application/application-main-window.vala:582
 msgid "Login problem"
 msgstr "Проблеми із входом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:585
+#: src/client/application/application-main-window.vala:584
 msgid "An account has reported an incorrect login or password."
 msgstr ""
 "Сервером облікового запису повідомлено про помилкове ім'я користувача або "
 "пароль."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:592
+#: src/client/application/application-main-window.vala:591
 msgid "Retry login, you will be prompted for your password"
 msgstr ""
 "Під час повторної спроби увійти програма попросить вас ввести ваш пароль"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:599
+#: src/client/application/application-main-window.vala:598
 msgid "Security problem"
 msgstr "Проблема із захистом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:601
+#: src/client/application/application-main-window.vala:600
 msgid "An account has reported an untrusted server."
 msgstr ""
 "Механізмами роботи із обліковими записами повідомлено про ненадійність "
 "сервера."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:604
+#: src/client/application/application-main-window.vala:603
 msgid "Check"
 msgstr "Перевірити"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:608
+#: src/client/application/application-main-window.vala:607
 msgid "Check the security details for the connection"
 msgstr "Перевірте параметри захисту з'єднання"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:651
+#: src/client/application/application-main-window.vala:650
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1255,31 +1268,31 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1044
+#: src/client/application/application-main-window.vala:1041
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1362
+#: src/client/application/application-main-window.vala:1359
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1363
+#: src/client/application/application-main-window.vala:1360
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1364
+#: src/client/application/application-main-window.vala:1361
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1365
+#: src/client/application/application-main-window.vala:1362
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1422
+#: src/client/application/application-main-window.vala:1419
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1287,13 +1300,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1427
-#: src/client/application/application-main-window.vala:1442
+#: src/client/application/application-main-window.vala:1424
+#: src/client/application/application-main-window.vala:1439
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1437
+#: src/client/application/application-main-window.vala:1434
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1301,7 +1314,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1728
+#: src/client/application/application-main-window.vala:1725
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1783,14 +1796,14 @@ msgstr "Зображення"
 #. Translators: Human-readable version of the RFC 822 To header
 #: src/client/composer/composer-widget.vala:2060
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:265 ui/conversation-message.ui:309
+#: src/client/util/util-email.vala:267 ui/conversation-message.ui:309
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
 #: src/client/composer/composer-widget.vala:2066
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:270 ui/conversation-message.ui:353
+#: src/client/util/util-email.vala:272 ui/conversation-message.ui:353
 msgid "Cc:"
 msgstr "Копія:"
 
@@ -1888,19 +1901,19 @@ msgstr "Я"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:537
-#: src/client/util/util-email.vala:256
+#: src/client/util/util-email.vala:258
 msgid "From:"
 msgstr "Від:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
 #: src/client/conversation-viewer/conversation-email.vala:557
-#: src/client/util/util-email.vala:261
+#: src/client/util/util-email.vala:263
 msgid "Date:"
 msgstr "Дата:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
 #: src/client/conversation-viewer/conversation-email.vala:567
-#: src/client/util/util-email.vala:259
+#: src/client/util/util-email.vala:261
 msgid "Subject:"
 msgstr "Тема:"
 
@@ -2469,14 +2482,14 @@ msgstr "%A"
 
 #. Translators: Label used when an email has a missing or
 #. an empty subject
-#: src/client/util/util-email.vala:50
+#: src/client/util/util-email.vala:52
 msgid "(No subject)"
 msgstr "(Без теми)"
 
 #. / Translators: This is shown for displaying a list of email
 #. / recipients that happens to be empty, i.e. contains no
 #. / email addresses.
-#: src/client/util/util-email.vala:148
+#: src/client/util/util-email.vala:150
 msgid "(No recipients)"
 msgstr "(Немає отримувачів)"
 
@@ -2485,7 +2498,7 @@ msgstr "(Немає отримувачів)"
 #. / addresses. The first (string) substitution is
 #. / address of the first, the second substitution is
 #. / the number of n - 1 remaining recipients.
-#: src/client/util/util-email.vala:160
+#: src/client/util/util-email.vala:162
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
@@ -2503,14 +2516,14 @@ msgstr[3] "%s і ще %d"
 #. / sender, so should be unambiguous (for example, do not
 #. / use mm/dd/yyyy since it could be confused with
 #. / dd/mm/yyyy) and must include the time zone.
-#: src/client/util/util-email.vala:192
+#: src/client/util/util-email.vala:194
 msgid "%a, %b %-e %Y at %X %Z"
 msgstr "%a, %d.%b.%Y о %X %Z"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s
 #. / will be substituted for the original sender.
-#: src/client/util/util-email.vala:198
+#: src/client/util/util-email.vala:200
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "Написано %1$s, %2$s:"
@@ -2518,7 +2531,7 @@ msgstr "Написано %1$s, %2$s:"
 #. / The quoted header for a message being replied to
 #. / (in case the date is not known).  %s will be
 #. / replaced by the original sender.
-#: src/client/util/util-email.vala:209
+#: src/client/util/util-email.vala:211
 #, c-format
 msgid "%s wrote:"
 msgstr "%s:"
@@ -2526,14 +2539,185 @@ msgstr "%s:"
 #. / The quoted header for a message being replied to
 #. / (in case the sender is not known).  %s will be
 #. / replaced by the original date
-#: src/client/util/util-email.vala:219
+#: src/client/util/util-email.vala:221
 #, c-format
 msgid "On %s:"
 msgstr "Написано %s:"
 
-#: src/client/util/util-email.vala:251
+#: src/client/util/util-email.vala:253
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Пересланий лист ----------"
+
+#. / Translators: Can be typed in the search box like
+#. / "attachment:file.txt" to find messages with attachments
+#. / with a particular name.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:605
+msgctxt "Search operator"
+msgid "attachment"
+msgstr "долучення"
+
+#. / Translators: Can be typed in the search box like
+#. / "bcc:johndoe@example.com" to find messages bcc'd to a
+#. / particular person.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:618
+msgctxt "Search operator"
+msgid "bcc"
+msgstr "bcc"
+
+#. / Translators: Can be typed in the search box like
+#. / "body:word" to find "word" only if it occurs in the body
+#. / of a message.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:630
+msgctxt "Search operator"
+msgid "body"
+msgstr "вміст"
+
+#. / Translators: Can be typed in the search box like
+#. / "cc:johndoe@example.com" to find messages cc'd to a
+#. / particular person.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:642
+msgctxt "Search operator"
+msgid "cc"
+msgstr "копія"
+
+#. / Translators: Can be typed in the search box like
+#. / "from:johndoe@example.com" to find messages from a
+#. / particular sender.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:654
+msgctxt "Search operator"
+msgid "from"
+msgstr "від"
+
+#. / Translators: Can be typed in the search box like
+#. / "subject:word" to find "word" only if it occurs in the
+#. / subject of a message.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:668
+msgctxt "Search operator"
+msgid "subject"
+msgstr "тема"
+
+#. / Translators: Can be typed in the search box like
+#. / "to:johndoe@example.com" to find messages received by a
+#. / particular person.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:680
+msgctxt "Search operator"
+msgid "to"
+msgstr "до"
+
+#. / Translators: Can be typed in the search box after "to:",
+#. / "cc:" and "bcc:" e.g.: "to:me". Matches conversations that
+#. / are addressed to the user.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:691
+msgctxt "Search operator value - mail addressed to the user"
+msgid "me"
+msgstr "ви"
+
+#. / Translators: Can be typed in the search box after "from:"
+#. / i.e.: "from:me". Matches conversations were sent by the
+#. / user.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:704
+msgctxt "Search operator value - mail sent by the user"
+msgid "me"
+msgstr "я"
+
+#. Boolean operators
+#. /////////////////////////////////////////////////////////
+#. / Translators: Can be typed in the search box like
+#. / "is:unread" to find messages that are read, unread, or
+#. / starred.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:719
+msgctxt "Search operator"
+msgid "is"
+msgstr "є"
+
+#. / Translators: Can be typed in the search box after "is:"
+#. / i.e.: "is:unread". Matches conversations that are flagged
+#. / unread.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:729
+msgctxt "'is:' search operator value"
+msgid "unread"
+msgstr "непрочитане"
+
+#. / Translators: Can be typed in the search box after "is:"
+#. / i.e.: "is:read". Matches conversations that are flagged as
+#. / read.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:739
+msgctxt "'is:' search operator value"
+msgid "read"
+msgstr "прочитане"
+
+#. / Translators: Can be typed in the search box after "is:"
+#. / i.e.: "is:starred". Matches conversations that are flagged
+#. / as starred.
+#. /
+#. / The translated string must be a single word (use '-', '_'
+#. / or similar to combine words into one), should be short,
+#. / and also match the translation in "search.page" of the
+#. / Geary User Guide.
+#: src/client/util/util-email.vala:749
+msgctxt "'is:' search operator value"
+msgid "starred"
+msgstr "позначене"
 
 #: src/client/util/util-files.vala:16
 msgid "bytes"
@@ -2599,179 +2783,11 @@ msgstr "Вихідні"
 msgid "Archive"
 msgstr "Архів"
 
-#. Map of possibly translated search operator names and values
-#. to English/internal names and values. We include the
-#. English version anyway so that when translations provide a
-#. localised version of the operator names but have not also
-#. translated the user manual, the English version in the
-#. manual still works.
-#. Can be typed in the search box like "attachment:file.txt"
-#. to find messages with attachments with a particular name.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:130
-msgctxt "Search operator"
-msgid "attachment"
-msgstr "долучення"
-
-#. Can be typed in the search box like
-#. "bcc:johndoe@example.com" to find messages bcc'd to a
-#. particular person.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:139
-msgctxt "Search operator"
-msgid "bcc"
-msgstr "bcc"
-
-#. Can be typed in the search box like "body:word" to find
-#. "word" only if it occurs in the body of a message.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:147
-msgctxt "Search operator"
-msgid "body"
-msgstr "вміст"
-
-#. Can be typed in the search box like
-#. "cc:johndoe@example.com" to find messages cc'd to a
-#. particular person.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:156
-msgctxt "Search operator"
-msgid "cc"
-msgstr "копія"
-
-#. Can be typed in the search box like
-#. "from:johndoe@example.com" to find messages from a
-#. particular sender.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:165
-msgctxt "Search operator"
-msgid "from"
-msgstr "від"
-
-#. Can be typed in the search box like "is:unread" to find
-#. messages that are read, unread, or starred.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:173
-msgctxt "Search operator"
-msgid "is"
-msgstr "є"
-
-#. Can be typed in the search box like "subject:word" to find
-#. "word" only if it occurs in the subject of a message.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary
-#. User Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:181
-msgctxt "Search operator"
-msgid "subject"
-msgstr "тема"
-
-#. Can be typed in the search box like
-#. "to:johndoe@example.com" to find messages received by a
-#. particular person.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:190
-msgctxt "Search operator"
-msgid "to"
-msgstr "до"
-
-#. Can be typed in the search box after "to:", "cc:" and
-#. "bcc:" e.g.: "to:me". Matches conversations that are
-#. addressed to the user.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:211
-msgctxt "Search operator value - mail addressed to the user"
-msgid "me"
-msgstr "ви"
-
-#. Can be typed in the search box after "from:" i.e.:
-#. "from:me". Matches conversations were sent by the user.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:223
-msgctxt "Search operator value - mail sent by the user"
-msgid "me"
-msgstr "я"
-
-#. Can be typed in the search box after "is:" i.e.:
-#. "is:read". Matches conversations that are flagged as read.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:235
-msgctxt "'is:' search operator value"
-msgid "read"
-msgstr "прочитане"
-
-#. Can be typed in the search box after "is:" i.e.:
-#. "is:starred". Matches conversations that are flagged as
-#. starred.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:246
-msgctxt "'is:' search operator value"
-msgid "starred"
-msgstr "позначене"
-
-#. Can be typed in the search box after "is:" i.e.:
-#. "is:unread". Matches conversations that are flagged unread.
-#.
-#. The translated string must be a single word (use '-', '_'
-#. or similar to combine words into one), should be short, and
-#. also match the translation in "search.page" of the Geary User
-#. Guide.
-#: src/engine/imap-db/imap-db-search-query.vala:256
-msgctxt "'is:' search operator value"
-msgid "unread"
-msgstr "непрочитане"
-
 #. List of general possible folder names to match for the
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:998
+#: src/engine/imap-engine/imap-engine-generic-account.vala:999
 msgid "Drafts | Draft"
 msgstr "Чернетки | Чернетка | Draft | Drafts"
 
@@ -2779,7 +2795,7 @@ msgstr "Чернетки | Чернетка | Draft | Drafts"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1007
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1008
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Надіслано | Надіслане | Надіслана пошта | Надісланий лист | Sent | Sent Mail "
@@ -2787,7 +2803,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1012
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1013
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Надіслані"
@@ -2796,7 +2812,7 @@ msgstr "Надіслані"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1022
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1023
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2808,13 +2824,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1032
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1033
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Сміття | Смітник | Кошик | TTrash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1037
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1038
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Вилучені записи"
@@ -2823,7 +2839,7 @@ msgstr "Вилучені записи"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1047
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1048
 msgid "Archive | Archives"
 msgstr "Архів | Архіви | Archive | Archives"
 
@@ -3714,7 +3730,6 @@ msgid "Keyboard navigation"
 msgstr "Навігація за допомогою клавіатури"
 
 #: ui/gtk/help-overlay.ui:395
-#| msgid "Select Color"
 msgctxt "shortcut window"
 msgid "Select Inbox"
 msgstr "Вибрати «Вхідні»"
@@ -3793,10 +3808,6 @@ msgstr "_Запам'ятати пароль"
 #: ui/password-dialog.glade:210
 msgid "_Authenticate"
 msgstr "_Засвідчення"
-
-#: ui/upgrade_dialog.glade:60
-msgid "Geary update in progress…"
-msgstr "Виконується оновлення…"
 
 #~ msgid "Confirm removing: %s"
 #~ msgstr "Підтвердження вилучення: %s"
