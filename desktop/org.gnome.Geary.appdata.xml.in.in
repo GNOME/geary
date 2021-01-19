@@ -95,6 +95,8 @@
           <li>Visual refresh including updated icon and interface</li>
           <li>Add support for half-screen, portrait and small displays</li>
           <li>Improved performance when displaying large conversations</li>
+          <li>Upgraded full-text search engine</li>
+          <li>Improved search for languages such as Thai and Chinese</li>
           <li>Improved keyboard shortcuts</li>
           <li>Improved server compatibility</li>
           <li>Numerous bug fixes and user interface improvements</li>
