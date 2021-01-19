@@ -49,8 +49,6 @@ geary_c_args = [
   '-DGCK_API_SUBJECT_TO_CHANGE',
   '-DGCR_API_SUBJECT_TO_CHANGE',
   '-DGOA_API_IS_SUBJECT_TO_CHANGE',
-  '-DSQLITE_ENABLE_FTS4',
-  '-DSQLITE_ENABLE_FTS4_UNICODE61'
 ]
 
 subdir('engine')
@@ -151,6 +149,7 @@ foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
   valadoc_dep_args += dep.name()
 endforeach
+valadoc_dep_args += [ '--pkg', 'icu-uc' ]
 valadoc_dep_args += [ '--pkg', 'libstemmer' ]
 valadoc_dep_args += [ '--pkg', 'posix' ]
 

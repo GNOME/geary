@@ -1044,7 +1044,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     sql = new StringBuilder();
                     sql.append("""
                         DELETE FROM MessageSearchTable
-                        WHERE docid IN (
+                        WHERE rowid IN (
                     """);
                     sql.append(message_ids_sql_sublist.str);
                     sql.append(")");
@@ -1712,6 +1712,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         string? from = email.from != null ? email.from.to_searchable_string() : null;
         string? cc = email.cc != null ? email.cc.to_searchable_string() : null;
         string? bcc = email.bcc != null ? email.bcc.to_searchable_string() : null;
+        string? flags = email.email_flags != null ? email.email_flags.serialise() : null;
 
         if (!Geary.String.is_empty(body) ||
             !Geary.String.is_empty(attachments) ||
@@ -1719,12 +1720,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             !Geary.String.is_empty(from) ||
             !Geary.String.is_empty(recipients) ||
             !Geary.String.is_empty(cc) ||
-            !Geary.String.is_empty(bcc)) {
+            !Geary.String.is_empty(bcc) ||
+            !Geary.String.is_empty(flags)) {
 
             Db.Statement stmt = cx.prepare("""
                 INSERT INTO MessageSearchTable
-                    (docid, body, attachment, subject, from_field, receivers, cc, bcc)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (rowid, body, attachments, subject, "from", receivers, cc, bcc, flags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """);
             stmt.bind_rowid(0, message_id);
             stmt.bind_string(1, body);
@@ -1734,6 +1736,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(5, recipients);
             stmt.bind_string(6, cc);
             stmt.bind_string(7, bcc);
+            stmt.bind_string(8, flags);
 
             stmt.exec_insert(cancellable);
         }
@@ -1741,7 +1744,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     private static bool do_check_for_message_search_row(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("SELECT 'TRUE' FROM MessageSearchTable WHERE docid=?");
+        Db.Statement stmt = cx.prepare("SELECT 'TRUE' FROM MessageSearchTable WHERE rowid=?");
         stmt.bind_rowid(0, message_id);
 
         Db.Result result = stmt.exec(cancellable);
@@ -1923,10 +1926,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // TODO: Unroll loop
     private void do_set_email_flags(Db.Connection cx, Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map,
         Cancellable? cancellable) throws Error {
-        Db.Statement update_stmt = cx.prepare(
-            "UPDATE MessageTable SET flags=?, fields = fields | ? WHERE id=?");
+        Db.Statement update_message = cx.prepare(
+            "UPDATE MessageTable SET flags = ?, fields = fields | ? WHERE id = ?"
+        );
+        Db.Statement update_search = cx.prepare("""
+            UPDATE MessageSearchTable SET flags = ? WHERE rowid = ?
+            """
+        );
 
         foreach (ImapDB.EmailIdentifier id in map.keys) {
+            // Find the email location
+
             LocationIdentifier? location = do_get_location_for_id(
                 cx,
                 id,
@@ -1940,6 +1950,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 );
             }
 
+            // Update MessageTable
+
             Geary.Imap.EmailFlags? flags = map.get(id) as Geary.Imap.EmailFlags;
             if (flags == null) {
                 throw new EngineError.BAD_PARAMETERS(
@@ -1947,12 +1959,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 );
             }
 
-            update_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-            update_stmt.bind_string(0, flags.message_flags.serialize());
-            update_stmt.bind_int(1, Geary.Email.Field.FLAGS);
-            update_stmt.bind_rowid(2, id.message_id);
+            update_message.reset(Db.ResetScope.CLEAR_BINDINGS);
+            update_message.bind_string(0, flags.message_flags.serialize());
+            update_message.bind_int(1, Geary.Email.Field.FLAGS);
+            update_message.bind_rowid(2, id.message_id);
+            update_message.exec(cancellable);
 
-            update_stmt.exec(cancellable);
+            // Update MessageSearchTable
+
+            update_search.reset(Db.ResetScope.CLEAR_BINDINGS);
+            update_search.bind_string(0, flags.serialise());
+            update_search.bind_rowid(1, id.message_id);
+            update_search.exec_insert(cancellable);
         }
     }
 
@@ -2119,9 +2137,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // existing data, then do a DELETE and INSERT. See Bug 772522.
 
         Db.Statement select = cx.prepare("""
-            SELECT body, attachment, subject, from_field, receivers, cc, bcc
+            SELECT body, attachments, subject, "from", receivers, cc, bcc, flags
             FROM MessageSearchTable
-            WHERE docid=?
+            WHERE rowid=?
         """);
         select.bind_rowid(0, message_id);
         Db.Result row = select.exec(cancellable);
@@ -2133,6 +2151,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         string? recipients = row.string_at(4);
         string? cc = row.string_at(5);
         string? bcc = row.string_at(6);
+        string? flags = row.string_at(7);
 
         if (new_fields.is_any_set(Geary.Email.REQUIRED_FOR_MESSAGE) &&
             email.fields.is_all_set(Geary.Email.REQUIRED_FOR_MESSAGE)) {
@@ -2165,16 +2184,22 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 bcc = email.bcc.to_searchable_string();
         }
 
+        if (new_fields.is_any_set(Geary.Email.Field.FLAGS)) {
+            if (email.email_flags != null) {
+                flags = email.email_flags.serialise();
+            }
+        }
+
         Db.Statement del = cx.prepare(
-            "DELETE FROM MessageSearchTable WHERE docid=?"
+            "DELETE FROM MessageSearchTable WHERE rowid=?"
         );
         del.bind_rowid(0, message_id);
         del.exec(cancellable);
 
         Db.Statement insert = cx.prepare("""
             INSERT INTO MessageSearchTable
-                (docid, body, attachment, subject, from_field, receivers, cc, bcc)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (rowid, body, attachments, subject, "from", receivers, cc, bcc, flags)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """);
         insert.bind_rowid(0, message_id);
         insert.bind_string(1, body);
@@ -2184,6 +2209,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         insert.bind_string(5, recipients);
         insert.bind_string(6, cc);
         insert.bind_string(7, bcc);
+        insert.bind_string(8, flags);
 
         insert.exec_insert(cancellable);
     }
@@ -2230,7 +2256,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             );
 
             post_fields |= Geary.Email.Field.FLAGS;
-
         }
     }
 

@@ -222,12 +222,11 @@ public class Mock.Account : Geary.Account,
         );
     }
 
-    public override async Geary.SearchQuery
-        new_search_query(string raw,
-                         Geary.SearchQuery.Strategy strategy,
-                         GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        return new SearchQuery(this, raw);
+    public override Geary.SearchQuery new_search_query(
+        Gee.List<Geary.SearchQuery.Term> expression,
+        string text
+    ) throws GLib.Error {
+        return new SearchQuery(expression, text);
     }
 
     public override async Gee.Collection<Geary.EmailIdentifier>?

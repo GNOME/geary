@@ -297,9 +297,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
         // Highlight matching terms from find if active, otherwise
         // from the search folder if that's where we are at
-        Geary.SearchQuery? query = yield get_find_search_query(
-            conversation.base_folder.account, null
-        );
+        var query = get_find_search_query(conversation.base_folder.account);
         if (query == null) {
             var search_folder = conversation.base_folder as Geary.App.SearchFolder;
             if (search_folder != null) {
@@ -406,9 +404,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 });
             this.find_cancellable = cancellable;
             try {
-                Geary.SearchQuery? query = yield get_find_search_query(
-                    list.conversation.base_folder.account,
-                    cancellable
+                var query = get_find_search_query(
+                    list.conversation.base_folder.account
                 );
                 if (query != null) {
                     yield list.search.highlight_matching_email(query, true);
@@ -419,8 +416,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
     }
 
-    private async Geary.SearchQuery? get_find_search_query(Geary.Account account,
-                                                           GLib.Cancellable? cancellable)
+    private Geary.SearchQuery? get_find_search_query(Geary.Account account)
         throws GLib.Error {
         Geary.SearchQuery? query = null;
         if (this.conversation_find_bar.get_search_mode()) {
@@ -429,11 +425,13 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             // opening every message in the conversation as soon as
             // the user presses a key
             if (text.length >= 2) {
-                var strategy = this.config.get_search_strategy();
-                query = yield account.new_search_query(
-                    text,
-                    strategy,
-                    cancellable
+                var expr_factory = new Util.Email.SearchExpressionFactory(
+                    this.config.get_search_strategy(),
+                    account.information
+                );
+                query = account.new_search_query(
+                    expr_factory.parse_query(text),
+                    text
                 );
             }
         }

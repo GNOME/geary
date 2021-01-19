@@ -1088,7 +1088,7 @@ internal class Application.Controller :
             update_account_status();
 
             // Stop any background processes
-            context.search.clear();
+            context.search.clear_query();
             context.contacts.close();
             context.cancellable.cancel();
 

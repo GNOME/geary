@@ -60,6 +60,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Gee.Map<Folder.SpecialUse,Gee.List<string>> special_search_names =
         new Gee.HashMap<Folder.SpecialUse,Gee.List<string>>();
 
+    private SnowBall.Stemmer stemmer;
+
 
     protected GenericAccount(AccountInformation config,
                              ImapDB.Account local,
@@ -107,6 +109,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.db_vacuum_monitor = local.vacuum_monitor;
 
         compile_special_search_names();
+        this.stemmer = new SnowBall.Stemmer(find_appropriate_search_stemmer());
     }
 
     /** {@inheritDoc} */
@@ -572,13 +575,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async SearchQuery new_search_query(string query,
-                                                       SearchQuery.Strategy strategy,
-                                                       GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        return yield new ImapDB.SearchQuery(
-            this, local, query, strategy, cancellable
-        );
+    public override SearchQuery new_search_query(
+        Gee.List<SearchQuery.Term> expression,
+        string text
+    ) throws GLib.Error {
+        return new FtsSearchQuery(expression, text, this.stemmer);
     }
 
     public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
@@ -1061,6 +1062,49 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private void check_open() throws EngineError {
         if (!open)
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
+    }
+
+    private string find_appropriate_search_stemmer() {
+        // Unfortunately, the stemmer library only accepts the full
+        // language name for the stemming algorithm. This translates
+        // between the desktop sessions's preferred language ISO 639-1
+        // code and the available stemmers.
+        //
+        // FIXME: the available list here is determined by what's
+        // included in libstemmer. We should pass that list in instead
+        // of hardcoding it here.
+        foreach (string l in Intl.get_language_names()) {
+            switch (l) {
+            case "ar": return "arabic";
+            case "eu": return "basque";
+            case "ca": return "catalan";
+            case "da": return "danish";
+            case "nl": return "dutch";
+            case "en": return "english";
+            case "fi": return "finnish";
+            case "fr": return "french";
+            case "de": return "german";
+            case "el": return "greek";
+            case "hi": return "hindi";
+            case "hu": return "hungarian";
+            case "id": return "indonesian";
+            case "ga": return "irish";
+            case "it": return "italian";
+            case "lt": return "lithuanian";
+            case "ne": return "nepali";
+            case "no": return "norwegian";
+            case "pt": return "portuguese";
+            case "ro": return "romanian";
+            case "ru": return "russian";
+            case "sr": return "serbian";
+            case "es": return "spanish";
+            case "sv": return "swedish";
+            case "ta": return "tamil";
+            case "tr": return "turkish";
+            }
+        }
+
+        return "english";
     }
 
     private void on_operation_error(AccountOperation op, Error error) {

@@ -164,6 +164,7 @@ client_dependencies = [
   goa,
   gspell,
   gtk,
+  icu_uc,
   javascriptcoregtk,
   json_glib,
   libhandy,

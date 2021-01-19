@@ -74,8 +74,10 @@ Building Geary requires the following major libraries and tools:
 See the `meson.build` file in the top-level directory for the complete
 list of required dependencies and minimum versions.
 
-Geary also requires SQLite to be built with the compiler flag
-`-DSQLITE_ENABLE_FTS3`.
+Geary requires SQLite is built with both FTS3 and FTS5 support. Ensure
+`--enable-fts5`, `-DSQLITE_ENABLE_FTS3` and
+`-DSQLITE_ENABLE_FTS3_PARENTHESIS` are passed to the SQLite configure
+script.
 
 All required libraries and tools are available from major Linux
 distribution's package repositories:
@@ -91,8 +93,9 @@ sudo dnf install meson vala desktop-file-utils enchant2-devel \
     gnome-online-accounts-devel gspell-devel gsound-devel \
     gtk3-devel iso-codes-devel itstool json-glib-devel \
     libappstream-glib-devel libgee-devel libhandy1-devel \
-    libpeas-devel libsecret-devel libstemmer-devel libunwind-devel \
-    libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
+    libpeas-devel libsecret-devel libicu-devel libstemmer-devel \
+    libunwind-devel libxml2-devel libytnef-devel sqlite-devel \
+    webkitgtk4-devel
 ```
 
 Installing dependencies on Ubuntu/Debian
@@ -106,8 +109,8 @@ sudo apt-get install meson build-essential valac \
     libappstream-glib-dev libenchant-2-dev libfolks-dev \
     libgcr-3-dev libgee-0.8-dev libglib2.0-dev libgmime-3.0-dev \
     libgoa-1.0-dev libgspell-1-dev libgsound-dev libgtk-3-dev \
-    libjson-glib-dev libhandy-1-dev libpeas-dev libsecret-1-dev \
-    libsqlite3-dev libstemmer-dev libunwind-dev \
+    libjson-glib-dev libhandy-1-dev libicu-dev libpeas-dev \
+    libsecret-1-dev libsqlite3-dev libstemmer-dev libunwind-dev \
     libwebkit2gtk-4.0-dev libxml2-dev libytnef0-dev
 ```
 

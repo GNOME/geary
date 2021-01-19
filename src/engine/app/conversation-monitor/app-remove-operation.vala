@@ -35,13 +35,14 @@ private class Geary.App.RemoveOperation : BatchOperation<EmailIdentifier> {
             trimmed
         );
 
-
-        // Fire signals, clean up
         this.monitor.removed(
             removed,
             trimmed,
             (this.source_folder == this.monitor.base_folder) ? batch : null
         );
+
+        // Queue an update since many emails may have been removed
+        this.monitor.check_window_count();
     }
 
 }

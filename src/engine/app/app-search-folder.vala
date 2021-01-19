@@ -110,10 +110,10 @@ public class Geary.App.SearchFolder :
         new Gee.HashSet<FolderPath?>();
 
     // The email present in the folder, sorted
-    private Gee.TreeSet<EmailEntry> contents;
+    private Gee.SortedSet<EmailEntry> entries;
 
     // Map of engine ids to search ids
-    private Gee.Map<EmailIdentifier,EmailEntry> id_map;
+    private Gee.Map<EmailIdentifier,EmailEntry> ids;
 
     private Nonblocking.Mutex result_mutex = new Nonblocking.Mutex();
 
@@ -131,7 +131,8 @@ public class Geary.App.SearchFolder :
         account.email_removed.connect(on_account_email_removed);
         account.email_locally_removed.connect(on_account_email_removed);
 
-        new_contents();
+        this.entries = new_entry_set();
+        this.ids = new_id_map();
 
         // Always exclude emails that don't live anywhere from search
         // results.
@@ -147,51 +148,40 @@ public class Geary.App.SearchFolder :
     }
 
     /**
-     * Executes the given query over the account's local email.
+     * Sets the current search query for the folder.
      *
-     * Calling this will block until the search is complete.
+     * Calling this method will start the search folder asynchronously
+     * in the background. If the given query is not equal to the
+     * existing query, the folder's contents will be updated to
+     * reflect the changed query.
      */
-    public async void search(SearchQuery query, GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        int result_mutex_token = yield result_mutex.claim_async();
+    public void update_query(SearchQuery query) {
+        if (this.query == null || !this.query.equal_to(query)) {
+            this.executing.cancel();
+            this.executing = new GLib.Cancellable();
 
-        clear();
-
-        if (cancellable != null) {
-            GLib.Cancellable @internal = this.executing;
-            cancellable.cancelled.connect(() => { @internal.cancel(); });
-        }
-
-        this.query = query;
-        GLib.Error? error = null;
-        try {
-            yield do_search_async(null, null, this.executing);
-        } catch(Error e) {
-            error = e;
-        }
-
-        result_mutex.release(ref result_mutex_token);
-
-        if (error != null) {
-            throw error;
+            this.query = query;
+            this.update.begin();
         }
     }
 
     /**
      * Cancels and clears the search query and results.
      *
-     * The {@link query} property will be cleared.
+     * The {@link query} property will be set to null.
      */
-    public void clear() {
+    public void clear_query() {
         this.executing.cancel();
         this.executing = new GLib.Cancellable();
 
-        var old_ids = this.id_map;
-        new_contents();
+        this.query = null;
+        var old_ids = this.ids;
+
+        this.entries = new_entry_set();
+        this.ids = new_id_map();
+
         notify_email_removed(old_ids.keys);
         notify_email_count_changed(0, REMOVED);
-
-        this.query = null;
     }
 
     /**
@@ -218,10 +208,16 @@ public class Geary.App.SearchFolder :
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
+        debug("Waiting for checking contains");
+        int result_mutex_token = yield this.result_mutex.claim_async(cancellable);
+        var existing_ids = this.ids;
+        result_mutex.release(ref result_mutex_token);
+
+        debug("Checking contains");
         return Geary.traverse(
             ids
         ).filter(
-            (id) => this.id_map.has_key(id)
+            (id) => existing_ids.has_key(id)
         ).to_hash_set();
     }
 
@@ -232,17 +228,22 @@ public class Geary.App.SearchFolder :
         Folder.ListFlags flags,
         Cancellable? cancellable = null
     ) throws GLib.Error {
-        int result_mutex_token = yield result_mutex.claim_async();
+        debug("Waiting to list email");
+        int result_mutex_token = yield this.result_mutex.claim_async(cancellable);
+        var existing_entries = this.entries;
+        var existing_ids = this.ids;
+        result_mutex.release(ref result_mutex_token);
 
+        debug("Listing email");
         var engine_ids = new Gee.LinkedList<EmailIdentifier>();
 
         if (Folder.ListFlags.OLDEST_TO_NEWEST in flags) {
             EmailEntry? oldest = null;
-            if (!this.contents.is_empty) {
+            if (!existing_entries.is_empty) {
                 if (initial_id == null) {
-                    oldest = this.contents.last();
+                    oldest = existing_entries.last();
                 } else {
-                    oldest = this.id_map.get(initial_id);
+                    oldest = existing_ids.get(initial_id);
 
                     if (oldest == null) {
                         throw new EngineError.NOT_FOUND(
@@ -251,13 +252,13 @@ public class Geary.App.SearchFolder :
                     }
 
                     if (!(Folder.ListFlags.INCLUDING_ID in flags)) {
-                        oldest = contents.higher(oldest);
+                        oldest = existing_entries.higher(oldest);
                     }
                 }
             }
             if (oldest != null) {
                 var iter = (
-                    this.contents.iterator_at(oldest) as
+                    existing_entries.iterator_at(oldest) as
                     Gee.BidirIterator<EmailEntry>
                 );
                 engine_ids.add(oldest.id);
@@ -268,11 +269,11 @@ public class Geary.App.SearchFolder :
         } else {
             // Newest to oldest
             EmailEntry? newest = null;
-            if (!this.contents.is_empty) {
+            if (!existing_entries.is_empty) {
                 if (initial_id == null) {
-                    newest = this.contents.first();
+                    newest = existing_entries.first();
                 } else {
-                    newest = this.id_map.get(initial_id);
+                    newest = existing_ids.get(initial_id);
 
                     if (newest == null) {
                         throw new EngineError.NOT_FOUND(
@@ -281,13 +282,13 @@ public class Geary.App.SearchFolder :
                     }
 
                     if (!(Folder.ListFlags.INCLUDING_ID in flags)) {
-                        newest = contents.lower(newest);
+                        newest = existing_entries.lower(newest);
                     }
                 }
             }
             if (newest != null) {
                 var iter = (
-                    this.contents.iterator_at(newest) as
+                    existing_entries.iterator_at(newest) as
                     Gee.BidirIterator<EmailEntry>
                 );
                 engine_ids.add(newest.id);
@@ -310,8 +311,6 @@ public class Geary.App.SearchFolder :
                 list_error = error;
             }
         }
-
-        result_mutex.release(ref result_mutex_token);
 
         if (list_error != null) {
             throw list_error;
@@ -390,7 +389,7 @@ public class Geary.App.SearchFolder :
 
     private void require_id(EmailIdentifier id)
         throws EngineError.NOT_FOUND {
-        if (!this.id_map.has_key(id)) {
+        if (!this.ids.has_key(id)) {
             throw new EngineError.NOT_FOUND(
                 "Id not found: %s", id.to_string()
             );
@@ -401,15 +400,112 @@ public class Geary.App.SearchFolder :
         Gee.Collection<EmailIdentifier> to_check
     ) {
         var available = new Gee.LinkedList<EmailIdentifier>();
-        var id_map = this.id_map;
+        var ids = this.ids;
         var iter = to_check.iterator();
         while (iter.next()) {
             var id = iter.get();
-            if (id_map.has_key(id)) {
+            if (ids.has_key(id)) {
                 available.add(id);
             }
         }
         return available;
+    }
+
+    private async void append(Folder folder,
+                              Gee.Collection<EmailIdentifier> ids) {
+        // Grab the cancellable before the lock so that if the current
+        // search is cancelled while waiting, this doesn't go and try
+        // to update the new results.
+        var cancellable = this.executing;
+
+        debug("Waiting to append to search results");
+        try {
+            int result_mutex_token = yield this.result_mutex.claim_async(
+                cancellable
+            );
+            try {
+                if (!this.exclude_folders.contains(folder.path)) {
+                    yield do_search_async(ids, null, cancellable);
+                }
+            } catch (GLib.Error error) {
+                this.account.report_problem(
+                    new AccountProblemReport(this.account.information, error)
+                );
+            }
+
+            this.result_mutex.release(ref result_mutex_token);
+        } catch (GLib.IOError.CANCELLED mutex_err) {
+            // all good
+        } catch (GLib.Error mutex_err) {
+            warning("Error acquiring lock: %s", mutex_err.message);
+        }
+    }
+
+    private async void update() {
+        // Grab the cancellable before the lock so that if the current
+        // search is cancelled while waiting, this doesn't go and try
+        // to update the new results.
+        var cancellable = this.executing;
+
+        debug("Waiting to update search results");
+        try {
+            int result_mutex_token = yield this.result_mutex.claim_async(
+                cancellable
+            );
+            try {
+                yield do_search_async(null, null, cancellable);
+            } catch (GLib.Error error) {
+                this.account.report_problem(
+                    new AccountProblemReport(this.account.information, error)
+                );
+            }
+
+            this.result_mutex.release(ref result_mutex_token);
+        } catch (GLib.IOError.CANCELLED mutex_err) {
+            // all good
+        } catch (GLib.Error mutex_err) {
+            warning("Error acquiring lock: %s", mutex_err.message);
+        }
+    }
+
+    private async void remove(Folder folder,
+                              Gee.Collection<EmailIdentifier> ids) {
+
+        // Grab the cancellable before the lock so that if the current
+        // search is cancelled while waiting, this doesn't go and try
+        // to update the new results.
+        var cancellable = this.executing;
+
+        debug("Waiting to remove from search results");
+        try {
+            int result_mutex_token = yield this.result_mutex.claim_async(
+                cancellable
+            );
+
+            // Ensure this happens inside the lock so it is working with
+            // up-to-date data
+            var id_map = this.ids;
+            var relevant_ids = (
+                traverse(ids)
+                .filter(id => id_map.has_key(id))
+                .to_linked_list()
+            );
+            if (relevant_ids.size > 0) {
+                try {
+                    yield do_search_async(null, relevant_ids, cancellable);
+                } catch (GLib.Error error) {
+                    this.account.report_problem(
+                        new AccountProblemReport(this.account.information, error)
+                    );
+                }
+            }
+
+            this.result_mutex.release(ref result_mutex_token);
+        } catch (GLib.IOError.CANCELLED mutex_err) {
+            // all good
+        } catch (GLib.Error mutex_err) {
+            warning("Error acquiring lock: %s", mutex_err.message);
+        }
     }
 
     // NOTE: you must call this ONLY after locking result_mutex_token.
@@ -422,10 +518,14 @@ public class Geary.App.SearchFolder :
                                        Gee.Collection<EmailIdentifier>? remove_ids,
                                        GLib.Cancellable? cancellable)
         throws GLib.Error {
-        var id_map = this.id_map;
-        var contents = this.contents;
+        debug("Processing search results");
+        var entries = new_entry_set();
+        var ids = new_id_map();
         var added = new Gee.LinkedList<EmailIdentifier>();
         var removed = new Gee.LinkedList<EmailIdentifier>();
+
+        entries.add_all(this.entries);
+        ids.set_all(this.ids);
 
         if (remove_ids == null) {
             // Adding email to the search, either searching all local
@@ -463,24 +563,24 @@ public class Geary.App.SearchFolder :
                     var hashed_results = new Gee.HashSet<EmailIdentifier>();
                     hashed_results.add_all(id_results);
 
-                    var existing = id_map.map_iterator();
+                    var existing = ids.map_iterator();
                     while (existing.next()) {
                         if (!hashed_results.contains(existing.get_key())) {
                             var entry = existing.get_value();
                             existing.unset();
-                            contents.remove(entry);
+                            entries.remove(entry);
                             removed.add(entry.id);
                         }
                     }
                 }
 
                 foreach (var email in email_results) {
-                    if (!id_map.has_key(email.id)) {
+                    if (!ids.has_key(email.id)) {
                         var entry = new EmailEntry(
                             email.id, email.properties.date_received
                         );
-                        contents.add(entry);
-                        id_map.set(email.id, entry);
+                        entries.add(entry);
+                        ids.set(email.id, entry);
                         added.add(email.id);
                     }
                 }
@@ -489,89 +589,53 @@ public class Geary.App.SearchFolder :
             // Removing email, can just remove them directly
             foreach (var id in remove_ids) {
                 EmailEntry entry;
-                if (id_map.unset(id, out entry)) {
-                    contents.remove(entry);
+                if (ids.unset(id, out entry)) {
+                    entries.remove(entry);
                     removed.add(id);
                 }
             }
         }
 
-        this._properties.set_total(this.contents.size);
+        if (!cancellable.is_cancelled()) {
+            this.entries = entries;
+            this.ids = ids;
 
-        // Note that we probably shouldn't be firing these signals from inside
-        // our mutex lock.  Keep an eye on it, and if there's ever a case where
-        // it might cause problems, it shouldn't be too hard to move the
-        // firings outside.
+            this._properties.set_total(entries.size);
 
-        Folder.CountChangeReason reason = CountChangeReason.NONE;
-        if (added.size > 0) {
-            // TODO: we'd like to be able to use APPENDED here when applicable,
-            // but because of the potential to append a thousand results at
-            // once and the ConversationMonitor's inability to handle that
-            // gracefully (#7464), we always use INSERTED for now.
-            notify_email_inserted(added);
-            reason |= Folder.CountChangeReason.INSERTED;
-        }
-        if (removed.size > 0) {
-            notify_email_removed(removed);
-            reason |= Folder.CountChangeReason.REMOVED;
-        }
-        if (reason != CountChangeReason.NONE)
-            notify_email_count_changed(this.contents.size, reason);
-    }
+            // Note that we probably shouldn't be firing these signals from inside
+            // our mutex lock.  Keep an eye on it, and if there's ever a case where
+            // it might cause problems, it shouldn't be too hard to move the
+            // firings outside.
 
-    private async void do_append(Folder folder,
-                                 Gee.Collection<EmailIdentifier> ids,
-                                 GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        int result_mutex_token = yield result_mutex.claim_async();
-
-        GLib.Error? error = null;
-        try {
-            if (!this.exclude_folders.contains(folder.path)) {
-                yield do_search_async(ids, null, cancellable);
+            Folder.CountChangeReason reason = CountChangeReason.NONE;
+            if (removed.size > 0) {
+                notify_email_removed(removed);
+                reason |= Folder.CountChangeReason.REMOVED;
             }
-        } catch (GLib.Error e) {
-            error = e;
-        }
-
-        result_mutex.release(ref result_mutex_token);
-
-        if (error != null)
-            throw error;
-    }
-
-    private async void do_remove(Folder folder,
-                                 Gee.Collection<EmailIdentifier> ids,
-                                 GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        int result_mutex_token = yield result_mutex.claim_async();
-
-        GLib.Error? error = null;
-        try {
-            var id_map = this.id_map;
-            var relevant_ids = (
-                traverse(ids)
-                .filter(id => id_map.has_key(id))
-                .to_linked_list()
-            );
-
-            if (relevant_ids.size > 0) {
-                yield do_search_async(null, relevant_ids, cancellable);
+            if (added.size > 0) {
+                // TODO: we'd like to be able to use APPENDED here
+                // when applicable, but because of the potential to
+                // append a thousand results at once and the
+                // ConversationMonitor's inability to handle that
+                // gracefully (#7464), we always use INSERTED for now.
+                notify_email_inserted(added);
+                reason |= Folder.CountChangeReason.INSERTED;
             }
-        } catch (GLib.Error e) {
-            error = e;
+            if (reason != CountChangeReason.NONE) {
+                notify_email_count_changed(this.entries.size, reason);
+            }
+            debug("Processing done, entries/ids: %d/%d", entries.size, ids.size);
+        } else {
+            debug("Processing cancelled, dropping entries/ids: %d/%d", entries.size, ids.size);
         }
-
-        result_mutex.release(ref result_mutex_token);
-
-        if (error != null)
-            throw error;
     }
 
-    private inline void new_contents() {
-        this.contents = new Gee.TreeSet<EmailEntry>(EmailEntry.compare_to);
-        this.id_map = new Gee.HashMap<EmailIdentifier,EmailEntry>();
+    private inline Gee.SortedSet<EmailEntry> new_entry_set() {
+        return new Gee.TreeSet<EmailEntry>(EmailEntry.compare_to);
+    }
+
+    private inline Gee.Map<EmailIdentifier,EmailEntry> new_id_map() {
+        return new Gee.HashMap<EmailIdentifier,EmailEntry>();
     }
 
     private void include_folder(Folder folder) {
@@ -611,40 +675,14 @@ public class Geary.App.SearchFolder :
     private void on_email_locally_complete(Folder folder,
                                            Gee.Collection<EmailIdentifier> ids) {
         if (this.query != null) {
-            this.do_append.begin(
-                folder, ids, null,
-                (obj, res) => {
-                    try {
-                        this.do_append.end(res);
-                    } catch (GLib.Error error) {
-                        this.account.report_problem(
-                            new AccountProblemReport(
-                                this.account.information, error
-                            )
-                        );
-                    }
-                }
-            );
+            this.append.begin(folder, ids);
         }
     }
 
     private void on_account_email_removed(Folder folder,
                                           Gee.Collection<EmailIdentifier> ids) {
         if (this.query != null) {
-            this.do_remove.begin(
-                folder, ids, null,
-                (obj, res) => {
-                    try {
-                        this.do_remove.end(res);
-                    } catch (GLib.Error error) {
-                        this.account.report_problem(
-                            new AccountProblemReport(
-                                this.account.information, error
-                            )
-                        );
-                    }
-                }
-            );
+            this.remove.begin(folder, ids);
         }
     }
 

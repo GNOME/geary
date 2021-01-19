@@ -85,6 +85,7 @@ goa = dependency('goa-1.0')
 gsound = dependency('gsound')
 gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
+icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
@@ -109,6 +110,13 @@ webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '
 # System dependencies above ensures appropriate versions for the
 # following libraries, but the declared dependency is what we actually
 # build against so we can include the custom VAPI correctly.
+
+icu_uc = declare_dependency(
+  dependencies: [
+    valac.find_library('icu-uc', dirs: [vapi_dir]),
+    cc.find_library('icuuc'),
+  ],
+)
 
 if libunwind_dep.found()
   # We need to add native lib to the search path for these so Flatpak
@@ -158,8 +166,10 @@ web_extensions_dir = client_lib_dir / 'web-extensions'
 
 # Ensure SQLite was built correctly
 if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER', dependencies: sqlite)
-  error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
-        + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
+  error('SQLite3 was not built with FTS3 support. See BUILDING.md for details.')
+endif
+if not cc.has_header_symbol('sqlite3.h', 'Fts5ExtensionApi', dependencies: sqlite)
+  error('SQLite3 was not built with FTS5 support. See BUILDING.md for details.')
 endif
 
 #

@@ -323,7 +323,6 @@ public class Application.MainWindow :
 
     private GLib.Cancellable action_update_cancellable = new GLib.Cancellable();
     private GLib.Cancellable folder_open = new GLib.Cancellable();
-    private GLib.Cancellable search_open = new GLib.Cancellable();
 
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
@@ -968,30 +967,30 @@ public class Application.MainWindow :
         return closed;
     }
 
-    internal async void start_search(string query_text, bool is_interactive) {
+    internal void start_search(string query_text, bool is_interactive) {
         var context = get_selected_account_context();
         if (context != null) {
-            // Stop any search in progress
-            this.search_open.cancel();
-            var cancellable = this.search_open = new GLib.Cancellable();
-
+            // If the current folder is not the search folder, save it
+            // so it can be re-selected later when search is closed
             if (this.previous_non_search_folder == null &&
                 this.selected_folder != null &&
                 this.selected_folder.used_as != SEARCH) {
                 this.previous_non_search_folder = this.selected_folder;
             }
 
-            var strategy = this.application.config.get_search_strategy();
             try {
-                var query = yield context.account.new_search_query(
-                    query_text,
-                    strategy,
-                    cancellable
+                var expr_factory = new Util.Email.SearchExpressionFactory(
+                    this.application.config.get_search_strategy(),
+                    context.account.information
+                );
+                var query = context.account.new_search_query(
+                    expr_factory.parse_query(query_text),
+                    query_text
                 );
                 this.folder_list.set_search(
                     this.application.engine, context.search
                 );
-                yield context.search.search(query, cancellable);
+                context.search.update_query(query);
             } catch (GLib.Error error) {
                 handle_error(context.account.information, error);
             }
@@ -999,10 +998,8 @@ public class Application.MainWindow :
     }
 
     internal void stop_search(bool is_interactive) {
-        // Stop any search in progress
-        this.search_open.cancel();
-        this.search_open = new GLib.Cancellable();
-
+        // If the search folder is current selected, deselect and
+        // re-select any previously selected folder
         if (this.selected_folder == null ||
             this.selected_folder.used_as == SEARCH) {
             var to_select = this.previous_non_search_folder;
@@ -1024,7 +1021,7 @@ public class Application.MainWindow :
         this.folder_list.remove_search();
 
         foreach (var context in this.controller.get_account_contexts()) {
-            context.search.clear();
+            context.search.clear_query();
         }
     }
 
@@ -2216,7 +2213,7 @@ public class Application.MainWindow :
         if (Geary.String.is_empty_or_whitespace(text)) {
             stop_search(true);
         } else {
-            this.start_search.begin(text, true);
+            this.start_search(text, true);
         }
     }
 
