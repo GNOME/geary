@@ -136,11 +136,11 @@ public class Geary.RFC822.MailboxAddress :
             : GMime.utils_decode_8bit(get_parser_options(), part.data)
         );
 
-        // unquote the string then decode the text
+        text = GMime.utils_header_unfold(text);
         GMime.utils_unquote_string(text);
 
-        // Sometimes quoted printables contain unencoded spaces which trips up GMime, so we want to
-        // encode them all here.
+        // Sometimes quoted printables contain unencoded spaces which
+        // trips up GMime, so we want to encode them all here.
         int offset = 0;
         int start;
         while ((start = text.index_of("=?", offset)) != -1) {
