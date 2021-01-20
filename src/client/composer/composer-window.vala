@@ -35,6 +35,11 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
         this.composer = composer;
         this.composer.set_mode(DETACHED);
 
+        // Create a new group for the window so attachment file
+        // choosers do not block other main windows or composers.
+        var group = new Gtk.WindowGroup();
+        group.add_window(this);
+
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");
 
