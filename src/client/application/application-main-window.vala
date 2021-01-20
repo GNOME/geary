@@ -517,6 +517,12 @@ public class Application.MainWindow :
         // without a warning.
         this.controller = application.controller;
 
+        // Create a new group for the window so attachment file
+        // choosers (save attachments & composer attach files) do not
+        // block other main windows or composers.
+        var group = new Gtk.WindowGroup();
+        group.add_window(this);
+
         load_config(application.config);
         restore_saved_window_state();
 
