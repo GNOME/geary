@@ -54,8 +54,4 @@ public class Composer.Box : Gtk.Frame, Container {
         destroy();
     }
 
-    public override void destroy() {
-        debug("Composer.Box::destroy");
-    }
-
 }

@@ -168,6 +168,7 @@ public class Components.InfoBar : Gtk.Box {
     /* {@inheritDoc} */
     public override void destroy() {
         this.plugin = null;
+        base.destroy();
     }
 
     public Gtk.Box get_action_area() {
