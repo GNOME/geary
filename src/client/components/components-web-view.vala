@@ -82,9 +82,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         // Enable WebProcess sandboxing
         context.add_path_to_sandbox(web_extension_dir.get_path(), true);
         context.set_sandbox_enabled(true);
-        // Use the doc viewer model since each web view instance only
-        // ever shows a single HTML document.
-        context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
+        // Use the doc browser model so that we get some caching of
+        // resources between email body loads.
+        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
 
         context.register_uri_scheme("cid", (req) => {
                 WebView? view = req.get_web_view() as WebView;
