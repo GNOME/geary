@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2020-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -367,7 +367,7 @@ public class Geary.RFC822.Subject :
     }
 
     public Subject.from_rfc822_string(string rfc822) {
-        base(GMime.utils_header_decode_text(get_parser_options(), rfc822).strip());
+        base(Utils.decode_rfc822_text_header_value(rfc822));
         this.rfc822 = rfc822;
     }
 
