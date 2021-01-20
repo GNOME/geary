@@ -80,6 +80,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
         // Enable WebProcess sandboxing
+        context.add_path_to_sandbox(web_extension_dir.get_path(), true);
         context.set_sandbox_enabled(true);
         // Use the doc viewer model since each web view instance only
         // ever shows a single HTML document.
