@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
 
+<enum id='org.gnome.Geary.AutoMarkRead'>
+  <value nick='never' value='0'/>
+  <value nick='when-viewed' value='1'/>
+</enum>
+
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/" gettext-domain="geary">
 
     <key name="window-maximize" type="b">
@@ -31,6 +36,12 @@
         <default>true</default>
         <summary>Autoselect next message</summary>
         <description>True if we should autoselect the next available conversation.</description>
+    </key>
+
+    <key name="automark-read" enum="org.gnome.Geary.AutoMarkRead">
+        <default>'when-viewed'</default>
+        <summary>Automatically mark messages as read</summary>
+        <description>If we should automatically mark messages as read after they are opened.</description>
     </key>
 
     <key name="display-preview" type="b">
