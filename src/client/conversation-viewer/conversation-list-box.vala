@@ -905,7 +905,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (view == null) {
             EmailRow? last = null;
             this.foreach((child) => {
-                    EmailRow? row = child as EmailRow;
+                    unowned EmailRow? row = child as EmailRow;
                     if (row != null) {
                         last = row;
                     }
@@ -1242,6 +1242,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read() {
+        if (Application.Configuration.AutoMarkRead.NEVER == config.automark_read) {
+            return;
+        }
+
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
         Gtk.Adjustment adj = get_adjustment();

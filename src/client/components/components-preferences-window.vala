@@ -117,6 +117,21 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
     }
 
     private void add_general_pane() {
+        var automark_read = new Gtk.ComboBoxText();
+        automark_read.valign = CENTER;
+
+        /// Translators: Preferences label
+        automark_read.append("never", _("Never"));
+        /// Translators: Preferences label
+        automark_read.append("when-viewed", _("When viewed"));
+
+        var automark_read_row = new Hdy.ActionRow();
+        /// Translators: Preferences label
+        automark_read_row.title = _("Automatically mark message as _read");
+        automark_read_row.use_underline = true;
+        automark_read_row.activatable_widget = automark_read;
+        automark_read_row.add(automark_read);
+
         var autoselect = new Gtk.Switch();
         autoselect.valign = CENTER;
 
@@ -179,6 +194,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         //group.title = _("General");
         /// Translators: Preferences group description
         //group.description = _("General application preferences");
+        group.add(automark_read_row);
         group.add(autoselect_row);
         group.add(display_preview_row);
         group.add(single_key_shortucts_row);
@@ -205,6 +221,11 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 Application.Configuration.AUTOSELECT_KEY,
                 autoselect,
                 "state"
+            );
+            config.bind(
+                Application.Configuration.AUTOMARK_READ_KEY,
+                automark_read,
+                "active_id"
             );
             config.bind(
                 Application.Configuration.DISPLAY_PREVIEW_KEY,

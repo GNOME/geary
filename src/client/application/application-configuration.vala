@@ -13,6 +13,7 @@ public class Application.Configuration : Geary.BaseObject {
 
 
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
+    public const string AUTOMARK_READ_KEY = "automark-read";
     public const string AUTOSELECT_KEY = "autoselect";
     public const string BRIEF_NOTIFICATION_DURATION = "brief-notification-duration";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
@@ -31,6 +32,11 @@ public class Application.Configuration : Geary.BaseObject {
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
     public const string WINDOW_WIDTH_KEY = "window-width";
     public const string IMAGES_TRUSTED_DOMAINS = "images-trusted-domains";
+
+    public enum AutoMarkRead {
+        NEVER = 0,
+        WHEN_VIEWED;
+    }
 
 
     public enum DesktopEnvironment {
@@ -89,6 +95,10 @@ public class Application.Configuration : Geary.BaseObject {
     public bool formatting_toolbar_visible {
         get { return settings.get_boolean(FORMATTING_TOOLBAR_VISIBLE); }
         set { settings.set_boolean(FORMATTING_TOOLBAR_VISIBLE, value); }
+    }
+
+    public int automark_read {
+        get { return settings.get_enum(AUTOMARK_READ_KEY); }
     }
 
     public bool autoselect {
