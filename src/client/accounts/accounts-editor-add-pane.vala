@@ -506,7 +506,7 @@ private abstract class Accounts.AddPaneRow<Value> :
 
 
     protected AddPaneRow(string label, Value value) {
-        base(label, new Gtk.Entry());
+        base(label, value);
         this.activatable = false;
     }
 
