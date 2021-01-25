@@ -197,6 +197,33 @@ public class ConversationWebView : Components.WebView {
     }
 
 
+    // Clip round bottom corner
+    // This is based on
+    // https://gitlab.gnome.org/GNOME/gnome-weather/-/commit/9b6336454cc90669d1ee8387bdfc6627e3659e83
+    public override bool draw(Cairo.Context cr) {
+        var frameWidth = this.get_allocated_width();
+        var frameHeight = this.get_allocated_height();
+        var styleContext = this.get_style_context();
+        int borderRadius = (int) styleContext.get_property("border-radius", styleContext.get_state());
+
+        var arc0 = 0.0;
+        var arc1 = Math.PI * 0.5;
+        var arc2 = Math.PI;
+
+        cr.new_sub_path();
+        cr.line_to(frameWidth, 0);
+        cr.arc(frameWidth - borderRadius, frameHeight - borderRadius, borderRadius, arc0, arc1);
+        cr.arc(borderRadius, frameHeight - borderRadius, borderRadius, arc1, arc2);
+        cr.line_to(0, 0);
+        cr.close_path();
+
+        cr.clip();
+        cr.fill();
+        base.draw(cr);
+
+        return Gdk.EVENT_PROPAGATE;
+    }
+
     public override void get_preferred_height(out int minimum_height,
                                               out int natural_height) {
         // XXX clamp height to something not too outrageous so we

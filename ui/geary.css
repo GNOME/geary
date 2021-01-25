@@ -89,39 +89,61 @@ row.geary-folder-popover-list-row > label {
 /* ConversationListBox */
 
 .conversation-listbox {
-  padding: 0 12px;
+  padding: 0px 12px;
 }
+
 .conversation-listbox > row {
-  margin: 0;
-  border: 1px solid @borders;
-  border-bottom-width: 0;
   padding: 0;
-  box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
 }
-.conversation-listbox > row > box {
-  background: @theme_base_color;
-  transition: background 0.25s;
-}
-.conversation-listbox > row:hover > box {
-  background: shade(@theme_base_color, 0.96);
-}
-.conversation-listbox > row.geary-expanded {
-  margin-bottom: 6px;
-  border-bottom-width: 1px;
-}
+
 .conversation-listbox *.geary-matched *.geary-match {
   color: @theme_selected_fg_color;
   background: @theme_selected_bg_color;
-;}
+}
+
 .conversation-listbox > row.geary-loading {
   border-top-width: 0px;
   padding: 6px;
+  border-top-left-radius: 0px;
+  -gtk-outline-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  -gtk-outline-top-right-radius: 0px;
 }
-.conversation-listbox > row:first-child:not(.geary-loading) {
+
+.conversation-listbox.content > row:first-child:not(.geary-loading) {
   margin-top: 12px;
+  transition: 0;
 }
-.conversation-listbox > row:last-child {
+
+.conversation-listbox.content > row:last-child {
   margin-bottom: 12px;
+}
+
+.conversation-listbox.content > row:last-child,
+.conversation-listbox.content > row.geary-expanded-previous-sibling,
+.conversation-listbox.content > row.geary-expanded {
+  border-width: 1px;
+}
+
+.geary-expanded:not(:first-child), .geary-expanded + row {
+  border-top-left-radius: 8px;
+  -gtk-outline-top-left-radius: 7px;
+  border-top-right-radius: 8px;
+  -gtk-outline-top-right-radius: 7px;
+  margin-top: 6px;
+}
+
+.geary-expanded,
+.geary-expanded-previous-sibling {
+  border-bottom-left-radius: 8px;
+  -gtk-outline-bottom-left-radius: 7px;
+  border-bottom-right-radius: 8px;
+  -gtk-outline-bottom-right-radius: 7px;
+  margin-bottom: 6px
+}
+
+.geary-expanded webkitwebview {
+  border-radius: 8px;
 }
 
 /* ConversationEmail */
@@ -129,6 +151,14 @@ row.geary-folder-popover-list-row > label {
 .geary-unread grid.geary-message-summary {
   border-color: @theme_selected_bg_color;
   transition: border 0.25s;
+}
+
+.geary-expanded > .geary_email grid.geary-message-summary,
+.geary-expanded + row > .geary_email grid.geary-message-summary {
+  border-top-left-radius: 8px;
+  -gtk-outline-top-left-radius: 7px;
+  border-top-right-radius: 8px;
+  -gtk-outline-top-right-radius: 7px;
 }
 
 /* ConversationMessage */
@@ -210,8 +240,10 @@ grid.geary-message-summary {
 /* Composer */
 
 .geary-composer-embed headerbar {
-  border-top: 1px solid @borders;
-  border-radius: 0px;
+  border-top-left-radius: 8px;
+  -gtk-outline-top-left-radius: 7px;
+  border-top-right-radius: 8px;
+  -gtk-outline-top-right-radius: 7px;
 }
 
 .geary-attachments-box > box > box {

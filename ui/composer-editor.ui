@@ -73,6 +73,9 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
+        <style>
+          <class name="background"/>
+        </style>
         <child>
           <object class="GtkRevealer" id="formatting">
             <property name="visible">True</property>
