@@ -71,6 +71,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private NameRow real_name;
     private EmailRow email = new EmailRow();
     private string last_valid_email = "";
+    private string last_valid_hostname = "";
 
     private HostnameRow imap_hostname = new HostnameRow(Geary.Protocol.IMAP);
     private TransportSecurityRow imap_tls = new TransportSecurityRow();
@@ -412,19 +413,44 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private void on_email_changed() {
+        Gtk.Entry imap_login_entry = this.imap_login.value;
+        Gtk.Entry smtp_login_entry = this.smtp_login.value;
+        Gtk.Entry imap_hostname_entry = this.imap_hostname.value;
+        Gtk.Entry smtp_hostname_entry = this.smtp_hostname.value;
         string email = "";
+        string hostname = "";
+        string imap_hostname = "";
+        string smtp_hostname = "";
+        string last_imap_hostname = "";
+        string last_smtp_hostname = "";
+
         if (this.email.validator.state == Components.Validator.Validity.VALID) {
             email = this.email.value.text;
+            hostname = email.split("@")[1];
+            smtp_hostname = "smtp." + hostname;
+            imap_hostname = "imap." + hostname;
         }
 
-        if (this.imap_login.value.text == this.last_valid_email) {
-            this.imap_login.value.text = email;
+        if (imap_login_entry.text == this.last_valid_email) {
+            imap_login_entry.text = email;
         }
-        if (this.smtp_login.value.text == this.last_valid_email) {
-            this.smtp_login.value.text = email;
+        if (smtp_login_entry.text == this.last_valid_email) {
+            smtp_login_entry.text = email;
+        }
+
+        if (this.last_valid_hostname != "") {
+            last_imap_hostname = "imap." + this.last_valid_hostname;
+            last_smtp_hostname = "smtp." + this.last_valid_hostname;
+        }
+        if (imap_hostname_entry.text == last_imap_hostname) {
+            imap_hostname_entry.text = imap_hostname;
+        }
+        if (smtp_hostname_entry.text == last_smtp_hostname) {
+            smtp_hostname_entry.text = smtp_hostname;
         }
 
         this.last_valid_email = email;
+        this.last_valid_hostname = hostname;
     }
 
     private void on_smtp_auth_changed() {
