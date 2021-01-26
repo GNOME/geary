@@ -247,6 +247,14 @@ geary-composer-embed headerbar {
   -gtk-outline-top-right-radius: 7px;
 }
 
+geary-composer-widget-header-row {
+  margin: 0 6px 6px 6px;
+}
+
+geary-composer-widget-header-row label {
+  margin: 0 6px;
+}
+
 geary-composer-widget .geary-attachments-box > box > box {
   margin: 6px;
 }
@@ -254,6 +262,11 @@ geary-composer-widget .geary-attachments-box > box > box {
 geary-composer-widget .geary-attachments-box > box > box > label {
   margin: 0px 4px;
 }
+
+geary-composer-widget-header-row label {
+
+}
+
 
 /* AttachmentPane  */
 

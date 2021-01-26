@@ -115,6 +115,65 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private enum DraftPolicy { DISCARD, KEEP }
 
+    private class HeaderRow<T> : Gtk.Box, Geary.BaseInterface {
+
+
+        static construct {
+            set_css_name("geary-composer-widget-header-row");
+        }
+
+        public Gtk.Label label { get; private set; }
+        public Gtk.Box value_container { get; private set; }
+        public T value { get; private set; }
+
+
+        public HeaderRow(string label, T value) {
+            Object(orientation: Gtk.Orientation.HORIZONTAL);
+            base_ref();
+
+            this.label = new Gtk.Label(label);
+            this.label.use_underline = true;
+            this.label.xalign = 1.0f;
+            add(this.label);
+
+            this.value_container = new Gtk.Box(HORIZONTAL, 0);
+            this.value_container.get_style_context().add_class("linked");
+            add(this.value_container);
+
+            this.value = value;
+
+            var value_widget = value as Gtk.Widget;
+            if (value_widget != null) {
+                value_widget.hexpand = true;
+                this.value_container.add(value_widget);
+                this.label.set_mnemonic_widget(value_widget);
+            }
+
+            show_all();
+        }
+
+        ~HeaderRow() {
+            base_unref();
+        }
+
+    }
+
+    private class EntryHeaderRow<T> : HeaderRow<T> {
+
+
+        public Components.EntryUndo? undo { get; private set; }
+
+
+        public EntryHeaderRow(string label, T value) {
+            base(label, value);
+            var value_entry = value as Gtk.Entry;
+            if (value_entry != null) {
+                this.undo = new Components.EntryUndo(value_entry);
+            }
+        }
+
+    }
+
     private class FromAddressMap {
         public Application.AccountContext account;
         public Geary.RFC822.MailboxAddresses from;
@@ -210,11 +269,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Determines if the composer is completely empty. */
     public bool is_blank {
         get {
-            return this.to_entry.is_empty
-                && this.cc_entry.is_empty
-                && this.bcc_entry.is_empty
-                && this.reply_to_entry.is_empty
-                && this.subject_entry.buffer.length == 0
+            return this.to_row.value.is_empty
+                && this.cc_row.value.is_empty
+                && this.bcc_row.value.is_empty
+                && this.reply_to_row.value.is_empty
+                && this.subject_row.value.buffer.length == 0
                 && this.editor.body.is_empty
                 && this.attached_files.size == 0;
         }
@@ -249,32 +308,32 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /** Current text of the `to` entry. */
     public string to {
-        get { return this.to_entry.get_text(); }
-        private set { this.to_entry.set_text(value); }
+        get { return this.to_row.value.get_text(); }
+        private set { this.to_row.value.set_text(value); }
     }
 
     /** Current text of the `cc` entry. */
     public string cc {
-        get { return this.cc_entry.get_text(); }
-        private set { this.cc_entry.set_text(value); }
+        get { return this.cc_row.value.get_text(); }
+        private set { this.cc_row.value.set_text(value); }
     }
 
     /** Current text of the `bcc` entry. */
     public string bcc {
-        get { return this.bcc_entry.get_text(); }
-        private set { this.bcc_entry.set_text(value); }
+        get { return this.bcc_row.value.get_text(); }
+        private set { this.bcc_row.value.set_text(value); }
     }
 
     /** Current text of the `reply-to` entry. */
     public string reply_to {
-        get { return this.reply_to_entry.get_text(); }
-        private set { this.reply_to_entry.set_text(value); }
+        get { return this.reply_to_row.value.get_text(); }
+        private set { this.reply_to_row.value.set_text(value); }
     }
 
     /** Current text of the `sender` entry. */
     public string subject {
-        get { return this.subject_entry.get_text(); }
-        private set { this.subject_entry.set_text(value); }
+        get { return this.subject_row.value.get_text(); }
+        private set { this.subject_row.value.set_text(value); }
     }
 
     /** The In-Reply-To header value for the composed email, if any. */
@@ -301,58 +360,26 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    [GtkChild]
-    private Gtk.Grid editor_container;
+    [GtkChild] private Gtk.Box header_container;
+    [GtkChild] private Gtk.Grid editor_container;
 
-    [GtkChild]
-    private Gtk.Label from_label;
-    [GtkChild] private Gtk.Box from_row;
-    [GtkChild]
-    private Gtk.Label from_single;
-    [GtkChild]
-    private Gtk.ComboBoxText from_multiple;
+    [GtkChild] private Gtk.Grid email_headers;
+    [GtkChild] private Gtk.Box filled_headers;
+    [GtkChild] private Gtk.Revealer extended_headers_revealer;
+    [GtkChild] private Gtk.Box extended_headers;
+    [GtkChild] private Gtk.ToggleButton show_extended_headers;
+
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
-    [GtkChild]
-    private Gtk.Box to_box;
-    [GtkChild]
-    private Gtk.Label to_label;
-    private EmailEntry to_entry;
-    private Components.EntryUndo to_undo;
+    private Gtk.SizeGroup header_labels_group = new Gtk.SizeGroup(HORIZONTAL);
 
-    [GtkChild] private Gtk.Revealer extended_fields_revealer;
-    [GtkChild] Gtk.Box extended_fields_box;
-    [GtkChild] private Gtk.ToggleButton show_extended_fields;
-    [GtkChild] private Gtk.Box filled_fields;
+    private HeaderRow<Gtk.ComboBoxText> from_row;
+    private HeaderRow<EmailEntry> to_row;
+    private HeaderRow<EmailEntry> cc_row;
+    private HeaderRow<EmailEntry> bcc_row;
+    private HeaderRow<EmailEntry> reply_to_row;
+    private HeaderRow<Gtk.Entry> subject_row;
 
-    [GtkChild] Gtk.Box cc_row;
-    [GtkChild]
-    private Gtk.Box cc_box;
-    [GtkChild]
-    private Gtk.Label cc_label;
-    private EmailEntry cc_entry;
-    private Components.EntryUndo cc_undo;
-
-    [GtkChild] Gtk.Box bcc_row;
-    [GtkChild]
-    private Gtk.Box bcc_box;
-    [GtkChild]
-    private Gtk.Label bcc_label;
-    private EmailEntry bcc_entry;
-    private Components.EntryUndo bcc_undo;
-
-    [GtkChild] Gtk.Box reply_to_row;
-    [GtkChild]
-    private Gtk.Box reply_to_box;
-    [GtkChild]
-    private Gtk.Label reply_to_label;
-    private EmailEntry reply_to_entry;
-    private Components.EntryUndo reply_to_undo;
-
-    [GtkChild] private Gtk.Box subject_row;
-    [GtkChild]
-    private Gtk.Entry subject_entry;
-    private Components.EntryUndo subject_undo;
     private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
     private Gspell.Entry subject_spell_entry;
 
@@ -366,10 +393,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     [GtkChild]
     private Gtk.Widget visible_on_attachment_drag_over_child;
-    [GtkChild]
-    private Gtk.Widget email_headers;
-    [GtkChild]
-    private Gtk.Box header_container;
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
@@ -459,36 +482,59 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.visible_on_attachment_drag_over_child
         );
 
-        this.to_entry = new EmailEntry(this);
-        this.to_entry.changed.connect(on_envelope_changed);
-        this.to_box.pack_start(to_entry, true, true);
-        this.to_label.set_mnemonic_widget(this.to_entry);
-        this.to_undo = new Components.EntryUndo(this.to_entry);
+        this.from_row = new HeaderRow<Gtk.ComboBoxText>(
+            /// Translators: Label for composer From address entry
+            _("_From"), new Gtk.ComboBoxText()
+        );
+        this.from_row.value.changed.connect(on_envelope_changed);
+        var cells = this.from_row.value.get_cells();
+        ((Gtk.CellRendererText) cells.data).ellipsize = END;
+        this.header_labels_group.add_widget(this.from_row.label);
+        this.filled_headers.add(this.from_row);
 
-        this.cc_entry = new EmailEntry(this);
-        this.cc_entry.hexpand = true;
-        this.cc_entry.changed.connect(on_envelope_changed);
-        this.cc_box.add(cc_entry);
-        this.cc_label.set_mnemonic_widget(this.cc_entry);
-        this.cc_undo = new Components.EntryUndo(this.cc_entry);
+        this.to_row = new EntryHeaderRow<EmailEntry>(
+            /// Translators: Label for composer To address entry
+            _("_To"), new EmailEntry(this)
+        );
+        this.to_row.value_container.add(this.show_extended_headers);
+        this.to_row.value.changed.connect(on_envelope_changed);
+        this.header_labels_group.add_widget(this.to_row.label);
+        this.filled_headers.add(this.to_row);
 
-        this.bcc_entry = new EmailEntry(this);
-        this.bcc_entry.hexpand = true;
-        this.bcc_entry.changed.connect(on_envelope_changed);
-        this.bcc_box.add(bcc_entry);
-        this.bcc_label.set_mnemonic_widget(this.bcc_entry);
-        this.bcc_undo = new Components.EntryUndo(this.bcc_entry);
+        this.cc_row = new EntryHeaderRow<EmailEntry>(
+            /// Translators: Label for composer CC address entry
+            _("_Cc"), new EmailEntry(this)
+        );
+        this.cc_row.value.changed.connect(on_envelope_changed);
+        this.header_labels_group.add_widget(this.cc_row.label);
+        this.extended_headers.add(this.cc_row);
 
-        this.reply_to_entry = new EmailEntry(this);
-        this.reply_to_entry.hexpand = true;
-        this.reply_to_entry.changed.connect(on_envelope_changed);
-        this.reply_to_box.add(reply_to_entry);
-        this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
-        this.reply_to_undo = new Components.EntryUndo(this.reply_to_entry);
+        this.bcc_row = new EntryHeaderRow<EmailEntry>(
+            /// Translators: Label for composer BCC address entry
+            _("_Bcc"), new EmailEntry(this)
+        );
+        this.bcc_row.value.changed.connect(on_envelope_changed);
+        this.header_labels_group.add_widget(this.bcc_row.label);
+        this.extended_headers.add(this.bcc_row);
 
-        this.subject_undo = new Components.EntryUndo(this.subject_entry);
+        this.reply_to_row = new EntryHeaderRow<EmailEntry>(
+            /// Translators: Label for composer Reply-To address entry
+            _("_Reply to"), new EmailEntry(this)
+        );
+        this.reply_to_row.value.changed.connect(on_envelope_changed);
+        this.header_labels_group.add_widget(this.reply_to_row.label);
+        this.extended_headers.add(this.reply_to_row);
+
+        this.subject_row = new EntryHeaderRow<Gtk.Entry>(
+            /// Translators: Label for composer Subject line entry
+            _("_Subject"), new Gtk.Entry()
+        );
+        this.subject_row.value.changed.connect(on_subject_changed);
+        this.header_labels_group.add_widget(this.subject_row.label);
+        this.email_headers.add(this.subject_row);
+
         this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
-            this.subject_entry
+            this.subject_row.value
         );
         config.settings.changed[
             Application.Configuration.SPELL_CHECK_LANGUAGES
@@ -548,17 +594,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         insert_action_group(Action.Window.GROUP_NAME, this.actions);
         this.header.insert_action_group("cmh", this.actions);
         validate_send_button();
-
-        // Connect everything (can only happen after actions were added)
-        this.to_entry.changed.connect(validate_send_button);
-        this.cc_entry.changed.connect(validate_send_button);
-        this.bcc_entry.changed.connect(validate_send_button);
-        this.reply_to_entry.changed.connect(validate_send_button);
-
-        // Set the from_multiple combo box to ellipsize. This can't be done
-        // from the .ui file.
-        var cells = this.from_multiple.get_cells();
-        ((Gtk.CellRendererText) cells.data).ellipsize = END;
 
         load_entry_completions();
     }
@@ -696,16 +731,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.from = full_context.from;
             }
             if (full_context.to != null) {
-                this.to_entry.addresses = full_context.to;
+                this.to_row.value.addresses = full_context.to;
             }
             if (full_context.cc != null) {
-                this.cc_entry.addresses = full_context.cc;
+                this.cc_row.value.addresses = full_context.cc;
             }
             if (full_context.bcc != null) {
-                this.bcc_entry.addresses = full_context.bcc;
+                this.bcc_row.value.addresses = full_context.bcc;
             }
             if (full_context.reply_to != null) {
-                this.reply_to_entry.addresses = full_context.reply_to;
+                this.reply_to_row.value.addresses = full_context.reply_to;
             }
             if (full_context.in_reply_to != null) {
                 this.in_reply_to = this.in_reply_to.concatenate_list(
@@ -1013,10 +1048,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      */
     private void load_entry_completions() {
         Application.ContactStore contacts = this.sender_context.contacts;
-        this.to_entry.completion = new ContactEntryCompletion(contacts);
-        this.cc_entry.completion = new ContactEntryCompletion(contacts);
-        this.bcc_entry.completion = new ContactEntryCompletion(contacts);
-        this.reply_to_entry.completion = new ContactEntryCompletion(contacts);
+        this.to_row.value.completion = new ContactEntryCompletion(contacts);
+        this.cc_row.value.completion = new ContactEntryCompletion(contacts);
+        this.bcc_row.value.completion = new ContactEntryCompletion(contacts);
+        this.reply_to_row.value.completion = new ContactEntryCompletion(contacts);
     }
 
     /**
@@ -1074,31 +1109,31 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 this.context_type = REPLY_ALL;
             }
 
-            if (!this.to_entry.addresses.contains_all(to_addresses)) {
-                this.to_entry.set_modified();
+            if (!this.to_row.value.addresses.contains_all(to_addresses)) {
+                this.to_row.value.set_modified();
             }
-            if (!this.cc_entry.addresses.contains_all(cc_addresses)) {
-                this.cc_entry.set_modified();
+            if (!this.cc_row.value.addresses.contains_all(cc_addresses)) {
+                this.cc_row.value.set_modified();
             }
             if (this.bcc != "") {
-                this.bcc_entry.set_modified();
+                this.bcc_row.value.set_modified();
             }
 
             // We're in compact inline mode, but there are modified email
             // addresses, so set us to use plain inline mode instead so
             // the modified addresses can be seen. If there are CC
             if (this.current_mode == INLINE_COMPACT && (
-                    this.to_entry.is_modified ||
-                    this.cc_entry.is_modified ||
-                    this.bcc_entry.is_modified ||
-                    this.reply_to_entry.is_modified)) {
+                    this.to_row.value.is_modified ||
+                    this.cc_row.value.is_modified ||
+                    this.bcc_row.value.is_modified ||
+                    this.reply_to_row.value.is_modified)) {
                 set_mode(INLINE);
             }
 
             // If there's a modified header that would normally be hidden,
             // show full fields.
-            if (this.bcc_entry.is_modified ||
-                this.reply_to_entry.is_modified) {
+            if (this.bcc_row.value.is_modified ||
+                this.reply_to_row.value.is_modified) {
                 this.actions.change_action_state(
                     ACTION_SHOW_EXTENDED_HEADERS, true
                 );
@@ -1117,9 +1152,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.current_mode != INLINE_COMPACT
         );
         if (not_inline && Geary.String.is_empty(to)) {
-            this.to_entry.grab_focus();
+            this.to_row.value.grab_focus();
         } else if (not_inline && Geary.String.is_empty(subject)) {
-            this.subject_entry.grab_focus();
+            this.subject_row.value.grab_focus();
         } else {
             // Need to grab the focus after the content has finished
             // loading otherwise the text caret will not be visible.
@@ -1252,13 +1287,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             date_override ?? new DateTime.now_local(),
             from
         ).set_to(
-            this.to_entry.addresses
+            this.to_row.value.addresses
         ).set_cc(
-            this.cc_entry.addresses
+            this.cc_row.value.addresses
         ).set_bcc(
-            this.bcc_entry.addresses
+            this.bcc_row.value.addresses
         ).set_reply_to(
-            this.reply_to_entry.addresses
+            this.reply_to_row.value.addresses
         ).set_subject(
             this.subject
         ).set_in_reply_to(
@@ -1320,8 +1355,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.sender_context.account.information.sender_mailboxes;
 
         // Add the sender to the To address list if needed
-        this.to_entry.addresses = Geary.RFC822.Utils.merge_addresses(
-            to_entry.addresses,
+        this.to_row.value.addresses = Geary.RFC822.Utils.merge_addresses(
+            this.to_row.value.addresses,
             Geary.RFC822.Utils.create_to_addresses_for_reply(
                 referred, sender_addresses
             )
@@ -1329,14 +1364,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (type == REPLY_ALL) {
             // Add other recipients to the Cc address list if needed,
             // but don't include any already in the To list.
-            this.cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
+            this.cc_row.value.addresses = Geary.RFC822.Utils.remove_addresses(
                 Geary.RFC822.Utils.merge_addresses(
-                    this.cc_entry.addresses,
+                    this.cc_row.value.addresses,
                     Geary.RFC822.Utils.create_cc_addresses_for_reply_all(
                         referred, sender_addresses
                     )
                 ),
-                this.to_entry.addresses
+                this.to_row.value.addresses
             );
         }
 
@@ -2044,41 +2079,41 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // fields must be either empty or valid.
         get_action(ACTION_SEND).set_enabled(
             this.can_send &&
-            this.to_entry.is_valid &&
-            (this.cc_entry.is_empty || this.cc_entry.is_valid) &&
-            (this.bcc_entry.is_empty || this.bcc_entry.is_valid) &&
-            (this.reply_to_entry.is_empty || this.reply_to_entry.is_valid)
+            this.to_row.value.is_valid &&
+            (this.cc_row.value.is_empty || this.cc_row.value.is_valid) &&
+            (this.bcc_row.value.is_empty || this.bcc_row.value.is_valid) &&
+            (this.reply_to_row.value.is_empty || this.reply_to_row.value.is_valid)
         );
 
         this.header.show_send = this.can_send;
     }
 
     private void set_compact_header_recipients() {
-        bool tocc = !this.to_entry.is_empty && !this.cc_entry.is_empty,
-            ccbcc = !(this.to_entry.is_empty && this.cc_entry.is_empty) && !this.bcc_entry.is_empty;
-        string label = this.to_entry.buffer.text + (tocc ? ", " : "")
-            + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
+        bool tocc = !this.to_row.value.is_empty && !this.cc_row.value.is_empty,
+            ccbcc = !(this.to_row.value.is_empty && this.cc_row.value.is_empty) && !this.bcc_row.value.is_empty;
+        string label = this.to_row.value.buffer.text + (tocc ? ", " : "")
+            + this.cc_row.value.buffer.text + (ccbcc ? ", " : "") + this.bcc_row.value.buffer.text;
         StringBuilder tooltip = new StringBuilder();
-        if (to_entry.addresses != null) {
-            foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses) {
+        if (this.to_row.value.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.to_row.value.addresses) {
                 // Translators: Human-readable version of the RFC 822 To header
                 tooltip.append("%s %s\n".printf(_("To:"), addr.to_full_display()));
             }
         }
-        if (cc_entry.addresses != null) {
-            foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses) {
+        if (this.cc_row.value.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.cc_row.value.addresses) {
                 // Translators: Human-readable version of the RFC 822 CC header
                 tooltip.append("%s %s\n".printf(_("Cc:"), addr.to_full_display()));
             }
         }
-        if (bcc_entry.addresses != null) {
-            foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses) {
+        if (this.bcc_row.value.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.bcc_row.value.addresses) {
                 // Translators: Human-readable version of the RFC 822 BCC header
                 tooltip.append("%s %s\n".printf(_("Bcc:"), addr.to_full_display()));
             }
         }
-        if (reply_to_entry.addresses != null) {
-            foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses) {
+        if (this.reply_to_row.value.addresses != null) {
+            foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_row.value.addresses) {
                 // Translators: Human-readable version of the RFC 822 Reply-To header
                 tooltip.append("%s%s\n".printf(_("Reply-To: "), addr.to_full_display()));
             }
@@ -2117,29 +2152,29 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void update_extended_headers(bool reorder=true) {
-        bool cc = !this.cc_entry.is_empty;
-        bool bcc = !this.bcc_entry.is_empty;
-        bool reply_to = !this.reply_to_entry.is_empty;
+        bool cc = !this.cc_row.value.is_empty;
+        bool bcc = !this.bcc_row.value.is_empty;
+        bool reply_to = !this.reply_to_row.value.is_empty;
 
         if (reorder) {
             if (cc) {
-                reparent_widget(this.cc_row, this.filled_fields);
+                reparent_widget(this.cc_row, this.filled_headers);
             } else {
-                reparent_widget(this.cc_row, this.extended_fields_box);
+                reparent_widget(this.cc_row, this.extended_headers);
             }
             if (bcc) {
-                reparent_widget(this.bcc_row, this.filled_fields);
+                reparent_widget(this.bcc_row, this.filled_headers);
             } else {
-                reparent_widget(this.bcc_row, this.extended_fields_box);
+                reparent_widget(this.bcc_row, this.extended_headers);
             }
             if (reply_to) {
-                reparent_widget(this.reply_to_row, this.filled_fields);
+                reparent_widget(this.reply_to_row, this.filled_headers);
             } else {
-                reparent_widget(this.reply_to_row, this.extended_fields_box);
+                reparent_widget(this.reply_to_row, this.extended_headers);
             }
         }
 
-        this.show_extended_fields.visible = !(cc && bcc && reply_to);
+        this.show_extended_headers.visible = !(cc && bcc && reply_to);
     }
 
     private void on_show_extended_headers_toggled(GLib.SimpleAction? action,
@@ -2149,7 +2184,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         update_extended_headers();
 
-        this.extended_fields_revealer.reveal_child = show_extended;
+        this.extended_headers_revealer.reveal_child = show_extended;
 
         if (show_extended && this.current_mode == INLINE_COMPACT) {
             set_mode(INLINE);
@@ -2202,11 +2237,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
             is_primary = false;
 
-            this.from_multiple.append_text(display);
+            this.from_row.value.append_text(display);
             this.from_list.add(new FromAddressMap(other_account, addresses));
 
             if (!set_active && this.from.equal_to(addresses)) {
-                this.from_multiple.set_active(this.from_list.size - 1);
+                this.from_row.value.set_active(this.from_list.size - 1);
                 set_active = true;
             }
         }
@@ -2226,8 +2261,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     // Updates from combobox contents and visibility, returns true if
     // the from address had to be set
     private bool update_from_field() {
-        this.from_multiple.changed.disconnect(on_from_changed);
-        this.from_single.visible = this.from_multiple.visible = this.from_row.visible = false;
+        this.from_row.visible = false;
+        this.from_row.value.changed.disconnect(on_from_changed);
 
         // Don't show in inline unless the current account has
         // multiple email accounts or aliases, since these will be replies to a
@@ -2251,10 +2286,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         this.from_row.visible = true;
-        this.from_label.set_mnemonic_widget(this.from_multiple);
-
-        this.from_multiple.visible = true;
-        this.from_multiple.remove_all();
+        this.from_row.value.remove_all();
         this.from_list = new Gee.ArrayList<FromAddressMap>();
 
         // Always add at least the current account. The var set_active
@@ -2273,15 +2305,15 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             // The identity or account that was active before has been
             // removed use the best we can get now (primary address of
             // the account or any other)
-            this.from_multiple.set_active(0);
+            this.from_row.value.set_active(0);
         }
 
-        this.from_multiple.changed.connect(on_from_changed);
+        this.from_row.value.changed.connect(on_from_changed);
         return !set_active;
     }
 
     private void update_from() throws Error {
-        int index = this.from_multiple.get_active();
+        int index = this.from_row.value.get_active();
         if (index >= 0) {
             FromAddressMap selected = this.from_list.get(index);
             this.from = selected.from;
@@ -2361,10 +2393,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
         }
 
-        Gspell.EntryBuffer buffer =
-            Gspell.EntryBuffer.get_from_gtk_entry_buffer(
-                this.subject_entry.buffer
-            );
+        var buffer = Gspell.EntryBuffer.get_from_gtk_entry_buffer(
+            this.subject_row.value.buffer
+        );
         Gspell.Checker checker = null;
         if (lang != null) {
             checker = this.subject_spell_checker;
@@ -2386,16 +2417,15 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         update_draft_state();
     }
 
-    [GtkCallback]
     private void on_subject_changed() {
         draft_changed();
         update_window_title();
     }
 
-    [GtkCallback]
     private void on_envelope_changed() {
         draft_changed();
         update_extended_headers(false);
+        validate_send_button();
     }
 
     private void on_from_changed() {
