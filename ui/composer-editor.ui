@@ -63,9 +63,6 @@
             </child>
           </object>
         </child>
-        <style>
-          <class name="geary-composer-body"/>
-        </style>
       </object>
     </child>
     <child>

@@ -81,6 +81,11 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         { ACTION_UNDERLINE,                on_action,        null, "false"    },
     };
 
+
+    static construct {
+        set_css_name("geary-composer-editor");
+    }
+
     public static void add_accelerators(Application.Client application) {
         application.add_edit_accelerators(ACTION_CUT, { "<Ctrl>x" } );
         application.add_edit_accelerators(ACTION_PASTE, { "<Ctrl>v" } );

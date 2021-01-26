@@ -157,6 +157,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                                            on_show_extended_headers_toggled },
     };
 
+
+    static construct {
+        set_css_name("geary-composer-widget");
+    }
+
     public static void add_accelerators(Application.Client application) {
         application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );

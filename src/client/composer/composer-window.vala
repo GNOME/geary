@@ -14,6 +14,10 @@
  */
 public class Composer.Window : Gtk.ApplicationWindow, Container {
 
+    static construct {
+        set_css_name("geary-composer-box");
+    }
+
 
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
