@@ -16,7 +16,7 @@
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="header_area">
+          <object class="GtkBox" id="header_container">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -40,7 +40,7 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkBox" id="recipients">
+                  <object class="GtkBox" id="email_headers">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="margin_start">6</property>

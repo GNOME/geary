@@ -362,9 +362,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     [GtkChild]
     private Gtk.Widget visible_on_attachment_drag_over_child;
     [GtkChild]
-    private Gtk.Widget recipients;
+    private Gtk.Widget email_headers;
     [GtkChild]
-    private Gtk.Box header_area;
+    private Gtk.Box header_container;
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
@@ -1382,17 +1382,17 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         switch (new_mode) {
         case PresentationMode.DETACHED:
         case PresentationMode.PANED:
-            this.recipients.set_visible(true);
+            this.email_headers.set_visible(true);
             this.subject_row.visible = true;
             break;
 
         case PresentationMode.INLINE:
-            this.recipients.set_visible(true);
+            this.email_headers.set_visible(true);
             this.subject_row.visible = false;
             break;
 
         case PresentationMode.INLINE_COMPACT:
-            this.recipients.set_visible(false);
+            this.email_headers.set_visible(false);
             this.subject_row.visible = false;
             set_compact_header_recipients();
             break;
@@ -1408,7 +1408,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     internal void embed_header() {
         if (this.header.parent == null) {
-            this.header_area.add(this.header);
+            this.header_container.add(this.header);
             this.header.hexpand = true;
         }
     }
