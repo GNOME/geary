@@ -203,6 +203,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const ActionEntry[] ACTIONS = {
         { Action.Edit.COPY,                on_copy                          },
         { Action.Window.CLOSE,             on_close                         },
+        { Action.Window.SHOW_HELP_OVERLAY, on_show_help_overlay             },
         { Action.Window.SHOW_MENU,         on_show_window_menu              },
         { ACTION_ADD_ATTACHMENT,           on_add_attachment                },
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments           },
@@ -2482,6 +2483,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (main != null) {
             main.show_window_menu();
         }
+    }
+
+    private void on_show_help_overlay() {
+        var overlay = this.container.top_window.get_help_overlay();
+        overlay.section_name = "composer";
+        overlay.show();
     }
 
     private void on_discard() {

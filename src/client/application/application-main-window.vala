@@ -41,6 +41,7 @@ public class Application.MainWindow :
 
     private const ActionEntry[] WINDOW_ACTIONS = {
         { Action.Window.CLOSE, on_close },
+        { Action.Window.SHOW_HELP_OVERLAY, on_show_help_overlay },
         { Action.Window.SHOW_MENU, on_show_window_menu },
 
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
@@ -2293,6 +2294,12 @@ public class Application.MainWindow :
 
     private void on_show_window_menu() {
         show_window_menu();
+    }
+
+    private void on_show_help_overlay() {
+        var overlay = get_help_overlay();
+        overlay.section_name = "conversation";
+        overlay.show();
     }
 
     private void on_show_copy_menu() {
