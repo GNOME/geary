@@ -121,9 +121,10 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         debug("Saving composed email: %s", email_subject(composed));
 
         // XXX work out what our public IP address is somehow and use
-        // that in preference to the sender's domain
-        string domain = composed.sender != null
-            ? composed.sender.domain
+        // that in preference to the originator's domain
+        var from = composed.from;
+        var domain = from != null && !from.is_empty
+            ? from[0].domain
             : this.account.primary_mailbox.domain;
         Geary.RFC822.Message rfc822 =
             yield new Geary.RFC822.Message.from_composed_email(
