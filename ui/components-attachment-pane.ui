@@ -5,12 +5,10 @@
   <template class="ComponentsAttachmentPane" parent="GtkGrid">
     <property name="name">box</property>
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
       </object>
       <packing>
         <property name="left_attach">0</property>
@@ -20,18 +18,15 @@
     <child>
       <object class="GtkActionBar" id="attachments_actions">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="select_all_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Select all attachments</property>
             <property name="action_name">cap.select-all</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">edit-select-all-symbolic</property>
               </object>
             </child>
@@ -42,14 +37,12 @@
         </child>
         <child>
           <object class="GtkButton" id="remove_button">
-            <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Select all attachments</property>
             <property name="action_name">cap.remove-selected</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">list-remove-symbolic</property>
               </object>
             </child>
@@ -61,14 +54,12 @@
         <child>
           <object class="GtkButton" id="save_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Save selected attachments</property>
             <property name="action_name">cap.save-selected</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">document-save-symbolic</property>
               </object>
             </child>
@@ -80,14 +71,12 @@
         <child>
           <object class="GtkButton" id="open_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Open selected attachments</property>
             <property name="action_name">cap.open-selected</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">document-open-symbolic</property>
               </object>
             </child>
@@ -108,7 +97,6 @@
     <child>
       <object class="GtkGrid" id="attachments_container">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <placeholder/>

@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <template class="ComposerWidget" parent="GtkEventBox">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
     <signal name="drag-drop" handler="on_drag_drop" swapped="no"/>
     <signal name="drag-leave" handler="on_drag_leave" swapped="no"/>
@@ -13,12 +12,10 @@
     <child>
       <object class="GtkBox" id="composer_container">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkBox" id="header_container">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <placeholder/>
             </child>
@@ -32,22 +29,18 @@
         <child>
           <object class="GtkBox" id="hidden_on_attachment_drag_over">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="hidden_on_attachment_drag_over_child">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkGrid" id="email_headers">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox" id="filled_headers">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="margin_top">6</property>
                         <property name="orientation">vertical</property>
                         <child>
@@ -68,11 +61,9 @@
                     <child>
                       <object class="GtkRevealer" id="extended_headers_revealer">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkBox" id="extended_headers">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
                               <placeholder/>
@@ -115,18 +106,15 @@
         <child>
           <object class="GtkBox" id="visible_on_attachment_drag_over">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkBox" id="visible_on_attachment_drag_over_child">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="valign">center</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkLabel" id="label1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">Drop files here</property>
                     <attributes>
@@ -142,7 +130,6 @@
                 <child>
                   <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">To add them as attachments</property>
                   </object>
@@ -169,7 +156,6 @@
         <child>
           <object class="GtkGrid" id="editor_container">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <placeholder/>
@@ -208,7 +194,6 @@
         <child>
           <object class="GtkBox" id="attachments_box">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <placeholder/>
@@ -228,14 +213,12 @@
   </template>
   <object class="GtkToggleButton" id="show_extended_headers">
     <property name="visible">True</property>
-    <property name="can_focus">True</property>
     <property name="receives_default">True</property>
     <property name="tooltip_text" translatable="yes">Show Cc, Bcc, and Reply-To fields</property>
     <property name="action_name">win.show-extended-headers</property>
     <child>
       <object class="GtkImage">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="icon_name">view-more-horizontal-symbolic</property>
       </object>
     </child>

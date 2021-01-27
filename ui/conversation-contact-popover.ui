@@ -3,17 +3,14 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="ConversationContactPopover" parent="GtkPopover">
-    <property name="can_focus">False</property>
     <signal name="closed" handler="after_closed" after="yes" swapped="no"/>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkGrid" id="contact_pane">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="margin_top">10</property>
@@ -22,12 +19,10 @@
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="margin_bottom">6</property>
                 <property name="column_spacing">12</property>
                 <child>
                   <object class="GtkButton" id="unstarred_button">
-                    <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
@@ -36,7 +31,6 @@
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">non-starred-symbolic</property>
                       </object>
                     </child>
@@ -48,7 +42,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="starred_button">
-                    <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
@@ -57,7 +50,6 @@
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">starred-symbolic</property>
                       </object>
                     </child>
@@ -70,7 +62,6 @@
                 <child>
                   <object class="GtkImage" id="avatar">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="pixel_size">48</property>
                   </object>
                   <packing>
@@ -81,12 +72,10 @@
                 <child>
                   <object class="GtkGrid">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="contact_name">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="valign">end</property>
                         <property name="vexpand">True</property>
@@ -99,7 +88,6 @@
                     <child>
                       <object class="GtkLabel" id="contact_address">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="valign">start</property>
                         <property name="margin_top">2</property>
@@ -130,7 +118,6 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -140,7 +127,6 @@
             <child>
               <object class="GtkModelButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.new-conversation</property>
                 <property name="text" translatable="yes">New Conversation…</property>
@@ -153,7 +139,6 @@
             <child>
               <object class="GtkModelButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.copy-email</property>
                 <property name="text" translatable="yes">Copy Email Address</property>
@@ -166,7 +151,6 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -176,7 +160,6 @@
             <child>
               <object class="GtkModelButton" id="save_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.save</property>
                 <property name="text" translatable="yes">Save in Contacts…</property>
@@ -189,7 +172,6 @@
             <child>
               <object class="GtkModelButton">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.show-conversations</property>
                 <property name="text" translatable="yes">Show Conversations</property>
@@ -202,7 +184,6 @@
             <child>
               <object class="GtkModelButton" id="open_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.open</property>
                 <property name="text" translatable="yes">Open in Contacts</property>
@@ -215,7 +196,6 @@
             <child>
               <object class="GtkModelButton" id="load_remote_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="action_name">con.load-remote</property>
                 <property name="text" translatable="yes">Always Load Remote Images</property>
@@ -233,7 +213,6 @@
         </child>
         <child>
           <object class="GtkGrid" id="deceptive_pane">
-            <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="margin_top">10</property>
@@ -243,12 +222,10 @@
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="column_spacing">12</property>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="pixel_size">24</property>
                     <property name="icon_name">dialog-warning-symbolic</property>
                   </object>
@@ -260,7 +237,6 @@
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes" comments="Title label on contact popover">Deceptive email address</property>
                     <style>
                       <class name="title"/>
@@ -280,7 +256,6 @@
             <child>
               <object class="GtkSeparator">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -290,7 +265,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes" comments="Contact popover label">This email address is:</property>
                 <property name="xalign">0</property>
               </object>
@@ -302,7 +276,6 @@
             <child>
               <object class="GtkLabel" id="actual_email_label">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <style>
                   <class name="geary-deceptive"/>
                 </style>
@@ -315,7 +288,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes" comments="Contact popover label">But was forged as:</property>
                 <property name="xalign">0</property>
               </object>
@@ -327,7 +299,6 @@
             <child>
               <object class="GtkLabel" id="forged_email_label">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <style>
                   <class name="geary-deceptive"/>
                 </style>
@@ -340,7 +311,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="label" translatable="yes" comments="Contact popover label">The sender may not be trustworthy</property>
                 <property name="xalign">0</property>
               </object>

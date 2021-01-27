@@ -5,11 +5,9 @@
   <requires lib="libhandy" version="0.0"/>
   <template class="ComponentsInspectorErrorView" parent="GtkGrid">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <child>
       <object class="HdyClamp">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="margin_left">16</property>
         <property name="margin_right">16</property>
         <property name="margin_top">32</property>
@@ -17,13 +15,11 @@
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="row_spacing">6</property>
             <property name="column_spacing">12</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="halign">start</property>
                 <property name="valign">baseline</property>
                 <property name="margin_bottom">12</property>
@@ -41,7 +37,6 @@
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="valign">baseline</property>
                 <property name="label" translatable="yes">Details:</property>
@@ -55,14 +50,12 @@
             <child>
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkTextView" id="problem_text">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
                     <property name="vexpand">True</property>
                     <property name="editable">False</property>

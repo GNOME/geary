@@ -4,12 +4,10 @@
   <requires lib="gtk+" version="3.14"/>
   <template class="ConversationMessage" parent="GtkGrid">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkGrid" id="summary">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="hexpand">True</property>
         <property name="column_spacing">6</property>
         <child>
@@ -17,7 +15,6 @@
             <property name="width_request">18</property>
             <property name="height_request">18</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="valign">start</property>
             <property name="pixel_size">48</property>
           </object>
@@ -29,36 +26,30 @@
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkRevealer" id="compact_revealer">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="transition_type">none</property>
                 <property name="reveal_child">True</property>
                 <child>
                   <object class="GtkGrid">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
                     <child>
                       <object class="GtkGrid">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkGrid">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="hexpand">True</property>
                             <child>
                               <object class="GtkLabel" id="compact_from">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="hexpand">True</property>
                                 <property name="label" translatable="yes">From &lt;email&gt;</property>
                                 <property name="ellipsize">end</property>
@@ -75,7 +66,6 @@
                             <child>
                               <object class="GtkLabel" id="compact_date">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="ellipsize">end</property>
                                 <style>
@@ -96,7 +86,6 @@
                         <child>
                           <object class="GtkLabel" id="compact_body">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="halign">start</property>
                             <property name="hexpand">True</property>
                             <property name="label" translatable="yes">Preview body text.</property>
@@ -131,29 +120,24 @@
             <child>
               <object class="GtkRevealer" id="header_revealer">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="hexpand">True</property>
                 <property name="transition_type">none</property>
                 <child>
                   <object class="GtkGrid">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="hexpand">True</property>
                     <child>
                       <object class="GtkGrid" id="headers">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkGrid" id="from_header">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="hexpand">True</property>
                             <child>
                               <object class="GtkFlowBox" id="from">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
                                 <property name="valign">baseline</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -172,7 +156,6 @@
                             <child>
                               <object class="GtkLabel" id="date">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">baseline</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="ellipsize">end</property>
@@ -193,11 +176,9 @@
                         </child>
                         <child>
                           <object class="GtkGrid" id="sender_header">
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="sender_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Sent by:</property>
                                 <property name="yalign">0</property>
                                 <style>
@@ -213,7 +194,6 @@
                             <child>
                               <object class="GtkFlowBox" id="sender_address">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -237,11 +217,9 @@
                         </child>
                         <child>
                           <object class="GtkGrid" id="reply_to_header">
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="reply_to_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Reply to:</property>
                                 <property name="yalign">0</property>
                                 <style>
@@ -257,7 +235,6 @@
                             <child>
                               <object class="GtkFlowBox" id="reply_to_addresses">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -282,7 +259,6 @@
                         <child>
                           <object class="GtkLabel" id="subject">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
                             <property name="halign">start</property>
                             <property name="hexpand">True</property>
                             <property name="label" translatable="yes">Subject</property>
@@ -301,11 +277,9 @@
                         </child>
                         <child>
                           <object class="GtkGrid" id="to_header">
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="to_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">To:</property>
                                 <property name="yalign">0</property>
                                 <style>
@@ -321,7 +295,6 @@
                             <child>
                               <object class="ConversationMessageContactList" id="to">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -345,11 +318,9 @@
                         </child>
                         <child>
                           <object class="GtkGrid" id="cc_header">
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="cc_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Cc:</property>
                                 <property name="yalign">0</property>
                                 <style>
@@ -365,7 +336,6 @@
                             <child>
                               <object class="ConversationMessageContactList" id="cc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -389,11 +359,9 @@
                         </child>
                         <child>
                           <object class="GtkGrid" id="bcc_header">
-                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="bcc_label">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Bcc:</property>
                                 <property name="yalign">0</property>
                                 <style>
@@ -409,7 +377,6 @@
                             <child>
                               <object class="ConversationMessageContactList" id="bcc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -466,16 +433,13 @@
     <child>
       <object class="GtkRevealer" id="body_revealer">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="transition_type">slide-up</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="ComponentsInfoBarStack" id="info_bars">
                 <property name="visible">False</property>
-                <property name="can_focus">False</property>
                 <property name="shadow_type">none</property>
                 <property name="algorithm">priority-queue</property>
               </object>
@@ -488,11 +452,9 @@
               <object class="GtkOverlay">
                 <property name="height_request">6</property>
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkGrid" id="body_container">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <placeholder/>
@@ -531,7 +493,6 @@
                 </child>
                 <child type="overlay">
                   <object class="GtkProgressBar" id="body_progress">
-                    <property name="can_focus">False</property>
                     <property name="valign">start</property>
                     <style>
                       <class name="osd"/>

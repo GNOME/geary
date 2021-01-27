@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkHeaderBar" id="header">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Edit Account</property>
     <property name="subtitle" translatable="yes">Account Name</property>
     <property name="has_subtitle">False</property>
@@ -12,17 +11,14 @@
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="back_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="clicked" handler="on_back_button_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="no_show_all">True</property>
                 <property name="icon_name">go-previous-symbolic</property>
               </object>
@@ -38,17 +34,14 @@
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="undo_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="action_name">edt.undo</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="no_show_all">True</property>
                 <property name="icon_name">edit-undo-symbolic</property>
               </object>
@@ -73,11 +66,9 @@
   </object>
   <template class="AccountsEditorEditPane" parent="GtkGrid">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="vadjustment">pane_adjustment</property>
@@ -86,27 +77,22 @@
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="HdyClamp">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="margin">24</property>
                 <child>
                   <object class="GtkGrid" id="pane_content">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="details_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
@@ -124,7 +110,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Email addresses</property>
                         <style>
@@ -139,14 +124,12 @@
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="senders_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
@@ -164,7 +147,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Signature</property>
                         <style>
@@ -179,7 +161,6 @@
                     <child>
                       <object class="GtkFrame" id="signature_frame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
@@ -201,7 +182,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Settings</property>
                         <style>
@@ -216,14 +196,12 @@
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="settings_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
@@ -241,13 +219,11 @@
                     <child>
                       <object class="GtkButtonBox">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="layout_style">end</property>
                         <child>
                           <object class="GtkButton">
                             <property name="label" translatable="yes" comments="This is a button in the account settings to show server settings.">Server Settings</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <signal name="clicked" handler="on_server_settings_clicked" swapped="no"/>
                           </object>
@@ -262,7 +238,6 @@
                           <object class="GtkButton" id="remove_button">
                             <property name="label" translatable="yes" comments="This is the remove account button in the account settings.">Remove Account</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
                             <signal name="clicked" handler="on_remove_account_clicked" swapped="no"/>
