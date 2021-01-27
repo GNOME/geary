@@ -17,6 +17,12 @@ public class Composer.Embed : Gtk.EventBox, Container {
 
     private const int MIN_EDITOR_HEIGHT = 200;
 
+
+    static construct {
+        set_css_name("geary-composer-embed");
+    }
+
+
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
         get { return get_toplevel() as Gtk.ApplicationWindow; }

@@ -3,12 +3,10 @@
   <requires lib="gtk+" version="3.20"/>
   <template class="ComponentsConversationHeaderBar" parent="GtkHeaderBar">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="hexpand">True</property>
     <signal name="notify::parent" handler="update_action_bar" swapped="no"/>
     <child>
       <object class="GtkButton" id="conversation_back">
-        <property name="can_focus">False</property>
         <property name="receives_default">False</property>
         <property name="valign">center</property>
         <property name="use-underline">True</property>
@@ -25,7 +23,6 @@
         <child>
           <object class="GtkImage" id="conversation_back_image">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_name">go-previous-symbolic</property>
             <property name="icon_size">1</property>
           </object>

@@ -4,38 +4,32 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkImage" id="archive_image">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="icon_name">mail-archive-symbolic</property>
   </object>
   <template class="MainToolbar" parent="HdyLeaflet">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="can_swipe_back">True</property>
     <property name="transition_type">over</property>
     <child>
       <object class="HdyLeaflet" id="conversations_leaflet">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="can_swipe_back">True</property>
         <property name="transition_type">over</property>
         <property name="hexpand_set">True</property>
         <child>
           <object class="GtkHeaderBar" id="folder_header">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
             <property name="title">Mail</property>
             <child>
               <object class="GtkMenuButton" id="main_menu_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="main_menu_image">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="icon_name">open-menu-symbolic</property>
                   </object>
                 </child>
@@ -53,7 +47,6 @@
         <child>
           <object class="GtkSeparator" id="folder_separator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <style>
               <class name="sidebar"/>
@@ -66,12 +59,10 @@
         <child>
           <object class="GtkHeaderBar" id="conversations_header">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="hexpand">True</property>
             <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
             <child>
               <object class="GtkButton" id="conversations_back">
-                <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <property name="valign">center</property>
                 <property name="use-underline">True</property>
@@ -88,7 +79,6 @@
                 <child>
                   <object class="GtkImage" id="conversations_back_image">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="icon_name">go-previous-symbolic</property>
                     <property name="icon_size">1</property>
                   </object>
@@ -98,7 +88,6 @@
             <child>
               <object class="GtkButton" id="compose_new_message_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes" context="tooltip">Compose Message</property>
@@ -107,7 +96,6 @@
                 <child>
                   <object class="GtkImage" id="compose_new_message_image">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="icon_name">text-editor-symbolic</property>
                   </object>
                 </child>
@@ -116,7 +104,6 @@
             <child>
               <object class="GtkToggleButton" id="search_conversations_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Toggle search bar</property>
@@ -124,7 +111,6 @@
                 <child>
                   <object class="GtkImage" id="search_conversations_image">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <property name="icon_name">preferences-system-search-symbolic</property>
                   </object>
                 </child>
@@ -147,7 +133,6 @@
     <child>
       <object class="GtkSeparator" id="conversations_separator">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <style>
           <class name="sidebar"/>

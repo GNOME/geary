@@ -4,19 +4,16 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkHeaderBar" id="header">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Server Settings</property>
     <property name="subtitle" translatable="yes">Account Name</property>
     <property name="show_close_button">False</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="cancel_button">
             <property name="label" translatable="yes">Cancel</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="clicked" handler="on_cancel_button_clicked" swapped="no"/>
           </object>
@@ -30,12 +27,10 @@
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="column_spacing">12</property>
         <child>
           <object class="GtkSpinner" id="apply_spinner">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -47,7 +42,6 @@
             <property name="label" translatable="yes">Apply</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="clicked" handler="on_apply_button_clicked" swapped="no"/>
             <style>
@@ -74,11 +68,9 @@
   <template class="AccountsEditorServersPane" parent="GtkGrid">
     <property name="name">1</property>
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="vadjustment">pane_adjustment</property>
@@ -87,27 +79,22 @@
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="HdyClamp">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="margin">24</property>
                 <child>
                   <object class="GtkGrid" id="pane_content">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="receiving_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_activate" swapped="no"/>
@@ -124,7 +111,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Receiving</property>
                         <style>
@@ -139,14 +125,12 @@
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="sending_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_activate" swapped="no"/>
@@ -163,7 +147,6 @@
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Sending</property>
                         <style>
@@ -178,14 +161,12 @@
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="hexpand">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
                         <child>
                           <object class="GtkListBox" id="details_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_activate" swapped="no"/>

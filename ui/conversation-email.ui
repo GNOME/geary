@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.14"/>
   <template class="ConversationEmail" parent="GtkBox">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
@@ -16,13 +15,11 @@
   </template>
   <object class="GtkGrid" id="actions">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="halign">end</property>
     <property name="valign">start</property>
     <child>
       <object class="GtkButton" id="attachments_button">
         <property name="sensitive">False</property>
-        <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Save all attachments</property>
         <property name="valign">start</property>
@@ -31,7 +28,6 @@
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_name">mail-attachment-symbolic</property>
           </object>
         </child>
@@ -45,7 +41,6 @@
       <object class="GtkButton" id="star_button">
         <property name="visible">True</property>
         <property name="sensitive">False</property>
-        <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this message as starred</property>
         <property name="valign">start</property>
@@ -54,7 +49,6 @@
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_name">non-starred-symbolic</property>
           </object>
         </child>
@@ -67,7 +61,6 @@
     <child>
       <object class="GtkButton" id="unstar_button">
         <property name="sensitive">False</property>
-        <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this message as not starred</property>
         <property name="valign">start</property>
@@ -76,7 +69,6 @@
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_name">starred-symbolic</property>
           </object>
         </child>
@@ -90,7 +82,6 @@
       <object class="GtkMenuButton" id="email_menubutton">
         <property name="visible">True</property>
         <property name="sensitive">False</property>
-        <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="valign">start</property>
         <property name="relief">none</property>
@@ -98,7 +89,6 @@
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="icon_name">view-more-symbolic</property>
           </object>
         </child>
@@ -111,7 +101,6 @@
   </object>
   <object class="GtkGrid" id="sub_messages">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>

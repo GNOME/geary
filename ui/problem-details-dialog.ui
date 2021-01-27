@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <requires lib="libhandy" version="0.0"/>
   <template class="DialogsProblemDetailsDialog" parent="GtkDialog">
-    <property name="can_focus">False</property>
     <property name="default_width">800</property>
     <property name="default_height">500</property>
     <property name="modal">True</property>
@@ -13,20 +12,17 @@
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="title" translatable="yes" comments="Dialog title for displaying technical details of a problem. Same as the button that invokes it.">Details</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkToggleButton" id="search_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for problem report button">Search for matching log entries</property>
             <property name="action_name">win.toggle-search</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">edit-find-symbolic</property>
               </object>
             </child>
@@ -38,7 +34,6 @@
         <child type="title">
           <object class="GtkStackSwitcher">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="stack">stack</property>
           </object>
         </child>
@@ -46,7 +41,6 @@
           <object class="GtkButton" id="save_as_button">
             <property name="label" translatable="yes" comments="Button label for saving problem report information">Save As</property>
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for problem report button">Save logs entries and details</property>
             <signal name="clicked" handler="on_save_as_clicked" swapped="no"/>
@@ -62,14 +56,12 @@
         <child>
           <object class="GtkButton" id="copy_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for problem report button">Copy to clipboard</property>
             <property name="action_name">win.copy</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">edit-copy-symbolic</property>
               </object>
             </child>
@@ -85,12 +77,10 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="border_width">0</property>
-        <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkStack" id="stack">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <signal name="notify::visible-child" handler="on_visible_child_changed" swapped="no"/>
           </object>
           <packing>

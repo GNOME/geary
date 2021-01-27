@@ -4,18 +4,15 @@
     <requires lib="gtk+" version="3.20"/>
     <object class="GtkBox" id="mark_copy_move_buttons">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
             <object class="GtkMenuButton" id="mark_message_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="always_show_image">True</property>
                 <child>
                     <object class="GtkImage" id="mark_message_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">marker-symbolic</property>
                     </object>
                 </child>
@@ -29,14 +26,12 @@
         <child>
             <object class="GtkMenuButton" id="copy_message_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="always_show_image">True</property>
                 <child>
                     <object class="GtkImage" id="copy_message_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">tag-symbolic</property>
                     </object>
                 </child>
@@ -50,14 +45,12 @@
         <child>
             <object class="GtkMenuButton" id="move_message_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="always_show_image">True</property>
                 <child>
                     <object class="GtkImage" id="move_message_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">folder-symbolic</property>
                     </object>
                 </child>
@@ -75,11 +68,9 @@
     </object>
     <object class="GtkBox" id="reply_forward_buttons">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
             <object class="GtkButton" id="reply_sender_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Reply</property>
@@ -88,7 +79,6 @@
                 <child>
                     <object class="GtkImage" id="reply_sender_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">mail-reply-sender-symbolic</property>
                     </object>
                 </child>
@@ -102,7 +92,6 @@
         <child>
             <object class="GtkButton" id="reply_all_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Reply All</property>
@@ -111,7 +100,6 @@
                 <child>
                     <object class="GtkImage" id="reply_all_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">mail-reply-all-symbolic</property>
                     </object>
                 </child>
@@ -125,7 +113,6 @@
         <child>
             <object class="GtkButton" id="forward_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Forward</property>
@@ -134,7 +121,6 @@
                 <child>
                     <object class="GtkImage" id="forward_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">mail-forward-symbolic</property>
                     </object>
                 </child>
@@ -152,17 +138,14 @@
     </object>
     <object class="GtkImage" id="archive_image">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="icon_name">mail-archive-symbolic</property>
     </object>
     <object class="GtkBox" id="archive_trash_delete_buttons">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
             <object class="GtkButton" id="archive_button">
                 <property name="label" translatable="yes">_Archive</property>
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="action_name">win.archive-conversation</property>
@@ -179,7 +162,6 @@
         <child>
             <object class="GtkButton" id="trash_delete_button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
                 <property name="action_name">win.trash-conversation</property>
@@ -187,7 +169,6 @@
                 <child>
                     <object class="GtkImage" id="trash_delete_image">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="icon_name">user-trash-symbolic</property>
                     </object>
                 </child>
@@ -205,7 +186,6 @@
     </object>
     <object class="GtkToggleButton" id="find_button">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="focus_on_click">False</property>
         <property name="receives_default">False</property>
         <property name="tooltip_text" translatable="yes">Toggle find bar</property>
@@ -213,7 +193,6 @@
         <child>
             <object class="GtkImage" id="find_image">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">preferences-system-search-symbolic</property>
             </object>
         </child>

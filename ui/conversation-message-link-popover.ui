@@ -3,12 +3,10 @@
 <interface>
   <requires lib="gtk+" version="3.14"/>
   <object class="GtkPopover" id="link_popover">
-    <property name="can_focus">False</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="margin_left">12</property>
         <property name="margin_right">12</property>
         <property name="margin_top">12</property>
@@ -17,7 +15,6 @@
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">center</property>
             <property name="margin_right">12</property>
             <property name="vexpand">True</property>
@@ -33,7 +30,6 @@
         <child>
           <object class="GtkLabel" id="bad_link_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="margin_left">12</property>
             <property name="label">&lt;a href="http://badlink.com"&gt;http://badlink.com&lt;/a&gt;</property>
@@ -49,7 +45,6 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">But actually goes to:</property>
           </object>
@@ -61,7 +56,6 @@
         <child>
           <object class="GtkLabel" id="good_link_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="margin_left">12</property>
             <property name="margin_bottom">6</property>
@@ -78,7 +72,6 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="margin_top">12</property>
             <property name="label" translatable="yes">The link appears to go to:</property>
@@ -91,7 +84,6 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">Deceptive link found</property>
             <attributes>
@@ -106,7 +98,6 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="label" translatable="yes">The email sender may be leading you to the wrong web site.</property>
           </object>
@@ -118,7 +109,6 @@
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="halign">start</property>
             <property name="margin_top">12</property>
             <property name="label" translatable="yes">If unsure, contact the sender and ask before continuing.</property>

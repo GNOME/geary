@@ -25,14 +25,12 @@
         <child>
           <object class="GtkButton" id="action_button">
             <property name="visible">False</property>
-            <property name="can_focus">False</property>
             <property name="valign">center</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="close_button">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="valign">center</property>
             <signal name="clicked" handler="close" swapped="no"/>
             <style>
@@ -41,7 +39,6 @@
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="icon_name">window-close-symbolic</property>
               </object>
             </child>

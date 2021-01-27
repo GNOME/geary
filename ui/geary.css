@@ -42,15 +42,6 @@ geary-conversation-viewer {
   border-bottom-width: 0;
 }
 
-.geary-composer-box > border {
-  border-width: 0px;
-}
-.geary-composer-body > border {
-  border-left-width: 0;
-  border-right-width: 0;
-  border-bottom-width: 0;
-}
-
 .geary-overlay {
   background-color: @theme_base_color;
   padding: 2px 6px;
@@ -239,20 +230,43 @@ grid.geary-message-summary {
 
 /* Composer */
 
-.geary-composer-embed headerbar {
+geary-composer-box > border {
+  border-width: 0px;
+}
+
+geary-composer-editor > frame > border {
+  border-left-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+}
+
+geary-composer-embed headerbar {
   border-top-left-radius: 8px;
   -gtk-outline-top-left-radius: 7px;
   border-top-right-radius: 8px;
   -gtk-outline-top-right-radius: 7px;
 }
 
-.geary-attachments-box > box > box {
+geary-composer-widget-header-row {
+  margin: 0 6px 6px 6px;
+}
+
+geary-composer-widget-header-row label {
+  margin: 0 6px;
+}
+
+geary-composer-widget .geary-attachments-box > box > box {
   margin: 6px;
 }
 
-.geary-attachments-box > box > box > label {
+geary-composer-widget .geary-attachments-box > box > box > label {
   margin: 0px 4px;
 }
+
+geary-composer-widget-header-row label {
+
+}
+
 
 /* AttachmentPane  */
 

@@ -44,6 +44,7 @@ namespace Action {
 
         public const string CLOSE = "close";
         public const string SHORTCUT_HELP = "show-help-overlay";
+        public const string SHOW_HELP_OVERLAY = "show-help-overlay";
         public const string SHOW_MENU = "show-menu";
 
 

@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkHeaderBar" id="header">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Accounts</property>
     <property name="has_subtitle">False</property>
     <property name="show_close_button">True</property>
@@ -16,11 +15,9 @@
   </object>
   <template class="AccountsEditorListPane" parent="GtkGrid">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
         <property name="vadjustment">pane_adjustment</property>
@@ -29,26 +26,21 @@
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="HdyClamp">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="margin">24</property>
                 <child>
                   <object class="GtkGrid" id="pane_content">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkGrid" id="welcome_panel">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">center</property>
                         <property name="column_spacing">12</property>
                         <child>
                           <object class="GtkImage" id="welcome_icon">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="pixel_size">64</property>
                             <property name="use_fallback">True</property>
                           </object>
@@ -61,7 +53,6 @@
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="halign">start</property>
                             <property name="valign">start</property>
                             <property name="wrap">True</property>
@@ -77,7 +68,6 @@
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="halign">start</property>
                             <property name="valign">end</property>
                             <property name="label" translatable="yes">Welcome to Geary</property>
@@ -104,7 +94,6 @@
                     <child>
                       <object class="GtkFrame" id="accounts_list_frame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="valign">start</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
@@ -113,7 +102,6 @@
                         <child>
                           <object class="GtkListBox" id="accounts_list">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_row_activated" swapped="no"/>
@@ -130,7 +118,6 @@
                     <child>
                       <object class="GtkLabel" id="add_service_label">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="label" translatable="yes">Add an account</property>
                         <attributes>
@@ -148,7 +135,6 @@
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="valign">start</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
@@ -158,7 +144,6 @@
                           <object class="GtkListBox" id="service_list">
                             <property name="width_request">0</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="valign">start</property>
                             <property name="selection_mode">none</property>
                             <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>

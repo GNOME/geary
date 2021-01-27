@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.20"/>
   <template class="ComposerHeaderbar" parent="GtkHeaderBar">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <child type="title">
       <object class="GtkBox">
         <property name="visible">False</property>
@@ -13,11 +12,9 @@
     <child>
       <object class="GtkBox" id="detach_start">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="detach_start_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Detach the composer from the window</property>
@@ -28,7 +25,6 @@
             <child>
               <object class="GtkImage" id="detach_start_image">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="pixel_size">16</property>
                 <property name="icon_name">detach-symbolic</property>
               </object>
@@ -43,7 +39,6 @@
         <child>
           <object class="GtkSeparator" id="detach_start_separator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
           </object>
           <packing>
@@ -57,7 +52,6 @@
     <child>
       <object class="GtkButton">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="label" translatable="yes">Cancel</property>
         <property name="action_name">cmh.composer-close</property>
       </object>
@@ -65,7 +59,6 @@
     <child>
       <object class="GtkButton" id="recipients_button">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="focus_on_click">False</property>
         <property name="receives_default">False</property>
         <property name="relief">none</property>
@@ -73,7 +66,6 @@
         <child>
           <object class="GtkLabel" id="recipients_label">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="ellipsize">end</property>
           </object>
         </child>
@@ -85,11 +77,9 @@
     <child>
       <object class="GtkBox" id="detach_end">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkSeparator" id="detach_end_separator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
           </object>
           <packing>
@@ -101,7 +91,6 @@
         <child>
           <object class="GtkButton" id="detach_end_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Detach the composer from the window</property>
@@ -112,7 +101,6 @@
             <child>
               <object class="GtkImage" id="detach_end_image">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="pixel_size">16</property>
                 <property name="icon_name">detach-symbolic</property>
               </object>
@@ -134,7 +122,6 @@
       <object class="GtkButton" id="send_button">
         <property name="label" translatable="yes">_Send</property>
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
         <property name="focus_on_click">False</property>
         <property name="receives_default">False</property>
         <property name="action_name">cmh.send</property>
@@ -152,11 +139,9 @@
     <child>
       <object class="GtkBox" id="close_buttons">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <child>
           <object class="GtkButton" id="discard_and_close_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Discard and Close</property>
@@ -165,7 +150,6 @@
             <child>
               <object class="GtkImage" id="discard_and_close_image">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="pixel_size">16</property>
                 <property name="icon_name">user-trash-symbolic</property>
               </object>
@@ -180,7 +164,6 @@
         <child>
           <object class="GtkButton" id="save_and_close_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Save and Close</property>
@@ -189,7 +172,6 @@
             <child>
               <object class="GtkImage" id="save_and_close_image">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="pixel_size">16</property>
                 <property name="icon_name">document-save-symbolic</property>
               </object>

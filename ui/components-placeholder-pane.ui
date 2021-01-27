@@ -4,7 +4,6 @@
   <requires lib="gtk+" version="3.14"/>
   <template class="ComponentsPlaceholderPane" parent="GtkGrid">
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
     <property name="halign">center</property>
     <property name="valign">center</property>
     <property name="hexpand">True</property>
@@ -12,7 +11,6 @@
     <child>
       <object class="GtkImage" id="placeholder_image">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="pixel_size">72</property>
         <property name="icon_name">image-x-generic-symbolic</property>
         <property name="icon_size">6</property>
@@ -25,7 +23,6 @@
     <child>
       <object class="GtkLabel" id="title_label">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="label">Mea navis volitans</property>
         <style>
           <class name="title"/>
@@ -39,7 +36,6 @@
     <child>
       <object class="GtkLabel" id="subtitle_label">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="label">Mea navis volitans anguillis plena est.</property>
         <property name="wrap">True</property>
         <style>
