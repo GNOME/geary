@@ -12,16 +12,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-01-19 13:43+0000\n"
-"PO-Revision-Date: 2021-01-19 17:07+0200\n"
+"POT-Creation-Date: 2021-01-27 12:08+0000\n"
+"PO-Revision-Date: 2021-01-28 10:17+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
-"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Lokalize 20.11.70\n"
 "X-Project-Style: gnome\n"
 
@@ -38,7 +37,7 @@ msgstr "Надіслати файли через Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:560
-#: src/client/application/application-main-window.vala:641
+#: src/client/application/application-main-window.vala:648
 msgid "Geary"
 msgstr "Geary"
 
@@ -333,18 +332,18 @@ msgstr "Не вдалося зберегти сертифікат"
 
 #. Translators: Label for adding an email account
 #. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:108
+#: src/client/accounts/accounts-editor-add-pane.vala:109
 msgid "All others"
 msgstr "Всі інші"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:195
+#: src/client/accounts/accounts-editor-add-pane.vala:196
 #: src/client/accounts/accounts-editor-servers-pane.vala:321
 msgid "Check your receiving login and password"
 msgstr "Перевірте ваші ім'я користувача і пароль для отримання пошти"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:210
+#: src/client/accounts/accounts-editor-add-pane.vala:211
 #: src/client/accounts/accounts-editor-servers-pane.vala:334
 msgid "Check your receiving server details"
 msgstr "Перевірте параметри сервера отримання пошти"
@@ -354,50 +353,50 @@ msgstr "Перевірте параметри сервера отримання 
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:232
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 #: src/client/accounts/accounts-editor-servers-pane.vala:355
 msgid "Check your sending login and password"
 msgstr "Перевірте ваші ім'я користувача і пароль для надсилання пошти"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:246
+#: src/client/accounts/accounts-editor-add-pane.vala:247
 #: src/client/accounts/accounts-editor-servers-pane.vala:368
 msgid "Check your sending server details"
 msgstr "Перевірте параметри сервера надсилання пошти"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:261
+#: src/client/accounts/accounts-editor-add-pane.vala:262
 msgid "Check your email address and password"
 msgstr "Перевірте ім'я користувача і пароль до вашої електронної пошти"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:272
+#: src/client/accounts/accounts-editor-add-pane.vala:273
 msgid "Could not connect, check your network"
 msgstr "Не вдалося встановити з'єднання. Перевірте, чи працездатна мережа."
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:285
+#: src/client/accounts/accounts-editor-add-pane.vala:286
 msgid "An unexpected problem occurred"
 msgstr "Виникла неочікувана проблема"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:303
+#: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
 msgid "Account not created: %s"
 msgstr "Обліковий запис не створено: %s"
 
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:558
+#: src/client/accounts/accounts-editor-add-pane.vala:584
 msgid "Your name"
 msgstr "Ваше ім’я"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:575
+#: src/client/accounts/accounts-editor-add-pane.vala:601
 #: src/client/accounts/accounts-editor-edit-pane.vala:536
 msgid "Email address"
 msgstr "Поштова адреса"
@@ -407,7 +406,7 @@ msgstr "Поштова адреса"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:579
+#: src/client/accounts/accounts-editor-add-pane.vala:605
 #: src/client/accounts/accounts-editor-edit-pane.vala:502
 msgid "person@example.com"
 msgstr "ivan@ukrmail.org"
@@ -416,16 +415,16 @@ msgstr "ivan@ukrmail.org"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:593
+#: src/client/accounts/accounts-editor-add-pane.vala:619
 #: src/client/accounts/accounts-editor-servers-pane.vala:889
 msgid "Login name"
 msgstr "Ім'я користувача"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:607
+#: src/client/accounts/accounts-editor-add-pane.vala:633
 #: src/client/accounts/accounts-editor-servers-pane.vala:1011
-#: ui/password-dialog.glade:108
+#: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Пароль"
 
@@ -433,14 +432,14 @@ msgstr "Пароль"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:629
+#: src/client/accounts/accounts-editor-add-pane.vala:655
 #: src/client/accounts/accounts-editor-servers-pane.vala:733
 msgid "IMAP server"
 msgstr "Сервер IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:632
+#: src/client/accounts/accounts-editor-add-pane.vala:658
 msgid "imap.example.com"
 msgstr "imap.ukrmail.com"
 
@@ -448,20 +447,20 @@ msgstr "imap.ukrmail.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:638
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 #: src/client/accounts/accounts-editor-servers-pane.vala:739
 msgid "SMTP server"
 msgstr "Сервер SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:641
+#: src/client/accounts/accounts-editor-add-pane.vala:667
 msgid "smtp.example.com"
 msgstr "smtp.ukrmail.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:220
-#: ui/accounts_editor_edit_pane.ui:263
+#: ui/accounts_editor_edit_pane.ui:239
 msgid "Remove Account"
 msgstr "Вилучити обліковий запис"
 
@@ -482,7 +481,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-edit-pane.vala:232
 #: src/client/components/stock.vala:19
 #: src/client/plugin/mail-merge/mail-merge.vala:392
-#: ui/password-dialog.glade:196
+#: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "_Скасувати"
 
@@ -622,12 +621,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2151
+#: src/client/application/application-main-window.vala:2158
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2134
+#: src/client/application/application-main-window.vala:2141
 msgid "Redo"
 msgstr "Повторити"
 
@@ -722,7 +721,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:587
+#: src/client/application/application-main-window.vala:594
 msgid "Login"
 msgstr "Увійти"
 
@@ -1194,73 +1193,71 @@ msgstr "Повідомлення до %s відкинуто"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
-#| msgid "Geary update in progress…"
 msgid "Account update in progress"
 msgstr "Виконуємо оновлення облікового запису"
 
 #. / Translators: Window title for account database upgrade
 #. / dialog
 #: src/client/application/application-database-manager.vala:80
-#| msgid "Account name"
 msgid "Account update"
 msgstr "Оновлення облікового запису"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:573
+#: src/client/application/application-main-window.vala:580
 msgid "Working offline"
 msgstr "Працюємо у автономному режимі"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:575
+#: src/client/application/application-main-window.vala:582
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Ви не зможете надсилати або отримувати електронну пошту до відновлення "
 "з'єднання із інтернетом."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:582
+#: src/client/application/application-main-window.vala:589
 msgid "Login problem"
 msgstr "Проблеми із входом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:584
+#: src/client/application/application-main-window.vala:591
 msgid "An account has reported an incorrect login or password."
 msgstr ""
 "Сервером облікового запису повідомлено про помилкове ім'я користувача або "
 "пароль."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:591
+#: src/client/application/application-main-window.vala:598
 msgid "Retry login, you will be prompted for your password"
 msgstr ""
 "Під час повторної спроби увійти програма попросить вас ввести ваш пароль"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:598
+#: src/client/application/application-main-window.vala:605
 msgid "Security problem"
 msgstr "Проблема із захистом"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:600
+#: src/client/application/application-main-window.vala:607
 msgid "An account has reported an untrusted server."
 msgstr ""
 "Механізмами роботи із обліковими записами повідомлено про ненадійність "
 "сервера."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:603
+#: src/client/application/application-main-window.vala:610
 msgid "Check"
 msgstr "Перевірити"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:607
+#: src/client/application/application-main-window.vala:614
 msgid "Check the security details for the connection"
 msgstr "Перевірте параметри захисту з'єднання"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:650
+#: src/client/application/application-main-window.vala:657
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1268,31 +1265,31 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1041
+#: src/client/application/application-main-window.vala:1048
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1359
+#: src/client/application/application-main-window.vala:1366
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1360
+#: src/client/application/application-main-window.vala:1367
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1361
+#: src/client/application/application-main-window.vala:1368
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1362
+#: src/client/application/application-main-window.vala:1369
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1419
+#: src/client/application/application-main-window.vala:1426
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1300,13 +1297,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1424
-#: src/client/application/application-main-window.vala:1439
+#: src/client/application/application-main-window.vala:1431
+#: src/client/application/application-main-window.vala:1446
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1441
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1314,7 +1311,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1725
+#: src/client/application/application-main-window.vala:1732
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1325,7 +1322,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1834
+#: src/client/composer/composer-widget.vala:1875
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1395,19 +1392,19 @@ msgstr[1] "Вилучити спілкування"
 msgstr[2] "Вилучити спілкування"
 msgstr[3] "Вилучити спілкування"
 
-#: src/client/components/components-info-bar.vala:251
+#: src/client/components/components-info-bar.vala:252
 msgid "Information"
 msgstr "Інформація"
 
-#: src/client/components/components-info-bar.vala:255
+#: src/client/components/components-info-bar.vala:256
 msgid "Question"
 msgstr "Питання"
 
-#: src/client/components/components-info-bar.vala:259
+#: src/client/components/components-info-bar.vala:260
 msgid "Warning"
 msgstr "Попередження"
 
-#: src/client/components/components-info-bar.vala:263
+#: src/client/components/components-info-bar.vala:264
 msgid "Error"
 msgstr "Помилка"
 
@@ -1435,13 +1432,13 @@ msgstr "Система"
 #: src/client/components/components-inspector.vala:229
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:220
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:223
-#: ui/problem-details-dialog.ui:47
+#: ui/problem-details-dialog.ui:42
 msgid "Save As"
 msgstr "Зберегти як"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
+#: ui/accounts_editor_servers_pane.ui:15 ui/composer-headerbar.ui:55
 msgid "Cancel"
 msgstr "Скасувати"
 
@@ -1677,7 +1674,7 @@ msgstr "З_берегти"
 msgid "_Keep"
 msgstr "_Зберегти"
 
-#: src/client/composer/composer-editor.vala:675
+#: src/client/composer/composer-editor.vala:680
 msgid "Select Color"
 msgstr "Вибрати колір"
 
@@ -1698,19 +1695,19 @@ msgstr "Некоректна адреса електронної пошти"
 msgid "New Message"
 msgstr "Створити лист"
 
-#: src/client/composer/composer-widget.vala:168
+#: src/client/composer/composer-widget.vala:233
 msgid "Saved"
 msgstr "Збережено"
 
-#: src/client/composer/composer-widget.vala:169
+#: src/client/composer/composer-widget.vala:234
 msgid "Saving"
 msgstr "Зберігання"
 
-#: src/client/composer/composer-widget.vala:170
+#: src/client/composer/composer-widget.vala:235
 msgid "Error saving"
 msgstr "Помилка зберігання"
 
-#: src/client/composer/composer-widget.vala:171
+#: src/client/composer/composer-widget.vala:236
 msgid "Press Backspace to delete quote"
 msgstr "Натисніть Backspace, щоб вилучити цитату"
 
@@ -1719,7 +1716,7 @@ msgstr "Натисніть Backspace, щоб вилучити цитату"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:187
+#: src/client/composer/composer-widget.vala:252
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1727,95 +1724,126 @@ msgstr ""
 "долучення|долучень|долучив|долучила|долучили|долучити|долучено|вкладення|"
 "вкладень|вклав|вклала|вклали|вкласти|вкладено"
 
+#. / Translators: Label for composer From address entry
+#: src/client/composer/composer-widget.vala:488
+msgid "_From"
+msgstr "_Від"
+
+#. / Translators: Label for composer To address entry
+#: src/client/composer/composer-widget.vala:498
+msgid "_To"
+msgstr "_Кому"
+
+#. / Translators: Label for composer CC address entry
+#: src/client/composer/composer-widget.vala:507
+msgid "_Cc"
+msgstr "Ко_пія"
+
+#. / Translators: Label for composer BCC address entry
+#: src/client/composer/composer-widget.vala:515
+msgid "_Bcc"
+msgstr "По_тайна копія"
+
+#. / Translators: Label for composer Reply-To address entry
+#: src/client/composer/composer-widget.vala:523
+#| msgid "Reply to:"
+msgid "_Reply to"
+msgstr "_Відповідати"
+
+#. / Translators: Label for composer Subject line entry
+#: src/client/composer/composer-widget.vala:531
+msgid "_Subject"
+msgstr "_Тема"
+
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:868
+#: src/client/composer/composer-widget.vala:909
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Хочете зберегти чи відкинути цю чернетку повідомлення?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:894
+#: src/client/composer/composer-widget.vala:935
 msgid "Do you want to discard this draft message?"
 msgstr "Хочете відкинути цю чернетку повідомлення?"
 
-#: src/client/composer/composer-widget.vala:1467
+#: src/client/composer/composer-widget.vala:1508
 msgid "Send message with an empty subject and body?"
 msgstr "Надіслати лист без теми і текстом листа?"
 
-#: src/client/composer/composer-widget.vala:1469
+#: src/client/composer/composer-widget.vala:1510
 msgid "Send message with an empty subject?"
 msgstr "Надіслати лист без теми?"
 
-#: src/client/composer/composer-widget.vala:1471
+#: src/client/composer/composer-widget.vala:1512
 msgid "Send message with an empty body?"
 msgstr "Надіслати лист без тексту?"
 
-#: src/client/composer/composer-widget.vala:1480
+#: src/client/composer/composer-widget.vala:1521
 msgid "Send message without an attachment?"
 msgstr "Надіслати лист без долучень?"
 
-#: src/client/composer/composer-widget.vala:1822
+#: src/client/composer/composer-widget.vala:1863
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "«%s» уже долучено для доставлення."
 
-#: src/client/composer/composer-widget.vala:1854
-#: src/client/composer/composer-widget.vala:1904
+#: src/client/composer/composer-widget.vala:1895
+#: src/client/composer/composer-widget.vala:1945
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» — порожній файл."
 
-#: src/client/composer/composer-widget.vala:1892
+#: src/client/composer/composer-widget.vala:1933
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Не вдалося знайти «%s»."
 
-#: src/client/composer/composer-widget.vala:1898
+#: src/client/composer/composer-widget.vala:1939
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» — тека."
 
-#: src/client/composer/composer-widget.vala:1917
+#: src/client/composer/composer-widget.vala:1958
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Не вдалося відкрити «%s» для читання."
 
-#: src/client/composer/composer-widget.vala:1925
+#: src/client/composer/composer-widget.vala:1966
 msgid "Cannot add attachment"
 msgstr "Неможливо додати долучення"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:1996
+#: src/client/composer/composer-widget.vala:2037
 msgid "Images"
 msgstr "Зображення"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2060
+#: src/client/composer/composer-widget.vala:2101
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:267 ui/conversation-message.ui:309
+#: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "Кому:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2066
+#: src/client/composer/composer-widget.vala:2107
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:272 ui/conversation-message.ui:353
+#: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "Копія:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2072
+#: src/client/composer/composer-widget.vala:2113
 #: src/client/conversation-viewer/conversation-email.vala:552
-#: ui/conversation-message.ui:397
+#: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "Потайна копія:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2078
+#: src/client/composer/composer-widget.vala:2119
 msgid "Reply-To: "
 msgstr "Відповісти:"
 
@@ -1824,7 +1852,7 @@ msgstr "Відповісти:"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2196
+#: src/client/composer/composer-widget.vala:2237
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s через %2$s"
@@ -2116,7 +2144,7 @@ msgstr "Під час спроби обробити сертифікат сер�
 #. / information pane
 #. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:99
-#: ui/problem-details-dialog.ui:17
+#: ui/problem-details-dialog.ui:15
 msgid "Details"
 msgstr "Подробиці"
 
@@ -2857,210 +2885,210 @@ msgstr "Не вдалося визначити тип даних для типу
 msgid "(no subject)"
 msgstr "(без теми)"
 
-#: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:135
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
 msgid "Add an account"
 msgstr "Додати обліковий запис"
 
-#: ui/accounts_editor_add_pane.ui:53
+#: ui/accounts_editor_add_pane.ui:47
 msgid "_Create"
 msgstr "С_творити"
 
-#: ui/accounts_editor_add_pane.ui:135 ui/accounts_editor_servers_pane.ui:129
+#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Отримання"
 
-#: ui/accounts_editor_add_pane.ui:183 ui/accounts_editor_servers_pane.ui:168
+#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Надсилання"
 
-#: ui/accounts_editor_edit_pane.ui:8
+#: ui/accounts_editor_edit_pane.ui:7
 msgid "Edit Account"
 msgstr "Змінити обліковий запис"
 
-#: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
+#: ui/accounts_editor_edit_pane.ui:8 ui/accounts_editor_servers_pane.ui:8
 msgid "Account Name"
 msgstr "Назва облікового запису"
 
-#: ui/accounts_editor_edit_pane.ui:129
+#: ui/accounts_editor_edit_pane.ui:114
 msgid "Email addresses"
 msgstr "Адреси ел. пошти"
 
-#: ui/accounts_editor_edit_pane.ui:169
+#: ui/accounts_editor_edit_pane.ui:151
 msgid "Signature"
 msgstr "Підпис"
 
-#: ui/accounts_editor_edit_pane.ui:206
+#: ui/accounts_editor_edit_pane.ui:186
 msgid "Settings"
 msgstr "Параметри"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:248 ui/accounts_editor_servers_pane.ui:8
+#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Параметри сервера"
 
-#: ui/accounts_editor_edit_pane.ui:267
+#: ui/accounts_editor_edit_pane.ui:242
 msgid "Remove this account from Geary"
 msgstr "Вилучити цей обліковий запис з Geary"
 
-#: ui/accounts_editor_list_pane.ui:8
+#: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "Облікові записи"
 
-#: ui/accounts_editor_list_pane.ui:68
+#: ui/accounts_editor_list_pane.ui:59
 msgid "To get started, select an email provider below."
 msgstr ""
 "Для початку, виберіть надавача послуг електронної пошти із наведеного нижче "
 "списку."
 
-#: ui/accounts_editor_list_pane.ui:83
+#: ui/accounts_editor_list_pane.ui:73
 msgid "Welcome to Geary"
 msgstr "Ласкаво просимо до Geary"
 
-#: ui/accounts_editor_servers_pane.ui:47
+#: ui/accounts_editor_servers_pane.ui:42
 msgid "Apply"
 msgstr "Застосувати"
 
-#: ui/certificate_warning_dialog.glade:7
+#: ui/certificate_warning_dialog.glade:6
 msgid "Untrusted Connection"
 msgstr "Надійне з'єднання"
 
-#: ui/certificate_warning_dialog.glade:29
+#: ui/certificate_warning_dialog.glade:26
 msgid "_Always Trust This Server"
 msgstr "_Завжди довіряти цьому серверу"
 
-#: ui/certificate_warning_dialog.glade:43
+#: ui/certificate_warning_dialog.glade:39
 msgid "_Trust This Server"
 msgstr "_Довіритись цьому серверу"
 
-#: ui/certificate_warning_dialog.glade:57
+#: ui/certificate_warning_dialog.glade:52
 msgid "_Don’t Trust This Server"
 msgstr "_Не довіряти цьому серверу"
 
-#: ui/composer-editor.ui:100
+#: ui/composer-editor.ui:89
 msgid "Bold text"
 msgstr "Текст напівжирним"
 
-#: ui/composer-editor.ui:124
+#: ui/composer-editor.ui:111
 msgid "Italic text"
 msgstr "Текст курсивом"
 
-#: ui/composer-editor.ui:148
+#: ui/composer-editor.ui:133
 msgid "Underline text"
 msgstr "Підкреслити текст"
 
-#: ui/composer-editor.ui:172
+#: ui/composer-editor.ui:155
 msgid "Strikethrough text"
 msgstr "Перекреслений текст"
 
-#: ui/composer-editor.ui:205
+#: ui/composer-editor.ui:185
 msgid "Insert bulleted list"
 msgstr "Вставити неупорядкований список"
 
-#: ui/composer-editor.ui:229
+#: ui/composer-editor.ui:207
 msgid "Insert numbered list"
 msgstr "Вставити упорядкований список"
 
-#: ui/composer-editor.ui:262
+#: ui/composer-editor.ui:237
 msgid "Indent or quote text"
 msgstr "Додати відступи або цитування тексту"
 
-#: ui/composer-editor.ui:286
+#: ui/composer-editor.ui:259
 msgid "Un-indent or unquote text"
 msgstr "Скасувати відступи або цитування тексту"
 
-#: ui/composer-editor.ui:315
+#: ui/composer-editor.ui:286
 msgid "Remove text formatting"
 msgstr "Вилучити форматування тексту"
 
-#: ui/composer-editor.ui:334
+#: ui/composer-editor.ui:303
 msgid "Change font type"
 msgstr "Змінити тип шрифту"
 
-#: ui/composer-editor.ui:349
+#: ui/composer-editor.ui:315
 msgid "Sans Serif"
 msgstr "Без засічок"
 
-#: ui/composer-editor.ui:360
+#: ui/composer-editor.ui:325
 msgid "Serif"
 msgstr "З засічками"
 
-#: ui/composer-editor.ui:371
+#: ui/composer-editor.ui:335
 msgid "Fixed Width"
 msgstr "Фіксована ширина"
 
-#: ui/composer-editor.ui:397
+#: ui/composer-editor.ui:359
 msgid "Change font color"
 msgstr "Змінити колір шрифту"
 
-#: ui/composer-editor.ui:412
+#: ui/composer-editor.ui:372
 msgid "Change font size"
 msgstr "Змінити розмір шрифту"
 
-#: ui/composer-editor.ui:447
+#: ui/composer-editor.ui:402
 msgid "Insert or update text link"
 msgstr "Вставити або оновити текстове посилання"
 
-#: ui/composer-editor.ui:471
+#: ui/composer-editor.ui:424
 msgid "Insert an image"
 msgstr "Вставити зображення"
 
-#: ui/composer-editor.ui:513
+#: ui/composer-editor.ui:463
 msgid "Undo last edit"
 msgstr "Скасувати останнє редагування"
 
-#: ui/composer-editor.ui:537
+#: ui/composer-editor.ui:485
 msgid "Redo last edit"
 msgstr "Повторити останнє скасоване редагування"
 
-#: ui/composer-editor.ui:566 ui/composer-editor.ui:591
+#: ui/composer-editor.ui:512 ui/composer-editor.ui:534
 msgid "Attach a file"
 msgstr "Вкласти файл"
 
-#: ui/composer-editor.ui:615
+#: ui/composer-editor.ui:556
 msgid "Add original attachments"
 msgstr "Додати початкові долучення"
 
-#: ui/composer-editor.ui:660
+#: ui/composer-editor.ui:598
 msgid "More options"
 msgstr "Ще параметри"
 
-#: ui/composer-editor.ui:680
+#: ui/composer-editor.ui:617
 msgid "Show formatting toolbar"
 msgstr "Показувати панель форматування"
 
-#: ui/composer-editor.ui:698
+#: ui/composer-editor.ui:634
 msgid "Select spell checking languages"
 msgstr "Виберіть мови для перевірки правопису"
 
-#: ui/composer-editor.ui:723
+#: ui/composer-editor.ui:658
 msgid "S_ans Serif"
 msgstr "_Без засічок"
 
-#: ui/composer-editor.ui:728
+#: ui/composer-editor.ui:663
 msgid "S_erif"
 msgstr "_З засічками"
 
-#: ui/composer-editor.ui:733
+#: ui/composer-editor.ui:668
 msgid "_Fixed Width"
 msgstr "_Фіксованої ширини"
 
-#: ui/composer-editor.ui:743
+#: ui/composer-editor.ui:678
 msgid "_Small"
 msgstr "_Малий"
 
-#: ui/composer-editor.ui:748
+#: ui/composer-editor.ui:683
 msgid "_Medium"
 msgstr "_Середній"
 
-#: ui/composer-editor.ui:753
+#: ui/composer-editor.ui:688
 msgid "Lar_ge"
 msgstr "Ве_ликий"
 
-#: ui/composer-editor.ui:763
+#: ui/composer-editor.ui:698
 msgid "_Rich Text"
 msgstr "_Форматований текст"
 
-#: ui/composer-editor.ui:768
+#: ui/composer-editor.ui:703
 msgid "_Plain Text"
 msgstr "_Звичайний текст"
 
@@ -3098,95 +3126,69 @@ msgstr "Вибрати _все"
 msgid "_Inspect…"
 msgstr "Дос_лідити…"
 
-#: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
+#: ui/composer-headerbar.ui:20 ui/composer-headerbar.ui:96
 msgid "Detach the composer from the window"
 msgstr "Від'єднати вікно редактора від основного вікна"
 
-#: ui/composer-headerbar.ui:135
+#: ui/composer-headerbar.ui:123
 msgid "_Send"
 msgstr "_Надіслати"
 
-#: ui/composer-headerbar.ui:162
+#: ui/composer-headerbar.ui:147
 msgid "Discard and Close"
 msgstr "Відкинути і закрити"
 
-#: ui/composer-headerbar.ui:186
+#: ui/composer-headerbar.ui:169
 msgid "Save and Close"
 msgstr "Зберегти і закрити"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:42
+#: ui/composer-link-popover.ui:38
 msgid "Insert the new link with this URL"
 msgstr "Вставити нове посилання із цією адресою"
 
-#: ui/composer-link-popover.ui:43
+#: ui/composer-link-popover.ui:39
 msgid "Add"
 msgstr "Додати"
 
-#: ui/composer-link-popover.ui:47
+#: ui/composer-link-popover.ui:43
 msgid "Link URL"
 msgstr "Адреса посилання"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:61
+#: ui/composer-link-popover.ui:56
 msgid "Update this link’s URL"
 msgstr "Оновити цю адресу посилання"
 
-#: ui/composer-link-popover.ui:62
+#: ui/composer-link-popover.ui:57
 msgid "Update"
 msgstr "Оновити"
 
-#: ui/composer-link-popover.ui:75
+#: ui/composer-link-popover.ui:69
 msgid "Delete this link"
 msgstr "Вилучити це посилання"
 
-#. Geary account mail will be sent from
-#: ui/composer-widget.ui:61
-msgid "_From"
-msgstr "_Від"
-
-#. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:131
-msgid "_To"
-msgstr "_Кому"
-
-#: ui/composer-widget.ui:159
-msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr "Показувати поля «Копія», «Bcc» і «Відповідати до»"
-
-#: ui/composer-widget.ui:220
-msgid "_Cc"
-msgstr "Ко_пія"
-
-#: ui/composer-widget.ui:268
-msgid "_Bcc"
-msgstr "По_тайна копія"
-
-#: ui/composer-widget.ui:316
-msgid "_Reply-To"
-msgstr "_Відповісти"
-
-#: ui/composer-widget.ui:373
-msgid "_Subject"
-msgstr "_Тема"
-
-#: ui/composer-widget.ui:446
+#: ui/composer-widget.ui:119
 msgid "Drop files here"
 msgstr "Перетягніть файли сюди"
 
-#: ui/composer-widget.ui:462
+#: ui/composer-widget.ui:134
 msgid "To add them as attachments"
 msgstr "Щоб додати їх як долучення"
 
-#: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
+#: ui/composer-widget.ui:217
+msgid "Show Cc, Bcc, and Reply-To fields"
+msgstr "Показувати поля «Копія», «Bcc» і «Відповідати до»"
+
+#: ui/components-attachment-pane.ui:25 ui/components-attachment-pane.ui:41
 msgid "Select all attachments"
 msgstr "Вибрати усі долучення"
 
-#: ui/components-attachment-pane.ui:66
+#: ui/components-attachment-pane.ui:58
 msgid "Save selected attachments"
 msgstr "Зберегти вибрані долучення"
 
-#: ui/components-attachment-pane.ui:85
+#: ui/components-attachment-pane.ui:75
 msgid "Open selected attachments"
 msgstr "Відкрити вибрані долучення"
 
@@ -3194,31 +3196,31 @@ msgstr "Відкрити вибрані долучення"
 msgid "Save _All"
 msgstr "Зберегти _все"
 
-#: ui/components-conversation-actions.ui:85
+#: ui/components-conversation-actions.ui:76
 msgid "Reply"
 msgstr "Відповісти"
 
-#: ui/components-conversation-actions.ui:108
+#: ui/components-conversation-actions.ui:97
 msgid "Reply All"
 msgstr "Відповісти всім"
 
-#: ui/components-conversation-actions.ui:131
+#: ui/components-conversation-actions.ui:118
 msgid "Forward"
 msgstr "Переслати"
 
-#: ui/components-conversation-actions.ui:163
+#: ui/components-conversation-actions.ui:147
 msgid "_Archive"
 msgstr "_Архівувати"
 
-#: ui/components-conversation-actions.ui:211
+#: ui/components-conversation-actions.ui:191
 msgid "Toggle find bar"
 msgstr "Увімкнути або вимкнути смужку пошуку"
 
-#: ui/components-conversation-header-bar.ui:22 ui/main-toolbar.ui:85
+#: ui/components-conversation-header-bar.ui:20 ui/main-toolbar.ui:76
 msgid "Back"
 msgstr "Назад"
 
-#: ui/components-inspector-error-view.ui:31
+#: ui/components-inspector-error-view.ui:27
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
 "one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
@@ -3231,98 +3233,98 @@ msgstr ""
 "\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">нового звіту щодо вади</"
 "a>."
 
-#: ui/components-inspector-error-view.ui:47
+#: ui/components-inspector-error-view.ui:42
 msgid "Details:"
 msgstr "Подробиці:"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:19 ui/problem-details-dialog.ui:24
+#: ui/components-inspector.ui:16 ui/problem-details-dialog.ui:21
 msgid "Search for matching log entries"
 msgstr "Шукати відповідні записи журналу"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:35
+#: ui/components-inspector.ui:30
 msgid "Toggle appending new log entries"
 msgstr "Перемкнути дописування нових записів журналу"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:55
+#: ui/components-inspector.ui:48
 msgid "Add a marker entry to the log"
 msgstr "Додати запис із позначкою до журналу"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:81 ui/problem-details-dialog.ui:51
+#: ui/components-inspector.ui:71 ui/problem-details-dialog.ui:45
 msgid "Save logs entries and details"
 msgstr "Зберегти записи журналу і подробиці"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:101 ui/problem-details-dialog.ui:67
+#: ui/components-inspector.ui:89 ui/problem-details-dialog.ui:60
 msgid "Copy to clipboard"
 msgstr "Скопіювати до буфера"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:121
+#: ui/components-inspector.ui:107
 msgid "Clears all log entries"
 msgstr "Спорожнити усі записи журналу"
 
-#: ui/conversation-contact-popover.ui:146
+#: ui/conversation-contact-popover.ui:132
 msgid "New Conversation…"
 msgstr "Нове спілкування…"
 
-#: ui/conversation-contact-popover.ui:159
+#: ui/conversation-contact-popover.ui:144
 msgid "Copy Email Address"
 msgstr "Скопіювати адресу ел. пошти"
 
-#: ui/conversation-contact-popover.ui:182
+#: ui/conversation-contact-popover.ui:165
 msgid "Save in Contacts…"
 msgstr "Зберегти у «Контактах»…"
 
-#: ui/conversation-contact-popover.ui:195
+#: ui/conversation-contact-popover.ui:177
 msgid "Show Conversations"
 msgstr "Показати спілкування"
 
-#: ui/conversation-contact-popover.ui:208
+#: ui/conversation-contact-popover.ui:189
 msgid "Open in Contacts"
 msgstr "Відкрити у «Контактах»"
 
-#: ui/conversation-contact-popover.ui:221
+#: ui/conversation-contact-popover.ui:201
 msgid "Always Load Remote Images"
 msgstr "Завжди завантажувати сторонні зображення"
 
 #. Title label on contact popover
-#: ui/conversation-contact-popover.ui:264
+#: ui/conversation-contact-popover.ui:240
 msgid "Deceptive email address"
 msgstr "Оманлива адреса електронної пошти"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:294
+#: ui/conversation-contact-popover.ui:268
 msgid "This email address is:"
 msgstr "Адреса цієї електронної пошти:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:319
+#: ui/conversation-contact-popover.ui:291
 msgid "But was forged as:"
 msgstr "Але її було підроблено так:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:344
+#: ui/conversation-contact-popover.ui:314
 msgid "The sender may not be trustworthy"
 msgstr "Ймовірно, відправнику не варто довіряти"
 
-#: ui/conversation-email.ui:27
+#: ui/conversation-email.ui:24
 msgid "Save all attachments"
 msgstr "Зберегти всі долучення"
 
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
-#: ui/conversation-email.ui:50
+#: ui/conversation-email.ui:45
 msgid "Mark this message as starred"
 msgstr "Позначити це повідомлення зіркою"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
-#: ui/conversation-email.ui:72
+#: ui/conversation-email.ui:65
 msgid "Mark this message as not starred"
 msgstr "Зняти позначення зірками з цього повідомлення"
 
@@ -3363,25 +3365,25 @@ msgstr "В_илучити повідомлення…"
 msgid "_View Source"
 msgstr "_Глянути код"
 
-#: ui/conversation-message-link-popover.ui:54
+#: ui/conversation-message-link-popover.ui:49
 msgid "But actually goes to:"
 msgstr "але насправді веде сюди:"
 
-#: ui/conversation-message-link-popover.ui:84
+#: ui/conversation-message-link-popover.ui:77
 msgid "The link appears to go to:"
 msgstr "Це посилання начебто веде сюди:"
 
-#: ui/conversation-message-link-popover.ui:96
+#: ui/conversation-message-link-popover.ui:88
 msgid "Deceptive link found"
 msgstr "Виявлено оманливе посилання"
 
-#: ui/conversation-message-link-popover.ui:111
+#: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
 msgstr ""
 "Ймовірно, відправник повідомлення хоче спрямувати вас не на той сайт, на "
 "який ви сподіваєтеся."
 
-#: ui/conversation-message-link-popover.ui:124
+#: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
 "Якщо не певні, зв'яжіться із відправником для підтвердження, перш ніж "
@@ -3411,59 +3413,59 @@ msgstr "Зберегти з_ображення як…"
 msgid "_Select All"
 msgstr "Ви_брати все"
 
-#: ui/conversation-message.ui:63
+#: ui/conversation-message.ui:54
 msgid "From <email>"
 msgstr "Від <email>"
 
-#: ui/conversation-message.ui:79 ui/conversation-message.ui:177
+#: ui/conversation-message.ui:69 ui/conversation-message.ui:160
 msgid "1/1/1970\t"
 msgstr "1.1.1970\t"
 
-#: ui/conversation-message.ui:102
+#: ui/conversation-message.ui:91
 msgid "Preview body text."
 msgstr "Попередній перегляд текстового вмісту."
 
-#: ui/conversation-message.ui:201
+#: ui/conversation-message.ui:182
 msgid "Sent by:"
 msgstr "Відправник:"
 
-#: ui/conversation-message.ui:245
+#: ui/conversation-message.ui:223
 msgid "Reply to:"
 msgstr "Відповідати до:"
 
-#: ui/conversation-message.ui:288
+#: ui/conversation-message.ui:264
 msgid "Subject"
 msgstr "Тема"
 
-#: ui/conversation-viewer.ui:60
+#: ui/conversation-viewer.ui:53
 msgid "Find in conversation"
 msgstr "Знайти у спілкуванні"
 
-#: ui/conversation-viewer.ui:75
+#: ui/conversation-viewer.ui:67
 msgid "Find the previous occurrence of the search string."
 msgstr "Знайти попередній відповідник шуканого рядка."
 
-#: ui/conversation-viewer.ui:96
+#: ui/conversation-viewer.ui:86
 msgid "Find the next occurrence of the search string."
 msgstr "Знайти наступний відповідник шуканого рядка"
 
-#: ui/find_bar.glade:66
+#: ui/find_bar.glade:58
 msgid "Find:"
 msgstr "Знайти:"
 
-#: ui/find_bar.glade:89
+#: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Назад"
 
-#: ui/find_bar.glade:107
+#: ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Далі"
 
-#: ui/find_bar.glade:125
+#: ui/find_bar.glade:114
 msgid "_Case sensitive"
 msgstr "_Враховувати регістр"
 
-#: ui/find_bar.glade:145
+#: ui/find_bar.glade:132
 msgid "label"
 msgstr "мітка"
 
@@ -3768,12 +3770,12 @@ msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Вибрати наступні або попередні спілкування"
 
-#: ui/main-toolbar.ui:104
+#: ui/main-toolbar.ui:93
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Нове повідомлення"
 
-#: ui/main-toolbar.ui:122
+#: ui/main-toolbar.ui:109
 msgid "Toggle search bar"
 msgstr "Перемкнути панель пошуку"
 
@@ -3793,21 +3795,24 @@ msgstr "_Клавіатурні скорочення"
 msgid "_About Geary"
 msgstr "_Про Geary"
 
-#: ui/password-dialog.glade:74
+#: ui/password-dialog.glade:66
 msgid "SMTP Credentials"
 msgstr "Реєстраційні дані SMTP"
 
-#: ui/password-dialog.glade:91
+#: ui/password-dialog.glade:82
 msgid "Username"
 msgstr "Користувач"
 
-#: ui/password-dialog.glade:152
+#: ui/password-dialog.glade:140
 msgid "_Remember password"
 msgstr "_Запам'ятати пароль"
 
-#: ui/password-dialog.glade:210
+#: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Засвідчення"
+
+#~ msgid "_Reply-To"
+#~ msgstr "_Відповісти"
 
 #~ msgid "Confirm removing: %s"
 #~ msgstr "Підтвердження вилучення: %s"
