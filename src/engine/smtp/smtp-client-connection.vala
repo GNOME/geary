@@ -110,14 +110,14 @@ internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
     }
 
     /**
-     * Sends a block of data (mail message) by first issuing the DATA command and transmitting
-     * the block if the appropriate response is sent.
+     * Sends a block of data
      *
-     * Dot-stuffing is performed on the data if !already_dotstuffed.  See
-     * [[http://tools.ietf.org/html/rfc2821#section-4.5.2]]
+     * This first issues a DATA command and transmits the block if the
+     * appropriate response is sent.
      *
-     * Returns the final Response of the transaction.  If the ResponseCode is not a successful
-     * completion, the message should not be considered sent.
+     * Returns the final Response of the transaction. If the
+     * ResponseCode is not a successful completion, the message should
+     * not be considered sent.
      */
     public async Response send_data_async(Memory.Buffer data,
                                           GLib.Cancellable? cancellable = null)

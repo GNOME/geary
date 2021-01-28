@@ -215,7 +215,7 @@ public class Geary.Smtp.ClientSession : BaseObject, Logging.Source {
 
         // DATA
         response = yield cx.send_data_async(
-            email.get_rfc822_buffer(), cancellable
+            email.get_rfc822_buffer(SMTP_FORMAT), cancellable
         );
         if (!response.code.is_success_completed())
             response.throw_error("Unable to send message");
