@@ -314,7 +314,9 @@ public abstract class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         setts.enable_media_stream = false;
         setts.enable_offline_web_application_cache = false;
         setts.enable_page_cache = false;
+#if WEBKIT_PLUGINS_SUPPORTED
         setts.enable_plugins = false;
+#endif
         setts.hardware_acceleration_policy =
             WebKit.HardwareAccelerationPolicy.NEVER;
         setts.javascript_can_access_clipboard = true;
