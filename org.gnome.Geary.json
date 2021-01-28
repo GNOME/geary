@@ -3,7 +3,7 @@
     "app-id": "org.gnome.Geary.Devel",
     "branch": "master",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "3.38",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
     "desktop-file-name-suffix": " (Development)",
@@ -21,10 +21,11 @@
         "--talk-name=org.gnome.Contacts",
         "--talk-name=org.gnome.ControlCenter",
         "--talk-name=org.gnome.OnlineAccounts",
-        "--talk-name=org.gnome.evolution.dataserver.AddressBook9",
+        "--talk-name=org.gnome.evolution.dataserver.AddressBook10",
         "--talk-name=org.gnome.evolution.dataserver.Sources5",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
         "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
+        "--filesystem=xdg-download:rw",
         "--filesystem=/tmp"
     ],
     "cleanup": [
@@ -52,9 +53,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/gnome-online-accounts/3.36/gnome-online-accounts-3.36.0.tar.xz",
+                    "sha256": "1c8f62990833ca41188dbb80c5e99d99b57a62608ca675bbcd37bc2244742f2e"
                 }
             ]
         },
@@ -66,9 +67,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gspell.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/gspell/1.8/gspell-1.8.4.tar.xz",
+                    "sha256": "cf4d16a716e813449bd631405dc1001ea89537b8cdae2b8abfb3999212bd43b4"
                 }
             ],
             "cleanup": [
@@ -92,7 +93,7 @@
                 {
                     "type": "archive",
                     "url": "https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz",
-                    "sha256": "09fecacaf75ba5a242159e3a9758a5446b5ce4d0ab684f98a7040864e1d1286f"
+                    "sha512": "ce015e6d4c1c7cb4af7b45748ce8251c663f80f6a4357ddff6a97796642619abe882f4cadeca10cabeb1b25577869f436da15bca882e032eb3ff0475f6010d8b"
                 }
             ],
             "cleanup": [
@@ -118,23 +119,23 @@
             "config-opts": [
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DENABLE_CANBERRA=OFF",
-                "-DENABLE_EXAMPLES=OFF",
+                "-DENABLE_GTK=ON",
                 "-DENABLE_GOA=ON",
                 "-DENABLE_GOOGLE=OFF",
-                "-DENABLE_GTK=ON",
-                "-DENABLE_GTK_DOC=OFF",
-                "-DENABLE_INSTALLED_TESTS=OFF",
-                "-DENABLE_INTROSPECTION=ON",
                 "-DENABLE_VALA_BINDINGS=ON",
                 "-DENABLE_WEATHER=OFF",
+                "-DWITH_OPENLDAP=OFF",
                 "-DWITH_LIBDB=OFF",
-                "-DWITH_OPENLDAP=OFF"
+                "-DENABLE_INTROSPECTION=ON",
+                "-DENABLE_INSTALLED_TESTS=OFF",
+                "-DENABLE_GTK_DOC=OFF",
+                "-DENABLE_EXAMPLES=OFF"
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/evolution-data-server/3.38/evolution-data-server-3.38.1.tar.xz",
+                    "sha256": "8ff278e9c334f185236182709ba46ab727db2830d0b4e09485c1e582e1f2e4b7"
                 }
             ],
             "cleanup": [
@@ -155,9 +156,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/folks.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/folks/0.14/folks-0.14.0.tar.xz",
+                    "sha256": "d6e778da637d3b33fd9a6b45115e8157d8868211dc08b943d1075b5eb7282bb9"
                 }
             ],
             "cleanup": [
@@ -183,9 +184,9 @@
             "name": "gsound",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gsound.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/gsound/1.0/gsound-1.0.2.tar.xz",
+                    "sha256": "bba8ff30eea815037e53bee727bbd5f0b6a2e74d452a7711b819a7c444e78e53"
                 }
             ]
         },
@@ -193,9 +194,9 @@
             "name": "gmime",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://github.com/jstedfast/gmime.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://github.com/jstedfast/gmime/archive/3.2.7.tar.gz",
+                    "sha256": "442db212b9ad71a13397b54cea742ab27cfcf95f43b3eb3d7ac4cec7cb4e59e5"
                 }
             ]
         },
@@ -209,9 +210,9 @@
             ],
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libhandy.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/libhandy/1.0/libhandy-1.0.0.tar.xz",
+                    "sha256": "a9398582f47b7d729205d6eac0c068fef35aaf249fdd57eea3724f8518d26699"
                 }
             ]
         },
@@ -220,9 +221,9 @@
             "buildsystem": "meson",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libpeas.git",
-                    "branch": "master"
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/libpeas/1.28/libpeas-1.28.0.tar.xz",
+                    "sha256": "42d91993b46ed50f16add6d9577ecc22beb8e2dffa7101e2232c2b63733b8b15"
                 }
             ]
         },
@@ -230,9 +231,9 @@
             "name": "libytnef",
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://github.com/Yeraze/ytnef.git",
-                    "branch": "v1.9.3"
+                    "type": "archive",
+                    "url": "https://github.com/Yeraze/ytnef/archive/v1.9.3.tar.gz",
+                    "sha256": "41a0033bde33c86a7e4aa4e14bb822dd03084098638e7d6557263e47e80b4f4f"
                 }
             ]
         },
@@ -256,7 +257,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/geary.git",
-                    "branch": "mainline"
+                    "branch": "gnome-3-38"
                 }
             ]
         }
