@@ -304,12 +304,14 @@ public class Application.Client : Gtk.Application {
 
         /// Application runtime information label
         info.add({ _("Distribution name"),
-                    GLib.Environment.get_os_info(GLib.OsInfoKey.NAME)
+                    GLib.Environment.get_os_info(GLib.OsInfoKey.NAME) ??
+                    _("Unknown")
             });
 
         /// Application runtime information label
         info.add({_("Distribution release"),
-                GLib.Environment.get_os_info(GLib.OsInfoKey.VERSION)
+                GLib.Environment.get_os_info(GLib.OsInfoKey.VERSION) ??
+                _("Unknown")
             });
 
         /// Application runtime information label
