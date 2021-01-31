@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-01-19 13:43+0000\n"
-"PO-Revision-Date: 2021-01-24 13:17+0100\n"
+"POT-Creation-Date: 2021-01-28 22:44+0000\n"
+"PO-Revision-Date: 2021-01-31 10:18+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -40,7 +40,7 @@ msgstr "Wysyłanie plików za pomocą programu Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:560
-#: src/client/application/application-main-window.vala:641
+#: src/client/application/application-main-window.vala:648
 msgid "Geary"
 msgstr "Geary"
 
@@ -325,18 +325,18 @@ msgstr "Zachowanie certyfikatu się nie powiodło"
 
 #. Translators: Label for adding an email account
 #. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:108
+#: src/client/accounts/accounts-editor-add-pane.vala:109
 msgid "All others"
 msgstr "Wszystkie pozostałe"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:195
+#: src/client/accounts/accounts-editor-add-pane.vala:196
 #: src/client/accounts/accounts-editor-servers-pane.vala:321
 msgid "Check your receiving login and password"
 msgstr "Proszę sprawdzić poprawność loginu i hasła odbierania"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:210
+#: src/client/accounts/accounts-editor-add-pane.vala:211
 #: src/client/accounts/accounts-editor-servers-pane.vala:334
 msgid "Check your receiving server details"
 msgstr "Proszę sprawdzić poprawność informacji o serwerze odbierania"
@@ -346,50 +346,50 @@ msgstr "Proszę sprawdzić poprawność informacji o serwerze odbierania"
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:232
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 #: src/client/accounts/accounts-editor-servers-pane.vala:355
 msgid "Check your sending login and password"
 msgstr "Proszę sprawdzić poprawność loginu i hasła wysyłania"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:246
+#: src/client/accounts/accounts-editor-add-pane.vala:247
 #: src/client/accounts/accounts-editor-servers-pane.vala:368
 msgid "Check your sending server details"
 msgstr "Proszę sprawdzić poprawność informacji o serwerze wysyłania"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:261
+#: src/client/accounts/accounts-editor-add-pane.vala:262
 msgid "Check your email address and password"
 msgstr "Proszę sprawdzić poprawność adresu e-mail i hasła"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:272
+#: src/client/accounts/accounts-editor-add-pane.vala:273
 msgid "Could not connect, check your network"
 msgstr "Nie można się połączyć, proszę sprawdzić sieć"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:285
+#: src/client/accounts/accounts-editor-add-pane.vala:286
 msgid "An unexpected problem occurred"
 msgstr "Wystąpił nieoczekiwany problem"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:303
+#: src/client/accounts/accounts-editor-add-pane.vala:304
 #, c-format
 msgid "Account not created: %s"
 msgstr "Nie utworzono konta: %s"
 
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:558
+#: src/client/accounts/accounts-editor-add-pane.vala:584
 msgid "Your name"
 msgstr "Imię i nazwisko"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:575
+#: src/client/accounts/accounts-editor-add-pane.vala:601
 #: src/client/accounts/accounts-editor-edit-pane.vala:536
 msgid "Email address"
 msgstr "Adres e-mail"
@@ -399,7 +399,7 @@ msgstr "Adres e-mail"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:579
+#: src/client/accounts/accounts-editor-add-pane.vala:605
 #: src/client/accounts/accounts-editor-edit-pane.vala:502
 msgid "person@example.com"
 msgstr "e-mail@example.com"
@@ -408,16 +408,16 @@ msgstr "e-mail@example.com"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:593
+#: src/client/accounts/accounts-editor-add-pane.vala:619
 #: src/client/accounts/accounts-editor-servers-pane.vala:889
 msgid "Login name"
 msgstr "Login"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:607
+#: src/client/accounts/accounts-editor-add-pane.vala:633
 #: src/client/accounts/accounts-editor-servers-pane.vala:1011
-#: ui/password-dialog.glade:108
+#: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Hasło"
 
@@ -425,14 +425,14 @@ msgstr "Hasło"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:629
+#: src/client/accounts/accounts-editor-add-pane.vala:655
 #: src/client/accounts/accounts-editor-servers-pane.vala:733
 msgid "IMAP server"
 msgstr "Serwer IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:632
+#: src/client/accounts/accounts-editor-add-pane.vala:658
 msgid "imap.example.com"
 msgstr "imap.example.com"
 
@@ -440,20 +440,20 @@ msgstr "imap.example.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:638
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 #: src/client/accounts/accounts-editor-servers-pane.vala:739
 msgid "SMTP server"
 msgstr "Serwer SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:641
+#: src/client/accounts/accounts-editor-add-pane.vala:667
 msgid "smtp.example.com"
 msgstr "smtp.example.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:220
-#: ui/accounts_editor_edit_pane.ui:263
+#: ui/accounts_editor_edit_pane.ui:239
 msgid "Remove Account"
 msgstr "Usuń konto"
 
@@ -473,7 +473,7 @@ msgstr ""
 #: src/client/accounts/accounts-editor-edit-pane.vala:232
 #: src/client/components/stock.vala:19
 #: src/client/plugin/mail-merge/mail-merge.vala:392
-#: ui/password-dialog.glade:196
+#: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "_Anuluj"
 
@@ -612,12 +612,12 @@ msgstr[1] "ostatnie %d dni"
 msgstr[2] "ostatnie %d dni"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2151
+#: src/client/application/application-main-window.vala:2158
 msgid "Undo"
 msgstr "Cofnij"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2134
+#: src/client/application/application-main-window.vala:2141
 msgid "Redo"
 msgstr "Ponów"
 
@@ -712,7 +712,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:587
+#: src/client/application/application-main-window.vala:594
 msgid "Login"
 msgstr "Login"
 
@@ -1192,56 +1192,56 @@ msgid "Account update"
 msgstr "Aktualizacja konta"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:573
+#: src/client/application/application-main-window.vala:580
 msgid "Working offline"
 msgstr "Tryb offline"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:575
+#: src/client/application/application-main-window.vala:582
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Nie można wysyłać ani odbierać poczty, dopóki komputer nie zostanie "
 "połączony."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:582
+#: src/client/application/application-main-window.vala:589
 msgid "Login problem"
 msgstr "Problem z logowaniem"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:584
+#: src/client/application/application-main-window.vala:591
 msgid "An account has reported an incorrect login or password."
 msgstr "Konto zgłosiło niewłaściwy login lub hasło."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:591
+#: src/client/application/application-main-window.vala:598
 msgid "Retry login, you will be prompted for your password"
 msgstr "Ponawia logowanie, zostanie wyświetlona prośba o hasło"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:598
+#: src/client/application/application-main-window.vala:605
 msgid "Security problem"
 msgstr "Problem zabezpieczeń"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:600
+#: src/client/application/application-main-window.vala:607
 msgid "An account has reported an untrusted server."
 msgstr "Konto zgłosiło niezaufany serwer."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:603
+#: src/client/application/application-main-window.vala:610
 msgid "Check"
 msgstr "Sprawdź poprawność"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:607
+#: src/client/application/application-main-window.vala:614
 msgid "Check the security details for the connection"
 msgstr "Sprawdza poprawność informacji o zabezpieczeniach połączenia"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:650
+#: src/client/application/application-main-window.vala:657
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1249,51 +1249,51 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1041
+#: src/client/application/application-main-window.vala:1048
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etykiety"
 
-#: src/client/application/application-main-window.vala:1359
+#: src/client/application/application-main-window.vala:1366
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: src/client/application/application-main-window.vala:1360
+#: src/client/application/application-main-window.vala:1367
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: src/client/application/application-main-window.vala:1361
+#: src/client/application/application-main-window.vala:1368
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: src/client/application/application-main-window.vala:1362
+#: src/client/application/application-main-window.vala:1369
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1419
+#: src/client/application/application-main-window.vala:1426
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Trwale usunąć ten wątek?"
 msgstr[1] "Trwale usunąć te wątki?"
 msgstr[2] "Trwale usunąć te wątki?"
 
-#: src/client/application/application-main-window.vala:1424
-#: src/client/application/application-main-window.vala:1439
+#: src/client/application/application-main-window.vala:1431
+#: src/client/application/application-main-window.vala:1446
 msgid "Delete"
 msgstr "Usuń"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1441
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: src/client/application/application-main-window.vala:1725
+#: src/client/application/application-main-window.vala:1732
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1304,7 +1304,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1834
+#: src/client/composer/composer-widget.vala:1875
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1368,19 +1368,19 @@ msgstr[0] "Usuwa wątek"
 msgstr[1] "Usuwa wątki"
 msgstr[2] "Usuwa wątki"
 
-#: src/client/components/components-info-bar.vala:251
+#: src/client/components/components-info-bar.vala:252
 msgid "Information"
 msgstr "Informacja"
 
-#: src/client/components/components-info-bar.vala:255
+#: src/client/components/components-info-bar.vala:256
 msgid "Question"
 msgstr "Pytanie"
 
-#: src/client/components/components-info-bar.vala:259
+#: src/client/components/components-info-bar.vala:260
 msgid "Warning"
 msgstr "Ostrzeżenie"
 
-#: src/client/components/components-info-bar.vala:263
+#: src/client/components/components-info-bar.vala:264
 msgid "Error"
 msgstr "Błąd"
 
@@ -1408,13 +1408,13 @@ msgstr "System"
 #: src/client/components/components-inspector.vala:229
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:220
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:223
-#: ui/problem-details-dialog.ui:47
+#: ui/problem-details-dialog.ui:42
 msgid "Save As"
 msgstr "Zapisz jako"
 
 #: src/client/components/components-inspector.vala:230
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
+#: ui/accounts_editor_servers_pane.ui:15 ui/composer-headerbar.ui:55
 msgid "Cancel"
 msgstr "Anuluj"
 
@@ -1648,7 +1648,7 @@ msgstr "_Zapisz"
 msgid "_Keep"
 msgstr "Za_chowaj"
 
-#: src/client/composer/composer-editor.vala:675
+#: src/client/composer/composer-editor.vala:680
 msgid "Select Color"
 msgstr "Wybór koloru"
 
@@ -1670,19 +1670,19 @@ msgstr "Nieprawidłowy adres e-mail"
 msgid "New Message"
 msgstr "Nowa wiadomość"
 
-#: src/client/composer/composer-widget.vala:168
+#: src/client/composer/composer-widget.vala:233
 msgid "Saved"
 msgstr "Zapisano"
 
-#: src/client/composer/composer-widget.vala:169
+#: src/client/composer/composer-widget.vala:234
 msgid "Saving"
 msgstr "Zapisywanie"
 
-#: src/client/composer/composer-widget.vala:170
+#: src/client/composer/composer-widget.vala:235
 msgid "Error saving"
 msgstr "Błąd podczas zapisywania"
 
-#: src/client/composer/composer-widget.vala:171
+#: src/client/composer/composer-widget.vala:236
 msgid "Press Backspace to delete quote"
 msgstr "Naciśnięcie klawisza Backspace usunie cytat"
 
@@ -1691,7 +1691,7 @@ msgstr "Naciśnięcie klawisza Backspace usunie cytat"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:187
+#: src/client/composer/composer-widget.vala:252
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1700,95 +1700,125 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
+#. / Translators: Label for composer From address entry
+#: src/client/composer/composer-widget.vala:488
+msgid "_From"
+msgstr "_Od"
+
+#. / Translators: Label for composer To address entry
+#: src/client/composer/composer-widget.vala:498
+msgid "_To"
+msgstr "_Do"
+
+#. / Translators: Label for composer CC address entry
+#: src/client/composer/composer-widget.vala:507
+msgid "_Cc"
+msgstr "Do _wiadomości"
+
+#. / Translators: Label for composer BCC address entry
+#: src/client/composer/composer-widget.vala:515
+msgid "_Bcc"
+msgstr "_Ukryty do wiadomości"
+
+#. / Translators: Label for composer Reply-To address entry
+#: src/client/composer/composer-widget.vala:523
+msgid "_Reply to"
+msgstr "Odpowi_edź do"
+
+#. / Translators: Label for composer Subject line entry
+#: src/client/composer/composer-widget.vala:531
+msgid "_Subject"
+msgstr "_Temat"
+
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:868
+#: src/client/composer/composer-widget.vala:909
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Zachować lub odrzucić ten szkic?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:894
+#: src/client/composer/composer-widget.vala:935
 msgid "Do you want to discard this draft message?"
 msgstr "Odrzucić ten szkic?"
 
-#: src/client/composer/composer-widget.vala:1467
+#: src/client/composer/composer-widget.vala:1508
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: src/client/composer/composer-widget.vala:1469
+#: src/client/composer/composer-widget.vala:1510
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: src/client/composer/composer-widget.vala:1471
+#: src/client/composer/composer-widget.vala:1512
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: src/client/composer/composer-widget.vala:1480
+#: src/client/composer/composer-widget.vala:1521
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: src/client/composer/composer-widget.vala:1822
+#: src/client/composer/composer-widget.vala:1863
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
 
-#: src/client/composer/composer-widget.vala:1854
-#: src/client/composer/composer-widget.vala:1904
+#: src/client/composer/composer-widget.vala:1895
+#: src/client/composer/composer-widget.vala:1945
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: src/client/composer/composer-widget.vala:1892
+#: src/client/composer/composer-widget.vala:1933
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: src/client/composer/composer-widget.vala:1898
+#: src/client/composer/composer-widget.vala:1939
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: src/client/composer/composer-widget.vala:1917
+#: src/client/composer/composer-widget.vala:1958
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: src/client/composer/composer-widget.vala:1925
+#: src/client/composer/composer-widget.vala:1966
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:1996
+#: src/client/composer/composer-widget.vala:2037
 msgid "Images"
 msgstr "Obrazy"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2060
+#: src/client/composer/composer-widget.vala:2101
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:267 ui/conversation-message.ui:309
+#: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "Do:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2066
+#: src/client/composer/composer-widget.vala:2107
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:272 ui/conversation-message.ui:353
+#: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "DW:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2072
+#: src/client/composer/composer-widget.vala:2113
 #: src/client/conversation-viewer/conversation-email.vala:552
-#: ui/conversation-message.ui:397
+#: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "UDW:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2078
+#: src/client/composer/composer-widget.vala:2119
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
@@ -1797,7 +1827,7 @@ msgstr "Odpowiedź do: "
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2196
+#: src/client/composer/composer-widget.vala:2237
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
@@ -2085,7 +2115,7 @@ msgstr "Wystąpił błąd podczas przetwarzania certyfikatu serwera"
 #. / information pane
 #. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:99
-#: ui/problem-details-dialog.ui:17
+#: ui/problem-details-dialog.ui:15
 msgid "Details"
 msgstr "Informacje"
 
@@ -2805,208 +2835,208 @@ msgstr "Nie można ustalić typu treści dla typu MIME „%s” na „%s”."
 msgid "(no subject)"
 msgstr "(brak tematu)"
 
-#: ui/accounts_editor_add_pane.ui:8 ui/accounts_editor_list_pane.ui:135
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
 msgid "Add an account"
 msgstr "Dodaj konto"
 
-#: ui/accounts_editor_add_pane.ui:53
+#: ui/accounts_editor_add_pane.ui:47
 msgid "_Create"
 msgstr "_Utwórz"
 
-#: ui/accounts_editor_add_pane.ui:135 ui/accounts_editor_servers_pane.ui:129
+#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Odbieranie"
 
-#: ui/accounts_editor_add_pane.ui:183 ui/accounts_editor_servers_pane.ui:168
+#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Wysyłanie"
 
-#: ui/accounts_editor_edit_pane.ui:8
+#: ui/accounts_editor_edit_pane.ui:7
 msgid "Edit Account"
 msgstr "Modyfikacja konta"
 
-#: ui/accounts_editor_edit_pane.ui:9 ui/accounts_editor_servers_pane.ui:9
+#: ui/accounts_editor_edit_pane.ui:8 ui/accounts_editor_servers_pane.ui:8
 msgid "Account Name"
 msgstr "Nazwa konta"
 
-#: ui/accounts_editor_edit_pane.ui:129
+#: ui/accounts_editor_edit_pane.ui:114
 msgid "Email addresses"
 msgstr "Adresy e-mail"
 
-#: ui/accounts_editor_edit_pane.ui:169
+#: ui/accounts_editor_edit_pane.ui:151
 msgid "Signature"
 msgstr "Podpis"
 
-#: ui/accounts_editor_edit_pane.ui:206
+#: ui/accounts_editor_edit_pane.ui:186
 msgid "Settings"
 msgstr "Ustawienia"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:248 ui/accounts_editor_servers_pane.ui:8
+#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Ustawienia serwera"
 
-#: ui/accounts_editor_edit_pane.ui:267
+#: ui/accounts_editor_edit_pane.ui:242
 msgid "Remove this account from Geary"
 msgstr "Usuwa to konto z programu Geary"
 
-#: ui/accounts_editor_list_pane.ui:8
+#: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "Konta"
 
-#: ui/accounts_editor_list_pane.ui:68
+#: ui/accounts_editor_list_pane.ui:59
 msgid "To get started, select an email provider below."
 msgstr "Proszę wybrać dostawcę poczty poniżej, aby rozpocząć."
 
-#: ui/accounts_editor_list_pane.ui:83
+#: ui/accounts_editor_list_pane.ui:73
 msgid "Welcome to Geary"
 msgstr "Witamy w programie Geary"
 
-#: ui/accounts_editor_servers_pane.ui:47
+#: ui/accounts_editor_servers_pane.ui:42
 msgid "Apply"
 msgstr "Zastosuj"
 
-#: ui/certificate_warning_dialog.glade:7
+#: ui/certificate_warning_dialog.glade:6
 msgid "Untrusted Connection"
 msgstr "Niezaufane połączenie"
 
-#: ui/certificate_warning_dialog.glade:29
+#: ui/certificate_warning_dialog.glade:26
 msgid "_Always Trust This Server"
 msgstr "_Zawsze ufaj temu serwerowi"
 
-#: ui/certificate_warning_dialog.glade:43
+#: ui/certificate_warning_dialog.glade:39
 msgid "_Trust This Server"
 msgstr "Z_aufaj temu serwerowi"
 
-#: ui/certificate_warning_dialog.glade:57
+#: ui/certificate_warning_dialog.glade:52
 msgid "_Don’t Trust This Server"
 msgstr "_Nie ufaj temu serwerowi"
 
-#: ui/composer-editor.ui:100
+#: ui/composer-editor.ui:89
 msgid "Bold text"
 msgstr "Pogrubia tekst"
 
-#: ui/composer-editor.ui:124
+#: ui/composer-editor.ui:111
 msgid "Italic text"
 msgstr "Pochyla tekst"
 
-#: ui/composer-editor.ui:148
+#: ui/composer-editor.ui:133
 msgid "Underline text"
 msgstr "Podkreśla tekst"
 
-#: ui/composer-editor.ui:172
+#: ui/composer-editor.ui:155
 msgid "Strikethrough text"
 msgstr "Przekreśla tekst"
 
-#: ui/composer-editor.ui:205
+#: ui/composer-editor.ui:185
 msgid "Insert bulleted list"
 msgstr "Wstawia listę wypunktowaną"
 
-#: ui/composer-editor.ui:229
+#: ui/composer-editor.ui:207
 msgid "Insert numbered list"
 msgstr "Wstawia listę numerowaną"
 
-#: ui/composer-editor.ui:262
+#: ui/composer-editor.ui:237
 msgid "Indent or quote text"
 msgstr "Wcina lub cytuje tekst"
 
-#: ui/composer-editor.ui:286
+#: ui/composer-editor.ui:259
 msgid "Un-indent or unquote text"
 msgstr "Usuwa wcięcie lub cytowanie tekstu"
 
-#: ui/composer-editor.ui:315
+#: ui/composer-editor.ui:286
 msgid "Remove text formatting"
 msgstr "Usuwa formatowanie tekstu"
 
-#: ui/composer-editor.ui:334
+#: ui/composer-editor.ui:303
 msgid "Change font type"
 msgstr "Zmienia typ czcionki"
 
-#: ui/composer-editor.ui:349
+#: ui/composer-editor.ui:315
 msgid "Sans Serif"
 msgstr "Bezszeryfowa"
 
-#: ui/composer-editor.ui:360
+#: ui/composer-editor.ui:325
 msgid "Serif"
 msgstr "Szeryfowa"
 
-#: ui/composer-editor.ui:371
+#: ui/composer-editor.ui:335
 msgid "Fixed Width"
 msgstr "Stała szerokość"
 
-#: ui/composer-editor.ui:397
+#: ui/composer-editor.ui:359
 msgid "Change font color"
 msgstr "Zmienia kolor czcionki"
 
-#: ui/composer-editor.ui:412
+#: ui/composer-editor.ui:372
 msgid "Change font size"
 msgstr "Zmienia rozmiar czcionki"
 
-#: ui/composer-editor.ui:447
+#: ui/composer-editor.ui:402
 msgid "Insert or update text link"
 msgstr "Wstawia lub aktualizuje odnośnik tekstowy"
 
-#: ui/composer-editor.ui:471
+#: ui/composer-editor.ui:424
 msgid "Insert an image"
 msgstr "Wstawia obraz"
 
-#: ui/composer-editor.ui:513
+#: ui/composer-editor.ui:463
 msgid "Undo last edit"
 msgstr "Cofa ostatnią modyfikację"
 
-#: ui/composer-editor.ui:537
+#: ui/composer-editor.ui:485
 msgid "Redo last edit"
 msgstr "Ponawia ostatnią modyfikację"
 
-#: ui/composer-editor.ui:566 ui/composer-editor.ui:591
+#: ui/composer-editor.ui:512 ui/composer-editor.ui:534
 msgid "Attach a file"
 msgstr "Załącza plik"
 
-#: ui/composer-editor.ui:615
+#: ui/composer-editor.ui:556
 msgid "Add original attachments"
 msgstr "Dodaje oryginalne załączniki"
 
-#: ui/composer-editor.ui:660
+#: ui/composer-editor.ui:598
 msgid "More options"
 msgstr "Więcej opcji"
 
-#: ui/composer-editor.ui:680
+#: ui/composer-editor.ui:617
 msgid "Show formatting toolbar"
 msgstr "Wyświetla pasek narzędziowy formatowania"
 
-#: ui/composer-editor.ui:698
+#: ui/composer-editor.ui:634
 msgid "Select spell checking languages"
 msgstr "Wybiera język sprawdzania pisowni"
 
-#: ui/composer-editor.ui:723
+#: ui/composer-editor.ui:658
 msgid "S_ans Serif"
 msgstr "_Bezszeryfowa"
 
-#: ui/composer-editor.ui:728
+#: ui/composer-editor.ui:663
 msgid "S_erif"
 msgstr "Sz_eryfowa"
 
-#: ui/composer-editor.ui:733
+#: ui/composer-editor.ui:668
 msgid "_Fixed Width"
 msgstr "S_tała szerokość"
 
-#: ui/composer-editor.ui:743
+#: ui/composer-editor.ui:678
 msgid "_Small"
 msgstr "_Mały"
 
-#: ui/composer-editor.ui:748
+#: ui/composer-editor.ui:683
 msgid "_Medium"
 msgstr "Ś_redni"
 
-#: ui/composer-editor.ui:753
+#: ui/composer-editor.ui:688
 msgid "Lar_ge"
 msgstr "_Duży"
 
-#: ui/composer-editor.ui:763
+#: ui/composer-editor.ui:698
 msgid "_Rich Text"
 msgstr "Tekst _sformatowany"
 
-#: ui/composer-editor.ui:768
+#: ui/composer-editor.ui:703
 msgid "_Plain Text"
 msgstr "_Zwykły tekst"
 
@@ -3044,96 +3074,70 @@ msgstr "Zaznacz _wszystko"
 msgid "_Inspect…"
 msgstr "Z_badaj…"
 
-#: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
+#: ui/composer-headerbar.ui:20 ui/composer-headerbar.ui:96
 msgid "Detach the composer from the window"
 msgstr "Odłącza okno tworzenia wiadomości"
 
-#: ui/composer-headerbar.ui:135
+#: ui/composer-headerbar.ui:123
 msgid "_Send"
 msgstr "_Wyślij"
 
-#: ui/composer-headerbar.ui:162
+#: ui/composer-headerbar.ui:147
 msgid "Discard and Close"
 msgstr "Odrzuca i zamyka"
 
-#: ui/composer-headerbar.ui:186
+#: ui/composer-headerbar.ui:169
 msgid "Save and Close"
 msgstr "Zapisuje i zamyka"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:42
+#: ui/composer-link-popover.ui:38
 msgid "Insert the new link with this URL"
 msgstr "Wstawia nowy odnośnik o tym adresie URL"
 
-#: ui/composer-link-popover.ui:43
+#: ui/composer-link-popover.ui:39
 msgid "Add"
 msgstr "Dodaj"
 
-#: ui/composer-link-popover.ui:47
+#: ui/composer-link-popover.ui:43
 msgid "Link URL"
 msgstr "Adres URL odnośnika"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
-#: ui/composer-link-popover.ui:61
+#: ui/composer-link-popover.ui:56
 msgid "Update this link’s URL"
 msgstr "Aktualizuje adres URL tego odnośnika"
 
-#: ui/composer-link-popover.ui:62
+#: ui/composer-link-popover.ui:57
 msgid "Update"
 msgstr "Zaktualizuj"
 
-#: ui/composer-link-popover.ui:75
+#: ui/composer-link-popover.ui:69
 msgid "Delete this link"
 msgstr "Usuwa ten odnośnik"
 
-#. Geary account mail will be sent from
-#: ui/composer-widget.ui:61
-msgid "_From"
-msgstr "_Od"
+#: ui/composer-widget.ui:119
+msgid "Drop files here"
+msgstr "Tutaj można upuścić pliki,"
 
-#. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:131
-msgid "_To"
-msgstr "_Do"
+#: ui/composer-widget.ui:134
+msgid "To add them as attachments"
+msgstr "aby dodać je jako załączniki."
 
-#: ui/composer-widget.ui:159
+#: ui/composer-widget.ui:217
 msgid "Show Cc, Bcc, and Reply-To fields"
 msgstr ""
 "Wyświetla pola „Do wiadomości”, „Ukryty do wiadomości” i „Odpowiedź do”"
 
-#: ui/composer-widget.ui:220
-msgid "_Cc"
-msgstr "Do _wiadomości"
-
-#: ui/composer-widget.ui:268
-msgid "_Bcc"
-msgstr "_Ukryty do wiadomości"
-
-#: ui/composer-widget.ui:316
-msgid "_Reply-To"
-msgstr "_Odpowiedź do"
-
-#: ui/composer-widget.ui:373
-msgid "_Subject"
-msgstr "_Temat"
-
-#: ui/composer-widget.ui:446
-msgid "Drop files here"
-msgstr "Tutaj można upuścić pliki,"
-
-#: ui/composer-widget.ui:462
-msgid "To add them as attachments"
-msgstr "aby dodać je jako załączniki."
-
-#: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
+#: ui/components-attachment-pane.ui:25 ui/components-attachment-pane.ui:41
 msgid "Select all attachments"
 msgstr "Zaznacza wszystkie załączniki"
 
-#: ui/components-attachment-pane.ui:66
+#: ui/components-attachment-pane.ui:58
 msgid "Save selected attachments"
 msgstr "Zapisuje zaznaczone załączniki"
 
-#: ui/components-attachment-pane.ui:85
+#: ui/components-attachment-pane.ui:75
 msgid "Open selected attachments"
 msgstr "Otwiera zaznaczone załączniki"
 
@@ -3141,31 +3145,31 @@ msgstr "Otwiera zaznaczone załączniki"
 msgid "Save _All"
 msgstr "Z_apisz wszystko"
 
-#: ui/components-conversation-actions.ui:85
+#: ui/components-conversation-actions.ui:76
 msgid "Reply"
 msgstr "Odpowiada"
 
-#: ui/components-conversation-actions.ui:108
+#: ui/components-conversation-actions.ui:97
 msgid "Reply All"
 msgstr "Odpowiada wszystkim"
 
-#: ui/components-conversation-actions.ui:131
+#: ui/components-conversation-actions.ui:118
 msgid "Forward"
 msgstr "Przekazuje"
 
-#: ui/components-conversation-actions.ui:163
+#: ui/components-conversation-actions.ui:147
 msgid "_Archive"
 msgstr "_Archiwizuj"
 
-#: ui/components-conversation-actions.ui:211
+#: ui/components-conversation-actions.ui:191
 msgid "Toggle find bar"
 msgstr "Przełącza pasek wyszukiwania"
 
-#: ui/components-conversation-header-bar.ui:22 ui/main-toolbar.ui:85
+#: ui/components-conversation-header-bar.ui:20 ui/main-toolbar.ui:76
 msgid "Back"
 msgstr "Wstecz"
 
-#: ui/components-inspector-error-view.ui:31
+#: ui/components-inspector-error-view.ui:27
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
 "one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
@@ -3177,98 +3181,98 @@ msgstr ""
 "\">kanałów kontaktowych</a> lub dołączyć do <a href=\"https://wiki.gnome.org/"
 "Apps/Geary/ReportingABug\">nowego zgłoszenia błędu</a> (w języku angielskim)."
 
-#: ui/components-inspector-error-view.ui:47
+#: ui/components-inspector-error-view.ui:42
 msgid "Details:"
 msgstr "Informacje:"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:19 ui/problem-details-dialog.ui:24
+#: ui/components-inspector.ui:16 ui/problem-details-dialog.ui:21
 msgid "Search for matching log entries"
 msgstr "Wyszukuje pasujące wpisy dziennika"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:35
+#: ui/components-inspector.ui:30
 msgid "Toggle appending new log entries"
 msgstr "Przełącza dołączanie nowych wpisów dziennika"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:55
+#: ui/components-inspector.ui:48
 msgid "Add a marker entry to the log"
 msgstr "Dodaje wpis znacznika do dziennika"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:81 ui/problem-details-dialog.ui:51
+#: ui/components-inspector.ui:71 ui/problem-details-dialog.ui:45
 msgid "Save logs entries and details"
 msgstr "Zapisuje wpisy i szczegóły dziennika"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:101 ui/problem-details-dialog.ui:67
+#: ui/components-inspector.ui:89 ui/problem-details-dialog.ui:60
 msgid "Copy to clipboard"
 msgstr "Kopiuje do schowka"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:121
+#: ui/components-inspector.ui:107
 msgid "Clears all log entries"
 msgstr "Czyści wszystkie wpisy dziennika"
 
-#: ui/conversation-contact-popover.ui:146
+#: ui/conversation-contact-popover.ui:132
 msgid "New Conversation…"
 msgstr "Nowy wątek…"
 
-#: ui/conversation-contact-popover.ui:159
+#: ui/conversation-contact-popover.ui:144
 msgid "Copy Email Address"
 msgstr "Skopiuj adres e-mail"
 
-#: ui/conversation-contact-popover.ui:182
+#: ui/conversation-contact-popover.ui:165
 msgid "Save in Contacts…"
 msgstr "Zapisz w Menedżerze kontaktów…"
 
-#: ui/conversation-contact-popover.ui:195
+#: ui/conversation-contact-popover.ui:177
 msgid "Show Conversations"
 msgstr "Wyświetl wątki"
 
-#: ui/conversation-contact-popover.ui:208
+#: ui/conversation-contact-popover.ui:189
 msgid "Open in Contacts"
 msgstr "Otwórz w Menedżerze kontaktów…"
 
-#: ui/conversation-contact-popover.ui:221
+#: ui/conversation-contact-popover.ui:201
 msgid "Always Load Remote Images"
 msgstr "Zawsze wczytuj zdalne obrazy"
 
 #. Title label on contact popover
-#: ui/conversation-contact-popover.ui:264
+#: ui/conversation-contact-popover.ui:240
 msgid "Deceptive email address"
 msgstr "Adres e-mail wprowadzający w błąd"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:294
+#: ui/conversation-contact-popover.ui:268
 msgid "This email address is:"
 msgstr "Ten adres e-mail to:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:319
+#: ui/conversation-contact-popover.ui:291
 msgid "But was forged as:"
 msgstr "Ale został sfałszowany jako:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:344
+#: ui/conversation-contact-popover.ui:314
 msgid "The sender may not be trustworthy"
 msgstr "Nadawca może nie być wiarygodny"
 
-#: ui/conversation-email.ui:27
+#: ui/conversation-email.ui:24
 msgid "Save all attachments"
 msgstr "Zapisuje wszystkie załączniki"
 
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
-#: ui/conversation-email.ui:50
+#: ui/conversation-email.ui:45
 msgid "Mark this message as starred"
 msgstr "Oznacza tę wiadomość jako wyróżnioną"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
-#: ui/conversation-email.ui:72
+#: ui/conversation-email.ui:65
 msgid "Mark this message as not starred"
 msgstr "Usuwa wyróżnienie tej wiadomości"
 
@@ -3309,23 +3313,23 @@ msgstr "_Usuń wiadomość…"
 msgid "_View Source"
 msgstr "_Wyświetl źródło"
 
-#: ui/conversation-message-link-popover.ui:54
+#: ui/conversation-message-link-popover.ui:49
 msgid "But actually goes to:"
 msgstr "Ale tak naprawdę prowadzi do:"
 
-#: ui/conversation-message-link-popover.ui:84
+#: ui/conversation-message-link-popover.ui:77
 msgid "The link appears to go to:"
 msgstr "Odnośnik wydaje się prowadzić do:"
 
-#: ui/conversation-message-link-popover.ui:96
+#: ui/conversation-message-link-popover.ui:88
 msgid "Deceptive link found"
 msgstr "Odnaleziono odnośnik wprowadzający w błąd"
 
-#: ui/conversation-message-link-popover.ui:111
+#: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
 msgstr "Nadawca wiadomości może prowadzić do złej strony."
 
-#: ui/conversation-message-link-popover.ui:124
+#: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
 "W razie niepewności, należy skontaktować się z nadawcą przed kontynuowaniem."
@@ -3354,59 +3358,59 @@ msgstr "Zapisz _obraz jako…"
 msgid "_Select All"
 msgstr "Zaznacz _wszystko"
 
-#: ui/conversation-message.ui:63
+#: ui/conversation-message.ui:54
 msgid "From <email>"
 msgstr "Od <e-mail>"
 
-#: ui/conversation-message.ui:79 ui/conversation-message.ui:177
+#: ui/conversation-message.ui:69 ui/conversation-message.ui:160
 msgid "1/1/1970\t"
 msgstr "1/1/1970\t"
 
-#: ui/conversation-message.ui:102
+#: ui/conversation-message.ui:91
 msgid "Preview body text."
 msgstr "Podgląd treści."
 
-#: ui/conversation-message.ui:201
+#: ui/conversation-message.ui:182
 msgid "Sent by:"
 msgstr "Wysłane przez:"
 
-#: ui/conversation-message.ui:245
+#: ui/conversation-message.ui:223
 msgid "Reply to:"
 msgstr "Odpowiedź do:"
 
-#: ui/conversation-message.ui:288
+#: ui/conversation-message.ui:264
 msgid "Subject"
 msgstr "Temat"
 
-#: ui/conversation-viewer.ui:60
+#: ui/conversation-viewer.ui:53
 msgid "Find in conversation"
 msgstr "Wyszukiwanie w wątku"
 
-#: ui/conversation-viewer.ui:75
+#: ui/conversation-viewer.ui:67
 msgid "Find the previous occurrence of the search string."
 msgstr "Wyszukuje poprzednie wystąpienie tekstu."
 
-#: ui/conversation-viewer.ui:96
+#: ui/conversation-viewer.ui:86
 msgid "Find the next occurrence of the search string."
 msgstr "Wyszukuje następne wystąpienie tekstu."
 
-#: ui/find_bar.glade:66
+#: ui/find_bar.glade:58
 msgid "Find:"
 msgstr "Wyszukiwanie:"
 
-#: ui/find_bar.glade:89
+#: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Poprzednie"
 
-#: ui/find_bar.glade:107
+#: ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Następne"
 
-#: ui/find_bar.glade:125
+#: ui/find_bar.glade:114
 msgid "_Case sensitive"
 msgstr "_Rozróżnianie małych i wielkich liter"
 
-#: ui/find_bar.glade:145
+#: ui/find_bar.glade:132
 msgid "label"
 msgstr "etykieta"
 
@@ -3711,12 +3715,12 @@ msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Zaznaczenie następnych/poprzednich wątków"
 
-#: ui/main-toolbar.ui:104
+#: ui/main-toolbar.ui:93
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Tworzy wiadomość"
 
-#: ui/main-toolbar.ui:122
+#: ui/main-toolbar.ui:109
 msgid "Toggle search bar"
 msgstr "Przełącza pasek wyszukiwania"
 
@@ -3736,18 +3740,18 @@ msgstr "_Skróty klawiszowe"
 msgid "_About Geary"
 msgstr "_O programie"
 
-#: ui/password-dialog.glade:74
+#: ui/password-dialog.glade:66
 msgid "SMTP Credentials"
 msgstr "Dane logowania SMTP"
 
-#: ui/password-dialog.glade:91
+#: ui/password-dialog.glade:82
 msgid "Username"
 msgstr "Nazwa użytkownika"
 
-#: ui/password-dialog.glade:152
+#: ui/password-dialog.glade:140
 msgid "_Remember password"
 msgstr "_Zapamiętanie hasła"
 
-#: ui/password-dialog.glade:210
+#: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Uwierzytelnij"
