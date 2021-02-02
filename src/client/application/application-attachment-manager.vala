@@ -271,6 +271,10 @@ public class Application.AttachmentManager : GLib.Object {
             Stock._SAVE,
             Stock._CANCEL
         );
+        var download_dir = GLib.Environment.get_user_special_dir(DOWNLOAD);
+        if (!Geary.String.is_empty_or_whitespace(download_dir)) {
+            dialog.set_current_folder(download_dir);
+        }
         dialog.set_local_only(false);
         return dialog;
     }
