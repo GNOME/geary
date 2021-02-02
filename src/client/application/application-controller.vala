@@ -189,8 +189,14 @@ internal class Application.Controller :
         // Hook up cert, accounts and credentials machinery
 
         this.certificate_manager = yield new Application.CertificateManager(
-            config_dir.get_child("pinned-certs"),
+            data_dir.get_child("pinned-certs"),
             cancellable
+        );
+        // Commit e8061379 mistakenly used config_dir for cert manager
+        // above, so remove it if found. This can be pulled out post
+        // v40.
+        Geary.Files.recursive_delete_async(
+            config_dir.get_child("pinned-certs")
         );
 
         SecretMediator? libsecret = yield new SecretMediator(cancellable);
