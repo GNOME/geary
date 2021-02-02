@@ -456,7 +456,6 @@ public class Components.AttachmentPane : Gtk.Grid {
     }
 
     private void on_save_all() {
-        debug("save all!");
         if (!save_all()) {
             beep();
         }
