@@ -8,7 +8,7 @@
 
 [GtkTemplate (ui = "/org/gnome/Geary/application-main-window.ui")]
 public class Application.MainWindow :
-    Gtk.ApplicationWindow, Geary.BaseInterface {
+    Hdy.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
@@ -1322,10 +1322,7 @@ public class Application.MainWindow :
             this.main_toolbar.show_close_button = false;
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
-            var titlebar = new Hdy.TitleBar();
-            titlebar.show();
-            titlebar.add(this.main_toolbar);
-            set_titlebar(titlebar);
+            this.main_layout.pack_start(main_toolbar, false, true, 0);
         }
 
         this.main_toolbar.add_conversation_actions(this.conversation_actions);
