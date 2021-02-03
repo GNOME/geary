@@ -577,6 +577,15 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         WebKit.PrintOperation op = this.primary_message.new_print_operation();
         Gtk.PrintSettings settings = new Gtk.PrintSettings();
 
+        // Use XDG_DOWNLOADS as default while WebKitGTK printing is
+        // entirely b0rked on Flatpak, since we know at least have the
+        // RW filesystem override in place to allow printing to PDF to
+        // work, when using that directory.
+        var download_dir = GLib.Environment.get_user_special_dir(DOWNLOAD);
+        if (!Geary.String.is_empty_or_whitespace(download_dir)) {
+            settings.set(Gtk.PRINT_SETTINGS_OUTPUT_DIR, download_dir);
+        }
+
         if (this.email.subject != null) {
             string file_name = Geary.String.reduce_whitespace(this.email.subject.value);
             file_name = file_name.replace("/", "_");
