@@ -81,6 +81,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
         // Enable WebProcess sandboxing
         context.add_path_to_sandbox(web_extension_dir.get_path(), true);
+        // Add the whole home directory otherwise print-to-PDF won't work.
+        // See https://bugs.webkit.org/show_bug.cgi?id=202363
+        context.add_path_to_sandbox(GLib.Environment.get_home_dir(), false);
         context.set_sandbox_enabled(true);
         // Use the doc browser model so that we get some caching of
         // resources between email body loads.
