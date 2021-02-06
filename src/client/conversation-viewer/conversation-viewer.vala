@@ -76,56 +76,68 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base_ref();
         this.config = config;
 
-        Components.PlaceholderPane no_conversations =
-            new Components.PlaceholderPane();
+        Hdy.StatusPage no_conversations =
+            new Hdy.StatusPage();
         no_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been selected.
-        no_conversations.title = _("No conversations selected");
+        no_conversations.title = _("No Conversations Selected");
         // Translators: Sub-title label for placeholder when no
         // conversations have been selected.
-        no_conversations.subtitle = _(
-            "Selecting a conversation from the list will display it here"
+        no_conversations.description = _(
+            "Selecting a conversation from the list will display it here."
         );
+        no_conversations.hexpand = true;
+        no_conversations.vexpand = true;
+        no_conversations.show ();
         this.no_conversations_page.add(no_conversations);
 
-        Components.PlaceholderPane multi_conversations =
-            new Components.PlaceholderPane();
+        Hdy.StatusPage multi_conversations =
+            new Hdy.StatusPage();
         multi_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when multiple
         // conversations have been selected.
-        multi_conversations.title = _("Multiple conversations selected");
+        multi_conversations.title = _("Multiple Conversations Selected");
         // Translators: Sub-title label for placeholder when multiple
         // conversations have been selected.
-        multi_conversations.subtitle = _(
-            "Choosing an action will apply to all selected conversations"
+        multi_conversations.description = _(
+            "Choosing an action will apply to all selected conversations."
         );
+        multi_conversations.hexpand = true;
+        multi_conversations.vexpand = true;
+        multi_conversations.show ();
         this.multiple_conversations_page.add(multi_conversations);
 
-        Components.PlaceholderPane empty_folder =
-            new Components.PlaceholderPane();
+        Hdy.StatusPage empty_folder =
+            new Hdy.StatusPage();
         empty_folder.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have exist in a folder.
-        empty_folder.title = _("No conversations found");
+        empty_folder.title = _("No Conversations Found");
         // Translators: Sub-title label for placeholder when no
         // conversations have exist in a folder.
-        empty_folder.subtitle = _(
-            "This folder does not contain any conversations"
+        empty_folder.description = _(
+            "This folder does not contain any conversations."
         );
+        empty_folder.hexpand = true;
+        empty_folder.vexpand = true;
+        empty_folder.show ();
         this.empty_folder_page.add(empty_folder);
 
-        Components.PlaceholderPane empty_search =
-            new Components.PlaceholderPane();
+        Hdy.StatusPage empty_search =
+            new Hdy.StatusPage();
         empty_search.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been found in a search.
-        empty_search.title = _("No conversations found");
+        empty_search.title = _("No Conversations Found");
         // Translators: Sub-title label for placeholder when no
         // conversations have been found in a search.
-        empty_search.subtitle = _(
-            "Your search returned no results, try refining your search terms"
+        empty_search.description = _(
+            "Your search returned no results, try refining your search terms."
         );
+        empty_search.hexpand = true;
+        empty_search.vexpand = true;
+        empty_search.show ();
         this.empty_search_page.add(empty_search);
 
         this.conversation_find_undo = new Components.EntryUndo(
