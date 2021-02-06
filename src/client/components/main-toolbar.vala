@@ -24,7 +24,7 @@ public class MainToolbar : Hdy.Leaflet {
 
     // Folder header elements
     [GtkChild]
-    private Gtk.HeaderBar folder_header;
+    private Hdy.HeaderBar folder_header;
     [GtkChild]
     private Gtk.MenuButton main_menu_button;
 
@@ -33,7 +33,7 @@ public class MainToolbar : Hdy.Leaflet {
 
     // Conversations header elements
     [GtkChild]
-    private Gtk.HeaderBar conversations_header;
+    private Hdy.HeaderBar conversations_header;
     [GtkChild]
     private Gtk.ToggleButton search_conversations_button;
 
