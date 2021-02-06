@@ -42,17 +42,13 @@ public class Components.InfoBar : Gtk.Box {
     private string? plugin_action_group_name = null;
     private Gtk.Button? plugin_primary_button = null;
 
-    [GtkChild]
-    private Gtk.Revealer revealer;
+    [GtkChild] private unowned Gtk.Revealer revealer;
 
-    [GtkChild]
-    private Gtk.Box action_area;
+    [GtkChild] private unowned Gtk.Box action_area;
 
-    [GtkChild]
-    private Gtk.Box content_area;
+    [GtkChild] private unowned Gtk.Box content_area;
 
-    [GtkChild]
-    private Gtk.Button close_button;
+    [GtkChild] private unowned Gtk.Button close_button;
 
     static construct {
         set_css_name("infobar");

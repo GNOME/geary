@@ -40,17 +40,13 @@ public class Composer.LinkPopover : Gtk.Popover {
     /** The URL displayed in the popover */
     public string link_uri { get { return this.url.get_text(); } }
 
-    [GtkChild]
-    private Gtk.Entry url;
+    [GtkChild] private unowned Gtk.Entry url;
 
-    [GtkChild]
-    private Gtk.Button insert;
+    [GtkChild] private unowned Gtk.Button insert;
 
-    [GtkChild]
-    private Gtk.Button update;
+    [GtkChild] private unowned Gtk.Button update;
 
-    [GtkChild]
-    private new Gtk.Button remove;
+    [GtkChild] private new unowned Gtk.Button remove;
 
     private Geary.TimeoutManager validation_timeout;
 

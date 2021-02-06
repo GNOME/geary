@@ -9,13 +9,12 @@
 // Draws the conversation action bar.
 [GtkTemplate (ui = "/org/gnome/Geary/components-conversation-action-bar.ui")]
 public class Components.ConversationActionBar : Gtk.Revealer {
+
+
+    [GtkChild] public unowned Gtk.Box action_box { get; }
+
     private ulong owner_notify;
 
-    [GtkChild]
-    public Gtk.Box action_box;
-
-    public ConversationActionBar() {
-    }
 
     /**
      * This takes ownership of the ConversationActions and places some of

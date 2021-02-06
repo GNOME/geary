@@ -48,11 +48,9 @@ public class Accounts.Editor : Gtk.Dialog {
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
-    [GtkChild]
-    private Gtk.Overlay notifications_pane;
+    [GtkChild] private unowned Gtk.Overlay notifications_pane;
 
-    [GtkChild]
-    private Gtk.Stack editor_panes;
+    [GtkChild] private unowned Gtk.Stack editor_panes;
 
     private EditorListPane editor_list_pane;
 

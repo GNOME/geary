@@ -329,41 +329,24 @@ public class Application.MainWindow :
     private int64 update_ui_last = 0;
 
 
-    [GtkChild]
-    private Gtk.Box main_layout;
-    [GtkChild]
-    private Hdy.Leaflet main_leaflet;
-    [GtkChild]
-    private Hdy.Leaflet conversations_leaflet;
-    [GtkChild]
-    private Gtk.Box folder_box;
-    [GtkChild]
-    private Gtk.ScrolledWindow folder_list_scrolled;
-    [GtkChild]
-    private Gtk.Box conversation_list_box;
-    [GtkChild]
-    private Gtk.ScrolledWindow conversation_list_scrolled;
-    [GtkChild]
-    private Gtk.Box conversation_viewer_box;
-    [GtkChild]
-    private Components.ConversationActionBar conversation_viewer_action_bar;
-    [GtkChild]
-    private Gtk.SizeGroup folder_size_group;
-    [GtkChild]
-    private Gtk.SizeGroup folder_separator_size_group;
-    [GtkChild]
-    private Gtk.SizeGroup conversations_size_group;
-    [GtkChild]
-    private Gtk.SizeGroup conversations_separator_size_group;
-    [GtkChild]
-    private Gtk.SizeGroup conversation_size_group;
-    [GtkChild]
-    private Hdy.SwipeGroup conversations_swipe_group;
-    [GtkChild]
-    private Hdy.SwipeGroup conversation_swipe_group;
+    [GtkChild] private unowned Gtk.Box main_layout;
+    [GtkChild] private unowned Hdy.Leaflet main_leaflet;
+    [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
+    [GtkChild] private unowned Gtk.Box folder_box;
+    [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
+    [GtkChild] private unowned Gtk.Box conversation_list_box;
+    [GtkChild] private unowned Gtk.ScrolledWindow conversation_list_scrolled;
+    [GtkChild] private unowned Gtk.Box conversation_viewer_box;
+    [GtkChild] private unowned Components.ConversationActionBar conversation_viewer_action_bar;
+    [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
+    [GtkChild] private unowned Gtk.SizeGroup folder_separator_size_group;
+    [GtkChild] private unowned Gtk.SizeGroup conversations_size_group;
+    [GtkChild] private unowned Gtk.SizeGroup conversations_separator_size_group;
+    [GtkChild] private unowned Gtk.SizeGroup conversation_size_group;
+    [GtkChild] private unowned Hdy.SwipeGroup conversations_swipe_group;
+    [GtkChild] private unowned Hdy.SwipeGroup conversation_swipe_group;
 
-    [GtkChild]
-    private Gtk.Overlay overlay;
+    [GtkChild] private unowned Gtk.Overlay overlay;
 
     private Components.ConversationActionBar action_bar;
 

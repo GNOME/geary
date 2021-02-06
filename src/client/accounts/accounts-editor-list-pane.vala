@@ -59,32 +59,23 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         }
     }
 
-    [GtkChild]
-    private Gtk.HeaderBar header;
+    [GtkChild] private unowned Gtk.HeaderBar header;
 
-    [GtkChild]
-    private Gtk.Grid pane_content;
+    [GtkChild] private unowned Gtk.Grid pane_content;
 
-    [GtkChild]
-    private Gtk.Adjustment pane_adjustment;
+    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
 
-    [GtkChild]
-    private Gtk.Grid welcome_panel;
+    [GtkChild] private unowned Gtk.Grid welcome_panel;
 
-    [GtkChild]
-    private Gtk.Image welcome_icon;
+    [GtkChild] private unowned Gtk.Image welcome_icon;
 
-    [GtkChild]
-    private Gtk.ListBox accounts_list;
+    [GtkChild] private unowned Gtk.ListBox accounts_list;
 
-    [GtkChild]
-    private Gtk.Frame accounts_list_frame;
+    [GtkChild] private unowned Gtk.Frame accounts_list_frame;
 
-    [GtkChild]
-    private Gtk.Label add_service_label;
+    [GtkChild] private unowned Gtk.Label add_service_label;
 
-    [GtkChild]
-    private Gtk.ListBox service_list;
+    [GtkChild] private unowned Gtk.ListBox service_list;
 
     private Gee.Map<Geary.AccountInformation,EditorEditPane> edit_pane_cache =
         new Gee.HashMap<Geary.AccountInformation,EditorEditPane>();

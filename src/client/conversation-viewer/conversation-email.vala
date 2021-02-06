@@ -237,23 +237,17 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // window, for updating email menu trash/delete actions.
     private bool shift_handler_installed = false;
 
-    [GtkChild]
-    private Gtk.Grid actions;
+    [GtkChild] private unowned Gtk.Grid actions;
 
-    [GtkChild]
-    private Gtk.Button attachments_button;
+    [GtkChild] private unowned Gtk.Button attachments_button;
 
-    [GtkChild]
-    private Gtk.Button star_button;
+    [GtkChild] private unowned Gtk.Button star_button;
 
-    [GtkChild]
-    private Gtk.Button unstar_button;
+    [GtkChild] private unowned Gtk.Button unstar_button;
 
-    [GtkChild]
-    private Gtk.MenuButton email_menubutton;
+    [GtkChild] private unowned Gtk.MenuButton email_menubutton;
 
-    [GtkChild]
-    private Gtk.Grid sub_messages;
+    [GtkChild] private unowned Gtk.Grid sub_messages;
 
 
     /** Fired when a internal link is activated */

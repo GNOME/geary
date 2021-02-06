@@ -302,13 +302,14 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         get; private set;
     }
 
-    /** Box containing the preview and full header widgets.  */
-    [GtkChild]
-    internal Gtk.Grid summary;
+    /** Container for preview and full header widgets.  */
+    [GtkChild] internal unowned Gtk.Grid summary { get; }
 
-    /** Box that InfoBar widgets should be added to. */
-    [GtkChild]
-    internal Components.InfoBarStack info_bars;
+    /** Container for message body components.  */
+    [GtkChild] internal unowned Gtk.Grid body_container { get; }
+
+    /** Conainer for message InfoBar widgets. */
+    [GtkChild] internal unowned Components.InfoBarStack info_bars  { get; }
 
     /**
      * Emitted when web_view's content has finished loaded.
@@ -334,51 +335,31 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private GLib.DateTime? local_date = null;
 
-    [GtkChild]
-    private Gtk.Image avatar;
+    [GtkChild] private unowned Gtk.Image avatar;
 
-    [GtkChild]
-    private Gtk.Revealer compact_revealer;
-    [GtkChild]
-    private Gtk.Label compact_from;
-    [GtkChild]
-    private Gtk.Label compact_date;
-    [GtkChild]
-    private Gtk.Label compact_body;
+    [GtkChild] private unowned Gtk.Revealer compact_revealer;
+    [GtkChild] private unowned Gtk.Label compact_from;
+    [GtkChild] private unowned Gtk.Label compact_date;
+    [GtkChild] private unowned Gtk.Label compact_body;
 
-    [GtkChild]
-    private Gtk.Revealer header_revealer;
-    [GtkChild]
-    private Gtk.FlowBox from;
-    [GtkChild]
-    private Gtk.Label subject;
+    [GtkChild] private unowned Gtk.Revealer header_revealer;
+    [GtkChild] private unowned Gtk.FlowBox from;
+    [GtkChild] private unowned Gtk.Label subject;
     private string subject_searchable = "";
-    [GtkChild]
-    private Gtk.Label date;
+    [GtkChild] private unowned Gtk.Label date;
 
-    [GtkChild]
-    private Gtk.Grid sender_header;
-    [GtkChild]
-    private Gtk.FlowBox sender_address;
+    [GtkChild] private unowned Gtk.Grid sender_header;
+    [GtkChild] private unowned Gtk.FlowBox sender_address;
 
-    [GtkChild]
-    private Gtk.Grid reply_to_header;
-    [GtkChild]
-    private Gtk.FlowBox reply_to_addresses;
+    [GtkChild] private unowned Gtk.Grid reply_to_header;
+    [GtkChild] private unowned Gtk.FlowBox reply_to_addresses;
 
-    [GtkChild]
-    private Gtk.Grid to_header;
-    [GtkChild]
-    private Gtk.Grid cc_header;
-    [GtkChild]
-    private Gtk.Grid bcc_header;
+    [GtkChild] private unowned Gtk.Grid to_header;
+    [GtkChild] private unowned Gtk.Grid cc_header;
+    [GtkChild] private unowned Gtk.Grid bcc_header;
 
-    [GtkChild]
-    private Gtk.Revealer body_revealer;
-    [GtkChild]
-    public Gtk.Grid body_container;
-    [GtkChild]
-    private Gtk.ProgressBar body_progress;
+    [GtkChild] private unowned Gtk.Revealer body_revealer;
+    [GtkChild] private unowned Gtk.ProgressBar body_progress;
 
     private Components.InfoBar? remote_images_info_bar = null;
 

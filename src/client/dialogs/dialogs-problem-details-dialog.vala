@@ -33,14 +33,11 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
     }
 
 
-    [GtkChild]
-    private Gtk.Stack stack;
+    [GtkChild] private unowned Gtk.Stack stack;
 
-    [GtkChild]
-    private Gtk.Button copy_button;
+    [GtkChild] private unowned Gtk.Button copy_button;
 
-    [GtkChild]
-    private Gtk.ToggleButton search_button;
+    [GtkChild] private unowned Gtk.ToggleButton search_button;
 
     private Components.InspectorErrorView error_pane;
     private Components.InspectorLogView log_pane;

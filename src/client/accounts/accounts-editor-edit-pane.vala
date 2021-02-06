@@ -37,35 +37,26 @@ internal class Accounts.EditorEditPane :
     /** {@inheritDoc} */
     protected weak Accounts.Editor editor { get; set; }
 
-    [GtkChild]
-    private Gtk.HeaderBar header;
+    [GtkChild] private unowned Gtk.HeaderBar header;
 
-    [GtkChild]
-    private Gtk.Grid pane_content;
+    [GtkChild] private unowned Gtk.Grid pane_content;
 
-    [GtkChild]
-    private Gtk.Adjustment pane_adjustment;
+    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
 
-    [GtkChild]
-    private Gtk.ListBox details_list;
+    [GtkChild] private unowned Gtk.ListBox details_list;
 
-    [GtkChild]
-    private Gtk.ListBox senders_list;
+    [GtkChild] private unowned Gtk.ListBox senders_list;
 
-    [GtkChild]
-    private Gtk.Frame signature_frame;
+    [GtkChild] private unowned Gtk.Frame signature_frame;
 
     private SignatureWebView signature_preview;
     private bool signature_changed = false;
 
-    [GtkChild]
-    private Gtk.ListBox settings_list;
+    [GtkChild] private unowned Gtk.ListBox settings_list;
 
-    [GtkChild]
-    private Gtk.Button undo_button;
+    [GtkChild] private unowned Gtk.Button undo_button;
 
-    [GtkChild]
-    private Gtk.Button remove_button;
+    [GtkChild] private unowned Gtk.Button remove_button;
 
 
     public EditorEditPane(Editor editor, Geary.AccountInformation account) {

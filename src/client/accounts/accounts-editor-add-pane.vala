@@ -35,38 +35,27 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private Geary.Engine engine;
 
 
-    [GtkChild]
-    private Gtk.HeaderBar header;
+    [GtkChild] private unowned Gtk.HeaderBar header;
 
-    [GtkChild]
-    private Gtk.Grid pane_content;
+    [GtkChild] private unowned Gtk.Grid pane_content;
 
-    [GtkChild]
-    private Gtk.Adjustment pane_adjustment;
+    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
 
-    [GtkChild]
-    private Gtk.ListBox details_list;
+    [GtkChild] private unowned Gtk.ListBox details_list;
 
-    [GtkChild]
-    private Gtk.Grid receiving_panel;
+    [GtkChild] private unowned Gtk.Grid receiving_panel;
 
-    [GtkChild]
-    private Gtk.ListBox receiving_list;
+    [GtkChild] private unowned Gtk.ListBox receiving_list;
 
-    [GtkChild]
-    private Gtk.Grid sending_panel;
+    [GtkChild] private unowned Gtk.Grid sending_panel;
 
-    [GtkChild]
-    private Gtk.ListBox sending_list;
+    [GtkChild] private unowned Gtk.ListBox sending_list;
 
-    [GtkChild]
-    private Gtk.Button create_button;
+    [GtkChild] private unowned Gtk.Button create_button;
 
-    [GtkChild]
-    private Gtk.Button back_button;
+    [GtkChild] private unowned Gtk.Button back_button;
 
-    [GtkChild]
-    private Gtk.Spinner create_spinner;
+    [GtkChild] private unowned Gtk.Spinner create_spinner;
 
     private NameRow real_name;
     private EmailRow email = new EmailRow();

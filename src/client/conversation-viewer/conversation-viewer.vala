@@ -38,35 +38,24 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     private GLib.Cancellable? find_cancellable = null;
 
     // Stack pages
-    [GtkChild]
-    private Gtk.Spinner loading_page;
-    [GtkChild]
-    private Gtk.Grid no_conversations_page;
-    [GtkChild]
-    private Gtk.Grid conversation_page;
-    [GtkChild]
-    private Gtk.Grid multiple_conversations_page;
-    [GtkChild]
-    private Gtk.Grid empty_folder_page;
-    [GtkChild]
-    private Gtk.Grid empty_search_page;
-    [GtkChild]
-    private Gtk.Grid composer_page;
+    [GtkChild] private unowned Gtk.Spinner loading_page;
+    [GtkChild] private unowned Gtk.Grid no_conversations_page;
+    [GtkChild] private unowned Gtk.Grid conversation_page;
+    [GtkChild] private unowned Gtk.Grid multiple_conversations_page;
+    [GtkChild] private unowned Gtk.Grid empty_folder_page;
+    [GtkChild] private unowned Gtk.Grid empty_search_page;
+    [GtkChild] private unowned Gtk.Grid composer_page;
 
     private Gtk.ScrolledWindow conversation_scroller;
 
-    [GtkChild]
-    internal Gtk.SearchBar conversation_find_bar;
+    [GtkChild] internal unowned Gtk.SearchBar conversation_find_bar;
 
-    [GtkChild]
-    internal Gtk.SearchEntry conversation_find_entry;
+    [GtkChild] internal unowned Gtk.SearchEntry conversation_find_entry;
     private Components.EntryUndo conversation_find_undo;
 
-    [GtkChild]
-    private Gtk.Button conversation_find_next;
+    [GtkChild] private unowned Gtk.Button conversation_find_next;
 
-    [GtkChild]
-    private Gtk.Button conversation_find_prev;
+    [GtkChild] private unowned Gtk.Button conversation_find_prev;
 
 
     /* Emitted when a new conversation list was added to this view. */
