@@ -22,13 +22,13 @@ public class MainToolbar : Hdy.Leaflet {
     [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
 
     // Folder header elements
-    [GtkChild] private unowned Gtk.HeaderBar folder_header;
+    [GtkChild] private unowned Hdy.HeaderBar folder_header;
     [GtkChild] private unowned Gtk.MenuButton main_menu_button;
 
     [GtkChild] private unowned Gtk.Separator folder_separator;
 
     // Conversations header elements
-    [GtkChild] private unowned Gtk.HeaderBar conversations_header;
+    [GtkChild] private unowned Hdy.HeaderBar conversations_header;
     [GtkChild] private unowned Gtk.ToggleButton search_conversations_button;
 
     [GtkChild] private unowned Gtk.Separator conversations_separator;
