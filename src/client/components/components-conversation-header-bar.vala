@@ -6,7 +6,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/components-conversation-header-bar.ui")]
-public class Components.ConversationHeaderBar : Gtk.HeaderBar {
+public class Components.ConversationHeaderBar : Hdy.HeaderBar {
     public Components.ConversationActionBar action_bar { get; set; }
     public bool folded { get; set; }
 

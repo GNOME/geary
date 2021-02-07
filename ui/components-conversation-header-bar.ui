@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="ComponentsConversationHeaderBar" parent="GtkHeaderBar">
+  <template class="ComponentsConversationHeaderBar" parent="HdyHeaderBar">
     <property name="visible">True</property>
     <property name="hexpand">True</property>
     <signal name="notify::parent" handler="update_action_bar" swapped="no"/>
