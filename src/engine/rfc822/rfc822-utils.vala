@@ -1,6 +1,7 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Portions copyright (C) 2000-2013 Jeffrey Stedfast
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2021 Michael Gratton <mike@vee.net>
+ * Portions copyright © 2000-2013 Jeffrey Stedfast
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -198,6 +199,16 @@ namespace Geary.RFC822.Utils {
         // avoid segfaults in the regex engine on invalid char data. See
         // issue #186 for the proper fix.
         return Geary.String.reduce_whitespace(preview.make_valid());
+    }
+
+    /**
+     * Decodes RFC-822 long header lines and RFC 2047 encoded text headers.
+     */
+    internal string decode_rfc822_text_header_value(string rfc822) {
+        return GMime.utils_header_decode_text(
+            get_parser_options(),
+            GMime.utils_header_unfold(rfc822)
+        );
     }
 
     /**

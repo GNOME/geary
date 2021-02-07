@@ -234,12 +234,21 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         assert(new MailboxAddress("test", "example@example@example.com").is_spoofed() == true);
         assert(new MailboxAddress("'prefix-example@example.com'", "example@example.com").is_spoofed() == true);
 
-        try {
-            assert(new MailboxAddress.from_rfc822_string("\"=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>")
-                   .is_spoofed() == true);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
+        assert_false(
+            new MailboxAddress.from_rfc822_string(
+                "hello\n there <example@example.com>"
+            ).is_spoofed()
+        );
+        assert_false(
+            new MailboxAddress.from_rfc822_string(
+                "\"hello\n there\" <example@example.com>"
+            ).is_spoofed()
+        );
+        assert_true(
+            new MailboxAddress.from_rfc822_string(
+                "\"=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>"
+            ).is_spoofed()
+        );
     }
 
     public void to_full_display() throws GLib.Error {

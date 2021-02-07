@@ -9,6 +9,7 @@ class Geary.RFC822.MessageDataTest : TestCase {
 
     public MessageDataTest() {
         base("Geary.RFC822.MessageDataTest");
+        add_test("subject_from_rfc822", subject_from_rfc822);
         add_test("date_from_rfc822", date_from_rfc822);
         add_test("date_from_rfc822", date_from_rfc822);
         add_test("date_to_rfc822", date_to_rfc822);
@@ -19,6 +20,14 @@ class Geary.RFC822.MessageDataTest : TestCase {
         add_test("MessageId.to_rfc822_string", message_id_to_rfc822_string);
         add_test("MessageIdList.from_rfc822_string", message_id_list_from_rfc822_string);
         add_test("MessageIdList.merge", message_id_list_merge);
+    }
+
+    public void subject_from_rfc822() throws GLib.Error {
+        Subject plain = new Subject.from_rfc822_string("hello");
+        assert_equal(plain.to_string(), "hello");
+
+        Subject new_line = new Subject.from_rfc822_string("hello\n there");
+        assert_equal(new_line.to_string(), "hello there");
     }
 
     public void preview_text_with_header() throws GLib.Error {
