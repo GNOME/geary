@@ -195,7 +195,7 @@ internal class Application.Controller :
         // Commit e8061379 mistakenly used config_dir for cert manager
         // above, so remove it if found. This can be pulled out post
         // v40.
-        Geary.Files.recursive_delete_async(
+        yield Geary.Files.recursive_delete_async(
             config_dir.get_child("pinned-certs")
         );
 
