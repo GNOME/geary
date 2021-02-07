@@ -88,6 +88,15 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="3.38.2" date="2021-02-07">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Numerous bug fixes</li>
+          <li>Numerous translation updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="3.38.1" date="2020-10-04">
       <description>
         <p>Enhancements included in this release:</p>

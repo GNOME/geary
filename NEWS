@@ -1,3 +1,29 @@
+Version 3.38.2
+~~~~~~~~~~~~~~
+Released: 2021-02-07
+
+Enhancements included in this release:
+ * Numerous bug fixes
+ * Numerous translation updates
+
+Thanks also to those who contributed translations for the interface:
+
+ * Anders Jonsson (sv)
+ * Daniel Șerbănescu (ro)
+ * Efstathios Iosifidis (el)
+ * Jordi Mas (ca)
+ * Marek Černocký (cs)
+ * Tim Sabsch (de)
+ * Źmicier Turok (be)
+ * Мирослав Николић (sr)
+
+And for the online help manual:
+
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Jordi Mas (ca)
+ * Marek Černocký (cs)
+
 Version 3.38.1
 ~~~~~~~~~~~~~~
 Released: 2020-10-04
