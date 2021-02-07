@@ -66,10 +66,10 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     [GtkChild]
-    private Hdy.SearchBar search_bar { get; private set; }
+    private Hdy.SearchBar search_bar;
 
     [GtkChild]
-    private Gtk.SearchEntry search_entry { get; private set; }
+    private Gtk.SearchEntry search_entry;
 
     [GtkChild]
     private Gtk.ListBox sidebar;
