@@ -12,8 +12,7 @@
 public class Components.InspectorErrorView : Gtk.Grid {
 
 
-    [GtkChild]
-    private Gtk.TextView problem_text;
+    [GtkChild] private unowned Gtk.TextView problem_text;
 
     private Geary.ErrorContext error;
     private Geary.AccountInformation? account;

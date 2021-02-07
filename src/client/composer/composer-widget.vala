@@ -361,14 +361,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    [GtkChild] private Gtk.Box header_container;
-    [GtkChild] private Gtk.Grid editor_container;
+    [GtkChild] private unowned Gtk.Box header_container;
+    [GtkChild] private unowned Gtk.Grid editor_container;
 
-    [GtkChild] private Gtk.Grid email_headers;
-    [GtkChild] private Gtk.Box filled_headers;
-    [GtkChild] private Gtk.Revealer extended_headers_revealer;
-    [GtkChild] private Gtk.Box extended_headers;
-    [GtkChild] private Gtk.ToggleButton show_extended_headers;
+    [GtkChild] private unowned Gtk.Grid email_headers;
+    [GtkChild] private unowned Gtk.Box filled_headers;
+    [GtkChild] private unowned Gtk.Revealer extended_headers_revealer;
+    [GtkChild] private unowned Gtk.Box extended_headers;
+    [GtkChild] private unowned Gtk.ToggleButton show_extended_headers;
 
     private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
 
@@ -384,16 +384,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
     private Gspell.Entry subject_spell_entry;
 
-    [GtkChild]
-    private Gtk.Box attachments_box;
-    [GtkChild]
-    private Gtk.Box hidden_on_attachment_drag_over;
-    [GtkChild]
-    private Gtk.Box visible_on_attachment_drag_over;
-    [GtkChild]
-    private Gtk.Widget hidden_on_attachment_drag_over_child;
-    [GtkChild]
-    private Gtk.Widget visible_on_attachment_drag_over_child;
+    [GtkChild] private unowned Gtk.Box attachments_box;
+    [GtkChild] private unowned Gtk.Box hidden_on_attachment_drag_over;
+    [GtkChild] private unowned Gtk.Box visible_on_attachment_drag_over;
+    [GtkChild] private unowned Gtk.Widget hidden_on_attachment_drag_over_child;
+    [GtkChild] private unowned Gtk.Widget visible_on_attachment_drag_over_child;
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 

@@ -64,14 +64,11 @@ public class Components.AttachmentPane : Gtk.Grid {
 
         public Geary.Attachment attachment { get; private set; }
 
-        [GtkChild]
-        private Gtk.Image icon;
+        [GtkChild] private unowned Gtk.Image icon;
 
-        [GtkChild]
-        private Gtk.Label filename;
+        [GtkChild] private unowned Gtk.Label filename;
 
-        [GtkChild]
-        private Gtk.Label description;
+        [GtkChild] private unowned Gtk.Label description;
 
         private string gio_content_type;
 
@@ -208,14 +205,11 @@ public class Components.AttachmentPane : Gtk.Grid {
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
-    [GtkChild]
-    private Gtk.Grid attachments_container;
+    [GtkChild] private unowned Gtk.Grid attachments_container;
 
-    [GtkChild]
-    private Gtk.Button save_button;
+    [GtkChild] private unowned Gtk.Button save_button;
 
-    [GtkChild]
-    private Gtk.Button remove_button;
+    [GtkChild] private unowned Gtk.Button remove_button;
 
     private FlowBox attachments_view;
 

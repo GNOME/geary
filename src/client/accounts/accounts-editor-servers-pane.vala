@@ -52,29 +52,21 @@ internal class Accounts.EditorServersPane :
         new Gee.LinkedList<Components.Validator>();
 
 
-    [GtkChild]
-    private Gtk.HeaderBar header;
+    [GtkChild] private unowned Gtk.HeaderBar header;
 
-    [GtkChild]
-    private Gtk.Grid pane_content;
+    [GtkChild] private unowned Gtk.Grid pane_content;
 
-    [GtkChild]
-    private Gtk.Adjustment pane_adjustment;
+    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
 
-    [GtkChild]
-    private Gtk.ListBox details_list;
+    [GtkChild] private unowned Gtk.ListBox details_list;
 
-    [GtkChild]
-    private Gtk.ListBox receiving_list;
+    [GtkChild] private unowned Gtk.ListBox receiving_list;
 
-    [GtkChild]
-    private Gtk.ListBox sending_list;
+    [GtkChild] private unowned Gtk.ListBox sending_list;
 
-    [GtkChild]
-    private Gtk.Button apply_button;
+    [GtkChild] private unowned Gtk.Button apply_button;
 
-    [GtkChild]
-    private Gtk.Spinner apply_spinner;
+    [GtkChild] private unowned Gtk.Spinner apply_spinner;
 
     private SaveDraftsRow save_drafts;
     private SaveSentRow save_sent;

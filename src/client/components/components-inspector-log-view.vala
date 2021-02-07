@@ -65,23 +65,17 @@ public class Components.InspectorLogView : Gtk.Grid {
         set { this.search_bar.search_mode_enabled = value; }
     }
 
-    [GtkChild]
-    private Hdy.SearchBar search_bar;
+    [GtkChild] private unowned Hdy.SearchBar search_bar;
 
-    [GtkChild]
-    private Gtk.SearchEntry search_entry;
+    [GtkChild] private unowned Gtk.SearchEntry search_entry;
 
-    [GtkChild]
-    private Gtk.ListBox sidebar;
+    [GtkChild] private unowned Gtk.ListBox sidebar;
 
-    [GtkChild]
-    private Gtk.ScrolledWindow logs_scroller;
+    [GtkChild] private unowned Gtk.ScrolledWindow logs_scroller;
 
-    [GtkChild]
-    private Gtk.TreeView logs_view;
+    [GtkChild] private unowned Gtk.TreeView logs_view;
 
-    [GtkChild]
-    private Gtk.CellRendererText log_renderer;
+    [GtkChild] private unowned Gtk.CellRendererText log_renderer;
 
     private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
             typeof(string),

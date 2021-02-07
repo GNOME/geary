@@ -7,10 +7,8 @@
 [GtkTemplate (ui = "/org/gnome/Geary/folder-popover.ui")]
 public class FolderPopover : Gtk.Popover {
 
-    [GtkChild]
-    private Gtk.SearchEntry search_entry;
-    [GtkChild]
-    private Gtk.ListBox list_box;
+    [GtkChild] private unowned Gtk.SearchEntry search_entry;
+    [GtkChild] private unowned Gtk.ListBox list_box;
 
     private int filtered_folder_count = 0;
 

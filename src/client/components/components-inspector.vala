@@ -48,26 +48,19 @@ public class Components.Inspector : Gtk.ApplicationWindow {
     }
 
 
-    [GtkChild]
-    private Gtk.HeaderBar header_bar;
+    [GtkChild] private unowned Gtk.HeaderBar header_bar;
 
-    [GtkChild]
-    private Gtk.Stack stack;
+    [GtkChild] private unowned Gtk.Stack stack;
 
-    [GtkChild]
-    private Gtk.Button copy_button;
+    [GtkChild] private unowned Gtk.Button copy_button;
 
-    [GtkChild]
-    private Gtk.ToggleButton play_button;
+    [GtkChild] private unowned Gtk.ToggleButton play_button;
 
-    [GtkChild]
-    private Gtk.Button mark_button;
+    [GtkChild] private unowned Gtk.Button mark_button;
 
-    [GtkChild]
-    private Gtk.ToggleButton search_button;
+    [GtkChild] private unowned Gtk.ToggleButton search_button;
 
-    [GtkChild]
-    private Gtk.Button clear_button;
+    [GtkChild] private unowned Gtk.Button clear_button;
 
     private InspectorLogView log_pane;
     private InspectorSystemView system_pane;

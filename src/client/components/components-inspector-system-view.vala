@@ -57,8 +57,7 @@ public class Components.InspectorSystemView : Gtk.Grid {
     }
 
 
-    [GtkChild]
-    private Gtk.ListBox system_list;
+    [GtkChild] private unowned Gtk.ListBox system_list;
 
     private Gee.Collection<Application.Client.RuntimeDetail?> details;
 

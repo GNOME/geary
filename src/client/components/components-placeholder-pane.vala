@@ -39,14 +39,11 @@ public class Components.PlaceholderPane : Gtk.Grid {
         }
     }
 
-    [GtkChild]
-    private Gtk.Image placeholder_image;
+    [GtkChild] private unowned Gtk.Image placeholder_image;
 
-    [GtkChild]
-    private Gtk.Label title_label;
+    [GtkChild] private unowned Gtk.Label title_label;
 
-    [GtkChild]
-    private Gtk.Label subtitle_label;
+    [GtkChild] private unowned Gtk.Label subtitle_label;
 
 
     private void update() {

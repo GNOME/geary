@@ -22,19 +22,13 @@ public class Composer.Headerbar : Gtk.HeaderBar {
 
     private bool is_attached = true;
 
-    [GtkChild]
-    private Gtk.Box detach_start;
-    [GtkChild]
-    private Gtk.Box detach_end;
-    [GtkChild]
-    private Gtk.Button recipients_button;
-    [GtkChild]
-    private Gtk.Label recipients_label;
-    [GtkChild]
-    private Gtk.Button save_and_close_button;
+    [GtkChild] private unowned Gtk.Box detach_start;
+    [GtkChild] private unowned Gtk.Box detach_end;
+    [GtkChild] private unowned Gtk.Button recipients_button;
+    [GtkChild] private unowned Gtk.Label recipients_label;
+    [GtkChild] private unowned Gtk.Button save_and_close_button;
 
-    [GtkChild]
-    private Gtk.Button send_button;
+    [GtkChild] private unowned Gtk.Button send_button;
 
     /** Fired when the user wants to expand a compact composer. */
     public signal void expand_composer();

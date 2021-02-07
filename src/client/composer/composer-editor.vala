@@ -107,8 +107,8 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
 
     internal GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
-    [GtkChild] internal Gtk.Button new_message_attach_button;
-    [GtkChild] internal Gtk.Box conversation_attach_buttons;
+    [GtkChild] internal unowned Gtk.Button new_message_attach_button;
+    [GtkChild] internal unowned Gtk.Box conversation_attach_buttons;
 
     private Application.Configuration config;
 
@@ -127,25 +127,25 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     private Menu context_menu_webkit_text_entry;
     private Menu context_menu_inspector;
 
-    [GtkChild] private Gtk.Grid body_container;
+    [GtkChild] private unowned Gtk.Grid body_container;
 
-    [GtkChild] private Gtk.Label message_overlay_label;
+    [GtkChild] private unowned Gtk.Label message_overlay_label;
 
-    [GtkChild] private Gtk.Box action_bar_box;
+    [GtkChild] private unowned Gtk.Box action_bar_box;
 
-    [GtkChild] private Gtk.Button insert_link_button;
-    [GtkChild] private Gtk.MenuButton select_dictionary_button;
+    [GtkChild] private unowned Gtk.Button insert_link_button;
+    [GtkChild] private unowned Gtk.MenuButton select_dictionary_button;
 
-    [GtkChild] private Gtk.Label info_label;
+    [GtkChild] private unowned Gtk.Label info_label;
 
-    [GtkChild] private Gtk.ProgressBar background_progress;
+    [GtkChild] private unowned Gtk.ProgressBar background_progress;
 
-    [GtkChild] private Gtk.Revealer formatting;
-    [GtkChild] private Gtk.MenuButton font_button;
-    [GtkChild] private Gtk.Stack font_button_stack;
-    [GtkChild] private Gtk.MenuButton font_size_button;
-    [GtkChild] private Gtk.Image font_color_icon;
-    [GtkChild] private Gtk.MenuButton more_options_button;
+    [GtkChild] private unowned Gtk.Revealer formatting;
+    [GtkChild] private unowned Gtk.MenuButton font_button;
+    [GtkChild] private unowned Gtk.Stack font_button_stack;
+    [GtkChild] private unowned Gtk.MenuButton font_size_button;
+    [GtkChild] private unowned Gtk.Image font_color_icon;
+    [GtkChild] private unowned Gtk.MenuButton more_options_button;
 
 
     internal signal void insert_image(bool from_clipboard);

@@ -19,33 +19,24 @@ public class MainToolbar : Hdy.Leaflet {
 
     private Components.ConversationActionBar conversation_viewer_action_bar;
 
-    [GtkChild]
-    private Hdy.Leaflet conversations_leaflet;
+    [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
 
     // Folder header elements
-    [GtkChild]
-    private Hdy.HeaderBar folder_header;
-    [GtkChild]
-    private Gtk.MenuButton main_menu_button;
+    [GtkChild] private unowned Hdy.HeaderBar folder_header;
+    [GtkChild] private unowned Gtk.MenuButton main_menu_button;
 
-    [GtkChild]
-    private Gtk.Separator folder_separator;
+    [GtkChild] private unowned Gtk.Separator folder_separator;
 
     // Conversations header elements
-    [GtkChild]
-    private Hdy.HeaderBar conversations_header;
-    [GtkChild]
-    private Gtk.ToggleButton search_conversations_button;
+    [GtkChild] private unowned Hdy.HeaderBar conversations_header;
+    [GtkChild] private unowned Gtk.ToggleButton search_conversations_button;
 
-    [GtkChild]
-    private Gtk.Separator conversations_separator;
+    [GtkChild] private unowned Gtk.Separator conversations_separator;
 
     // Conversation header elements
-    [GtkChild]
-    private Components.ConversationHeaderBar conversation_header;
+    [GtkChild] private unowned Components.ConversationHeaderBar conversation_header;
 
-    [GtkChild]
-    private Hdy.HeaderGroup header_group;
+    [GtkChild] private unowned Hdy.HeaderGroup header_group;
 
     Gtk.SizeGroup conversation_group;
 

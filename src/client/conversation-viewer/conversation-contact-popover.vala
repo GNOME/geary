@@ -41,41 +41,29 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     private GLib.Cancellable load_cancellable = new GLib.Cancellable();
 
-    [GtkChild]
-    private Gtk.Grid contact_pane;
+    [GtkChild] private unowned Gtk.Grid contact_pane;
 
-    [GtkChild]
-    private Gtk.Image avatar;
+    [GtkChild] private unowned Gtk.Image avatar;
 
-    [GtkChild]
-    private Gtk.Label contact_name;
+    [GtkChild] private unowned Gtk.Label contact_name;
 
-    [GtkChild]
-    private Gtk.Label contact_address;
+    [GtkChild] private unowned Gtk.Label contact_address;
 
-    [GtkChild]
-    private Gtk.Button starred_button;
+    [GtkChild] private unowned Gtk.Button starred_button;
 
-    [GtkChild]
-    private Gtk.Button unstarred_button;
+    [GtkChild] private unowned Gtk.Button unstarred_button;
 
-    [GtkChild]
-    private Gtk.ModelButton open_button;
+    [GtkChild] private unowned Gtk.ModelButton open_button;
 
-    [GtkChild]
-    private Gtk.ModelButton save_button;
+    [GtkChild] private unowned Gtk.ModelButton save_button;
 
-    [GtkChild]
-    private Gtk.ModelButton load_remote_button;
+    [GtkChild] private unowned Gtk.ModelButton load_remote_button;
 
-    [GtkChild]
-    private Gtk.Grid deceptive_pane;
+    [GtkChild] private unowned Gtk.Grid deceptive_pane;
 
-    [GtkChild]
-    private Gtk.Label forged_email_label;
+    [GtkChild] private unowned Gtk.Label forged_email_label;
 
-    [GtkChild]
-    private Gtk.Label actual_email_label;
+    [GtkChild] private unowned Gtk.Label actual_email_label;
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 

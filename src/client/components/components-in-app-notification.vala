@@ -15,11 +15,9 @@ public class Components.InAppNotification : Gtk.Revealer {
     /** Default length of time to show the notification. */
     public const uint DEFAULT_DURATION = 5;
 
-    [GtkChild]
-    private Gtk.Label message_label;
+    [GtkChild] private unowned Gtk.Label message_label;
 
-    [GtkChild]
-    private Gtk.Button action_button;
+    [GtkChild] private unowned Gtk.Button action_button;
 
     private uint duration;
 
