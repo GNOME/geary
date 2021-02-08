@@ -43,6 +43,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public ImapDB.Account local { get; private set; }
 
     public signal void old_messages_background_cleanup_request(GLib.Cancellable? cancellable);
+    /** The account's remote folder synchroniser. */
+    internal AccountSynchronizer sync { get; private set; }
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
@@ -54,7 +56,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         new Gee.HashMap<FolderPath,Folder>();
 
     private AccountProcessor? processor;
-    private AccountSynchronizer sync;
     private TimeoutManager refresh_folder_timer;
 
     private Gee.Map<Folder.SpecialUse,Gee.List<string>> special_search_names =
@@ -101,7 +102,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.refresh_folder_timer = new TimeoutManager.seconds(
             REFRESH_FOLDER_LIST_SEC,
-            () => { this.update_remote_folders(); }
+            () => { this.update_remote_folders(true); }
          );
 
         this.background_progress = new ReentrantProgressMonitor(ACTIVITY);
@@ -703,7 +704,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /**
-     * Fires appropriate signals for a single altered folder.
+     * Notifies the engine a folder's contents have been altered.
      *
      * This is functionally equivalent to {@link update_folders}.
      */
@@ -712,17 +713,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             new Gee.LinkedList<Geary.Folder>();
         folders.add(folder);
         debug("Folder updated: %s", folder.path.to_string());
-        notify_folders_contents_altered(folders);
+        this.sync.folders_contents_altered(folders);
     }
 
     /**
-     * Fires appropriate signals for folders have been altered.
+     * Notifies the engine multiple folders' contents have been altered.
      *
      * This is functionally equivalent to {@link update_folder}.
      */
     internal void update_folders(Gee.Collection<Geary.Folder> folders) {
         if (!folders.is_empty) {
-            notify_folders_contents_altered(sort_by_path(folders));
+            this.sync.folders_contents_altered(folders);
         }
     }
 
@@ -924,20 +925,26 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /**
      * Hooks up and queues an {@link UpdateRemoteFolders} operation.
      */
-    private void update_remote_folders() {
+    private void update_remote_folders(bool already_connected) {
         this.refresh_folder_timer.reset();
 
-        UpdateRemoteFolders op = new UpdateRemoteFolders(
+        var op = new UpdateRemoteFolders(
             this,
+            already_connected,
             get_supported_special_folders()
         );
         op.completed.connect(() => {
                 this.refresh_folder_timer.start();
             });
-        try {
-            queue_operation(op);
-        } catch (Error err) {
-            // oh well
+        if (this.imap.current_status == CONNECTED) {
+            try {
+                queue_operation(op);
+            } catch (GLib.Error err) {
+                debug("Failed to update queue for  %s %s",
+                      op.to_string(), err.message);
+            }
+        } else {
+            this.processor.dequeue(op);
         }
     }
 
@@ -1115,7 +1122,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (this.open) {
             if (this.imap.current_status == CONNECTED) {
                 this.remote_ready_lock.blind_notify();
-                update_remote_folders();
+                update_remote_folders(false);
             } else {
                 this.remote_ready_lock.reset();
                 this.refresh_folder_timer.reset();
@@ -1234,13 +1241,16 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 
 
     private weak GenericAccount generic_account;
+    private bool already_connected;
     private Folder.SpecialUse[] specials;
 
 
     internal UpdateRemoteFolders(GenericAccount account,
+                                 bool already_connected,
                                  Folder.SpecialUse[] specials) {
         base(account);
         this.generic_account = account;
+        this.already_connected = already_connected;
         this.specials = specials;
     }
 
@@ -1386,7 +1396,8 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 
         // For folders to add, clone them and their properties
         // locally, then add to the account
-        ImapDB.Account local = ((GenericAccount) this.account).local;
+        var generic_account = (GenericAccount) this.account;
+        var local = generic_account.local;
         Gee.ArrayList<ImapDB.Folder> to_build = new Gee.ArrayList<ImapDB.Folder>();
         foreach (Geary.Imap.Folder remote_folder in to_add) {
             try {
@@ -1430,16 +1441,34 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             );
         }
 
-        // report all altered folders
-        if (altered_paths.size > 0) {
-            Gee.ArrayList<Geary.Folder> altered = new Gee.ArrayList<Geary.Folder>();
-            foreach (Geary.FolderPath altered_path in altered_paths) {
-                if (existing_folders.has_key(altered_path))
-                    altered.add(existing_folders.get(altered_path));
-                else
-                    debug("Unable to report %s altered: no local representation", altered_path.to_string());
+        if (this.already_connected) {
+            // Notify of updated folders only when already
+            // connected. This will cause them to get refreshed.
+            if (altered_paths.size > 0) {
+                Gee.ArrayList<Geary.Folder> altered = new Gee.ArrayList<Geary.Folder>();
+                foreach (Geary.FolderPath altered_path in altered_paths) {
+                    if (existing_folders.has_key(altered_path))
+                        altered.add(existing_folders.get(altered_path));
+                    else
+                        debug("Unable to report %s altered: no local representation", altered_path.to_string());
+                }
+                this.generic_account.update_folders(altered);
             }
-            this.generic_account.update_folders(altered);
+        } else {
+            // Notify all remote folders after re-connecting so they
+            // get fully sync'ed
+            if (remote_folders.size > 0) {
+                var remotes = new Gee.ArrayList<Geary.Folder>();
+                foreach (var path in remote_folders.keys) {
+                    if (existing_folders.has_key(path)) {
+                        remotes.add(existing_folders.get(path));
+                    } else {
+                        debug("Unable to report %s remote: no local representation",
+                              path.to_string());
+                    }
+                }
+                this.generic_account.sync.folders_discovered(remotes);
+            }
         }
 
         // Ensure each of the important special folders we need already exist
