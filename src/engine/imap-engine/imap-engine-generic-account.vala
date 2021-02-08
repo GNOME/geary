@@ -156,11 +156,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.queue_operation(new LoadFolders(this, this.local));
 
-        // Start the mail services. Start incoming directly, but queue
-        // outgoing so local folders can be loaded first in case
-        // queued mail gets sent and needs to get saved somewhere.
-        yield this.imap.start(cancellable);
-        this.queue_operation(new StartPostie(this, this.smtp.outbox));
+        // Start remote mail services after local folders have been
+        // loaded in case queued mail gets sent and needs to get saved
+        // somewhere
+        this.queue_operation(new StartServices(this, this.smtp.outbox));
 
         // Kick off a background update of the search table.
         //
@@ -1192,21 +1191,23 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 
 
 /**
- * Account operation for starting the outgoing service.
+ * Account operation for starting remote mail services.
  */
-internal class Geary.ImapEngine.StartPostie : AccountOperation {
+internal class Geary.ImapEngine.StartServices : AccountOperation {
 
 
     private Outbox.Folder outbox;
 
 
-    internal StartPostie(Account account, Outbox.Folder outbox) {
+    internal StartServices(Account account, Outbox.Folder outbox) {
         base(account);
         this.outbox = outbox;
     }
 
     public override async void execute(GLib.Cancellable cancellable)
         throws GLib.Error {
+        yield this.account.incoming.start(cancellable);
+
         this.account.register_local_folder(this.outbox);
         yield this.account.outgoing.start(cancellable);
     }
