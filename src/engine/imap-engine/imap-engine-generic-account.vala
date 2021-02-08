@@ -638,7 +638,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async void cleanup_storage(GLib.Cancellable? cancellable) {
+    public override async void cleanup_storage(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        check_open();
         debug("Backgrounded storage cleanup check for %s account", this.information.display_name);
 
         DateTime now = new DateTime.now_local();
@@ -648,7 +650,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             (now.difference(last_cleanup) / TimeSpan.MINUTE > APP_BACKGROUNDED_CLEANUP_WORK_INTERVAL_MINUTES)) {
             // Interval check is OK, start by detaching old messages
             this.last_storage_cleanup = now;
-            this.old_messages_background_cleanup_request(cancellable);
+            this.sync.cleanup_storage();
         } else if (local.db.want_background_vacuum) {
             // Vacuum has been flagged as needed, run it
             local.db.run_gc.begin(
