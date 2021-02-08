@@ -221,11 +221,6 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public signal void folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted);
 
     /**
-     * Fired when a Folder's contents is detected having changed.
-     */
-    public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
-
-    /**
      * Fired when a Folder's special use is detected having changed.
      */
     public signal void folders_use_changed(Gee.Collection<Geary.Folder> altered);
@@ -560,7 +555,8 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * has been flagged to run this will be executed. Designed to be run
      * while the app is in the background and idle.
      */
-    public abstract async void cleanup_storage(GLib.Cancellable? cancellable);
+    public abstract async void cleanup_storage(GLib.Cancellable? cancellable)
+        throws GLib.Error;
 
     /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {
@@ -587,11 +583,6 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     /** Fires a {@link folders_deleted} signal. */
     protected virtual void notify_folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted) {
         folders_deleted(deleted);
-    }
-
-    /** Fires a {@link folders_contents_altered} signal. */
-    protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
-        folders_contents_altered(altered);
     }
 
     /** Fires a {@link email_appended} signal. */

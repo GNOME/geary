@@ -42,7 +42,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** Local database for the account. */
     public ImapDB.Account local { get; private set; }
 
-    public signal void old_messages_background_cleanup_request(GLib.Cancellable? cancellable);
     /** The account's remote folder synchroniser. */
     internal AccountSynchronizer sync { get; private set; }
 
