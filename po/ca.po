@@ -1723,7 +1723,7 @@ msgstr "«%s» és un fitxer buit."
 #: src/client/composer/composer-widget.vala:1845
 #, c-format
 msgid "“%s” could not be found."
-msgstr "No es pot conèixer «%s»."
+msgstr "No s'ha pogut trobar «%s»."
 
 #: src/client/composer/composer-widget.vala:1851
 #, c-format
