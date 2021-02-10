@@ -195,9 +195,13 @@ internal class Application.Controller :
         // Commit e8061379 mistakenly used config_dir for cert manager
         // above, so remove it if found. This can be pulled out post
         // v40.
-        yield Geary.Files.recursive_delete_async(
-            config_dir.get_child("pinned-certs")
-        );
+        try {
+            yield Geary.Files.recursive_delete_async(
+                config_dir.get_child("pinned-certs")
+            );
+        } catch (GLib.IOError.NOT_FOUND err) {
+            // exactly as planned
+        }
 
         SecretMediator? libsecret = yield new SecretMediator(cancellable);
 
