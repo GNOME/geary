@@ -59,9 +59,9 @@ public class MainToolbar : Hdy.Leaflet {
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
     }
 
-    public void set_conversation_header(Gtk.HeaderBar header) {
+    public void set_conversation_header(Hdy.HeaderBar header) {
         remove(conversation_header);
-        this.header_group.add_gtk_header_bar(header);
+        this.header_group.add_header_bar(header);
         header.hexpand = true;
         conversation_group.remove_widget(conversation_header);
         conversation_group.add_widget(header);
@@ -69,9 +69,9 @@ public class MainToolbar : Hdy.Leaflet {
         child_set(header, "name", "conversation", null);
     }
 
-    public void remove_conversation_header(Gtk.HeaderBar header) {
+    public void remove_conversation_header(Hdy.HeaderBar header) {
         remove(header);
-        this.header_group.remove_gtk_header_bar(header);
+        this.header_group.remove_header_bar(header);
         conversation_group.remove_widget(header);
         conversation_group.add_widget(conversation_header);
         add(conversation_header);

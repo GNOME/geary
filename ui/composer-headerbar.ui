@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="ComposerHeaderbar" parent="GtkHeaderBar">
+  <template class="ComposerHeaderbar" parent="HdyHeaderBar">
     <property name="visible">True</property>
     <child type="title">
       <object class="GtkBox">
