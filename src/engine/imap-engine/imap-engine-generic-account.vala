@@ -686,7 +686,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             Account.folder_path_comparator
         );
         foreach(ImapDB.Folder db_folder in db_folders) {
-            Folder.Path path = db_folder.get_path();
+            Folder.Path path = db_folder.path;
             if (!this.remote_folders.has_key(path)) {
                 MinimalFolder folder = new_folder(db_folder);
                 if (folder.used_as == NONE) {
@@ -1135,9 +1135,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
         if (children != null) {
             foreach (ImapDB.Folder child in children) {
                 this.folders.add(child);
-                yield enumerate_local_folders_async(
-                    child.get_path(), cancellable
-                );
+                yield enumerate_local_folders_async(child.path, cancellable);
             }
         }
     }
@@ -1309,8 +1307,9 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             if (remote_folder.properties.is_openable.is_possible()) {
                 ImapDB.Folder local_folder = minimal_folder.local_folder;
 
-                if (remote_folder.properties.have_contents_changed(local_folder.get_properties(),
-                    minimal_folder.to_string())) {
+                if (remote_folder.properties.have_contents_changed(
+                        local_folder.properties,
+                        minimal_folder.to_string())) {
                     altered_paths.add(remote_folder.path);
                 }
             }
@@ -1479,7 +1478,7 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
                 ImapDB.Folder local_folder = folder.local_folder;
 
                 if (remote_folder.properties.have_contents_changed(
-                        local_folder.get_properties(),
+                        local_folder.properties,
                         this.folder.to_string())) {
 
                     yield local_folder.update_folder_status(

@@ -162,10 +162,10 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test1 = traverse(result).first();
         assert_equal<int?>(result.size, 1, "Base folder not listed");
-        assert_equal(test1.get_path().name, "test1", "Base folder name");
+        assert_equal(test1.path.name, "test1", "Base folder name");
 
         this.account.list_folders_async.begin(
-            test1.get_path(),
+            test1.path,
             null,
             this.async_completion
         );
@@ -173,10 +173,10 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test2 = traverse(result).first();
         assert_equal<int?>(result.size, 1, "Child folder not listed");
-        assert_equal(test2.get_path().name, "test2", "Child folder name");
+        assert_equal(test2.path.name, "test2", "Child folder name");
 
         this.account.list_folders_async.begin(
-            test2.get_path(),
+            test2.path,
             null,
             this.async_completion
         );
@@ -184,7 +184,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder test3 = traverse(result).first();
         assert_equal<int?>(result.size, 1, "Grandchild folder not listed");
-        assert_equal(test3.get_path().name, "test3", "Grandchild folder name");
+        assert_equal(test3.path.name, "test3", "Grandchild folder name");
     }
 
     public void delete_folder() throws GLib.Error {
@@ -268,7 +268,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_equal(result.get_path().name, "test1");
+        assert_equal(result.path.name, "test1");
     }
 
     public void fetch_child_folder() throws GLib.Error {
@@ -287,7 +287,7 @@ class Geary.ImapDB.AccountTest : TestCase {
 
         Folder? result = this.account.fetch_folder_async.end(async_result());
         assert_non_null(result);
-        assert_equal(result.get_path().name, "test2");
+        assert_equal(result.path.name, "test2");
     }
 
     public void fetch_nonexistent_folder() throws GLib.Error {

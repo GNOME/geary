@@ -51,7 +51,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     /** {@inheritDoc} */
     public Folder.Path path {
         get {
-            return local_folder.get_path();
+            return local_folder.path;
         }
     }
 
@@ -125,7 +125,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         this.local_folder.email_complete.connect(on_email_complete);
 
         this._used_as = use;
-        this._properties = local_folder.get_properties();
+        this._properties = local_folder.properties;
 
         this.replay_queue = new ReplayQueue(this);
         this.replay_queue.remotely_executed.connect(this.on_remote_status_check);
@@ -403,7 +403,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         throws GLib.Error {
         debug("Begin normalizing remote and local folders");
 
-        Geary.Imap.FolderProperties local_properties = this.local_folder.get_properties();
+        Geary.Imap.FolderProperties local_properties = this.local_folder.properties;
         Geary.Imap.FolderProperties remote_properties = session.folder.properties;
 
         /*

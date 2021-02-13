@@ -450,7 +450,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // return current if already created
         ImapDB.Folder? folder = get_local_folder(path);
         if (folder != null) {
-            folder.set_properties(properties);
+            folder.properties = properties;
         } else {
             folder = new Geary.ImapDB.Folder(
                 db,
@@ -1124,7 +1124,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     continue;
 
                 // Remove the folder that triggered this event.
-                paths.remove(source.get_path());
+                paths.remove(source.path);
                 if (paths.size == 0)
                     continue;
 
@@ -1153,8 +1153,9 @@ private class Geary.ImapDB.Account : BaseObject {
             if (folder == null)
                 continue;
 
-            folder.get_properties().set_status_unseen(folder.get_properties().email_unread +
-                unread_change.get(path));
+            folder.properties.set_status_unseen(
+                folder.properties.email_unread + unread_change.get(path)
+            );
         }
     }
 

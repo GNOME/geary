@@ -95,7 +95,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         assert_equal<int?>(results.size, 1);
         assert_true(results.get(mock));
-        assert_equal(this.folder.get_properties().email_unread, 0);
+        assert_equal(this.folder.properties.email_unread, 0);
     }
 
     public void create_unread_email() throws GLib.Error {
@@ -115,7 +115,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         assert_equal<int?>(results.size, 1);
         assert_true(results.get(mock));
-        assert_equal<int?>(this.folder.get_properties().email_unread, 1);
+        assert_equal<int?>(this.folder.properties.email_unread, 1);
     }
 
     public void create_no_unread_update() throws GLib.Error {
@@ -135,7 +135,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         assert_equal<int?>(results.size, 1);
         assert_true(results.get(mock));
-        assert_equal<int?>(this.folder.get_properties().email_unread, 0);
+        assert_equal<int?>(this.folder.properties.email_unread, 0);
     }
 
     public void merge_email() throws GLib.Error {

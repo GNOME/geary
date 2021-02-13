@@ -91,14 +91,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
     }
 
+    internal Geary.Folder.Path path { get; private set; }
+
+    internal Geary.Imap.FolderProperties properties { get; set; }
+
     protected int manual_ref_count { get; protected set; }
 
     private Geary.Db.Database db;
-    private Geary.Folder.Path path;
     private GLib.File attachments_path;
     private string account_owner_email;
     private int64 folder_id;
-    private Geary.Imap.FolderProperties properties;
 
     /**
      * Fired after one or more emails have been fetched with all Fields, and
@@ -124,18 +126,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
         this.folder_id = folder_id;
-        this.properties = properties;
-    }
-
-    public unowned Geary.Folder.Path get_path() {
-        return path;
-    }
-
-    public Geary.Imap.FolderProperties get_properties() {
-        return properties;
-    }
-
-    internal void set_properties(Geary.Imap.FolderProperties properties) {
         this.properties = properties;
     }
 

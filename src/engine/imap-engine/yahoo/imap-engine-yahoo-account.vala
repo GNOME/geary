@@ -38,7 +38,7 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
-        Folder.Path path = local_folder.get_path();
+        Folder.Path path = local_folder.path;
         Folder.SpecialUse use = NONE;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
             use = INBOX;
@@ -47,7 +47,7 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
             // SPECIAL-USE via its CAPABILITIES, it lists the
             // appropriate attributes in LIST results anyway, so we
             // can just consult that. :|
-            use = local_folder.get_properties().attrs.get_special_use();
+            use = local_folder.properties.attrs.get_special_use();
             // There can be only one Inbox
             if (use == INBOX) {
                 use = NONE;
