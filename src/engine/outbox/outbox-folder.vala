@@ -9,10 +9,12 @@
 /**
  * A folder for storing outgoing mail.
  */
-public class Geary.Outbox.Folder : Geary.Folder,
-    Geary.FolderSupport.Create,
-    Geary.FolderSupport.Mark,
-    Geary.FolderSupport.Remove {
+public class Geary.Outbox.Folder : BaseObject,
+    Logging.Source,
+    Geary.Folder,
+    FolderSupport.Create,
+    FolderSupport.Mark,
+    FolderSupport.Remove {
 
 
     /** The canonical name of the outbox folder. */
@@ -71,6 +73,11 @@ public class Geary.Outbox.Folder : Geary.Folder,
         get {
             return OUTBOX;
         }
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.account; }
     }
 
     private weak Account _account;
@@ -186,7 +193,7 @@ public class Geary.Outbox.Folder : Geary.Folder,
     }
 
     /** {@inheritDoc} */
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -212,7 +219,7 @@ public class Geary.Outbox.Folder : Geary.Folder,
         return contains;
     }
 
-    public override async Gee.List<Email>?
+    public async Gee.List<Email>?
         list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
                                int count,
                                Geary.Email.Field required_fields,
@@ -297,7 +304,7 @@ public class Geary.Outbox.Folder : Geary.Folder,
         return list;
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                       Geary.Email.Field required_fields,
                                       Geary.Folder.ListFlags flags,
@@ -323,7 +330,7 @@ public class Geary.Outbox.Folder : Geary.Folder,
         return (list.size > 0) ? list : null;
     }
 
-    public override async Email
+    public async Email
         fetch_email_async(Geary.EmailIdentifier id,
                           Geary.Email.Field required_fields,
                           Geary.Folder.ListFlags flags,
@@ -346,9 +353,15 @@ public class Geary.Outbox.Folder : Geary.Folder,
         return row_to_email(row);
     }
 
-    public override void set_used_as_custom(bool enabled)
+    /** {@inheritDoc} */
+    public void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED {
         throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
+    }
+
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.path.to_string());
     }
 
     // Utility for getting an email object back from an outbox row.

@@ -34,11 +34,11 @@
  * expand_vector}, causing the lower end of the vector to be
  * temporarily ''expanded''.
  */
-public abstract class Geary.RemoteFolder : Folder {
+public interface Geary.RemoteFolder : Folder {
 
 
     /**
-     * Determines if the folder is checking for remote changes to email.
+     * Indicates if the folder is checking for remote changes to email.
      *
      * @see start_monitoring
      * @see stop_monitoring
@@ -46,7 +46,7 @@ public abstract class Geary.RemoteFolder : Folder {
     public abstract bool is_monitoring { get; }
 
     /**
-     * Determines if the folder's local vector contains all remote email.
+     * Indicates if the folder's local vector contains all remote email.
      *
      * This property is not guaranteed to be accurate at all times. It
      * is only updated whenever a connection to the remote folder is

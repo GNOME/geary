@@ -20,7 +20,10 @@
  * A remote folder connection is not automatically established, only
  * if monitoring or as needed for other folder operations.
  */
-private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
+private class Geary.ImapEngine.MinimalFolder : BaseObject,
+    Logging.Source,
+    Folder,
+    RemoteFolder,
     FolderSupport.Copy,
     FolderSupport.Mark,
     FolderSupport.Move {
@@ -34,26 +37,26 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
 
 
     /** {@inheritDoc} */
-    public override Account account {
+    public Account account {
         get { return this._account; }
     }
     private weak GenericAccount _account;
 
     /** {@inheritDoc} */
-    public override FolderProperties properties {
+    public FolderProperties properties {
         get { return this._properties; }
     }
     private FolderProperties _properties;
 
     /** {@inheritDoc} */
-    public override FolderPath path {
+    public FolderPath path {
         get {
             return local_folder.get_path();
         }
     }
 
     /** {@inheritDoc} */
-    public override Folder.SpecialUse used_as {
+    public Folder.SpecialUse used_as {
         get {
             return this._used_as;
         }
@@ -61,16 +64,21 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     private Folder.SpecialUse _used_as;
 
     /** {@inheritDoc} */
-    public override bool is_monitoring {
+    public bool is_monitoring {
         get { return this._is_monitoring; }
     }
     private bool _is_monitoring = false;
 
     /** {@inheritDoc} */
-    public override bool is_fully_expanded {
+    public bool is_fully_expanded {
         get { return this._is_fully_expanded; }
     }
     private bool _is_fully_expanded = false;
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.account; }
+    }
 
     /** Determines if there is currently a remote session. */
     internal bool is_remote_open {
@@ -138,7 +146,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
         this.closed_semaphore.blind_notify();
     }
 
-    public override void set_used_as_custom(bool enabled)
+    public void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED {
         if (enabled) {
             if (this._used_as != NONE) {
@@ -168,7 +176,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override void start_monitoring() {
+    public void start_monitoring() {
         this._is_monitoring = true;
         this._account.imap.notify["current-status"].connect(
             this.on_remote_status_check
@@ -177,7 +185,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override void stop_monitoring() {
+    public void stop_monitoring() {
         this._is_monitoring = false;
         this._account.imap.notify["current-status"].disconnect(
             this.on_remote_status_check
@@ -186,7 +194,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override async void synchronise(GLib.Cancellable? cancellable)
+    public async void synchronise(GLib.Cancellable? cancellable)
         throws GLib.Error {
         bool have_nooped = false;
         int retries = 3;
@@ -243,7 +251,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override async void expand_vector(GLib.Cancellable? cancellable)
+    public async void expand_vector(GLib.Cancellable? cancellable)
         throws GLib.Error {
 
     }
@@ -825,7 +833,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -836,7 +844,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     // list email variants
     //
 
-    public override async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
+    public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
         check_flags("list_email_by_id_async", flags);
@@ -856,7 +864,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
         return !op.accumulator.is_empty ? op.accumulator : null;
     }
 
-    public async override Gee.List<Geary.Email>? list_email_by_sparse_id_async(
+    public async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
         Cancellable? cancellable = null) throws Error {
         check_flags("list_email_by_sparse_id_async", flags);
@@ -876,7 +884,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
         return !op.accumulator.is_empty ? op.accumulator : null;
     }
 
-    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
+    public async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
         Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
         throws Error {
         check_flags("fetch_email_async", flags);
@@ -1030,7 +1038,7 @@ private class Geary.ImapEngine.MinimalFolder : RemoteFolder,
     }
 
     /** {@inheritDoc} */
-    public override Logging.State to_logging_state() {
+    public Logging.State to_logging_state() {
         return new Logging.State(
             this,
             "%s, remote_opened=%s",

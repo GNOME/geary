@@ -13,7 +13,10 @@
  * search, then collects search results and presents them via the
  * folder interface.
  */
-public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
+public class Geary.App.SearchFolder : BaseObject,
+    Logging.Source,
+    Folder,
+    FolderSupport.Remove {
 
 
     /** Number of messages to include in the initial search. */
@@ -75,19 +78,19 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
 
 
     /** {@inheritDoc} */
-    public override Account account {
+    public Account account {
         get { return _account; }
     }
     private weak Account _account;
 
     /** {@inheritDoc} */
-    public override FolderProperties properties {
+    public FolderProperties properties {
         get { return _properties; }
     }
     private FolderPropertiesImpl _properties;
 
     /** {@inheritDoc} */
-    public override FolderPath path {
+    public FolderPath path {
         get { return _path; }
     }
     private FolderPath? _path = null;
@@ -97,12 +100,17 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
      *
      * Always returns {@link Folder.SpecialUse.SEARCH}.
      */
-    public override Folder.SpecialUse used_as {
+    public Folder.SpecialUse used_as {
         get { return SEARCH; }
     }
 
     /** The query being evaluated by this folder, if any. */
     public SearchQuery? query { get; protected set; default = null; }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.account; }
+    }
 
     // Folders that should be excluded from search
     private Gee.HashSet<FolderPath?> exclude_folders =
@@ -203,7 +211,7 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
     }
 
     /** {@inheritDoc} */
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -220,7 +228,7 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
         ).to_hash_set();
     }
 
-    public override async Gee.List<Email>? list_email_by_id_async(
+    public async Gee.List<Email>? list_email_by_id_async(
         EmailIdentifier? initial_id,
         int count,
         Email.Field required_fields,
@@ -318,7 +326,7 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
         return results;
     }
 
-    public override async Gee.List<Email>? list_email_by_sparse_id_async(
+    public async Gee.List<Email>? list_email_by_sparse_id_async(
         Gee.Collection<EmailIdentifier> list,
         Email.Field required_fields,
         Folder.ListFlags flags,
@@ -329,10 +337,10 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
         );
     }
 
-    public override async Email fetch_email_async(EmailIdentifier fetch,
-                                                  Email.Field required_fields,
-                                                  Folder.ListFlags flags,
-                                                  GLib.Cancellable? cancellable = null)
+    public async Email fetch_email_async(EmailIdentifier fetch,
+                                         Email.Field required_fields,
+                                         Folder.ListFlags flags,
+                                         GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         require_id(fetch);
         return yield this.account.local_fetch_email_async(
@@ -366,9 +374,15 @@ public class Geary.App.SearchFolder : Folder, FolderSupport.Remove {
         }
     }
 
-    public override void set_used_as_custom(bool enabled)
+    /** {@inheritDoc} */
+    public void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED {
         throw new EngineError.UNSUPPORTED("Folder special use cannot be changed");
+    }
+
+    /** {@inheritDoc} */
+    public virtual Logging.State to_logging_state() {
+        return new Logging.State(this, this.path.to_string());
     }
 
     private void require_id(EmailIdentifier id)

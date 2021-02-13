@@ -5,7 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Mock.Folder : Geary.Folder,
+public class Mock.Folder : GLib.Object,
+    Geary.Logging.Source,
+    Geary.Folder,
     ValaUnit.TestAssertions,
     ValaUnit.MockObject {
 
@@ -24,6 +26,10 @@ public class Mock.Folder : Geary.Folder,
 
     public override Geary.Folder.SpecialUse used_as {
         get { return this._used_as; }
+    }
+
+    public Geary.Logging.Source? logging_parent {
+        get { return this.account; }
     }
 
     protected Gee.Queue<ValaUnit.ExpectedCall> expected {
@@ -50,7 +56,7 @@ public class Mock.Folder : Geary.Folder,
         this._opening_monitor = monitor;
     }
 
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -61,7 +67,7 @@ public class Mock.Folder : Geary.Folder,
         );
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
                                Geary.Email.Field required_fields,
@@ -75,7 +81,7 @@ public class Mock.Folder : Geary.Folder,
         );
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                       Geary.Email.Field required_fields,
                                       Geary.Folder.ListFlags flags,
@@ -88,7 +94,7 @@ public class Mock.Folder : Geary.Folder,
         );
     }
 
-    public override async Geary.Email
+    public async Geary.Email
         fetch_email_async(Geary.EmailIdentifier email_id,
                           Geary.Email.Field required_fields,
                           Geary.Folder.ListFlags flags,
@@ -97,9 +103,13 @@ public class Mock.Folder : Geary.Folder,
         throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
-    public override void set_used_as_custom(bool enabled)
+    public void set_used_as_custom(bool enabled)
         throws Geary.EngineError.UNSUPPORTED {
         throw new Geary.EngineError.UNSUPPORTED("Mock method");
+    }
+
+    public virtual Geary.Logging.State to_logging_state() {
+        return new Geary.Logging.State(this, this.path.to_string());
     }
 
 }

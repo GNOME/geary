@@ -34,7 +34,7 @@
  * presence of {@link FolderSupport} interfaces, include {@link
  * FolderSupport.Remove}, {@link FolderSupport.Copy}, and so forth.
  */
-public abstract class Geary.Folder : BaseObject, Logging.Source {
+public interface Geary.Folder : GLib.Object, Logging.Source {
 
 
     /**
@@ -179,10 +179,6 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public abstract SpecialUse used_as { get; }
 
-    /** {@inheritDoc} */
-    public Logging.Source? logging_parent {
-        get { return this.account; }
-    }
 
     /**
      * Fired when email has been appended to the folder.
@@ -244,15 +240,15 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      * and {@link email_removed} (although see the note at
      * email_removed).
      */
-    public signal void email_count_changed(int new_count, CountChangeReason reason);
+    public virtual signal void email_count_changed(int new_count, CountChangeReason reason);
 
     /**
-    * Fired when the folder's special use has changed.
-    *
-    * This will usually happen when the local object has been updated
-    * with data discovered from the remote account.
-    */
-    public signal void use_changed(SpecialUse old_use, SpecialUse new_use);
+     * Fired when the folder's special use has changed.
+     *
+     * This will usually happen when the local object has been updated
+     * with data discovered from the remote account.
+     */
+    public virtual signal void use_changed(SpecialUse old_use, SpecialUse new_use);
 
 
     /**
@@ -374,10 +370,5 @@ public abstract class Geary.Folder : BaseObject, Logging.Source {
      */
     public abstract void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED;
-
-    /** {@inheritDoc} */
-    public virtual Logging.State to_logging_state() {
-        return new Logging.State(this, this.path.to_string());
-    }
 
 }

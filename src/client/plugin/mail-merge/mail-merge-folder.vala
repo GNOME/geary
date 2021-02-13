@@ -8,7 +8,9 @@
 /**
  * Plugin to Fill in and send email templates using a spreadsheet.
  */
-public class MailMerge.Folder : Geary.Folder {
+public class MailMerge.Folder : Geary.BaseObject,
+    Geary.Logging.Source,
+    Geary.Folder {
 
 
     private class EmailIdentifier : Geary.EmailIdentifier {
@@ -129,6 +131,10 @@ public class MailMerge.Folder : Geary.Folder {
     /** Specifies if the merged mail is currently being sent. */
     public bool is_sending { get; private set; default = false; }
 
+    /** {@inheritDoc} */
+    public Geary.Logging.Source? logging_parent {
+        get { return this.account; }
+    }
 
     private Gee.List<Geary.EmailIdentifier> ids =
         new Gee.ArrayList<Geary.EmailIdentifier>();
@@ -190,7 +196,7 @@ public class MailMerge.Folder : Geary.Folder {
     }
 
     /** {@inheritDoc} */
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -201,7 +207,7 @@ public class MailMerge.Folder : Geary.Folder {
         ).to_hash_set();
     }
 
-    public override async Geary.Email
+    public async Geary.Email
         fetch_email_async(Geary.EmailIdentifier id,
                           Geary.Email.Field required_fields,
                           Geary.Folder.ListFlags flags,
@@ -216,7 +222,7 @@ public class MailMerge.Folder : Geary.Folder {
         return email;
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
                                Geary.Email.Field required_fields,
@@ -264,7 +270,7 @@ public class MailMerge.Folder : Geary.Folder {
         return (list.size > 0) ? list : null;
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                       Geary.Email.Field required_fields,
                                       Geary.Folder.ListFlags flags,
@@ -283,7 +289,8 @@ public class MailMerge.Folder : Geary.Folder {
         return (list.size > 0) ? list : null;
     }
 
-    public override void set_used_as_custom(bool enabled)
+    /** {@inheritDoc} */
+    public void set_used_as_custom(bool enabled)
         throws Geary.EngineError.UNSUPPORTED {
         this._used_as = (
             enabled
@@ -292,6 +299,10 @@ public class MailMerge.Folder : Geary.Folder {
         );
     }
 
+    /** {@inheritDoc} */
+    public virtual Geary.Logging.State to_logging_state() {
+        return new Geary.Logging.State(this, this.path.to_string());
+    }
 
     // NB: This is called from a thread outside of the main loop
     private async void load_data(GLib.Cancellable? cancellable) {

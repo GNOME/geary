@@ -5,36 +5,43 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Mock.RemoteFolder : Geary.RemoteFolder,
+public class Mock.RemoteFolder : GLib.Object,
+    Geary.Logging.Source,
+    Geary.Folder,
+    Geary.RemoteFolder,
     ValaUnit.TestAssertions,
     ValaUnit.MockObject {
 
 
-    public override Geary.Account account {
+    public Geary.Account account {
         get { return this._account; }
     }
 
-    public override Geary.FolderProperties properties {
+    public Geary.FolderProperties properties {
         get { return this._properties; }
     }
 
-    public override Geary.FolderPath path {
+    public Geary.FolderPath path {
         get { return this._path; }
     }
 
-    public override Geary.Folder.SpecialUse used_as {
+    public Geary.Folder.SpecialUse used_as {
         get { return this._used_as; }
     }
 
-    public override bool is_monitoring {
+    public bool is_monitoring {
         get { return this._is_monitoring; }
     }
     private bool _is_monitoring = false;
 
-    public override bool is_fully_expanded {
+    public bool is_fully_expanded {
         get { return this._is_fully_expanded; }
     }
     private bool _is_fully_expanded = false;
+
+    public Geary.Logging.Source? logging_parent {
+        get { return this.account; }
+    }
 
     protected Gee.Queue<ValaUnit.ExpectedCall> expected {
         get; set; default = new Gee.LinkedList<ValaUnit.ExpectedCall>();
@@ -64,7 +71,7 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         this._is_fully_expanded = is_fully_expanded;
     }
 
-    public override async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
+    public async Gee.Collection<Geary.EmailIdentifier> contains_identifiers(
         Gee.Collection<Geary.EmailIdentifier> ids,
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
@@ -75,7 +82,7 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         );
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
                                Geary.Email.Field required_fields,
@@ -89,7 +96,7 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         );
     }
 
-    public override async Gee.List<Geary.Email>?
+    public async Gee.List<Geary.Email>?
         list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                       Geary.Email.Field required_fields,
                                       Geary.Folder.ListFlags flags,
@@ -102,7 +109,7 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         );
     }
 
-    public override async Geary.Email
+    public async Geary.Email
         fetch_email_async(Geary.EmailIdentifier email_id,
                           Geary.Email.Field required_fields,
                           Geary.Folder.ListFlags flags,
@@ -111,12 +118,12 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
-    public override void set_used_as_custom(bool enabled)
+    public void set_used_as_custom(bool enabled)
         throws Geary.EngineError.UNSUPPORTED {
         throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
-    public override void start_monitoring() {
+    public void start_monitoring() {
         try {
             void_call("start_monitoring", {});
             this._is_monitoring = true;
@@ -125,7 +132,7 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         }
     }
 
-    public override void stop_monitoring() {
+    public void stop_monitoring() {
         try {
             void_call("stop_monitoring", {});
             this._is_monitoring = false;
@@ -134,14 +141,18 @@ public class Mock.RemoteFolder : Geary.RemoteFolder,
         }
     }
 
-    public override async void synchronise(GLib.Cancellable? cancellable)
+    public async void synchronise(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield void_call_async("synchronise", { cancellable });
     }
 
-    public override async void expand_vector(GLib.Cancellable? cancellable)
+    public async void expand_vector(GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield void_call_async("expand_vector", { cancellable });
+    }
+
+    public virtual Geary.Logging.State to_logging_state() {
+        return new Geary.Logging.State(this, this.path.to_string());
     }
 
 }
