@@ -27,7 +27,7 @@ public interface Geary.FolderSupport.Copy : Folder {
      */
     public abstract async void
         copy_email_async(Gee.Collection<EmailIdentifier> to_copy,
-                         FolderPath destination,
+                         Folder.Path destination,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error;
 

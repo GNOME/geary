@@ -622,7 +622,7 @@ public class Application.Client : Gtk.Application {
                 email.get_email_identifier_for_variant(id);
             if (context != null && email_id != null) {
                 // Determine what folders the email is in
-                Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? folders = null;
+                Gee.MultiMap<Geary.EmailIdentifier,Geary.Folder.Path>? folders = null;
                 try {
                     folders = yield context.account.get_containing_folders_async(
                         Geary.Collection.single(email_id),

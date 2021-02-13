@@ -81,9 +81,9 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     }
 
     /**
-     * Returns true if the {@link Geary.FolderPath} points to the IMAP Inbox.
+     * Returns true if the given path points to the IMAP Inbox.
      */
-    public static bool folder_path_is_inbox(FolderPath path) {
+    public static bool folder_path_is_inbox(Geary.Folder.Path path) {
         return path.is_top_level && is_inbox_name(path.name);
     }
 
@@ -117,9 +117,9 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     }
 
     /**
-     * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
+     * Converts a generic folder path into an IMAP mailbox specifier.
      */
-    public MailboxSpecifier.from_folder_path(FolderPath path,
+    public MailboxSpecifier.from_folder_path(Geary.Folder.Path path,
                                              MailboxSpecifier inbox,
                                              string? delim)
         throws ImapError {
@@ -196,14 +196,14 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * translated name but the standard IMAP name ("INBOX") must be
      * used in addressing its children.
      */
-    public FolderPath to_folder_path(FolderRoot root,
-                                     string? delim,
-                                     MailboxSpecifier? inbox_specifier) {
+    public Geary.Folder.Path to_folder_path(Geary.Folder.Root root,
+                                            string? delim,
+                                            MailboxSpecifier? inbox_specifier) {
         Gee.List<string> list = to_list(delim);
 
         // If the first element is same as supplied inbox specifier,
         // use canonical inbox name, otherwise keep
-        FolderPath? path = (
+        Geary.Folder.Path? path = (
             (inbox_specifier != null && list[0] == inbox_specifier.name)
             ? root.get_child(CANONICAL_INBOX_NAME)
             : root.get_child(list[0])

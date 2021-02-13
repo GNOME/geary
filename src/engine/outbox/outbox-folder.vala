@@ -57,12 +57,12 @@ public class Geary.Outbox.Folder : BaseObject,
      * This is always the child of the root given to the constructor,
      * with the name given by {@link MAGIC_BASENAME}.
      */
-    public override FolderPath path {
+    public override Geary.Folder.Path path {
         get {
             return _path;
         }
     }
-    private FolderPath _path;
+    private Geary.Folder.Path _path;
 
     /**
      * Returns the type of this folder.
@@ -86,7 +86,7 @@ public class Geary.Outbox.Folder : BaseObject,
     private int64 next_ordering = 0;
 
 
-    internal Folder(Account account, FolderRoot root, Db.Database db) {
+    internal Folder(Account account, Geary.Folder.Root root, Db.Database db) {
         this._account = account;
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
         this.db = db;

@@ -423,14 +423,14 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     /**
      * Returns the list of folders that disqualify emails from conversations.
      */
-    internal Gee.Collection<Geary.FolderPath> get_search_folder_blacklist() {
+    internal Gee.Collection<Folder.Path> get_search_folder_blacklist() {
         Folder.SpecialUse[] blacklisted_folder_types = {
             JUNK,
             TRASH,
             DRAFTS,
         };
 
-        var blacklist = new Gee.ArrayList<Geary.FolderPath?>();
+        var blacklist = new Gee.ArrayList<Folder.Path?>();
         foreach (var type in blacklisted_folder_types) {
             Geary.Folder? blacklist_folder = this.base_folder.account.get_special_folder(type);
             if (blacklist_folder != null) {
@@ -684,7 +684,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         Gee.Collection<Conversation>? removed_due_to_merge = null;
         try {
             // Get known paths for all emails
-            Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? email_paths =
+            Gee.MultiMap<Geary.EmailIdentifier, Folder.Path>? email_paths =
                 yield this.base_folder.account.get_containing_folders_async(
                     job.emails.keys,
                     this.operation_cancellable
@@ -727,7 +727,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         debug("expand_conversations: %d email ids", needed_message_ids.size);
 
-        Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_folder_blacklist();
+        Gee.Collection<Folder.Path> folder_blacklist = get_search_folder_blacklist();
         Geary.EmailFlags flag_blacklist = get_search_flag_blacklist();
 
         // execute all the local search operations at once

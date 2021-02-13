@@ -28,7 +28,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
 
     public Geary.Account account { get; private set; }
     public SpecialGrouping user_folder_group { get; private set; }
-    public Gee.HashMap<Geary.FolderPath, FolderEntry> folder_entries { get; private set; }
+    public Gee.HashMap<Geary.Folder.Path, FolderEntry> folder_entries { get; private set; }
 
     private string display_name = "";
 
@@ -41,7 +41,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         // folders created by people (as opposed to special-use
         // folders)
         user_folder_group = new SpecialGrouping(2, _("Labels"), "tag-symbolic");
-        folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
+        folder_entries = new Gee.HashMap<Geary.Folder.Path, FolderEntry>();
 
         this.display_name = account.information.display_name;
         account.information.changed.connect(on_information_changed);
@@ -110,7 +110,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         return a.get_sidebar_name().collate(b.get_sidebar_name());
     }
 
-    public FolderEntry? get_entry_for_path(Geary.FolderPath folder_path) {
+    public FolderEntry? get_entry_for_path(Geary.Folder.Path folder_path) {
         return folder_entries.get(folder_path);
     }
 
@@ -161,7 +161,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         }
     }
 
-    public void remove_folder(Geary.FolderPath path) {
+    public void remove_folder(Geary.Folder.Path path) {
         Sidebar.Entry? entry = this.folder_entries.get(path);
         if (entry == null) {
             debug("Could not remove folder %s", path.to_string());

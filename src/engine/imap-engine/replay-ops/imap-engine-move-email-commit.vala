@@ -13,12 +13,14 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
 
     private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_move = new Gee.ArrayList<ImapDB.EmailIdentifier>();
-    private Geary.FolderPath destination;
-    private Cancellable? cancellable;
+    private Folder.Path destination;
+    private GLib.Cancellable? cancellable;
     private Gee.List<Imap.MessageSet>? remaining_msg_sets = null;
 
-    public MoveEmailCommit(MinimalFolder engine, Gee.Collection<ImapDB.EmailIdentifier> to_move,
-        Geary.FolderPath destination, Cancellable? cancellable) {
+    public MoveEmailCommit(MinimalFolder engine,
+                           Gee.Collection<ImapDB.EmailIdentifier> to_move,
+                           Folder.Path destination,
+                           GLib.Cancellable? cancellable) {
         base.only_remote("MoveEmailCommit", OnError.RETRY);
 
         this.engine = engine;

@@ -1061,7 +1061,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         bool new_email = true;
         foreach (var mid in this.in_reply_to) {
-            Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map = null;
+            Gee.MultiMap<Geary.Email, Geary.Folder.Path?>? email_map = null;
             try {
                 // TODO: Folder blacklist
                 email_map = yield this.sender_context.account

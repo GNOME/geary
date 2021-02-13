@@ -166,7 +166,6 @@ src/engine/api/geary-email.vala
 src/engine/api/geary-endpoint.vala
 src/engine/api/geary-engine-error.vala
 src/engine/api/geary-engine.vala
-src/engine/api/geary-folder-path.vala
 src/engine/api/geary-folder-properties.vala
 src/engine/api/geary-folder-supports-archive.vala
 src/engine/api/geary-folder-supports-copy.vala

@@ -120,7 +120,7 @@ public class Composer.WidgetTest : TestCase {
             mock_account,
             new Geary.App.SearchFolder(
                 mock_account,
-                new Geary.FolderRoot("", false)
+                new Geary.Folder.Root("", false)
             ),
             new Geary.App.EmailStore(mock_account),
             new Application.ContactStore(

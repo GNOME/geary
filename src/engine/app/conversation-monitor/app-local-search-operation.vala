@@ -9,14 +9,14 @@ private class Geary.App.LocalSearchOperation : Geary.Nonblocking.BatchOperation 
     public Geary.Account account;
     public RFC822.MessageID message_id;
     public Geary.Email.Field required_fields;
-    public Gee.Collection<Geary.FolderPath>? blacklist;
+    public Gee.Collection<Folder.Path>? blacklist;
     public Geary.EmailFlags? flag_blacklist;
 
     // OUT
-    public Gee.MultiMap<Geary.Email, Geary.FolderPath?>? emails = null;
+    public Gee.MultiMap<Geary.Email, Folder.Path?>? emails = null;
 
     public LocalSearchOperation(Geary.Account account, RFC822.MessageID message_id,
-        Geary.Email.Field required_fields, Gee.Collection<Geary.FolderPath?> blacklist,
+        Geary.Email.Field required_fields, Gee.Collection<Folder.Path?> blacklist,
         Geary.EmailFlags? flag_blacklist) {
         this.account = account;
         this.message_id = message_id;

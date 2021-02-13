@@ -726,7 +726,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     // Returns a mapping of the source UID to the destination UID.  If the MessageSet is not for
     // UIDs, then null is returned.  If the server doesn't support COPYUID, null is returned.
     public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set,
-                                                     FolderPath destination,
+                                                     Geary.Folder.Path destination,
                                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         ClientSession session = get_session();

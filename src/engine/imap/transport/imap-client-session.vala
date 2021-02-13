@@ -612,7 +612,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /**
      * Determines the SELECT-able mailbox name for a specific folder path.
      */
-    public MailboxSpecifier get_mailbox_for_path(FolderPath path)
+    public MailboxSpecifier get_mailbox_for_path(Geary.Folder.Path path)
         throws ImapError {
         string? delim = get_delimiter_for_path(path);
         return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
@@ -621,8 +621,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     /**
      * Determines the folder path for a mailbox name.
      */
-    public FolderPath get_path_for_mailbox(FolderRoot root,
-                                           MailboxSpecifier mailbox)
+    public Geary.Folder.Path get_path_for_mailbox(Geary.Folder.Root root,
+                                                  MailboxSpecifier mailbox)
         throws ImapError {
         string? delim = get_delimiter_for_mailbox(mailbox);
         return mailbox.to_folder_path(root, delim, this.inbox.mailbox);
@@ -634,7 +634,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
      * The returned delimiter be null if a namespace (INBOX, personal,
      * etc) for the path does not exist, or if the namespace is flat.
      */
-    public string? get_delimiter_for_path(FolderPath path)
+    public string? get_delimiter_for_path(Geary.Folder.Path path)
     throws ImapError {
         string? delim = null;
 
@@ -644,7 +644,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
             delim = this.inbox.delim;
         } else {
             Namespace? ns = null;
-            FolderPath? search = path;
+            var search = path;
             while (ns == null && search != null) {
                 ns = this.namespaces.get(search.name);
                 search = search.parent;

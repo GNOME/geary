@@ -21,7 +21,7 @@ public class Mock.RemoteFolder : GLib.Object,
         get { return this._properties; }
     }
 
-    public Geary.FolderPath path {
+    public Geary.Folder.Path path {
         get { return this._path; }
     }
 
@@ -50,14 +50,14 @@ public class Mock.RemoteFolder : GLib.Object,
 
     private Geary.Account _account;
     private Geary.FolderProperties _properties;
-    private Geary.FolderPath _path;
+    private Geary.Folder.Path _path;
     private Geary.Folder.SpecialUse _used_as;
     private Geary.ProgressMonitor _opening_monitor;
 
 
     public RemoteFolder(Geary.Account? account,
                         Geary.FolderProperties? properties,
-                        Geary.FolderPath? path,
+                        Geary.Folder.Path? path,
                         Geary.Folder.SpecialUse used_as,
                         Geary.ProgressMonitor? monitor,
                         bool is_monitoring,

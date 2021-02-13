@@ -90,10 +90,10 @@ public class Geary.App.SearchFolder : BaseObject,
     private FolderPropertiesImpl _properties;
 
     /** {@inheritDoc} */
-    public FolderPath path {
+    public Folder.Path path {
         get { return _path; }
     }
-    private FolderPath? _path = null;
+    private Folder.Path? _path = null;
 
     /**
      * {@inheritDoc}
@@ -113,8 +113,8 @@ public class Geary.App.SearchFolder : BaseObject,
     }
 
     // Folders that should be excluded from search
-    private Gee.HashSet<FolderPath?> exclude_folders =
-        new Gee.HashSet<FolderPath?>();
+    private Gee.HashSet<Folder.Path?> exclude_folders =
+        new Gee.HashSet<Folder.Path?>();
 
     // The email present in the folder, sorted
     private Gee.SortedSet<EmailEntry> entries;
@@ -127,7 +127,7 @@ public class Geary.App.SearchFolder : BaseObject,
     private GLib.Cancellable executing = new GLib.Cancellable();
 
 
-    public SearchFolder(Account account, FolderRoot root) {
+    public SearchFolder(Account account, Folder.Root root) {
         this._account = account;
         this._properties = new FolderPropertiesImpl(0, 0);
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
@@ -352,17 +352,17 @@ public class Geary.App.SearchFolder : BaseObject,
         Gee.Collection<EmailIdentifier> remove,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
-        Gee.MultiMap<EmailIdentifier,FolderPath>? ids_to_folders =
+        Gee.MultiMap<EmailIdentifier,Folder.Path>? ids_to_folders =
             yield account.get_containing_folders_async(
                 check_ids(remove), cancellable
             );
         if (ids_to_folders != null) {
-            Gee.MultiMap<FolderPath,EmailIdentifier> folders_to_ids =
-                Collection.reverse_multi_map<EmailIdentifier,FolderPath>(
+            Gee.MultiMap<Folder.Path,EmailIdentifier> folders_to_ids =
+                Collection.reverse_multi_map<EmailIdentifier,Folder.Path>(
                     ids_to_folders
                 );
 
-            foreach (FolderPath path in folders_to_ids.get_keys()) {
+            foreach (Folder.Path path in folders_to_ids.get_keys()) {
                 Folder folder = account.get_folder(path);
                 FolderSupport.Remove? removable = folder as FolderSupport.Remove;
                 if (removable != null) {

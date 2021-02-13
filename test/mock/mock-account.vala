@@ -64,7 +64,7 @@ public class Mock.Account : Geary.Account,
     }
 
     public override Gee.Collection<Geary.Folder>
-        list_matching_folders(Geary.FolderPath? parent) {
+        list_matching_folders(Geary.Folder.Path? parent) {
         try {
             return object_call<Gee.Collection<Geary.Folder>>(
                 "get_containing_folders_async",
@@ -115,10 +115,10 @@ public class Mock.Account : Geary.Account,
         }
     }
 
-    public override Geary.FolderPath to_folder_path(GLib.Variant serialised)
+    public override Geary.Folder.Path to_folder_path(GLib.Variant serialised)
         throws Geary.EngineError.BAD_PARAMETERS {
         try {
-            return object_or_throw_call<Geary.FolderPath>(
+            return object_or_throw_call<Geary.Folder.Path>(
                 "to_folder_path",
                 { box_arg(serialised) },
                 new Geary.EngineError.BAD_PARAMETERS("Mock error")
@@ -126,11 +126,11 @@ public class Mock.Account : Geary.Account,
         } catch (Geary.EngineError.BAD_PARAMETERS err) {
             throw err;
         } catch (GLib.Error err) {
-            return new Geary.FolderRoot("#mock", false);
+            return new Geary.Folder.Root("#mock", false);
         }
     }
 
-    public override Geary.Folder get_folder(Geary.FolderPath path)
+    public override Geary.Folder get_folder(Geary.Folder.Path path)
         throws Geary.EngineError.NOT_FOUND {
         try {
             return object_or_throw_call<Folder>(
@@ -176,15 +176,15 @@ public class Mock.Account : Geary.Account,
         );
     }
 
-    public override async Gee.MultiMap<Geary.Email,Geary.FolderPath?>?
+    public override async Gee.MultiMap<Geary.Email,Geary.Folder.Path?>?
         local_search_message_id_async(Geary.RFC822.MessageID message_id,
                                       Geary.Email.Field requested_fields,
                                       bool partial_ok,
-                                      Gee.Collection<Geary.FolderPath?>? folder_blacklist,
+                                      Gee.Collection<Geary.Folder.Path?>? folder_blacklist,
                                       Geary.EmailFlags? flag_blacklist,
                                       GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        return object_call<Gee.MultiMap<Geary.Email,Geary.FolderPath?>?>(
+        return object_call<Gee.MultiMap<Geary.Email,Geary.Folder.Path?>?>(
             "local_search_message_id_async",
             {
                 message_id,
@@ -233,7 +233,7 @@ public class Mock.Account : Geary.Account,
         local_search_async(Geary.SearchQuery query,
                            int limit = 100,
                            int offset = 0,
-                           Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+                           Gee.Collection<Geary.Folder.Path?>? folder_blacklist = null,
                            Gee.Collection<Geary.EmailIdentifier>? search_ids = null,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
@@ -261,11 +261,11 @@ public class Mock.Account : Geary.Account,
         );
     }
 
-    public override async Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>?
+    public override async Gee.MultiMap<Geary.EmailIdentifier,Geary.Folder.Path>?
         get_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return object_call<Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>?>(
+        return object_call<Gee.MultiMap<Geary.EmailIdentifier, Geary.Folder.Path>?>(
             "get_containing_folders_async", {ids, cancellable}, null
         );
     }

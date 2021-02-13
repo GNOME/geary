@@ -49,7 +49,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     private FolderProperties _properties;
 
     /** {@inheritDoc} */
-    public FolderPath path {
+    public Folder.Path path {
         get {
             return local_folder.get_path();
         }
@@ -975,7 +975,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     public virtual async void
         copy_email_async(Gee.Collection<Geary.EmailIdentifier> to_copy,
-                         Geary.FolderPath destination,
+                         Folder.Path destination,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         Geary.Folder target = this._account.get_folder(destination);
@@ -988,7 +988,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
      */
     protected async Gee.Set<Imap.UID>?
         copy_email_uids_async(Gee.Collection<Geary.EmailIdentifier> to_copy,
-                              Geary.FolderPath destination,
+                              Folder.Path destination,
                               GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_ids("copy_email_uids_async", to_copy);
@@ -1012,7 +1012,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     public virtual async Geary.Revokable? move_email_async(
         Gee.Collection<Geary.EmailIdentifier> to_move,
-        Geary.FolderPath destination,
+        Folder.Path destination,
         Cancellable? cancellable = null)
     throws Error {
         check_ids("move_email_async", to_move);

@@ -11,7 +11,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
     AccountInformation? account_info = null;
     Mock.Account? account = null;
-    FolderRoot? folder_root = null;
+    Folder.Root? folder_root = null;
     Mock.RemoteFolder? base_folder = null;
     Mock.Folder? other_folder = null;
 
@@ -47,7 +47,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             new RFC822.MailboxAddress(null, "test1@example.com")
         );
         this.account = new Mock.Account(this.account_info);
-        this.folder_root = new FolderRoot("#test", false);
+        this.folder_root = new Folder.Root("#test", false);
         this.base_folder = new Mock.RemoteFolder(
             this.account,
             null,
@@ -208,8 +208,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public void load_single_message() throws Error {
         Email e1 = setup_email(1);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.base_folder.path);
 
         ConversationMonitor monitor = setup_monitor({e1}, paths);
@@ -227,8 +227,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         Email e2 = setup_email(2, null);
         Email e3 = setup_email(3, null);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.base_folder.path);
         paths.set(e2.id, this.base_folder.path);
         paths.set(e3.id, this.base_folder.path);
@@ -244,13 +244,13 @@ class Geary.App.ConversationMonitorTest : TestCase {
         Email e1 = setup_email(1);
         Email e2 = setup_email(2, e1);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.other_folder.path);
         paths.set(e2.id, this.base_folder.path);
 
-        Gee.MultiMap<Email,FolderPath> related_paths =
-            new Gee.HashMultiMap<Email,FolderPath>();
+        Gee.MultiMap<Email,Folder.Path> related_paths =
+            new Gee.HashMultiMap<Email,Folder.Path>();
         related_paths.set(e1, this.other_folder.path);
         related_paths.set(e2, this.base_folder.path);
 
@@ -268,8 +268,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public void base_folder_message_appended() throws Error {
         Email e1 = setup_email(1);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.base_folder.path);
 
         ConversationMonitor monitor = setup_monitor();
@@ -300,14 +300,14 @@ class Geary.App.ConversationMonitorTest : TestCase {
         Email e2 = setup_email(2, e1);
         Email e3 = setup_email(3);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.other_folder.path);
         paths.set(e2.id, this.base_folder.path);
         paths.set(e3.id, this.base_folder.path);
 
-        Gee.MultiMap<Email,FolderPath> e2_related_paths =
-            new Gee.HashMultiMap<Email,FolderPath>();
+        Gee.MultiMap<Email,Folder.Path> e2_related_paths =
+            new Gee.HashMultiMap<Email,Folder.Path>();
         e2_related_paths.set(e1, this.other_folder.path);
         e2_related_paths.set(e2, this.base_folder.path);
 
@@ -341,14 +341,14 @@ class Geary.App.ConversationMonitorTest : TestCase {
         Email e2 = setup_email(2, e1);
         Email e3 = setup_email(3, e1);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.base_folder.path);
         paths.set(e2.id, this.base_folder.path);
         paths.set(e3.id, this.other_folder.path);
 
-        Gee.MultiMap<Email,FolderPath> related_paths =
-            new Gee.HashMultiMap<Email,FolderPath>();
+        Gee.MultiMap<Email,Folder.Path> related_paths =
+            new Gee.HashMultiMap<Email,Folder.Path>();
         related_paths.set(e1, this.base_folder.path);
         related_paths.set(e3, this.other_folder.path);
 
@@ -421,8 +421,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public void conversation_marked_as_deleted() throws Error {
         Email e1 = setup_email(1);
 
-        Gee.MultiMap<EmailIdentifier,FolderPath> paths =
-            new Gee.HashMultiMap<EmailIdentifier,FolderPath>();
+        Gee.MultiMap<EmailIdentifier,Folder.Path> paths =
+            new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         paths.set(e1.id, this.base_folder.path);
 
         ConversationMonitor monitor = setup_monitor({e1}, paths);
@@ -466,8 +466,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
     private ConversationMonitor
         setup_monitor(Email[] base_folder_email = {},
-                      Gee.MultiMap<EmailIdentifier,FolderPath>? paths = null,
-                      Gee.MultiMap<Email,FolderPath>[] related_paths = {})
+                      Gee.MultiMap<EmailIdentifier,Folder.Path>? paths = null,
+                      Gee.MultiMap<Email,Folder.Path>[] related_paths = {})
         throws Error {
         ConversationMonitor monitor = new ConversationMonitor(
             this.base_folder, Email.Field.NONE, 10
@@ -539,7 +539,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
                 this.account.expect_call("get_special_folder");
 
                 seen_ids.clear();
-                foreach (Gee.MultiMap<Email,FolderPath> related in related_paths) {
+                foreach (Gee.MultiMap<Email,Folder.Path> related in related_paths) {
                     if (related != null) {
                         foreach (Email email in related.get_keys()) {
                             if (!base_email_ids.contains(email.message_id)) {

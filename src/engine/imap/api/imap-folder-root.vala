@@ -15,7 +15,7 @@
  * this class ensure certain requirements are held throughout the
  * library.
  */
-public class Geary.Imap.FolderRoot : Geary.FolderRoot {
+public class Geary.Imap.FolderRoot : Geary.Folder.Root {
 
 
    /**
@@ -25,10 +25,11 @@ public class Geary.Imap.FolderRoot : Geary.FolderRoot {
      * with some case-insensitive version of the IMAP inbox mailbox is
      * obtained via {@link get_child} from this root folder. However
      * since multiple folder roots may be constructed, in general
-     * {@link FolderPath.equal_to} or {@link FolderPath.compare_to}
-     * should still be used for testing equality with this path.
+     * {@link Geary.Folder.Path.equal_to} or {@link
+     * Geary.Folder.Path.compare_to} should still be used for testing
+     * equality with this path.
      */
-    public FolderPath inbox { get; private set; }
+    public Geary.Folder.Path inbox { get; private set; }
 
 
     public FolderRoot(string label) {
@@ -45,9 +46,8 @@ public class Geary.Imap.FolderRoot : Geary.FolderRoot {
      * If the given basename is that of the IMAP inbox, then {@link
      * inbox} will be returned.
      */
-    public override
-        FolderPath get_child(string basename,
-                             Trillian is_case_sensitive = Trillian.UNKNOWN) {
+    public override Geary.Folder.Path get_child(string basename,
+                                                Trillian is_case_sensitive = UNKNOWN) {
         return (MailboxSpecifier.is_inbox_name(basename))
             ? this.inbox
             : base.get_child(basename, is_case_sensitive);

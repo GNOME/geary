@@ -7,9 +7,9 @@
 private class Geary.App.CopyOperation : Geary.App.AsyncFolderOperation {
     public override Type folder_type { get { return typeof(Geary.FolderSupport.Copy); } }
 
-    public Geary.FolderPath destination;
+    public Folder.Path destination;
 
-    public CopyOperation(Geary.FolderPath destination) {
+    public CopyOperation(Folder.Path destination) {
         this.destination = destination;
     }
 

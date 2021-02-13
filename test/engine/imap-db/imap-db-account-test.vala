@@ -12,7 +12,7 @@ class Geary.ImapDB.AccountTest : TestCase {
     private GLib.File? tmp_dir = null;
     private Geary.AccountInformation? config = null;
     private Account? account = null;
-    private FolderRoot? root = null;
+    private Geary.Folder.Root? root = null;
 
 
     public AccountTest() {
@@ -52,7 +52,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         );
         this.account.open_async.end(async_result());
 
-        this.root = new FolderRoot("#test", false);
+        this.root = new Geary.Folder.Root("#test", false);
     }
 
     public override void tear_down() throws GLib.Error {

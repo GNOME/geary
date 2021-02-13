@@ -20,13 +20,13 @@
 internal class Geary.Imap.Folder : Geary.BaseObject {
 
     /** The full path to this folder. */
-    public FolderPath path { get; private set; }
+    public Geary.Folder.Path path { get; private set; }
 
     /** IMAP properties reported by the server. */
     public Imap.FolderProperties properties  { get; private set; }
 
 
-    internal Folder(FolderPath path, Imap.FolderProperties properties) {
+    internal Folder(Geary.Folder.Path path, Imap.FolderProperties properties) {
         this.path = path;
         this.properties = properties;
     }

@@ -94,7 +94,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     protected int manual_ref_count { get; protected set; }
 
     private Geary.Db.Database db;
-    private Geary.FolderPath path;
+    private Geary.Folder.Path path;
     private GLib.File attachments_path;
     private string account_owner_email;
     private int64 folder_id;
@@ -113,7 +113,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public signal void unread_updated(Gee.Map<ImapDB.EmailIdentifier, bool> unread_status);
 
     internal Folder(Geary.Db.Database db,
-                    Geary.FolderPath path,
+                    Geary.Folder.Path path,
                     GLib.File attachments_path,
                     string account_owner_email,
                     int64 folder_id,
@@ -127,7 +127,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.properties = properties;
     }
 
-    public unowned Geary.FolderPath get_path() {
+    public unowned Geary.Folder.Path get_path() {
         return path;
     }
 

@@ -10,7 +10,7 @@ class Geary.App.ConversationTest : TestCase {
 
     Conversation? test = null;
     Folder? base_folder = null;
-    FolderRoot? folder_root = null;
+    Folder.Root? folder_root = null;
 
 
     public ConversationTest() {
@@ -28,7 +28,7 @@ class Geary.App.ConversationTest : TestCase {
     }
 
     public override void set_up() {
-        this.folder_root = new FolderRoot("#test", false);
+        this.folder_root = new Folder.Root("#test", false);
         this.base_folder = new Mock.Folder(
             null,
             null,
@@ -89,8 +89,8 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(this.base_folder.path));
 
-        FolderPath other_path = this.folder_root.get_child("other");
-        Gee.LinkedList<FolderPath> other_paths = new Gee.LinkedList<FolderPath>();
+        Folder.Path other_path = this.folder_root.get_child("other");
+        Gee.LinkedList<Folder.Path> other_paths = new Gee.LinkedList<Folder.Path>();
         other_paths.add(other_path);
 
         assert(this.test.add(e1, other_paths) == false);
@@ -156,7 +156,7 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderPath other_path = this.folder_root.get_child("other");
+        Folder.Path other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
@@ -169,7 +169,7 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderPath other_path = this.folder_root.get_child("other");
+        Folder.Path other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
@@ -188,11 +188,11 @@ class Geary.App.ConversationTest : TestCase {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        FolderPath other_path = this.folder_root.get_child("other");
+        Folder.Path other_path = this.folder_root.get_child("other");
         Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(other_path));
 
-        Gee.Collection<FolderPath> blacklist = new Gee.ArrayList<FolderPath>();
+        Gee.Collection<Folder.Path> blacklist = new Gee.ArrayList<Folder.Path>();
 
         blacklist.add(other_path);
         assert_collection(

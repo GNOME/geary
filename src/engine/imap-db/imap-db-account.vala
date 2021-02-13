@@ -14,9 +14,9 @@ private class Geary.ImapDB.Account : BaseObject {
 
 
     private class FolderReference : Geary.SmartReference {
-        public Geary.FolderPath path;
+        public Geary.Folder.Path path;
 
-        public FolderReference(ImapDB.Folder folder, Geary.FolderPath path) {
+        public FolderReference(ImapDB.Folder folder, Geary.Folder.Path path) {
             base (folder);
 
             this.path = path;
@@ -52,8 +52,8 @@ private class Geary.ImapDB.Account : BaseObject {
     private string name;
     private GLib.File db_file;
     private GLib.File attachments_dir;
-    private Gee.HashMap<Geary.FolderPath, FolderReference> folder_refs =
-        new Gee.HashMap<Geary.FolderPath, FolderReference>();
+    private Gee.HashMap<Geary.Folder.Path, FolderReference> folder_refs =
+        new Gee.HashMap<Geary.Folder.Path, FolderReference>();
     private Cancellable? background_cancellable = null;
 
     public Account(AccountInformation config,
@@ -166,7 +166,7 @@ private class Geary.ImapDB.Account : BaseObject {
         check_open();
 
         Geary.Imap.FolderProperties properties = imap_folder.properties;
-        Geary.FolderPath path = imap_folder.path;
+        Geary.Folder.Path path = imap_folder.path;
 
         // XXX this should really be a db table constraint
         Geary.ImapDB.Folder? folder = get_local_folder(path);
@@ -218,7 +218,7 @@ private class Geary.ImapDB.Account : BaseObject {
         return yield fetch_folder_async(path, cancellable);
     }
 
-    public async void delete_folder_async(Geary.FolderPath path,
+    public async void delete_folder_async(Geary.Folder.Path path,
                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open();
@@ -251,17 +251,17 @@ private class Geary.ImapDB.Account : BaseObject {
      * as the parent.
      */
     public async Gee.Collection<Geary.ImapDB.Folder>
-        list_folders_async(Geary.FolderPath parent,
+        list_folders_async(Geary.Folder.Path parent,
                            GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open();
 
         // TODO: A better solution here would be to only pull the FolderProperties if the Folder
         // object itself doesn't already exist
-        Gee.HashMap<Geary.FolderPath, int64?> id_map = new Gee.HashMap<
-            Geary.FolderPath, int64?>();
-        Gee.HashMap<Geary.FolderPath, Geary.Imap.FolderProperties> prop_map = new Gee.HashMap<
-            Geary.FolderPath, Geary.Imap.FolderProperties>();
+        Gee.HashMap<Geary.Folder.Path, int64?> id_map = new Gee.HashMap<
+            Geary.Folder.Path, int64?>();
+        Gee.HashMap<Geary.Folder.Path, Geary.Imap.FolderProperties> prop_map = new Gee.HashMap<
+            Geary.Folder.Path, Geary.Imap.FolderProperties>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             int64 parent_id = Db.INVALID_ROWID;
             if (!parent.is_root &&
@@ -287,7 +287,7 @@ private class Geary.ImapDB.Account : BaseObject {
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 string basename = result.string_for("name");
-                Geary.FolderPath path = parent.get_child(basename);
+                Geary.Folder.Path path = parent.get_child(basename);
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties.from_imapdb(
                     Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")),
                     result.int_for("last_seen_total"),
@@ -320,7 +320,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
 
         Gee.Collection<Geary.ImapDB.Folder> folders = new Gee.ArrayList<Geary.ImapDB.Folder>();
-        foreach (Geary.FolderPath path in id_map.keys) {
+        foreach (Geary.Folder.Path path in id_map.keys) {
             Geary.ImapDB.Folder? folder = get_local_folder(path);
             if (folder == null && id_map.has_key(path) && prop_map.has_key(path))
                 folder = create_local_folder(path, id_map.get(path), prop_map.get(path));
@@ -331,7 +331,7 @@ private class Geary.ImapDB.Account : BaseObject {
         return folders;
     }
 
-    public async Geary.ImapDB.Folder fetch_folder_async(Geary.FolderPath path, Cancellable? cancellable)
+    public async Geary.ImapDB.Folder fetch_folder_async(Geary.Folder.Path path, Cancellable? cancellable)
         throws Error {
         check_open();
 
@@ -433,7 +433,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
     }
 
-    private Geary.ImapDB.Folder? get_local_folder(Geary.FolderPath path) {
+    private Geary.ImapDB.Folder? get_local_folder(Geary.Folder.Path path) {
         FolderReference? folder_ref = folder_refs.get(path);
         if (folder_ref == null)
             return null;
@@ -445,7 +445,7 @@ private class Geary.ImapDB.Account : BaseObject {
         return folder;
     }
 
-    private Geary.ImapDB.Folder create_local_folder(Geary.FolderPath path, int64 folder_id,
+    private Geary.ImapDB.Folder create_local_folder(Geary.Folder.Path path, int64 folder_id,
         Imap.FolderProperties properties) throws Error {
         // return current if already created
         ImapDB.Folder? folder = get_local_folder(path);
@@ -480,14 +480,14 @@ private class Geary.ImapDB.Account : BaseObject {
         folder_refs.unset(folder_ref.path);
     }
 
-    public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
+    public async Gee.MultiMap<Geary.Email, Geary.Folder.Path?>? search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Gee.Collection<Geary.Folder.Path?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error {
         check_open();
 
-        Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
-            = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
+        Gee.HashMultiMap<Geary.Email, Geary.Folder.Path?> messages
+            = new Gee.HashMultiMap<Geary.Email, Geary.Folder.Path?>();
 
         if (flag_blacklist != null)
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
@@ -511,12 +511,12 @@ private class Geary.ImapDB.Account : BaseObject {
                         cx, this.db.attachments_path, email, id, cancellable
                     );
 
-                    Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, true, cancellable);
+                    Gee.Set<Geary.Folder.Path>? folders = do_find_email_folders(cx, id, true, cancellable);
                     if (folders == null) {
                         if (folder_blacklist == null || !folder_blacklist.contains(null))
                             messages.set(email, null);
                     } else {
-                        foreach (Geary.FolderPath path in folders) {
+                        foreach (Geary.Folder.Path path in folders) {
                             // If it's in a blacklisted folder, we don't report
                             // it at all.
                             if (folder_blacklist != null && folder_blacklist.contains(path)) {
@@ -578,7 +578,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     public async Gee.Collection<Geary.EmailIdentifier>? search_async(Geary.SearchQuery q,
-        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? excluded_folders = null,
+        int limit = 100, int offset = 0, Gee.Collection<Geary.Folder.Path?>? excluded_folders = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
         throws Error {
 
@@ -747,7 +747,7 @@ private class Geary.ImapDB.Account : BaseObject {
      */
     public async void
         get_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                     Gee.MultiMap<Geary.EmailIdentifier,FolderPath>? map,
+                                     Gee.MultiMap<Geary.EmailIdentifier,Geary.Folder.Path>? map,
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         check_open();
@@ -757,11 +757,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 if (imap_db_id == null)
                     continue;
 
-                Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(
+                Gee.Set<Geary.Folder.Path>? folders = do_find_email_folders(
                     cx, imap_db_id.message_id, false, cancellable);
                 if (folders != null) {
                     Geary.Collection.multi_map_set_all<Geary.EmailIdentifier,
-                        Geary.FolderPath>(map, id, folders);
+                        Geary.Folder.Path>(map, id, folders);
                 }
             }
 
@@ -941,12 +941,12 @@ private class Geary.ImapDB.Account : BaseObject {
         folder_stmt.exec(cancellable);
     }
 
-    // If the FolderPath has no parent, returns true and folder_id
+    // If the Folder.Path has no parent, returns true and folder_id
     // will be set to Db.INVALID_ROWID.  If cannot create path or
     // there is a logical problem traversing it, returns false with
     // folder_id set to Db.INVALID_ROWID.
     internal bool do_fetch_folder_id(Db.Connection cx,
-                                     Geary.FolderPath path,
+                                     Geary.Folder.Path path,
                                      bool create,
                                      out int64 folder_id,
                                      GLib.Cancellable? cancellable)
@@ -1008,7 +1008,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
 
     internal bool do_fetch_parent_id(Db.Connection cx,
-                                     FolderPath path,
+                                     Geary.Folder.Path path,
                                      bool create,
                                      out int64 parent_id,
                                      GLib.Cancellable? cancellable = null)
@@ -1037,7 +1037,7 @@ private class Geary.ImapDB.Account : BaseObject {
 
     // For a message row id, return a set of all folders it's in, or null if
     // it's not in any folders.
-    private Gee.Set<Geary.FolderPath>?
+    private Gee.Set<Geary.Folder.Path>?
         do_find_email_folders(Db.Connection cx,
                               int64 message_id,
                               bool include_removed,
@@ -1053,10 +1053,10 @@ private class Geary.ImapDB.Account : BaseObject {
         if (result.finished)
             return null;
 
-        Gee.HashSet<Geary.FolderPath> folder_paths = new Gee.HashSet<Geary.FolderPath>();
+        Gee.HashSet<Geary.Folder.Path> folder_paths = new Gee.HashSet<Geary.Folder.Path>();
         while (!result.finished) {
             int64 folder_id = result.int64_at(0);
-            Geary.FolderPath? path = do_find_folder_path(cx, folder_id, cancellable);
+            Geary.Folder.Path? path = do_find_folder_path(cx, folder_id, cancellable);
             if (path != null)
                 folder_paths.add(path);
 
@@ -1069,7 +1069,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // For a folder row id, return the folder path (constructed with default
     // separator and case sensitivity) of that folder, or null in the event
     // it's not found.
-    private Geary.FolderPath? do_find_folder_path(Db.Connection cx,
+    private Geary.Folder.Path? do_find_folder_path(Db.Connection cx,
                                                   int64 folder_id,
                                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -1092,11 +1092,11 @@ private class Geary.ImapDB.Account : BaseObject {
             return null;
         }
 
-        Geary.FolderPath? path = null;
+        Geary.Folder.Path? path = null;
         if (parent_id <= 0) {
             path = this.imap_folder_root.get_child(name);
         } else {
-            Geary.FolderPath? parent_path = do_find_folder_path(
+            Geary.Folder.Path? parent_path = do_find_folder_path(
                 cx, parent_id, cancellable
             );
             if (parent_path != null) {
@@ -1114,11 +1114,11 @@ private class Geary.ImapDB.Account : BaseObject {
     // Updates unread count on all folders.
     private async void update_unread_async(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>
         unread_status, Cancellable? cancellable) throws Error {
-        Gee.Map<Geary.FolderPath, int> unread_change = new Gee.HashMap<Geary.FolderPath, int>();
+        Gee.Map<Geary.Folder.Path, int> unread_change = new Gee.HashMap<Geary.Folder.Path, int>();
 
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             foreach (ImapDB.EmailIdentifier id in unread_status.keys) {
-                Gee.Set<Geary.FolderPath>? paths = do_find_email_folders(
+                Gee.Set<Geary.Folder.Path>? paths = do_find_email_folders(
                     cx, id.message_id, true, cancellable);
                 if (paths == null)
                     continue;
@@ -1128,7 +1128,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 if (paths.size == 0)
                     continue;
 
-                foreach (Geary.FolderPath path in paths) {
+                foreach (Geary.Folder.Path path in paths) {
                     int current_unread = unread_change.has_key(path) ? unread_change.get(path) : 0;
                     current_unread += unread_status.get(id) ? 1 : -1;
                     unread_change.set(path, current_unread);
@@ -1136,7 +1136,7 @@ private class Geary.ImapDB.Account : BaseObject {
             }
 
             // Update each folder's unread count in the database.
-            foreach (Geary.FolderPath path in unread_change.keys) {
+            foreach (Geary.Folder.Path path in unread_change.keys) {
                 Geary.ImapDB.Folder? folder = get_local_folder(path);
                 if (folder == null)
                     continue;
@@ -1148,7 +1148,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
 
         // Update each folder's unread count property.
-        foreach (Geary.FolderPath path in unread_change.keys) {
+        foreach (Geary.Folder.Path path in unread_change.keys) {
             Geary.ImapDB.Folder? folder = get_local_folder(path);
             if (folder == null)
                 continue;
@@ -1232,7 +1232,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // special case, if "folderless" or orphan emails are to be excluded,
     // set the out bool to true.
     private string do_get_excluded_folder_ids(
-        Gee.Collection<Geary.FolderPath?> excluded_folder,
+        Gee.Collection<Geary.Folder.Path?> excluded_folder,
         Db.Connection cx,
         out bool exclude_folderless,
         GLib.Cancellable? cancellable
@@ -1241,7 +1241,7 @@ private class Geary.ImapDB.Account : BaseObject {
 
         var ids = new GLib.StringBuilder();
         var is_first = true;
-        foreach (Geary.FolderPath? folder_path in excluded_folder) {
+        foreach (Geary.Folder.Path? folder_path in excluded_folder) {
             if (folder_path == null) {
                 exclude_folderless = true;
             } else {

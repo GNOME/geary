@@ -44,10 +44,10 @@ public class Geary.App.Conversation : BaseObject {
     public Folder base_folder { get; private set; }
 
     /** Cache of paths associated with each email */
-    internal Gee.HashMultiMap<Geary.EmailIdentifier,Geary.FolderPath> path_map {
+    internal Gee.HashMultiMap<Geary.EmailIdentifier,Folder.Path> path_map {
         get;
         private set;
-        default = new Gee.HashMultiMap< Geary.EmailIdentifier,Geary.FolderPath>();
+        default = new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
     }
 
     private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
@@ -86,7 +86,7 @@ public class Geary.App.Conversation : BaseObject {
     /**
      * Constructs a conversation relative to the given base folder.
      */
-    internal Conversation(Geary.Folder base_folder) {
+    internal Conversation(Folder base_folder) {
         this.convnum = Conversation.next_convnum++;
         this.base_folder = base_folder;
     }
@@ -101,7 +101,7 @@ public class Geary.App.Conversation : BaseObject {
     /**
      * Returns the number of emails in the conversation in a particular folder.
      */
-    public uint get_count_in_folder(FolderPath path) {
+    public uint get_count_in_folder(Folder.Path path) {
         uint count = 0;
         foreach (Geary.EmailIdentifier id in this.path_map.get_keys()) {
             if (path in this.path_map.get(id)) {
@@ -147,7 +147,7 @@ public class Geary.App.Conversation : BaseObject {
      */
     public Email?
         get_earliest_sent_email(Location location,
-                                Gee.Collection<FolderPath>? blacklist = null) {
+                                Gee.Collection<Folder.Path>? blacklist = null) {
         return get_single_email(Ordering.SENT_DATE_ASCENDING, location, blacklist);
     }
 
@@ -159,7 +159,7 @@ public class Geary.App.Conversation : BaseObject {
      */
     public Email?
         get_latest_sent_email(Location location,
-                              Gee.Collection<FolderPath>? blacklist = null) {
+                              Gee.Collection<Folder.Path>? blacklist = null) {
         return get_single_email(Ordering.SENT_DATE_DESCENDING, location);
     }
 
@@ -168,7 +168,7 @@ public class Geary.App.Conversation : BaseObject {
      */
     public Email?
         get_earliest_recv_email(Location location,
-                                Gee.Collection<FolderPath>? blacklist = null) {
+                                Gee.Collection<Folder.Path>? blacklist = null) {
         return get_single_email(Ordering.RECV_DATE_ASCENDING, location);
     }
 
@@ -177,13 +177,13 @@ public class Geary.App.Conversation : BaseObject {
      */
     public Email?
         get_latest_recv_email(Location location,
-                              Gee.Collection<FolderPath>? blacklist = null) {
+                              Gee.Collection<Folder.Path>? blacklist = null) {
         return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
     }
 
     public Gee.Collection<Email>
         get_emails_flagged_for_deletion(Location location,
-                                        Gee.Collection<FolderPath>? blacklist = null) {
+                                        Gee.Collection<Folder.Path>? blacklist = null) {
         Gee.Collection<Email> emails = get_emails(Ordering.NONE, location, blacklist, false);
         Iterable<Email> filtered = traverse<Email>(emails);
         return filtered.filter(
@@ -202,7 +202,7 @@ public class Geary.App.Conversation : BaseObject {
     public Gee.List<Email>
         get_emails(Ordering ordering,
                    Location location = Location.ANYWHERE,
-                   Gee.Collection<FolderPath>? blacklist = null,
+                   Gee.Collection<Folder.Path>? blacklist = null,
                    bool filter_deleted = true) {
         Gee.Collection<Email> email;
         switch (ordering) {
@@ -254,8 +254,8 @@ public class Geary.App.Conversation : BaseObject {
 
         if (blacklist != null && !blacklist.is_empty) {
             if (blacklist.size == 1) {
-                FolderPath blacklist_path =
-                    traverse<FolderPath>(blacklist).first();
+                Folder.Path blacklist_path =
+                    traverse<Folder.Path>(blacklist).first();
                 filtered = filtered.filter(
                     (e) => !this.path_map.get(e.id).contains(blacklist_path)
                 );
@@ -275,7 +275,7 @@ public class Geary.App.Conversation : BaseObject {
      * Determines if the given id is in the conversation's base folder.
      */
     public bool is_in_base_folder(Geary.EmailIdentifier id) {
-        Gee.Collection<Geary.FolderPath>? paths = this.path_map.get(id);
+        Gee.Collection<Folder.Path>? paths = this.path_map.get(id);
         return (paths != null && paths.contains(this.base_folder.path));
     }
 
@@ -283,7 +283,7 @@ public class Geary.App.Conversation : BaseObject {
      * Determines if the given id is in the conversation's base folder.
      */
     public uint get_folder_count(Geary.EmailIdentifier id) {
-        Gee.Collection<Geary.FolderPath>? paths = this.path_map.get(id);
+        Gee.Collection<Folder.Path>? paths = this.path_map.get(id);
         uint count = 0;
         if (paths != null) {
             count = paths.size;
@@ -333,16 +333,16 @@ public class Geary.App.Conversation : BaseObject {
      * Add the email to the conversation if not already present.
      *
      * The value of `known_paths` should contain all the known {@link
-     * FolderPath} instances this email is contained within.
+     * Folder.Path} instances this email is contained within.
      *
      * Returns if the email was added, else false if already present
      * and only `known_paths` were merged.
      */
-    internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
+    internal bool add(Email email, Gee.Collection<Folder.Path> known_paths) {
         // Add the known paths to the path map regardless of whether
         // the email is already in the conversation or not, so that it
         // remains complete
-        foreach (Geary.FolderPath path in known_paths)
+        foreach (Folder.Path path in known_paths)
             this.path_map.set(email.id, path);
 
         bool added = false;
@@ -406,13 +406,13 @@ public class Geary.App.Conversation : BaseObject {
     /**
      * Removes the target path from the known set for the given id.
      */
-    internal void remove_path(Geary.EmailIdentifier id, FolderPath path) {
+    internal void remove_path(Geary.EmailIdentifier id, Folder.Path path) {
         this.path_map.remove(id, path);
     }
 
     private Geary.Email?
         get_single_email(Ordering ordering, Location location,
-                         Gee.Collection<Geary.FolderPath>? blacklist = null) {
+                         Gee.Collection<Folder.Path>? blacklist = null) {
         // note that the location-ordering preferences are treated as
         // ANYWHERE by get_emails()
         Gee.Collection<Geary.Email> all = get_emails(

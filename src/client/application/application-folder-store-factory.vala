@@ -43,7 +43,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             var id = target as EmailStoreFactory.IdImpl;
             if (id != null) {
                 var context = id._account.backing;
-                Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? multi_folders =
+                Gee.MultiMap<Geary.EmailIdentifier,Geary.Folder.Path>? multi_folders =
                     yield context.account.get_containing_folders_async(
                         Geary.Collection.single(id.backing),
                         cancellable
@@ -218,7 +218,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
         Geary.Folder? folder = null;
         if (context != null) {
             try {
-                Geary.FolderPath? path = context.account.to_folder_path(
+                Geary.Folder.Path? path = context.account.to_folder_path(
                     target.get_child_value(1).get_variant()
                 );
                 folder = context.account.get_folder(path);

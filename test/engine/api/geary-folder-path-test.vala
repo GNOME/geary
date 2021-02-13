@@ -10,7 +10,7 @@ public class Geary.FolderPathTest : TestCase {
 
     private const string TEST_LABEL = "#test";
 
-    private FolderRoot? root = null;
+    private Folder.Root? root = null;
 
 
     public FolderPathTest() {
@@ -33,7 +33,7 @@ public class Geary.FolderPathTest : TestCase {
     }
 
     public override void set_up() {
-        this.root = new FolderRoot(TEST_LABEL, false);
+        this.root = new Folder.Root(TEST_LABEL, false);
     }
 
     public override void tear_down() {
@@ -89,11 +89,11 @@ public class Geary.FolderPathTest : TestCase {
 
     public void distinct_roots_compare() throws GLib.Error {
         assert_true(
-            this.root.compare_to(new FolderRoot(TEST_LABEL, false)) == 0,
+            this.root.compare_to(new Folder.Root(TEST_LABEL, false)) == 0,
             "Root label equality"
         );
         assert_true(
-            this.root.compare_to(new FolderRoot("#other", false)) > 0,
+            this.root.compare_to(new Folder.Root("#other", false)) > 0,
             "Root label inequality"
         );
     }
@@ -270,64 +270,64 @@ public class Geary.FolderPathTest : TestCase {
 
     public void root_instances_compare() throws GLib.Error {
         assert_compare_eq(
-            this.root.compare_to(new FolderRoot(TEST_LABEL, false)),
+            this.root.compare_to(new Folder.Root(TEST_LABEL, false)),
             "Root equality"
         );
         assert_compare_eq(
-            this.root.get_child("a").compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")),
+            this.root.get_child("a").compare_to(new Folder.Root(TEST_LABEL, false).get_child("a")),
             "Equal child comparison"
         );
 
         assert_compare_gt(
             this.root.get_child("a").compare_to(
-                new FolderRoot("#other", false).get_child("a")),
+                new Folder.Root("#other", false).get_child("a")),
             "Root label inequality with children"
         );
 
         assert_compare_lt(
-            this.root.get_child("a").compare_to(new FolderRoot(TEST_LABEL, false).get_child("b")),
+            this.root.get_child("a").compare_to(new Folder.Root(TEST_LABEL, false).get_child("b")),
             "Greater than child comparison"
         );
 
         assert_compare_gt(
-            this.root.get_child("b").compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")),
+            this.root.get_child("b").compare_to(new Folder.Root(TEST_LABEL, false).get_child("a")),
             "Less than child comparison"
         );
 
         assert_compare_gt(
             this.root.get_child("a").get_child("test")
-            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a")),
+            .compare_to(new Folder.Root(TEST_LABEL, false).get_child("a")),
             "Greater than descendant"
         );
         assert_true(
             this.root.get_child("a")
-            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("test")) < 0,
+            .compare_to(new Folder.Root(TEST_LABEL, false).get_child("a").get_child("test")) < 0,
             "Less than descendant"
         );
 
         assert_compare_eq(
             this.root.get_child("a").get_child("b")
-            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("b")),
+            .compare_to(new Folder.Root(TEST_LABEL, false).get_child("a").get_child("b")),
             "N-path equality"
         );
 
         assert_compare_lt(
             this.root.get_child("a").get_child("a")
-            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("b").get_child("b")),
+            .compare_to(new Folder.Root(TEST_LABEL, false).get_child("b").get_child("b")),
             "Less than double disjoint"
         );
         assert_compare_gt(
             this.root.get_child("b").get_child("a")
-            .compare_to(new FolderRoot(TEST_LABEL, false).get_child("a").get_child("a")),
+            .compare_to(new Folder.Root(TEST_LABEL, false).get_child("a").get_child("a")),
             "Greater than double disjoint"
         );
 
     }
 
     public void variant_representation() throws GLib.Error {
-        FolderPath orig = this.root.get_child("test");
+        Folder.Path orig = this.root.get_child("test");
         GLib.Variant variant = orig.to_variant();
-        FolderPath copy = this.root.from_variant(variant);
+        Folder.Path copy = this.root.from_variant(variant);
 
         assert_true(orig.equal_to(copy));
     }

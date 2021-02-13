@@ -24,8 +24,8 @@
 internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
     private FolderRoot root;
-    private Gee.HashMap<FolderPath,Imap.Folder> folders =
-        new Gee.HashMap<FolderPath,Imap.Folder>();
+    private Gee.HashMap<Geary.Folder.Path,Imap.Folder> folders =
+        new Gee.HashMap<Geary.Folder.Path,Imap.Folder>();
 
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.List<MailboxInformation>? list_collector = null;
@@ -43,7 +43,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     /**
      * Returns the root path for the default personal namespace.
      */
-    public async FolderPath get_default_personal_namespace(Cancellable? cancellable)
+    public async Geary.Folder.Path get_default_personal_namespace(Cancellable? cancellable)
     throws Error {
         ClientSession session = get_session();
         Gee.List<Namespace> personal = session.get_personal_namespaces();
@@ -66,7 +66,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     /**
      * Determines if the given folder path appears to a valid mailbox.
      */
-    public bool is_folder_path_valid(FolderPath? path) throws GLib.Error {
+    public bool is_folder_path_valid(Geary.Folder.Path? path) throws GLib.Error {
         bool is_valid = false;
         if (path != null) {
             ClientSession session = get_session();
@@ -90,7 +90,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      * CREATE-SPECIAL-USE is supported by the connection, that will be
      * used to specify the type of the new folder.
      */
-    public async void create_folder_async(FolderPath path,
+    public async void create_folder_async(Geary.Folder.Path path,
                                           Geary.Folder.SpecialUse? use,
                                           Cancellable? cancellable)
     throws Error {
@@ -122,7 +122,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      * instead of fetching it again. If not, it is fetched from the
      * server and cached for future use.
      */
-    public async Imap.Folder fetch_folder_async(FolderPath path,
+    public async Imap.Folder fetch_folder_async(Geary.Folder.Path path,
                                                 Cancellable? cancellable)
         throws Error {
         ClientSession session = get_session();
@@ -166,7 +166,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      * folders found, and hence should be used with care.
      */
     public async Gee.List<Folder>
-        fetch_child_folders_async(FolderPath parent,
+        fetch_child_folders_async(Geary.Folder.Path parent,
                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
         ClientSession session = get_session();
@@ -198,7 +198,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 // Mailbox is unselectable, so doesn't need a STATUS,
                 // so we can create it now if it does not already
                 // exist
-                FolderPath path = session.get_path_for_mailbox(
+                Geary.Folder.Path path = session.get_path_for_mailbox(
                     this.root, mailbox_info.mailbox
                 );
                 Folder? child = this.folders.get(path);
@@ -251,7 +251,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 }
                 status_results.remove(status);
 
-                FolderPath child_path = session.get_path_for_mailbox(
+                Geary.Folder.Path child_path = session.get_path_for_mailbox(
                     this.root, mailbox_info.mailbox
                 );
                 Imap.Folder? child = this.folders.get(child_path);
@@ -280,8 +280,8 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         return children;
     }
 
-    internal void folders_removed(Gee.Collection<FolderPath> paths) {
-        foreach (FolderPath path in paths) {
+    internal void folders_removed(Gee.Collection<Geary.Folder.Path> paths) {
+        foreach (Geary.Folder.Path path in paths) {
             if (folders.has_key(path))
                 folders.unset(path);
         }
@@ -309,7 +309,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
     // Performs a LIST against the server, returning the results
     private async Gee.List<MailboxInformation> send_list_async(ClientSession session,
-                                                               FolderPath folder,
+                                                               Geary.Folder.Path folder,
                                                                bool list_children,
                                                                Cancellable? cancellable)
         throws Error {
@@ -363,7 +363,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         if (folder != null && list_children) {
             Gee.Iterator<MailboxInformation> iter = list_results.iterator();
             while (iter.next()) {
-                FolderPath list_path = session.get_path_for_mailbox(
+                Geary.Folder.Path list_path = session.get_path_for_mailbox(
                     this.root, iter.get().mailbox
                 );
                 if (list_path.equal_to(folder)) {
@@ -465,7 +465,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     }
 
     [NoReturn]
-    private void throw_not_found(Geary.FolderPath? path) throws EngineError {
+    private void throw_not_found(Geary.Folder.Path? path) throws EngineError {
         throw new EngineError.NOT_FOUND(
             "Folder not found: %s",
             (path != null) ? path.to_string() : "[root]"

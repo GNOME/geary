@@ -28,7 +28,7 @@ public interface Geary.FolderSupport.Move : Folder {
      */
     public abstract async Revokable?
         move_email_async(Gee.Collection<EmailIdentifier> to_move,
-                         FolderPath destination,
+                         Folder.Path destination,
                          GLib.Cancellable? cancellable = null)
         throws GLib.Error;
 

@@ -38,7 +38,7 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
-        FolderPath path = local_folder.get_path();
+        Folder.Path path = local_folder.get_path();
         Folder.SpecialUse use = NONE;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path)) {
             use = INBOX;

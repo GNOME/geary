@@ -92,7 +92,7 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
      * being merged into another.
      */
     public void add_all_emails(Gee.Collection<Email> emails,
-                               Gee.MultiMap<EmailIdentifier, FolderPath> id_to_paths,
+                               Gee.MultiMap<EmailIdentifier,Folder.Path> id_to_paths,
                                out Gee.Collection<Conversation> added,
                                out Gee.MultiMap<Conversation, Email> appended,
                                out Gee.Collection<Conversation> removed_due_to_merge) {
@@ -141,7 +141,7 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
 
             Conversation? conversation = null;
             bool added_conversation = false;
-            Gee.Collection<Geary.FolderPath>? known_paths = id_to_paths.get(email.id);
+            Gee.Collection<Folder.Path>? known_paths = id_to_paths.get(email.id);
             if (known_paths != null) {
                 // Don't add an email with no known paths - it may
                 // have been removed after being listed for adding.
@@ -177,7 +177,7 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
      * were trimmed and the emails that were trimmed from it,
      * respectively.
      */
-    public void remove_all_emails_by_identifier(FolderPath source_path,
+    public void remove_all_emails_by_identifier(Folder.Path source_path,
                                                 Gee.Collection<EmailIdentifier> ids,
                                                 Gee.Collection<Conversation> removed,
                                                 Gee.MultiMap<Conversation,Email> trimmed) {
@@ -298,7 +298,7 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
      * was created, else it is set to `false`.
      */
     private Conversation? add_email(Geary.Email email,
-                                    Gee.Collection<FolderPath>? known_paths,
+                                    Gee.Collection<Folder.Path>? known_paths,
                                     out bool added_conversation) {
         added_conversation = false;
 
@@ -333,7 +333,7 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
      * Unconditionally adds an email to a conversation.
      */
     private void add_email_to_conversation(Conversation conversation, Geary.Email email,
-        Gee.Collection<Geary.FolderPath>? known_paths) {
+        Gee.Collection<Folder.Path>? known_paths) {
         if (!conversation.add(email, known_paths)) {
             error("Couldn't add duplicate email %s to conversation %s",
                 email.id.to_string(), conversation.to_string());
@@ -368,12 +368,11 @@ private class Geary.App.ConversationSet : BaseObject, Logging.Source {
 
         // Collect all emails and their paths from all conversations
         // to be merged, then remove those conversations
-        Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? id_to_paths =
-            new Gee.HashMultiMap<Geary.EmailIdentifier,Geary.FolderPath>();
+        var id_to_paths = new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
         foreach (Conversation conversation in conversations) {
             foreach (EmailIdentifier id in conversation.path_map.get_keys()) {
                 moved_email.add(conversation.get_email_by_id(id));
-                foreach (FolderPath path in conversation.path_map.get(id)) {
+                foreach (var path in conversation.path_map.get(id)) {
                     id_to_paths.set(id, path);
                 }
             }

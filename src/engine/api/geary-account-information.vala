@@ -382,9 +382,9 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Returns a folder path based on the configured steps for a use.
      */
-    public FolderPath? new_folder_path_for_use(FolderRoot root,
-                                               Folder.SpecialUse use) {
-        FolderPath? path = null;
+    public Folder.Path? new_folder_path_for_use(Folder.Root root,
+                                                Folder.SpecialUse use) {
+        Folder.Path? path = null;
         var steps = this.special_use_paths.get(use);
         if (steps != null) {
             path = root;
@@ -398,7 +398,7 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Returns the configured special folder use for a given path.
      */
-    public Folder.SpecialUse get_folder_use_for_path(FolderPath path) {
+    public Folder.SpecialUse get_folder_use_for_path(Folder.Path path) {
         var path_steps = path.as_array();
         var use = Folder.SpecialUse.NONE;
         foreach (var entry in this.special_use_paths.entries) {

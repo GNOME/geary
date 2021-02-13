@@ -66,8 +66,8 @@ public class Application.AccountContext : Geary.BaseObject {
         get; internal set; default = false;
     }
 
-    private Gee.Map<Geary.FolderPath,FolderContext> folders =
-        new Gee.HashMap<Geary.FolderPath,FolderContext>();
+    private Gee.Map<Geary.Folder.Path,FolderContext> folders =
+        new Gee.HashMap<Geary.Folder.Path,FolderContext>();
 
 
     /** Emitted when folders contexts become available. */

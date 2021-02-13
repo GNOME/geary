@@ -9,11 +9,13 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
 
     private MinimalFolder engine;
     private Gee.HashSet<ImapDB.EmailIdentifier> to_copy = new Gee.HashSet<ImapDB.EmailIdentifier>();
-    private Geary.FolderPath destination;
-    private Cancellable? cancellable;
+    private Folder.Path destination;
+    private GLib.Cancellable? cancellable;
 
-    public CopyEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) {
+    public CopyEmail(MinimalFolder engine,
+                     Gee.List<ImapDB.EmailIdentifier> to_copy,
+                     Folder.Path destination,
+                     GLib.Cancellable? cancellable = null) {
         base("CopyEmail", OnError.RETRY);
 
         this.engine = engine;

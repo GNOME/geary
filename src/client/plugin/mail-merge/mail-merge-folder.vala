@@ -105,10 +105,10 @@ public class MailMerge.Folder : Geary.BaseObject,
     private FolderProperties _properties = new FolderProperties();
 
     /** {@inheritDoc} */
-    public override Geary.FolderPath path {
+    public override Geary.Folder.Path path {
         get { return _path; }
     }
-    private Geary.FolderPath _path;
+    private Geary.Folder.Path _path;
 
     /** {@inheritDoc} */
     public override Geary.Folder.SpecialUse used_as {
@@ -153,7 +153,7 @@ public class MailMerge.Folder : Geary.BaseObject,
 
 
     public async Folder(Geary.Account account,
-                        Geary.FolderRoot root,
+                        Geary.Folder.Root root,
                         Geary.Email template,
                         GLib.File data_location,
                         Csv.Reader data)

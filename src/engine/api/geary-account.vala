@@ -72,7 +72,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
 
     /**
      * A utility method to sort a Gee.Collection of {@link Folder}s by
-     * their {@link FolderPath}s to ensure they comport with {@link
+     * their {@link Folder.Path}s to ensure they comport with {@link
      * folders_available_unavailable}, {@link folders_created}, {@link
      * folders_deleted} signals' contracts.
      */
@@ -137,8 +137,8 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * Any local folders create by the engine or clients must use this
      * as the root for local folders.
      */
-    public FolderRoot local_folder_root {
-        get; private set; default = new Geary.FolderRoot("$geary-local", true);
+    public Folder.Root local_folder_root {
+        get; private set; default = new Folder.Root("$geary-local", true);
     }
 
     public ProgressMonitor background_progress { get; protected set; }
@@ -359,12 +359,12 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * not guarantee that the folder represented by the path will
      * exist.
      *
-     * @see FolderPath.to_variant
+     * @see Folder.Path.to_variant
      * @throws EngineError.BAD_PARAMETERS when the variant is not the
      * have the correct type or if no folder root with an appropriate
      * label exists.
      */
-    public abstract FolderPath to_folder_path(GLib.Variant serialised)
+    public abstract Folder.Path to_folder_path(GLib.Variant serialised)
         throws EngineError.BAD_PARAMETERS;
 
     /**
@@ -373,7 +373,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * This method only considers currently known folders, it does not
      * check the remote to see if a previously folder exists.
      */
-    public virtual bool has_folder(FolderPath path) {
+    public virtual bool has_folder(Folder.Path path) {
         try {
             get_folder(path);
             return true;
@@ -390,7 +390,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      *
      * @throws EngineError.NOT_FOUND if the folder does not exist.
      */
-    public abstract Folder get_folder(FolderPath path)
+    public abstract Folder get_folder(Folder.Path path)
         throws EngineError.NOT_FOUND;
 
     /**
@@ -407,7 +407,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * thrown. However, the caller should be prepared to deal with an
      * empty list being returned instead.
      */
-    public abstract Gee.Collection<Folder> list_matching_folders(FolderPath? parent)
+    public abstract Gee.Collection<Folder> list_matching_folders(Folder.Path? parent)
         throws EngineError.NOT_FOUND;
 
     /**
@@ -484,12 +484,12 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * optionally ignoring emails that don't have the requested fields set.
      * Don't include emails that appear in any of the blacklisted folders in
      * the result.  If null is included in the blacklist, omit emails appearing
-     * in no folders.  Return a map of Email object to a list of FolderPaths
+     * in no folders.  Return a map of Email object to a list of Folder.Paths
      * it's in, which can be null if it's in no folders.
      */
-    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
+    public abstract async Gee.MultiMap<Geary.Email, Folder.Path?>? local_search_message_id_async(
         Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Gee.Collection<Folder.Path?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error;
 
     /**
@@ -535,7 +535,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * offset must not be negative.
      */
     public abstract async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,
-        int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
+        int limit = 100, int offset = 0, Gee.Collection<Folder.Path?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
 
     /**
@@ -551,7 +551,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * would be empty.  Only throw database errors et al., not errors due to
      * the email id not being found.
      */
-    public abstract async Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? get_containing_folders_async(
+    public abstract async Gee.MultiMap<Geary.EmailIdentifier,Folder.Path>? get_containing_folders_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error;
 
     /** {@inheritDoc} */

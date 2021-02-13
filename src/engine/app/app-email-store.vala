@@ -20,7 +20,7 @@ public class Geary.App.EmailStore : BaseObject {
      */
     public async Gee.MultiMap<Geary.EmailIdentifier, Type>? get_supported_operations_async(
         Gee.Collection<Geary.EmailIdentifier> emails, Cancellable? cancellable = null) throws Error {
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? folders
+        Gee.MultiMap<Geary.EmailIdentifier, Folder.Path>? folders
             = yield account.get_containing_folders_async(emails, cancellable);
         if (folders == null)
             return null;
@@ -38,7 +38,7 @@ public class Geary.App.EmailStore : BaseObject {
         foreach (Geary.EmailIdentifier email in folders.get_keys()) {
             Gee.HashSet<Type> support = new Gee.HashSet<Type>();
 
-            foreach (Geary.FolderPath path in folders.get(email)) {
+            foreach (Folder.Path path in folders.get(email)) {
                 Geary.Folder folder;
                 try {
                     folder = account.get_folder(path);
@@ -103,18 +103,18 @@ public class Geary.App.EmailStore : BaseObject {
      * Geary.FolderSupport.Copy folder.
      */
     public async void copy_email_async(Gee.Collection<Geary.EmailIdentifier> emails,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+        Folder.Path destination, Cancellable? cancellable = null) throws Error {
         yield do_folder_operation_async(new Geary.App.CopyOperation(destination),
             emails, cancellable);
     }
 
-    private FolderPath?
+    private Folder.Path?
         next_folder_for_operation(AsyncFolderOperation operation,
-                                  Gee.MultiMap<FolderPath,EmailIdentifier> folders_to_ids)
+                                  Gee.MultiMap<Folder.Path,EmailIdentifier> folders_to_ids)
         throws GLib.Error {
-        Geary.FolderPath? best = null;
+        Folder.Path? best = null;
         int best_count = 0;
-        foreach (Geary.FolderPath path in folders_to_ids.get_keys()) {
+        foreach (Folder.Path path in folders_to_ids.get_keys()) {
             Folder folder = this.account.get_folder(path);
             if (folder.get_type().is_a(operation.folder_type)) {
                 int count = folders_to_ids.get(path).size;
@@ -135,14 +135,14 @@ public class Geary.App.EmailStore : BaseObject {
         debug("EmailStore %s running %s on %d emails", account.to_string(),
             operation.get_type().name(), emails.size);
 
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? ids_to_folders
+        Gee.MultiMap<Geary.EmailIdentifier, Folder.Path>? ids_to_folders
             = yield account.get_containing_folders_async(emails, cancellable);
         if (ids_to_folders == null)
             return;
 
-        Gee.MultiMap<Geary.FolderPath, Geary.EmailIdentifier> folders_to_ids
-            = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Geary.FolderPath>(ids_to_folders);
-        Geary.FolderPath? path;
+        Gee.MultiMap<Folder.Path, Geary.EmailIdentifier> folders_to_ids
+            = Geary.Collection.reverse_multi_map<Geary.EmailIdentifier, Folder.Path>(ids_to_folders);
+        Folder.Path? path;
         while ((path = next_folder_for_operation(operation, folders_to_ids)) != null) {
             Geary.Folder folder = this.account.get_folder(path);
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
@@ -154,7 +154,7 @@ public class Geary.App.EmailStore : BaseObject {
             // We don't want to operate on any mails twice.
             if (used_ids != null) {
                 foreach (Geary.EmailIdentifier id in used_ids.to_array()) {
-                    foreach (Geary.FolderPath p in ids_to_folders.get(id))
+                    foreach (Folder.Path p in ids_to_folders.get(id))
                         folders_to_ids.remove(p, id);
                 }
             }
