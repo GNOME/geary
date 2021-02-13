@@ -59,7 +59,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
         this.other_folder = new Mock.Folder(
             this.account,
-            null,
             this.folder_root.get_child("other"),
             NONE,
             null
@@ -167,7 +166,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
         throws GLib.Error {
         var test_article = new Mock.Folder(
             this.account,
-            null,
             this.folder_root.get_child("base"),
             NONE,
             null

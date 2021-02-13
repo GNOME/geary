@@ -112,6 +112,8 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
             }
         }
 
+        yield this.owner.update_email_counts(this.cancellable);
+
         // store the reported count, *not* the current count (which is updated outside the of
         // the queue) to ensure that updates happen serially and reflect committed local changes
         yield this.owner.local_folder.update_remote_selected_message_count(
@@ -126,8 +128,6 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
             this.owner.account.email_added(created, this.owner);
             this.owner.email_appended(created);
         }
-
-        this.owner.email_count_changed(this.remote_count, Folder.CountChangeReason.APPENDED);
 
         debug("%s do_replay_appended_message: completed, this.remote_count=%d",
               to_string(), this.remote_count);

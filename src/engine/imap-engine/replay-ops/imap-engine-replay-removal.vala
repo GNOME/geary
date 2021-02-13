@@ -105,13 +105,10 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
                 to_string(), this.position.value, this.remote_count, local_position, local_count);
         }
 
-        // for debugging
-        int new_local_count = -1;
         try {
-            new_local_count = yield this.owner.local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+            yield this.owner.update_email_counts(null);
         } catch (Error err) {
-            debug("%s do_replay_removed_message: error fetching new local count: %s", to_string(),
+            debug("%s do_replay_removed_message: unable to update remote count: %s", to_string(),
                 err.message);
         }
 
@@ -134,16 +131,10 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
                 this.owner.marked_email_removed(removed);
         }
 
-        if (!marked) {
-            this.owner.email_count_changed(
-                this.remote_count, Folder.CountChangeReason.REMOVED
-            );
-        }
-
         debug("%s ReplayRemoval: completed, "
             + "(this.remote_count=%d local_count=%d starting local_count=%d this.position=%lld local_position=%lld marked=%s)",
               this.owner.to_string(),
-              this.remote_count, new_local_count, local_count,
+              this.remote_count, this.owner.email_total, local_count,
               this.position.value, local_position, marked.to_string());
     }
 

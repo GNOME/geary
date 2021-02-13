@@ -43,25 +43,32 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     private weak GenericAccount _account;
 
     /** {@inheritDoc} */
-    public FolderProperties properties {
-        get { return this._properties; }
+    public Folder.Path path {
+        get { return this.local_folder.path; }
     }
-    private FolderProperties _properties;
 
     /** {@inheritDoc} */
-    public Folder.Path path {
-        get {
-            return local_folder.path;
-        }
+    public int email_total {
+        get { return this._email_total; }
     }
+    private int _email_total = 0;
+
+    /** {@inheritDoc} */
+    public int email_unread {
+        get { return this._email_unread; }
+    }
+    private int _email_unread = 0;
 
     /** {@inheritDoc} */
     public Folder.SpecialUse used_as {
-        get {
-            return this._used_as;
-        }
+        get { return this._used_as; }
     }
     private Folder.SpecialUse _used_as;
+
+    /** {@inheritDoc} */
+    public override RemoteProperties remote_properties {
+        get { return this.local_folder.properties; }
+    }
 
     /** {@inheritDoc} */
     public bool is_monitoring {
@@ -125,7 +132,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         this.local_folder.email_complete.connect(on_email_complete);
 
         this._used_as = use;
-        this._properties = local_folder.properties;
 
         this.replay_queue = new ReplayQueue(this);
         this.replay_queue.remotely_executed.connect(this.on_remote_status_check);
@@ -146,6 +152,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         this.closed_semaphore.blind_notify();
     }
 
+    /** {@inheritDoc} */
     public void set_used_as_custom(bool enabled)
         throws EngineError.UNSUPPORTED {
         if (enabled) {
@@ -268,6 +275,30 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             yield this.open_remote_session(cancellable);
         }
         return this.remote_session;
+    }
+
+    /**
+     * Updates the email total and unread counts for the folder.
+     */
+    internal async void update_email_counts(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        int existing_total = this._email_total;
+        int new_total = yield this.local_folder.get_email_count_async(
+            NONE, cancellable
+        );
+        if (existing_total != new_total) {
+            this._email_total = new_total;
+            notify_property("email-total");
+        }
+
+        int existing_unread = this._email_unread;
+        int new_unread = yield this.local_folder.get_email_unread_async(
+            cancellable
+        );
+        if (existing_unread != new_unread) {
+            this._email_unread = new_unread;
+            notify_property("email-unread");
+        }
     }
 
     /**
@@ -679,12 +710,11 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             return;
         }
 
-
         /*
          * Step 5: Notify subscribers of what has happened.
          */
 
-        Folder.CountChangeReason count_change_reason = Folder.CountChangeReason.NONE;
+        yield update_email_counts(cancellable);
 
         if (removed_ids != null && removed_ids.size > 0) {
             // there may be operations pending on the remote queue for these removed emails; notify
@@ -695,8 +725,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             debug("Notifying of %d removed emails since last opened",
                   removed_ids.size);
             email_removed(removed_ids);
-
-            count_change_reason |= Folder.CountChangeReason.REMOVED;
         }
 
         // notify created (new email located somewhere inside the
@@ -713,7 +741,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             debug("Notifying of %d inserted emails since last opened",
                   inserted_ids.size);
             email_inserted(inserted_ids);
-            count_change_reason |= Folder.CountChangeReason.INSERTED;
         }
 
         // notify appended (new email added since the folder was last opened)
@@ -721,13 +748,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             debug("Notifying of %d appended emails since last opened",
                   appended_ids.size);
             email_appended(appended_ids);
-            count_change_reason |= Folder.CountChangeReason.APPENDED;
-        }
-
-        if (count_change_reason != Folder.CountChangeReason.NONE) {
-            debug("Notifying of %Xh count change reason (%d remote messages)",
-                  count_change_reason, remote_message_count);
-            email_count_changed(remote_message_count, count_change_reason);
         }
 
         debug("Completed normalize_folder");
@@ -739,12 +759,12 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
 
         yield local_folder.detach_all_emails_async(cancellable);
+        yield update_email_counts(cancellable);
 
         if (all != null && all.size > 0) {
             Gee.List<EmailIdentifier> ids =
                 traverse<Email>(all).map<EmailIdentifier>((email) => email.id).to_array_list();
             email_removed(ids);
-            email_count_changed(0, Folder.CountChangeReason.REMOVED);
         }
     }
 

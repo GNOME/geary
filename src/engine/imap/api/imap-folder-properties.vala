@@ -38,20 +38,42 @@
  * is considered more authoritative than STATUS.
  */
 
-public class Geary.Imap.FolderProperties : Geary.FolderProperties {
+public class Geary.Imap.FolderProperties : BaseObject, RemoteFolder.RemoteProperties {
+
+    /** {@inheritDoc} */
+    public int email_total { get; protected set; }
+
+    /** {@inheritDoc} */
+    public int email_unread { get; protected set; }
+
+    /** {@inheritDoc} */
+    public Trillian has_children { get; protected set; }
+
+    /** {@inheritDoc} */
+    public Trillian supports_children { get; protected set; }
+
+    /** {@inheritDoc} */
+    public Trillian is_openable { get; protected set; }
+
+    /** {@inheritDoc} */
+    public bool create_never_returns_id { get; protected set; }
+
     /**
      * -1 if the Folder was not opened via SELECT or EXAMINE.  Updated as EXISTS server data
      * arrives.
      */
     public int select_examine_messages { get; private set; }
+
     /**
      * -1 if the FolderProperties were not obtained or updated via a STATUS command
      */
     public int status_messages { get; private set; }
+
     /**
      * -1 if the FolderProperties were not obtained or updated via a STATUS command
      */
     public int unseen { get; private set; }
+
     public int recent { get; internal set; }
     public UIDValidity? uid_validity { get; internal set; }
     public UID? uid_next { get; internal set; }
@@ -134,12 +156,12 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
 
         Trillian is_openable = Trillian.from_boolean(!attrs.is_no_select);
 
-        base(email_total, email_unread,
-             has_children, supports_children, is_openable,
-             false, // not local
-             false, // not virtual
-             !supports_uid);
-
+        this.email_total = email_total;
+        this.email_unread = email_unread;
+        this.has_children = has_children;
+        this.supports_children = supports_children;
+        this.is_openable = is_openable;
+        this.create_never_returns_id = create_never_returns_id;
         this.attrs = attrs;
     }
 
@@ -197,8 +219,9 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     /**
      * Update an existing {@link FolderProperties} with fresh {@link StatusData}.
      *
-     * This will force the {@link Geary.FolderProperties.email_total} property to match the
-     * {@link status_messages} value.
+     * This will force the {@link
+     * Geary.RemoteFolder.RemoteProperties.email_total} property to
+     * match the {@link status_messages} value.
      */
     public void update_status(StatusData status) {
         set_status_message_count(status.messages, true);

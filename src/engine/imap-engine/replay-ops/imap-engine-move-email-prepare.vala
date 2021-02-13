@@ -38,21 +38,11 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
         if (to_move.size <= 0)
             return ReplayOperation.Status.COMPLETED;
 
-        int count = this.engine.properties.email_total;
-        // as this value is only used for reporting, offer best-possible service
-        if (count < 0)
-            count = to_move.size;
-
         prepared_for_move = yield engine.local_folder.mark_removed_async(to_move, true, cancellable);
-        if (prepared_for_move == null || prepared_for_move.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-
-        engine.email_removed(prepared_for_move);
-        engine.email_count_changed(
-            Numeric.int_floor(count - prepared_for_move.size, 0),
-            REMOVED
-        );
-
+        if (prepared_for_move != null && !prepared_for_move.is_empty) {
+            yield this.engine.update_email_counts(this.cancellable);
+            this.engine.email_removed(prepared_for_move);
+        }
         return COMPLETED;
     }
 

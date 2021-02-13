@@ -129,13 +129,56 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.properties = properties;
     }
 
-    public async int get_email_count_async(ListFlags flags, Cancellable? cancellable) throws Error {
+    public async int get_email_count_async(ListFlags flags,
+                                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
         int count = 0;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            count = do_get_email_count(cx, flags, cancellable);
+        yield db.exec_transaction_async(
+            RO,
+            (cx) => {
+                Db.Statement stmt = cx.prepare(
+                    "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id=?");
+                stmt.bind_rowid(0, folder_id);
 
-            return Db.TransactionOutcome.SUCCESS;
-        }, cancellable);
+                Db.Result results = stmt.exec(cancellable);
+                if (!results.finished) {
+                    count = results.int_at(0);
+                    if (!flags.include_marked_for_remove()) {
+                        count -= do_get_marked_removed_count(cx, cancellable);
+                    }
+                }
+                return SUCCESS;
+            },
+            cancellable
+        );
+
+        return count;
+    }
+
+    public async int get_email_unread_async(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        int count = 0;
+        yield db.exec_transaction_async(
+            RO,
+            (cx) => {
+                Db.Statement stmt = cx.prepare(
+                    """
+                    SELECT COUNT(*) FROM MessageLocationTable
+                    WHERE folder_id = ?
+                      AND remove_marker <> ?
+                      AND message_id IN (SELECT rowid FROM MessageSearchTable WHERE MessageSearchTable MATCH '{flags} : UNREAD')
+                    """
+                );
+                stmt.bind_rowid(0, folder_id);
+                stmt.bind_bool(1, true);
+                Db.Result results = stmt.exec(cancellable);
+                if (!results.finished) {
+                    count = results.int_at(0);
+                }
+                return SUCCESS;
+            },
+            cancellable
+        );
 
         return count;
     }
@@ -1388,21 +1431,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // Database transaction helper methods
     // These should only be called from within a TransactionMethod.
     //
-
-    private int do_get_email_count(Db.Connection cx, ListFlags flags, Cancellable? cancellable)
-        throws Error {
-        Db.Statement stmt = cx.prepare(
-            "SELECT COUNT(*) FROM MessageLocationTable WHERE folder_id=?");
-        stmt.bind_rowid(0, folder_id);
-
-        Db.Result results = stmt.exec(cancellable);
-        if (results.finished)
-            return 0;
-
-        int marked = !flags.include_marked_for_remove() ? do_get_marked_removed_count(cx, cancellable) : 0;
-
-        return Numeric.int_floor(results.int_at(0) - marked, 0);
-    }
 
     private int do_get_marked_removed_count(Db.Connection cx, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare(

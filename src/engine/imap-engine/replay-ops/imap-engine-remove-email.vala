@@ -5,11 +5,13 @@
  */
 
 private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperation {
+
+
     private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_remove = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Cancellable? cancellable;
     private Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
-    private int original_count = 0;
+
 
     public RemoveEmail(MinimalFolder engine,
                        Gee.Collection<ImapDB.EmailIdentifier> to_remove,
@@ -32,22 +34,11 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
         if (this.to_remove.size <= 0)
             return ReplayOperation.Status.COMPLETED;
 
-        this.original_count = this.engine.properties.email_total;
-        // because this value is only used for reporting count changes, offer best-possible service
-        if (this.original_count < 0)
-            this.original_count = this.to_remove.size;
-
         removed_ids = yield engine.local_folder.mark_removed_async(to_remove, true, cancellable);
-        if (removed_ids == null || removed_ids.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-
-        engine.email_removed(removed_ids);
-
-        engine.email_count_changed(
-            Numeric.int_floor(original_count - removed_ids.size, 0),
-            REMOVED
-        );
-
+        if (removed_ids != null && !removed_ids.is_empty) {
+            yield this.engine.update_email_counts(this.cancellable);
+            this.engine.email_removed(removed_ids);
+        }
         return CONTINUE;
     }
 
@@ -70,11 +61,13 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     }
 
     public override async void backout_local_async() throws Error {
-        if (removed_ids != null && removed_ids.size > 0) {
-            yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
-            engine.email_inserted(removed_ids);
+        if (this.removed_ids != null && !this.removed_ids.is_empty) {
+            yield this.engine.local_folder.mark_removed_async(
+                this.removed_ids, false, this.cancellable
+            );
+            yield this.engine.update_email_counts(this.cancellable);
+            this.engine.email_inserted(this.removed_ids);
         }
-        engine.email_count_changed(original_count, INSERTED);
     }
 
     public override string describe_state() {
@@ -82,4 +75,3 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
             (removed_ids != null) ? removed_ids.size : 0);
     }
 }
-

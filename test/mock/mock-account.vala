@@ -84,7 +84,7 @@ public class Mock.Account : Geary.Account,
         return object_call<Folder>(
             "create_personal_folder",
             { box_arg(name), box_arg(use), cancellable },
-            new Folder(null, null, null, use, null)
+            new Folder(null, null, use, null)
         );
     }
 
@@ -141,7 +141,7 @@ public class Mock.Account : Geary.Account,
         } catch (Geary.EngineError.NOT_FOUND err) {
             throw err;
         } catch (GLib.Error err) {
-            return new Folder(null, null, null, NONE, null);
+            return new Folder(null, null, NONE, null);
         }
     }
 

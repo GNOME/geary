@@ -13,7 +13,6 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     private MinimalFolder engine;
     private Cancellable? cancellable;
     private Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
-    private int original_count = 0;
 
     public EmptyFolder(MinimalFolder engine, Cancellable? cancellable) {
         base("EmptyFolder", OnError.RETRY);
@@ -23,25 +22,12 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        this.original_count = this.engine.properties.email_total;
-        // because this value is only used for reporting count changes, offer best-possible service
-        if (this.original_count < 0)
-            this.original_count = 0;
-
         // mark everything in the folder as removed
         removed_ids = yield engine.local_folder.mark_removed_async(null, true, cancellable);
-
-        // if local folder is not empty, report all as being removed
-        if (removed_ids != null) {
-            if (removed_ids.size > 0)
-                engine.email_removed(removed_ids);
-
-            int new_count = Numeric.int_floor(original_count - removed_ids.size, 0);
-            if (new_count != original_count) {
-                engine.email_count_changed(new_count, REMOVED);
-            }
+        if (removed_ids != null && !removed_ids.is_empty) {
+            yield this.engine.update_email_counts(cancellable);
+            engine.email_removed(removed_ids);
         }
-
         return ReplayOperation.Status.CONTINUE;
     }
 
@@ -61,14 +47,13 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     public override async void backout_local_async() throws Error {
         if (removed_ids != null && removed_ids.size > 0) {
             yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);
+            yield this.engine.update_email_counts(cancellable);
             engine.email_inserted(removed_ids);
         }
-
-        engine.email_count_changed(original_count, INSERTED);
     }
 
     public override string describe_state() {
         return "removed_ids.size=%d".printf((removed_ids != null) ? removed_ids.size : 0);
     }
-}
 
+}

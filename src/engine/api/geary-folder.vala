@@ -486,14 +486,6 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
 
     }
 
-    [Flags]
-    public enum CountChangeReason {
-        NONE = 0,
-        APPENDED,
-        INSERTED,
-        REMOVED
-    }
-
     /**
      * Flags modifying how email is retrieved.
      */
@@ -553,11 +545,14 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     /** The account that owns this folder. */
     public abstract Geary.Account account { get; }
 
-    /** Current properties for this folder. */
-    public abstract Geary.FolderProperties properties { get; }
-
     /** The path to this folder in the account's folder hierarchy. */
     public abstract Path path { get; }
+
+    /** The total number of email messages in this folder. */
+    public abstract int email_total { get; }
+
+    /** The number of unread email messages in this folder. */
+    public abstract int email_unread { get; }
 
     /**
      * Determines the special use of this folder.
@@ -646,17 +641,6 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     ) {
         this.account.email_flags_changed_in_folder(map, this);
     }
-
-    /**
-     * Fired when the total count of email in a folder has changed in any way.
-     *
-     * Note that this signal will fire after {@link email_appended},
-     * and {@link email_removed} (although see the note at
-     * email_removed).
-     */
-    public virtual signal void email_count_changed(
-        int new_count, CountChangeReason reason
-    );
 
     /**
      * Fired when the folder's special use has changed.

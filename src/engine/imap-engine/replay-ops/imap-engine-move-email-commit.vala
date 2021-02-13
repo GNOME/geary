@@ -92,17 +92,13 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
     }
 
     public override async void backout_local_async() throws Error {
-        if (to_move.size == 0)
-            return;
-
-        yield engine.local_folder.mark_removed_async(to_move, false, cancellable);
-
-        int count = this.engine.properties.email_total;
-        if (count < 0) {
-            count = 0;
+        if (!this.to_move.is_empty) {
+            yield this.engine.local_folder.mark_removed_async(
+                this.to_move, false, this.cancellable
+            );
+            yield this.engine.update_email_counts(this.cancellable);
+            this.engine.email_inserted(this.to_move);
         }
-        engine.email_inserted(to_move);
-        engine.email_count_changed(count + to_move.size, INSERTED);
     }
 
     public override string describe_state() {

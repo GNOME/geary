@@ -16,12 +16,16 @@ public class Mock.Folder : GLib.Object,
         get { return this._account; }
     }
 
-    public override Geary.FolderProperties properties {
-        get { return this._properties; }
-    }
-
     public override Geary.Folder.Path path {
         get { return this._path; }
+    }
+
+    public override int email_total {
+        get { return this._email_total; }
+    }
+
+    public override int email_unread {
+        get { return this._email_unread; }
     }
 
     public override Geary.Folder.SpecialUse used_as {
@@ -38,19 +42,18 @@ public class Mock.Folder : GLib.Object,
 
 
     private Geary.Account _account;
-    private Geary.FolderProperties _properties;
     private Geary.Folder.Path _path;
+    private int _email_total = 0;
+    private int _email_unread = 0;
     private Geary.Folder.SpecialUse _used_as;
     private Geary.ProgressMonitor _opening_monitor;
 
 
     public Folder(Geary.Account? account,
-                  Geary.FolderProperties? properties,
                   Geary.Folder.Path? path,
                   Geary.Folder.SpecialUse used_as,
                   Geary.ProgressMonitor? monitor) {
         this._account = account;
-        this._properties = properties ?? new FolderPoperties();
         this._path = path;
         this._used_as = used_as;
         this._opening_monitor = monitor;

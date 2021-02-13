@@ -35,17 +35,13 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
 
         this.engine.account_available.connect(on_accounts_changed);
         this.engine.account_unavailable.connect(on_accounts_changed);
-        folder.properties.notify[
-            Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL
-        ].connect(on_email_total_changed);
+        folder.notify["email-total"].connect(on_email_total_changed);
     }
 
     ~SearchEntry() {
         this.engine.account_available.disconnect(on_accounts_changed);
         this.engine.account_unavailable.disconnect(on_accounts_changed);
-        folder.properties.notify[
-            Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL
-        ].disconnect(on_email_total_changed);
+        folder.notify["email-total"].disconnect(on_email_total_changed);
     }
 
     public override string get_sidebar_name() {
@@ -55,7 +51,7 @@ public class FolderList.SearchEntry : FolderList.AbstractFolderEntry {
     }
 
     public override string? get_sidebar_tooltip() {
-        int total = folder.properties.email_total;
+        int total = folder.email_total;
         return ngettext("%d result", "%d results", total).printf(total);
     }
 

@@ -44,11 +44,8 @@ public class Geary.Outbox.Folder : BaseObject,
 
 
     /** {@inheritDoc} */
-    public override Account account { get { return this._account; } }
-
-    /** {@inheritDoc} */
-    public override Geary.FolderProperties properties {
-        get { return _properties; }
+    public override Account account {
+        get { return this._account; }
     }
 
     /**
@@ -58,11 +55,20 @@ public class Geary.Outbox.Folder : BaseObject,
      * with the name given by {@link MAGIC_BASENAME}.
      */
     public override Geary.Folder.Path path {
-        get {
-            return _path;
-        }
+        get { return this._path; }
     }
     private Geary.Folder.Path _path;
+
+    /** {@inheritDoc} */
+    public int email_total {
+        get { return this._email_total; }
+    }
+    private int _email_total = 0;
+
+    /** {@inheritDoc} */
+    public int email_unread {
+        get { return 0; }
+    }
 
     /**
      * Returns the type of this folder.
@@ -82,11 +88,12 @@ public class Geary.Outbox.Folder : BaseObject,
 
     private weak Account _account;
     private Db.Database db = null;
-    private FolderProperties _properties = new FolderProperties(0, 0);
     private int64 next_ordering = 0;
 
 
-    internal Folder(Account account, Geary.Folder.Root root, Db.Database db) {
+    internal Folder(Account account,
+                    Geary.Folder.Root root,
+                    Db.Database db) {
         this._account = account;
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
         this.db = db;
@@ -98,7 +105,6 @@ public class Geary.Outbox.Folder : BaseObject,
                            GLib.DateTime? date_received,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        int email_count = 0;
         OutboxRow? row = null;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
             int64 ordering = do_get_next_ordering(cx, cancellable);
@@ -113,20 +119,16 @@ public class Geary.Outbox.Folder : BaseObject,
             int position = do_get_position_by_ordering(cx, ordering, cancellable);
 
             row = new OutboxRow(new_id, position, ordering, false, null);
-            email_count = do_get_email_count(cx, cancellable);
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
 
-        // update properties
-        _properties.set_total(yield get_email_count_async(cancellable));
+        this._email_total++;
+        notify_property("email-total");
 
-        Gee.List<EmailIdentifier> list = new Gee.ArrayList<EmailIdentifier>();
-        list.add(row.outbox_id);
-
+        var list = Geary.Collection.single(row.outbox_id);
         this.account.email_added(list, this);
         email_inserted(list);
-        email_count_changed(email_count, CountChangeReason.APPENDED);
 
         return row.outbox_id;
     }
@@ -159,8 +161,7 @@ public class Geary.Outbox.Folder : BaseObject,
         remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
                            GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        Gee.List<Geary.EmailIdentifier> removed = new Gee.ArrayList<Geary.EmailIdentifier>();
-        int final_count = 0;
+        var removed = new Gee.ArrayList<Geary.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
             foreach (Geary.EmailIdentifier id in email_ids) {
                 // ignore anything not belonging to the outbox, but also don't report it as removed
@@ -174,20 +175,17 @@ public class Geary.Outbox.Folder : BaseObject,
                 // never reuse an ordering value while Geary is running.
                 do_get_next_ordering(cx, cancellable);
 
-                if (do_remove_email(cx, outbox_id, cancellable))
+                if (do_remove_email(cx, outbox_id, cancellable)) {
                     removed.add(outbox_id);
+                }
             }
-
-            final_count = do_get_email_count(cx, cancellable);
-
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
 
-        if (removed.size >= 0) {
-            _properties.set_total(final_count);
-
+        if (!removed.is_empty) {
+            this._email_total -= removed.size;
+            notify_property("email-total");
             email_removed(removed);
-            email_count_changed(final_count, REMOVED);
         }
     }
 
@@ -363,6 +361,21 @@ public class Geary.Outbox.Folder : BaseObject,
         return new Logging.State(this, this.path.to_string());
     }
 
+    /** Initialises outbox state from the database */
+    internal async void load(GLib.Cancellable cancellable) throws GLib.Error {
+        yield this.db.exec_transaction_async(
+            RO, (cx) => {
+                Db.Statement stmt = cx.prepare("SELECT COUNT(*) FROM SmtpOutboxTable");
+                Db.Result results = stmt.exec(cancellable);
+                if (!results.finished) {
+                    this._email_total = results.int_at(0);
+                }
+                return DONE;
+            },
+            cancellable
+        );
+    }
+
     // Utility for getting an email object back from an outbox row.
     private Geary.Email row_to_email(OutboxRow row) throws Error {
         Geary.Email? email = null;
@@ -388,17 +401,6 @@ public class Geary.Outbox.Folder : BaseObject,
         return email;
     }
 
-    private async int get_email_count_async(Cancellable? cancellable) throws Error {
-        int count = 0;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            count = do_get_email_count(cx, cancellable);
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        return count;
-    }
-
     //
     // Transaction helper methods
     //
@@ -417,14 +419,6 @@ public class Geary.Outbox.Folder : BaseObject,
 
             return next_ordering++;
         }
-    }
-
-    private int do_get_email_count(Db.Connection cx, Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("SELECT COUNT(*) FROM SmtpOutboxTable");
-
-        Db.Result results = stmt.exec(cancellable);
-
-        return (!results.finished) ? results.int_at(0) : 0;
     }
 
     private int do_get_position_by_ordering(Db.Connection cx, int64 ordering, Cancellable? cancellable)

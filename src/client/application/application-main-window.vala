@@ -719,7 +719,8 @@ public class Application.MainWindow :
                     this.selected_folder, true
                 );
 
-                this.selected_folder.properties.notify.disconnect(update_headerbar);
+                this.selected_folder.notify["email-total"].disconnect(update_headerbar);
+                this.selected_folder.notify["email-unread"].disconnect(update_headerbar);
                 this.selected_folder = null;
             }
             if (this.conversations != null) {
@@ -773,7 +774,8 @@ public class Application.MainWindow :
             // loading conversations.
 
             if (to_select != null) {
-                to_select.properties.notify.connect(update_headerbar);
+                to_select.notify["email-total"].connect(update_headerbar);
+                to_select.notify["email-unread"].connect(update_headerbar);
 
                 this.conversations = new Geary.App.ConversationMonitor(
                     to_select,
@@ -1709,11 +1711,11 @@ public class Application.MainWindow :
             switch (this.selected_folder.used_as) {
             case DRAFTS:
             case OUTBOX:
-                count = this.selected_folder.properties.email_total;
+                count = this.selected_folder.email_total;
                 break;
 
             default:
-                count = this.selected_folder.properties.email_unread;
+                count = this.selected_folder.email_unread;
                 break;
             }
 
@@ -1862,7 +1864,7 @@ public class Application.MainWindow :
                     focus = this.conversation_list_view;
                 } else {
                     if (this.conversation_actions.selected_conversations == 1 &&
-                        this.selected_folder.properties.email_total > 0) {
+                        this.selected_folder.email_total > 0) {
                         main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                         focus = this.conversation_viewer.visible_child;
                     }

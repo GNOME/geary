@@ -13,7 +13,6 @@ libmock_sources = [
   'mock/mock-email-identifier.vala',
   'mock/mock-email-properties.vala',
   'mock/mock-folder.vala',
-  'mock/mock-folder-properties.vala',
   'mock/mock-remote-folder.vala',
   'mock/mock-search-query.vala',
 ]

@@ -102,7 +102,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     public bool can_load_more {
         get {
             return (
-                this.base_folder.properties.email_total >
+                this.base_folder.email_total >
                 this.folder_window_size
             ) && !this.fill_complete;
         }

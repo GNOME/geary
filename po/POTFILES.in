@@ -166,7 +166,6 @@ src/engine/api/geary-email.vala
 src/engine/api/geary-endpoint.vala
 src/engine/api/geary-engine-error.vala
 src/engine/api/geary-engine.vala
-src/engine/api/geary-folder-properties.vala
 src/engine/api/geary-folder-supports-archive.vala
 src/engine/api/geary-folder-supports-copy.vala
 src/engine/api/geary-folder-supports-create.vala
@@ -385,7 +384,6 @@ src/engine/nonblocking/nonblocking-reporting-semaphore.vala
 src/engine/nonblocking/nonblocking-variants.vala
 src/engine/outbox/outbox-email-identifier.vala
 src/engine/outbox/outbox-email-properties.vala
-src/engine/outbox/outbox-folder-properties.vala
 src/engine/outbox/outbox-folder.vala
 src/engine/rfc822/rfc822-error.vala
 src/engine/rfc822/rfc822-gmime-filter-blockquotes.vala

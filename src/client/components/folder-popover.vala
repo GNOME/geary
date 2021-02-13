@@ -29,18 +29,15 @@ public class FolderPopover : Gtk.Popover {
     }
 
     public void add_folder(Geary.Folder folder) {
-        // don't allow multiples and don't allow folders that can't be opened (that means they
-        // support almost no operations and have no content)
-        if (has_folder(folder) || folder.properties.is_openable.is_impossible())
-            return;
-
-        // also don't allow local-only or virtual folders, which also have a limited set of
-        // operations
-        if (folder.properties.is_local_only || folder.properties.is_virtual)
-            return;
-
-        list_box.add(build_row(folder));
-        list_box.invalidate_sort();
+        // Only include remote-backed folders that can be opened
+        if (!has_folder(folder)) {
+            var remote = folder as Geary.RemoteFolder;
+            if (remote != null &&
+                !remote.remote_properties.is_openable.is_impossible()) {
+                list_box.add(build_row(folder));
+                list_box.invalidate_sort();
+            }
+        }
     }
 
     public void enable_disable_folder(Geary.Folder folder, bool sensitive) {

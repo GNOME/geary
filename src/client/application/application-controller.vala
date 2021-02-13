@@ -26,8 +26,8 @@ internal class Application.Controller :
         return (
             target != null &&
             target.used_as != TRASH &&
-            !target.properties.is_local_only &&
-            (target as Geary.FolderSupport.Move) != null
+            target is Geary.RemoteFolder &&
+            target is Geary.FolderSupport.Move
         );
     }
 
@@ -35,10 +35,13 @@ internal class Application.Controller :
     private static bool should_add_folder(Gee.Collection<Geary.Folder>? all,
                                           Geary.Folder folder) {
         // if folder is openable, add it
-        if (folder.properties.is_openable != Geary.Trillian.FALSE)
-            return true;
-        else if (folder.properties.has_children == Geary.Trillian.FALSE)
-            return false;
+        var remote = folder as Geary.RemoteFolder;
+        if (remote != null) {
+            if (remote.remote_properties.is_openable != Geary.Trillian.FALSE)
+                return true;
+            else if (remote.remote_properties.has_children == Geary.Trillian.FALSE)
+                return false;
+        }
 
         // if folder contains children, we must ensure that there is
         // at least one of the same type
@@ -844,7 +847,7 @@ internal class Application.Controller :
     public async void delete_conversations(Geary.FolderSupport.Remove target,
                                            Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
-        var messages = target.properties.is_virtual
+        var messages = target.used_as == SEARCH
             ? to_all_email_ids(conversations)
             : to_in_folder_email_ids(conversations);
         yield delete_messages(target, conversations, messages);

@@ -75,23 +75,6 @@ public class MailMerge.Folder : Geary.BaseObject,
     }
 
 
-    private class FolderProperties : Geary.FolderProperties {
-
-        public FolderProperties() {
-            base(
-                0, 0,
-                Geary.Trillian.FALSE, Geary.Trillian.FALSE, Geary.Trillian.TRUE,
-                true, false, false
-            );
-        }
-
-        public void set_total(int total) {
-            this.email_total = total;
-        }
-
-    }
-
-
     /** {@inheritDoc} */
     public override Geary.Account account {
         get { return this._account; }
@@ -99,16 +82,20 @@ public class MailMerge.Folder : Geary.BaseObject,
     private Geary.Account _account;
 
     /** {@inheritDoc} */
-    public override Geary.FolderProperties properties {
-        get { return _properties; }
-    }
-    private FolderProperties _properties = new FolderProperties();
-
-    /** {@inheritDoc} */
     public override Geary.Folder.Path path {
         get { return _path; }
     }
     private Geary.Folder.Path _path;
+
+    /** {@inheritDoc} */
+    public int email_total {
+        get { return this.ids.size; }
+    }
+
+    /** {@inheritDoc} */
+    public int email_unread {
+        get { return 0; }
+    }
 
     /** {@inheritDoc} */
     public override Geary.Folder.SpecialUse used_as {
@@ -123,10 +110,7 @@ public class MailMerge.Folder : Geary.BaseObject,
     public string data_display_name { get; private set; }
 
     /** The number of email that have been sent. */
-    public uint email_sent { get; private set; default = 0; }
-
-    /** The number of email in total. */
-    public uint email_total { get; private set; default = 0; }
+    public int email_sent { get; private set; default = 0; }
 
     /** Specifies if the merged mail is currently being sent. */
     public bool is_sending { get; private set; default = false; }
@@ -343,9 +327,8 @@ public class MailMerge.Folder : Geary.BaseObject,
                 this.ids.add(id);
                 this.composed.set(id, composed);
                 this.email.set(id, email);
-                this._properties.set_total((int) next_id);
-                this.email_total = (uint) next_id;
 
+                notify_property("email-total");
                 email_inserted(Geary.Collection.single(id));
                 record = yield this.data.read_record();
             }
@@ -385,7 +368,8 @@ public class MailMerge.Folder : Geary.BaseObject,
                     this.ids.remove_at(last);
                     this.email.unset(id);
                     this.composed.unset(id);
-                    this._properties.set_total(last);
+
+                    notify_property("email-total");
                     email_removed(Geary.Collection.single(id));
 
                     // Rate limit to ~30/minute for now

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2018-2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2018-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -36,6 +36,63 @@
  */
 public interface Geary.RemoteFolder : Folder {
 
+
+    /** A collection of known properties about a remote mailbox. */
+    public interface RemoteProperties : GLib.Object {
+
+
+        /**
+         * The total count of email in the remote mailbox.
+         */
+        public abstract int email_total { get; protected set; }
+
+        /**
+         * The total count of unread email in the remote mailbox.
+         */
+        public abstract int email_unread { get; protected set; }
+
+        /**
+         * Indicates whether the remote mailbox has children.
+         *
+         * Note that if {@link has_children} == {@link
+         * Trillian.TRUE}, it implies {@link supports_children} ==
+         * {@link Trillian.TRUE}.
+         */
+        public abstract Trillian has_children { get; protected set; }
+
+        /**
+         * Indicates whether the remote mailbox can have children.
+         *
+         * This does ''not'' mean creating a sub-folder is guaranteed
+         * to succeed.
+         */
+        public abstract Trillian supports_children { get; protected set; }
+
+        /**
+         * Indicates whether the remote mailbox can be opened.
+         *
+         * Mailboxes that cannot be opened exist as steps in the
+         * mailbox name-space only - they do not contain email.
+         */
+        public abstract Trillian is_openable { get; protected set; }
+
+        /**
+         * Indicates whether the remote mailbox reports ids for created email.
+         *
+         * True if a folder supporting {@link FolderSupport.Create}
+         * will not to return a {@link EmailIdentifier} when a call to
+         * {@link FolderSupport.Create.create_email_async} succeeds.
+         *
+         * This is for IMAP servers that don't support UIDPLUS. Most
+         * servers support UIDPLUS, so this will usually be false.
+         */
+        public abstract bool create_never_returns_id { get; protected set; }
+
+    }
+
+
+    /** Last known remote properties for this folder. */
+    public abstract RemoteProperties remote_properties { get; }
 
     /**
      * Indicates if the folder is checking for remote changes to email.

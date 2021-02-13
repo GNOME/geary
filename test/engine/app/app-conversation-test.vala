@@ -31,7 +31,6 @@ class Geary.App.ConversationTest : TestCase {
         this.folder_root = new Folder.Root("#test", false);
         this.base_folder = new Mock.Folder(
             null,
-            null,
             this.folder_root.get_child("test"),
             NONE,
             null

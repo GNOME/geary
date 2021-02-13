@@ -20,7 +20,6 @@ engine_vala_sources = files(
   'api/geary-engine-error.vala',
   'api/geary-engine.vala',
   'api/geary-folder.vala',
-  'api/geary-folder-properties.vala',
   'api/geary-folder-supports-archive.vala',
   'api/geary-folder-supports-copy.vala',
   'api/geary-folder-supports-create.vala',
@@ -254,7 +253,6 @@ engine_vala_sources = files(
   'outbox/outbox-email-identifier.vala',
   'outbox/outbox-email-properties.vala',
   'outbox/outbox-folder.vala',
-  'outbox/outbox-folder-properties.vala',
 
   'rfc822/rfc822.vala',
   'rfc822/rfc822-error.vala',

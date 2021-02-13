@@ -52,7 +52,7 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             "Filled %d of %d locally, window: %d, total: %d",
             loaded, num_to_load,
             this.monitor.conversations.size,
-            this.monitor.base_folder.properties.email_total
+            this.monitor.base_folder.email_total
         );
 
         var remote = this.monitor.base_folder as RemoteFolder;
@@ -83,7 +83,7 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
                 "Filled %d of %d from the remote, window: %d, total: %d",
                 loaded, num_to_load,
                 this.monitor.conversations.size,
-                this.monitor.base_folder.properties.email_total
+                this.monitor.base_folder.email_total
             );
 
         }

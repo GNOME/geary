@@ -83,18 +83,16 @@ private class Geary.ImapEngine.AccountSynchronizer :
 
         foreach (Folder folder in folders) {
             // Only sync folders that:
-            // 1. Can actually be opened (i.e. are selectable)
-            // 2. Are remote backed
+            // 1. Are remote backed
+            // 2. Can actually be opened (i.e. are selectable)
             //
-            // All this implies the folder must be a MinimalFolder and
+            // This implies the folder must be a MinimalFolder and
             // we do require that for syncing at the moment anyway,
             // but keep the tests in for that one glorious day where
             // we can just use a generic folder.
-            MinimalFolder? imap_folder = folder as MinimalFolder;
+            var imap_folder = folder as MinimalFolder;
             if (imap_folder != null &&
-                folder.properties.is_openable.is_possible() &&
-                !folder.properties.is_local_only &&
-                !folder.properties.is_virtual) {
+                imap_folder.remote_properties.is_openable.is_possible()) {
 
                 AccountOperation? op = null;
                 switch (reason) {
@@ -258,7 +256,8 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
     protected override async void sync_folder(GLib.DateTime max_epoch,
                                               GLib.Cancellable cancellable)
         throws GLib.Error {
-        ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+        var imap_folder = (MinimalFolder) this.folder;
+        var local_folder = imap_folder.local_folder;
 
         // Detach older emails outside the prefetch window
         if (this.account.information.prefetch_period_days >= 0) {
@@ -313,7 +312,7 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
 
             debug("Fetching to: %s", next_epoch.to_string());
 
-            if (local_count < this.folder.properties.email_total &&
+            if (local_count < imap_folder.remote_properties.email_total &&
                 next_epoch.compare(max_epoch) >= 0) {
                 if (next_epoch.compare(this.sync_max_epoch) > 0) {
                     current_oldest = yield expand_vector(

@@ -93,7 +93,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.imap = imap;
 
         smtp.outbox = new Outbox.Folder(this, local_folder_root, local.db);
-        smtp.report_problem.connect(notify_report_problem);
+        smtp.report_problem.connect(this.notify_report_problem);
         smtp.set_logging_parent(this);
         this.smtp = smtp;
 
@@ -1171,8 +1171,9 @@ internal class Geary.ImapEngine.StartServices : AccountOperation {
         throws GLib.Error {
         yield this.account.incoming.start(cancellable);
 
-        this.account.register_local_folder(this.outbox);
+        yield this.outbox.load(cancellable);
         yield this.account.outgoing.start(cancellable);
+        this.account.register_local_folder(this.outbox);
     }
 
 }

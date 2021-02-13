@@ -20,14 +20,14 @@ public class FolderList.FolderEntry :
         this.context = context;
         this.context.notify.connect(on_context_changed);
         this.has_new = false;
-        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].connect(on_counts_changed);
-        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].connect(on_counts_changed);
+        this.folder.notify["email-total"].connect(on_counts_changed);
+        this.folder.notify["email-unread"].connect(on_counts_changed);
     }
 
     ~FolderEntry() {
         this.context.notify.disconnect(on_context_changed);
-        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_TOTAL].disconnect(on_counts_changed);
-        this.folder.properties.notify[Geary.FolderProperties.PROP_NAME_EMAIL_UNREAD].disconnect(on_counts_changed);
+        this.folder.notify["email-total"].disconnect(on_counts_changed);
+        this.folder.notify["email-unread"].disconnect(on_counts_changed);
     }
 
     public override string get_sidebar_name() {
@@ -39,18 +39,18 @@ public class FolderList.FolderEntry :
         // messages in a folder. String substitution is the actual
         // number.
         string total_msg = ngettext(
-            "%d message", "%d messages", folder.properties.email_total
-        ).printf(folder.properties.email_total);
+            "%d message", "%d messages", folder.email_total
+        ).printf(folder.email_total);
 
-        if (folder.properties.email_unread == 0)
+        if (folder.email_unread == 0)
             return total_msg;
 
         // Translators: Label displaying number of unread email
         // messages in a folder. String substitution is the actual
         // number.
         string unread_msg = ngettext(
-            "%d unread", "%d unread", folder.properties.email_unread
-        ).printf(folder.properties.email_unread);
+            "%d unread", "%d unread", folder.email_unread
+        ).printf(folder.email_unread);
 
         // Translators: This string represents the divider between two
         // messages: "n messages" and "n unread", shown in the folder
@@ -99,10 +99,10 @@ public class FolderList.FolderEntry :
     public override int get_count() {
         switch (this.context.displayed_count) {
         case TOTAL:
-            return folder.properties.email_total;
+            return folder.email_total;
 
         case UNREAD:
-            return folder.properties.email_unread;
+            return folder.email_unread;
 
         default:
             return 0;

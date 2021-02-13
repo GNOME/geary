@@ -33,17 +33,10 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
 
         Gee.Set<ImapDB.EmailIdentifier>? revoked = yield engine.local_folder.mark_removed_async(
             to_revoke, false, cancellable);
-        if (revoked == null || revoked.size == 0)
-            return ReplayOperation.Status.COMPLETED;
-
-        int count = this.engine.properties.email_total;
-        if (count < 0) {
-            count = 0;
+        if (revoked != null && !revoked.is_empty) {
+            yield this.engine.update_email_counts(this.cancellable);
+            this.engine.email_inserted(revoked);
         }
-
-        engine.email_inserted(revoked);
-        engine.email_count_changed(count + revoked.size, INSERTED);
-
         return COMPLETED;
     }
 

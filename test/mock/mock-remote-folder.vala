@@ -13,16 +13,50 @@ public class Mock.RemoteFolder : GLib.Object,
     ValaUnit.MockObject {
 
 
+    public class RemoteProperties : GLib.Object,
+        Geary.RemoteFolder.RemoteProperties {
+
+
+        public int email_total { get; protected set; default = 0; }
+
+        public int email_unread { get; protected set; default = 0; }
+
+        public Geary.Trillian has_children {
+            get; protected set; default = Geary.Trillian.UNKNOWN;
+        }
+
+        public Geary.Trillian supports_children {
+            get; protected set; default = Geary.Trillian.UNKNOWN;
+        }
+
+        public Geary.Trillian is_openable {
+            get; protected set; default = Geary.Trillian.UNKNOWN;
+        }
+
+        public bool create_never_returns_id {
+            get; protected set; default = false;
+        }
+
+    }
+
     public Geary.Account account {
         get { return this._account; }
     }
 
-    public Geary.FolderProperties properties {
-        get { return this._properties; }
+    public Geary.RemoteFolder.RemoteProperties remote_properties {
+        get { return this._remote_properties; }
     }
 
     public Geary.Folder.Path path {
         get { return this._path; }
+    }
+
+    public override int email_total {
+        get { return this._email_total; }
+    }
+
+    public override int email_unread {
+        get { return this._email_unread; }
     }
 
     public Geary.Folder.SpecialUse used_as {
@@ -49,21 +83,23 @@ public class Mock.RemoteFolder : GLib.Object,
 
 
     private Geary.Account _account;
-    private Geary.FolderProperties _properties;
+    private Geary.RemoteFolder.RemoteProperties _remote_properties;
     private Geary.Folder.Path _path;
+    private int _email_total = 0;
+    private int _email_unread = 0;
     private Geary.Folder.SpecialUse _used_as;
     private Geary.ProgressMonitor _opening_monitor;
 
 
     public RemoteFolder(Geary.Account? account,
-                        Geary.FolderProperties? properties,
+                        Geary.RemoteFolder.RemoteProperties? remote_properties,
                         Geary.Folder.Path? path,
                         Geary.Folder.SpecialUse used_as,
                         Geary.ProgressMonitor? monitor,
                         bool is_monitoring,
                         bool is_fully_expanded) {
         this._account = account;
-        this._properties = properties ?? new FolderPoperties();
+        this._remote_properties = remote_properties ?? new RemoteProperties();
         this._path = path;
         this._used_as = used_as;
         this._opening_monitor = monitor;

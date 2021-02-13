@@ -33,20 +33,6 @@ public class Geary.App.SearchFolder : BaseObject,
     };
 
 
-    private class FolderPropertiesImpl : FolderProperties {
-
-
-        public FolderPropertiesImpl(int total, int unread) {
-            base(total, unread, Trillian.FALSE, Trillian.FALSE, Trillian.TRUE, true, true, false);
-        }
-
-        public void set_total(int total) {
-            this.email_total = total;
-        }
-
-    }
-
-
     // Represents an entry in the folder. Does not implement
     // Gee.Comparable since that would require extending GLib.Object
     // and hence make them very heavyweight.
@@ -84,16 +70,20 @@ public class Geary.App.SearchFolder : BaseObject,
     private weak Account _account;
 
     /** {@inheritDoc} */
-    public FolderProperties properties {
-        get { return _properties; }
-    }
-    private FolderPropertiesImpl _properties;
-
-    /** {@inheritDoc} */
     public Folder.Path path {
         get { return _path; }
     }
     private Folder.Path? _path = null;
+
+    /** {@inheritDoc} */
+    public int email_total {
+        get { return this.entries.size; }
+    }
+
+    /** {@inheritDoc} */
+    public int email_unread {
+        get { return 0; }
+    }
 
     /**
      * {@inheritDoc}
@@ -129,7 +119,6 @@ public class Geary.App.SearchFolder : BaseObject,
 
     public SearchFolder(Account account, Folder.Root root) {
         this._account = account;
-        this._properties = new FolderPropertiesImpl(0, 0);
         this._path = root.get_child(MAGIC_BASENAME, Trillian.TRUE);
 
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
@@ -187,8 +176,8 @@ public class Geary.App.SearchFolder : BaseObject,
         this.entries = new_entry_set();
         this.ids = new_id_map();
 
+        notify_property("email-total");
         email_removed(old_ids.keys);
-        email_count_changed(0, REMOVED);
     }
 
     /**
@@ -598,29 +587,25 @@ public class Geary.App.SearchFolder : BaseObject,
             this.entries = entries;
             this.ids = ids;
 
-            this._properties.set_total(entries.size);
+            if (!added.is_empty && !removed.is_empty) {
+                notify_property("email-total");
+            }
 
             // Note that we probably shouldn't be firing these signals from inside
             // our mutex lock.  Keep an eye on it, and if there's ever a case where
             // it might cause problems, it shouldn't be too hard to move the
             // firings outside.
 
-            Folder.CountChangeReason reason = CountChangeReason.NONE;
-            if (removed.size > 0) {
+            if (!removed.is_empty) {
                 email_removed(removed);
-                reason |= Folder.CountChangeReason.REMOVED;
             }
-            if (added.size > 0) {
+            if (!added.is_empty) {
                 // TODO: we'd like to be able to use APPENDED here
                 // when applicable, but because of the potential to
                 // append a thousand results at once and the
                 // ConversationMonitor's inability to handle that
                 // gracefully (#7464), we always use INSERTED for now.
                 email_inserted(added);
-                reason |= Folder.CountChangeReason.INSERTED;
-            }
-            if (reason != CountChangeReason.NONE) {
-                email_count_changed(this.entries.size, reason);
             }
             debug("Processing done, entries/ids: %d/%d", entries.size, ids.size);
         } else {

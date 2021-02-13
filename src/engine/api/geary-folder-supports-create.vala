@@ -30,7 +30,7 @@ public interface Geary.FolderSupport.Create : Folder {
      * time to be set when saved.  Like EmailFlags, this is optional
      * if not applicable.
      *
-     * @see FolderProperties.create_never_returns_id
+     * @see RemoteFolder.RemoteProperties.create_never_returns_id
      */
     public abstract async EmailIdentifier?
         create_email_async(RFC822.Message rfc822,

@@ -217,7 +217,8 @@ public class Geary.App.DraftManager : BaseObject {
 
         // if drafts folder doesn't return the identifier of newly created emails, then this object
         // can't do it's work ... wait until open to check for this, to be absolutely sure
-        if (drafts_folder.properties.create_never_returns_id) {
+        if (drafts_folder is RemoteFolder &&
+            ((RemoteFolder) drafts_folder).remote_properties.create_never_returns_id) {
             throw new EngineError.UNSUPPORTED(
                 "%s: Drafts folder %s does not return created mail ID",
                 to_string(), drafts_folder.to_string()
