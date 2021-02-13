@@ -175,7 +175,7 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * ProblemReport} class provides context about the nature of the
      * problem itself.
      */
-    public signal void report_problem(Geary.ProblemReport problem);
+    public virtual signal void report_problem(Geary.ProblemReport problem);
 
     /**
      * Fired when folders become available or unavailable in the account.
@@ -191,9 +191,10 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      *
      * @see sort_by_path
      */
-    public signal void
-        folders_available_unavailable(Gee.BidirSortedSet<Folder>? available,
-                                      Gee.BidirSortedSet<Folder>? unavailable);
+    public virtual signal void folders_available_unavailable(
+        Gee.BidirSortedSet<Folder>? available,
+        Gee.BidirSortedSet<Folder>? unavailable
+    );
 
     /**
      * Fired when new folders have been created.
@@ -208,7 +209,9 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * words, parents are listed before children, assuming the
      * collection is traversed in natural order.
      */
-    public signal void folders_created(Gee.BidirSortedSet<Geary.Folder> created);
+    public virtual signal void folders_created(
+        Gee.BidirSortedSet<Geary.Folder> created
+    );
 
     /**
      * Fired when existing folders are deleted.
@@ -223,38 +226,70 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * words, parents are listed before children, assuming the
      * collection is traversed in natural order.
      */
-    public signal void folders_deleted(Gee.BidirSortedSet<Geary.Folder> deleted);
+    public virtual signal void folders_deleted(
+        Gee.BidirSortedSet<Folder> deleted
+    );
 
     /**
      * Fired when a Folder's special use is detected having changed.
      */
-    public signal void folders_use_changed(Gee.Collection<Geary.Folder> altered);
+    public virtual signal void folders_use_changed(
+        Gee.Collection<Folder> altered
+    );
 
     /**
      * Emitted when emails are appended to a folder for this account.
+     *
+     * This is by default emitted by {@link Folder.email_appended}
+     * after that signal is emitted.
+     *
+     * @see email_inserted_into_folder
+     * @see Folder.email_appended
      */
-    public signal void email_appended_to_folder(Folder folder,
-                                                Gee.Collection<EmailIdentifier> ids);
+    public virtual signal void email_appended_to_folder(
+        Gee.Collection<EmailIdentifier> ids,
+        Folder source
+    );
 
     /**
      * Emitted when email messages are inserted into a folder for this account.
      *
+     * This is by default emitted by {@link Folder.email_inserted}
+     * after that signal is emitted.
+     *
+     * @see email_appended_to_folder
      * @see Folder.email_inserted
      */
-    public signal void email_inserted_into_folder(Folder folder,
-                                                  Gee.Collection<EmailIdentifier> ids);
+    public virtual signal void email_inserted_into_folder(
+        Gee.Collection<EmailIdentifier> ids,
+        Folder source
+    );
 
     /**
      * Emitted when email messages are removed from a folder for this account.
+     *
+     * This is by default emitted by {@link Folder.email_removed}
+     * after that signal is emitted.
+     *
+     * @see Folder.email_removed
      */
-    public signal void email_removed_from_folder(Folder folder,
-                                                 Gee.Collection<EmailIdentifier> ids);
+    public virtual signal void email_removed_from_folder(
+        Gee.Collection<EmailIdentifier> ids,
+        Folder source
+    );
 
     /**
      * Fired when the supplied email flags have changed from any folder.
+     *
+     * This is by default emitted by {@link
+     * Folder.email_flags_changed} after that signal is emitted.
+     *
+     * @see Folder.email_flags_changed
      */
-    public signal void email_flags_changed_in_folder(Folder folder,
-                                                     Gee.Map<EmailIdentifier,EmailFlags> map);
+    public virtual signal void email_flags_changed_in_folder(
+        Gee.Map<EmailIdentifier,EmailFlags> map,
+        Folder source
+    );
 
     /**
      * Emitted when email has been added to the account.
@@ -263,8 +298,10 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * added to an the account for the first time, including the
      * folder in they first appear.
      */
-    public signal void email_added(Gee.Collection<EmailIdentifier> ids,
-                                   Folder containing_folder);
+    public virtual signal void email_added(
+        Gee.Collection<EmailIdentifier> ids,
+        Folder containing_folder
+    );
 
     /**
      * Emitted when email has been removed from the account.
@@ -274,12 +311,16 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * necessarily immediately) after they have been removed from all
      * folders they have been present.
      */
-    public signal void email_removed(Gee.Collection<EmailIdentifier> ids);
+    public virtual signal void email_removed(
+        Gee.Collection<EmailIdentifier> ids
+    );
 
     /**
      * Emitted when email mesages have been fully downloaded.
      */
-    public signal void email_complete(Gee.Collection<EmailIdentifier> ids);
+    public virtual signal void email_complete(
+        Gee.Collection<EmailIdentifier> ids
+    );
 
 
     protected Account(AccountInformation information,

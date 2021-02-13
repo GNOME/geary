@@ -149,10 +149,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.last_storage_cleanup = yield this.local.fetch_last_cleanup_async(cancellable);
         this.notify["last_storage_cleanup"].connect(on_last_storage_cleanup_notify);
-        this.email_appended_to_folder.connect(on_folder_contents_altered);
-        this.email_inserted_into_folder.connect(on_folder_contents_altered);
-        this.email_removed_from_folder.connect(on_folder_contents_altered);
-        this.email_flags_changed_in_folder.connect(on_folder_contents_altered);
+        this.email_appended_to_folder.connect(on_folder_email_contents_altered);
+        this.email_inserted_into_folder.connect(on_folder_email_contents_altered);
+        this.email_removed_from_folder.connect(on_folder_email_contents_altered);
+        this.email_flags_changed_in_folder.connect(on_folder_email_flags_altered);
 
         this.open = true;
         opened();
@@ -183,10 +183,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             debug("Error stopping SMTP service: %s", err.message);
         }
 
-        this.email_appended_to_folder.disconnect(on_folder_contents_altered);
-        this.email_inserted_into_folder.disconnect(on_folder_contents_altered);
-        this.email_removed_from_folder.disconnect(on_folder_contents_altered);
-        this.email_flags_changed_in_folder.disconnect(on_folder_contents_altered);
+        this.email_appended_to_folder.disconnect(on_folder_email_contents_altered);
+        this.email_inserted_into_folder.disconnect(on_folder_email_contents_altered);
+        this.email_removed_from_folder.disconnect(on_folder_email_contents_altered);
+        this.email_flags_changed_in_folder.disconnect(on_folder_email_flags_altered);
 
         // Halt internal tasks early so they stop using local and
         // remote connections.
@@ -1080,7 +1080,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
     }
 
-    private void on_folder_contents_altered(Folder folder) {
+    private void on_folder_email_contents_altered(
+        Gee.Collection<EmailIdentifier> ids,
+        Folder folder
+    ) {
+        schedule_unseen_update(folder);
+    }
+
+    private void on_folder_email_flags_altered(
+        Gee.Map<EmailIdentifier,EmailFlags> map,
+        Folder folder
+    ) {
         schedule_unseen_update(folder);
     }
 

@@ -164,15 +164,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             }
             set_use(NONE);
         }
-    }
-
-    public void set_use(Folder.SpecialUse new_use) {
-        var old_use = this._used_as;
-        this._used_as = new_use;
-        if (old_use != new_use) {
-            use_changed(old_use, new_use);
-            update_harvester();
-        }
+        this.account.folders_use_changed(Collection.single(this));
     }
 
     /** {@inheritDoc} */
@@ -276,6 +268,23 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             yield this.open_remote_session(cancellable);
         }
         return this.remote_session;
+    }
+
+    /**
+     * Sets the special use for this folder.
+     *
+     * Note this emits the {@link Folder.use_changed} signal as
+     * required, but does not emit {@link
+     * Account.folders_use_changed}. Callers will need arrange to see
+     * that emitted.
+     */
+    internal void set_use(Folder.SpecialUse new_use) {
+        var old_use = this._used_as;
+        if (old_use != new_use) {
+            this._used_as = new_use;
+            use_changed(old_use, new_use);
+            update_harvester();
+        }
     }
 
     private async void check_remote_session() {

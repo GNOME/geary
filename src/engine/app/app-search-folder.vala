@@ -608,7 +608,6 @@ public class Geary.App.SearchFolder : BaseObject,
             Folder.CountChangeReason reason = CountChangeReason.NONE;
             if (removed.size > 0) {
                 email_removed(removed);
-                this.account.email_removed_from_folder(this, removed);
                 reason |= Folder.CountChangeReason.REMOVED;
             }
             if (added.size > 0) {
@@ -618,7 +617,6 @@ public class Geary.App.SearchFolder : BaseObject,
                 // ConversationMonitor's inability to handle that
                 // gracefully (#7464), we always use INSERTED for now.
                 email_inserted(added);
-                this.account.email_inserted_into_folder(this, removed);
                 reason |= Folder.CountChangeReason.INSERTED;
             }
             if (reason != CountChangeReason.NONE) {
@@ -672,15 +670,15 @@ public class Geary.App.SearchFolder : BaseObject,
         }
     }
 
-    private void on_email_added(Geary.Folder source,
-                                Gee.Collection<EmailIdentifier> ids) {
+    private void on_email_added(Gee.Collection<EmailIdentifier> ids,
+                                Geary.Folder source) {
         if (this.query != null) {
             this.append.begin(source, ids);
         }
     }
 
-    private void on_email_removed(Geary.Folder source,
-                                  Gee.Collection<EmailIdentifier> ids) {
+    private void on_email_removed(Gee.Collection<EmailIdentifier> ids,
+                                  Geary.Folder source) {
         if (this.query != null) {
             this.remove.begin(source, ids);
         }

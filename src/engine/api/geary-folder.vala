@@ -580,10 +580,16 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      * the "top" of the vector of messages, for example, newly
      * delivered email.
      *
+     * This will be default also emit {@link
+     * Account.email_appended_to_folder}.
+     *
      * @see email_inserted
+     * @see Account.email_appended_to_folder
      */
-    public virtual signal void email_appended(Gee.Collection<EmailIdentifier> ids) {
-        this.account.email_appended_to_folder(this, ids);
+    public virtual signal void email_appended(
+        Gee.Collection<EmailIdentifier> ids
+    ) {
+        this.account.email_appended_to_folder(ids, this);
     }
 
     /**
@@ -596,33 +602,49 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      * including vector expansion, but note that newly received
      * messages are appended and notified via {@link email_appended}.
      *
+     * This will be default also emit {@link
+     * Account.email_inserted_into_folder}.
+     *
      * @see email_appended
+     * @see Account.email_inserted_into_folder
      */
-    public virtual signal void email_inserted(Gee.Collection<EmailIdentifier> ids) {
-        this.account.email_inserted_into_folder(this, ids);
+    public virtual signal void email_inserted(
+        Gee.Collection<EmailIdentifier> ids
+    ) {
+        this.account.email_inserted_into_folder(ids, this);
     }
 
     /**
      * Fired when email has been removed (deleted or moved) from the folder.
      *
-     * This may occur due to the local user's action or reported from the server (i.e. another
-     * client has performed the action).  Email positions greater than the removed emails are
-     * affected.
+     * This may occur due to the local user's action or reported from
+     * the server (i.e. another client has performed the action).
+     * Email positions greater than the removed emails are affected.
      *
-     * ''Note:'' It's possible for the remote server to report a message has been removed that is not
-     * known locally (and therefore the caller could not have record of).  If this happens, this
-     * signal will ''not'' fire, although {@link email_count_changed} will.
+     * This will be default also emit {@link
+     * Account.email_removed_from_folder}.
+     *
+     * @see Account.email_removed_from_folder
      */
-    public virtual signal void email_removed(Gee.Collection<EmailIdentifier> ids) {
-        this.account.email_removed_from_folder(this, ids);
+    public virtual signal void email_removed(
+        Gee.Collection<EmailIdentifier> ids
+    ) {
+        this.account.email_removed_from_folder(ids, this);
     }
 
     /**
      * Fired when the supplied email flags have changed, whether due to local action or reported by
      * the server.
+     *
+     * This will be default also emit {@link
+     * Account.email_flags_changed_in_folder}.
+     *
+     * @see Account.email_flags_changed_in_folder
      */
-    public virtual signal void email_flags_changed(Gee.Map<EmailIdentifier,EmailFlags> map) {
-        this.account.email_flags_changed_in_folder(this, map);
+    public virtual signal void email_flags_changed(
+        Gee.Map<EmailIdentifier,EmailFlags> map
+    ) {
+        this.account.email_flags_changed_in_folder(map, this);
     }
 
     /**
@@ -632,15 +654,21 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      * and {@link email_removed} (although see the note at
      * email_removed).
      */
-    public virtual signal void email_count_changed(int new_count, CountChangeReason reason);
+    public virtual signal void email_count_changed(
+        int new_count, CountChangeReason reason
+    );
 
     /**
      * Fired when the folder's special use has changed.
      *
      * This will usually happen when the local object has been updated
      * with data discovered from the remote account.
+     *
+     * @see Account.folders_use_changed
      */
-    public virtual signal void use_changed(SpecialUse old_use, SpecialUse new_use);
+    public virtual signal void use_changed(
+        SpecialUse old_use, SpecialUse new_use
+    );
 
 
     /**

@@ -188,7 +188,6 @@ public class Geary.Outbox.Folder : BaseObject,
 
             email_removed(removed);
             email_count_changed(final_count, REMOVED);
-            this.account.email_removed(removed);
         }
     }
 

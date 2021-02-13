@@ -771,15 +771,15 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         this.queue.add(new RemoveOperation(this, this.base_folder, removed));
     }
 
-    private void on_account_email_appended(Folder folder,
-                                           Gee.Collection<EmailIdentifier> added) {
+    private void on_account_email_appended(Gee.Collection<EmailIdentifier> added,
+                                           Folder folder) {
         if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, added));
         }
     }
 
-    private void on_account_email_inserted(Folder folder,
-                                           Gee.Collection<EmailIdentifier> inserted) {
+    private void on_account_email_inserted(Gee.Collection<EmailIdentifier> inserted,
+                                           Folder folder) {
         // ExternalAppendOperation will check to determine if the
         // email is relevant for some existing conversation before
         // adding it, which is what we want here.
@@ -788,15 +788,15 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         }
     }
 
-    private void on_account_email_removed(Folder folder,
-                                          Gee.Collection<EmailIdentifier> removed) {
+    private void on_account_email_removed(Gee.Collection<EmailIdentifier> removed,
+                                          Folder folder) {
         if (folder != this.base_folder) {
             this.queue.add(new RemoveOperation(this, folder, removed));
         }
     }
 
-    private void on_account_email_flags_changed(Geary.Folder folder,
-                                                Gee.Map<EmailIdentifier,EmailFlags> map) {
+    private void on_account_email_flags_changed(Gee.Map<EmailIdentifier,EmailFlags> map,
+                                                Geary.Folder folder) {
         Gee.HashSet<EmailIdentifier> inserted_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
