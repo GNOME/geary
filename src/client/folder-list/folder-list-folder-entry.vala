@@ -12,6 +12,7 @@ public class FolderList.FolderEntry :
 
 
     private Application.FolderContext context;
+    private Geary.RemoteFolder? remote;
     private bool has_new;
 
 
@@ -19,15 +20,26 @@ public class FolderList.FolderEntry :
         base(context.folder);
         this.context = context;
         this.context.notify.connect(on_context_changed);
+        this.remote = context.folder as Geary.RemoteFolder;
         this.has_new = false;
         this.folder.notify["email-total"].connect(on_counts_changed);
         this.folder.notify["email-unread"].connect(on_counts_changed);
+        if (this.remote != null) {
+            this.remote.remote_properties.notify["email-total"].connect(
+                on_counts_changed
+            );
+        }
     }
 
     ~FolderEntry() {
         this.context.notify.disconnect(on_context_changed);
         this.folder.notify["email-total"].disconnect(on_counts_changed);
         this.folder.notify["email-unread"].disconnect(on_counts_changed);
+        if (this.remote != null) {
+            this.remote.remote_properties.notify["email-total"].disconnect(
+                on_counts_changed
+            );
+        }
     }
 
     public override string get_sidebar_name() {
@@ -35,29 +47,51 @@ public class FolderList.FolderEntry :
     }
 
     public override string? get_sidebar_tooltip() {
-        // Translators: Label displaying total number of email
-        // messages in a folder. String substitution is the actual
-        // number.
-        string total_msg = ngettext(
-            "%d message", "%d messages", folder.email_total
-        ).printf(folder.email_total);
+        string? tooltip = null;
 
-        if (folder.email_unread == 0)
-            return total_msg;
+        int local_total = this.remote.email_total;
+        int local_unread = this.remote.email_unread;
+        int remote_total = local_total;
+        if (this.remote != null) {
+            remote_total = this.remote.remote_properties.email_total;
+        }
 
-        // Translators: Label displaying number of unread email
-        // messages in a folder. String substitution is the actual
-        // number.
-        string unread_msg = ngettext(
-            "%d unread", "%d unread", folder.email_unread
-        ).printf(folder.email_unread);
+        if (local_total == remote_total) {
+            // Translators: Tooltip displaying total number of email
+            // messages in a folder. The string substitution is the
+            // actual number.
+            tooltip = ngettext(
+                "%d message", "%d messages", folder.email_total
+            ).printf(local_total);
+        } else {
+            // Translators: Tooltip displaying total number of email
+            // messages locally in a folder and the total of number in
+            // the remote folder. The first string substitution is the
+            // local number, the second is the remote number.
+            tooltip = ngettext(
+                "%d of %d messages", "%d of %d messages", remote_total
+            ).printf(
+                local_total,
+                remote_total
+            );
+        }
 
-        // Translators: This string represents the divider between two
-        // messages: "n messages" and "n unread", shown in the folder
-        // list as a tooltip.  Please use your languages conventions
-        // for combining the two, i.e. a comma (",") for English; "6
-        // messages, 3 unread"
-        return _("%s, %s").printf(total_msg, unread_msg);
+        if (local_unread > 0) {
+            // Translators: Tooltip displaying number of unread email
+            // messages in a folder. The string substitution is the
+            // actual number.
+            string unread_msg = ngettext(
+                "%d unread", "%d unread", local_unread
+            ).printf(local_unread);
+
+            // Translators: Tooltip string that combines two messages:
+            // "n messages" and "n unread".  Please use your languages
+            // conventions for combining the two, i.e. a comma (",")
+            // for English; "6 messages, 3 unread"
+            tooltip = _("%s, %s").printf(tooltip, unread_msg);
+        }
+
+        return tooltip;
     }
 
     public override string? get_sidebar_icon() {
