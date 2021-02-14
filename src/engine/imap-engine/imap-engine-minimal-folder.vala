@@ -256,6 +256,13 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     }
 
     /**
+     * Initialises the folder in preparation for use.
+     */
+    internal async void init(GLib.Cancellable? cancellable) throws GLib.Error {
+        yield this.update_email_counts(cancellable);
+    }
+
+    /**
      * Shuts down the folder in preparation for account close.
      */
     internal async void close() throws GLib.Error {

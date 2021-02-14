@@ -519,7 +519,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         ImapDB.Folder local_folder = yield this.local.clone_folder_async(
             remote_folder, cancellable
         );
-        add_folders(Collection.single(local_folder), false);
+        yield add_folders(Collection.single(local_folder), false, cancellable);
         var folder = this.remote_folders.get(path);
         if (use != NONE) {
             promote_folders(
@@ -680,8 +680,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * seen before and the {@link Geary.Account.folders_created} signal is
      * not fired.
      */
-    internal Gee.Collection<Folder> add_folders(Gee.Collection<ImapDB.Folder> db_folders,
-                                                bool are_existing) {
+    internal async Gee.Collection<Folder> add_folders(
+        Gee.Collection<ImapDB.Folder> db_folders,
+        bool are_existing,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
         Gee.TreeSet<MinimalFolder> built_folders = new Gee.TreeSet<MinimalFolder>(
             Account.folder_path_comparator
         );
@@ -689,6 +692,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             Folder.Path path = db_folder.path;
             if (!this.remote_folders.has_key(path)) {
                 MinimalFolder folder = new_folder(db_folder);
+                yield folder.init(cancellable);
                 if (folder.used_as == NONE) {
                     var use = this.information.get_folder_use_for_path(path);
                     if (use != NONE) {
@@ -1126,7 +1130,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
         yield enumerate_local_folders_async(
             generic.local.imap_folder_root, cancellable
         );
-        generic.add_folders(this.folders, true);
+        yield generic.add_folders(this.folders, true, cancellable);
     }
 
     private async void enumerate_local_folders_async(Folder.Path parent,
@@ -1376,7 +1380,12 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                       err.message);
             }
         }
-        this.generic_account.add_folders(to_build, false);
+
+        try {
+            yield this.generic_account.add_folders(to_build, false, cancellable);
+        } catch (GLib.Error err) {
+            debug("Unable to add folders: %s", err.message);
+        }
 
         if (remote_folders_suspect) {
             debug("Skipping removing folders due to prior errors");
