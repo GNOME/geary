@@ -217,6 +217,9 @@ public class Plugin.EmailTemplates :
     private void unregister_folder(Folder target) {
         var info_bar = this.info_bars.get(target);
         if (info_bar != null) {
+            this.folders.remove_folder_info_bar(target, info_bar);
+            this.info_bars.unset(target);
+
             try {
                 this.folders.unregister_folder_used_as(target);
             } catch (GLib.Error err) {
@@ -226,8 +229,6 @@ public class Plugin.EmailTemplates :
                     err.message
                 );
             }
-            this.folders.remove_folder_info_bar(target, info_bar);
-            this.info_bars.unset(target);
         }
     }
 
@@ -323,7 +324,8 @@ public class Plugin.EmailTemplates :
     private void on_folders_type_changed(Gee.Collection<Folder> changed) {
         foreach (var folder in changed) {
             unregister_folder(folder);
-            if (folder.display_name in this.folder_names) {
+            if (folder.display_name in this.folder_names &&
+                folder.used_as == NONE) {
                 register_folder(folder);
             }
             update_folder(folder);
