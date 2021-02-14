@@ -194,8 +194,15 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     public Message.from_parts(Header header, Text body)
         throws Error {
         GMime.StreamCat stream_cat = new GMime.StreamCat();
-        stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
-        stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
+
+        if (header.buffer.size != 0) {
+            stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
+        } else {
+            throw new Error.INVALID("Missing header in RFC 822 message");
+        }
+        if (body.buffer.size != 0) {
+            stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
+        }
 
         GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
         var message = parser.construct_message(Geary.RFC822.get_parser_options());
