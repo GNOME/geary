@@ -45,14 +45,17 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         if (original_flags == null || original_flags.size == 0)
             return ReplayOperation.Status.COMPLETED;
 
-        yield engine.local_folder.mark_email_async(original_flags.keys, flags_to_add, flags_to_remove,
-            cancellable);
+        yield this.engine.local_folder.mark_email_async(
+            original_flags.keys, flags_to_add, flags_to_remove, cancellable
+        );
+        yield this.engine.update_email_counts(this.cancellable);
 
         // Notify using flags from DB.
         Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
             original_flags.keys, cancellable);
-        if (map != null && map.size > 0)
+        if (map != null && !map.is_empty) {
             engine.email_flags_changed(map);
+        }
 
         return ReplayOperation.Status.CONTINUE;
     }

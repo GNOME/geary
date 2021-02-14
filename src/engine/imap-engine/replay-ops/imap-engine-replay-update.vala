@@ -60,6 +60,7 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
                 changed_map.set(id, new Imap.EmailFlags(message_flags));
 
                 yield this.owner.local_folder.set_email_flags_async(changed_map, null);
+                yield this.owner.update_email_counts(null);
 
                 // only notify if the email is not marked for deletion
                 try {
