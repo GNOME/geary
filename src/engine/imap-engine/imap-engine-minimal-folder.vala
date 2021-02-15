@@ -134,7 +134,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         this._used_as = use;
 
         this.replay_queue = new ReplayQueue(this);
-        this.replay_queue.remotely_executed.connect(this.on_remote_status_check);
 
         this.email_prefetcher = new EmailPrefetcher(this);
         update_harvester();
@@ -266,7 +265,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
      * Shuts down the folder in preparation for account close.
      */
     internal async void close() throws GLib.Error {
-        yield this.replay_queue.close_async(true);
+        yield this.replay_queue.close();
         yield close_remote_session();
         yield this.closed_semaphore.wait_async(null);
     }
@@ -777,8 +776,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     /**
      * Closes the folder and the remote session.
-     *
-     * This should only be called from the replay queue.
      */
     private async void close_remote_session() {
         lock (this.remote_session) {

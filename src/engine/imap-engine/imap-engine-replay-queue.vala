@@ -38,9 +38,14 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
         bool local_closed = false;
         bool remote_closed = false;
 
-        public CloseReplayQueue() {
-            // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
-            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE_REMOTE);
+        public CloseReplayQueue(bool flush_remote) {
+            base(
+                "CloseReplayQueue",
+                flush_remote
+                    ? ReplayOperation.Scope.LOCAL_AND_REMOTE
+                    : ReplayOperation.Scope.LOCAL_ONLY,
+                IGNORE_REMOTE
+            );
         }
 
         public override async ReplayOperation.Status replay_local_async()
@@ -105,7 +110,15 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
 
     public bool has_remote_operation {
         get {
-            return this.remote_op_active != null || !this.remote_queue.is_empty;
+            return (
+                this.remote_op_active != null ||
+                !this.remote_queue.is_empty ||
+                (this.local_op_active != null &&
+                 this.local_op_active.scope == LOCAL_AND_REMOTE) ||
+                this.local_queue.get_all().any_match(
+                    op => (op.scope == LOCAL_AND_REMOTE)
+                )
+            );
         }
     }
 
@@ -392,9 +405,12 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
      *
      * A ReplayQueue cannot be re-opened.
      */
-    public async void close_async(bool flush_pending, Cancellable? cancellable = null) throws Error {
+    public async void close(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         if (state != State.OPEN)
             return;
+
+        var flush_pending = !this.remote_cancellable.is_cancelled();
 
         // cancel notification queue timeout
         if (notification_timer != null)
@@ -418,9 +434,8 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
         }
 
         // flush a ReplayClose operation down the pipe so all working operations complete
-        CloseReplayQueue close_op = new CloseReplayQueue();
-        bool is_scheduled = schedule(close_op);
-        assert(is_scheduled);
+        CloseReplayQueue close_op = new CloseReplayQueue(flush_pending);
+        schedule(close_op);
 
         yield close_op.wait_for_ready_async(cancellable);
 
@@ -611,7 +626,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
             remotely_executing(op);
 
             GLib.Error? remote_err = null;
-            if (remote != null) {
+            if (remote != null || is_close_op) {
                 if (op.remote_retry_count > 0)
                     debug("Retrying op %s on %s", op.to_string(), to_string());
 
