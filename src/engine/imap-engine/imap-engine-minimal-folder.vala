@@ -103,7 +103,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     private GLib.Cancellable remote_cancellable = new GLib.Cancellable();
     private Imap.FolderSession? remote_session = null;
-    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
 
     private TimeoutManager update_flags_timer;
 
@@ -145,10 +144,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         this.refresh_unseen_timer = new TimeoutManager.seconds(
             REFRESH_UNSEEN_TIMEOUT_SEC, on_refresh_unseen
         );
-
-        // Notify now to ensure that wait_for_close_async does not
-        // block if never opened.
-        this.closed_semaphore.blind_notify();
     }
 
     /** {@inheritDoc} */
@@ -267,7 +262,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     internal async void close() throws GLib.Error {
         yield this.replay_queue.close();
         yield close_remote_session();
-        yield this.closed_semaphore.wait_async(null);
     }
 
     /**
@@ -370,9 +364,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         if (cancellable != null) {
             cancellable.cancelled.connect(() => union_cancellable.cancel());
         }
-
-        // Reset to force waiting again in `close()`
-        this.closed_semaphore.reset();
 
         // Reset unseen count refresh since it will be updated when
         // the remote opens - it's only used when the folder isn't
@@ -806,7 +797,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             yield this._account.release_folder_session(session);
         }
 
-        this.closed_semaphore.blind_notify();
     }
 
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
