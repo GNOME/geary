@@ -770,37 +770,27 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     }
 
     /**
-     * Closes the folder and the remote session.
+     * Closes the folder's current remote session, if any.
      */
     private async void close_remote_session() {
         lock (this.remote_session) {
-            if (this.remote_session != null) {
-                yield this.close_remote_locked();
+            var session = this.remote_session;
+            if (session != null) {
+                this.remote_cancellable.cancel();
+                this.email_prefetcher.close();
+                this.update_flags_timer.reset();
+                this.replay_queue.stop_remote();
+                this.remote_session = null;
+
+                session.appended.disconnect(on_remote_appended);
+                session.updated.disconnect(on_remote_updated);
+                session.removed.disconnect(on_remote_removed);
+                session.disconnected.disconnect(on_remote_disconnected);
+
+                yield this._account.release_folder_session(session);
                 debug("Remote closed");
             }
         }
-    }
-
-    /**
-     * Unhooks the IMAP folder session and returns it to the account.
-     */
-    private async void close_remote_locked() {
-        // Stop any internal tasks from running
-        this.remote_cancellable.cancel();
-        this.email_prefetcher.close();
-        this.update_flags_timer.reset();
-        this.replay_queue.stop_remote();
-
-        var session = this.remote_session;
-        this.remote_session = null;
-        if (session != null) {
-            session.appended.disconnect(on_remote_appended);
-            session.updated.disconnect(on_remote_updated);
-            session.removed.disconnect(on_remote_removed);
-            session.disconnected.disconnect(on_remote_disconnected);
-            yield this._account.release_folder_session(session);
-        }
-
     }
 
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
