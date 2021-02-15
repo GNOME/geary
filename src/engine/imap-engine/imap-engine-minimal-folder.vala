@@ -36,6 +36,13 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
 
 
+    [Flags]
+    private enum OpenReason {
+        MONITOR,
+        SYNCHRONISE;
+    }
+
+
     /** {@inheritDoc} */
     public Account account {
         get { return this._account; }
@@ -101,8 +108,9 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     private EmailPrefetcher email_prefetcher;
 
-    private GLib.Cancellable remote_cancellable = new GLib.Cancellable();
+    private OpenReason remote_opens = 0;
     private Imap.FolderSession? remote_session = null;
+    private GLib.Cancellable remote_cancellable = new GLib.Cancellable();
 
     private TimeoutManager update_flags_timer;
 
@@ -170,77 +178,40 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     /** {@inheritDoc} */
     public void start_monitoring() {
-        this._is_monitoring = true;
-        this._account.imap.notify["current-status"].connect(
-            this.on_remote_status_check
-        );
-        on_remote_status_check();
+        if (!this._is_monitoring) {
+            this._is_monitoring = true;
+            this.remote_opens |= MONITOR;
+            this._account.imap.notify["current-status"].connect(
+                this.on_remote_status_check
+            );
+            this.check_remote_session.begin();
+        }
     }
 
     /** {@inheritDoc} */
     public void stop_monitoring() {
-        this._is_monitoring = false;
-        this._account.imap.notify["current-status"].disconnect(
-            this.on_remote_status_check
-        );
-        this.check_remote_session.begin();
+        if (this._is_monitoring) {
+            this._is_monitoring = false;
+            this.remote_opens &= ~OpenReason.MONITOR;
+            this._account.imap.notify["current-status"].disconnect(
+                this.on_remote_status_check
+            );
+            this.check_remote_session.begin();
+        }
     }
 
     /** {@inheritDoc} */
     public async void synchronise(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        bool have_nooped = false;
-        int retries = 3;
-        while (!have_nooped && !cancellable.is_cancelled()) {
-            // The normalisation process will pick up any missing
-            // messages if closed, so ensure there is a remote
-            // session.
-            var remote = yield claim_remote_session(cancellable);
-
+        if (!(OpenReason.SYNCHRONISE in this.remote_opens)) {
+            this.remote_opens |= SYNCHRONISE;
             try {
-                // Send a NOOP so the server can return an untagged
-                // EXISTS if any new messages have arrived since the
-                // remote was opened.
-                //
-                // This is important for servers like GMail that
-                // automatically save sent mail, since the Sent folder
-                // will already be open, but unless the client is also
-                // showing the Sent folder, IDLE won't be enabled and
-                // hence we won't get notified of the saved mail.
-                yield remote.send_noop(cancellable);
-                have_nooped = true;
-            } catch (GLib.Error err) {
-                retries =- 1;
-                if (is_recoverable_failure(err) && retries > 0) {
-                    // XXX In theory we should be able to just retry
-                    // this immediately, but there's a race between
-                    // the old connection being disposed and another
-                    // being obtained that can make this into an
-                    // infinite loop. So limit the maximum number of
-                    // reties and set a timeout to help aid recovery.
-                    debug("Recoverable error during remote sync: %s",
-                          err.message);
-                    GLib.Timeout.add_seconds(
-                        1, this.synchronise.callback
-                    );
-                    yield;
-                } else {
-                    throw err;
-                }
+                yield synchronise_impl(cancellable);
+            } finally {
+                this.remote_opens &= ~OpenReason.SYNCHRONISE;
+                yield check_remote_session();
             }
         }
-
-        // Wait until the replay queue has processed all notifications
-        // so the prefetcher becomes aware of the new mail
-        this.replay_queue.flush_notifications();
-        yield this.replay_queue.checkpoint(cancellable);
-
-        // Finally, wait for the prefetcher to have finished
-        // downloading the new mail.
-        yield this.email_prefetcher.active_sem.wait_async(cancellable);
-
-        // Close the remote if no longer needed
-        yield check_remote_session();
     }
 
     /** {@inheritDoc} */
@@ -318,15 +289,67 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         }
     }
 
+    /** {@inheritDoc} */
+    public async void synchronise_impl(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        bool have_nooped = false;
+        int retries = 3;
+        while (!have_nooped && !cancellable.is_cancelled()) {
+            // The normalisation process will pick up any missing
+            // messages if closed, so ensure there is a remote
+            // session.
+            var remote = yield claim_remote_session(cancellable);
+
+            try {
+                // Send a NOOP so the server can return an untagged
+                // EXISTS if any new messages have arrived since the
+                // remote was opened.
+                //
+                // This is important for servers like GMail that
+                // automatically save sent mail, since the Sent folder
+                // will already be open, but unless the client is also
+                // showing the Sent folder, IDLE won't be enabled and
+                // hence we won't get notified of the saved mail.
+                yield remote.send_noop(cancellable);
+                have_nooped = true;
+            } catch (GLib.Error err) {
+                retries =- 1;
+                if (is_recoverable_failure(err) && retries > 0) {
+                    // XXX In theory we should be able to just retry
+                    // this immediately, but there's a race between
+                    // the old connection being disposed and another
+                    // being obtained that can make this into an
+                    // infinite loop. So limit the maximum number of
+                    // reties and set a timeout to help aid recovery.
+                    debug("Recoverable error during remote sync: %s",
+                          err.message);
+                    GLib.Timeout.add_seconds(
+                        1, this.synchronise_impl.callback
+                    );
+                    yield;
+                } else {
+                    throw err;
+                }
+            }
+        }
+
+        // Wait until the replay queue has processed all notifications
+        // so the prefetcher becomes aware of the new mail
+        this.replay_queue.flush_notifications();
+        yield this.replay_queue.checkpoint(cancellable);
+
+        // Finally, wait for the prefetcher to have finished
+        // downloading the new mail.
+        yield this.email_prefetcher.active_sem.wait_async(cancellable);
+    }
+
     private async void check_remote_session() {
+        bool should_be_connected = (this.remote_opens != 0);
         bool can_be_connected = (
             this._account.imap.current_status == CONNECTED
         );
-        bool should_be_connected = (
-            this.is_monitoring || this.replay_queue.has_remote_operation
-        );
         try {
-            if (can_be_connected && should_be_connected) {
+            if (should_be_connected && can_be_connected) {
                 debug("Remote should be open");
                 yield this.open_remote_session();
             } else {
