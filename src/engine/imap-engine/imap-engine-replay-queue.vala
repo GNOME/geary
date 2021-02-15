@@ -120,18 +120,22 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
     }
 
     private weak MinimalFolder owner;
+
     private ReplayOperation? local_op_active = null;
     private Nonblocking.Queue<ReplayOperation> local_queue =
         new Nonblocking.Queue<ReplayOperation>.fifo();
-    private bool remote_running = false;
+
     private ReplayOperation? remote_op_active = null;
     private Nonblocking.Queue<ReplayOperation> remote_queue =
         new Nonblocking.Queue<ReplayOperation>.fifo();
+    private GLib.Cancellable remote_cancellable = new GLib.Cancellable();
+
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
+
     private int64 next_submission_number = 0;
     private State state = State.OPEN;
-    private Cancellable remote_wait_cancellable = new Cancellable();
+
 
     public virtual signal void scheduled(ReplayOperation op) {
         debug("Scheduled: %s", op.to_string());
@@ -195,6 +199,9 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
     public ReplayQueue(MinimalFolder owner) {
         this.owner = owner;
         this.do_replay_local_async.begin();
+
+        // Start off with the remote queue not running
+        this.remote_cancellable.cancel();
     }
 
     ~ReplayQueue() {
@@ -205,15 +212,15 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
 
     /** Starts the remote queue running */
     public void start_remote() {
-        if (!this.remote_running) {
-            this.remote_running = true;
+        if (this.remote_cancellable.is_cancelled()) {
+            this.remote_cancellable = new GLib.Cancellable();
             this.do_replay_remote_async.begin();
         }
     }
 
     /** Starts the remote queue running */
     public void stop_remote() {
-        this.remote_running = false;
+        this.remote_cancellable.cancel();
     }
 
     /**
@@ -406,7 +413,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
         // and clear out all waiting operations, backing out any that
         // need to be backed out
         if (!flush_pending) {
-            this.remote_wait_cancellable.cancel();
+            this.remote_cancellable.cancel();
             yield clear_pending_async(cancellable);
         }
 
@@ -557,13 +564,16 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
     }
 
     private async void do_replay_remote_async() {
-        while (this.remote_running) {
-            // wait for the next operation ... do this *before*
+        while (!this.remote_cancellable.is_cancelled()) {
+            // Wait for the next operation ... do this *before*
             // waiting for remote
             ReplayOperation op;
             try {
-                op = yield this.remote_queue.peek();
-            } catch (Error recv_err) {
+                op = yield this.remote_queue.peek(this.remote_cancellable);
+            } catch (GLib.IOError.CANCELLED err) {
+                // all good
+                break;
+            } catch (GLib.Error recv_err) {
                 warning(
                     "Unable to receive next replay operation on remote queue %s: %s", to_string(),
                     recv_err.message
@@ -576,13 +586,16 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
             if (!is_close_op) {
                 try {
                     remote = yield owner.claim_remote_session(
-                        this.remote_wait_cancellable
+                        this.remote_cancellable
                     );
                     yield this.remote_queue.receive();
+                } catch (GLib.IOError.CANCELLED err) {
+                    // all good, just bail out
+                    break;
                 } catch (GLib.Error remote_err) {
                     // Have to bail out completely if we can't get a
                     // remote, since any op that runs will fail
-                    this.remote_running = false;
+                    this.remote_cancellable.cancel();
                     warning(
                         "Folder %s closed or failed to open, remote replay queue closing: %s",
                         to_string(),
@@ -591,7 +604,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
                     break;
                 }
             } else {
-                this.remote_running = false;
+                this.remote_cancellable.cancel();
             }
 
             this.remote_op_active = op;
