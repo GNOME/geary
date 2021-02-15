@@ -346,6 +346,10 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     private async void open_remote_session(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
+        if (this._account.imap.current_status != CONNECTED) {
+            throw new EngineError.SERVER_UNAVAILABLE("Not IMAP not connected");
+        }
+
         lock (this.remote_session) {
             if (this.remote_session == null) {
                 yield open_remote_locked(cancellable);
