@@ -340,7 +340,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
         // Finally, wait for the prefetcher to have finished
         // downloading the new mail.
-        yield this.email_prefetcher.active_sem.wait_async(cancellable);
+        yield this.email_prefetcher.active_lock.wait_async(cancellable);
     }
 
     private async void check_remote_session() {

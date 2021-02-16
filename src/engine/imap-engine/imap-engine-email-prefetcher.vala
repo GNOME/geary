@@ -27,8 +27,9 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
     private const int PREFETCH_CHUNK_BYTES = 512 * 1024;
 
-    public Nonblocking.CountingSemaphore active_sem { get; private set;
-        default = new Nonblocking.CountingSemaphore(null); }
+    public Nonblocking.Semaphore active_lock {
+        get; private set; default = new Nonblocking.Semaphore(null);
+    }
 
     private weak ImapEngine.MinimalFolder folder;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
@@ -60,8 +61,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         if (this.running.is_cancelled()) {
             this.running = new Cancellable();
 
-            // acquire here since .begin() only schedules for later
-            this.active_sem.acquire();
+            this.active_lock.reset();
             this.do_prepare_all_local_async.begin();
         }
     }
@@ -69,34 +69,25 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public void close() {
         if (!this.running.is_cancelled()) {
             this.running.cancel();
+            this.prefetch_timer.reset();
 
-            if (this.prefetch_timer.is_running) {
-                this.prefetch_timer.reset();
-                // An acquire was done when the timer was started, so
-                // need to notify if it is still running.
-                this.active_sem.blind_notify();
-            }
+            this.active_lock.blind_notify();
         }
     }
 
     private void on_local_expansion(Gee.Collection<Geary.EmailIdentifier> ids) {
         if (!this.running.is_cancelled()) {
-            // acquire here since .begin() only schedules for later
-            this.active_sem.acquire();
-            do_prepare_new_async.begin(ids);
+            this.active_lock.reset();
+            this.do_prepare_new_async.begin(ids);
         }
     }
 
     private void schedule_prefetch(Gee.Collection<Geary.Email>? emails) {
         if (emails != null && emails.size > 0) {
             this.prefetch_emails.add_all(emails);
-
-            // only increment active state if not rescheduling
-            if (!this.prefetch_timer.is_running) {
-                this.active_sem.acquire();
-            }
-
             this.prefetch_timer.start();
+        } else {
+            this.active_lock.blind_notify();
         }
     }
 
@@ -119,7 +110,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         debug("%s: Scheduling %d messages on open for prefetching",
               this.folder.to_string(), list != null ? list.size : 0);
         schedule_prefetch(list);
-        this.active_sem.blind_notify();
     }
 
     private async void do_prepare_new_async(Gee.Collection<Geary.EmailIdentifier> ids) {
@@ -141,7 +131,6 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         debug("%s: Scheduling %d new emails for prefetching",
               this.folder.to_string(), list != null ? list.size : 0);
         schedule_prefetch(list);
-        this.active_sem.blind_notify();
     }
 
     private async void do_prefetch_async() {
@@ -155,7 +144,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         }
 
         // this round is done
-        active_sem.blind_notify();
+        this.active_lock.blind_notify();
 
         if (token != Nonblocking.Mutex.INVALID_TOKEN) {
             try {
