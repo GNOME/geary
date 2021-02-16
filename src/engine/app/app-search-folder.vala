@@ -217,6 +217,17 @@ public class Geary.App.SearchFolder : BaseObject,
         ).to_hash_set();
     }
 
+    /** {@inheritDoc} */
+    public async Email get_email_by_id(EmailIdentifier fetch,
+                                       Email.Field required_fields,
+                                       GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        require_id(fetch);
+        return yield this.account.local_fetch_email_async(
+            fetch, required_fields, cancellable
+        );
+    }
+
     public async Gee.List<Email>? list_email_by_id_async(
         EmailIdentifier? initial_id,
         int count,
@@ -323,17 +334,6 @@ public class Geary.App.SearchFolder : BaseObject,
     ) throws GLib.Error {
         return yield this.account.list_local_email_async(
             check_ids(list), required_fields, cancellable
-        );
-    }
-
-    public async Email fetch_email_async(EmailIdentifier fetch,
-                                         Email.Field required_fields,
-                                         Folder.ListFlags flags,
-                                         GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        require_id(fetch);
-        return yield this.account.local_fetch_email_async(
-            fetch, required_fields, cancellable
         );
     }
 

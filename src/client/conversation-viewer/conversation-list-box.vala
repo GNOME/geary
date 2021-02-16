@@ -1153,10 +1153,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // full email here so that ConverationEmail can handle it if
         // the full email isn't actually available in the same way as
         // any other.
-        Geary.Email full_email = yield this.email_store.fetch_email_async(
+        Geary.Email full_email = yield this.email_store.get_email_by_id(
             id,
             REQUIRED_FIELDS | ConversationEmail.REQUIRED_FOR_CONSTRUCT,
-            Geary.Folder.ListFlags.NONE,
             this.cancellable
         );
 

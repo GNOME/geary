@@ -207,7 +207,6 @@ engine_vala_sources = files(
   'imap-engine/replay-ops/imap-engine-copy-email.vala',
   'imap-engine/replay-ops/imap-engine-create-email.vala',
   'imap-engine/replay-ops/imap-engine-empty-folder.vala',
-  'imap-engine/replay-ops/imap-engine-fetch-email.vala',
   'imap-engine/replay-ops/imap-engine-list-email-by-id.vala',
   'imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala',
   'imap-engine/replay-ops/imap-engine-mark-email.vala',

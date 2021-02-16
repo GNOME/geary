@@ -118,6 +118,18 @@ public class Mock.RemoteFolder : GLib.Object,
         );
     }
 
+    public async Geary.Email get_email_by_id(
+        Geary.EmailIdentifier email_id,
+        Geary.Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return yield object_call_async<Geary.Email>(
+            "get_email",
+            {email_id, box_arg(required_fields), cancellable},
+            new Geary.Email(new Mock.EmailIdentifer(0))
+        );
+    }
+
     public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
@@ -143,15 +155,6 @@ public class Mock.RemoteFolder : GLib.Object,
             {ids, box_arg(required_fields), box_arg(flags), cancellable},
             null
         );
-    }
-
-    public async Geary.Email
-        fetch_email_async(Geary.EmailIdentifier email_id,
-                          Geary.Email.Field required_fields,
-                          Geary.Folder.ListFlags flags,
-                          GLib.Cancellable? cancellable = null)
-    throws GLib.Error {
-        throw new Geary.EngineError.UNSUPPORTED("Mock method");
     }
 
     public void set_used_as_custom(bool enabled)

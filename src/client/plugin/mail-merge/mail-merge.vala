@@ -415,10 +415,9 @@ public class Plugin.MailMerge :
             var account_context = this.client_plugins.to_client_account(
                 plugin.identifier.account
             );
-            engine = yield account_context.emails.fetch_email_async(
+            engine = yield account_context.emails.get_email_by_id(
                 engine.id,
                 global::MailMerge.Processor.REQUIRED_FIELDS,
-                Geary.Folder.ListFlags.LOCAL_ONLY,
                 this.cancellable
             );
         }

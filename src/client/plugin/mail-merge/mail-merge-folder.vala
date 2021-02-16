@@ -191,11 +191,10 @@ public class MailMerge.Folder : Geary.BaseObject,
         ).to_hash_set();
     }
 
-    public async Geary.Email
-        fetch_email_async(Geary.EmailIdentifier id,
-                          Geary.Email.Field required_fields,
-                          Geary.Folder.ListFlags flags,
-                          GLib.Cancellable? cancellable = null)
+    /** {@inheritDoc} */
+    public async Geary.Email get_email_by_id(Geary.EmailIdentifier id,
+                                             Geary.Email.Field required_fields,
+                                             GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         var email = this.email.get(id);
         if (email == null) {

@@ -5,26 +5,26 @@
  */
 
 private class Geary.App.FetchOperation : Geary.App.AsyncFolderOperation {
+
     public override Type folder_type { get { return typeof(Geary.Folder); } }
 
-    public Geary.Email? result = null;
-    public Geary.Email.Field required_fields;
-    public Geary.Folder.ListFlags flags;
+    public Email? result { get; private set; default = null; }
+    public Email.Field required_fields;
 
-    public FetchOperation(Geary.Email.Field required_fields, Geary.Folder.ListFlags flags) {
+
+    public FetchOperation(Email.Field required_fields) {
         this.required_fields = required_fields;
-        this.flags = flags;
     }
 
-    public override async Gee.Collection<Geary.EmailIdentifier> execute_async(
-        Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids,
-        Cancellable? cancellable) throws Error {
-        assert(result == null);
-        Geary.EmailIdentifier? id = Collection.first(ids);
-        assert(id != null);
-
-        result = yield folder.fetch_email_async(
-            id, required_fields, flags, cancellable);
-        return Geary.iterate<Geary.EmailIdentifier>(id).to_array_list();
+    public override async Gee.Collection<EmailIdentifier> execute_async(
+        Folder folder,
+        Gee.Collection<EmailIdentifier> ids,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        var id = Collection.first(ids);
+        this.result = yield folder.get_email_by_id(
+            id, required_fields, cancellable
+        );
+        return iterate<EmailIdentifier>(id).to_array_list();
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -18,11 +18,18 @@
  * sending), or as a representation of those found in a mailbox on a
  * remote mail server, such as those provided by an IMAP server. Email
  * messages are represented by the {@link Email} class, and many
- * folder methods will return collections of these.
+ * folder methods return instances of these.
+ *
+ * The set of email in a folder is called the folder's ''vector'', and
+ * contains generally the most recent message in the mailbox at the
+ * upper end, back through to some older message at the start or lower
+ * end of the vector. The ordering of the vector is the ''natural''
+ * ordering, based on the order in which messages were appended to the
+ * folder, not when messages were sent or some other criteria.
  *
  * Folders that represent a remote folder extend {@link
- * RemoteFolder}. These cache the remote folder's email locally, and
- * the set of cached messages may be a subset of those available in
+ * RemoteFolder}. These cache the remote folder's email locally in the
+ * vector, and these messages may be a subset of those available in
  * the mailbox, depending on an account's settings. Email messages may
  * be partially cached, in the case of a new message having just
  * arrived or a message with many large attachments that was not
@@ -664,6 +671,32 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     throws GLib.Error;
 
     /**
+     * Returns email from the folder's vector.
+     *
+     * The returned email object will have its property values set for
+     * at least all requested fields, others may or may not be. If is
+     * good practice for callers request only the fields be loaded
+     * that they actually require, since the time taken to load the
+     * message will be reduced as there will be less data to load from
+     * local storage.
+     *
+     * Note that for remote-backed folders, an email may not have yet
+     * been fully downloaded and hence might exist incomplete in local
+     * storage. If the requested fields are not available, {@link
+     * EngineError.INCOMPLETE_MESSAGE} is thrown. Connect to the
+     * {@link Account.email_complete} signal to be notified of when
+     * email is fully downloaded in this case.
+     *
+     * If the given email identifier is not present in the vector, an
+     * {@link EngineError.NOT_FOUND} error is thrown.
+     */
+    public abstract async Geary.Email get_email_by_id(
+        EmailIdentifier email_id,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
      * List a number of contiguous emails in the folder's vector.
      *
      * Emails in the folder are listed starting at a particular
@@ -731,26 +764,6 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     public abstract async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, ListFlags flags,
         Cancellable? cancellable = null) throws Error;
-
-    /**
-     * Returns a single email that fulfills the required_fields flag at the ordered position in
-     * the folder.  If the email_id is invalid for the folder's contents, an EngineError.NOT_FOUND
-     * error is thrown.  If the requested fields are not available, EngineError.INCOMPLETE_MESSAGE
-     * is thrown.
-     *
-     * Because fetch_email_async() is a form of listing (listing exactly one email), it takes
-     * ListFlags as a parameter.  See list_email_async() for more information.  Note that one
-     * flag (ListFlags.EXCLUDING_ID) makes no sense in this context.
-     *
-     * This method also works like the list variants in that it will not wait for the server to
-     * connect if called in the OPENING state.  A ListFlag option may be offered in the future to
-     * force waiting for the server to connect.  Unlike the list variants, if in the OPENING state
-     * and the message is not found locally, EngineError.NOT_FOUND is thrown.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
 
     /**
      * Sets whether this folder has a custom special use.

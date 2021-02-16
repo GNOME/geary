@@ -216,6 +216,28 @@ public class Geary.Outbox.Folder : BaseObject,
         return contains;
     }
 
+    /** {@inheritDoc} */
+    public async Email get_email_by_id(Geary.EmailIdentifier id,
+                                       Email.Field required_fields,
+                                       GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        EmailIdentifier? outbox_id = id as EmailIdentifier;
+        if (outbox_id == null)
+            throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+
+        OutboxRow? row = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        if (row == null)
+            throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
+
+        return row_to_email(row);
+    }
+
     public async Gee.List<Email>?
         list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
                                int count,
@@ -325,29 +347,6 @@ public class Geary.Outbox.Folder : BaseObject,
         }, cancellable);
 
         return (list.size > 0) ? list : null;
-    }
-
-    public async Email
-        fetch_email_async(Geary.EmailIdentifier id,
-                          Geary.Email.Field required_fields,
-                          Geary.Folder.ListFlags flags,
-                          GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        EmailIdentifier? outbox_id = id as EmailIdentifier;
-        if (outbox_id == null)
-            throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-
-        OutboxRow? row = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        if (row == null)
-            throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
-
-        return row_to_email(row);
     }
 
     /** {@inheritDoc} */

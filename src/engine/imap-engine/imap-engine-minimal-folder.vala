@@ -880,6 +880,20 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         return yield this.local_folder.contains_identifiers(ids, cancellable);
     }
 
+    /** {@inheritDoc} */
+    public async Email get_email_by_id(EmailIdentifier id,
+                                       Email.Field required_fields,
+                                       GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        check_id("get_email_by_id", id);
+        return yield this.local_folder.fetch_email_async(
+            (ImapDB.EmailIdentifier) id,
+            required_fields,
+            NONE,
+            cancellable
+        );
+    }
+
     //
     // list email variants
     //
@@ -922,25 +936,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         yield op.wait_for_ready_async(cancellable);
 
         return !op.accumulator.is_empty ? op.accumulator : null;
-    }
-
-    public async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags, Cancellable? cancellable = null)
-        throws Error {
-        check_flags("fetch_email_async", flags);
-        check_id("fetch_email_async", id);
-
-        FetchEmail op = new FetchEmail(
-            this,
-            (ImapDB.EmailIdentifier) id,
-            required_fields,
-            flags,
-            cancellable
-        );
-        replay_queue.schedule(op);
-
-        yield op.wait_for_ready_async(cancellable);
-        return op.email;
     }
 
     // Helper function for child classes dealing with the

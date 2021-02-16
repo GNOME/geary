@@ -75,10 +75,11 @@ public class Geary.App.EmailStore : BaseObject {
     /**
      * Fetches any EmailIdentifier regardless of what folder it's in.
      */
-    public async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
-        Cancellable? cancellable = null) throws Error {
-        FetchOperation op = new Geary.App.FetchOperation(required_fields, flags);
+    public async Email get_email_by_id(EmailIdentifier email_id,
+                                       Email.Field required_fields,
+                                       GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        FetchOperation op = new Geary.App.FetchOperation(required_fields);
         yield do_folder_operation_async(op,
             Geary.iterate<Geary.EmailIdentifier>(email_id).to_array_list(), cancellable);
 

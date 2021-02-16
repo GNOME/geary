@@ -357,20 +357,26 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (!loaded) {
             this.body_loading_timeout.start();
             try {
-                this.email = yield this.email_store.fetch_email_async(
+                this.email = yield this.email_store.get_email_by_id(
                     this.email.id,
                     REQUIRED_FOR_LOAD,
-                    LOCAL_ONLY, // Throws an error if not downloaded
                     this.load_cancellable
                 );
                 loaded = true;
                 this.body_loading_timeout.reset();
             } catch (Geary.EngineError.INCOMPLETE_MESSAGE err) {
                 // Don't have the complete message at the moment, so
-                // download it in the background. Don't reset the body
-                // load timeout here since this will attempt to fetch
-                // from the remote
-                this.fetch_remote_body.begin();
+                // wait for it to be downloaded. Don't reset the body
+                // load timeout here since we want it to show up.
+                this.email_store.account.email_complete.connect(
+                    this.on_email_complete
+                );
+                this.body_loading_timeout.reset();
+                if (is_online()) {
+                    this.primary_message.show_loading_pane();
+                } else {
+                    handle_load_offline();
+                }
             } catch (GLib.IOError.CANCELLED err) {
                 this.body_loading_timeout.reset();
                 throw err;
@@ -617,49 +623,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
     }
 
-    private async void fetch_remote_body() {
-        if (is_online()) {
-            // XXX Need proper progress reporting here, rather than just
-            // doing a pulse
-            if (!this.body_loading_timeout.is_running) {
-                this.body_loading_timeout.start();
-            }
-
-            Geary.Email? loaded = null;
-            try {
-                debug("Downloading remote message: %s", this.email.to_string());
-                loaded = yield this.email_store.fetch_email_async(
-                    this.email.id,
-                    REQUIRED_FOR_LOAD,
-                    FORCE_UPDATE,
-                    this.load_cancellable
-                );
-            } catch (GLib.IOError.CANCELLED err) {
-                // All good
-            } catch (GLib.Error err) {
-                debug("Remote message download failed: %s", err.message);
-                handle_load_failure(err);
-            }
-
-            this.body_loading_timeout.reset();
-
-            if (loaded != null && !this.load_cancellable.is_cancelled()) {
-                try {
-                    this.email = loaded;
-                    yield update_body();
-                } catch (GLib.IOError.CANCELLED err) {
-                    // All good
-                } catch (GLib.Error err) {
-                    debug("Remote message update failed: %s", err.message);
-                    handle_load_failure(err);
-                }
-            }
-        } else {
-            this.body_loading_timeout.reset();
-            handle_load_offline();
-        }
-    }
-
     private async void update_body()
         throws GLib.Error {
         Geary.RFC822.Message message = this.email.get_message();
@@ -878,6 +841,15 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.body_loading_timeout.reset();
     }
 
+    private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
+        if (this.email.id in ids) {
+            this.email_store.account.email_complete.disconnect(
+                this.on_email_complete
+            );
+            this.load_body.begin();
+        }
+    }
+
     private void on_flag_remote_images() {
         activate_email_action(ConversationListBox.ACTION_MARK_LOAD_REMOTE);
     }
@@ -957,7 +929,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         if (this.message_body_state == FAILED &&
             !this.load_cancellable.is_cancelled() &&
             is_online()) {
-            this.fetch_remote_body.begin();
+            this.load_body.begin();
         }
     }
 
