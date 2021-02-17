@@ -30,8 +30,8 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
 
     private const int FLAG_UPDATE_TIMEOUT_SEC = 2;
-    private const int FLAG_UPDATE_START_CHUNK = 20;
-    private const int FLAG_UPDATE_MAX_CHUNK = 100;
+    private const int FLAG_UPDATE_START_CHUNK = 16;
+    private const int FLAG_UPDATE_MAX_CHUNK = 1024;
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
 
