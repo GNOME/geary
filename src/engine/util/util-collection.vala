@@ -23,6 +23,13 @@ namespace Geary.Collection {
         return single;
     }
 
+    /** Returns a modifiable set containing a single element. */
+    public Gee.Set<E> single_set<E>(E element) {
+        var single = new Gee.HashSet<E>();
+        single.add(element);
+        return single;
+    }
+
     /** Returns a copy of the given collection in a new collection. */
     public Gee.Collection<V> copy<V>(Gee.Collection<V> original) {
         // Use a linked list, the returned value can't be accessed by
