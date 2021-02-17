@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright 2018-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -25,6 +25,14 @@
  * a database. This can be checked via an email's {@link fields}
  * property, and if the currently loaded fields are not sufficient,
  * then additional fields can be loaded via a folder.
+ *
+ * Email objects are mutable and hence do not define equality. This
+ * makes them unsuitable for use in collections dependent on object
+ * identity, such as sets and maps. However they can be somewhat
+ * safely in these collections if their identity is based on their
+ * {@link id}, which is generally immutable. See {@link
+ * new_identifier_based_set} and {@link emails_to_map} for support for
+ * this.
  */
 public class Geary.Email : BaseObject, EmailHeaderSet {
 
@@ -177,6 +185,20 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
             }
             return value;
         }
+    }
+
+
+    /**
+     * Returns a new email set, with identity defined by identifier identity.
+     *
+     * Email objects are not immutable, hence do not define equality,
+     * which makes them
+     */
+    public static Gee.Set<Email>? new_identifier_based_set() {
+        return new Gee.HashSet<Geary.Email>(
+            e => e.id.hash(),
+            (e1, e2) => e1.id.equal_to(e2.id)
+        );
     }
 
     /**
