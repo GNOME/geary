@@ -62,17 +62,6 @@ public class Geary.App.EmailStore : BaseObject {
     }
 
     /**
-     * Lists any set of EmailIdentifiers as if they were all in one folder.
-     */
-    public async Gee.Collection<Geary.Email>? list_email_by_sparse_id_async(
-        Gee.Collection<Geary.EmailIdentifier> emails, Geary.Email.Field required_fields,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
-        ListOperation op = new Geary.App.ListOperation(required_fields, flags);
-        yield do_folder_operation_async(op, emails, cancellable);
-        return (op.results.size > 0 ? op.results : null);
-    }
-
-    /**
      * Fetches any EmailIdentifier regardless of what folder it's in.
      */
     public async Email get_email_by_id(EmailIdentifier email_id,
@@ -86,6 +75,19 @@ public class Geary.App.EmailStore : BaseObject {
         if (op.result == null)
             throw new EngineError.NOT_FOUND("Couldn't fetch email ID %s", email_id.to_string());
         return op.result;
+    }
+
+    /**
+     * Lists any set of EmailIdentifiers as if they were all in one folder.
+     */
+    public async Gee.Collection<Geary.Email> get_multiple_email_by_id(
+        Gee.Collection<EmailIdentifier> emails,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        var op = new Geary.App.ListOperation(required_fields);
+        yield do_folder_operation_async(op, emails, cancellable);
+        return op.results;
     }
 
     /**

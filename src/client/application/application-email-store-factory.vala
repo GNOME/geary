@@ -69,13 +69,12 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
 
             foreach (var context in found_accounts.keys) {
                 Gee.Collection<Geary.Email> batch =
-                    yield context.emails.list_email_by_sparse_id_async(
+                    yield context.emails.get_multiple_email_by_id(
                         found_accounts.get(context),
                         REQUIRED_FIELDS,
-                        NONE,
                         context.cancellable
                     );
-                if (batch != null) {
+                if (!batch.is_empty) {
                     foreach (var email in batch) {
                         emails.add(
                             new EmailImpl(

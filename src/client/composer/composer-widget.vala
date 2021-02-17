@@ -692,14 +692,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         var full_context = context;
         if (!context.fields.is_all_set(REQUIRED_FIELDS)) {
-            Gee.Collection<Geary.Email>? email =
-                yield this.sender_context.emails.list_email_by_sparse_id_async(
+            Gee.Collection<Geary.Email> email =
+                yield this.sender_context.emails.get_multiple_email_by_id(
                     Geary.Collection.single(context.id),
                     REQUIRED_FIELDS,
-                    NONE,
                     this.sender_context.cancellable
                 );
-            if (email == null || email.is_empty) {
+            if (email.is_empty) {
                 throw new Geary.EngineError.INCOMPLETE_MESSAGE(
                     "Unable to load email fields required for composer: %s",
                     context.fields.to_string()

@@ -228,6 +228,17 @@ public class Geary.App.SearchFolder : BaseObject,
         );
     }
 
+    /** {@inheritDoc} */
+    public async Gee.Set<Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return yield this.account.get_multiple_email_by_id(
+            check_ids(ids), required_fields, cancellable
+        );
+    }
+
     public async Gee.List<Email>? list_email_by_id_async(
         EmailIdentifier? initial_id,
         int count,
@@ -305,11 +316,11 @@ public class Geary.App.SearchFolder : BaseObject,
             }
         }
 
-        Gee.List<Email>? results = null;
+        Gee.Set<Email> results = null;
         GLib.Error? list_error = null;
         if (!engine_ids.is_empty) {
             try {
-                results = yield this.account.list_local_email_async(
+                results = yield this.account.get_multiple_email_by_id(
                     engine_ids,
                     required_fields,
                     cancellable
@@ -323,18 +334,9 @@ public class Geary.App.SearchFolder : BaseObject,
             throw list_error;
         }
 
-        return results;
-    }
-
-    public async Gee.List<Email>? list_email_by_sparse_id_async(
-        Gee.Collection<EmailIdentifier> list,
-        Email.Field required_fields,
-        Folder.ListFlags flags,
-        Cancellable? cancellable = null
-    ) throws GLib.Error {
-        return yield this.account.list_local_email_async(
-            check_ids(list), required_fields, cancellable
-        );
+        var list = new Gee.ArrayList<Email>();
+        list.add_all(EmailIdentifier.sort_emails(results));
+        return list.is_empty ? null : list;
     }
 
     public virtual async void remove_email_async(
@@ -537,7 +539,7 @@ public class Geary.App.SearchFolder : BaseObject,
                 // Fetch email to get the received date for
                 // correct ordering in the search folder
                 Gee.Collection<Email> email_results =
-                    yield this.account.list_local_email_async(
+                    yield this.account.get_multiple_email_by_id(
                         id_results,
                         PROPERTIES,
                         cancellable

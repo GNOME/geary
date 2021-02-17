@@ -492,23 +492,21 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     }
 
     /** Loads messages from the base folder into the window. */
-    internal async void load_by_sparse_id(Gee.Collection<EmailIdentifier> ids,
-                                          Folder.ListFlags flags = Folder.ListFlags.NONE)
+    internal async void load_by_sparse_id(Gee.Collection<EmailIdentifier> ids)
         throws Error {
         notify_scan_started();
 
         GLib.Error? scan_error = null;
         try {
-            Gee.Collection<Geary.Email>? messages =
-                yield this.base_folder.list_email_by_sparse_id_async(
-                    ids, required_fields, flags, this.operation_cancellable
+            Gee.Collection<Geary.Email> messages =
+                yield this.base_folder.get_multiple_email_by_id(
+                    ids, required_fields, this.operation_cancellable
                 );
 
-            if (messages != null && !messages.is_empty) {
+            if (!messages.is_empty) {
                 foreach (Email email in messages) {
                     this.window.add(email.id);
                 }
-
                 yield process_email_async(messages, ProcessJobContext());
             }
         } catch (GLib.Error err) {
@@ -529,16 +527,14 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
      * handled separately.
      */
     internal async void external_load_by_sparse_id(Folder folder,
-                                                   Gee.Collection<EmailIdentifier> ids,
-                                                   Folder.ListFlags flags)
+                                                   Gee.Collection<EmailIdentifier> ids)
         throws GLib.Error {
         // First just get the bare minimum we need to determine if we even
         // care about the messages.
-        Gee.List<Geary.Email>? emails =
-            yield folder.list_email_by_sparse_id_async(
-                ids, Geary.Email.Field.REFERENCES, flags, this.operation_cancellable
-            );
-        if (emails != null) {
+        Gee.Set<Geary.Email> emails = yield folder.get_multiple_email_by_id(
+            ids, REFERENCES, this.operation_cancellable
+        );
+        if (!emails.is_empty) {
             var relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
             foreach (var email in emails) {
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
@@ -552,18 +548,17 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
             // fields, to make sure when we load them from the
             // database we have all the data we need.
             if (!relevant_ids.is_empty) {
-                emails = yield folder.list_email_by_sparse_id_async(
+                emails = yield folder.get_multiple_email_by_id(
                     relevant_ids,
                     required_fields,
-                    flags,
                     this.operation_cancellable
                 );
             } else {
-                emails = null;
+                emails.clear();
             }
         }
 
-        if (emails != null && !emails.is_empty) {
+        if (!emails.is_empty) {
             debug("Fetched %d relevant emails locally", emails.size);
             yield process_email_async(emails, ProcessJobContext());
         }

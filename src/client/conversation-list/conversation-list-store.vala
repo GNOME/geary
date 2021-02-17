@@ -203,12 +203,13 @@ public class ConversationListStore : Gtk.ListStore {
 
     private async Gee.Collection<Geary.Email> do_get_previews_async(
         Gee.Collection<Geary.EmailIdentifier> emails_needing_previews) {
-        Geary.Folder.ListFlags flags = (loading_local_only) ? Geary.Folder.ListFlags.LOCAL_ONLY
-            : Geary.Folder.ListFlags.NONE;
-        Gee.Collection<Geary.Email>? emails = null;
+        Gee.Collection<Geary.Email> emails = null;
         try {
-            emails = yield email_store.list_email_by_sparse_id_async(emails_needing_previews,
-                ConversationListStore.WITH_PREVIEW_FIELDS, flags, cancellable);
+            emails = yield email_store.get_multiple_email_by_id(
+                emails_needing_previews,
+                WITH_PREVIEW_FIELDS,
+                cancellable
+            );
         } catch (GLib.IOError.CANCELLED err) {
             // All good
         } catch (Geary.EngineError.NOT_FOUND err) {
@@ -218,7 +219,7 @@ public class ConversationListStore : Gtk.ListStore {
             warning("Unable to fetch preview: %s", err.message);
         }
 
-        return emails ?? new Gee.ArrayList<Geary.Email>();
+        return emails;
     }
 
     private Gee.Set<Geary.EmailIdentifier> get_emails_needing_previews() {

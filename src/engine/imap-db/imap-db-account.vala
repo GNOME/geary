@@ -666,13 +666,13 @@ private class Geary.ImapDB.Account : BaseObject {
         return search_matches;
     }
 
-    public async Gee.List<Email>? list_email(Gee.Collection<EmailIdentifier> ids,
-                                             Email.Field required_fields,
-                                             GLib.Cancellable? cancellable = null)
-    throws GLib.Error {
+    public async Gee.Set<Email> list_email(Gee.Collection<EmailIdentifier> ids,
+                                           Email.Field required_fields,
+                                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
-        var results = new Gee.ArrayList<Email>();
+        var results = Email.new_identifier_based_set();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
                 foreach (var id in ids) {
                     // TODO: once we have a way of deleting messages, we won't be able

@@ -205,6 +205,24 @@ public class MailMerge.Folder : Geary.BaseObject,
         return email;
     }
 
+    public async Gee.Set<Geary.Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        var results = Geary.Email.new_identifier_based_set();
+        foreach (var id in ids) {
+            var email = this.email.get(id);
+            if (email == null) {
+                throw new Geary.EngineError.NOT_FOUND(
+                    "No email with ID %s in merge", id.to_string()
+                );
+            }
+            results.add(email);
+        }
+        return results;
+    }
+
     public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
@@ -250,25 +268,6 @@ public class MailMerge.Folder : Geary.BaseObject,
             }
         }
 
-        return (list.size > 0) ? list : null;
-    }
-
-    public async Gee.List<Geary.Email>?
-        list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                      Geary.Email.Field required_fields,
-                                      Geary.Folder.ListFlags flags,
-                                      GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-        foreach (var id in ids) {
-            var email = this.email.get(id);
-            if (email == null) {
-                throw new Geary.EngineError.NOT_FOUND(
-                    "No email with ID %s in merge", id.to_string()
-                );
-            }
-            list.add(email);
-        }
         return (list.size > 0) ? list : null;
     }
 

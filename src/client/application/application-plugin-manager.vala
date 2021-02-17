@@ -163,12 +163,11 @@ public class Application.PluginManager : GLib.Object {
             if (id == null) {
                 throw new Plugin.Error.NOT_FOUND("Email id not found");
             }
-            Gee.Collection<Geary.Email>? email = null;
+            Gee.Collection<Geary.Email> email = null;
             try {
-                email = yield source_impl.backing.emails.list_email_by_sparse_id_async(
+                email = yield source_impl.backing.emails.get_multiple_email_by_id(
                     Geary.Collection.single(id),
                     Composer.Widget.REQUIRED_FIELDS,
-                    NONE,
                     source_impl.backing.cancellable
                 );
             } catch (GLib.Error err) {
@@ -176,7 +175,7 @@ public class Application.PluginManager : GLib.Object {
                     "Error looking up email: %s", err.message
                 );
             }
-            if (email == null || email.is_empty) {
+            if (email.is_empty) {
                 throw new Plugin.Error.NOT_FOUND("Email not found for id");
             }
             var context = Geary.Collection.first(email);

@@ -604,7 +604,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /** {@inheritDoc} */
-    public override async Gee.List<Email> list_local_email_async(
+    public override async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> ids,
         Email.Field required_fields,
         GLib.Cancellable? cancellable = null

@@ -894,6 +894,20 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         );
     }
 
+    /** {@inheritDoc} */
+    public async Gee.Set<Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return yield this.local_folder.list_email_by_sparse_id_async(
+            check_ids("get_multiple_email_by_id", ids),
+            required_fields,
+            NONE,
+            cancellable
+        );
+    }
+
     //
     // list email variants
     //
@@ -910,26 +924,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
         // Schedule list operation and wait for completion.
         ListEmailByID op = new ListEmailByID(this, (ImapDB.EmailIdentifier) initial_id, count,
-            required_fields, flags, cancellable);
-        replay_queue.schedule(op);
-
-        yield op.wait_for_ready_async(cancellable);
-
-        return !op.accumulator.is_empty ? op.accumulator : null;
-    }
-
-    public async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, Folder.ListFlags flags,
-        Cancellable? cancellable = null) throws Error {
-        check_flags("list_email_by_sparse_id_async", flags);
-        check_ids("list_email_by_sparse_id_async", ids);
-
-        if (ids.size == 0)
-            return null;
-
-        // Schedule list operation and wait for completion.
-        // TODO: Break up requests to avoid hogging the queue
-        ListEmailBySparseID op = new ListEmailBySparseID(this, (Gee.Collection<ImapDB.EmailIdentifier>) ids,
             required_fields, flags, cancellable);
         replay_queue.schedule(op);
 
@@ -982,9 +976,14 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             throw new EngineError.BAD_PARAMETERS("Email ID %s is not IMAP Email ID", id.to_string());
     }
 
-    private void check_ids(string method, Gee.Collection<EmailIdentifier> ids) throws EngineError {
-        foreach (EmailIdentifier id in ids)
+    private Gee.Collection<ImapDB.EmailIdentifier> check_ids(
+        string method,
+        Gee.Collection<EmailIdentifier> ids
+    ) throws EngineError {
+        foreach (EmailIdentifier id in ids) {
             check_id(method, id);
+        }
+        return (Gee.Collection<ImapDB.EmailIdentifier>) ids;
     }
 
     public virtual async void
@@ -1186,52 +1185,59 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
         Geary.EmailIdentifier? lowest = null;
-        while (this.remote_session != null) {
-            Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
+        while (true) {
+            Gee.List<Geary.Email>? local = yield list_email_by_id_async(
                 lowest, chunk_size,
                 Geary.Email.Field.FLAGS,
                 Geary.Folder.ListFlags.LOCAL_ONLY,
                 cancellable
             );
-            if (list_local == null || list_local.is_empty)
+            if (local == null ||
+                local.is_empty ||
+                this.remote_session == null) {
                 break;
-
-            // find the lowest for the next iteration
-            lowest = Geary.EmailIdentifier.sort_emails(list_local).first().id;
-
-            // Get all email identifiers in the local folder mapped to their EmailFlags
-            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map =
-                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
-            foreach (Geary.Email e in list_local)
-                local_map.set(e.id, e.email_flags);
-
-            // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
-            // and the latest to be gotten from the server (updating the cache in the process)
-            debug("Fetching %d flags", local_map.keys.size);
-            Gee.List<Geary.Email>? list_remote = yield list_email_by_sparse_id_async(
-                local_map.keys,
-                Email.Field.FLAGS,
-                Folder.ListFlags.FORCE_UPDATE |
-                // Updating read/unread count here breaks the unread
-                // count, so don't do it. See issue #213.
-                Folder.ListFlags.NO_UNREAD_UPDATE,
-                cancellable
-            );
-            if (list_remote == null || list_remote.is_empty)
-                break;
-
-            // Build map of emails that have changed.
-            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map =
-                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
-            foreach (Geary.Email e in list_remote) {
-                if (!local_map.has_key(e.id))
-                    continue;
-
-                if (!local_map.get(e.id).equal_to(e.email_flags))
-                    changed_map.set(e.id, e.email_flags);
             }
 
-            if (!cancellable.is_cancelled() && changed_map.size > 0) {
+            // find the lowest for the next iteration
+            var sorted = EmailIdentifier.sort_emails(local);
+            lowest = sorted.first().id;
+
+            // Get all email identifiers in the local folder mapped to their EmailFlags
+            var local_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
+            foreach (Geary.Email e in local) {
+                local_map.set(e.id, e.email_flags);
+            }
+
+            debug("Fetching %d flags", local_map.keys.size);
+            Gee.List<Email>? remote =
+                yield this.remote_session.list_email_async(
+                    new Imap.MessageSet.uid_range(
+                        ((ImapDB.EmailIdentifier) lowest).uid,
+                        ((ImapDB.EmailIdentifier) sorted.last().id).uid
+                    ),
+                    FLAGS,
+                    cancellable
+                );
+
+            if (remote != null && !remote.is_empty) {
+                var changed_set = new Gee.HashSet<Email>();
+                var changed_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
+                foreach (var email in remote) {
+                    var local_flags = local_map.get(email.id);
+                    var remote_flags = email.email_flags;
+                    if (local_flags != null &&
+                        local_flags.equal_to(remote_flags)) {
+                        changed_set.add(email);
+                        changed_map.set(email.id, remote_flags);
+                    }
+                }
+
+                yield this.local_folder.create_or_merge_email_async(
+                    changed_set,
+                    true,
+                    this.harvester,
+                    cancellable
+                );
                 email_flags_changed(changed_map);
             }
 

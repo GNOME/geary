@@ -503,8 +503,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (only_incomplete)
             locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
 
-        // Next, read in email in chunks
-        return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
+        var results = new Gee.ArrayList<Email>();
+        yield list_email_in_chunks_async(
+            locations, results, required_fields, flags, cancellable
+        );
+        return results.is_empty ? null : results;
     }
 
     // ListFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
@@ -557,8 +560,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
 
-        // Next, read in email in chunks
-        return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
+        var results = new Gee.ArrayList<Email>();
+        yield list_email_in_chunks_async(
+            locations, results, required_fields, flags, cancellable
+        );
+        return results.is_empty ? null : results;
     }
 
     // ListFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
@@ -605,14 +611,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (only_incomplete)
             locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
 
-        // Next, read in email in chunks
-        return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
+        var results = new Gee.ArrayList<Email>();
+        yield list_email_in_chunks_async(
+            locations, results, required_fields, flags, cancellable
+        );
+        return results.is_empty ? null : results;
     }
 
-    public async Gee.List<Geary.Email>? list_email_by_sparse_id_async(Gee.Collection<ImapDB.EmailIdentifier> ids,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
-        if (ids.size == 0)
-            return null;
+    public async Gee.Set<Email> list_email_by_sparse_id_async(
+        Gee.Collection<ImapDB.EmailIdentifier> ids,
+        Geary.Email.Field required_fields,
+        ListFlags flags,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        var results = Email.new_identifier_based_set();
+        if (ids.size == 0) {
+            return results;
+        }
 
         bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
 
@@ -660,8 +675,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (only_incomplete)
             locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
 
-        // Next, read in email in chunks
-        return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
+        yield list_email_in_chunks_async(
+            locations, results, required_fields, flags, cancellable
+        );
+        return results;
     }
 
     private async Gee.List<LocationIdentifier>? remove_complete_locations_in_chunks_async(
@@ -695,10 +712,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return (incomplete_locations.size > 0) ? incomplete_locations : null;
     }
 
-    private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier>? ids,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+    private async void list_email_in_chunks_async(
+        Gee.List<LocationIdentifier>? ids,
+        Gee.Collection<Email> results,
+        Geary.Email.Field required_fields,
+        ListFlags flags,
+        GLib.Cancellable? cancellable
+    ) throws Error {
         if (ids == null || ids.size == 0)
-            return null;
+            return;
 
         // chunk count depends on whether or not the message -- body + headers -- is being fetched
         int chunk_count = required_fields.requires_any(Email.Field.BODY | Email.Field.HEADER)
@@ -706,7 +728,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         int length_rounded_up = Numeric.int_round_up(ids.size, chunk_count);
 
-        Gee.List<Geary.Email> results = new Gee.ArrayList<Geary.Email>();
         for (int start = 0; start < length_rounded_up; start += chunk_count) {
             // stop is the index *after* the end of the slice
             int stop = Numeric.int_ceiling((start + chunk_count), ids.size);
@@ -721,14 +742,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 return Db.TransactionOutcome.SUCCESS;
             }, cancellable);
 
-            if (list != null)
+            if (list != null) {
                 results.add_all(list);
+            }
         }
 
-        if (results.size != ids.size)
+        if (results.size != ids.size) {
             debug("list_email_in_chunks_async: Requested %d email, returned %d", ids.size, results.size);
-
-        return (results.size > 0) ? results : null;
+        }
     }
 
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier id,

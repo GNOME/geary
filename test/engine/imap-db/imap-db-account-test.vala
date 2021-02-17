@@ -332,13 +332,15 @@ class Geary.ImapDB.AccountTest : TestCase {
             null,
             this.async_completion
         );
-        Gee.List<Email> result = this.account.list_email.end(
+        Gee.Set<Email> result = this.account.list_email.end(
             async_result()
         );
 
         assert_equal<int?>(result.size, 2, "Not enough email listed");
-        assert_true(new EmailIdentifier(1, null).equal_to(result[0].id));
-        assert_true(new EmailIdentifier(2, null).equal_to(result[1].id));
+
+        var list = traverse(result).to_array_list();
+        assert_true(new EmailIdentifier(1, null).equal_to(list[0].id));
+        assert_true(new EmailIdentifier(2, null).equal_to(list[1].id));
 
         this.account.list_email.begin(
             Collection.single(new EmailIdentifier(3, null)),

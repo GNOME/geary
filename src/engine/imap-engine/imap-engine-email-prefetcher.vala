@@ -251,22 +251,45 @@ private class Geary.ImapEngine.EmailPrefetcher : BaseObject,
     private async bool do_prefetch_email_async(Gee.Collection<EmailIdentifier> ids,
                                                int64 chunk_bytes) {
         debug("Prefetching %d emails (%sb)", ids.size, chunk_bytes.to_string());
+        var success = true;
+        var cancellable = this.running;
 
         try {
-            yield folder.list_email_by_sparse_id_async(
-                ids, PREFETCH_FIELDS, NONE, this.running
+            Imap.FolderSession remote = yield this.folder.claim_remote_session(
+                cancellable
             );
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED) && !(err is EngineError.OPEN_REQUIRED)) {
-                debug("Error prefetching %d emails for %s: %s", ids.size, folder.to_string(),
-                    err.message);
-            } else {
-                // only exit if cancelled or not open; fetch_email_async() can error out on lots of things,
-                // including mail that's been deleted, and that shouldn't stop the prefetcher
-                return false;
+
+            Gee.Collection<Imap.UID> uids = ImapDB.EmailIdentifier.to_uids(
+                (Gee.Collection<ImapDB.EmailIdentifier>) ids
+            );
+            Gee.Collection<Imap.MessageSet> message_sets =
+                Imap.MessageSet.uid_sparse(uids);
+            foreach (var message_set in message_sets) {
+                Gee.List<Email>? email = yield remote.list_email_async(
+                    message_set,
+                    PREFETCH_FIELDS,
+                    cancellable
+                );
+                if (email != null && !email.is_empty) {
+                    yield this.folder.local_folder.create_or_merge_email_async(
+                        email,
+                        true,
+                        this.folder.harvester,
+                        cancellable
+                    );
+                }
             }
+        } catch (GLib.IOError.CANCELLED err) {
+            // fine
+        } catch (EngineError.SERVER_UNAVAILABLE err) {
+            // fine
+            debug("Error prefetching %d emails: %s", ids.size, err.message);
+        } catch (GLib.Error err) {
+            // not fine
+            success = false;
+            warning("Error prefetching %d emails: %s", ids.size, err.message);
         }
 
-        return true;
+        return success;
     }
 }

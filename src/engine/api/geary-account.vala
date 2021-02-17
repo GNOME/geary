@@ -544,16 +544,23 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
 
     /**
-     * Return a collection of email with the given identifiers.
+     * Returns a set of non-contiguous email objects from local storage.
      *
-     * The returned collection will be in the same order as the
-     * natural ordering of the given identifiers.
+     * Any {@link Gee.Collection} of email identifiers is accepted,
+     * but the returned set will only contain one email for each
+     * requested; duplicates are ignored.
      *
-     * Throws {@link EngineError.NOT_FOUND} if any email is not found
-     * and {@link EngineError.INCOMPLETE_MESSAGE} if the fields aren't
-     * available.
+     * Note that for remote-backed folders, email may not have yet
+     * been fully downloaded and hence might exist incomplete in local
+     * storage. If the requested fields are not available for all
+     * given identifiers, {@link EngineError.INCOMPLETE_MESSAGE} is
+     * thrown. Connect to the {@link Account.email_complete} signal to
+     * be notified of when email is fully downloaded in this case.
+     *
+     * If any of the given email identifiers are not present in the
+     * vector, an {@link EngineError.NOT_FOUND} error is thrown.
      */
-    public abstract async Gee.List<Email> list_local_email_async(
+    public abstract async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> ids,
         Email.Field required_fields,
         GLib.Cancellable? cancellable = null

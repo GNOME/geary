@@ -273,8 +273,11 @@ class Geary.App.ConversationMonitorTest : TestCase {
         ConversationMonitor monitor = setup_monitor();
         assert_equal<int?>(monitor.size, 0, "Initial conversation count");
 
-        this.base_folder.expect_call("list_email_by_sparse_id_async")
-            .returns_object(new Gee.ArrayList<Email>.wrap({e1}));
+        this.base_folder.expect_call(
+            "get_multiple_email_by_id"
+        ).returns_object(
+            Collection.single_set(e1)
+        );
 
         this.account.expect_call("get_special_folder");
         this.account.expect_call("get_special_folder");
@@ -284,7 +287,9 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.account.expect_call("get_containing_folders_async")
             .returns_object(paths);
 
-        this.base_folder.email_appended(new Gee.ArrayList<EmailIdentifier>.wrap({e1.id}));
+        this.base_folder.email_appended(
+            new Gee.ArrayList<EmailIdentifier>.wrap({e1.id})
+        );
 
         wait_for_signal(monitor, "conversations-added");
         this.base_folder.assert_expectations();
@@ -353,10 +358,17 @@ class Geary.App.ConversationMonitorTest : TestCase {
         ConversationMonitor monitor = setup_monitor({e1}, paths);
         assert_equal<int?>(monitor.size, 1, "Initial conversation count");
 
-        this.other_folder.expect_call("list_email_by_sparse_id_async")
-            .returns_object(new Gee.ArrayList<Email>.wrap({e3}));
-        this.other_folder.expect_call("list_email_by_sparse_id_async")
-            .returns_object(new Gee.ArrayList<Email>.wrap({e3}));
+        this.other_folder.expect_call(
+            "get_multiple_email_by_id"
+        ).returns_object(
+            Collection.single_set(e3)
+        );
+
+        this.other_folder.expect_call(
+            "get_multiple_email_by_id"
+        ).returns_object(
+            Collection.single_set(e3)
+        );
 
         // ExternalAppendOperation's blacklist check
         this.account.expect_call("get_special_folder");
@@ -435,7 +447,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
             this.base_folder
         );
 
-        this.base_folder.expect_call("list_email_by_sparse_id_async");
+        this.base_folder.expect_call("get_multiple_email_by_id");
         this.base_folder.expect_call("list_email_by_id_async");
 
         wait_for_signal(monitor, "email-flags-changed");

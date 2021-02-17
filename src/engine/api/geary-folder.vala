@@ -697,6 +697,33 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     ) throws GLib.Error;
 
     /**
+     * Returns a set of non-contiguous emails from the folder's vector.
+     *
+     * Similar in contract to {@link get_email_by_id}, but for a
+     * collection of {@link Geary.EmailIdentifier}s rather than a
+     * single email.
+     *
+     * Any {@link Gee.Collection} of email identifiers is accepted,
+     * but the returned set will only contain one email for each
+     * requested; duplicates are ignored.
+     *
+     * Note that for remote-backed folders, email may not have yet
+     * been fully downloaded and hence might exist incomplete in local
+     * storage. If the requested fields are not available for all
+     * given identifiers, {@link EngineError.INCOMPLETE_MESSAGE} is
+     * thrown. Connect to the {@link Account.email_complete} signal to
+     * be notified of when email is fully downloaded in this case.
+     *
+     * If any of the given email identifiers are not present in the
+     * vector, an {@link EngineError.NOT_FOUND} error is thrown.
+     */
+    public abstract async Gee.Set<Email> get_multiple_email_by_id(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
+
+    /**
      * List a number of contiguous emails in the folder's vector.
      *
      * Emails in the folder are listed starting at a particular
@@ -746,24 +773,6 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
         throws Error;
-
-    /**
-     * List a set of non-contiguous emails in the folder's vector.
-     *
-     * Similar in contract to {@link list_email_by_id_async}, but uses a list of
-     * {@link Geary.EmailIdentifier}s rather than a range.
-     *
-     * Any Gee.Collection is accepted for EmailIdentifiers, but the returned list will only contain
-     * one email for each requested; duplicates are ignored.  ListFlags.INCLUDING_ID is ignored
-     * for this call.
-     *
-     * If the remote connection fails, this call will return locally-available Email without error.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, ListFlags flags,
-        Cancellable? cancellable = null) throws Error;
 
     /**
      * Sets whether this folder has a custom special use.

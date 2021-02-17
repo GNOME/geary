@@ -82,6 +82,18 @@ public class Mock.Folder : GLib.Object,
         );
     }
 
+    public async Gee.Set<Geary.Email>
+        get_multiple_email_by_id(Gee.Collection<Geary.EmailIdentifier> ids,
+                                 Geary.Email.Field required_fields,
+                                 GLib.Cancellable? cancellable = null
+        ) throws GLib.Error {
+        return yield object_call_async<Gee.Set<Geary.Email>>(
+            "get_multiple_email_by_id",
+            {ids, box_arg(required_fields), cancellable},
+            new Gee.HashSet<Geary.Email>()
+        );
+    }
+
     public async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,
@@ -92,19 +104,6 @@ public class Mock.Folder : GLib.Object,
         return yield object_call_async<Gee.List<Geary.Email>?>(
             "list_email_by_id_async",
             {initial_id, int_arg(count), box_arg(required_fields), box_arg(flags), cancellable},
-            null
-        );
-    }
-
-    public async Gee.List<Geary.Email>?
-        list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                      Geary.Email.Field required_fields,
-                                      Geary.Folder.ListFlags flags,
-                                      GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        return yield object_call_async<Gee.List<Geary.Email>?>(
-            "list_email_by_sparse_id_async",
-            {ids, box_arg(required_fields), box_arg(flags), cancellable},
             null
         );
     }

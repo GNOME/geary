@@ -238,6 +238,32 @@ public class Geary.Outbox.Folder : BaseObject,
         return row_to_email(row);
     }
 
+    /** {@inheritDoc} */
+    public async Gee.Set<Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Email.Field required_fields,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        var email = Email.new_identifier_based_set();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            foreach (Geary.EmailIdentifier id in ids) {
+                EmailIdentifier? outbox_id = id as EmailIdentifier;
+                if (outbox_id == null)
+                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+
+                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+                if (row == null)
+                    continue;
+
+                email.add(row_to_email(row));
+            }
+
+            return DONE;
+        }, cancellable);
+
+        return email;
+    }
+
     public async Gee.List<Email>?
         list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
                                int count,
@@ -321,32 +347,6 @@ public class Geary.Outbox.Folder : BaseObject,
         }, cancellable);
 
         return list;
-    }
-
-    public async Gee.List<Geary.Email>?
-        list_email_by_sparse_id_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                                      Geary.Email.Field required_fields,
-                                      Geary.Folder.ListFlags flags,
-                                      GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            foreach (Geary.EmailIdentifier id in ids) {
-                EmailIdentifier? outbox_id = id as EmailIdentifier;
-                if (outbox_id == null)
-                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-
-                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-                if (row == null)
-                    continue;
-
-                list.add(row_to_email(row));
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        return (list.size > 0) ? list : null;
     }
 
     /** {@inheritDoc} */

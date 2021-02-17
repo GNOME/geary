@@ -287,12 +287,11 @@ internal class Application.NotificationPluginContext :
     ) {
         MonitorInformation info = this.folder_information.get(folder);
         if (info != null) {
-            Gee.List<Geary.Email>? list = null;
+            Gee.Set<Geary.Email> email = null;
             try {
-                list = yield folder.list_email_by_sparse_id_async(
+                email = yield folder.get_multiple_email_by_id(
                     email_ids,
                     REQUIRED_FIELDS,
-                    NONE,
                     info.cancellable
                 );
             } catch (GLib.Error err) {
@@ -300,8 +299,8 @@ internal class Application.NotificationPluginContext :
                     "Unable to list new email for notification: %s", err.message
                 );
             }
-            if (list != null && !list.is_empty) {
-                new_messages(info, list);
+            if (!email.is_empty) {
+                new_messages(info, email);
             } else {
                 warning(
                     "%d new emails, but none could be listed for notification",

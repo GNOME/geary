@@ -59,14 +59,13 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
                 local_ids.add(id);
         }
 
-        Gee.List<Geary.Email>? local_list = yield owner.local_folder.list_email_by_sparse_id_async(
+        Gee.Set<Geary.Email> local_list = yield owner.local_folder.list_email_by_sparse_id_async(
             local_ids, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
 
         // Build list of local email
         Gee.Map<ImapDB.EmailIdentifier, Geary.Email> map = new Gee.HashMap<ImapDB.EmailIdentifier, Geary.Email>();
-        if (local_list != null) {
-            foreach (Geary.Email email in local_list)
-                map.set((ImapDB.EmailIdentifier) email.id, email);
+        foreach (var email in local_list) {
+            map.set((ImapDB.EmailIdentifier) email.id, email);
         }
 
         // Convert into fulfilled and unfulfilled email for the base class to complete

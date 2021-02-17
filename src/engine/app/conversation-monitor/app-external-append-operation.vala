@@ -27,9 +27,7 @@ private class Geary.App.ExternalAppendOperation : BatchOperation<EmailIdentifier
                   batch.size,
                   this.folder.to_string());
 
-            yield this.monitor.external_load_by_sparse_id(
-                this.folder, batch, Geary.Folder.ListFlags.NONE
-            );
+            yield this.monitor.external_load_by_sparse_id(this.folder, batch);
         }
     }
 
