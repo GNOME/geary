@@ -202,6 +202,137 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
     }
 
     /**
+     * Converts a Collection of emails to a map keyed by their identifiers.
+     *
+     * @return null if emails is empty or null.
+     */
+    public static Gee.Map<EmailIdentifier,Email>? emails_to_map(Gee.Collection<Email>? emails) {
+        if (emails == null || emails.size == 0)
+            return null;
+
+        Gee.Map<Geary.EmailIdentifier, Geary.Email> map = new Gee.HashMap<Geary.EmailIdentifier,
+            Geary.Email>();
+        foreach (Email email in emails)
+            map.set(email.id, email);
+
+        return map;
+    }
+
+    /**
+     * A comparison function based on the email sent date, ascending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * date}, most recent last.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_sent_date_ascending(Geary.Email aemail, Geary.Email bemail) {
+        if (aemail.date == null || bemail.date == null) {
+            GLib.message("Warning: comparing email for sent date but no Date: field loaded");
+
+            return compare_id_ascending(aemail, bemail);
+        }
+
+        int compare = aemail.date.value.compare(bemail.date.value);
+
+        // stabilize sort by using the mail identifier's stable sort ordering
+        return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
+    }
+
+    /**
+     * A comparison function based on the email sent date, descending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * date}, most recent first.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_sent_date_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_sent_date_ascending(bemail, aemail);
+    }
+
+    /**
+     * A comparison function based on the email received date, ascending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * EmailProperties.date_received}, most recent last.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_recv_date_ascending(Geary.Email aemail, Geary.Email bemail) {
+        if (aemail.properties == null || bemail.properties == null) {
+            GLib.message("Warning: comparing email for received date but email properties not loaded");
+
+            return compare_id_ascending(aemail, bemail);
+        }
+
+        int compare = aemail.properties.date_received.compare(bemail.properties.date_received);
+
+        // stabilize sort with identifiers
+        return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
+    }
+
+    /**
+     * A comparison function based on the email received date, descending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * EmailProperties.date_received}, most recent first.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_recv_date_descending(Geary.Email aemail, Geary.Email bemail) {
+        return compare_recv_date_ascending(bemail, aemail);
+    }
+
+    /**
+     * A comparison function based on email size, ascending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * EmailProperties.total_bytes}, smallest first.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_size_ascending(Geary.Email aemail, Geary.Email bemail) {
+        Geary.EmailProperties? aprop = (Geary.EmailProperties) aemail.properties;
+        Geary.EmailProperties? bprop = (Geary.EmailProperties) bemail.properties;
+
+        if (aprop == null || bprop == null) {
+            GLib.message("Warning: comparing email by size but email properties not loaded");
+
+            return compare_id_ascending(aemail, bemail);
+        }
+
+        int cmp = (int) (aprop.total_bytes - bprop.total_bytes).clamp(-1, 1);
+
+        return (cmp != 0) ? cmp : compare_id_ascending(aemail, bemail);
+    }
+
+    /**
+     * A comparison function based on email size, descending.
+     *
+     * Implements {@link GLib.CompareFunc} to sort email by {@link
+     * EmailProperties.total_bytes}, largest first.
+     *
+     * If {@link properties} is unavailable on either email, their
+     * identifiers are compared to stabilize the sort.
+     */
+    public static int compare_size_descending(Geary.Email aemail,
+                                              Geary.Email bemail) {
+        return compare_size_ascending(bemail, aemail);
+    }
+
+    // only used to stabilize a sort
+    private static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
+        return aemail.id.stable_sort_comparator(bemail.id);
+    }
+
+
+    /**
      * A unique identifier for the Email in the Folder.
      *
      * This is is guaranteed to be unique for as long as the Folder is
@@ -604,111 +735,4 @@ public class Geary.Email : BaseObject, EmailHeaderSet {
         return "[%s] ".printf(id.to_string());
     }
 
-    /**
-     * Converts a Collection of {@link Email}s to a Map of Emails keyed by {@link EmailIdentifier}s.
-     *
-     * @return null if emails is empty or null.
-     */
-    public static Gee.Map<Geary.EmailIdentifier, Geary.Email>? emails_to_map(Gee.Collection<Geary.Email>? emails) {
-        if (emails == null || emails.size == 0)
-            return null;
-
-        Gee.Map<Geary.EmailIdentifier, Geary.Email> map = new Gee.HashMap<Geary.EmailIdentifier,
-            Geary.Email>();
-        foreach (Email email in emails)
-            map.set(email.id, email);
-
-        return map;
-    }
-
-    /**
-     * CompareFunc to sort {@link Email} by {@link date} ascending.
-     *
-     * If the date field is unavailable on either Email, their identifiers are compared to
-     * stabilize the sort.
-     */
-    public static int compare_sent_date_ascending(Geary.Email aemail, Geary.Email bemail) {
-        if (aemail.date == null || bemail.date == null) {
-            GLib.message("Warning: comparing email for sent date but no Date: field loaded");
-
-            return compare_id_ascending(aemail, bemail);
-        }
-
-        int compare = aemail.date.value.compare(bemail.date.value);
-
-        // stabilize sort by using the mail identifier's stable sort ordering
-        return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
-    }
-
-    /**
-     * CompareFunc to sort {@link Email} by {@link date} descending.
-     *
-     * If the date field is unavailable on either Email, their identifiers are compared to
-     * stabilize the sort.
-     */
-    public static int compare_sent_date_descending(Geary.Email aemail, Geary.Email bemail) {
-        return compare_sent_date_ascending(bemail, aemail);
-    }
-
-    /**
-     * CompareFunc to sort {@link Email} by {@link EmailProperties.date_received} ascending.
-     *
-     * If {@link properties} is unavailable on either Email, their identifiers are compared to
-     * stabilize the sort.
-     */
-    public static int compare_recv_date_ascending(Geary.Email aemail, Geary.Email bemail) {
-        if (aemail.properties == null || bemail.properties == null) {
-            GLib.message("Warning: comparing email for received date but email properties not loaded");
-
-            return compare_id_ascending(aemail, bemail);
-        }
-
-        int compare = aemail.properties.date_received.compare(bemail.properties.date_received);
-
-        // stabilize sort with identifiers
-        return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
-    }
-
-    /**
-     * CompareFunc to sort {@link Email} by {@link EmailProperties.date_received} descending.
-     *
-     * If {@link properties} is unavailable on either Email, their identifiers are compared to
-     * stabilize the sort.
-     */
-    public static int compare_recv_date_descending(Geary.Email aemail, Geary.Email bemail) {
-        return compare_recv_date_ascending(bemail, aemail);
-    }
-
-    // only used to stabilize a sort
-    private static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
-        return aemail.id.stable_sort_comparator(bemail.id);
-    }
-
-    /**
-     * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
-     * compared by EmailIdentifier.
-     */
-    public static int compare_size_ascending(Geary.Email aemail, Geary.Email bemail) {
-        Geary.EmailProperties? aprop = (Geary.EmailProperties) aemail.properties;
-        Geary.EmailProperties? bprop = (Geary.EmailProperties) bemail.properties;
-
-        if (aprop == null || bprop == null) {
-            GLib.message("Warning: comparing email by size but email properties not loaded");
-
-            return compare_id_ascending(aemail, bemail);
-        }
-
-        int cmp = (int) (aprop.total_bytes - bprop.total_bytes).clamp(-1, 1);
-
-        return (cmp != 0) ? cmp : compare_id_ascending(aemail, bemail);
-    }
-
-    /**
-     * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
-     * compared by EmailIdentifier.
-     */
-    public static int compare_size_descending(Geary.Email aemail, Geary.Email bemail) {
-        return compare_size_ascending(bemail, aemail);
-    }
 }
-
