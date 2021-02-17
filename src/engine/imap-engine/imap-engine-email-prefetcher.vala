@@ -9,7 +9,8 @@
 /**
  * Ensures all email in a folder's vector has been downloaded.
  */
-private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
+private class Geary.ImapEngine.EmailPrefetcher : BaseObject,
+    Logging.Source {
 
 
     public const int PREFETCH_DELAY_SEC = 1;
@@ -29,6 +30,11 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
 
     public Nonblocking.Semaphore active_lock {
         get; private set; default = new Nonblocking.Semaphore(null);
+    }
+
+    /** {@inheritDoc} */
+    public Logging.Source? logging_parent {
+        get { return this.folder; }
     }
 
     private weak ImapEngine.MinimalFolder folder;
@@ -75,6 +81,17 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         }
     }
 
+    /** {@inheritDoc} */
+    public Logging.State to_logging_state() {
+        return new Logging.State(
+            this,
+            "running: %s, queued email: %d, locked: %s",
+            (!this.running.is_cancelled()).to_string(),
+            prefetch_emails.size,
+            (!this.active_lock.can_pass).to_string()
+        );
+    }
+
     private void on_local_expansion(Gee.Collection<Geary.EmailIdentifier> ids) {
         if (!this.running.is_cancelled()) {
             this.active_lock.reset();
@@ -103,12 +120,11 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         } catch (GLib.IOError.CANCELLED err) {
             // all good
         } catch (GLib.Error err) {
-            warning("%s: Error listing email on open: %s",
-                    folder.to_string(), err.message);
+            warning("Error listing email on open: %s", err.message);
         }
 
-        debug("%s: Scheduling %d messages on open for prefetching",
-              this.folder.to_string(), list != null ? list.size : 0);
+        debug("Scheduling %d local messages on open for prefetching",
+              list != null ? list.size : 0);
         schedule_prefetch(list);
     }
 
@@ -124,12 +140,11 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         } catch (GLib.IOError.CANCELLED err) {
             // all good
         } catch (GLib.Error err) {
-            warning("%s: Error listing email on open: %s",
-                    folder.to_string(), err.message);
+            warning("Error listing email on open: %s", err.message);
         }
 
-        debug("%s: Scheduling %d new emails for prefetching",
-              this.folder.to_string(), list != null ? list.size : 0);
+        debug("Scheduling %d new emails for prefetching",
+              list != null ? list.size : 0);
         schedule_prefetch(list);
     }
 
@@ -140,7 +155,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             yield do_prefetch_batch_async();
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
-                debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
+                debug("Error prefetching emails: %s", err.message);
         }
 
         // this round is done
@@ -149,8 +164,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         if (token != Nonblocking.Mutex.INVALID_TOKEN) {
             try {
                 mutex.release(ref token);
-            } catch (Error release_err) {
-                debug("Unable to release email prefetcher mutex: %s", release_err.message);
+            } catch (GLib.Error release_err) {
+                warning("Unable to release mutex: %s", release_err.message);
             }
         }
     }
@@ -163,7 +178,7 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
         if (emails.size == 0)
             return;
 
-        debug("do_prefetch_batch_async %s start_total=%d", folder.to_string(), emails.size);
+        debug("Processing batch, size: %d", emails.size);
 
         // Big TODO: The engine needs to be able to synthesize
         // ENVELOPE (and any of the fields constituting it) from
@@ -229,14 +244,13 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
             yield do_prefetch_email_async(Collection.single(id), -1);
         }
 
-        debug("finished do_prefetch_batch_async %s end_total=%d", folder.to_string(), count);
+        debug("Finished processing batch: %d", count);
     }
 
     // Return true to continue, false to stop prefetching (cancelled or not open)
     private async bool do_prefetch_email_async(Gee.Collection<EmailIdentifier> ids,
                                                int64 chunk_bytes) {
-        debug("do_prefetch_email_async: %s prefetching %d emails (%sb)",
-              folder.to_string(), ids.size, chunk_bytes.to_string());
+        debug("Prefetching %d emails (%sb)", ids.size, chunk_bytes.to_string());
 
         try {
             yield folder.list_email_by_sparse_id_async(
