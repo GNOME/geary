@@ -904,6 +904,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             check_ids("get_multiple_email_by_id", ids),
             required_fields,
             NONE,
+            true,
             cancellable
         );
     }

@@ -135,6 +135,7 @@ private class Geary.ImapEngine.EmailPrefetcher : BaseObject,
                 (Gee.Collection<ImapDB.EmailIdentifier>) ids,
                 PREPARE_FIELDS,
                 PREPARE_FLAGS,
+                false,
                 this.running
             );
         } catch (GLib.IOError.CANCELLED err) {

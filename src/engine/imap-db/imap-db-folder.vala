@@ -505,7 +505,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         var results = new Gee.ArrayList<Email>();
         yield list_email_in_chunks_async(
-            locations, results, required_fields, flags, cancellable
+            locations, results, required_fields, flags, true, cancellable
         );
         return results.is_empty ? null : results;
     }
@@ -562,7 +562,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         var results = new Gee.ArrayList<Email>();
         yield list_email_in_chunks_async(
-            locations, results, required_fields, flags, cancellable
+            locations, results, required_fields, flags, false, cancellable
         );
         return results.is_empty ? null : results;
     }
@@ -613,7 +613,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         var results = new Gee.ArrayList<Email>();
         yield list_email_in_chunks_async(
-            locations, results, required_fields, flags, cancellable
+            locations, results, required_fields, flags, false, cancellable
         );
         return results.is_empty ? null : results;
     }
@@ -622,6 +622,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Collection<ImapDB.EmailIdentifier> ids,
         Geary.Email.Field required_fields,
         ListFlags flags,
+        bool require_all_email,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
         var results = Email.new_identifier_based_set();
@@ -633,13 +634,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         // Break up work so all reading isn't done in single transaction that locks up the
         // database ... first, gather locations of all emails in database
-        Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
+        Gee.List<LocationIdentifier>? locations = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             // convert ids into LocationIdentifiers
-            Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids, flags,
-                cancellable);
-            if (locs == null || locs.size == 0)
-                return Db.TransactionOutcome.DONE;
+            var locs = do_get_locations_for_ids(cx, ids, flags, cancellable);
+            if (locs == null || locs.is_empty) {
+                throw new EngineError.NOT_FOUND("No email found");
+            }
 
             StringBuilder sql = new StringBuilder("""
                 SELECT MessageLocationTable.message_id, ordering, remove_marker
@@ -666,18 +667,34 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
 
-            locations = do_results_to_locations(stmt.exec(cancellable), int.MAX, flags, cancellable);
+            locations = do_results_to_locations(
+                stmt.exec(cancellable), int.MAX, flags, cancellable
+            );
+            if (locations == null || locations.is_empty) {
+                throw new EngineError.NOT_FOUND("No email found");
+            }
 
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
 
-        // remove complete locations (emails with all fields downloaded)
-        if (only_incomplete)
-            locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
+        if (locations != null) {
+            // remove complete locations (emails with all fields downloaded)
+            if (only_incomplete) {
+                locations = yield remove_complete_locations_in_chunks_async(
+                    locations, cancellable
+                );
+            }
 
-        yield list_email_in_chunks_async(
-            locations, results, required_fields, flags, cancellable
-        );
+            yield list_email_in_chunks_async(
+                locations,
+                results,
+                required_fields,
+                flags,
+                require_all_email,
+                cancellable
+            );
+        }
+
         return results;
     }
 
@@ -717,6 +734,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Collection<Email> results,
         Geary.Email.Field required_fields,
         ListFlags flags,
+        bool require_all_email,
         GLib.Cancellable? cancellable
     ) throws Error {
         if (ids == null || ids.size == 0)
@@ -736,11 +754,21 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             assert(slice != null && slice.size > 0);
 
             Gee.List<Geary.Email>? list = null;
-            yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-                list = do_list_email(cx, slice, required_fields, flags, cancellable);
-
-                return Db.TransactionOutcome.SUCCESS;
-            }, cancellable);
+            yield db.exec_transaction_async(
+                RO,
+                (cx, cancellable) => {
+                    list = do_list_email(
+                        cx,
+                        slice,
+                        required_fields,
+                        flags,
+                        require_all_email,
+                        cancellable
+                    );
+                    return SUCCESS;
+                },
+                cancellable
+            );
 
             if (list != null) {
                 results.add_all(list);
@@ -1790,20 +1818,27 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return !result.finished;
     }
 
-    private Gee.List<Geary.Email>? do_list_email(Db.Connection cx, Gee.List<LocationIdentifier> locations,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
-        Gee.List<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
+    private Gee.List<Email>? do_list_email(
+        Db.Connection cx,
+        Gee.List<LocationIdentifier> locations,
+        Email.Field required_fields,
+        ListFlags flags,
+        bool require_all_email,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        var emails = new Gee.ArrayList<Geary.Email>();
         foreach (LocationIdentifier location in locations) {
             try {
-                emails.add(do_location_to_email(cx, location, required_fields, flags, cancellable));
-            } catch (EngineError err) {
-                if (err is EngineError.NOT_FOUND) {
-                    debug("Warning: Message not found, dropping: %s", err.message);
-                } else if (!(err is EngineError.INCOMPLETE_MESSAGE)) {
-                    // if not all required_fields available, simply drop with no comment; it's up to
-                    // the caller to detect and fulfill from the network
+                emails.add(
+                    do_location_to_email(
+                        cx, location, required_fields, flags, cancellable
+                    )
+                );
+            } catch (EngineError.NOT_FOUND err) {
+                if (require_all_email) {
                     throw err;
                 }
+                debug("Warning: Message not found, dropping: %s", err.message);
             }
         }
 
