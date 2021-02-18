@@ -198,7 +198,6 @@ src/engine/app/conversation-monitor/app-insert-operation.vala
 src/engine/app/conversation-monitor/app-local-search-operation.vala
 src/engine/app/conversation-monitor/app-load-operation.vala
 src/engine/app/conversation-monitor/app-remove-operation.vala
-src/engine/app/conversation-monitor/app-reseed-operation.vala
 src/engine/app/conversation-monitor/app-terminate-operation.vala
 src/engine/app/email-store/app-async-folder-operation.vala
 src/engine/app/email-store/app-copy-operation.vala

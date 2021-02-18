@@ -53,7 +53,6 @@ engine_vala_sources = files(
   'app/conversation-monitor/app-load-operation.vala',
   'app/conversation-monitor/app-local-search-operation.vala',
   'app/conversation-monitor/app-remove-operation.vala',
-  'app/conversation-monitor/app-reseed-operation.vala',
   'app/conversation-monitor/app-terminate-operation.vala',
 
   'app/email-store/app-async-folder-operation.vala',
