@@ -79,6 +79,18 @@ public interface ValaUnit.CollectionAssertions<E> : GLib.Object {
         throws GLib.Error;
 
 
+    /**
+     * Returns the element at the given index.
+     *
+     * This method allows access to collection contents directly, so
+     * they can be further inspected.
+     *
+     * Note the give position is 0-based, not 1-based.
+     */
+    public abstract new E get(long position)
+        throws GLib.Error;
+
+
 }
 
 internal class ValaUnit.StringCollectionAssertion : GLib.Object,
@@ -175,6 +187,10 @@ internal class ValaUnit.StringCollectionAssertion : GLib.Object,
             );
         }
         return this;
+    }
+
+    public new string get(long position) throws GLib.Error {
+        return this.actual.substring(position, 1);
     }
 
 }
@@ -330,6 +346,10 @@ internal class ValaUnit.ArrayCollectionAssertion<E> : GLib.Object,
         return this;
     }
 
+    public new E get(long position) throws GLib.Error {
+        return this.actual[position];
+    }
+
     private string to_collection_display() {
         var buf = new GLib.StringBuilder();
         int len = this.actual.length;
@@ -469,6 +489,14 @@ internal class ValaUnit.GeeCollectionAssertion<E> :
             );
         }
         return this;
+    }
+
+    public new E get(long position) throws GLib.Error {
+        Gee.Iterator<E> iterator = this.actual.iterator();
+        for (int i = 0; i <= position; i++) {
+            iterator.next();
+        }
+        return iterator.get();
     }
 
     private string to_collection_display() {
