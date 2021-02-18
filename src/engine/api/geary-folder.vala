@@ -494,31 +494,24 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     }
 
     /**
-     * Flags modifying how email is retrieved.
+     * Flags for modifying the ranges of email retrieved from the vector.
+     *
+     * @see list_email_range_by_id
      */
     [Flags]
     public enum ListFlags {
+
         NONE = 0,
-        /**
-         * Fetch from the local store only.
-         */
-        LOCAL_ONLY,
-        /**
-         * Fetch from remote store only (results merged into local store).
-         */
-        FORCE_UPDATE,
-        /**
-         * Include the provided EmailIdentifier (only respected by {@link list_email_by_id_async}.
-         */
+
+        /** Include the email with the given identifier in the range. */
         INCLUDING_ID,
-        /**
-         * Direction of list traversal (if not set, from newest to oldest).
-         */
-        OLDEST_TO_NEWEST,
-        /**
-         * Internal use only, prevents flag changes updating unread count.
-         */
-        NO_UNREAD_UPDATE;
+
+        /** Include email that only partially matches the requested fields. */
+        INCLUDING_PARTIAL,
+
+        /** Return email ordered oldest to newest, instead of the default. */
+        OLDEST_TO_NEWEST;
+
 
         public bool is_any_set(ListFlags flags) {
             return (this & flags) != 0;
@@ -528,26 +521,20 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
             return (this & flags) == flags;
         }
 
-        public bool is_local_only() {
-            return is_all_set(LOCAL_ONLY);
-        }
-
-        public bool is_force_update() {
-            return is_all_set(FORCE_UPDATE);
-        }
-
         public bool is_including_id() {
             return is_all_set(INCLUDING_ID);
+        }
+
+        public bool is_newest_to_oldest() {
+            return !is_oldest_to_newest();
         }
 
         public bool is_oldest_to_newest() {
             return is_all_set(OLDEST_TO_NEWEST);
         }
 
-        public bool is_newest_to_oldest() {
-            return !is_oldest_to_newest();
-        }
     }
+
 
     /** The account that owns this folder. */
     public abstract Geary.Account account { get; }
@@ -728,51 +715,48 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      *
      * Emails in the folder are listed starting at a particular
      * location within the vector and moving either direction along
-     * it. For remote-backed folders, the remote server is contacted
-     * if any messages stored locally do not meet the requirements
-     * given by `required_fields`, or if `count` extends back past the
-     * low end of the vector.
+     * it.
      *
-     * If the {@link EmailIdentifier} is null, it indicates the end of
-     * the vector, not the end of the remote.  Which end depends on
-     * the {@link ListFlags.OLDEST_TO_NEWEST} flag.  If not set, the
-     * default is to traverse from newest to oldest, with null being
-     * the newest email in the vector. If set, the direction is
-     * reversed and null indicates the oldest email in the vector, not
-     * the oldest in the mailbox.
+     * If the given identifier is null, it indicates the end of the
+     * vector (not the end of the remote for remote-backed folders).
+     * Which end depends on the {@link ListFlags.OLDEST_TO_NEWEST}
+     * flag. If not set, the default is to traverse from newest to
+     * oldest, with null being the newest email in the vector. If set,
+     * the direction is reversed and null indicates the oldest email
+     * in the vector, not the oldest in the mailbox.
      *
      * If not null, the EmailIdentifier ''must'' have originated from
-     * this Folder.
+     * this folder.
      *
      * To fetch all available messages in one call, use a count of
-     * `int.MAX`. If the {@link ListFlags.OLDEST_TO_NEWEST} flag is
-     * set then the listing will contain all messages in the vector,
-     * and no expansion will be performed. It may still access the
-     * remote however in case of any of the messages not meeting the
-     * given `required_fields`. If {@link ListFlags.OLDEST_TO_NEWEST}
-     * is not set, the call will cause the vector to be fully expanded
-     * and the listing will return all messages in the remote
-     * mailbox. Note that specifying `int.MAX` in either case may be a
-     * expensive operation (in terms of both computation and memory)
-     * if the number of messages in the folder or mailbox is large,
-     * hence should be avoided if possible.
+     * `int.MAX`. Note that this can be an extremely expensive
+     * operation.
+     *
+     * Note that for remote-backed folders, email may not have yet
+     * been fully downloaded and hence might exist incomplete in local
+     * storage. If the requested fields are not available for all
+     * email in the range, {@link EngineError.INCOMPLETE_MESSAGE} is
+     * thrown. Use {@link ListFlags.INCLUDING_PARTIAL} to allow email
+     * that does not meet the given criteria to be included in the
+     * results, and connect to the {@link Account.email_complete}
+     * signal to be notified of when those email are fully downloaded.
      *
      * Use {@link ListFlags.INCLUDING_ID} to include the {@link Email}
      * for the particular identifier in the results.  Otherwise, the
-     * specified email will not be included.  A null EmailIdentifier
-     * implies that the top most email is included in the result (i.e.
+     * specified email will not be included. A null identifier implies
+     * that the top most email is included in the result (i.e.
      * ListFlags.INCLUDING_ID is not required);
      *
-     * If the remote connection fails, this call will return
-     * locally-available Email without error.
-     *
-     * There's no guarantee of the returned messages' order.
-     *
-     * The Folder must be opened prior to attempting this operation.
+     * Email is returned listed by the vector's natural ordering, in
+     * the direction given by the given list flags.
      */
-    public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
-        int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
-        throws Error;
+    public abstract async Gee.List<Email> list_email_range_by_id(
+        EmailIdentifier? initial_id,
+        int count,
+        Email.Field required_fields,
+        ListFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
 
     /**
      * Sets whether this folder has a custom special use.

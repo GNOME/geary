@@ -463,13 +463,13 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         int load_count = 0;
         GLib.Error? scan_error = null;
         try {
-            Gee.Collection<Geary.Email>? messages =
-                yield this.base_folder.list_email_by_id_async(
+            Gee.Collection<Geary.Email> messages =
+                yield this.base_folder.list_email_range_by_id(
                     initial_id, count, required_fields, flags,
                     this.operation_cancellable
                 );
 
-            if (messages != null && !messages.is_empty) {
+            if (!messages.is_empty) {
                 load_count = messages.size;
 
                 foreach (Email email in messages) {

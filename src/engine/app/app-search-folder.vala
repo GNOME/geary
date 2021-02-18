@@ -239,12 +239,13 @@ public class Geary.App.SearchFolder : BaseObject,
         );
     }
 
-    public async Gee.List<Email>? list_email_by_id_async(
+    /** {@inheritDoc} */
+    public async Gee.List<Email> list_email_range_by_id(
         EmailIdentifier? initial_id,
         int count,
         Email.Field required_fields,
         Folder.ListFlags flags,
-        Cancellable? cancellable = null
+        GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
         debug("Waiting to list email");
         int result_mutex_token = yield this.result_mutex.claim_async(cancellable);
@@ -336,7 +337,14 @@ public class Geary.App.SearchFolder : BaseObject,
 
         var list = new Gee.ArrayList<Email>();
         list.add_all(EmailIdentifier.sort_emails(results));
-        return list.is_empty ? null : list;
+        list.sort((a, b) => {
+                int cmp = a.id.natural_sort_comparator(b.id);
+                if (cmp == 0) {
+                    cmp = a.id.stable_sort_comparator(b.id);
+                }
+                return cmp;
+            });
+        return list;
     }
 
     public virtual async void remove_email_async(

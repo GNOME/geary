@@ -41,7 +41,7 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
 
         try {
             loaded = yield this.monitor.load_by_id_async(
-                this.monitor.window_lowest, num_to_load, LOCAL_ONLY
+                this.monitor.window_lowest, num_to_load, NONE
             );
         } catch (EngineError.NOT_FOUND err) {
             debug("Stale FillWindowOperation: %s", err.message);
@@ -54,39 +54,6 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             this.monitor.conversations.size,
             this.monitor.base_folder.email_total
         );
-
-        var remote = this.monitor.base_folder as RemoteFolder;
-        if (loaded < num_to_load &&
-            this.monitor.can_load_more &&
-            remote != null &&
-            remote.is_monitoring) {
-            // Not enough were loaded locally, but the remote seems to
-            // be online and it looks like there and there might be
-            // some more on the remote, so go see if there are any.
-            //
-            // XXX Ideally this would be performed as an explicit user
-            // action
-
-            // Load the max amount if going to the trouble of talking
-            // to the remote.
-            num_to_load = MAX_FILL_COUNT;
-            try {
-                loaded = yield this.monitor.load_by_id_async(
-                    this.monitor.window_lowest, num_to_load, FORCE_UPDATE
-                );
-            } catch (EngineError.NOT_FOUND err) {
-                debug("Stale FillWindowOperation: %s", err.message);
-                return;
-            }
-
-            debug(
-                "Filled %d of %d from the remote, window: %d, total: %d",
-                loaded, num_to_load,
-                this.monitor.conversations.size,
-                this.monitor.base_folder.email_total
-            );
-
-        }
 
         if (loaded == num_to_load) {
             // Loaded the maximum number of messages, so go see if

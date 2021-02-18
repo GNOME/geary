@@ -228,17 +228,15 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
     private async void fill_outbox_queue(GLib.Cancellable cancellable) {
         debug("Filling queue");
         try {
-            Gee.List<Email>? queued = yield this.outbox.list_email_by_id_async(
+            Gee.List<Email> queued = yield this.outbox.list_email_range_by_id(
                 null,
                 int.MAX, // fetch all
-                Email.Field.NONE, // ids only
-                Folder.ListFlags.OLDEST_TO_NEWEST,
+                NONE, // ids only
+                OLDEST_TO_NEWEST,
                 cancellable
             );
-            if (queued != null) {
-                foreach (Email email in queued) {
-                    this.outbox_queue.send(email.id);
-                }
+            foreach (Email email in queued) {
+                this.outbox_queue.send(email.id);
             }
         } catch (Error err) {
             warning("Error filling queue: %s", err.message);
@@ -406,10 +404,10 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         if (id != null) {
             const int MAX_RETRIES = 3;
             for (int i = 0; i < MAX_RETRIES; i++) {
-                Gee.List<Email>? list = yield location.list_email_by_id_async(
+                Gee.List<Email> list = yield location.list_email_range_by_id(
                     null, 1, REFERENCES, NONE, cancellable
                 );
-                if (list != null && !list.is_empty) {
+                if (!list.is_empty) {
                     Email listed = Collection.first(list);
                     if (listed.message_id != null &&
                         listed.message_id.equal_to(id)) {

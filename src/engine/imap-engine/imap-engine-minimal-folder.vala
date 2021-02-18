@@ -909,28 +909,27 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         );
     }
 
-    //
-    // list email variants
-    //
-
-    public async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
-        int count, Geary.Email.Field required_fields, Folder.ListFlags flags,
-        Cancellable? cancellable = null) throws Error {
-        check_flags("list_email_by_id_async", flags);
-        if (initial_id != null)
+    /** {@inheritDoc} */
+    public async Gee.List<Email> list_email_range_by_id(
+        EmailIdentifier? initial_id,
+        int count,
+        Email.Field required_fields,
+        Folder.ListFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        ImapDB.EmailIdentifier? imap_id = null;
+        if (initial_id != null) {
             check_id("list_email_by_id_async", initial_id);
+            imap_id = (ImapDB.EmailIdentifier) initial_id;
+        }
 
-        if (count == 0)
-            return null;
-
-        // Schedule list operation and wait for completion.
-        ListEmailByID op = new ListEmailByID(this, (ImapDB.EmailIdentifier) initial_id, count,
-            required_fields, flags, cancellable);
-        replay_queue.schedule(op);
-
-        yield op.wait_for_ready_async(cancellable);
-
-        return !op.accumulator.is_empty ? op.accumulator : null;
+        return yield this.local_folder.list_email_by_id_async(
+            imap_id,
+            count,
+            required_fields,
+            ImapDB.Folder.ListFlags.from_folder_flags(flags),
+            cancellable
+        );
     }
 
     // Helper function for child classes dealing with the
@@ -963,13 +962,6 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         yield this.replay_queue.checkpoint(cancellable);
 
         yield this._account.local.db.run_gc(NONE, null, cancellable);
-    }
-
-    private void check_flags(string method, Folder.ListFlags flags) throws EngineError {
-        if (flags.is_all_set(Folder.ListFlags.LOCAL_ONLY) && flags.is_all_set(Folder.ListFlags.FORCE_UPDATE)) {
-            throw new EngineError.BAD_PARAMETERS("%s %s failed: LOCAL_ONLY and FORCE_UPDATE are mutually exclusive",
-                to_string(), method);
-        }
     }
 
     private void check_id(string method, EmailIdentifier id) throws EngineError {
@@ -1129,24 +1121,161 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
                 new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), before_uid.previous(true))));
         }
 
-        ServerSearchEmail op = new ServerSearchEmail(this, criteria, Geary.Email.Field.NONE,
-            cancellable);
+        var remote = yield claim_remote_session(cancellable);
+        Gee.SortedSet<Imap.UID>? uids = yield remote.search_async(
+            criteria, cancellable
+        );
+        if (uids == null || uids.size == 0) {
+            return null;
+        }
 
-        replay_queue.schedule(op);
+        // if the earliest UID is not in the local store, then need to
+        // expand vector to it first
+        ImapDB.EmailIdentifier? first_id = yield this.local_folder.get_id_async(
+            uids.first(), NONE, cancellable
+        );
+        if (first_id == null) {
+            yield expand_vector_internal(
+                remote, uids.first(), 1, OLDEST_TO_NEWEST, cancellable
+            );
+            first_id = yield this.local_folder.get_id_async(
+                uids.first(), NONE, cancellable
+            );
+        }
 
-        yield op.wait_for_ready_async(cancellable);
+        return yield this.local_folder.fetch_email_async(
+            first_id, PROPERTIES, NONE, cancellable
+        );
+    }
 
-        // find earliest ID; because all Email comes from Folder, UID should always be present
-        Geary.Email? earliest = null;
-        ImapDB.EmailIdentifier? earliest_id = null;
-        foreach (Geary.Email email in op.accumulator) {
-            ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-            if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0) {
-                earliest = email;
-                earliest_id = email_id;
+    /**
+     * Expands the owning folder's vector.
+     *
+     * Lists on the remote messages needed to fulfill ImapDB's
+     * requirements from `initial_uid` (inclusive) forward to the
+     * start of the vector if the OLDEST_TO_NEWEST flag is set, else
+     * from `initial_uid` (inclusive) back at most by `count` number
+     * of messages. If `initial_uid` is null, the start or end of the
+     * vector is used, respectively.
+     *
+     * The returned UIDs are those added to the vector, which can then
+     * be examined and added to the messages to be fulfilled if
+     * needed.
+     */
+    internal async void expand_vector_internal(
+        Imap.FolderSession remote,
+        Imap.UID? initial_uid,
+        int count,
+        Folder.ListFlags flags,
+        GLib.Cancellable cancellable
+    ) throws GLib.Error {
+        debug("Expanding vector...");
+        int remote_count = remote.folder.properties.email_total;
+
+        // include marked for removed in the count in case this is being called while a removal
+        // is in process, in which case don't want to expand vector this moment because the
+        // vector is in flux
+        int local_count = yield this.local_folder.get_email_count_async(
+            INCLUDE_MARKED_FOR_REMOVE, cancellable
+        );
+
+        // watch out for attempts to expand vector when it's expanded as far as it will go
+        if (local_count >= remote_count) {
+            return;
+        }
+
+        // Determine low and high position for expansion. The vector
+        // start position is based on the assumption that the vector
+        // end is the same as the remote end.
+        int64 vector_start = (remote_count - local_count + 1);
+        int64 low_pos = -1;
+        int64 high_pos = -1;
+        int64 initial_pos = -1;
+
+        if (initial_uid != null) {
+            Gee.Map<Imap.UID, Imap.SequenceNumber>? map =
+            // this does an IMAP FETCH, but EXPUNGE responses to that
+            // are forbidden the returned UIDs are likely fine.
+            yield remote.uid_to_position_async(
+                new Imap.MessageSet.uid(initial_uid), cancellable
+            );
+            Imap.SequenceNumber? pos = map.get(initial_uid);
+            if (pos != null) {
+                initial_pos = pos.value;
             }
         }
-        return earliest;
+
+        // Determine low and high position for expansion
+        if (flags.is_oldest_to_newest()) {
+            low_pos = Imap.SequenceNumber.MIN;
+            if (initial_pos > Imap.SequenceNumber.MIN) {
+                low_pos = initial_pos;
+            }
+            high_pos = vector_start - 1;
+        } else {
+            // Newest to oldest.
+            if (initial_pos <= Imap.SequenceNumber.MIN) {
+                high_pos = remote_count;
+                low_pos = Numeric.int64_floor(
+                    high_pos - count + 1, Imap.SequenceNumber.MIN
+                );
+            } else {
+                high_pos = Numeric.int64_floor(
+                    initial_pos, vector_start - 1
+                );
+                low_pos = Numeric.int64_floor(
+                    initial_pos - (count - 1), Imap.SequenceNumber.MIN
+                );
+            }
+        }
+
+        if (low_pos > high_pos) {
+            debug("Aborting vector expansion, low_pos=%s > high_pos=%s",
+                  low_pos.to_string(), high_pos.to_string());
+            return;
+        }
+
+        Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(
+            new Imap.SequenceNumber(low_pos),
+            new Imap.SequenceNumber(high_pos)
+        );
+        int64 actual_count = (high_pos - low_pos) + 1;
+
+        debug("Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%s local_count=%d remote_count=%d oldest_to_newest=%s",
+              msg_set.to_string(),
+              (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count.to_string(),
+              local_count, remote_count, flags.is_oldest_to_newest().to_string());
+
+
+        Gee.List<Geary.Email>? list = yield remote.list_email_async(
+            msg_set,
+            ImapDB.Folder.REQUIRED_FIELDS,
+            cancellable
+        );
+
+        var created_ids = new Gee.HashSet<EmailIdentifier>();
+        if (list != null) {
+            Gee.Map<Email, bool>? created_or_merged =
+                yield local_folder.create_or_merge_email_async(
+                    list, true, this.harvester, cancellable
+                );
+
+            foreach (Email email in created_or_merged.keys) {
+                if (created_or_merged.get(email)) {
+                    created_ids.add(email.id);
+                }
+            }
+
+            if (!created_ids.is_empty) {
+                if (flags.is_oldest_to_newest()) {
+                    email_inserted(created_ids);
+                } else {
+                    email_appended(created_ids);
+                }
+            }
+        }
+
+        debug("Vector expansion completed (%d new email)", created_ids.size);
     }
 
     protected async EmailIdentifier?
@@ -1167,9 +1296,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             // locally possibly before the server notified that the
             // message exists. As such, fetch any missing parts from
             // the remote to ensure it is properly filled in.
-            yield list_email_by_id_async(
-                op.created_id, 1, ALL, INCLUDING_ID, cancellable
-            );
+            yield get_email_by_id(op.created_id, ALL, cancellable);
         } else {
             // The server didn't return a UID for the new email, so do
             // a sync now to ensure it shows up immediately.
@@ -1185,23 +1312,20 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         // Update this to use CHANGEDSINCE FETCH when available, when
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
-        Geary.EmailIdentifier? lowest = null;
+        Geary.EmailIdentifier? oldest = null;
         while (true) {
-            Gee.List<Geary.Email>? local = yield list_email_by_id_async(
-                lowest, chunk_size,
-                Geary.Email.Field.FLAGS,
-                Geary.Folder.ListFlags.LOCAL_ONLY,
+            var local = yield list_email_range_by_id(
+                oldest,
+                chunk_size,
+                FLAGS,
+                NONE,
                 cancellable
             );
-            if (local == null ||
-                local.is_empty ||
-                this.remote_session == null) {
+            if (local.is_empty) {
                 break;
             }
 
-            // find the lowest for the next iteration
-            var sorted = EmailIdentifier.sort_emails(local);
-            lowest = sorted.first().id;
+            oldest = local.last().id;
 
             // Get all email identifiers in the local folder mapped to their EmailFlags
             var local_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
@@ -1210,20 +1334,21 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             }
 
             debug("Fetching %d flags", local_map.keys.size);
-            Gee.List<Email>? remote =
-                yield this.remote_session.list_email_async(
+            var remote = yield claim_remote_session(cancellable);
+            Gee.List<Email>? remote_email =
+                yield remote.list_email_async(
                     new Imap.MessageSet.uid_range(
-                        ((ImapDB.EmailIdentifier) lowest).uid,
-                        ((ImapDB.EmailIdentifier) sorted.last().id).uid
+                        ((ImapDB.EmailIdentifier) oldest).uid,
+                        ((ImapDB.EmailIdentifier) local.first().id).uid
                     ),
                     FLAGS,
                     cancellable
                 );
 
-            if (remote != null && !remote.is_empty) {
+            if (remote_email != null && !remote_email.is_empty) {
                 var changed_set = new Gee.HashSet<Email>();
                 var changed_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
-                foreach (var email in remote) {
+                foreach (var email in remote_email) {
                     var local_flags = local_map.get(email.id);
                     var remote_flags = email.email_flags;
                     if (local_flags != null &&

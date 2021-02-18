@@ -94,7 +94,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         monitor.scan_completed.connect(() => { saw_scan_completed = true; });
 
         test_article.expect_call("start_monitoring");
-        test_article.expect_call("list_email_by_id_async");
+        test_article.expect_call("list_email_range_by_id")
+            .returns_object(new Gee.ArrayList<Email>());
         test_article.expect_call("stop_monitoring");
 
         monitor.start_monitoring.begin(
@@ -139,7 +140,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         monitor.scan_started.connect(() => { saw_scan_started = true; });
         monitor.scan_completed.connect(() => { saw_scan_completed = true; });
 
-        test_article.expect_call("list_email_by_id_async");
+        test_article.expect_call("list_email_range_by_id")
+            .returns_object(new Gee.ArrayList<Email>());
 
         monitor.start_monitoring.begin(
             test_cancellable, this.async_completion
@@ -180,7 +182,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         monitor.scan_started.connect(() => { saw_scan_started = true; });
         monitor.scan_completed.connect(() => { saw_scan_completed = true; });
 
-        test_article.expect_call("list_email_by_id_async");
+        test_article.expect_call("list_email_range_by_id")
+            .returns_object(new Gee.ArrayList<Email>());
 
         monitor.start_monitoring.begin(
             test_cancellable, this.async_completion
@@ -448,7 +451,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
 
         this.base_folder.expect_call("get_multiple_email_by_id");
-        this.base_folder.expect_call("list_email_by_id_async");
+        this.base_folder.expect_call("list_email_range_by_id")
+            .returns_object(new Gee.ArrayList<Email>());
 
         wait_for_signal(monitor, "email-flags-changed");
 
@@ -490,7 +494,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
         /*
          * The process for loading messages looks roughly like this:
          * - load_by_id_async
-         *   - base_folder.list_email_by_id_async
+         *   - base_folder.list_email_range_by_id
          *   - process_email_async
          *     - gets all related messages from listing
          *     - expand_conversations_async
@@ -503,7 +507,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         this.base_folder.expect_call("start_monitoring");
         ValaUnit.ExpectedCall list_call = this.base_folder
-            .expect_call("list_email_by_id_async")
+            .expect_call("list_email_range_by_id")
             .returns_object(new Gee.ArrayList<Email>.wrap(base_folder_email));
 
         if (base_folder_email.length > 0) {

@@ -223,13 +223,13 @@ public class MailMerge.Folder : Geary.BaseObject,
         return results;
     }
 
-    public async Gee.List<Geary.Email>?
-        list_email_by_id_async(Geary.EmailIdentifier? initial_id,
-                               int count,
-                               Geary.Email.Field required_fields,
-                               Geary.Folder.ListFlags flags,
-                               GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
+    public async Gee.List<Geary.Email> list_email_range_by_id(
+        Geary.EmailIdentifier? initial_id,
+        int count,
+        Geary.Email.Field required_fields,
+        Geary.Folder.ListFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         var initial = initial_id as EmailIdentifier;
         if (initial_id != null && initial == null) {
             throw new Geary.EngineError.BAD_PARAMETERS(
@@ -268,7 +268,7 @@ public class MailMerge.Folder : Geary.BaseObject,
             }
         }
 
-        return (list.size > 0) ? list : null;
+        return list;
     }
 
     /** {@inheritDoc} */

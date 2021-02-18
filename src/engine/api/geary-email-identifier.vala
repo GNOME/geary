@@ -79,7 +79,7 @@ public abstract class Geary.EmailIdentifier :
      * EmailIdentifiers that cannot be compared against this one (i.e. of a different subclass)
      * should return 1 as well.  Generally this means they came from different Folders.
      *
-     * @see Folder.list_email_by_id_async
+     * @see Folder.list_email_range_by_id
      */
     public abstract int natural_sort_comparator(Geary.EmailIdentifier other);
 

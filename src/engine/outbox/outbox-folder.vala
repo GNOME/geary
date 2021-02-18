@@ -264,21 +264,23 @@ public class Geary.Outbox.Folder : BaseObject,
         return email;
     }
 
-    public async Gee.List<Email>?
-        list_email_by_id_async(Geary.EmailIdentifier? _initial_id,
-                               int count,
-                               Geary.Email.Field required_fields,
-                               Geary.Folder.ListFlags flags,
-                               GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
+    public async Gee.List<Email> list_email_range_by_id(
+        Geary.EmailIdentifier? _initial_id,
+        int count,
+        Email.Field required_fields,
+        Geary.Folder.ListFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         EmailIdentifier? initial_id = _initial_id as EmailIdentifier;
         if (_initial_id != null && initial_id == null) {
             throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
                 initial_id.to_string());
         }
 
-        if (count <= 0)
-            return null;
+        var list = new Gee.LinkedList<Email>();
+        if (count <= 0)  {
+            return list;
+        }
 
         bool list_all = (required_fields != Email.Field.NONE);
 
@@ -287,7 +289,6 @@ public class Geary.Outbox.Folder : BaseObject,
             select = select + ", message, sent";
         }
 
-        Gee.List<Geary.Email>? list = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             string dir = flags.is_newest_to_oldest() ? "DESC" : "ASC";
 
@@ -317,7 +318,6 @@ public class Geary.Outbox.Folder : BaseObject,
             if (results.finished)
                 return Db.TransactionOutcome.DONE;
 
-            list = new Gee.ArrayList<Geary.Email>();
             int position = -1;
             do {
                 int64 ordering = results.int64_at(1);

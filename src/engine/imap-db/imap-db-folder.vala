@@ -70,6 +70,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             if (flags.is_all_set(Geary.Folder.ListFlags.INCLUDING_ID))
                 result |= INCLUDING_ID;
 
+            if (flags.is_all_set(Geary.Folder.ListFlags.INCLUDING_PARTIAL))
+                result |= PARTIAL_OK;
+
             if (flags.is_all_set(Geary.Folder.ListFlags.OLDEST_TO_NEWEST))
                 result |= OLDEST_TO_NEWEST;
 
@@ -427,11 +430,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return contained_ids.values;
     }
 
-    public async Gee.List<Geary.Email>? list_email_by_id_async(ImapDB.EmailIdentifier? initial_id,
-        int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable)
-        throws Error {
-        if (count <= 0)
-            return null;
+    public async Gee.List<Geary.Email> list_email_by_id_async(
+        ImapDB.EmailIdentifier? initial_id,
+        int count,
+        Email.Field required_fields,
+        ListFlags flags,
+        GLib.Cancellable? cancellable
+    ) throws GLib.Error {
+        var results = new Gee.LinkedList<Email>();
+        if (count <= 0) {
+            return results;
+        }
 
         bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
         bool oldest_to_newest = flags.is_all_set(ListFlags.OLDEST_TO_NEWEST);
@@ -446,10 +455,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             if (initial_id != null) {
                 // use INCLUDE_MARKED_FOR_REMOVE because this is a ranged list ...
                 // do_results_to_location() will deal with removing EmailIdentifiers if necessary
-                LocationIdentifier? location = do_get_location_for_id(cx, initial_id,
-                    ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
-                if (location == null)
-                    return Db.TransactionOutcome.DONE;
+                LocationIdentifier? location = do_get_location_for_id(
+                    cx, initial_id, INCLUDE_MARKED_FOR_REMOVE, cancellable
+                );
+                if (location == null) {
+                    throw new EngineError.NOT_FOUND("Initial id not found");
+                }
 
                 start_uid = location.uid;
 
@@ -503,11 +514,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (only_incomplete)
             locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
 
-        var results = new Gee.ArrayList<Email>();
         yield list_email_in_chunks_async(
             locations, results, required_fields, flags, true, cancellable
         );
-        return results.is_empty ? null : results;
+        return results;
     }
 
     // ListFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.

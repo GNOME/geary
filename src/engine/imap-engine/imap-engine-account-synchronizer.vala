@@ -371,11 +371,13 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
             "Unable to locate epoch messages on remote folder%s, fetching one past oldest...",
             (id != null) ? " earlier than oldest local" : ""
         );
-        yield this.folder.list_email_by_id_async(
-            id,
+        var minimal = (MinimalFolder) this.folder;
+        var remote = yield minimal.claim_remote_session(cancellable);
+        yield minimal.expand_vector_internal(
+            remote,
+            ((ImapDB.EmailIdentifier) id).uid,
             1,
-            Geary.Email.Field.NONE,
-            Geary.Folder.ListFlags.NONE,
+            OLDEST_TO_NEWEST,
             cancellable
         );
     }
@@ -395,11 +397,13 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
         //
         // XXX This is expensive, but should only usually happen once
         // per folder - at the end of a full sync.
-        yield this.folder.list_email_by_id_async(
+        var minimal = (MinimalFolder) this.folder;
+        var remote = yield minimal.claim_remote_session(cancellable);
+        yield minimal.expand_vector_internal(
+            remote,
             null,
             int.MAX,
-            Geary.Email.Field.NONE,
-            Geary.Folder.ListFlags.NONE,
+            OLDEST_TO_NEWEST,
             cancellable
         );
     }
