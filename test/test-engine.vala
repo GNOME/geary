@@ -78,6 +78,7 @@ int main(string[] args) {
 
     engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().suite);
     engine.add_suite(new Geary.ImapEngine.GenericAccountTest().suite);
+    engine.add_suite(new Geary.ImapEngine.MinimalFolderTest().suite);
 
     // Depends on ImapDb.Database working correctly
     engine.add_suite(new Geary.ContactStoreImplTest().suite);
