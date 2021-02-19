@@ -171,7 +171,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.fetch_email_async.begin(
             (EmailIdentifier) mock.id,
             fixture_fields | mock.fields,
-            Folder.ListFlags.NONE,
+            NONE,
             null,
             this.async_completion
         );
@@ -433,7 +433,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.folder.fetch_email_async.begin(
             id,
             Email.Field.FLAGS,
-            Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+            INCLUDE_MARKED_FOR_REMOVE,
             null,
             this.async_completion
         );

@@ -284,7 +284,7 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
             null,
             1,
             Email.Field.PROPERTIES,
-            ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
+            OLDEST_TO_NEWEST,
             cancellable
         );
 
@@ -302,7 +302,7 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
         DateTime? next_epoch = oldest_date;
         while (next_epoch.compare(max_epoch) > 0) {
             int local_count = yield local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.NONE, cancellable
+                NONE, cancellable
             );
 
             next_epoch = next_epoch.add_months(-3);

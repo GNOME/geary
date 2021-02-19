@@ -48,7 +48,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int MINIMUM_MESSAGES_TO_RETAIN_DURING_GC = 100;
 
     [Flags]
-    public enum ListFlags {
+    public enum LoadFlags {
         NONE = 0,
         PARTIAL_OK,
         INCLUDE_MARKED_FOR_REMOVE,
@@ -56,7 +56,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         OLDEST_TO_NEWEST,
         ONLY_INCOMPLETE;
 
-        public bool is_all_set(ListFlags flags) {
+        public bool is_all_set(LoadFlags flags) {
             return (this & flags) == flags;
         }
 
@@ -64,8 +64,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return is_all_set(INCLUDE_MARKED_FOR_REMOVE);
         }
 
-        public static ListFlags from_folder_flags(Geary.Folder.ListFlags flags) {
-            ListFlags result = NONE;
+        public static LoadFlags from_folder_flags(Geary.Folder.ListFlags flags) {
+            LoadFlags result = NONE;
 
             if (flags.is_all_set(Geary.Folder.ListFlags.INCLUDING_ID))
                 result |= INCLUDING_ID;
@@ -132,7 +132,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.properties = properties;
     }
 
-    public async int get_email_count_async(ListFlags flags,
+    public async int get_email_count_async(LoadFlags flags,
                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
         int count = 0;
@@ -434,7 +434,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         ImapDB.EmailIdentifier? initial_id,
         int count,
         Email.Field required_fields,
-        ListFlags flags,
+        LoadFlags flags,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
         var results = new Gee.LinkedList<Email>();
@@ -442,9 +442,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return results;
         }
 
-        bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
-        bool oldest_to_newest = flags.is_all_set(ListFlags.OLDEST_TO_NEWEST);
-        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
+        bool including_id = flags.is_all_set(LoadFlags.INCLUDING_ID);
+        bool oldest_to_newest = flags.is_all_set(LoadFlags.OLDEST_TO_NEWEST);
+        bool only_incomplete = flags.is_all_set(LoadFlags.ONLY_INCOMPLETE);
 
         // Break up work so all reading isn't done in single transaction that locks up the
         // database ... first, gather locations of all emails in database
@@ -520,12 +520,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return results;
     }
 
-    // ListFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
+    // LoadFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
     // Without this flag, neither are considered as part of the range.
     public async Gee.List<Geary.Email>? list_email_by_range_async(ImapDB.EmailIdentifier start_id,
-        ImapDB.EmailIdentifier end_id, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable)
+        ImapDB.EmailIdentifier end_id, Geary.Email.Field required_fields, LoadFlags flags, Cancellable? cancellable)
         throws Error {
-        bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
+        bool including_id = flags.is_all_set(LoadFlags.INCLUDING_ID);
 
         // Break up work so all reading isn't done in single transaction that locks up the
         // database ... first, gather locations of all emails in database
@@ -534,7 +534,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // use INCLUDE_MARKED_FOR_REMOVE because this is a ranged list ...
             // do_results_to_location() will deal with removing EmailIdentifiers if necessary
             LocationIdentifier? start_location = do_get_location_for_id(cx, start_id,
-                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+                LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (start_location == null)
                 return Db.TransactionOutcome.DONE;
 
@@ -542,7 +542,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             // see note above about INCLUDE_MARKED_FOR_REMOVE
             LocationIdentifier? end_location = do_get_location_for_id(cx, end_id,
-                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+                LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (end_location == null)
                 return Db.TransactionOutcome.DONE;
 
@@ -577,13 +577,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return results.is_empty ? null : results;
     }
 
-    // ListFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
+    // LoadFlags.OLDEST_TO_NEWEST is ignored.  INCLUDING_ID means including *both* identifiers.
     // Without this flag, neither are considered as part of the range.
     public async Gee.List<Geary.Email>? list_email_by_uid_range_async(Imap.UID start,
-        Imap.UID end, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable)
+        Imap.UID end, Geary.Email.Field required_fields, LoadFlags flags, Cancellable? cancellable)
         throws Error {
-        bool including_id = flags.is_all_set(ListFlags.INCLUDING_ID);
-        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
+        bool including_id = flags.is_all_set(LoadFlags.INCLUDING_ID);
+        bool only_incomplete = flags.is_all_set(LoadFlags.ONLY_INCOMPLETE);
 
         Imap.UID start_uid = start;
         Imap.UID end_uid = end;
@@ -631,7 +631,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Set<Email> list_email_by_sparse_id_async(
         Gee.Collection<ImapDB.EmailIdentifier> ids,
         Geary.Email.Field required_fields,
-        ListFlags flags,
+        LoadFlags flags,
         bool require_all_email,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
@@ -640,7 +640,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return results;
         }
 
-        bool only_incomplete = flags.is_all_set(ListFlags.ONLY_INCOMPLETE);
+        bool only_incomplete = flags.is_all_set(LoadFlags.ONLY_INCOMPLETE);
 
         // Break up work so all reading isn't done in single transaction that locks up the
         // database ... first, gather locations of all emails in database
@@ -743,7 +743,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.List<LocationIdentifier>? ids,
         Gee.Collection<Email> results,
         Geary.Email.Field required_fields,
-        ListFlags flags,
+        LoadFlags flags,
         bool require_all_email,
         GLib.Cancellable? cancellable
     ) throws Error {
@@ -791,7 +791,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier id,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields, LoadFlags flags, Cancellable? cancellable) throws Error {
         Geary.Email? email = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             LocationIdentifier? location = do_get_location_for_id(cx, id, flags, cancellable);
@@ -877,7 +877,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return id;
     }
 
-    public async Imap.UID? get_uid_async(ImapDB.EmailIdentifier id, ListFlags flags,
+    public async Imap.UID? get_uid_async(ImapDB.EmailIdentifier id, LoadFlags flags,
         Cancellable? cancellable) throws Error {
         // Always look up the UID rather than pull the one from the EmailIdentifier; it could be
         // for another Folder
@@ -894,7 +894,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     public async Gee.Set<Imap.UID>? get_uids_async(Gee.Collection<ImapDB.EmailIdentifier> ids,
-        ListFlags flags, Cancellable? cancellable) throws Error {
+        LoadFlags flags, Cancellable? cancellable) throws Error {
         // Always look up the UID rather than pull the one from the EmailIdentifier; it could be
         // for another Folder
         Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
@@ -913,7 +913,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     // Returns null if the UID is not found in this Folder.
-    public async ImapDB.EmailIdentifier? get_id_async(Imap.UID uid, ListFlags flags,
+    public async ImapDB.EmailIdentifier? get_id_async(Imap.UID uid, LoadFlags flags,
         Cancellable? cancellable) throws Error {
         ImapDB.EmailIdentifier? id = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -929,7 +929,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     public async Gee.Set<ImapDB.EmailIdentifier>? get_ids_async(Gee.Collection<Imap.UID> uids,
-        ListFlags flags, Cancellable? cancellable) throws Error {
+        LoadFlags flags, Cancellable? cancellable) throws Error {
         Gee.Set<ImapDB.EmailIdentifier> ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Gee.List<LocationIdentifier>? locs = do_get_locations_for_uids(cx, uids, flags,
@@ -986,7 +986,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // account.
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids,
-                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+                LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
 
@@ -1278,7 +1278,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         bool internal_is_marked = false;
         bool was_unread = false;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            LocationIdentifier? location = do_get_location_for_id(cx, id, ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+            LocationIdentifier? location = do_get_location_for_id(cx, id, LoadFlags.INCLUDE_MARKED_FOR_REMOVE,
                 cancellable);
             if (location == null) {
                 throw new EngineError.NOT_FOUND("Message %s cannot be removed from %s: not found",
@@ -1306,7 +1306,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     // Mark messages as removed (but not expunged) from the folder.  Marked messages are skipped
-    // on most operations unless ListFlags.INCLUDE_MARKED_REMOVED is true.  Use detach_email_async()
+    // on most operations unless LoadFlags.INCLUDE_MARKED_REMOVED is true.  Use detach_email_async()
     // to formally remove the messages from the folder.
     //
     // If ids is null, all messages are marked for removal.
@@ -1322,9 +1322,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Gee.List<LocationIdentifier?> locs;
             if (ids != null)
-                locs = do_get_locations_for_ids(cx, ids, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+                locs = do_get_locations_for_ids(cx, ids, LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             else
-                locs = do_get_all_locations(cx, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+                locs = do_get_all_locations(cx, LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
 
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
@@ -1437,7 +1437,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     public async Gee.Map<ImapDB.EmailIdentifier, Geary.Email.Field>? list_email_fields_by_id_async(
-        Gee.Collection<ImapDB.EmailIdentifier> ids, ListFlags flags, Cancellable? cancellable)
+        Gee.Collection<ImapDB.EmailIdentifier> ids, LoadFlags flags, Cancellable? cancellable)
         throws Error {
         if (ids.size == 0)
             return null;
@@ -1655,7 +1655,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         LocationIdentifier? location = do_get_location_for_uid(
             cx,
             email_id.uid,
-            ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+            LoadFlags.INCLUDE_MARKED_FOR_REMOVE,
             cancellable
         );
         if (location != null) {
@@ -1832,7 +1832,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Connection cx,
         Gee.List<LocationIdentifier> locations,
         Email.Field required_fields,
-        ListFlags flags,
+        LoadFlags flags,
         bool require_all_email,
         GLib.Cancellable? cancellable
     ) throws GLib.Error {
@@ -1873,7 +1873,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private Geary.Email do_location_to_email(Db.Connection cx, LocationIdentifier location,
-        Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable) throws Error {
+        Geary.Email.Field required_fields, LoadFlags flags, Cancellable? cancellable) throws Error {
         if (!flags.include_marked_for_remove() && location.marked_removed) {
             throw new EngineError.NOT_FOUND("Message %s marked as removed in %s",
                 location.email_id.to_string(), to_string());
@@ -1886,7 +1886,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Geary.Email.Field db_fields;
         MessageRow row = do_fetch_message_row(cx, location.message_id, required_fields,
             out db_fields, cancellable);
-        if (!flags.is_all_set(ListFlags.PARTIAL_OK) && !row.fields.fulfills(required_fields)) {
+        if (!flags.is_all_set(LoadFlags.PARTIAL_OK) && !row.fields.fulfills(required_fields)) {
             throw new EngineError.INCOMPLETE_MESSAGE(
                 "Message %s in folder %s only fulfills %Xh fields (required: %Xh)",
                 location.email_id.to_string(), to_string(), row.fields, required_fields);
@@ -1968,7 +1968,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? do_get_email_flags(Db.Connection cx,
         Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids, ListFlags.NONE,
+        Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids, LoadFlags.NONE,
             cancellable);
         if (locs == null || locs.size == 0)
             return null;
@@ -2025,7 +2025,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 cx,
                 id,
                 // Could be setting a flag on a deleted message
-                ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                LoadFlags.INCLUDE_MARKED_FOR_REMOVE,
                 cancellable
             );
             if (location == null) {
@@ -2429,7 +2429,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // Db.Result must include columns for "message_id", "ordering", and "remove_marker" from the
     // MessageLocationTable
     private Gee.List<LocationIdentifier> do_results_to_locations(Db.Result results, int count,
-        ListFlags flags, Cancellable? cancellable) throws Error {
+        LoadFlags flags, Cancellable? cancellable) throws Error {
         Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
 
         if (results.finished)
@@ -2495,7 +2495,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private LocationIdentifier? do_get_location_for_id(Db.Connection cx, ImapDB.EmailIdentifier id,
-        ListFlags flags, Cancellable? cancellable) throws Error {
+        LoadFlags flags, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("""
             SELECT ordering, remove_marker
             FROM MessageLocationTable
@@ -2515,7 +2515,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private Gee.List<LocationIdentifier>? do_get_locations_for_ids(Db.Connection cx,
-        Gee.Collection<ImapDB.EmailIdentifier>? ids, ListFlags flags, Cancellable? cancellable)
+        Gee.Collection<ImapDB.EmailIdentifier>? ids, LoadFlags flags, Cancellable? cancellable)
         throws Error {
         if (ids == null || ids.size == 0)
             return null;
@@ -2545,7 +2545,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private LocationIdentifier? do_get_location_for_uid(Db.Connection cx, Imap.UID uid,
-        ListFlags flags, Cancellable? cancellable) throws Error {
+        LoadFlags flags, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("""
             SELECT message_id, remove_marker
             FROM MessageLocationTable
@@ -2564,7 +2564,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private Gee.List<LocationIdentifier>? do_get_locations_for_uids(Db.Connection cx,
-        Gee.Collection<Imap.UID>? uids, ListFlags flags, Cancellable? cancellable)
+        Gee.Collection<Imap.UID>? uids, LoadFlags flags, Cancellable? cancellable)
         throws Error {
         if (uids == null || uids.size == 0)
             return null;
@@ -2593,7 +2593,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return (locs.size > 0) ? locs : null;
     }
 
-    private Gee.List<LocationIdentifier>? do_get_all_locations(Db.Connection cx, ListFlags flags,
+    private Gee.List<LocationIdentifier>? do_get_all_locations(Db.Connection cx, LoadFlags flags,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("""
             SELECT message_id, ordering, remove_marker

@@ -42,7 +42,7 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
         throws GLib.Error {
         if (to_copy.size > 0) {
             Gee.Set<Imap.UID>? uids = yield engine.local_folder.get_uids_async(
-                to_copy, ImapDB.Folder.ListFlags.NONE, cancellable
+                to_copy, NONE, cancellable
             );
 
             if (uids != null && uids.size > 0) {

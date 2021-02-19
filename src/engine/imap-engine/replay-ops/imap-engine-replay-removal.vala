@@ -65,7 +65,8 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
             // remote count already being decremented in MinimalFolder
             // when this op was queued.
             local_count = yield this.owner.local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+                INCLUDE_MARKED_FOR_REMOVE, null
+            );
             local_position = this.position.value - (this.remote_count + 1 - local_count);
 
             // zero or negative means the message exists beyond the local vector's range, so

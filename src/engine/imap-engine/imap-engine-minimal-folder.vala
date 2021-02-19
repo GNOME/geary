@@ -719,8 +719,9 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         // Convert removed UIDs into EmailIdentifiers and detach immediately
         Gee.Set<ImapDB.EmailIdentifier>? removed_ids = null;
         if (removed_uids.size > 0) {
-            removed_ids = yield local_folder.get_ids_async(removed_uids,
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            removed_ids = yield local_folder.get_ids_async(
+                removed_uids, INCLUDE_MARKED_FOR_REMOVE, cancellable
+            );
             if (removed_ids != null && removed_ids.size > 0) {
                 yield local_folder.detach_multiple_emails_async(removed_ids, cancellable);
             }
@@ -779,8 +780,9 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     // used by normalize_folders() during the normalization process; should not be used elsewhere
     private async void detach_all_emails_async(Cancellable? cancellable) throws Error {
-        Gee.List<Email>? all = yield local_folder.list_email_by_id_async(null, -1,
-            Geary.Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
+        Gee.List<Email>? all = yield local_folder.list_email_by_id_async(
+            null, -1, Geary.Email.Field.NONE, NONE, cancellable
+        );
 
         yield local_folder.detach_all_emails_async(cancellable);
         yield update_email_counts(cancellable);
@@ -927,7 +929,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             imap_id,
             count,
             required_fields,
-            ImapDB.Folder.ListFlags.from_folder_flags(flags),
+            ImapDB.Folder.LoadFlags.from_folder_flags(flags),
             cancellable
         );
     }
@@ -1110,8 +1112,9 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
         // if before_id available, only search for messages before it
         if (before_id != null) {
-            Imap.UID? before_uid = yield local_folder.get_uid_async((ImapDB.EmailIdentifier) before_id,
-                ImapDB.Folder.ListFlags.NONE, cancellable);
+            Imap.UID? before_uid = yield local_folder.get_uid_async(
+                (ImapDB.EmailIdentifier) before_id, NONE, cancellable
+            );
             if (before_uid == null) {
                 throw new EngineError.NOT_FOUND("before_id %s not found in %s", before_id.to_string(),
                     to_string());

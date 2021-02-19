@@ -44,7 +44,8 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
             // need total count, including those marked for removal, to accurately calculate position
             // from server's point of view, not client's
             local_count = yield this.owner.local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
+                INCLUDE_MARKED_FOR_REMOVE, null
+            );
             local_position = this.position.value - (this.remote_count - local_count);
 
             ImapDB.EmailIdentifier? id = null;

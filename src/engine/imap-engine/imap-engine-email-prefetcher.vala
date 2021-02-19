@@ -21,7 +21,7 @@ private class Geary.ImapEngine.EmailPrefetcher : BaseObject,
     // that don't have properties (i.e. are essentially blank)
     // are still found and filled in.
     private const Geary.Email.Field PREPARE_FIELDS = PROPERTIES;
-    private const ImapDB.Folder.ListFlags PREPARE_FLAGS = (
+    private const ImapDB.Folder.LoadFlags PREPARE_FLAGS = (
         ONLY_INCOMPLETE | PARTIAL_OK
     );
 
