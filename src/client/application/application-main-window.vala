@@ -204,7 +204,19 @@ public class Application.MainWindow :
         );
         Gtk.BindingEntry.add_signal(
             bindings,
+            Gdk.Key.Back, 0,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_LEFT
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
             Gdk.Key.Right, MOD1_MASK,
+            "navigate", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_RIGHT
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Forward, 0,
             "navigate", 1,
             typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_RIGHT
         );
