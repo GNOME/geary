@@ -72,6 +72,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
                     yield context.emails.get_multiple_email_by_id(
                         found_accounts.get(context),
                         REQUIRED_FIELDS,
+                        NONE,
                         context.cancellable
                     );
                 if (!batch.is_empty) {
@@ -194,9 +195,10 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             throws GLib.Error {
             if (!(Geary.Email.REQUIRED_FOR_MESSAGE in this.backing.fields)) {
                 Geary.Account account = this.account.backing.account;
-                this.backing = yield account.local_fetch_email_async(
+                this.backing = yield account.get_email_by_id(
                     this.backing.id,
                     Geary.Email.REQUIRED_FOR_MESSAGE | this.backing.fields,
+                    NONE,
                     cancellable
                 );
             }

@@ -696,6 +696,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 yield this.sender_context.emails.get_multiple_email_by_id(
                     Geary.Collection.single(context.id),
                     REQUIRED_FIELDS,
+                    NONE,
                     this.sender_context.cancellable
                 );
             if (email.is_empty) {

@@ -120,25 +120,27 @@ public class Mock.RemoteFolder : GLib.Object,
 
     public async Geary.Email get_email_by_id(
         Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
-        return yield object_call_async<Geary.Email>(
-            "get_email",
-            {email_id, box_arg(required_fields), cancellable},
-            new Geary.Email(new Mock.EmailIdentifer(0))
+        return object_or_throw_call<Geary.Email>(
+            "get_email_by_id",
+            {email_id, box_arg(required_fields), box_arg(flags), cancellable},
+            new Geary.EngineError.UNSUPPORTED("Mock method")
         );
     }
 
-    public async Gee.Set<Geary.Email>
-        get_multiple_email_by_id(Gee.Collection<Geary.EmailIdentifier> ids,
-                                 Geary.Email.Field required_fields,
-                                 GLib.Cancellable? cancellable = null
-        ) throws GLib.Error {
-        return yield object_call_async<Gee.Set<Geary.Email>>(
+    public async Gee.Set<Geary.Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_or_throw_call<Gee.Set<Geary.Email>>(
             "get_multiple_email_by_id",
-            {ids, box_arg(required_fields), cancellable},
-            new Gee.HashSet<Geary.Email>()
+            {ids, box_arg(required_fields), box_arg(flags), cancellable},
+            new Geary.EngineError.UNSUPPORTED("Mock method")
         );
     }
 

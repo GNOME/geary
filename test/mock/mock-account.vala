@@ -198,26 +198,28 @@ public class Mock.Account : Geary.Account,
         );
     }
 
-    public override async Gee.Set<Geary.Email> get_multiple_email_by_id(
-        Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.Email.Field required_fields,
+    public override async Geary.Email get_email_by_id(
+        Geary.EmailIdentifier id,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
-        return object_or_throw_call<Gee.Set<Geary.Email>>(
-            "get_multiple_email_by_id",
-            {ids, box_arg(required_fields), cancellable},
+        return object_or_throw_call<Geary.Email>(
+            "get_email_by_id",
+            {id, box_arg(required_fields), box_arg(flags), cancellable},
             new Geary.EngineError.NOT_FOUND("Mock call")
         );
     }
 
-    public override async Geary.Email
-        local_fetch_email_async(Geary.EmailIdentifier email_id,
-                                Geary.Email.Field required_fields,
-                                GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        return object_or_throw_call<Geary.Email>(
-            "local_fetch_email_async",
-            {email_id, box_arg(required_fields), cancellable},
+    public override async Gee.Set<Geary.Email> get_multiple_email_by_id(
+        Gee.Collection<Geary.EmailIdentifier> ids,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return object_or_throw_call<Gee.Set<Geary.Email>>(
+            "get_multiple_email_by_id",
+            {ids, box_arg(required_fields), box_arg(flags), cancellable},
             new Geary.EngineError.NOT_FOUND("Mock call")
         );
     }

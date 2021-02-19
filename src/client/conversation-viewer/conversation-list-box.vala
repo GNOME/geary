@@ -1156,6 +1156,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         Geary.Email full_email = yield this.email_store.get_email_by_id(
             id,
             REQUIRED_FIELDS | ConversationEmail.REQUIRED_FOR_CONSTRUCT,
+            NONE,
             this.cancellable
         );
 

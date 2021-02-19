@@ -208,6 +208,7 @@ public class ConversationListStore : Gtk.ListStore {
             emails = yield email_store.get_multiple_email_by_id(
                 emails_needing_previews,
                 WITH_PREVIEW_FIELDS,
+                NONE,
                 cancellable
             );
         } catch (GLib.IOError.CANCELLED err) {

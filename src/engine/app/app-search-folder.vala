@@ -219,23 +219,25 @@ public class Geary.App.SearchFolder : BaseObject,
 
     /** {@inheritDoc} */
     public async Email get_email_by_id(EmailIdentifier fetch,
-                                       Email.Field required_fields,
+                                       Email.Field required_fields = ALL,
+                                       GetFlags flags = NONE,
                                        GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         require_id(fetch);
-        return yield this.account.local_fetch_email_async(
-            fetch, required_fields, cancellable
+        return yield this.account.get_email_by_id(
+            fetch, required_fields, flags, cancellable
         );
     }
 
     /** {@inheritDoc} */
     public async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<Geary.EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
         return yield this.account.get_multiple_email_by_id(
-            check_ids(ids), required_fields, cancellable
+            check_ids(ids), required_fields, flags, cancellable
         );
     }
 
@@ -324,6 +326,7 @@ public class Geary.App.SearchFolder : BaseObject,
                 results = yield this.account.get_multiple_email_by_id(
                     engine_ids,
                     required_fields,
+                    NONE,
                     cancellable
                 );
             } catch (GLib.Error error) {
@@ -550,6 +553,7 @@ public class Geary.App.SearchFolder : BaseObject,
                     yield this.account.get_multiple_email_by_id(
                         id_results,
                         PROPERTIES,
+                        NONE,
                         cancellable
                     );
 

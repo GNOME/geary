@@ -65,12 +65,14 @@ public class Geary.App.EmailStore : BaseObject {
      * Fetches any EmailIdentifier regardless of what folder it's in.
      */
     public async Email get_email_by_id(EmailIdentifier email_id,
-                                       Email.Field required_fields,
+                                       Email.Field required_fields = ALL,
+                                       Folder.GetFlags flags = NONE,
                                        GLib.Cancellable? cancellable = null)
         throws GLib.Error {
-        FetchOperation op = new Geary.App.FetchOperation(required_fields);
-        yield do_folder_operation_async(op,
-            Geary.iterate<Geary.EmailIdentifier>(email_id).to_array_list(), cancellable);
+            FetchOperation op = new Geary.App.FetchOperation(required_fields, flags);
+        yield do_folder_operation_async(
+            op, Collection.single(email_id), cancellable
+        );
 
         if (op.result == null)
             throw new EngineError.NOT_FOUND("Couldn't fetch email ID %s", email_id.to_string());
@@ -82,10 +84,11 @@ public class Geary.App.EmailStore : BaseObject {
      */
     public async Gee.Collection<Geary.Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> emails,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
-        var op = new Geary.App.ListOperation(required_fields);
+        var op = new Geary.App.ListOperation(required_fields, flags);
         yield do_folder_operation_async(op, emails, cancellable);
         return op.results;
     }

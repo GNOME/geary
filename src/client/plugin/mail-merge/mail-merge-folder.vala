@@ -192,10 +192,12 @@ public class MailMerge.Folder : Geary.BaseObject,
     }
 
     /** {@inheritDoc} */
-    public async Geary.Email get_email_by_id(Geary.EmailIdentifier id,
-                                             Geary.Email.Field required_fields,
-                                             GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
+    public async Geary.Email get_email_by_id(
+        Geary.EmailIdentifier id,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         var email = this.email.get(id);
         if (email == null) {
             throw new Geary.EngineError.NOT_FOUND(
@@ -207,7 +209,8 @@ public class MailMerge.Folder : Geary.BaseObject,
 
     public async Gee.Set<Geary.Email> get_multiple_email_by_id(
         Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.Email.Field required_fields,
+        Geary.Email.Field required_fields = ALL,
+        Geary.Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
         var results = Geary.Email.new_identifier_based_set();
@@ -339,9 +342,10 @@ public class MailMerge.Folder : Geary.BaseObject,
         throws GLib.Error {
         var template = this.template;
         if (!template.fields.fulfills(Geary.Email.REQUIRED_FOR_MESSAGE)) {
-            template = yield this.account.local_fetch_email_async(
+            template = yield this.account.get_email_by_id(
                 template.id,
                 Geary.Email.REQUIRED_FOR_MESSAGE,
+                NONE,
                 cancellable
             );
         }

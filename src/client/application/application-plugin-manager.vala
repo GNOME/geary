@@ -168,6 +168,7 @@ public class Application.PluginManager : GLib.Object {
                 email = yield source_impl.backing.emails.get_multiple_email_by_id(
                     Geary.Collection.single(id),
                     Composer.Widget.REQUIRED_FIELDS,
+                    NONE,
                     source_impl.backing.cancellable
                 );
             } catch (GLib.Error err) {

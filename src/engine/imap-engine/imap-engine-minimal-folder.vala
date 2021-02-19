@@ -884,14 +884,15 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
     /** {@inheritDoc} */
     public async Email get_email_by_id(EmailIdentifier id,
-                                       Email.Field required_fields,
+                                       Email.Field required_fields = ALL,
+                                       GetFlags flags = NONE,
                                        GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         check_id("get_email_by_id", id);
         return yield this.local_folder.fetch_email_async(
             (ImapDB.EmailIdentifier) id,
             required_fields,
-            NONE,
+            ImapDB.Folder.LoadFlags.from_folder_get(flags),
             cancellable
         );
     }
@@ -899,13 +900,14 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     /** {@inheritDoc} */
     public async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<Geary.EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
         return yield this.local_folder.list_email_by_sparse_id_async(
             check_ids("get_multiple_email_by_id", ids),
             required_fields,
-            NONE,
+            ImapDB.Folder.LoadFlags.from_folder_get(flags),
             true,
             cancellable
         );
@@ -929,7 +931,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             imap_id,
             count,
             required_fields,
-            ImapDB.Folder.LoadFlags.from_folder_flags(flags),
+            ImapDB.Folder.LoadFlags.from_folder_list(flags),
             cancellable
         );
     }
@@ -1299,7 +1301,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             // locally possibly before the server notified that the
             // message exists. As such, fetch any missing parts from
             // the remote to ensure it is properly filled in.
-            yield get_email_by_id(op.created_id, ALL, cancellable);
+            yield get_email_by_id(op.created_id, ALL, NONE, cancellable);
         } else {
             // The server didn't return a UID for the new email, so do
             // a sync now to ensure it shows up immediately.

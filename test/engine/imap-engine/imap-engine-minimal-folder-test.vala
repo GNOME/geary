@@ -15,8 +15,14 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
     public MinimalFolderTest() {
         base("Geary.ImapEngine.MinimalFolderTest");
         add_test("get_email_by_id", get_email_by_id);
+        add_test("get_email_by_id_partial", get_email_by_id_partial);
         add_test("get_multiple_email_by_id", get_multiple_email_by_id);
-        add_test("list_email_range_by_null_id", list_email_range_by_null_id);
+        add_test(
+            "get_multiple_email_by_id_partial", get_multiple_email_by_id_partial
+        );
+        add_test(
+            "list_email_range_by_null_id", list_email_range_by_null_id
+        );
         add_test(
             "list_email_range_by_non_null_id_descending",
             list_email_range_by_non_null_id_descending
@@ -79,7 +85,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         var valid_id = new ImapDB.EmailIdentifier(1, new Imap.UID(1));
 
         folder.get_email_by_id.begin(
-            invalid_id, ALL, null, this.async_completion
+            invalid_id, ALL, NONE, null, this.async_completion
         );
         try {
             folder.get_email_by_id.end(async_result());
@@ -89,7 +95,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         }
 
         folder.get_email_by_id.begin(
-            valid_id, RECEIVERS, null, this.async_completion
+            valid_id, RECEIVERS, NONE, null, this.async_completion
         );
         var email = folder.get_email_by_id.end(async_result());
         assert_true(email.id.equal_to(valid_id));
@@ -98,7 +104,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         assert_equal(email.to[0].address, "test1@example.com");
 
         folder.get_email_by_id.begin(
-            valid_id, ALL, null, this.async_completion
+            valid_id, ALL, NONE, null, this.async_completion
         );
         try {
             folder.get_email_by_id.end(async_result());
@@ -106,6 +112,41 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         } catch (EngineError.INCOMPLETE_MESSAGE err) {
             // all good
         }
+    }
+
+    public void get_email_by_id_partial() throws GLib.Error {
+        var folder = new MinimalFolder(
+            this.account,
+            this.local_folder,
+            NONE
+        );
+        var valid_id1 = new ImapDB.EmailIdentifier(1, new Imap.UID(1));
+        var valid_id2 = new ImapDB.EmailIdentifier(1, new Imap.UID(2));
+
+        // Get an email that actually has all requested flags
+
+        folder.get_email_by_id.begin(
+            valid_id2,
+            ORIGINATORS|RECEIVERS,
+            INCLUDING_PARTIAL,
+            null,
+            this.async_completion
+        );
+        var complete = folder.get_email_by_id.end(async_result());
+        assert_true(complete.id.equal_to(valid_id2));
+
+        // Get an  email missing requested flags
+
+        folder.get_email_by_id.begin(
+            valid_id1,
+            ORIGINATORS|RECEIVERS,
+            INCLUDING_PARTIAL,
+            null,
+            this.async_completion
+        );
+        var incomplete = folder.get_email_by_id.end(async_result());
+        assert_true(incomplete.id.equal_to(valid_id1));
+
     }
 
     public void get_multiple_email_by_id() throws GLib.Error {
@@ -118,7 +159,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         var valid_id = new ImapDB.EmailIdentifier(1, new Imap.UID(1));
 
         folder.get_multiple_email_by_id.begin(
-            Collection.single(invalid_id), ALL, null, this.async_completion
+            Collection.single(invalid_id), ALL, NONE, null, this.async_completion
         );
         try {
             folder.get_multiple_email_by_id.end(async_result());
@@ -128,7 +169,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         }
 
         folder.get_multiple_email_by_id.begin(
-            Collection.single(valid_id), RECEIVERS, null, this.async_completion
+            Collection.single(valid_id), RECEIVERS, NONE, null, this.async_completion
         );
         var email = assert_collection(
             folder.get_multiple_email_by_id.end(async_result())
@@ -139,7 +180,7 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         assert_equal(email.to[0].address, "test1@example.com");
 
         folder.get_multiple_email_by_id.begin(
-            Collection.single(valid_id), ALL, null, this.async_completion
+            Collection.single(valid_id), ALL, NONE, null, this.async_completion
         );
         try {
             folder.get_multiple_email_by_id.end(async_result());
@@ -147,6 +188,58 @@ internal class Geary.ImapEngine.MinimalFolderTest : AccountBasedTest {
         } catch (EngineError.INCOMPLETE_MESSAGE err) {
             // all good
         }
+    }
+
+    public void get_multiple_email_by_id_partial() throws GLib.Error {
+        var folder = new MinimalFolder(
+            this.account,
+            this.local_folder,
+            NONE
+        );
+        var valid_id1 = new ImapDB.EmailIdentifier(1, new Imap.UID(1));
+        var valid_id2 = new ImapDB.EmailIdentifier(2, new Imap.UID(2));
+
+        // get an email that does fulfil all fields
+
+        folder.get_multiple_email_by_id.begin(
+            Collection.single(valid_id2),
+            ORIGINATORS|RECEIVERS,
+            INCLUDING_PARTIAL,
+            null,
+            this.async_completion
+        );
+        var complete = assert_collection(
+            folder.get_multiple_email_by_id.end(async_result())
+        ).size(1)[0];
+        assert_true(complete.id.equal_to(valid_id2));
+
+        // get an email that does not fulfil all fields
+
+        folder.get_multiple_email_by_id.begin(
+            Collection.single(valid_id1),
+            ORIGINATORS|RECEIVERS,
+            INCLUDING_PARTIAL,
+            null,
+            this.async_completion
+        );
+        var incomplete = assert_collection(
+            folder.get_multiple_email_by_id.end(async_result())
+        ).size(1)[0];
+        assert_true(incomplete.id.equal_to(valid_id1));
+
+
+        // get a mix of both
+
+        folder.get_multiple_email_by_id.begin(
+            new Gee.ArrayList<EmailIdentifier>.wrap({valid_id1,valid_id2}),
+            ORIGINATORS|RECEIVERS,
+            INCLUDING_PARTIAL,
+            null,
+            this.async_completion
+        );
+        assert_collection(
+            folder.get_multiple_email_by_id.end(async_result())
+        ).size(2);
     }
 
     public void list_email_range_by_null_id() throws GLib.Error {

@@ -56,15 +56,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         OLDEST_TO_NEWEST,
         ONLY_INCOMPLETE;
 
-        public bool is_all_set(LoadFlags flags) {
-            return (this & flags) == flags;
+        public static LoadFlags from_folder_get(Geary.Folder.GetFlags flags) {
+            LoadFlags result = NONE;
+            if (Geary.Folder.GetFlags.INCLUDING_PARTIAL in flags) {
+                result |= PARTIAL_OK;
+            }
+            return result;
         }
 
-        public bool include_marked_for_remove() {
-            return is_all_set(INCLUDE_MARKED_FOR_REMOVE);
-        }
-
-        public static LoadFlags from_folder_flags(Geary.Folder.ListFlags flags) {
+        public static LoadFlags from_folder_list(Geary.Folder.ListFlags flags) {
             LoadFlags result = NONE;
 
             if (flags.is_all_set(Geary.Folder.ListFlags.INCLUDING_ID))
@@ -78,6 +78,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             return result;
         }
+
+        public bool is_all_set(LoadFlags flags) {
+            return (this & flags) == flags;
+        }
+
+        public bool include_marked_for_remove() {
+            return is_all_set(INCLUDE_MARKED_FOR_REMOVE);
+        }
+
     }
 
     private class LocationIdentifier {

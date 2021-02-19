@@ -252,7 +252,9 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
             throw new SmtpError.AUTHENTICATION_FAILED("Credentials not loaded");
         }
 
-        Email email = yield this.outbox.get_email_by_id(id, ALL, cancellable);
+        Email email = yield this.outbox.get_email_by_id(
+            id, ALL, NONE, cancellable
+        );
 
         if (!email.email_flags.contains(EmailFlags.OUTBOX_SENT)) {
             RFC822.Message message = email.get_message();

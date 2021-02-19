@@ -500,7 +500,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         try {
             Gee.Collection<Geary.Email> messages =
                 yield this.base_folder.get_multiple_email_by_id(
-                    ids, required_fields, this.operation_cancellable
+                    ids, required_fields, NONE, this.operation_cancellable
                 );
 
             if (!messages.is_empty) {
@@ -532,7 +532,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         // First just get the bare minimum we need to determine if we even
         // care about the messages.
         Gee.Set<Geary.Email> emails = yield folder.get_multiple_email_by_id(
-            ids, REFERENCES, this.operation_cancellable
+            ids, REFERENCES, NONE, this.operation_cancellable
         );
         if (!emails.is_empty) {
             var relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -551,6 +551,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
                 emails = yield folder.get_multiple_email_by_id(
                     relevant_ids,
                     required_fields,
+                    NONE,
                     this.operation_cancellable
                 );
             } else {

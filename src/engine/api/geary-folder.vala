@@ -494,7 +494,23 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     }
 
     /**
-     * Flags for modifying the ranges of email retrieved from the vector.
+     * Flags modifying retrieval of specific email from the vector.
+     *
+     * @see get_email_by_id
+     * @see get_multiple_email_by_id
+     */
+    [Flags]
+    public enum GetFlags {
+
+        NONE = 0,
+
+        /** Include email that only partially matches the requested fields. */
+        INCLUDING_PARTIAL;
+
+    }
+
+    /**
+     * Flags for modifying retrieval of ranges of email from the vector.
      *
      * @see list_email_range_by_id
      */
@@ -658,7 +674,7 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
     throws GLib.Error;
 
     /**
-     * Returns email from the folder's vector.
+     * Returns an email from the folder's vector.
      *
      * The returned email object will have its property values set for
      * at least all requested fields, others may or may not be. If is
@@ -670,21 +686,25 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      * Note that for remote-backed folders, an email may not have yet
      * been fully downloaded and hence might exist incomplete in local
      * storage. If the requested fields are not available, {@link
-     * EngineError.INCOMPLETE_MESSAGE} is thrown. Connect to the
-     * {@link Account.email_complete} signal to be notified of when
-     * email is fully downloaded in this case.
+     * EngineError.INCOMPLETE_MESSAGE} is thrown, unless the {@link
+     * GetFlags.INCLUDING_PARTIAL} in specified. Connect to the {@link
+     * Account.email_complete} signal to be notified of when email is
+     * fully downloaded in this case.
      *
      * If the given email identifier is not present in the vector, an
      * {@link EngineError.NOT_FOUND} error is thrown.
+     *
+     * @see Account.get_email_by_id
      */
     public abstract async Geary.Email get_email_by_id(
         EmailIdentifier email_id,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error;
 
     /**
-     * Returns a set of non-contiguous emails from the folder's vector.
+     * Returns a set of emails from the folder's vector.
      *
      * Similar in contract to {@link get_email_by_id}, but for a
      * collection of {@link Geary.EmailIdentifier}s rather than a
@@ -698,15 +718,19 @@ public interface Geary.Folder : GLib.Object, Logging.Source {
      * been fully downloaded and hence might exist incomplete in local
      * storage. If the requested fields are not available for all
      * given identifiers, {@link EngineError.INCOMPLETE_MESSAGE} is
-     * thrown. Connect to the {@link Account.email_complete} signal to
-     * be notified of when email is fully downloaded in this case.
+     * thrown, unless the {@link GetFlags.INCLUDING_PARTIAL} in
+     * specified. Connect to the {@link Account.email_complete} signal
+     * to be notified of when email is fully downloaded in this case.
      *
      * If any of the given email identifiers are not present in the
      * vector, an {@link EngineError.NOT_FOUND} error is thrown.
+     *
+     * @see Account.get_multiple_email_by_id
      */
     public abstract async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error;
 

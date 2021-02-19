@@ -218,7 +218,8 @@ public class Geary.Outbox.Folder : BaseObject,
 
     /** {@inheritDoc} */
     public async Email get_email_by_id(Geary.EmailIdentifier id,
-                                       Email.Field required_fields,
+                                       Email.Field required_fields = ALL,
+                                       GetFlags flags = NONE,
                                        GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         EmailIdentifier? outbox_id = id as EmailIdentifier;
@@ -241,7 +242,8 @@ public class Geary.Outbox.Folder : BaseObject,
     /** {@inheritDoc} */
     public async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<Geary.EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
         var email = Email.new_identifier_based_set();

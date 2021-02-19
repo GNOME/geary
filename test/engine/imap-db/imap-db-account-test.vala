@@ -323,16 +323,17 @@ class Geary.ImapDB.AccountTest : TestCase {
             "VALUES (2, %d, '%s');".printf(fixture_fields, fixture_to)
         );
 
-        this.account.list_email.begin(
+        this.account.fetch_muliple_email.begin(
             iterate_array<Geary.ImapDB.EmailIdentifier>({
                     new EmailIdentifier(1, null),
                     new EmailIdentifier(2, null)
                 }).to_linked_list(),
             Email.Field.RECEIVERS,
+            NONE,
             null,
             this.async_completion
         );
-        Gee.Set<Email> result = this.account.list_email.end(
+        Gee.Set<Email> result = this.account.fetch_muliple_email.end(
             async_result()
         );
 
@@ -342,27 +343,29 @@ class Geary.ImapDB.AccountTest : TestCase {
         assert_true(new EmailIdentifier(1, null).equal_to(list[0].id));
         assert_true(new EmailIdentifier(2, null).equal_to(list[1].id));
 
-        this.account.list_email.begin(
+        this.account.fetch_muliple_email.begin(
             Collection.single(new EmailIdentifier(3, null)),
             Email.Field.RECEIVERS,
+            NONE,
             null,
             this.async_completion
         );
         try {
-            this.account.list_email.end(async_result());
+            this.account.fetch_muliple_email.end(async_result());
             assert_not_reached();
         } catch (EngineError.NOT_FOUND error) {
             // All good
         }
 
-        this.account.list_email.begin(
+        this.account.fetch_muliple_email.begin(
             Collection.single(new EmailIdentifier(1, null)),
             Email.Field.BODY,
+            NONE,
             null,
             this.async_completion
         );
         try {
-            this.account.list_email.end(async_result());
+            this.account.fetch_muliple_email.end(async_result());
             assert_not_reached();
         } catch (EngineError.INCOMPLETE_MESSAGE error) {
             // All good

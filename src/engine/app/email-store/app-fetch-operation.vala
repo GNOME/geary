@@ -9,11 +9,13 @@ private class Geary.App.FetchOperation : Geary.App.AsyncFolderOperation {
     public override Type folder_type { get { return typeof(Geary.Folder); } }
 
     public Email? result { get; private set; default = null; }
-    public Email.Field required_fields;
+    public Email.Field required_fields { get; private set; }
+    public Folder.GetFlags flags { get; private set; }
 
 
-    public FetchOperation(Email.Field required_fields) {
+    public FetchOperation(Email.Field required_fields, Folder.GetFlags flags) {
         this.required_fields = required_fields;
+        this.flags = flags;
     }
 
     public override async Gee.Collection<EmailIdentifier> execute_async(
@@ -23,7 +25,7 @@ private class Geary.App.FetchOperation : Geary.App.AsyncFolderOperation {
     ) throws GLib.Error {
         var id = Collection.first(ids);
         this.result = yield folder.get_email_by_id(
-            id, required_fields, cancellable
+            id, required_fields, this.flags, cancellable
         );
         return iterate<EmailIdentifier>(id).to_array_list();
     }

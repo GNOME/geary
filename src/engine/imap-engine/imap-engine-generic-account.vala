@@ -598,19 +598,27 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             message_id, requested_fields, partial_ok, folder_blacklist, flag_blacklist, cancellable);
     }
 
-    public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
-        return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
+    /** {@inheritDoc} */
+    public override async Email get_email_by_id(
+        EmailIdentifier id,
+        Email.Field required_fields = ALL,
+        Folder.GetFlags flags = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
+        return yield this.local.fetch_email(
+            check_id(id), required_fields, flags, cancellable
+        );
     }
 
     /** {@inheritDoc} */
     public override async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error {
-        return yield local.list_email(
-            check_ids(ids), required_fields, cancellable
+        return yield this.local.fetch_muliple_email(
+            check_ids(ids), required_fields, flags, cancellable
         );
     }
 

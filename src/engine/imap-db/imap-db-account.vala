@@ -666,10 +666,12 @@ private class Geary.ImapDB.Account : BaseObject {
         return search_matches;
     }
 
-    public async Gee.Set<Email> list_email(Gee.Collection<EmailIdentifier> ids,
-                                           Email.Field required_fields,
-                                           GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
+    public async Gee.Set<Email> fetch_muliple_email(
+        Gee.Collection<EmailIdentifier> ids,
+        Email.Field required_fields,
+        Geary.Folder.GetFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         check_open();
 
         var results = Email.new_identifier_based_set();
@@ -682,7 +684,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                         cx, id.message_id, required_fields, out db_fields, cancellable
                     );
-                    if (!row.fields.fulfills(required_fields)) {
+                    if (!row.fields.fulfills(required_fields) &&
+                        !(Geary.Folder.GetFlags.INCLUDING_PARTIAL in flags)) {
                         throw new EngineError.INCOMPLETE_MESSAGE(
                             "Message %s only fulfills %Xh fields (required: %Xh)",
                             id.to_string(), row.fields, required_fields
@@ -708,8 +711,12 @@ private class Geary.ImapDB.Account : BaseObject {
         return results;
     }
 
-    public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
+    public async Geary.Email fetch_email(
+        ImapDB.EmailIdentifier email_id,
+        Geary.Email.Field required_fields,
+        Geary.Folder.GetFlags flags,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error {
         check_open();
 
         Geary.Email? email = null;
@@ -721,7 +728,8 @@ private class Geary.ImapDB.Account : BaseObject {
             MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                 cx, email_id.message_id, required_fields, out db_fields, cancellable);
 
-            if (!row.fields.fulfills(required_fields))
+            if (!row.fields.fulfills(required_fields) &&
+                !(Geary.Folder.GetFlags.INCLUDING_PARTIAL in flags))
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s only fulfills %Xh fields (required: %Xh)",
                     email_id.to_string(), row.fields, required_fields);

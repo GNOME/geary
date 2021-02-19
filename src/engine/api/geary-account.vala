@@ -534,17 +534,38 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
         Cancellable? cancellable = null) throws Error;
 
     /**
-     * Return a single email fulfilling the required fields.  The email to pull
-     * is identified by an EmailIdentifier from a previous call to
-     * local_search_message_id_async() or local_search_async().  Throw
-     * EngineError.NOT_FOUND if the email isn't found and
-     * EngineError.INCOMPLETE_MESSAGE if the fields aren't available.
+     * Returns an email from local storage.
+     *
+     * The returned email object will have its property values set for
+     * at least all requested fields, others may or may not be. If is
+     * good practice for callers request only the fields be loaded
+     * that they actually require, since the time taken to load the
+     * message will be reduced as there will be less data to load from
+     * local storage.
+     *
+     * Note that for remote-backed folders, an email may not have yet
+     * been fully downloaded and hence might exist incomplete in local
+     * storage. If the requested fields are not available, {@link
+     * EngineError.INCOMPLETE_MESSAGE} is thrown, unless the {@link
+     * Folder.GetFlags.INCLUDING_PARTIAL} in specified. Connect to the {@link
+     * Account.email_complete} signal to be notified of when email is
+     * fully downloaded in this case.
+     *
+     * If any of the given email identifiers are not present in local
+     * storage, an {@link EngineError.NOT_FOUND} error is
+     * thrown.
+     *
+     * @see Folder.get_email_by_id
      */
-    public abstract async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
-        Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
+    public abstract async Geary.Email get_email_by_id(
+        EmailIdentifier email_id,
+        Email.Field required_fields = ALL,
+        Folder.GetFlags flags = NONE,
+        GLib.Cancellable? cancellable = null
+    ) throws GLib.Error;
 
     /**
-     * Returns a set of non-contiguous email objects from local storage.
+     * Returns a set of email from local storage.
      *
      * Any {@link Gee.Collection} of email identifiers is accepted,
      * but the returned set will only contain one email for each
@@ -554,15 +575,20 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
      * been fully downloaded and hence might exist incomplete in local
      * storage. If the requested fields are not available for all
      * given identifiers, {@link EngineError.INCOMPLETE_MESSAGE} is
-     * thrown. Connect to the {@link Account.email_complete} signal to
-     * be notified of when email is fully downloaded in this case.
+     * thrown, unless the {@link Folder.GetFlags.INCLUDING_PARTIAL} in
+     * specified. Connect to the {@link Account.email_complete} signal
+     * to be notified of when email is fully downloaded in this case.
      *
-     * If any of the given email identifiers are not present in the
-     * vector, an {@link EngineError.NOT_FOUND} error is thrown.
+     * If any of the given email identifiers are not present in local
+     * storage, an {@link EngineError.NOT_FOUND} error is
+     * thrown.
+     *
+     * @see Folder.get_multiple_email_by_id
      */
     public abstract async Gee.Set<Email> get_multiple_email_by_id(
         Gee.Collection<EmailIdentifier> ids,
-        Email.Field required_fields,
+        Email.Field required_fields = ALL,
+        Folder.GetFlags flags = NONE,
         GLib.Cancellable? cancellable = null
     ) throws GLib.Error;
 

@@ -418,6 +418,7 @@ public class Plugin.MailMerge :
             engine = yield account_context.emails.get_email_by_id(
                 engine.id,
                 global::MailMerge.Processor.REQUIRED_FIELDS,
+                NONE,
                 this.cancellable
             );
         }

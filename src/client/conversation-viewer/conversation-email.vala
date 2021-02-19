@@ -360,6 +360,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 this.email = yield this.email_store.get_email_by_id(
                     this.email.id,
                     REQUIRED_FOR_LOAD,
+                    NONE,
                     this.load_cancellable
                 );
                 loaded = true;

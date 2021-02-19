@@ -292,6 +292,7 @@ internal class Application.NotificationPluginContext :
                 email = yield folder.get_multiple_email_by_id(
                     email_ids,
                     REQUIRED_FIELDS,
+                    NONE,
                     info.cancellable
                 );
             } catch (GLib.Error err) {
