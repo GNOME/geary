@@ -406,12 +406,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
         this.account.expect_call("get_containing_folders_async")
             .returns_object(paths);
 
-        // Should not be added, since it's actually in the base folder
-        this.account.email_appended_to_folder(
-            new Gee.ArrayList<EmailIdentifier>.wrap({e2.id}),
-            this.base_folder
-        );
-
         // Should be added, since it's an external message
         this.account.email_appended_to_folder(
             new Gee.ArrayList<EmailIdentifier>.wrap({e3.id}),

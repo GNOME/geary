@@ -313,13 +313,11 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         this.is_monitoring = true;
         this.base_was_opened = false;
 
-        this.base_folder.email_appended.connect(on_folder_email_appended);
-        this.base_folder.email_inserted.connect(on_folder_email_inserted);
-        this.base_folder.email_removed.connect(on_folder_email_removed);
-        this.base_folder.account.email_appended_to_folder.connect(on_account_email_appended);
-        this.base_folder.account.email_inserted_into_folder.connect(on_account_email_inserted);
-        this.base_folder.account.email_removed_from_folder.connect(on_account_email_removed);
-        this.base_folder.account.email_flags_changed_in_folder.connect(on_account_email_flags_changed);
+        var account = this.base_folder.account;
+        account.email_appended_to_folder.connect(on_email_appended);
+        account.email_inserted_into_folder.connect(on_email_inserted);
+        account.email_removed_from_folder.connect(on_email_removed);
+        account.email_flags_changed_in_folder.connect(on_email_flags_changed);
 
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
@@ -364,7 +362,23 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         if (this.is_monitoring) {
             // Set now to prevent reentrancy during yield or signal
             this.is_monitoring = false;
-            yield stop_monitoring_internal(cancellable);
+
+            var account = this.base_folder.account;
+            account.email_appended_to_folder.disconnect(on_email_appended);
+            account.email_inserted_into_folder.disconnect(on_email_inserted);
+            account.email_removed_from_folder.disconnect(on_email_removed);
+            account.email_flags_changed_in_folder.disconnect(on_email_flags_changed);
+
+            yield this.queue.stop_processing_async(cancellable);
+
+            // Cancel outstanding ops so they don't block the queue closing
+            this.operation_cancellable.cancel();
+
+            if (this.base_was_opened) {
+                ((Geary.RemoteFolder) this.base_folder).stop_monitoring();
+                this.base_was_opened = false;
+            }
+
             is_closing = true;
         }
         return is_closing;
@@ -617,27 +631,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         email_flags_changed(conversation, email);
     }
 
-    private async void stop_monitoring_internal(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        this.base_folder.email_appended.disconnect(on_folder_email_appended);
-        this.base_folder.email_inserted.disconnect(on_folder_email_inserted);
-        this.base_folder.email_removed.disconnect(on_folder_email_removed);
-        this.base_folder.account.email_appended_to_folder.disconnect(on_account_email_appended);
-        this.base_folder.account.email_inserted_into_folder.disconnect(on_account_email_inserted);
-        this.base_folder.account.email_removed_from_folder.disconnect(on_account_email_removed);
-        this.base_folder.account.email_flags_changed_in_folder.disconnect(on_account_email_flags_changed);
-
-        // Cancel outstanding ops so they don't block the queue closing
-        this.operation_cancellable.cancel();
-
-        if (this.base_was_opened) {
-            ((Geary.RemoteFolder) this.base_folder).stop_monitoring();
-            this.base_was_opened = false;
-        }
-
-        yield this.queue.stop_processing_async(cancellable);
-    }
-
     private async void process_email_async(Gee.Collection<Geary.Email>? emails,
                                            ProcessJobContext job)
         throws Error {
@@ -755,44 +748,31 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
               needed_message_ids.size, needed_messages.size);
     }
 
-    private void on_folder_email_appended(Gee.Collection<EmailIdentifier> appended) {
-        this.queue.add(new AppendOperation(this, appended));
-    }
-
-    private void on_folder_email_inserted(Gee.Collection<EmailIdentifier> inserted) {
-        this.queue.add(new InsertOperation(this, inserted));
-    }
-
-    private void on_folder_email_removed(Gee.Collection<EmailIdentifier> removed) {
-        this.queue.add(new RemoveOperation(this, this.base_folder, removed));
-    }
-
-    private void on_account_email_appended(Gee.Collection<EmailIdentifier> added,
-                                           Folder folder) {
-        if (folder != this.base_folder) {
-            this.queue.add(new ExternalAppendOperation(this, folder, added));
+    private void on_email_appended(Gee.Collection<EmailIdentifier> appended,
+                                   Folder folder) {
+        if (folder == this.base_folder) {
+            this.queue.add(new AppendOperation(this, appended));
+        } else {
+            this.queue.add(new ExternalAppendOperation(this, folder, appended));
         }
     }
 
-    private void on_account_email_inserted(Gee.Collection<EmailIdentifier> inserted,
-                                           Folder folder) {
-        // ExternalAppendOperation will check to determine if the
-        // email is relevant for some existing conversation before
-        // adding it, which is what we want here.
-        if (folder != this.base_folder) {
+    private void on_email_inserted(Gee.Collection<EmailIdentifier> inserted,
+                                   Folder folder) {
+        if (folder == this.base_folder) {
+            this.queue.add(new InsertOperation(this, inserted));
+        } else {
             this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
 
-    private void on_account_email_removed(Gee.Collection<EmailIdentifier> removed,
-                                          Folder folder) {
-        if (folder != this.base_folder) {
-            this.queue.add(new RemoveOperation(this, folder, removed));
-        }
+    private void on_email_removed(Gee.Collection<EmailIdentifier> removed,
+                                  Folder folder) {
+        this.queue.add(new RemoveOperation(this, this.base_folder, removed));
     }
 
-    private void on_account_email_flags_changed(Gee.Map<EmailIdentifier,EmailFlags> map,
-                                                Geary.Folder folder) {
+    private void on_email_flags_changed(Gee.Map<EmailIdentifier,EmailFlags> map,
+                                        Geary.Folder folder) {
         Gee.HashSet<EmailIdentifier> inserted_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
