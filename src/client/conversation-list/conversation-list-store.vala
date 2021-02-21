@@ -182,14 +182,16 @@ public class ConversationListStore : Gtk.ListStore {
         if (conversation_monitor == null || !this.config.display_preview)
             return;
 
-        Gee.Set<Geary.EmailIdentifier> needing_previews = get_emails_needing_previews();
+        Gee.Set<Geary.EmailIdentifier> needing_previews =
+            get_emails_needing_previews();
 
-        Gee.ArrayList<Geary.Email> emails = new Gee.ArrayList<Geary.Email>();
-        if (needing_previews.size > 0)
-            emails.add_all(yield do_get_previews_async(needing_previews));
-        if (emails.size < 1)
-            return;
-
+        var emails = new Gee.ArrayList<Geary.Email>();
+        if (needing_previews.size > 0) {
+            var with_previews = yield do_get_previews_async(needing_previews);
+            if (with_previews != null) {
+                emails.add_all(with_previews);
+            }
+        }
         foreach (Geary.Email email in emails) {
             Geary.App.Conversation? conversation = conversation_monitor.get_by_email_identifier(email.id);
             // The conversation can be null if e.g. a search is
