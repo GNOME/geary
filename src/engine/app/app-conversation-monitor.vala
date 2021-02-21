@@ -1,6 +1,6 @@
 /*
  * Copyright © 2016 Software Freedom Conservancy Inc.
- * Copyright © 2018, 2020 Michael Gratton <mike@vee.net>
+ * Copyright © 2018-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -155,6 +155,14 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
     // Determines if the base folder was actually opened or not
     private bool base_was_opened = false;
+
+    // Set of in-folder email that doesn't meet required_fields (yet)
+    private Gee.Set<EmailIdentifier> incomplete =
+        new Gee.HashSet<EmailIdentifier>();
+
+    // Set of out-of-folder email that doesn't meet required_fields (yet)
+    private Gee.Set<EmailIdentifier> incomplete_external =
+        new Gee.HashSet<EmailIdentifier>();
 
     private Geary.Email.Field required_fields;
     private ConversationOperationQueue queue;
@@ -318,6 +326,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         account.email_inserted_into_folder.connect(on_email_inserted);
         account.email_removed_from_folder.connect(on_email_removed);
         account.email_flags_changed_in_folder.connect(on_email_flags_changed);
+        account.email_complete.connect(on_email_complete);
 
         this.queue.operation_error.connect(on_operation_error);
         this.queue.add(new FillWindowOperation(this));
@@ -368,6 +377,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
             account.email_inserted_into_folder.disconnect(on_email_inserted);
             account.email_removed_from_folder.disconnect(on_email_removed);
             account.email_flags_changed_in_folder.disconnect(on_email_flags_changed);
+            account.email_complete.disconnect(on_email_complete);
 
             yield this.queue.stop_processing_async(cancellable);
 
@@ -471,26 +481,35 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     internal async int load_by_id_async(EmailIdentifier? initial_id,
                                         int count,
                                         Folder.ListFlags flags = Folder.ListFlags.NONE)
-        throws Error {
+        throws GLib.Error {
         notify_scan_started();
 
         int load_count = 0;
         GLib.Error? scan_error = null;
         try {
-            Gee.Collection<Geary.Email> messages =
+            Gee.Collection<Geary.Email> emails =
                 yield this.base_folder.list_email_range_by_id(
-                    initial_id, count, required_fields, flags,
+                    initial_id,
+                    count,
+                    this.required_fields,
+                    flags | INCLUDING_PARTIAL,
                     this.operation_cancellable
                 );
 
-            if (!messages.is_empty) {
-                load_count = messages.size;
-
-                foreach (Email email in messages) {
+            var i = emails.iterator();
+            while (i.next()) {
+                var email = i.get();
+                if (this.required_fields in email.fields) {
                     this.window.add(email.id);
+                } else {
+                    this.incomplete.add(email.id);
+                    i.remove();
                 }
+            }
 
-                yield process_email_async(messages, ProcessJobContext());
+            if (!emails.is_empty) {
+                load_count = emails.size;
+                yield process_email_async(emails, ProcessJobContext());
             }
         } catch (GLib.Error err) {
             scan_error = err;
@@ -506,22 +525,34 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     }
 
     /** Loads messages from the base folder into the window. */
-    internal async void load_by_sparse_id(Gee.Collection<EmailIdentifier> ids)
-        throws Error {
+        internal async void load_by_sparse_id(
+            Gee.Collection<EmailIdentifier> ids
+        ) throws GLib.Error {
         notify_scan_started();
 
         GLib.Error? scan_error = null;
         try {
-            Gee.Collection<Geary.Email> messages =
+            Gee.Collection<Geary.Email> emails =
                 yield this.base_folder.get_multiple_email_by_id(
-                    ids, required_fields, NONE, this.operation_cancellable
+                    ids,
+                    required_fields,
+                    INCLUDING_PARTIAL,
+                    this.operation_cancellable
                 );
 
-            if (!messages.is_empty) {
-                foreach (Email email in messages) {
+            var i = emails.iterator();
+            while (i.next()) {
+                var email = i.get();
+                if (this.required_fields in email.fields) {
                     this.window.add(email.id);
+                } else {
+                    this.incomplete.add(email.id);
+                    i.remove();
                 }
-                yield process_email_async(messages, ProcessJobContext());
+            }
+
+            if (!emails.is_empty) {
+                yield process_email_async(emails, ProcessJobContext());
             }
         } catch (GLib.Error err) {
             scan_error = err;
@@ -535,42 +566,56 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     }
 
     /**
-     * Loads messages from outside the monitor's base folder.
+     * Loads email from outside the monitor's base folder.
      *
-     * Since this requires opening and closing the other folder, it is
-     * handled separately.
+     * These messages will only be added if their references included
+     * email already in the conversation set.
      */
-    internal async void external_load_by_sparse_id(Folder folder,
-                                                   Gee.Collection<EmailIdentifier> ids)
+    internal async void external_load_by_sparse_id(Gee.Collection<EmailIdentifier> ids)
         throws GLib.Error {
         // First just get the bare minimum we need to determine if we even
         // care about the messages.
-        Gee.Set<Geary.Email> emails = yield folder.get_multiple_email_by_id(
-            ids, REFERENCES, NONE, this.operation_cancellable
-        );
-        if (!emails.is_empty) {
-            var relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
-            foreach (var email in emails) {
+
+        Gee.Set<Geary.Email> emails =
+            yield this.base_folder.account.get_multiple_email_by_id(
+                ids, REFERENCES, INCLUDING_PARTIAL, this.operation_cancellable
+            );
+
+        var relevant_ids = new Gee.HashSet<Geary.EmailIdentifier>();
+        foreach (var email in emails) {
+            if (Email.Field.REFERENCES in email.fields) {
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
                 if (ancestors != null &&
-                    Geary.traverse<RFC822.MessageID>(ancestors).any(id => conversations.has_message_id(id))) {
+                    Geary.traverse<RFC822.MessageID>(ancestors).any(
+                        id => conversations.has_message_id(id))) {
                     relevant_ids.add(email.id);
                 }
-            }
-
-            // List the relevant messages again with the full set of
-            // fields, to make sure when we load them from the
-            // database we have all the data we need.
-            if (!relevant_ids.is_empty) {
-                emails = yield folder.get_multiple_email_by_id(
-                    relevant_ids,
-                    required_fields,
-                    NONE,
-                    this.operation_cancellable
-                );
             } else {
-                emails.clear();
+                this.incomplete_external.add(email.id);
             }
+        }
+
+        // List the relevant messages again with the full set of
+        // fields, to make sure when we load them from the
+        // database we have all the data we need.
+        if (!relevant_ids.is_empty) {
+            emails = yield this.base_folder.account.get_multiple_email_by_id(
+                relevant_ids,
+                this.required_fields,
+                INCLUDING_PARTIAL,
+                this.operation_cancellable
+            );
+
+            var i = emails.iterator();
+            while (i.next()) {
+                var email = i.get();
+                if (!(this.required_fields in email.fields)) {
+                    this.incomplete_external.add(email.id);
+                    i.remove();
+                }
+            }
+        } else {
+            emails.clear();
         }
 
         if (!emails.is_empty) {
@@ -768,6 +813,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
     private void on_email_removed(Gee.Collection<EmailIdentifier> removed,
                                   Folder folder) {
+        this.incomplete.remove_all(removed);
+        this.incomplete_external.remove_all(removed);
         this.queue.add(new RemoveOperation(this, this.base_folder, removed));
     }
 
@@ -836,6 +883,37 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
             new Gee.HashMultiMap<Conversation, Email>(),
             (folder == this.base_folder) ? removed_ids : null
         );
+    }
+
+    private void on_email_complete(Gee.Collection<EmailIdentifier> completed) {
+        var was_incomplete = new Gee.HashSet<EmailIdentifier>();
+        var was_incomplete_external = new Gee.HashSet<EmailIdentifier>();
+        foreach (var email in completed) {
+            if (this.incomplete.remove(email)) {
+                was_incomplete.add(email);
+            } else if (this.incomplete_external.remove(email)) {
+                was_incomplete_external.add(email);
+            }
+        }
+        if (!was_incomplete.is_empty) {
+            this.queue.add(
+                new AppendOperation(this, was_incomplete)
+            );
+        }
+        if (!was_incomplete_external.is_empty) {
+            this.queue.add(
+                new ExternalAppendOperation(
+                    this,
+                    // Using the base folder here is technically
+                    // incorrect, but if we got to this point the
+                    // external email has already been filtered by
+                    // folder, by ExternalAppendOperation, so we can
+                    // get away with it
+                    this.base_folder,
+                    was_incomplete_external
+                )
+            );
+        }
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {

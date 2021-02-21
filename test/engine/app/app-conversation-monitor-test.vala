@@ -37,6 +37,8 @@ class Geary.App.ConversationMonitorTest : TestCase {
         add_test("base_folder_message_removed", base_folder_message_removed);
         add_test("external_folder_message_appended", external_folder_message_appended);
         add_test("conversation_marked_as_deleted", conversation_marked_as_deleted);
+        add_test("incomplete_base_folder", incomplete_base_folder);
+        add_test("incomplete_external_folder", incomplete_external_folder);
     }
 
     public override void set_up() {
@@ -361,22 +363,22 @@ class Geary.App.ConversationMonitorTest : TestCase {
         ConversationMonitor monitor = setup_monitor({e1}, paths);
         assert_equal<int?>(monitor.size, 1, "Initial conversation count");
 
-        this.other_folder.expect_call(
-            "get_multiple_email_by_id"
-        ).returns_object(
-            Collection.single_set(e3)
-        );
-
-        this.other_folder.expect_call(
-            "get_multiple_email_by_id"
-        ).returns_object(
-            Collection.single_set(e3)
-        );
-
         // ExternalAppendOperation's blacklist check
         this.account.expect_call("get_special_folder");
         this.account.expect_call("get_special_folder");
         this.account.expect_call("get_special_folder");
+
+        this.account.expect_call(
+            "get_multiple_email_by_id"
+        ).returns_object(
+            Collection.single_set(e3)
+        );
+
+        this.account.expect_call(
+            "get_multiple_email_by_id"
+        ).returns_object(
+            Collection.single_set(e3)
+        );
 
         /////////////////////////////////////////////////////////
         // First call to expand_conversations_async for e3's refs
@@ -414,7 +416,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
 
         wait_for_signal(monitor, "conversations-added");
         this.base_folder.assert_expectations();
-        this.other_folder.assert_expectations();
         this.account.assert_expectations();
 
         assert_equal<int?>(monitor.size, 1, "Conversation count");
@@ -456,22 +457,154 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
     }
 
+    public void incomplete_base_folder() throws Error {
+        var incomplete = new Email(new Mock.EmailIdentifer(1));
+        var complete = setup_email(1);
+
+        var paths = new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
+        paths.set(incomplete.id, this.base_folder.path);
+
+        var monitor = new ConversationMonitor(this.base_folder, NONE, 10);
+
+        this.base_folder.expect_call("start_monitoring");
+        ValaUnit.ExpectedCall incomplete_list_call = this.base_folder
+            .expect_call("list_email_range_by_id")
+            .returns_object(Collection.single(incomplete));
+
+        monitor.start_monitoring.begin(null, this.async_completion);
+        monitor.start_monitoring.end(async_result());
+        wait_for_call(incomplete_list_call);
+        assert_equal<int?>(monitor.size, 0, "incomplete count");
+
+        // Process all of the async tasks arising from the open
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
+        }
+
+        this.base_folder
+            .expect_call("get_multiple_email_by_id")
+            .returns_object(Collection.single(complete));
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("local_search_message_id_async");
+        this.account.expect_call("get_containing_folders_async")
+            .returns_object(paths);
+
+        this.account.email_complete(Collection.single(complete.id));
+
+        wait_for_signal(monitor, "conversations-added");
+        assert_equal<int?>(monitor.size, 1, "complete count");
+
+        this.base_folder.assert_expectations();
+        this.account.assert_expectations();
+    }
+
+    public void incomplete_external_folder() throws Error {
+        var in_folder = setup_email(1);
+        var incomplete_external = new Email(new Mock.EmailIdentifer(2));
+        var complete_external = setup_email(2, in_folder);
+
+        var in_folder_paths = new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
+        in_folder_paths.set(in_folder.id, this.base_folder.path);
+
+        var external_paths = new Gee.HashMultiMap<EmailIdentifier,Folder.Path>();
+        external_paths.set(complete_external.id, this.other_folder.path);
+
+        var related_paths = new Gee.HashMultiMap<Email,Folder.Path>();
+        related_paths.set(in_folder, this.base_folder.path);
+        related_paths.set(complete_external, this.other_folder.path);
+
+        var monitor = setup_monitor({in_folder}, in_folder_paths);
+
+        // initial call with incomplete email
+
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+
+        var initial_incomplete_load = this.account
+            .expect_call("get_multiple_email_by_id")
+            .returns_object(Collection.single(incomplete_external));
+
+        // Should not get added, since it's incomplete
+        this.account.email_appended_to_folder(
+            Collection.single(incomplete_external.id),
+            this.other_folder
+        );
+
+        wait_for_call(initial_incomplete_load);
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
+        }
+
+        assert_equal<int?>(monitor.size, 1, "incomplete count");
+        var c1 = Collection.first(monitor.read_only_view);
+        assert_equal<int?>(c1.get_count(), 1, "incomplete conversation count");
+
+        // email completed
+
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+
+        this.account
+            .expect_call("get_multiple_email_by_id")
+            .returns_object(Collection.single(complete_external));
+
+        this.account
+            .expect_call("get_multiple_email_by_id")
+            .returns_object(Collection.single(complete_external));
+
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+
+        this.account.expect_call("local_search_message_id_async")
+            .returns_object(related_paths);
+        this.account.expect_call("local_search_message_id_async");
+
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+        this.account.expect_call("get_special_folder");
+
+        this.account.expect_call("local_search_message_id_async");
+        this.account.expect_call("get_containing_folders_async")
+            .returns_object(external_paths);
+
+        this.account.email_complete(Collection.single(complete_external.id));
+
+        wait_for_signal(monitor, "conversation-appended");
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
+        }
+
+        assert_equal<int?>(monitor.size, 1, "incomplete count");
+        var c2 = Collection.first(monitor.read_only_view);
+        assert_equal<int?>(c2.get_count(), 2, "incomplete conversation count");
+        assert_equal(c2.get_email_by_id(complete_external.id), complete_external,
+                     "completed email not present in conversation");
+    }
+
     private Email setup_email(int id, Email? references = null) {
         Email email = new Email(new Mock.EmailIdentifer(id));
+
         DateTime now = new DateTime.now_local();
+        email.set_send_date(new RFC822.Date(now));
+        email.set_email_properties(new Mock.EmailProperties(now));
+
         Geary.RFC822.MessageID mid = new Geary.RFC822.MessageID(
             "test%d@localhost".printf(id)
         );
-
         Geary.RFC822.MessageIDList refs_list = null;
         if (references != null) {
             refs_list = new Geary.RFC822.MessageIDList.single(
                 references.message_id
             );
         }
-        email.set_send_date(new RFC822.Date(now));
-        email.set_email_properties(new Mock.EmailProperties(now));
         email.set_full_references(mid, null, refs_list);
+
+        email.set_flags(new EmailFlags());
         return email;
     }
 

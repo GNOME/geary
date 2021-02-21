@@ -23,11 +23,11 @@ private class Geary.App.ExternalAppendOperation : BatchOperation<EmailIdentifier
         throws GLib.Error {
         if (!this.monitor.get_search_folder_blacklist().contains(folder.path) &&
             !this.monitor.conversations.is_empty) {
-            debug("Appending %d out of folder message(s) to %s",
+            debug("Adding %d out-of-folder email to conversations in %s",
                   batch.size,
                   this.folder.to_string());
 
-            yield this.monitor.external_load_by_sparse_id(this.folder, batch);
+            yield this.monitor.external_load_by_sparse_id(batch);
         }
     }
 

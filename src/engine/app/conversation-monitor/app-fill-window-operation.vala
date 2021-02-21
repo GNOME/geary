@@ -41,7 +41,7 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
 
         try {
             loaded = yield this.monitor.load_by_id_async(
-                this.monitor.window_lowest, num_to_load, NONE
+                this.monitor.window_lowest, num_to_load
             );
         } catch (EngineError.NOT_FOUND err) {
             debug("Stale FillWindowOperation: %s", err.message);
