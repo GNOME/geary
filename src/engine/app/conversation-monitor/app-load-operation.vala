@@ -33,7 +33,7 @@ private class Geary.App.LoadOperation : ConversationOperation {
             debug("Loading messages into %s",
                   this.monitor.base_folder.to_string());
             yield this.monitor.load_by_id_async(
-                this.to_load, int.MAX, Folder.ListFlags.OLDEST_TO_NEWEST
+                this.to_load, int.MAX, INCLUDING_ID | OLDEST_TO_NEWEST
             );
         } else {
             debug("Not loading messages in %s",
