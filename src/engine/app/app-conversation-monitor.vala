@@ -47,9 +47,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
      * parameter passed to the constructor.
      */
     public const Geary.Email.Field REQUIRED_FIELDS = (
-        Geary.Email.Field.REFERENCES |
-        Geary.Email.Field.FLAGS |
-        Geary.Email.Field.DATE
+        // Required for linking email into conversations
+        REFERENCES |
+        // Required for checking for deleted flags
+        FLAGS |
+        // Required for checking ordering conversations
+        DATE | PROPERTIES
     );
 
     /** The GLib logging domain used by this class. */
