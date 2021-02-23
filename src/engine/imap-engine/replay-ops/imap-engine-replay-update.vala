@@ -61,7 +61,15 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
 
                 yield this.owner.local_folder.set_email_flags_async(changed_map, null);
 
-                this.owner.replay_notify_email_flags_changed(changed_map);
+                // only notify if the email is not marked for deletion
+                try {
+                    yield this.owner.local_folder.fetch_email_async(
+                        id, NONE, NONE, null
+                    );
+                    this.owner.replay_notify_email_flags_changed(changed_map);
+                } catch (EngineError.NOT_FOUND err) {
+                    //fine
+                }
             } else {
                 debug("%s replay_local_async id is null!", to_string());
             }
