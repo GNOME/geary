@@ -828,9 +828,12 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         foreach (EmailIdentifier id in map.keys) {
+            var flags = map.get(id);
+
             Conversation? conversation = this.conversations.get_by_email_identifier(id);
             if (conversation == null) {
-                if (folder == this.base_folder) {
+                if (!flags.is_deleted() &&
+                    folder == this.base_folder) {
                     // Check to see if the incoming message is sorted later than the last message in the
                     // window. If it is, don't resurrect it since it likely hasn't been loaded yet.
                     Geary.EmailIdentifier? lowest = this.window_lowest;
@@ -862,7 +865,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
             // Remove conversation if get_emails yields an empty collection -- this probably means
             // the conversation was deleted.
-            if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
+            if (flags.is_deleted() &&
+                conversation.get_emails(Conversation.Ordering.NONE).size == 0) {
                 debug(
                     "Flagging email %s for deletion evaporates conversation %s",
                     id.to_string(), conversation.to_string()
