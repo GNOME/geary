@@ -68,6 +68,16 @@ internal class Geary.ImapEngine.AccountProcessor :
         }
     }
 
+    public void dequeue(AccountOperation op) {
+        if (this.current_op != null &&
+            this.current_op.equal_to(op) &&
+            this.op_cancellable != null) {
+            this.op_cancellable.cancel();
+            this.op_cancellable = null;
+        }
+        this.queue.revoke(op);
+    }
+
     public void stop() {
         this.is_running = false;
         if (this.op_cancellable != null) {

@@ -1723,10 +1723,14 @@ internal class Application.Controller :
         foreach (AccountContext context in this.accounts.values) {
             Geary.Account account = context.account;
             context.cancellable.cancelled.connect(this.storage_cleanup_cancellable.cancel);
-            yield account.cleanup_storage(this.storage_cleanup_cancellable);
+            try {
+                yield account.cleanup_storage(this.storage_cleanup_cancellable);
+            } catch (GLib.Error err) {
+                report_problem(new Geary.ProblemReport(err));
+            }
+            context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
             if (this.storage_cleanup_cancellable.is_cancelled())
                 break;
-            context.cancellable.cancelled.disconnect(this.storage_cleanup_cancellable.cancel);
         }
         this.storage_cleanup_cancellable = null;
     }
