@@ -16,8 +16,11 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
 
 
     public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
-        // remote error will cause folder to reconnect and re-normalize, making this remove moot
-        base ("Removal", Scope.LOCAL_AND_REMOTE, OnError.IGNORE_REMOTE);
+        // Although technically a local-only operation, must treat as
+        // remote to ensure it's processed in-order with ReplayAppend
+        // and ReplayUpdate operations. Remote error will cause folder
+        // to reconnect and re-normalize, making this remove moot
+        base ("Removal", Scope.REMOTE_ONLY, OnError.IGNORE_REMOTE);
 
         this.owner = owner;
         this.remote_count = remote_count;
@@ -35,12 +38,6 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
 
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // this ReplayOperation doesn't do remote removes, it reacts to them
-    }
-
-    public override async ReplayOperation.Status replay_local_async() throws Error {
-        // Although technically a local-only operation, must treat as remote to ensure it's
-        // processed in-order with ReplayAppend operations
-        return ReplayOperation.Status.CONTINUE;
     }
 
     public override async void replay_remote_async(Imap.FolderSession remote)

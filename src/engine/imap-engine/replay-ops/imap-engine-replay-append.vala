@@ -20,8 +20,11 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
                         int remote_count,
                         Gee.List<Imap.SequenceNumber> positions,
                         Cancellable? cancellable) {
-        // IGNORE remote errors because the reconnect will re-normalize the folder, making this
-        // append moot
+        // Since this is a report op, both ReplayRemove and
+        // ReplayUpdate must also be run as remote ops so their
+        // effects are interleaved correctly. IGNORE remote errors
+        // because the reconnect will re-normalize the folder, making
+        // this append moot
         base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE_REMOTE);
 
         this.owner = owner;
