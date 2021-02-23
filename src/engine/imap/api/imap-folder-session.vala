@@ -1037,7 +1037,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 preview_specifier
             );
 
-            RFC822.PreviewText? preview = null;
+            RFC822.PreviewText preview = new RFC822.PreviewText(new Memory.StringBuffer(""));
             if (preview_headers != null && preview_headers.size > 0 &&
                 preview_body != null && preview_body.size > 0) {
                 preview = new RFC822.PreviewText.with_header(
