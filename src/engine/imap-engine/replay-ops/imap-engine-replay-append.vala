@@ -80,7 +80,9 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
         Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(this.positions);
         foreach (Imap.MessageSet msg_set in msg_sets) {
             Gee.List<Geary.Email>? list = yield remote.list_email_async(
-                msg_set, ImapDB.Folder.REQUIRED_FIELDS, this.cancellable
+                msg_set,
+                ((GenericAccount) this.owner.account).local.required_email_fields,
+                this.cancellable
             );
             if (list != null && list.size > 0) {
                 debug("%s do_replay_appended_message: %d new messages in %s", to_string(),

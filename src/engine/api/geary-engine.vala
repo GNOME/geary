@@ -79,6 +79,42 @@ public class Geary.Engine : BaseObject {
     /** Location of the directory containing shared resource files. */
     public File resource_dir { get; private set; }
 
+    /**
+     * The minimum set of fields to be fulfilled when downloading email.
+     *
+     * The value of this setting determines how much of an email will
+     * be initially downloaded from a remote when the email is first
+     * delivered to a mailbox, and the minimum amount that will be
+     * stored in local storage, regardless of caching used for the
+     * email body and attachments.
+     *
+     * When a remote server is delivered new email, the engine will
+     * not notify about new mail being {@link
+     * Account.email_appended_to_folder} or {@link
+     * Account.email_inserted_into_folder} until enough of the email
+     * has been downloaded such that the fields given here have been
+     * fulfilled.
+     *
+     * Setting more fields here will require more data to be
+     * downloaded when an email first arrives, causing notifications
+     * to be delayed, potentially incurring higher data costs, and
+     * causing more storage to be used for the email. Setting fewer
+     * fields may cause more round-trips to the server to downloaded
+     * additional parts of the email if not enough is present to
+     * display to the user.
+     *
+     * Some engine-provided applications components such as the {@link
+     * App.ConversationMonitor} and {@link App.SearchFolder} have
+     * specific requirements, if using these components be sure to
+     * include their required fields (for example: {@link
+     * App.ConversationMonitor.REQUIRED_FIELDS}) to this property. See
+     * those classes for details. Further, the Engine has its own
+     * internal minimum requirements for de-duplication of email and
+     * so on, and hence will always download a minimum to satisfy
+     * those.
+     */
+    public Email.Field minimum_email_fields { get; set; default = 0; }
+
     private bool is_open = true;
     private Gee.List<Account> accounts = new Gee.ArrayList<Account>();
 
@@ -200,6 +236,7 @@ public class Geary.Engine : BaseObject {
 
         ImapDB.Account local = new ImapDB.Account(
             config,
+            this.minimum_email_fields,
             config.data_dir,
             this.resource_dir.get_child("sql")
         );

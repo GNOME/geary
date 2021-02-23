@@ -12,12 +12,31 @@
  * This uses the search methods on {@link Account} to implement the
  * search, then collects search results and presents them via the
  * folder interface.
+ *
+ * If using this class in your application, ensure {@link
+ * REQUIRED_FIELDS} is added to {@link Engine.minimum_email_fields} so
+ * that email can be processed before being completely downloaded.
  */
 public class Geary.App.SearchFolder : BaseObject,
     Logging.Source,
     Folder,
     FolderSupport.Remove {
 
+
+    /**
+     * The minimum fields required by the search folder.
+     *
+     * These fields will be retrieved regardless of the
+     * `required_fields` parameter passed to the constructor, and
+     * should be generally available for email when first downloaded
+     * from the remote.
+     *
+     * @see Engine.minimum_email_fields
+     */
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        // Required for ordering conversations
+        PROPERTIES
+    );
 
     /** Number of messages to include in the initial search. */
     public const int MAX_RESULT_EMAILS = 1000;
@@ -552,7 +571,7 @@ public class Geary.App.SearchFolder : BaseObject,
                 Gee.Collection<Email> email_results =
                     yield this.account.get_multiple_email_by_id(
                         id_results,
-                        PROPERTIES,
+                        REQUIRED_FIELDS,
                         NONE,
                         cancellable
                     );

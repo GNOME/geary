@@ -382,6 +382,12 @@ public class Application.Client : Gtk.Application {
         Hdy.init();
 
         this.engine = new Geary.Engine(get_resource_directory());
+        this.engine.minimum_email_fields = (
+            Geary.App.ConversationMonitor.REQUIRED_FIELDS |
+            Geary.App.SearchFolder.REQUIRED_FIELDS |
+            ConversationListStore.REQUIRED_FIELDS
+        );
+
         this.config = new Configuration(SCHEMA_ID);
         this.autostart = new StartupManager(
             this.config, this.get_desktop_directory()

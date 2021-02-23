@@ -8,6 +8,22 @@
 
 private class Geary.ImapDB.Account : BaseObject {
 
+
+    /** Minimum fields required for email to be stored in the database. */
+    internal const Email.Field MIN_REQUIRED_FIELDS = (
+        // Required for primary duplicate detection size and received date
+        PROPERTIES |
+        // Required for secondary duplicate detection via UID
+        REFERENCES |
+        // Required to ensure the unread count is up to date and so
+        // that when moving a message, the new copy turns back up as
+        // being not deleted.
+        FLAGS
+    );
+
+    /** Fields required for a message to be considered for full-text indexing. */
+    private const Email.Field REQUIRED_FTS_FIELDS = Email.REQUIRED_FOR_MESSAGE;
+
     // Storage path names
     private const string DB_FILENAME = "geary.db";
     private const string ATTACHMENTS_DIR = "attachments";
@@ -47,6 +63,13 @@ private class Geary.ImapDB.Account : BaseObject {
     /** The backing database for the account. */
     public ImapDB.Database db { get; private set; }
 
+    /**
+     * Minimum email field set to be downloaded for new email.
+     *
+     * @see Engine.minimum_email_fields
+     */
+    public Email.Field required_email_fields { get; private set; }
+
     internal AccountInformation account_information { get; private set; }
 
     private string name;
@@ -57,12 +80,15 @@ private class Geary.ImapDB.Account : BaseObject {
     private Cancellable? background_cancellable = null;
 
     public Account(AccountInformation config,
+                   Email.Field required_email_fields,
                    GLib.File data_dir,
                    GLib.File schema_dir) {
         this.account_information = config;
         this.name = config.id + ":db";
         this.db_file = data_dir.get_child(DB_FILENAME);
         this.attachments_dir = data_dir.get_child(ATTACHMENTS_DIR);
+
+        update_required_email_fields(required_email_fields);
 
         this.db = new ImapDB.Database(
             this.db_file,
@@ -71,6 +97,10 @@ private class Geary.ImapDB.Account : BaseObject {
             upgrade_monitor,
             vacuum_monitor
         );
+    }
+
+    public void update_required_email_fields(Email.Field required_fields) {
+        this.required_email_fields = MIN_REQUIRED_FIELDS | required_fields;
     }
 
     public async void open_async(GLib.Cancellable? cancellable)
@@ -814,8 +844,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     var stmt = cx.prepare(
                         "SELECT id FROM MessageTable WHERE (fields & ?) = ?"
                     );
-                    stmt.bind_uint(0, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
-                    stmt.bind_uint(1, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
+                    stmt.bind_uint(0, REQUIRED_FTS_FIELDS);
+                    stmt.bind_uint(1, REQUIRED_FTS_FIELDS);
                     result = stmt.exec(cancellable);
                     while (!result.finished) {
                         message_ids.add(result.rowid_at(0));

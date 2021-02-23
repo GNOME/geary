@@ -675,8 +675,11 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             // detection)
             Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(remote_uids);
             foreach (Imap.MessageSet msg_set in msg_sets) {
-                Gee.List<Geary.Email>? list = yield session.list_email_async(msg_set,
-                    ImapDB.Folder.REQUIRED_FIELDS, cancellable);
+                Gee.List<Geary.Email>? list = yield session.list_email_async(
+                    msg_set,
+                    this._account.local.required_email_fields,
+                    cancellable
+                );
                 if (list != null && list.size > 0)
                     to_create.add_all(list);
             }
@@ -1254,7 +1257,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
 
         Gee.List<Geary.Email>? list = yield remote.list_email_async(
             msg_set,
-            ImapDB.Folder.REQUIRED_FIELDS,
+            this._account.local.required_email_fields,
             cancellable
         );
 

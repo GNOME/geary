@@ -43,6 +43,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.account = new Account(
             config,
+            NONE,
             this.tmp_dir,
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
         );

@@ -26,25 +26,25 @@
  * additional scan operations to be executed as needed to fill the new
  * window size.
  *
- * If the folder is backed by a remote mailbox, scans will be
- * local-only if the remote is not open so as to not block. However
- * this means any messages (and their conversations) that are not
- * sufficiently complete to satisfy both the monitor's and the owner's
- * email field requirements will not be found. If or when the folder
- * does open a remote connection, the folder will be re-scanned to
- * ensure any missing messages are picked up.
- *
  * The monitor will also keep track of messages being appended or
  * removed account-wide, so that known conversations can be updated as
  * needed.
+ *
+ * If using this class in your application, ensure {@link
+ * REQUIRED_FIELDS} is added to {@link Engine.minimum_email_fields} so
+ * that email can be processed before being completely downloaded.
  */
 public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
     /**
-     * The fields Conversations require to thread emails together.
+     * The minimum fields required by the conversation monitor.
      *
-     * These fields will be retrieved regardless of the Field
-     * parameter passed to the constructor.
+     * These fields will be retrieved regardless of the
+     * `required_fields` parameter passed to the constructor, and
+     * should be generally available for email when first downloaded
+     * from the remote.
+     *
+     * @see Engine.minimum_email_fields
      */
     public const Geary.Email.Field REQUIRED_FIELDS = (
         // Required for linking email into conversations
@@ -290,7 +290,8 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
      *
      * @param base_folder a Folder to monitor for conversations
      * @param required_fields See {@link Geary.Folder}
-     * @param min_window_count Minimum number of conversations that will be loaded
+     * @param min_window_count Minimum number of conversations that
+     * will be loaded
      */
     public ConversationMonitor(Folder base_folder,
                                Email.Field required_fields,

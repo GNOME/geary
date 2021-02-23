@@ -53,6 +53,7 @@ internal abstract class Geary.ImapEngine.AccountBasedTest : TestCase {
 
         this.local_account = new ImapDB.Account(
             config,
+            NONE,
             this.tmp_dir,
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
         );

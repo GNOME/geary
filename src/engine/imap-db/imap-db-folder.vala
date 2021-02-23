@@ -17,25 +17,6 @@
 
 private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
-    /**
-     * Fields required for a message to be stored in the database.
-     */
-    public const Geary.Email.Field REQUIRED_FIELDS = (
-        // Required for primary duplicate detection done with properties
-        Email.Field.PROPERTIES |
-        // Required for secondary duplicate detection via UID
-        Email.Field.REFERENCES |
-        // Required to ensure the unread count is up to date and so
-        // that when moving a message, the new copy turns back up as
-        // being not deleted.
-        Email.Field.FLAGS
-    );
-
-    /**
-     * Fields required for a message to be considered for full-text indexing.
-     */
-    public const Geary.Email.Field REQUIRED_FTS_FIELDS = Geary.Email.REQUIRED_FOR_MESSAGE;
-
     private const int LIST_EMAIL_WITH_MESSAGE_CHUNK_COUNT = 10;
     private const int LIST_EMAIL_METADATA_COUNT = 100;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
@@ -1551,7 +1532,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         throws Error {
         int64 id = -1;
         // if fields not present, then no duplicate can reliably be found
-        if (!email.fields.is_all_set(REQUIRED_FIELDS)) {
+        if (!email.fields.is_all_set(Account.MIN_REQUIRED_FIELDS)) {
             debug(
                 "%s: Unable to detect duplicates for %s, fields available: %s",
                 this.to_string(),
