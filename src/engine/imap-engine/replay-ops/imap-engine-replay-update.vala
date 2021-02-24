@@ -22,7 +22,10 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
                         int remote_count,
                         Imap.SequenceNumber position,
                         Imap.FetchedData data) {
-        base ("Update", Scope.LOCAL_ONLY, OnError.RETRY);
+        // Although technically a local-only operation, must treat as
+        // remote to ensure it's processed in-order with ReplayAppend
+        // and ReplayRemove operations
+        base ("Update", Scope.REMOTE_ONLY, OnError.RETRY);
 
         this.owner = owner;
         this.remote_count = remote_count;
@@ -30,8 +33,8 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
         this.data = data;
     }
 
-    public override async ReplayOperation.Status replay_local_async()
-        throws Error {
+    public override async void replay_remote_async(Imap.FolderSession remote)
+        throws GLib.Error {
         Imap.MessageFlags? message_flags =
             this.data.data_map.get(Imap.FetchDataSpecifier.FLAGS) as Imap.MessageFlags;
         if (message_flags != null) {
@@ -58,7 +61,15 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
 
                 yield this.owner.local_folder.set_email_flags_async(changed_map, null);
 
-                this.owner.replay_notify_email_flags_changed(changed_map);
+                // only notify if the email is not marked for deletion
+                try {
+                    yield this.owner.local_folder.fetch_email_async(
+                        id, NONE, NONE, null
+                    );
+                    this.owner.replay_notify_email_flags_changed(changed_map);
+                } catch (EngineError.NOT_FOUND err) {
+                    //fine
+                }
             } else {
                 debug("%s replay_local_async id is null!", to_string());
             }
@@ -66,8 +77,6 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
             debug("%s Don't know what to do without any FLAGS: %s",
                   to_string(), this.data.to_string());
         }
-
-        return ReplayOperation.Status.COMPLETED;
     }
 
     public override string describe_state() {
