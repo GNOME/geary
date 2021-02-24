@@ -45,28 +45,17 @@ int main(string[] args) {
      * Hook up all tests into appropriate suites
      */
 
-    TestSuite client = new TestSuite("client");
+    TestSuite js = new TestSuite("js");
 
-    // Keep this before other ClientWebView based tests since it tests
-    // WebContext init
-    client.add_suite(new Accounts.ManagerTest().suite);
-    client.add_suite(new Application.CertificateManagerTest().suite);
-    client.add_suite(new Application.ClientTest().suite);
-    client.add_suite(new Application.ConfigurationTest().suite);
-    client.add_suite(new Components.WebViewTest().suite);
-    client.add_suite(new Components.ValidatorTest().suite);
-    client.add_suite(new Composer.WebViewTest().suite);
-    client.add_suite(new Composer.WidgetTest().suite);
-    client.add_suite(new Util.Avatar.Test().suite);
-    client.add_suite(new Util.Cache.Test().suite);
-    client.add_suite(new Util.Email.Test().suite);
-    client.add_suite(new Util.JS.Test().suite);
+    js.add_suite(new Components.PageStateTest().suite);
+    js.add_suite(new Composer.PageStateTest().suite);
+    js.add_suite(new ConversationPageStateTest().suite);
 
     /*
      * Run the tests
      */
     TestSuite root = TestSuite.get_root();
-    root.add_suite(client);
+    root.add_suite(js);
 
     int ret = -1;
     Idle.add(() => {
