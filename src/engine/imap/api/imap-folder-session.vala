@@ -661,7 +661,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                 all_uid = false;
 
             cmds.add(
-                new StoreCommand(msg_set, ADD_FLAGS, NONE, flags, cancellable)
+                new StoreCommand(msg_set, ADD_FLAGS, SILENT, flags, cancellable)
             );
         }
 
@@ -700,7 +700,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     new StoreCommand(
                         msg_set,
                         ADD_FLAGS,
-                        NONE,
+                        SILENT,
                         msg_flags_add,
                         cancellable
                     )
@@ -712,7 +712,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
                     new StoreCommand(
                         msg_set,
                         REMOVE_FLAGS,
-                        NONE,
+                        SILENT,
                         msg_flags_remove,
                         cancellable
                     )
