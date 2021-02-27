@@ -182,6 +182,16 @@
             ]
         },
         {
+            "name": "libsecret",
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://download.gnome.org/sources/libsecret/0.19/libsecret-0.19.1.tar.xz",
+                    "sha256": "8583e10179456ae2c83075d95455f156dc08db6278b32bf4bd61819335a30e3a"
+                }
+            ]
+        },
+        {
             "name": "gsound",
             "sources": [
                 {
