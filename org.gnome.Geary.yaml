@@ -50,8 +50,7 @@ finish-args:
   - "--talk-name=org.gnome.OnlineAccounts"
 
   # Folks contact and avatar support (via EDS)
-  - "--talk-name=org.gnome.evolution.dataserver.AddressBook9"
-  - "--talk-name=org.gnome.evolution.dataserver.Sources5"
+  - "--talk-name=org.gnome.evolution.dataserver.*"
   - "--filesystem=xdg-cache/evolution/addressbook:ro"
 
   # Migrate GSettings into the sandbox
