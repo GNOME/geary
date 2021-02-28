@@ -1336,42 +1336,31 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             oldest = local.last().id;
 
             // Get all email identifiers in the local folder mapped to their EmailFlags
-            var local_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
+            var local_map = new Gee.HashMap<ImapDB.EmailIdentifier,EmailFlags>();
             foreach (Geary.Email e in local) {
-                local_map.set(e.id, e.email_flags);
+                local_map.set((ImapDB.EmailIdentifier) e.id, e.email_flags);
             }
 
             debug("Fetching %d flags", local_map.keys.size);
-            var remote = yield claim_remote_session(cancellable);
-            Gee.List<Email>? remote_email =
-                yield remote.list_email_async(
-                    new Imap.MessageSet.uid_range(
-                        ((ImapDB.EmailIdentifier) oldest).uid,
-                        ((ImapDB.EmailIdentifier) local.first().id).uid
-                    ),
-                    FLAGS,
-                    cancellable
-                );
+            var op = new FetchEmail(
+                this, local_map.keys, FLAGS, cancellable
+            );
+            this.replay_queue.schedule(op);
+            yield op.wait_for_ready_async(cancellable);
 
-            if (remote_email != null && !remote_email.is_empty) {
-                var changed_set = new Gee.HashSet<Email>();
-                var changed_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
-                foreach (var email in remote_email) {
-                    var local_flags = local_map.get(email.id);
-                    var remote_flags = email.email_flags;
-                    if (local_flags != null &&
-                        local_flags.equal_to(remote_flags)) {
-                        changed_set.add(email);
-                        changed_map.set(email.id, remote_flags);
-                    }
+            var changed_map = new Gee.HashMap<EmailIdentifier,EmailFlags>();
+            foreach (var fetched in op.fetched_email) {
+                var local_flags = local_map.get(
+                    (ImapDB.EmailIdentifier) fetched.id
+                );
+                var remote_flags = fetched.email_flags;
+                if (local_flags != null &&
+                    remote_flags != null &&
+                    !local_flags.equal_to(remote_flags)) {
+                    changed_map.set(fetched.id, remote_flags);
                 }
-
-                yield this.local_folder.create_or_merge_email_async(
-                    changed_set,
-                    true,
-                    this.harvester,
-                    cancellable
-                );
+            }
+            if (!changed_map.is_empty) {
                 email_flags_changed(changed_map);
             }
 
@@ -1407,10 +1396,10 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             (obj, res) => {
                 try {
                     this.update_flags.end(res);
-                } catch (IOError.CANCELLED err) {
+                } catch (GLib.IOError.CANCELLED err) {
                     // all good
-                } catch (Error err) {
-                    debug("Error updating flags: %s", err.message);
+                } catch (GLib.Error err) {
+                    warning("Error updating flags: %s", err.message);
                 }
             }
         );
