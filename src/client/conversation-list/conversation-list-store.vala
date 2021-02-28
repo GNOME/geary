@@ -124,6 +124,9 @@ public class ConversationListStore : Gtk.ListStore {
         conversations.conversation_appended.connect(on_conversation_appended);
         conversations.conversation_trimmed.connect(on_conversation_trimmed);
         conversations.email_flags_changed.connect(on_email_flags_changed);
+        conversations.base_folder.account.email_complete.connect(
+            on_email_completed
+        );
 
         // add all existing conversations
         on_conversations_added(conversations.read_only_view);
@@ -478,6 +481,10 @@ public class ConversationListStore : Gtk.ListStore {
         // that's changed, need to change the preview
         // TODO: need support code to load preview for single conversation, not scan all
         refresh_previews_async.begin(this.conversations);
+    }
+
+    private void on_email_completed() {
+        this.refresh_previews_async.begin(this.conversations);
     }
 
     private bool update_date_string(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
