@@ -308,6 +308,19 @@ public abstract class Geary.Imap.Command : BaseObject {
     }
 
     /**
+     * Updates the commands response timer, if running.
+     *
+     * This will reset the command's response timer, preventing the
+     * command from timing out for another {@link response_timeout}
+     * seconds.
+     */
+    internal virtual void update_response_timer() {
+        if (this.response_timer.is_running) {
+            this.response_timer.start();
+        }
+    }
+
+    /**
      * Called when a tagged status response is received for this command.
      *
      * This will update the command's {@link status} property, then

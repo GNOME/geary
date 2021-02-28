@@ -566,6 +566,11 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
         this.bytes_accumulator += bytes;
         var now = GLib.get_real_time();
         if (this.last_seen + 1000000 <= now) {
+            // Touch any sent commands so they don't time out while
+            // downloading large literal blocks.
+            foreach (var command in this.sent_queue) {
+                command.update_response_timer();
+            }
             received_bytes(this.bytes_accumulator);
             this.bytes_accumulator = 0;
             this.last_seen = now;
