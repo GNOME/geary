@@ -73,6 +73,10 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     private int tag_counter = 0;
     private char tag_prefix = 'a';
 
+    private int64 last_seen = 0;
+
+    private size_t bytes_accumulator = 0;
+
     private Geary.Nonblocking.Queue<Command> pending_queue =
         new Geary.Nonblocking.Queue<Command>.fifo();
     private Gee.Queue<Command> sent_queue = new Gee.LinkedList<Command>();
@@ -555,7 +559,17 @@ public class Geary.Imap.ClientConnection : BaseObject, Logging.Source {
     }
 
     private void on_bytes_received(size_t bytes) {
-        received_bytes(bytes);
+        // the deser's bytes_received signal can be called 10's of
+        // times per second, so avoid some CPU overhead by turning
+        // down the number of times per second it is emitted to higher
+        // levels.
+        this.bytes_accumulator += bytes;
+        var now = GLib.get_real_time();
+        if (this.last_seen + 1000000 <= now) {
+            received_bytes(this.bytes_accumulator);
+            this.bytes_accumulator = 0;
+            this.last_seen = now;
+        }
     }
 
     private void on_eos() {
