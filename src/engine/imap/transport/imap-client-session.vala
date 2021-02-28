@@ -809,11 +809,9 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         assert(cx == null);
         cx = new ClientConnection(imap_endpoint, this.quirks);
         cx.set_logging_parent(this);
-        cx.sent_command.connect(on_network_sent_command);
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
-        cx.received_continuation_response.connect(on_received_continuation_response);
         cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
         cx.receive_failure.connect(on_network_receive_failure);
@@ -830,11 +828,8 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         unschedule_keepalive();
 
         if (cx != null) {
-            cx.sent_command.disconnect(on_network_sent_command);
-            cx.send_failure.disconnect(on_network_send_error);
             cx.received_status_response.disconnect(on_received_status_response);
             cx.received_server_data.disconnect(on_received_server_data);
-            cx.received_continuation_response.disconnect(on_received_continuation_response);
             cx.received_bytes.disconnect(on_received_bytes);
             cx.received_bad_response.disconnect(on_received_bad_response);
             cx.receive_failure.disconnect(on_network_receive_failure);
@@ -1831,19 +1826,11 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // network connection event handlers
     //
 
-    private void on_network_sent_command(Command cmd) {
-        // resechedule keepalive
-        schedule_keepalive();
-    }
-
     private void on_network_send_error(Error err) {
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
 
     private void on_received_status_response(StatusResponse status_response) {
-        this.last_seen = GLib.get_real_time();
-        schedule_keepalive();
-
         // XXX Need to ignore emitted IDLE status responses. They are
         // emitted by ClientConnection because it doesn't make any
         // sense not to, and so they get logged by that class's
@@ -1981,11 +1968,6 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     }
 
     private void on_received_server_data(ServerData server_data) {
-        this.last_seen = GLib.get_real_time();
-
-        // reschedule keepalive (traffic seen on channel)
-        schedule_keepalive();
-
         // send ServerData to upper layers for processing and storage
         try {
             notify_received_data(server_data);
@@ -1996,14 +1978,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
         }
     }
 
-    private void on_received_continuation_response(ContinuationResponse response) {
-        this.last_seen = GLib.get_real_time();
-
-        // reschedule keepalive (traffic seen on channel)
-        schedule_keepalive();
-    }
-
-    private void on_received_bytes(size_t bytes) {
+    private void on_received_bytes() {
         this.last_seen = GLib.get_real_time();
 
         // reschedule keepalive
