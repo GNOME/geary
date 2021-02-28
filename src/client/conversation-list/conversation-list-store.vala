@@ -165,9 +165,7 @@ public class ConversationListStore : Gtk.ListStore {
         }
 
         preview_monitor.notify_start();
-
         yield do_refresh_previews_async(conversation_monitor);
-
         preview_monitor.notify_finish();
 
         try {
@@ -182,30 +180,25 @@ public class ConversationListStore : Gtk.ListStore {
         if (conversation_monitor == null || !this.config.display_preview)
             return;
 
-        Gee.Set<Geary.EmailIdentifier> needing_previews =
-            get_emails_needing_previews();
-
-        var emails = new Gee.ArrayList<Geary.Email>();
-        if (needing_previews.size > 0) {
-            var with_previews = yield do_get_previews_async(needing_previews);
-            if (with_previews != null) {
-                emails.add_all(with_previews);
-            }
-        }
-        foreach (Geary.Email email in emails) {
-            Geary.App.Conversation? conversation = conversation_monitor.get_by_email_identifier(email.id);
-            // The conversation can be null if e.g. a search is
-            // changing quickly and the original has evaporated
-            // already.
-            if (conversation != null) {
-                set_preview_for_conversation(conversation, email);
+        var with_previews = yield do_get_previews_async(get_emails_needing_previews());
+        if (with_previews != null) {
+            foreach (var email in with_previews) {
+                Geary.App.Conversation? conversation =
+                    conversation_monitor.get_by_email_identifier(email.id);
+                // The conversation can be null if e.g. a search is
+                // changing quickly and the original has evaporated
+                // already.
+                if (conversation != null) {
+                    set_preview_for_conversation(conversation, email);
+                }
             }
         }
     }
 
-    private async Gee.Collection<Geary.Email> do_get_previews_async(
-        Gee.Collection<Geary.EmailIdentifier> emails_needing_previews) {
-        Gee.Collection<Geary.Email> emails = null;
+    private async Gee.Collection<Geary.Email>? do_get_previews_async(
+        Gee.Collection<Geary.EmailIdentifier> ids
+    ) {
+        Gee.Collection<Geary.Email>? emails = null;
         try {
             emails = yield email_store.get_multiple_email_by_id(
                 emails_needing_previews,
