@@ -295,6 +295,7 @@ src/engine/imap-engine/outlook/imap-engine-outlook-folder.vala
 src/engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-create-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-empty-folder.vala
+src/engine/imap-engine/replay-ops/imap-engine-expand-vector.vala
 src/engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-mark-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-move-email-commit.vala
