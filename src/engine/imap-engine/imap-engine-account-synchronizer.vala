@@ -278,31 +278,25 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
             }
         }
 
-        // get oldest local email and its time, as well as number
-        // of messages in local store
-        Gee.List<Geary.Email>? list = yield local_folder.list_email_by_id_async(
-            null,
-            1,
-            Email.Field.PROPERTIES,
-            OLDEST_TO_NEWEST,
-            cancellable
+        Gee.List<Email> vector = yield this.folder.list_email_range_by_id(
+            null, 1, PROPERTIES, OLDEST_TO_NEWEST, cancellable
         );
+        var current_oldest = Collection.first(vector);
 
-        Geary.Email? current_oldest = null;
-        if (list != null && list.size > 0) {
-            current_oldest = list[0];
-        }
-
-        DateTime? oldest_date = (current_oldest != null)
+        GLib.DateTime? oldest_date = (current_oldest != null)
             ? current_oldest.properties.date_received : null;
         if (oldest_date == null) {
             oldest_date = new DateTime.now_local();
         }
 
-        DateTime? next_epoch = oldest_date;
-        while (next_epoch.compare(max_epoch) > 0) {
+        GLib.DateTime next_epoch = oldest_date;
+        debug("XXX next: %s, oldest %s, cmp: %d",
+              next_epoch.format_iso8601(),
+              max_epoch.format_iso8601(),
+              next_epoch.compare(max_epoch));
+        while (true) {
             int local_count = yield local_folder.get_email_count_async(
-                NONE, cancellable
+                INCLUDE_MARKED_FOR_REMOVE, cancellable
             );
 
             next_epoch = next_epoch.add_months(-3);
@@ -310,102 +304,18 @@ private class Geary.ImapEngine.FullFolderSync : RefreshFolderSync {
                 next_epoch = max_epoch;
             }
 
-            debug("Fetching to: %s", next_epoch.to_string());
-
             if (local_count < imap_folder.remote_properties.email_total &&
-                next_epoch.compare(max_epoch) >= 0) {
-                if (next_epoch.compare(this.sync_max_epoch) > 0) {
-                    current_oldest = yield expand_vector(
-                        next_epoch, current_oldest, cancellable
-                    );
-                    if (current_oldest == null &&
-                        next_epoch.equal(max_epoch)) {
-                        yield expand_to_previous(
-                            current_oldest, cancellable
-                        );
-                        // Exit next time around
-                        next_epoch = max_epoch.add_days(-1);
-                    }
-                } else {
-                    yield expand_complete_vector(cancellable);
-                    // Exit next time around
-                    next_epoch = max_epoch.add_days(-1);
-                }
+                next_epoch.compare(max_epoch) > 0) {
+                debug("Fetching to: %s", next_epoch.to_string());
+                yield imap_folder.expand_vector(next_epoch, null, cancellable);
             } else {
-                // Exit next time around
-                next_epoch = max_epoch.add_days(-1);
+                break;
             }
 
             // Wait for basic syncing (i.e. the prefetcher) to
             // complete as well.
             yield base.sync_folder(max_epoch, cancellable);
         }
-    }
-
-    private async Geary.Email? expand_vector(DateTime next_epoch,
-                                             Geary.Email? current_oldest,
-                                             Cancellable cancellable)
-        throws Error {
-        debug("Expanding vector to %s", next_epoch.to_string());
-        return yield ((MinimalFolder) this.folder).find_earliest_email_async(
-            next_epoch,
-            (current_oldest != null) ? current_oldest.id : null,
-            cancellable
-        );
-    }
-
-    private async void expand_to_previous(Geary.Email? current_oldest,
-                                          Cancellable cancellable)
-        throws Error {
-        // there's nothing between the oldest local and the epoch,
-        // which means the mail just prior to our local oldest is
-        // oldest than the epoch; rather than continually thrashing
-        // looking for something that's just out of reach, add it to
-        // the folder and be done with it ... note that this even
-        // works if id is null, as that means the local folder is
-        // empty and so we should at least pull the first one to get a
-        // marker of age
-        Geary.EmailIdentifier? id =
-            (current_oldest != null) ? current_oldest.id : null;
-        debug(
-            "Unable to locate epoch messages on remote folder%s, fetching one past oldest...",
-            (id != null) ? " earlier than oldest local" : ""
-        );
-        var minimal = (MinimalFolder) this.folder;
-        var remote = yield minimal.claim_remote_session(cancellable);
-        yield minimal.expand_vector_internal(
-            remote,
-            ((ImapDB.EmailIdentifier) id).uid,
-            1,
-            OLDEST_TO_NEWEST,
-            cancellable
-        );
-    }
-
-    private async void expand_complete_vector(Cancellable cancellable)
-        throws Error {
-        // past max_epoch, so just pull in everything and be done with it
-        debug(
-            "Reached max epoch of %s, fetching all mail",
-            this.sync_max_epoch.to_string()
-        );
-
-        // Per the contract for list_email_by_id_async, we need to
-        // specify int.MAX count and ensure that
-        // ListFlags.OLDEST_TO_NEWEST is *not* specified to get all
-        // messages listed.
-        //
-        // XXX This is expensive, but should only usually happen once
-        // per folder - at the end of a full sync.
-        var minimal = (MinimalFolder) this.folder;
-        var remote = yield minimal.claim_remote_session(cancellable);
-        yield minimal.expand_vector_internal(
-            remote,
-            null,
-            int.MAX,
-            OLDEST_TO_NEWEST,
-            cancellable
-        );
     }
 
 }
