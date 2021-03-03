@@ -626,7 +626,9 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
             remotely_executing(op);
 
             GLib.Error? remote_err = null;
-            if (remote != null || is_close_op) {
+            // Don't actually execute a close op, since there's no
+            // remote to pass to it.
+            if (remote != null && !is_close_op) {
                 if (op.remote_retry_count > 0)
                     debug("Retrying op %s on %s", op.to_string(), to_string());
 
