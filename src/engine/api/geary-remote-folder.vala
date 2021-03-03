@@ -160,10 +160,17 @@ public interface Geary.RemoteFolder : Folder {
      * connection to the server, having the remote folder open, and so
      * on.
      *
+     * The vector will be attempted to be extended back to both the
+     * date (if given) and by the number of email messages (if
+     * given). If neither are specified no attempt will be made to
+     * expand the vector.
+     *
      * This method requires the host is online, an error will be
      * thrown if the remote server cannot be reached.
      */
-    public abstract async void expand_vector(GLib.Cancellable? cancellable)
+    public abstract async void expand_vector(GLib.DateTime? target_date,
+                                             uint? target_count,
+                                             GLib.Cancellable? cancellable)
         throws GLib.Error;
 
 }

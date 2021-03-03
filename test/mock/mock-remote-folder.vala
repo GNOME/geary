@@ -186,9 +186,14 @@ public class Mock.RemoteFolder : GLib.Object,
         yield void_call_async("synchronise", { cancellable });
     }
 
-    public async void expand_vector(GLib.Cancellable? cancellable)
+    public async void expand_vector(GLib.DateTime? target_date,
+                                    uint? target_count,
+                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-        yield void_call_async("expand_vector", { cancellable });
+        yield void_call_async(
+            "expand_vector",
+            { box_arg(target_date), box_arg(target_count), cancellable }
+        );
     }
 
     public virtual Geary.Logging.State to_logging_state() {

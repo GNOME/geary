@@ -39,7 +39,8 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     [Flags]
     private enum OpenReason {
         MONITOR,
-        SYNCHRONISE;
+        SYNCHRONISE,
+        EXPAND_VECTOR,
     }
 
 
@@ -215,9 +216,23 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     }
 
     /** {@inheritDoc} */
-    public async void expand_vector(GLib.Cancellable? cancellable)
+    public async void expand_vector(GLib.DateTime? target_date,
+                                    uint? target_count,
+                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
-
+        if (target_date != null || target_count != null) {
+            if (!(OpenReason.EXPAND_VECTOR in this.remote_opens)) {
+                this.remote_opens |= SYNCHRONISE;
+                try {
+                    yield expand_vector_impl(
+                        target_date, target_count, cancellable
+                    );
+                } finally {
+                    this.remote_opens &= ~OpenReason.EXPAND_VECTOR;
+                    yield check_remote_session();
+                }
+            }
+        }
     }
 
     /**
@@ -1311,6 +1326,38 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
             yield synchronise(cancellable);
         }
         return op.created_id;
+    }
+
+    /**
+     * Expands the owning folder's vector.
+     */
+    private async void expand_vector_impl(GLib.DateTime? target_date,
+                                          uint? target_count,
+                                          GLib.Cancellable cancellable
+    ) throws GLib.Error {
+        var remote = yield claim_remote_session(cancellable);
+
+        // include marked for removed in the count in case this is
+        // being called while a removal is in process, in which case
+        // don't want to expand vector this moment because the vector
+        // is in flux
+        int local_count = yield this.local_folder.get_email_count_async(
+            INCLUDE_MARKED_FOR_REMOVE, cancellable
+        );
+
+        // watch out for attempts to expand vector when it's expanded
+        // as far as it will go
+        if (remote.folder.properties.email_total > local_count) {
+            var op = new ExpandVector(
+                this,
+                this._account.local.required_email_fields,
+                target_date,
+                target_count,
+                cancellable
+            );
+            this.replay_queue.schedule(op);
+            yield op.wait_for_ready_async(cancellable);
+        }
     }
 
     /**
