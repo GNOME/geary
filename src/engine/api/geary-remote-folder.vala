@@ -91,8 +91,29 @@ public interface Geary.RemoteFolder : Folder {
     }
 
 
-    /** Last known remote properties for this folder. */
+    /**
+     * Last known properties of this folder's remote mailbox.
+     *
+     * This property is not guaranteed to be accurate at all times. It
+     * is only updated whenever a connection to the remote folder is
+     * established, i.e. by {@link start_monitoring}, {@link
+     * synchronise}, {@link expand_vector} and others, and in response
+     * to notifications from the server.
+     *
+     * Note that remote properties may change even when there is no
+     * current connection to this remote folder (that is, if {@link
+     * is_connected} is false), since another connection may have
+     * provided updated information.
+     */
     public abstract RemoteProperties remote_properties { get; }
+
+    /**
+     * Indicates if the folder's local vector contains all remote email.
+     *
+     * This property is not guaranteed to be accurate at all times. It
+     * is only updated at the same times as {@link remote_properties}.
+     */
+    public abstract bool is_fully_expanded { get; }
 
     /**
      * Indicates if the folder is checking for remote changes to email.
@@ -101,16 +122,6 @@ public interface Geary.RemoteFolder : Folder {
      * @see stop_monitoring
      */
     public abstract bool is_monitoring { get; }
-
-    /**
-     * Indicates if the folder's local vector contains all remote email.
-     *
-     * This property is not guaranteed to be accurate at all times. It
-     * is only updated whenever a connection to the remote folder is
-     * established, i.e. by {@link start_monitoring}, {@link
-     * synchronise}, {@link expand_vector} and others.
-     */
-    public abstract bool is_fully_expanded { get; }
 
 
     /**

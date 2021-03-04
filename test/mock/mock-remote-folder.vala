@@ -63,15 +63,15 @@ public class Mock.RemoteFolder : GLib.Object,
         get { return this._used_as; }
     }
 
-    public bool is_monitoring {
-        get { return this._is_monitoring; }
-    }
-    private bool _is_monitoring = false;
-
     public bool is_fully_expanded {
         get { return this._is_fully_expanded; }
     }
     private bool _is_fully_expanded = false;
+
+    public bool is_monitoring {
+        get { return this._is_monitoring; }
+    }
+    private bool _is_monitoring = false;
 
     public Geary.Logging.Source? logging_parent {
         get { return this.account; }
