@@ -92,7 +92,7 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
                 // could mean created or simply a known email associated with this folder)
                 Gee.Map<Geary.Email, bool> created_or_merged =
                     yield this.owner.local_folder.create_or_merge_email_async(
-                        list, true, this.owner.harvester, this.cancellable
+                        list, this.owner.harvester, this.cancellable
                     );
                 foreach (Geary.Email email in created_or_merged.keys) {
                     // true means created

@@ -86,7 +86,6 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
-            true,
             new MockContactHarvester(),
             null,
             this.async_completion
@@ -106,7 +105,6 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
-            true,
             new MockContactHarvester(),
             null,
             this.async_completion
@@ -116,7 +114,7 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         assert_equal<int?>(results.size, 1);
         assert_true(results.get(mock));
-        assert_equal<int?>(this.folder.properties.email_unread, 1);
+        assert_equal<int?>(this.folder.properties.email_unread, 0);
     }
 
     public void create_no_unread_update() throws GLib.Error {
@@ -126,7 +124,6 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
-            false,
             new MockContactHarvester(),
             null,
             this.async_completion
@@ -156,7 +153,6 @@ class Geary.ImapDB.FolderTest : TestCase {
 
         this.folder.create_or_merge_email_async.begin(
             Collection.single(mock),
-            true,
             new MockContactHarvester(),
             null,
             this.async_completion
@@ -207,7 +203,6 @@ class Geary.ImapDB.FolderTest : TestCase {
         Email test = new_mock_remote_email(1, null, test_flags);
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
-            true,
             new MockContactHarvester(),
             null,
             this.async_completion
@@ -241,7 +236,6 @@ class Geary.ImapDB.FolderTest : TestCase {
         Email test = new_mock_remote_email(1, null, test_flags);
         this.folder.create_or_merge_email_async.begin(
             Collection.single(test),
-            true,
             new MockContactHarvester(),
             null,
             this.async_completion

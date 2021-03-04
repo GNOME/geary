@@ -61,7 +61,6 @@ private class Geary.ImapEngine.FetchEmail : SendReplayOperation {
                 );
                 var updated = yield local.create_or_merge_email_async(
                     fetched,
-                    true,
                     this.engine.harvester,
                     cancellable
                 );

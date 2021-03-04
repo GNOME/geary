@@ -497,8 +497,6 @@ private class Geary.ImapDB.Account : BaseObject {
 
             // add to the references table
             folder_refs.set(folder_ref.path, folder_ref);
-
-            folder.unread_updated.connect(on_unread_updated);
         }
         return folder;
     }
@@ -1142,59 +1140,6 @@ private class Geary.ImapDB.Account : BaseObject {
             }
         }
         return path;
-    }
-
-    private void on_unread_updated(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>
-        unread_status) {
-        update_unread_async.begin(source, unread_status, null);
-    }
-
-    // Updates unread count on all folders.
-    private async void update_unread_async(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>
-        unread_status, Cancellable? cancellable) throws Error {
-        Gee.Map<Geary.Folder.Path, int> unread_change = new Gee.HashMap<Geary.Folder.Path, int>();
-
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            foreach (ImapDB.EmailIdentifier id in unread_status.keys) {
-                Gee.Set<Geary.Folder.Path>? paths = do_find_email_folders(
-                    cx, id.message_id, true, cancellable);
-                if (paths == null)
-                    continue;
-
-                // Remove the folder that triggered this event.
-                paths.remove(source.path);
-                if (paths.size == 0)
-                    continue;
-
-                foreach (Geary.Folder.Path path in paths) {
-                    int current_unread = unread_change.has_key(path) ? unread_change.get(path) : 0;
-                    current_unread += unread_status.get(id) ? 1 : -1;
-                    unread_change.set(path, current_unread);
-                }
-            }
-
-            // Update each folder's unread count in the database.
-            foreach (Geary.Folder.Path path in unread_change.keys) {
-                Geary.ImapDB.Folder? folder = get_local_folder(path);
-                if (folder == null)
-                    continue;
-
-                folder.do_add_to_unread_count(cx, unread_change.get(path), cancellable);
-            }
-
-            return Db.TransactionOutcome.SUCCESS;
-        }, cancellable);
-
-        // Update each folder's unread count property.
-        foreach (Geary.Folder.Path path in unread_change.keys) {
-            Geary.ImapDB.Folder? folder = get_local_folder(path);
-            if (folder == null)
-                continue;
-
-            folder.properties.set_status_unseen(
-                folder.properties.email_unread + unread_change.get(path)
-            );
-        }
     }
 
     // Not using a MultiMap because when traversing want to process all values at once per iteration,

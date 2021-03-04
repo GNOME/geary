@@ -101,11 +101,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      */
     public signal void email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids);
 
-    /**
-     * Fired when an email's unread (aka seen) status has changed.  This allows the account to
-     * change the unread count for other folders that contain the email.
-     */
-    public signal void unread_updated(Gee.Map<ImapDB.EmailIdentifier, bool> unread_status);
 
     internal Folder(Geary.Db.Database db,
                     Geary.Folder.Path path,
@@ -306,7 +301,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // not be able to find them after this function.  Be warned.
     public async Gee.Map<Email, bool>
         create_or_merge_email_async(Gee.Collection<Email> emails,
-                                    bool update_totals,
                                     ContactHarvester harvester,
                                     GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -319,16 +313,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Gee.List<Geary.Email> slice = list.slice(index, stop);
 
             Gee.ArrayList<Geary.EmailIdentifier> complete_ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-            int total_unread_change = 0;
             yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 foreach (Geary.Email email in slice) {
                     Geary.Email.Field pre_fields;
                     Geary.Email.Field post_fields;
-                    int unread_change = 0;
                     bool created = do_create_or_merge_email(
                         cx, email,
                         out pre_fields, out post_fields,
-                        ref unread_change,
                         cancellable
                     );
 
@@ -338,23 +329,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     // have all the fields but after the create/merge now does
                     if (post_fields.is_all_set(Geary.Email.Field.ALL) && !pre_fields.is_all_set(Geary.Email.Field.ALL))
                         complete_ids.add(email.id);
-
-                    if (update_totals) {
-                        // Update unread count in DB.
-                        do_add_to_unread_count(cx, unread_change, cancellable);
-                        total_unread_change += unread_change;
-                    }
                 }
 
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
-
-            if (update_totals) {
-                // Update the email_unread properties.
-                properties.set_status_unseen(
-                    (properties.email_unread + total_unread_change).clamp(0, int.MAX)
-                );
-            }
 
             if (complete_ids.size > 0)
                 email_complete(complete_ids);
@@ -829,7 +807,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     public async void detach_multiple_emails_async(Gee.Collection<ImapDB.EmailIdentifier> ids,
         Cancellable? cancellable) throws Error {
-        int unread_count = 0;
         // TODO: Right now, deleting an email is merely detaching its association with a folder
         // (since it may be located in multiple folders).  This means at some point in the future
         // a vacuum will be required to remove emails that are completely unassociated with the
@@ -839,9 +816,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 LoadFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
-
-            unread_count = do_get_unread_count_for_ids(cx, ids, cancellable);
-            do_add_to_unread_count(cx, -unread_count, cancellable);
 
             StringBuilder sql = new StringBuilder("""
                 DELETE FROM MessageLocationTable WHERE message_id IN (
@@ -861,9 +835,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-
-        if (unread_count > 0)
-            properties.set_status_unseen(properties.email_unread - unread_count);
     }
 
     public async void detach_all_emails_async(Cancellable? cancellable) throws Error {
@@ -1005,8 +976,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, Cancellable? cancellable)
         throws Error {
-        int unread_change = 0; // Negative means messages are read, positive means unread.
-        Gee.Map<ImapDB.EmailIdentifier, bool> unread_status = new Gee.HashMap<ImapDB.EmailIdentifier, bool>();
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             // fetch flags for each email
             Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? map = do_get_email_flags(cx,
@@ -1024,11 +993,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                             continue;
 
                         flags.add(flag);
-
-                        if (flag.equal_to(Geary.EmailFlags.UNREAD)) {
-                            unread_change++;
-                            unread_status.set(id, true);
-                        }
                     }
                 }
 
@@ -1038,11 +1002,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                             continue;
 
                         flags.remove(flag);
-
-                        if (flag.equal_to(Geary.EmailFlags.UNREAD)) {
-                            unread_change--;
-                            unread_status.set(id, false);
-                        }
                     }
                 }
             }
@@ -1050,18 +1009,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // write them all back out
             do_set_email_flags(cx, map, cancellable);
 
-            // Update unread count.
-            do_add_to_unread_count(cx, unread_change, cancellable);
-
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-
-        // Update the email_unread properties.
-        properties.set_status_unseen((properties.email_unread + unread_change).clamp(0, int.MAX));
-
-        // Signal changes so other folders can be updated.
-        if (unread_status.size > 0)
-            unread_updated(unread_status);
     }
 
     internal async Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? get_email_flags_async(
@@ -1078,68 +1027,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     public async void set_email_flags_async(Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map,
         Cancellable? cancellable) throws Error {
-        Error? error = null;
-        int unread_change = 0; // Negative means messages are read, positive means unread.
-
-        try {
-            yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
-                // TODO get current flags, compare to ones being set
-                Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? existing_map =
-                    do_get_email_flags(cx, map.keys, cancellable);
-
-                if (existing_map != null) {
-                    foreach(ImapDB.EmailIdentifier id in map.keys) {
-                        Geary.EmailFlags? existing_flags = existing_map.get(id);
-                        if (existing_flags == null)
-                            continue;
-
-                        Geary.EmailFlags new_flags = map.get(id);
-                        if (!existing_flags.contains(Geary.EmailFlags.UNREAD) &&
-                            new_flags.contains(Geary.EmailFlags.UNREAD))
-                            unread_change++;
-                        else if (existing_flags.contains(Geary.EmailFlags.UNREAD) &&
-                            !new_flags.contains(Geary.EmailFlags.UNREAD))
-                            unread_change--;
-                    }
-                }
-
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
                 do_set_email_flags(cx, map, cancellable);
-
-                // Update unread count.
-                do_add_to_unread_count(cx, unread_change, cancellable);
 
                 // TODO set db unread count
                 return Db.TransactionOutcome.COMMIT;
             }, cancellable);
-        } catch (Error e) {
-            error = e;
-        }
-
-        // Update the email_unread properties.
-        if (error == null) {
-            properties.set_status_unseen((properties.email_unread + unread_change).clamp(0, int.MAX));
-        } else {
-            throw error;
-        }
     }
 
     public async void detach_single_email_async(ImapDB.EmailIdentifier id, Cancellable? cancellable,
         out bool is_marked) throws Error {
         bool internal_is_marked = false;
-        bool was_unread = false;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             LocationIdentifier? location = do_get_location_for_id(cx, id, LoadFlags.INCLUDE_MARKED_FOR_REMOVE,
                 cancellable);
             if (location == null) {
                 throw new EngineError.NOT_FOUND("Message %s cannot be removed from %s: not found",
                     id.to_string(), to_string());
-            }
-
-            // Check to see if message is unread (this only affects non-marked emails.)
-            if (do_get_unread_count_for_ids(cx,
-                Geary.iterate<ImapDB.EmailIdentifier>(id).to_array_list(), cancellable) > 0) {
-                do_add_to_unread_count(cx, -1, cancellable);
-                was_unread = true;
             }
 
             internal_is_marked = location.marked_removed;
@@ -1150,9 +1054,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
 
         is_marked = internal_is_marked;
-
-        if (was_unread)
-            properties.set_status_unseen(properties.email_unread - 1);
     }
 
     // Mark messages as removed (but not expunged) from the folder.  Marked messages are skipped
@@ -1166,8 +1067,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     public async Gee.Set<ImapDB.EmailIdentifier>? mark_removed_async(
         Gee.Collection<ImapDB.EmailIdentifier>? ids, bool mark_removed, Cancellable? cancellable)
         throws Error {
-        int total_changed = 0;
-        int unread_count = 0;
         Gee.Set<ImapDB.EmailIdentifier> removed_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Gee.List<LocationIdentifier?> locs;
@@ -1179,9 +1078,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
 
-            total_changed = locs.size;
-            unread_count = do_get_unread_count_for_ids(cx, ids, cancellable);
-
             Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
             foreach (LocationIdentifier location in locs) {
                 uids.add(location.uid);
@@ -1189,27 +1085,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
 
             do_mark_unmark_removed(cx, uids, mark_removed, cancellable);
-            do_add_to_unread_count(cx, -unread_count, cancellable);
-
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-
-
-        // Update the folder properties so client sees the changes
-        // right away
-
-        // Email total
-        if (mark_removed) {
-            total_changed = -total_changed;
-        }
-        int total = this.properties.select_examine_messages + total_changed;
-        if (total >= 0) {
-            this.properties.set_select_examine_message_count(total);
-        }
-
-        // Unread total
-        if (unread_count > 0)
-            properties.set_status_unseen(properties.email_unread - unread_count);
 
         return (removed_ids.size > 0) ? removed_ids : null;
     }
@@ -1424,7 +1301,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                                           Geary.Email email,
                                           out Geary.Email.Field pre_fields,
                                           out Geary.Email.Field post_fields,
-                                          ref int unread_count_change,
                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
 
@@ -1477,18 +1353,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_merge_email(
                     cx, location, email,
                     out pre_fields, out post_fields,
-                    ref unread_count_change,
                     cancellable
                 );
-
-                // Already associated with folder and flags were known.
-                if (is_associated && pre_fields.is_all_set(Geary.Email.Field.FLAGS))
-                    unread_count_change = 0;
             } else {
                 do_merge_email_flags(
                     cx, location, email,
                     out pre_fields, out post_fields,
-                    ref unread_count_change, cancellable
+                    cancellable
                 );
             }
         } else {
@@ -1541,10 +1412,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
 
             do_add_email_to_search_table(cx, message_id, email, cancellable);
-
-            // Update unread count if our new email is unread.
-            if (email.email_flags != null && email.email_flags.is_unread())
-                unread_count_change++;
         }
 
         // Finally, update the email's message id and add it to the
@@ -1786,19 +1653,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return (map.size > 0) ? map : null;
     }
 
-    private Geary.EmailFlags? do_get_email_flags_single(Db.Connection cx, int64 message_id,
-        Cancellable? cancellable) throws Error {
-        Db.Statement fetch_stmt = cx.prepare("SELECT flags FROM MessageTable WHERE id=?");
-        fetch_stmt.bind_rowid(0, message_id);
-
-        Db.Result results = fetch_stmt.exec(cancellable);
-
-        if (results.finished || results.is_null_at(0))
-            return null;
-
-        return new Geary.Imap.EmailFlags(Geary.Imap.MessageFlags.deserialize(results.string_at(0)));
-    }
-
     // TODO: Unroll loop
     private void do_set_email_flags(Db.Connection cx, Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map,
         Cancellable? cancellable) throws Error {
@@ -1870,7 +1724,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private void do_merge_message_row(Db.Connection cx,
                                       MessageRow row,
                                       out Geary.Email.Field new_fields,
-                                      ref int unread_count_change,
                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.Email.Field available_fields;
@@ -1966,16 +1819,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
 
         if (new_fields.is_any_set(Geary.Email.Field.FLAGS)) {
-            // Fetch existing flags to update unread count
-            Geary.EmailFlags? old_flags = do_get_email_flags_single(cx, row.id, cancellable);
-            Geary.EmailFlags new_flags = new Geary.Imap.EmailFlags(
-                    Geary.Imap.MessageFlags.deserialize(row.email_flags));
-
-            if (old_flags != null && (old_flags.is_unread() != new_flags.is_unread()))
-                unread_count_change += new_flags.is_unread() ? 1 : -1;
-            else if (new_flags.is_unread())
-                unread_count_change++;
-
             Db.Statement stmt = cx.prepare(
                 "UPDATE MessageTable SET flags=? WHERE id=?");
             stmt.bind_string(0, row.email_flags);
@@ -2097,7 +1940,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                                       Geary.Email email,
                                       out Geary.Email.Field pre_fields,
                                       out Geary.Email.Field post_fields,
-                                      ref int unread_count_change,
                                       GLib.Cancellable? cancellable)
         throws GLib.Error {
         assert(email.fields == Geary.Email.Field.FLAGS);
@@ -2112,12 +1954,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Geary.Email row_email = row.to_email(location.email_id);
         if (row_email.email_flags == null ||
             !row_email.email_flags.equal_to(email.email_flags)) {
-
-            // Check for unread count changes
-            if (row_email.email_flags != null &&
-                row_email.email_flags.is_unread() != email.email_flags.is_unread()) {
-                unread_count_change += email.email_flags.is_unread() ? 1 : -1;
-            }
 
             // do_set_email_flags requires a valid message location,
             // but doesn't accept one as an arg, so despite knowing
@@ -2140,7 +1976,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                                 Geary.Email email,
                                 out Geary.Email.Field pre_fields,
                                 out Geary.Email.Field post_fields,
-                                ref int unread_count_change,
                                 GLib.Cancellable? cancellable)
         throws GLib.Error {
         // fetch message from database and merge in this email
@@ -2155,7 +1990,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return;
 
         // Merge in any fields in the submitted email that aren't already in the database or are mutable
-        int new_unread_count = 0;
         if (((fetched_fields & email.fields) != email.fields) ||
             email.fields.is_any_set(Geary.Email.MUTABLE_FIELDS)) {
             // Build the combined email from the merge, which will be used to save the attachments
@@ -2179,7 +2013,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             do_merge_message_row(
                 cx, row,
                 out new_fields,
-                ref new_unread_count,
                 cancellable
             );
 
@@ -2187,35 +2020,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_merge_email_in_search_table(cx, location.message_id, new_fields, combined_email, cancellable);
             else
                 do_add_email_to_search_table(cx, location.message_id, combined_email, cancellable);
-        } else {
-            // If the email is ready to go, we still may need to update the unread count.
-            Geary.EmailFlags? combined_flags = do_get_email_flags_single(cx, location.message_id,
-                cancellable);
-            if (combined_flags != null && combined_flags.is_unread())
-                new_unread_count = 1;
         }
-
-        unread_count_change += new_unread_count;
-    }
-
-    /**
-     * Adds a value to the unread count.  If this makes the unread count negative, it will be
-     * set to zero.
-     */
-    internal void do_add_to_unread_count(Db.Connection cx, int to_add, Cancellable? cancellable)
-        throws Error {
-        if (to_add == 0)
-            return; // Nothing to do.
-
-        Db.Statement update_stmt = cx.prepare(
-            "UPDATE FolderTable SET unread_count = CASE WHEN unread_count + ? < 0 THEN 0 ELSE " +
-            "unread_count + ? END WHERE id=?");
-
-        update_stmt.bind_int(0, to_add);
-        update_stmt.bind_int(1, to_add);
-        update_stmt.bind_rowid(2, folder_id);
-
-        update_stmt.exec(cancellable);
     }
 
     // Db.Result must include columns for "message_id", "ordering", and "remove_marker" from the
@@ -2398,22 +2203,6 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             flags, cancellable);
 
         return (locs.size > 0) ? locs : null;
-    }
-
-    private int do_get_unread_count_for_ids(Db.Connection cx,
-        Gee.Collection<ImapDB.EmailIdentifier>? ids, Cancellable? cancellable) throws Error {
-        if (ids == null || ids.size == 0)
-            return 0;
-
-        // Fetch flags for each email and update this folder's unread count.
-        // (Note that this only flags for emails which have NOT been marked for removal
-        // are included.)
-        Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? flag_map = do_get_email_flags(cx,
-            ids, cancellable);
-        if (flag_map != null)
-            return Geary.traverse<Geary.EmailFlags>(flag_map.values).count_matching(f => f.is_unread());
-
-        return 0;
     }
 
     // For SELECT/EXAMINE responses, not STATUS responses

@@ -147,7 +147,7 @@ private class Geary.ImapEngine.ExpandVector : ReplayOperation {
         if (list != null) {
             Gee.Map<Email, bool>? created_or_merged =
                 yield this.engine.local_folder.create_or_merge_email_async(
-                    list, true, this.engine.harvester, cancellable
+                    list, this.engine.harvester, cancellable
                 );
 
             foreach (Email email in created_or_merged.keys) {

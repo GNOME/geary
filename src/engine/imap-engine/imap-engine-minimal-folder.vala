@@ -712,12 +712,9 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         var inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         var created_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         if (to_create.size > 0) {
-            // Don't update the unread count here, since it'll get
-            // updated once normalisation has finished anyway. See
-            // also Issue #213.
             Gee.Map<Email, bool>? created_or_merged =
                 yield local_folder.create_or_merge_email_async(
-                    to_create, false, this.harvester, cancellable
+                    to_create, this.harvester, cancellable
                 );
             assert(created_or_merged != null);
 

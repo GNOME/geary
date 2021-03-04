@@ -67,7 +67,6 @@ private class Geary.ImapEngine.CreateEmail : SendReplayOperation {
             Gee.Map<Geary.Email, bool> results =
                 yield this.engine.local_folder.create_or_merge_email_async(
                     Geary.iterate<Geary.Email>(created).to_array_list(),
-                    true,
                     this.engine.harvester,
                     this.cancellable
                 );
