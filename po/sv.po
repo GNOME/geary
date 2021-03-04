@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-02-24 12:30+0000\n"
-"PO-Revision-Date: 2021-02-25 21:19+0100\n"
+"POT-Creation-Date: 2021-03-03 11:14+0000\n"
+"PO-Revision-Date: 2021-03-04 15:29+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -809,12 +809,12 @@ msgid "_Replace"
 msgstr "E_rsätt"
 
 #: src/client/application/application-client.vala:34
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright © 2016 Software Freedom Conservancy Inc."
+msgstr "Copyright © 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/application-client.vala:35
-msgid "Copyright 2016-2020 Geary Development Team."
-msgstr "Copyright 2016-2020 Gearys utvecklingsgrupp."
+msgid "Copyright © 2016-2021 Geary Development Team."
+msgstr "Copyright © 2016-2021 Gearys utvecklingsgrupp."
 
 #: src/client/application/application-client.vala:37
 msgid "Visit the Geary web site"
