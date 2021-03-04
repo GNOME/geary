@@ -79,6 +79,11 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
     }
 
     /** {@inheritDoc} */
+    public bool is_connected {
+        get { return this.remote_session != null; }
+    }
+
+    /** {@inheritDoc} */
     public bool is_fully_expanded {
         get { return this._is_fully_expanded; }
     }
@@ -455,6 +460,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
         // All done, can now hook up the session to the folder
         this.remote_session = session;
         session.disconnected.connect(on_remote_disconnected);
+        notify_property("is-connected");
 
         // Enable IDLE now that the local and remote folders are in
         // sync. Can't do this earlier since we might get untagged
@@ -824,6 +830,7 @@ private class Geary.ImapEngine.MinimalFolder : BaseObject,
                 this.update_flags_timer.reset();
                 this.replay_queue.stop_remote();
                 this.remote_session = null;
+                notify_property("is-connected");
 
                 session.appended.disconnect(on_remote_appended);
                 session.updated.disconnect(on_remote_updated);

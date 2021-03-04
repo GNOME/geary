@@ -63,6 +63,11 @@ public class Mock.RemoteFolder : GLib.Object,
         get { return this._used_as; }
     }
 
+    public bool is_connected {
+        get { return this._connected; }
+    }
+    private bool _connected = false;
+
     public bool is_fully_expanded {
         get { return this._is_fully_expanded; }
     }

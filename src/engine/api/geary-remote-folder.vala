@@ -92,6 +92,16 @@ public interface Geary.RemoteFolder : Folder {
 
 
     /**
+     * Determines if there is an open network connection to the remote.
+     *
+     * Note that this property reflects the engine's best current
+     * understanding of whether a remote connection is currently
+     * available. It may be inaccurate due to changing network
+     * conditions and is at best treated as advisory.
+     */
+    public abstract bool is_connected { get; }
+
+    /**
      * Last known properties of this folder's remote mailbox.
      *
      * This property is not guaranteed to be accurate at all times. It
