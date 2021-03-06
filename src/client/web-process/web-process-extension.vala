@@ -48,6 +48,7 @@ public class GearyWebExtension : Object {
     public GearyWebExtension(WebKit.WebExtension extension) {
         this.extension = extension;
         extension.page_created.connect(on_page_created);
+        WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
     }
 
     private void on_console_message(WebKit.WebPage page,
@@ -134,32 +135,6 @@ public class GearyWebExtension : Object {
 
     private void on_page_created(WebKit.WebExtension extension,
                                  WebKit.WebPage page) {
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-
-        var extension_class = context.register_class(
-            this.get_type().name(),
-            null,
-            null,
-            null
-        );
-        extension_class.add_method(
-            EXTENSION_CLASS_SEND,
-            (instance, values) => {
-                return this.on_page_send_message(page, values);
-            },
-            GLib.Type.NONE
-        );
-        context.set_value(
-            EXTENSION_CLASS_VAR,
-            new JSC.Value.object(context, extension_class, extension_class)
-        );
-
-        context.set_value(
-            REMOTE_LOAD_VAR,
-            new JSC.Value.boolean(context, false)
-        );
-
         page.console_message_sent.connect(on_console_message);
         page.send_request.connect(on_send_request);
         page.user_message_received.connect(on_page_message_received);
@@ -267,6 +242,36 @@ public class GearyWebExtension : Object {
 
         page.send_message_to_view.begin(message, null);
         return true;
+    }
+
+    private void on_window_object_cleared(WebKit.ScriptWorld world,
+                                          WebKit.WebPage page,
+                                          WebKit.Frame frame)
+    {
+        JSC.Context context = frame.get_js_context();
+
+        var extension_class = context.register_class(
+            this.get_type().name(),
+            null,
+            null,
+            null
+        );
+        extension_class.add_method(
+            EXTENSION_CLASS_SEND,
+            (instance, values) => {
+                return this.on_page_send_message(page, values);
+            },
+            GLib.Type.NONE
+        );
+        context.set_value(
+            EXTENSION_CLASS_VAR,
+            new JSC.Value.object(context, extension_class, extension_class)
+        );
+
+        context.set_value(
+            REMOTE_LOAD_VAR,
+            new JSC.Value.boolean(context, false)
+        );
     }
 
 }
