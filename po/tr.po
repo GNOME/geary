@@ -10,14 +10,14 @@
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014, 2016.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2020.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-02-10 12:13+0000\n"
-"PO-Revision-Date: 2021-02-18 03:46+0300\n"
+"POT-Creation-Date: 2021-03-03 11:14+0000\n"
+"PO-Revision-Date: 2021-03-06 22:19+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -40,7 +40,7 @@ msgstr "Dosyaları Geary kullanarak gönderin"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:631
+#: src/client/application/application-main-window.vala:643
 msgid "Geary"
 msgstr "Geary"
 
@@ -606,12 +606,12 @@ msgid_plural "%d days back"
 msgstr[0] "%d gün öncesinden"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2138
+#: src/client/application/application-main-window.vala:2150
 msgid "Undo"
 msgstr "Geri Al"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2121
+#: src/client/application/application-main-window.vala:2133
 msgid "Redo"
 msgstr "Yinele"
 
@@ -706,7 +706,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:577
+#: src/client/application/application-main-window.vala:589
 msgid "Login"
 msgstr "Giriş"
 
@@ -805,12 +805,12 @@ msgid "_Replace"
 msgstr "_Değiştir"
 
 #: src/client/application/application-client.vala:34
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr "Telif Hakkı 2016 Software Freedom Conservancy Inc."
+msgid "Copyright © 2016 Software Freedom Conservancy Inc."
+msgstr "Telif Hakkı © 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/application-client.vala:35
-msgid "Copyright 2016-2020 Geary Development Team."
-msgstr "Telif Hakkı 2016-2020 Geary Geliştirme Takımı."
+msgid "Copyright © 2016-2021 Geary Development Team."
+msgstr "Telif Hakkı © 2016-2021 Geary Geliştirme Takımı."
 
 #: src/client/application/application-client.vala:37
 msgid "Visit the Geary web site"
@@ -942,7 +942,7 @@ msgstr "Dağıtım sürümü"
 msgid "Installation prefix"
 msgstr "Kurulum ön eki"
 
-#: src/client/application/application-client.vala:576
+#: src/client/application/application-client.vala:587
 #, c-format
 msgid "About %s"
 msgstr "%s hakkında"
@@ -950,7 +950,7 @@ msgstr "%s hakkında"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:580
+#: src/client/application/application-client.vala:591
 msgid "translator-credits"
 msgstr ""
 "Emin Tufan Çetin <etcetin@gmail.com>\n"
@@ -960,13 +960,13 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1110
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "`--hidden` seçeneği terk edilmiştir ve gelecekte kaldırılacaktır."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1132
+#: src/client/application/application-client.vala:1143
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Tanınmayan program argümanı: “%s”"
@@ -1125,27 +1125,27 @@ msgstr "Şun(lar)a eposta gönderildi: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2512
+#: src/client/application/application-controller.vala:2516
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Şun(lar)a gidecek eposta iletim sırasında: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2576
+#: src/client/application/application-controller.vala:2580
 #, c-format
 msgid "Email to %s saved"
 msgstr "Şun(lar)a gidecek eposta kaydedildi: %s"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2591
-#: src/client/application/application-controller.vala:2649
+#: src/client/application/application-controller.vala:2595
+#: src/client/application/application-controller.vala:2653
 msgid "Composer could not be restored"
 msgstr "Oluşturucu kurtarılamadı"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2634
+#: src/client/application/application-controller.vala:2638
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Şun(lar)a gidecek eposta gözden çıkarıldı: %s"
@@ -1162,54 +1162,54 @@ msgid "Account update"
 msgstr "Hesap güncelleme"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:563
+#: src/client/application/application-main-window.vala:575
 msgid "Working offline"
 msgstr "Çevrim dışı çalışıyor"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:565
+#: src/client/application/application-main-window.vala:577
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Yeniden bağlanana dek e-posta gönderemez veya alamazsınız."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:572
+#: src/client/application/application-main-window.vala:584
 msgid "Login problem"
 msgstr "Giriş sorunu"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:574
+#: src/client/application/application-main-window.vala:586
 msgid "An account has reported an incorrect login or password."
 msgstr "Hesap yanlış bir giriş veya parola bildirdi."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:581
+#: src/client/application/application-main-window.vala:593
 msgid "Retry login, you will be prompted for your password"
 msgstr "Giriş yapmayı yeniden dene, parola girmeniz istenecek"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:588
+#: src/client/application/application-main-window.vala:600
 msgid "Security problem"
 msgstr "Güvenlik sorunu"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:590
+#: src/client/application/application-main-window.vala:602
 msgid "An account has reported an untrusted server."
 msgstr "Hesap, güvenilmeyen bir sunucu bildirdi."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:593
+#: src/client/application/application-main-window.vala:605
 msgid "Check"
 msgstr "Gözden geçir"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:597
+#: src/client/application/application-main-window.vala:609
 msgid "Check the security details for the connection"
 msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:640
+#: src/client/application/application-main-window.vala:652
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1217,47 +1217,47 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1031
+#: src/client/application/application-main-window.vala:1043
 #: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etiketler"
 
-#: src/client/application/application-main-window.vala:1346
+#: src/client/application/application-main-window.vala:1358
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/application-main-window.vala:1347
+#: src/client/application/application-main-window.vala:1359
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/application-main-window.vala:1348
+#: src/client/application/application-main-window.vala:1360
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/application-main-window.vala:1349
+#: src/client/application/application-main-window.vala:1361
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1406
+#: src/client/application/application-main-window.vala:1418
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Bu konuşmaları kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1411
-#: src/client/application/application-main-window.vala:1426
+#: src/client/application/application-main-window.vala:1423
+#: src/client/application/application-main-window.vala:1438
 msgid "Delete"
 msgstr "Sil"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1421
+#: src/client/application/application-main-window.vala:1433
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1712
+#: src/client/application/application-main-window.vala:1724
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -2683,7 +2683,7 @@ msgstr "Arşiv"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:999
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1006
 msgid "Drafts | Draft"
 msgstr "Taslaklar | Taslak"
 
@@ -2691,14 +2691,14 @@ msgstr "Taslaklar | Taslak"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1008
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Gönderilmiş | Gönderilmiş Posta | Gönderilmiş Eposta | Gönderilmiş E-Posta"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1013
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Gönderilmiş Ögeler"
@@ -2707,7 +2707,7 @@ msgstr "Gönderilmiş Ögeler"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1023
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2719,13 +2719,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1033
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1040
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Çöp | Çöp | Çöp Kutusu"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1038
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Silinen Ögeler"
@@ -2734,21 +2734,21 @@ msgstr "Silinen Ögeler"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1048
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1055
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
-#: src/engine/rfc822/rfc822-message.vala:544
+#: src/engine/rfc822/rfc822-message.vala:551
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s” için mime türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:555
+#: src/engine/rfc822/rfc822-message.vala:562
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%2$s” üstündeki “%1$s” mime türü için içerik türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:1008
+#: src/engine/rfc822/rfc822-message.vala:1015
 msgid "(no subject)"
 msgstr "(konu yok)"
 
