@@ -43,5 +43,9 @@ private class Geary.App.InsertOperation : BatchOperation<EmailIdentifier> {
             debug("Inserting no messages into %s, none needed",
                   this.monitor.base_folder.to_string());
         }
+
+        // Check the window in case the remote is being expanded and
+        // there is more email that can subsequently be pulled down.
+        yield this.monitor.check_window_count();
     }
 }

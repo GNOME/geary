@@ -1597,7 +1597,7 @@ public class Application.MainWindow :
 
     private async void open_conversation_monitor(Geary.App.ConversationMonitor to_open,
                                                  GLib.Cancellable cancellable) {
-        to_open.scan_completed.connect(on_scan_completed);
+        to_open.scan_completed.connect_after(on_scan_completed);
         to_open.scan_error.connect(on_scan_error);
 
         to_open.scan_completed.connect(on_conversation_count_changed);
@@ -1668,7 +1668,10 @@ public class Application.MainWindow :
 
     private void load_more() {
         if (this.conversations != null) {
-            this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
+            this.conversations.update_minimum_window_size(
+                this.conversations.minimum_window_size +
+                MIN_CONVERSATION_COUNT
+            );
         }
     }
 

@@ -41,8 +41,9 @@ private class Geary.App.RemoveOperation : BatchOperation<EmailIdentifier> {
             (this.source_folder == this.monitor.base_folder) ? batch : null
         );
 
-        // Queue an update since many emails may have been removed
-        this.monitor.check_window_count();
+        // Check the window since many emails may have been removed
+        // and hence more are needed to fill it back up.
+        yield this.monitor.check_window_count();
     }
 
 }

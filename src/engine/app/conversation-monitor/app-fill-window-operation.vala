@@ -29,7 +29,7 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
 
     public override async void execute_async() throws Error {
         int num_to_load = (int) (
-            (this.monitor.min_window_count - this.monitor.conversations.size)
+            (this.monitor.minimum_window_size - this.monitor.conversations.size)
         );
         if (num_to_load < MIN_FILL_COUNT) {
             num_to_load = MIN_FILL_COUNT;
@@ -56,12 +56,10 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
         );
 
         if (loaded == num_to_load) {
-            // Loaded the maximum number of messages, so go see if
-            // there are any more needed.
-            this.monitor.check_window_count();
-        } else {
-            this.monitor.fill_complete = true;
+            // Loaded either no email, or the maximum number of email,
+            // so go see if there are any more needed.
+            yield this.monitor.check_window_count();
         }
-
     }
+
 }

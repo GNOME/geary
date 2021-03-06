@@ -20,6 +20,10 @@ private class Geary.App.AppendOperation : BatchOperation<EmailIdentifier> {
               batch.size, this.monitor.base_folder.to_string());
 
         yield this.monitor.load_by_sparse_id(batch);
+
+        // Check the window in case the remote is being expanded and
+        // there is more email that can subsequently be pulled down.
+        yield this.monitor.check_window_count();
     }
 
 }

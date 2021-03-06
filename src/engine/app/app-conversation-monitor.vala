@@ -22,7 +22,7 @@
  * When monitoring starts via a call to {@link
  * start_monitoring}, the folder will perform an initial
  * //scan// of messages in the base folder and load conversation load
- * based on that. Increasing {@link min_window_count} will cause
+ * based on that. Increasing {@link minimum_window_size} will cause
  * additional scan operations to be executed as needed to fill the new
  * window size.
  *
@@ -94,32 +94,17 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     /** Determines if this monitor is monitoring the base folder. */
     public bool is_monitoring { get; private set; default = false; }
 
-    /** Determines if more conversations should be loaded. */
-    public bool should_load_more {
-        get {
-            return (this.conversations.size < this.min_window_count);
-        }
-    }
+    /** Minimum number of conversations the monitor should maintain. */
+    public int minimum_window_size { get; private set; }
 
-    /** Determines if more conversations can be loaded. */
+    /**
+     * Determines if more conversations can be loaded.
+     */
     public bool can_load_more {
         get {
-            return (
-                this.base_folder.email_total >
-                this.folder_window_size
-            ) && !this.fill_complete;
+            return (this.can_load_more_local | this.can_load_more_remote);
         }
     }
-
-    /** Minimum number of emails large conversations should contain. */
-    public int min_window_count {
-        get { return _min_window_count; }
-        set {
-            _min_window_count = value;
-            check_window_count();
-        }
-    }
-    private int _min_window_count = 0;
 
     /** Indicates progress conversations are being loaded. */
     public ProgressMonitor progress_monitor {
@@ -136,13 +121,55 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         get { return this.base_folder; }
     }
 
+    /**
+     * Determines if more conversations should be loaded.
+     *
+     * If true, the monitor will attempt to load more email from the
+     * base folder's vector.
+     */
+    internal bool should_load_more {
+        get {
+            return (this.conversations.size < this.minimum_window_size);
+        }
+    }
+
+    /**
+     * Determines if more email can be loaded from the folder.
+     *
+     * If true, then more email is present in the base folder's vector
+     * which can be loaded locally.
+     */
+    internal bool can_load_more_local {
+        get {
+            return (this.base_folder.email_total > this.folder_window_size);
+        }
+    }
+
+    /**
+     * Determines if more email can be loaded from the remote.
+     *
+     * If true, the base folder is remote-backed, there is an open
+     * connection to the remote, and more email is known to be present
+     * on the remote which could be downloaded.
+     */
+    internal bool can_load_more_remote {
+        get {
+            return (
+                this.remote != null &&
+                this.remote.is_connected &&
+                this.base_folder.email_total <
+                this.remote.remote_properties.email_total
+            );
+        }
+    }
+
     /** The set of all conversations loaded by the monitor. */
     internal ConversationSet conversations { get; private set; }
 
     /** The number of messages currently loaded from the base folder. */
     internal uint folder_window_size {
         get {
-            return (this.window.is_empty) ? 0 : this.window.size;
+            return this.window.size;
         }
     }
 
@@ -153,11 +180,11 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         }
     }
 
-    /** Determines if the fill operation can load more messages. */
-    internal bool fill_complete { get; set; default = false; }
+    // The base folder as a remote, if it is remote-backed
+    private RemoteFolder? remote = null;
 
     // Determines if the base folder was actually opened or not
-    private bool base_was_opened = false;
+    private bool remote_started_monitoring = false;
 
     // Set of in-folder email that doesn't meet required_fields (yet)
     private Gee.Set<EmailIdentifier> incomplete =
@@ -290,15 +317,16 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
      *
      * @param base_folder a Folder to monitor for conversations
      * @param required_fields See {@link Geary.Folder}
-     * @param min_window_count Minimum number of conversations that
+     * @param minimum_window_size Minimum number of conversations that
      * will be loaded
      */
     public ConversationMonitor(Folder base_folder,
                                Email.Field required_fields,
-                               int min_window_count) {
+                               int minimum_window_size) {
         this.base_folder = base_folder;
+        this.remote = base_folder as RemoteFolder;
         this.required_fields = required_fields | REQUIRED_FIELDS;
-        this._min_window_count = min_window_count;
+        this.minimum_window_size = minimum_window_size;
         this.conversations = new ConversationSet(base_folder);
         this.operation_cancellable = new Cancellable();
         this.queue = new ConversationOperationQueue(this.progress_monitor);
@@ -323,7 +351,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         // Set early yield to guard against reentrancy
         this.is_monitoring = true;
-        this.base_was_opened = false;
+        this.remote_started_monitoring = false;
 
         var account = this.base_folder.account;
         account.email_appended_to_folder.connect(on_email_appended);
@@ -333,7 +361,6 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         account.email_complete.connect(on_email_complete);
 
         this.queue.operation_error.connect(on_operation_error);
-        this.queue.add(new FillWindowOperation(this));
 
         // Take the union of the two cancellables so that of the
         // monitor is closed while it is opening, the folder open is
@@ -344,14 +371,16 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
             cancellable.cancelled.connect(() => opening.cancel());
         }
 
-        var remote = this.base_folder as RemoteFolder;
-        if (remote != null && !remote.is_monitoring) {
-            remote.start_monitoring();
-            this.base_was_opened = true;
+        if (this.remote != null) {
+            this.remote.notify["is-connected"].connect(on_remote_connected);
+            if (!this.remote.is_monitoring) {
+                this.remote.start_monitoring();
+                this.remote_started_monitoring = true;
+            }
         }
 
-        // Now the folder is open, start the queue running. The here
-        // is needed for the same reason as the one immediately above.
+        this.check_window_count.begin();
+
         if (this.is_monitoring) {
             this.queue.run_process_async.begin();
         }
@@ -388,14 +417,28 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
             // Cancel outstanding ops so they don't block the queue closing
             this.operation_cancellable.cancel();
 
-            if (this.base_was_opened) {
-                ((Geary.RemoteFolder) this.base_folder).stop_monitoring();
-                this.base_was_opened = false;
+            if (this.remote != null) {
+                this.remote.notify["is-connected"].disconnect(on_remote_connected);
+                if (this.remote_started_monitoring) {
+                    this.remote.stop_monitoring();
+                    this.remote_started_monitoring = false;
+                }
             }
 
             is_closing = true;
         }
         return is_closing;
+    }
+
+    /**
+     * Set the minimum conversation window size.
+     *
+     * Calling this will cause the monitor to load more conversations
+     * if the current window size is less than the new minimum.
+     */
+    public void update_minimum_window_size(int size) {
+        this.minimum_window_size = size;
+        this.check_window_count.begin();
     }
 
     /** Ensures the given email are loaded in the monitor. */
@@ -431,20 +474,38 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     public Logging.State to_logging_state() {
         return new Logging.State(
             this,
-            "size=%d, min_window_count=%u, can_load_more=%s, should_load_more=%s",
+            "size=%d, minimum_window_size=%u, can_load_more_local=%s, can_load_more_remote=%s, should_load_more=%s",
             this.size,
-            this.min_window_count,
-            this.can_load_more.to_string(),
+            this.minimum_window_size,
+            this.can_load_more_local.to_string(),
+            this.can_load_more_remote.to_string(),
             this.should_load_more.to_string()
         );
     }
 
     /** Ensures enough conversations are present, otherwise loads more. */
-    internal void check_window_count() {
-        if (this.is_monitoring &&
-            this.can_load_more &&
-            this.should_load_more) {
-            this.queue.add(new FillWindowOperation(this));
+    internal async void check_window_count() {
+        if (this.is_monitoring && this.should_load_more) {
+            if (this.can_load_more_local) {
+                this.queue.add(new FillWindowOperation(this));
+            } else {
+                // Load more email from the remote if it is connected,
+                // and there is more email on the remote to be loaded
+                if (this.can_load_more_remote) {
+                    int missing = this.minimum_window_size - this.conversations.size;
+                    debug("Expanding vector by %d email", missing);
+                    try {
+                        yield remote.expand_vector(
+                            null, missing, operation_cancellable
+                        );
+                    } catch (GLib.IOError.CANCELLED err) {
+                        // fine
+                    } catch (GLib.Error err) {
+                        debug("Error expanding vector for conversation: %s",
+                              err.message);
+                    }
+                }
+            }
         }
     }
 
@@ -807,6 +868,10 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
 
         debug("expand_conversations completed: %d email ids (%d found)",
               needed_message_ids.size, needed_messages.size);
+    }
+
+    private void on_remote_connected() {
+        this.check_window_count.begin();
     }
 
     private void on_email_appended(Gee.Collection<EmailIdentifier> appended,
