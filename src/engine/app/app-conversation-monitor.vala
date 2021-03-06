@@ -482,7 +482,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     }
 
     /** Loads messages from the base folder into the window. */
-    internal async int load_by_id_async(EmailIdentifier? initial_id,
+    internal async int load_by_id_async(EmailIdentifier? initial,
                                         int count,
                                         Folder.ListFlags flags = Folder.ListFlags.NONE)
         throws GLib.Error {
@@ -491,29 +491,41 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
         int load_count = 0;
         GLib.Error? scan_error = null;
         try {
-            Gee.Collection<Geary.Email> emails =
-                yield this.base_folder.list_email_range_by_id(
-                    initial_id,
-                    count,
-                    this.required_fields,
-                    flags | INCLUDING_PARTIAL,
-                    this.operation_cancellable
-                );
+            // Need to potentially run the query multiple times since
+            // if any partial emails are loaded, there will be less
+            // than expected.
+            var complete = Email.new_identifier_based_set();
+            var next = initial;
+            while (complete.size < count) {
+                Gee.List<Geary.Email> loaded =
+                    yield this.base_folder.list_email_range_by_id(
+                        next,
+                        count - complete.size,
+                        this.required_fields,
+                        flags | INCLUDING_PARTIAL,
+                        this.operation_cancellable
+                    );
+                if (!loaded.is_empty) {
+                    next = loaded[loaded.size - 1].id;
+                }
 
-            var i = emails.iterator();
-            while (i.next()) {
-                var email = i.get();
-                if (this.required_fields in email.fields) {
-                    this.window.add(email.id);
-                } else {
-                    this.incomplete.add(email.id);
-                    i.remove();
+                foreach (var email in loaded) {
+                    if (this.required_fields in email.fields) {
+                        complete.add(email);
+                        this.window.add(email.id);
+                    } else {
+                        this.incomplete.add(email.id);
+                    }
+                }
+
+                if (loaded.size < count) {
+                    break;
                 }
             }
 
-            if (!emails.is_empty) {
-                load_count = emails.size;
-                yield process_email_async(emails, ProcessJobContext());
+            if (!complete.is_empty) {
+                load_count = complete.size;
+                yield process_email_async(complete, ProcessJobContext());
             }
         } catch (GLib.Error err) {
             scan_error = err;
@@ -529,7 +541,7 @@ public class Geary.App.ConversationMonitor : BaseObject, Logging.Source {
     }
 
     /** Loads messages from the base folder into the window. */
-        internal async void load_by_sparse_id(
+    internal async void load_by_sparse_id(
             Gee.Collection<EmailIdentifier> ids
         ) throws GLib.Error {
         notify_scan_started();
