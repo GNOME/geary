@@ -534,18 +534,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         this.compact_from.get_style_context().add_class(FROM_CLASS);
 
-        if (preview != null) {
-            string clean_preview = preview;
-            if (preview.length > MAX_PREVIEW_BYTES) {
-                clean_preview = Geary.String.safe_byte_substring(
-                    preview, MAX_PREVIEW_BYTES
-                );
-                // Add an ellipsis in case the view is wider is wider than
-                // the text
-                clean_preview += "…";
-            }
-            this.compact_body.set_text(clean_preview);
-        }
+        update_preview(preview ?? "");
 
         // Full headers. These are partially done here and partially
         // in load_contacts.
@@ -882,6 +871,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             throw new GLib.IOError.CANCELLED("Conversation load cancelled");
         }
 
+        var preview = message.get_preview();
+        if (preview != "") {
+            update_preview(preview);
+        }
+
         if (this.web_view == null) {
             initialize_web_view();
         }
@@ -976,6 +970,19 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         this.date.set_text(date_text);
         this.date.set_tooltip_text(date_tooltip);
+    }
+
+    private void update_preview(string preview) {
+        string clean_preview = preview;
+        if (preview.length > MAX_PREVIEW_BYTES) {
+            clean_preview = Geary.String.safe_byte_substring(
+                preview, MAX_PREVIEW_BYTES
+            );
+            // Add an ellipsis in case the view is wider is wider than
+            // the text
+            clean_preview += "…";
+        }
+        this.compact_body.set_text(clean_preview);
     }
 
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {

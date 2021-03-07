@@ -20,7 +20,7 @@
  */
 public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
-    /** Fields that must be available for listing conversation email. */
+    /** Fields that must be available for displaying conversations. */
     public const Geary.Email.Field REQUIRED_FIELDS = (
         // Sorting the conversation
         Geary.Email.Field.DATE |
@@ -764,9 +764,24 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         throws GLib.Error {
         set_sort_func(null);
 
-        Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails(
+        Gee.Collection<Geary.Email>? convo_email = this.conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
         );
+
+        // Load all email up-font including the preview, but include
+        // partials so if the preview does not exist this does not
+        // throw an error.
+        Gee.Collection<Geary.Email> full_email_set =
+            yield this.email_store.get_multiple_email_by_id(
+                this.conversation.get_email_ids(),
+                REQUIRED_FIELDS |
+                ConversationEmail.REQUIRED_FOR_CONSTRUCT |
+                Geary.Email.Field.PREVIEW,
+                INCLUDING_PARTIAL,
+                this.cancellable
+            );
+        Gee.Map<Geary.EmailIdentifier,Geary.Email> full_email_map =
+            Geary.Email.emails_to_map(full_email_set);
 
         // Work out what the first interesting email is, and load it
         // before all of the email before and after that so we can
@@ -785,34 +800,36 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             var first_scroll = Geary.Collection.first(valid_scroll_to);
 
             if (first_scroll != null) {
-                foreach (Geary.Email email in all_email) {
+                foreach (Geary.Email email in convo_email) {
+                    var full_email = full_email_map.get(email.id);
                     if (first_interesting == null) {
                         if (email.id == first_scroll) {
-                            first_interesting = email;
+                            first_interesting = full_email;
                         } else {
                             // Inserted reversed so most recent uninteresting
                             // rows are added first.
-                            uninteresting.insert(0, email);
+                            uninteresting.insert(0, full_email);
                         }
                     } else {
-                        post_interesting.add(email);
+                        post_interesting.add(full_email);
                     }
                 }
             }
         }
 
         if (first_interesting == null) {
-            foreach (Geary.Email email in all_email) {
+            foreach (Geary.Email email in convo_email) {
+                var full_email = full_email_map.get(email.id);
                 if (first_interesting == null) {
                     if (is_interesting(email)) {
-                        first_interesting = email;
+                        first_interesting = full_email;
                     } else {
                         // Inserted reversed so most recent uninteresting
                         // rows are added first.
-                        uninteresting.insert(0, email);
+                        uninteresting.insert(0, full_email);
                     }
                 } else {
-                    post_interesting.add(email);
+                    post_interesting.add(full_email);
                 }
             }
         }

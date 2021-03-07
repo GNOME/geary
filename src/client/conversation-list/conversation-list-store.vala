@@ -21,11 +21,8 @@ public class ConversationListStore : Gtk.ListStore {
         Geary.Email.Field.PROPERTIES
     );
 
-    // XXX Remove REQUIRED_FOR_BODY when PREVIEW has been fixed. See Bug 714317.
     public const Geary.Email.Field WITH_PREVIEW_FIELDS = (
-        REQUIRED_FIELDS |
-        Geary.Email.Field.PREVIEW |
-        Geary.Email.REQUIRED_FOR_MESSAGE
+        REQUIRED_FIELDS | PREVIEW
     );
 
     public enum Column {

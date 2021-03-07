@@ -779,12 +779,10 @@ public class Application.MainWindow :
 
                 this.conversations = new Geary.App.ConversationMonitor(
                     to_select,
-                    // Include fields for the conversation viewer as well so
-                    // conversations can be displayed without having to go
-                    // back to the db
-                    ConversationListStore.REQUIRED_FIELDS |
-                    ConversationListBox.REQUIRED_FIELDS |
-                    ConversationEmail.REQUIRED_FOR_CONSTRUCT,
+                    // Only include conversation list req's here, not
+                    // the conversation viewer's, since that will
+                    // ensure it's own prereqs.
+                    ConversationListStore.REQUIRED_FIELDS,
                     MIN_CONVERSATION_COUNT
                 );
                 this.progress_monitor.add(this.conversations.progress_monitor);

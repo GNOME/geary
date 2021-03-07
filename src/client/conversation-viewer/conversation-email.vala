@@ -28,7 +28,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     /** Fields that must be available for constructing the view. */
     internal const Geary.Email.Field REQUIRED_FOR_CONSTRUCT = (
         Geary.Email.Field.ENVELOPE |
-        Geary.Email.Field.PREVIEW |
         Geary.Email.Field.FLAGS
     );
 

@@ -385,6 +385,9 @@ public class Application.Client : Gtk.Application {
         this.engine.minimum_email_fields = (
             Geary.App.ConversationMonitor.REQUIRED_FIELDS |
             Geary.App.SearchFolder.REQUIRED_FIELDS |
+            // Only include conversation list req's here, not the
+            // conversation viewer's, since that will ensure it's own
+            // prereqs.
             ConversationListStore.REQUIRED_FIELDS
         );
 
