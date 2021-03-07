@@ -149,6 +149,7 @@ private class Geary.ImapEngine.ExpandVector : ReplayOperation {
                 yield this.engine.local_folder.create_or_merge_email_async(
                     list, this.engine.harvester, cancellable
                 );
+            yield this.engine.update_email_counts(this.cancellable);
 
             foreach (Email email in created_or_merged.keys) {
                 if (created_or_merged.get(email)) {

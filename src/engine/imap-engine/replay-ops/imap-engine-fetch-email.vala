@@ -64,6 +64,7 @@ private class Geary.ImapEngine.FetchEmail : SendReplayOperation {
                     this.engine.harvester,
                     cancellable
                 );
+                yield this.engine.update_email_counts(this.cancellable);
                 this.fetched_email.add_all(updated.keys);
             }
         }

@@ -70,6 +70,7 @@ private class Geary.ImapEngine.CreateEmail : SendReplayOperation {
                     this.engine.harvester,
                     this.cancellable
                 );
+            yield this.engine.update_email_counts(cancellable);
 
             if (results.size > 0) {
                 this.created_id = Collection.first(results.keys).id;
