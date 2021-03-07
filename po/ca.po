@@ -1835,7 +1835,7 @@ msgstr "_Respon"
 
 #: src/client/conversation-list/conversation-list-view.vala:402
 msgid "R_eply All"
-msgstr "R_espon tot"
+msgstr "R_espon a tots"
 
 #. Translators: Menu item to forward a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:408
@@ -1845,7 +1845,7 @@ msgstr "_Reenvia"
 
 #: src/client/conversation-list/formatted-conversation-data.vala:18
 msgid "Me"
-msgstr "En a mi"
+msgstr "Jo"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:537
