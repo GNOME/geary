@@ -74,7 +74,7 @@ private class Geary.ImapEngine.ExpandVector : ReplayOperation {
             high_pos = remote.folder.properties.email_total;
         }
 
-        low_pos = high_pos - target;
+        low_pos = high_pos - target + 1;
         if (low_pos < Imap.SequenceNumber.MIN) {
             low_pos = Imap.SequenceNumber.MIN;
         }
@@ -155,7 +155,6 @@ private class Geary.ImapEngine.ExpandVector : ReplayOperation {
                     created_ids.add(email.id);
                 }
             }
-
             if (!created_ids.is_empty) {
                 this.engine.email_inserted(created_ids);
             }
