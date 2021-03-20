@@ -5,14 +5,14 @@
 #
 # Translators:
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
-# Asier Sarasua Garmendia <asier.sarasua@gmail.com>, 2019, 2020.
+# Asier Sarasua Garmendia <asiersarasua@ni.eus>, 2019, 2020, 2021.
 #
 msgid ""
 msgstr "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2020-03-31 15:07+0000\n"
-"PO-Revision-Date: 2020-04-09 10:00+0100\n"
-"Last-Translator: Asier Sarasua Garmendia <asier.sarasua@gmail.com>\n"
+"POT-Creation-Date: 2020-11-10 06:27+0000\n"
+"PO-Revision-Date: 2021-03-20 10:00+0100\n"
+"Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
@@ -31,10 +31,10 @@ msgstr "Bidali fitxategiak Geary erabilita"
 
 #. Translators: The application name
 #: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:12
+#: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:555
-#: src/client/application/application-main-window.vala:590
+#: src/client/accounts/accounts-editor-servers-pane.vala:560
+#: src/client/application/application-main-window.vala:608
 msgid "Geary"
 msgstr "Geary"
 
@@ -45,9 +45,9 @@ msgstr "Posta elektronikoa"
 
 #. Translators: The application's summary / tagline
 #: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:16
+#: desktop/org.gnome.Geary.appdata.xml.in.in:15
 #: desktop/org.gnome.Geary.desktop.in.in:5
-#: src/client/application/application-client.vala:32
+#: src/client/application/application-client.vala:33
 msgid "Send and receive email"
 msgstr "Bidali eta jaso mezuak"
 
@@ -57,58 +57,58 @@ msgid "Email;E-mail;Mail;"
 msgstr "posta;helb.elek;helb.el.;"
 
 #. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:14
+#: desktop/org.gnome.Geary.appdata.xml.in.in:13
 msgid "Geary Development Team"
 msgstr "Geary aplikazioaren garatzaile-taldea"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:18
+#: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr "Geary posta elektronikoko aplikazio bat da, berriketen inguruan eraikitakoa eta GNOME 3 mahaigainean dabilena. Interfaze garbi eta modernoa du eta posta-mezuak irakurri, aurkitu eta bidaltzeko balio dizu."
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:23
+#: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr "Berriketak erabilita, eztabaida osoak irakur daitezke mezu batetik hurrengora jauzi egin behar izan gabe."
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:27
+#: desktop/org.gnome.Geary.appdata.xml.in.in:26
 msgid "Geary’s features include:"
 msgstr "Geary-ren eginbide nagusiak honakoak dira:"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
+#: desktop/org.gnome.Geary.appdata.xml.in.in:28
 msgid "Quick email account setup"
 msgstr "Posta-kontuen konfigurazio azkarra"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
+#: desktop/org.gnome.Geary.appdata.xml.in.in:29
 msgid "Shows related messages together in conversations"
 msgstr "Elkarri lotutako mezuak berriketa moduan erakusten ditu"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
+#: desktop/org.gnome.Geary.appdata.xml.in.in:30
 msgid "Fast, full text and keyword search"
 msgstr "Bilaketa azkarra, testu osoena zein gako-hitzena"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
+#: desktop/org.gnome.Geary.appdata.xml.in.in:31
 msgid "Full-featured HTML and plain text message composer"
 msgstr "HTML formatuko zein testu soileko mezuen konposatzailea"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
+#: desktop/org.gnome.Geary.appdata.xml.in.in:32
 msgid "Desktop notification of new mail"
 msgstr "Mezu berrien jakinarazpena mahaigainean"
 
-#: desktop/org.gnome.Geary.appdata.xml.in.in:34
+#: desktop/org.gnome.Geary.appdata.xml.in.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "GMail, Yahoo! Mail, Outlook.com eta beste IMAP zerbitzari batzuekin bateragarria"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:48
+#: desktop/org.gnome.Geary.appdata.xml.in.in:47
 msgid "Geary displaying a conversation"
 msgstr "Geary berriketa bat bistaratzen"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:59
+#: desktop/org.gnome.Geary.appdata.xml.in.in:58
 msgid "Geary showing the rich text composer"
 msgstr "Geary testu aberatseko konposatzailea erakusten"
 
@@ -345,13 +345,13 @@ msgstr "Beste guztiak"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:195
-#: src/client/accounts/accounts-editor-servers-pane.vala:316
+#: src/client/accounts/accounts-editor-servers-pane.vala:321
 msgid "Check your receiving login and password"
 msgstr "Egiaztatu mezuak jasotzeko saio-hasiera eta pasahitza"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:210
-#: src/client/accounts/accounts-editor-servers-pane.vala:329
+#: src/client/accounts/accounts-editor-servers-pane.vala:334
 msgid "Check your receiving server details"
 msgstr "Egiaztatu mezuak jasotzeko zerbitzari-xehetasunak"
 
@@ -361,13 +361,13 @@ msgstr "Egiaztatu mezuak jasotzeko zerbitzari-xehetasunak"
 #. specify custom creds here
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:232
-#: src/client/accounts/accounts-editor-servers-pane.vala:350
+#: src/client/accounts/accounts-editor-servers-pane.vala:355
 msgid "Check your sending login and password"
 msgstr "Egiaztatu mezuak bidaltzeko saio-hasiera eta pasahitza"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:246
-#: src/client/accounts/accounts-editor-servers-pane.vala:363
+#: src/client/accounts/accounts-editor-servers-pane.vala:368
 msgid "Check your sending server details"
 msgstr "Egiaztatu mezuak bidaltzeko zerbitzari-xehetasunak"
 
@@ -423,14 +423,14 @@ msgstr "pertsona@abidibea.com"
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
 #: src/client/accounts/accounts-editor-add-pane.vala:593
-#: src/client/accounts/accounts-editor-servers-pane.vala:884
+#: src/client/accounts/accounts-editor-servers-pane.vala:889
 msgid "Login name"
 msgstr "Saioa hasteko izena"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
 #: src/client/accounts/accounts-editor-add-pane.vala:607
-#: src/client/accounts/accounts-editor-servers-pane.vala:1006
+#: src/client/accounts/accounts-editor-servers-pane.vala:1011
 #: ui/password-dialog.glade:108
 msgid "Password"
 msgstr "Pasahitza"
@@ -440,7 +440,7 @@ msgstr "Pasahitza"
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:629
-#: src/client/accounts/accounts-editor-servers-pane.vala:728
+#: src/client/accounts/accounts-editor-servers-pane.vala:733
 msgid "IMAP server"
 msgstr "IMAP zerbitzaria"
 
@@ -455,7 +455,7 @@ msgstr "imap.adibidea.com"
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
 #: src/client/accounts/accounts-editor-add-pane.vala:638
-#: src/client/accounts/accounts-editor-servers-pane.vala:734
+#: src/client/accounts/accounts-editor-servers-pane.vala:739
 msgid "SMTP server"
 msgstr "SMTP zerbitzaria"
 
@@ -600,55 +600,54 @@ msgstr[0] "Egun %d atzera"
 msgstr[1] "%d egun atzera"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2060
+#: src/client/application/application-main-window.vala:2066
 msgid "Undo"
 msgstr "Desegin"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:264
-#: src/client/application/application-main-window.vala:2043
+#: src/client/application/application-main-window.vala:2049
 msgid "Redo"
 msgstr "Berregin"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:358
-#: src/client/accounts/accounts-editor-list-pane.vala:446
+#: src/client/accounts/accounts-editor-list-pane.vala:454
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:362
-#: src/client/accounts/accounts-editor-list-pane.vala:450
+#: src/client/accounts/accounts-editor-list-pane.vala:458
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:366
-#: src/client/accounts/accounts-editor-list-pane.vala:454
+#: src/client/accounts/accounts-editor-list-pane.vala:462
 #: src/client/accounts/accounts-editor-row.vala:287
 msgid "Yahoo"
 msgstr "Yahoo"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:384
+#: src/client/accounts/accounts-editor-list-pane.vala:388
 msgid "This account has been disabled"
 msgstr "Kontu hau desgaitu egin da"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:393
+#: src/client/accounts/accounts-editor-list-pane.vala:397
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Kontu honetan arazo bat aurkitu da eta ez dago erabilgarri"
 
-#. Translators: Label for adding a generic email account
-#: src/client/accounts/accounts-editor-list-pane.vala:443
+#: src/client/accounts/accounts-editor-list-pane.vala:466
 msgid "Other email providers"
 msgstr "Beste posta-hornitzaile batzuk"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:560
+#: src/client/accounts/accounts-editor-list-pane.vala:572
 #, c-format
 msgid "Account “%s” removed"
 msgstr "“%s” kontua kendu egin da"
@@ -656,7 +655,7 @@ msgstr "“%s” kontua kendu egin da"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:567
+#: src/client/accounts/accounts-editor-list-pane.vala:579
 #, c-format
 msgid "Account “%s” restored"
 msgstr "“%s” kontua berrezarri egin da"
@@ -669,30 +668,30 @@ msgstr "Arrastatu elementu hau lekuz aldatzeko"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:295
+#: src/client/accounts/accounts-editor-row.vala:299
 msgid "Service provider"
 msgstr "Zerbitzu-hornitzailea"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:468
+#: src/client/accounts/accounts-editor-row.vala:473
 msgid "Connection security"
 msgstr "Konezioaren segurtasuna"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:479
-#: src/client/accounts/accounts-editor-servers-pane.vala:755
-#: src/client/accounts/accounts-editor-servers-pane.vala:970
+#: src/client/accounts/accounts-editor-row.vala:484
+#: src/client/accounts/accounts-editor-servers-pane.vala:760
+#: src/client/accounts/accounts-editor-servers-pane.vala:975
 msgid "None"
 msgstr "Bat ere ez"
 
-#: src/client/accounts/accounts-editor-row.vala:486
+#: src/client/accounts/accounts-editor-row.vala:491
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:493
+#: src/client/accounts/accounts-editor-row.vala:498
 msgid "TLS"
 msgstr "TLS"
 
@@ -700,35 +699,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:534
-#: src/client/application/application-main-window.vala:544
+#: src/client/accounts/accounts-editor-row.vala:539
+#: src/client/application/application-main-window.vala:554
 msgid "Login"
 msgstr "Saio-hasiera"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:541
+#: src/client/accounts/accounts-editor-row.vala:546
 msgid "No login needed"
 msgstr "Ez da saiorik hasi behar"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:549
+#: src/client/accounts/accounts-editor-row.vala:554
 msgid "Use same login as receiving"
 msgstr "Erabili jasotzean erabilitako saio-hasiera bera"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:557
+#: src/client/accounts/accounts-editor-row.vala:562
 msgid "Use a different login"
 msgstr "Erabili beste saio-hasiera bat"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:377
+#: src/client/accounts/accounts-editor-servers-pane.vala:382
 #, c-format
 msgid "Account not updated: %s"
 msgstr "Kontua ez da eguneratu: %s"
@@ -736,23 +735,23 @@ msgstr "Kontua ez da eguneratu: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:540
+#: src/client/accounts/accounts-editor-servers-pane.vala:545
 msgid "Account source"
 msgstr "Kontu-iturburua"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
+#: src/client/accounts/accounts-editor-servers-pane.vala:557
 msgid "GNOME Online Accounts"
 msgstr "GNOME lineako kontuak"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:611
+#: src/client/accounts/accounts-editor-servers-pane.vala:616
 msgid "Save draft email on server"
 msgstr "Gorde mezu-zirriborroa zerbitzarian"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:666
+#: src/client/accounts/accounts-editor-servers-pane.vala:671
 msgid "Save sent email on server"
 msgstr "Gorde bidalitako mezua zerbitzarian"
 
@@ -761,12 +760,12 @@ msgstr "Gorde bidalitako mezua zerbitzarian"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:956
+#: src/client/accounts/accounts-editor-servers-pane.vala:961
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s OAuth2 erabilita"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:966
+#: src/client/accounts/accounts-editor-servers-pane.vala:971
 msgid "Use receiving server login"
 msgstr "Erabili jasotako zerbitzariaren saio-hasiera"
 
@@ -797,15 +796,15 @@ msgstr "'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia gai
 msgid "_Replace"
 msgstr "_Ordeztu"
 
-#: src/client/application/application-client.vala:33
+#: src/client/application/application-client.vala:34
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright-a © 2001-2014 Free Software Foundation, Inc."
 
-#: src/client/application/application-client.vala:34
+#: src/client/application/application-client.vala:35
 msgid "Copyright 2016-2020 Geary Development Team."
 msgstr "Copyright 2016-2020 Geary garapen-taldea."
 
-#: src/client/application/application-client.vala:36
+#: src/client/application/application-client.vala:37
 msgid "Visit the Geary web site"
 msgstr "Bisitatu Geary-ren webgunea"
 
@@ -842,105 +841,98 @@ msgstr "Erregistratu karpetaren normalizazioa"
 
 #. / Command line option
 #: src/client/application/application-client.vala:116
-msgid "Log network activity"
-msgstr "Erregistratu sareko jarduera"
-
-#. / Command line option
-#: src/client/application/application-client.vala:119
-msgid "Log periodic activity"
-msgstr "Erregistratu aldiko jarduera"
+msgid "Log IMAP network activity"
+msgstr "Erregistratu IMAP sarearen jarduera"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:124
+#: src/client/application/application-client.vala:121
 msgid "Log IMAP replay queue"
 msgstr "Erregistratu IMAP gertaeren ilara"
 
-#. / Command line option. Serialization is how commands and
-#. / responses are converted into a stream of bytes for
-#. / network transmission
-#: src/client/application/application-client.vala:129
-msgid "Log IMAP network serialization"
-msgstr "Erregistratu IMAP sarearen serializatzea"
+#. / Command line option
+#: src/client/application/application-client.vala:124
+msgid "Log SMTP network activity"
+msgstr "Erregistratu SMTP sarearen jarduera"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:127
 msgid "Log database queries (generates lots of messages)"
 msgstr "Erregistratu datu-basearen kontsultak (mezu ugari sortzen ditu)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:130
 msgid "Perform a graceful quit"
 msgstr "Irten egokiro"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:132
 msgid "Open a new window"
 msgstr "Ireki leiho berria"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:135
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Errebokatu sastatutako TLS zerbitzari-ziurtagiri guztiak"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:138
 msgid "Display program version"
 msgstr "Bistaratu programaren bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:267
+#: src/client/application/application-client.vala:262
 msgid "Geary version"
 msgstr "Geary bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:269
+#: src/client/application/application-client.vala:264
 msgid "Geary revision"
 msgstr "Geary berrikuspena"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:271
+#: src/client/application/application-client.vala:266
 msgid "GTK version"
 msgstr "GTK bertsioa"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:278
+#: src/client/application/application-client.vala:273
 msgid "GLib version"
 msgstr "GLib bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:285
+#: src/client/application/application-client.vala:280
 msgid "WebKitGTK version"
 msgstr "WebKitGTK bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:292
+#: src/client/application/application-client.vala:287
 msgid "Desktop environment"
 msgstr "Mahaigaineko ingurunea"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:289
 #: src/client/components/components-attachment-pane.vala:91
 msgid "Unknown"
 msgstr "Ezezaguna"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:324
+#: src/client/application/application-client.vala:293
 msgid "Distribution name"
 msgstr "Banaketaren izena"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:329
+#: src/client/application/application-client.vala:298
 msgid "Distribution release"
 msgstr "Banaketaren bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:337
+#: src/client/application/application-client.vala:303
 msgid "Installation prefix"
 msgstr "Instalazio-aurrizkia"
 
-#: src/client/application/application-client.vala:590
+#: src/client/application/application-client.vala:559
 #, c-format
 msgid "About %s"
 msgstr "%s aplikazioari buruz"
@@ -948,43 +940,43 @@ msgstr "%s aplikazioari buruz"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:594
+#: src/client/application/application-client.vala:563
 msgid "translator-credits"
 msgstr "Asier Sarasua Garmendia <asier.sarasua@gmail.com>"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:941
+#: src/client/application/application-client.vala:1045
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "`--hidden` aukera zaharkituta dago eta kendu egingo da etorkizunean."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:974
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Programa-argumentu ezezaguna: “%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:455
+#: src/client/application/application-controller.vala:479
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Arazoa gertatu da mezua honetara bidaltzean: %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:459
+#: src/client/application/application-controller.vala:483
 msgid "Email will not be sent until re-connected"
 msgstr "Mezua ez da bidaliko berriro konektatu arte"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:565
+#: src/client/application/application-controller.vala:582
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Berriketa markatu da"
 msgstr[1] "Berriketak markatu dira"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:571
+#: src/client/application/application-controller.vala:588
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Berriketari marka kendu zaio"
@@ -993,8 +985,8 @@ msgstr[1] "Berriketei marka kendu zaie"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:597
-#: src/client/application/application-controller.vala:681
+#: src/client/application/application-controller.vala:614
+#: src/client/application/application-controller.vala:698
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1006,8 +998,8 @@ msgstr[1] "Berriketak %s karpetara eraman dira"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:605
-#: src/client/application/application-controller.vala:627
+#: src/client/application/application-controller.vala:622
+#: src/client/application/application-controller.vala:644
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1015,7 +1007,7 @@ msgstr[0] "Berriketa %s karpetan leheneratu da"
 msgstr[1] "Berriketak %s karpetan leheneratu dira"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:648
+#: src/client/application/application-controller.vala:665
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Berriketa artxibatu da"
@@ -1023,7 +1015,7 @@ msgstr[1] "Berriketak artxibatu dira"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:704
+#: src/client/application/application-controller.vala:721
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1031,7 +1023,7 @@ msgstr[0] "Mezua %s karpetara leheneratu da"
 msgstr[1] "Mezuak %s karpetara leheneratu dira"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:725
+#: src/client/application/application-controller.vala:742
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Mezua artxibatu da"
@@ -1040,7 +1032,7 @@ msgstr[1] "Mezuak artxibatu dira"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:760
+#: src/client/application/application-controller.vala:777
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1050,7 +1042,7 @@ msgstr[1] "Mezuak %s karpetara eraman dira"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:788
+#: src/client/application/application-controller.vala:805
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1060,19 +1052,19 @@ msgstr[1] "Berriketei %s etiketa jarri zaie"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:796
+#: src/client/application/application-controller.vala:813
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Berriketari %s etiketa kendu zaio"
 msgstr[1] "Berriketei %s etiketa kendu zaie"
 
-#: src/client/application/application-controller.vala:1215
+#: src/client/application/application-controller.vala:1320
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Ezin da '%s'(r)en datu-basea ireki"
 
-#: src/client/application/application-controller.vala:1216
+#: src/client/application/application-controller.vala:1321
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1092,20 +1084,20 @@ msgstr "Errorea gertatu da kontu honen lokaleko postaren datu-basea irekitzean. 
 "\n"
 "Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
 
-#: src/client/application/application-controller.vala:1218
+#: src/client/application/application-controller.vala:1323
 msgid "_Rebuild"
 msgstr "_Berreraiki"
 
-#: src/client/application/application-controller.vala:1218
+#: src/client/application/application-controller.vala:1323
 msgid "E_xit"
 msgstr "I_rten"
 
-#: src/client/application/application-controller.vala:1228
+#: src/client/application/application-controller.vala:1333
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Ezin izan da datu-basea berreraiki honetarako: “%s”"
 
-#: src/client/application/application-controller.vala:1229
+#: src/client/application/application-controller.vala:1334
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1117,133 +1109,137 @@ msgstr "Errorea berreraikitzean:\n"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1468
+#: src/client/application/application-controller.vala:1501
 #, c-format
 msgid "Email sent to %s"
 msgstr "Mezua %s helbidera bidali da"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2564
+#: src/client/application/application-controller.vala:2491
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "%s helbiderako mezua bidaltzeko ilaran jarri da"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2628
+#: src/client/application/application-controller.vala:2555
 #, c-format
 msgid "Email to %s saved"
 msgstr "%s helbiderako mezua gorde da"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2643
-#: src/client/application/application-controller.vala:2701
+#: src/client/application/application-controller.vala:2570
+#: src/client/application/application-controller.vala:2628
 msgid "Composer could not be restored"
 msgstr "Konposatzaile ezin izan da leheneratu"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2686
+#: src/client/application/application-controller.vala:2613
 #, c-format
 msgid "Email to %s discarded"
 msgstr "%s helbiderako mezua baztertu da"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:530
+#: src/client/application/application-main-window.vala:540
 msgid "Working offline"
 msgstr "Lineaz kanpo lanean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:532
+#: src/client/application/application-main-window.vala:542
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Ezin izango duzu postarik bidali edo jaso berriro konektatu arte."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:539
+#: src/client/application/application-main-window.vala:549
 msgid "Login problem"
 msgstr "Arazoa saioa hastean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:541
+#: src/client/application/application-main-window.vala:551
 msgid "An account has reported an incorrect login or password."
 msgstr "Kontu batek saio-haste edo pasahitz oker baten berri eman du."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:547
+#: src/client/application/application-main-window.vala:558
 msgid "Retry login, you will be prompted for your password"
 msgstr "Saiatu berriro saioa hasten, pasahitza eskatuko zaizu."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:554
+#: src/client/application/application-main-window.vala:565
 msgid "Security problem"
 msgstr "Segurtasun-arazoa"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:556
-msgid "An account has reported an untrusted server.."
+#: src/client/application/application-main-window.vala:567
+msgid "An account has reported an untrusted server."
 msgstr "Kontu batek fidagarria ez den zerbitzari baten berri eman du."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:559
+#: src/client/application/application-main-window.vala:570
 msgid "Check"
 msgstr "Egiaztatu"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:562
+#: src/client/application/application-main-window.vala:574
 msgid "Check the security details for the connection"
 msgstr "Egiaztatu konexioaren segurtasun-xehetasunak"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:595
+#: src/client/application/application-main-window.vala:617
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:991
+#. Translators: The name of the folder group containing
+#. folders created by people (as opposed to special-use
+#. folders)
+#: src/client/application/application-main-window.vala:996
+#: src/client/folder-list/folder-list-account-branch.vala:43
 msgid "Labels"
 msgstr "Etiketak"
 
-#: src/client/application/application-main-window.vala:1290
+#: src/client/application/application-main-window.vala:1298
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Hustu zure %s karpetako mezu guztiak?"
 
-#: src/client/application/application-main-window.vala:1291
+#: src/client/application/application-main-window.vala:1299
 msgid "This removes the email from Geary and your email server."
 msgstr "Horrek posta Geary-tik eta posta-zerbitzaritik kenduko du."
 
-#: src/client/application/application-main-window.vala:1292
+#: src/client/application/application-main-window.vala:1300
 msgid "This cannot be undone."
 msgstr "Hau ezin da desegin."
 
-#: src/client/application/application-main-window.vala:1293
+#: src/client/application/application-main-window.vala:1301
 #, c-format
 msgid "Empty %s"
 msgstr "Hustu %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1350
+#: src/client/application/application-main-window.vala:1358
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Berriketa hau betiko ezabatu nahi dituzu?"
 msgstr[1] "Berriketa hauek betiko ezabatu nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1355
-#: src/client/application/application-main-window.vala:1370
+#: src/client/application/application-main-window.vala:1363
+#: src/client/application/application-main-window.vala:1378
 msgid "Delete"
 msgstr "Ezabatu"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1365
+#: src/client/application/application-main-window.vala:1373
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Mezu hau betirako ezabatzea nahi duzu?"
 msgstr[1] "Mezu hauek betirako ezabatzea nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1698
+#: src/client/application/application-main-window.vala:1696
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1254,7 +1250,7 @@ msgstr "%s (%d)"
 #. Document (100.9MB)
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: src/client/components/components-attachment-pane.vala:107
-#: src/client/composer/composer-widget.vala:1839
+#: src/client/composer/composer-widget.vala:1787
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -1273,83 +1269,83 @@ msgstr "Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu fid
 msgid "Don’t _ask me again"
 msgstr "_Ez galdetu berriro"
 
-#: src/client/components/components-inspector.vala:72
+#: src/client/components/components-inspector.vala:78
 msgid "Inspector"
 msgstr "Ikuskatzailea"
 
 #. / Translators: Title for Inspector logs pane
 #. / Translators: Title for problem report dialog logs pane
-#: src/client/components/components-inspector.vala:87
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:102
+#: src/client/components/components-inspector.vala:93
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:101
 msgid "Logs"
 msgstr "Egunkariak"
 
 #. / Translators: Title for Inspector system system information pane
 #. / Translators: Title for problem report system information
 #. / pane
-#: src/client/components/components-inspector.vala:91
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:105
+#: src/client/components/components-inspector.vala:97
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:104
 msgid "System"
 msgstr "Sistema"
 
 #. Button label for saving problem report information
-#: src/client/components/components-inspector.vala:208
-#: src/client/components/components-inspector.vala:211
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:221
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:224
-#: ui/problem-details-dialog.ui:42
+#: src/client/components/components-inspector.vala:226
+#: src/client/components/components-inspector.vala:229
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:220
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:223
+#: ui/problem-details-dialog.ui:47
 msgid "Save As"
 msgstr "Gorde honela"
 
-#: src/client/components/components-inspector.vala:212
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:225
-#: ui/accounts_editor_servers_pane.ui:17
+#: src/client/components/components-inspector.vala:230
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:224
+#: ui/accounts_editor_servers_pane.ui:17 ui/composer-headerbar.ui:61
 msgid "Cancel"
 msgstr "Utzi"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:52
+#: src/client/components/components-preferences-window.vala:124
 msgid "_Automatically select next message"
 msgstr "Hautatu _automatikoki hurrengo mezua"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:62
+#: src/client/components/components-preferences-window.vala:134
 msgid "_Display conversation preview"
 msgstr "_Bistaratu berriketaren aurrebista"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:72
+#: src/client/components/components-preferences-window.vala:144
 msgid "Use _three pane view"
 msgstr "Erabili _hiru paneleko bista"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:82
+#: src/client/components/components-preferences-window.vala:154
 msgid "Use _single key email shortcuts"
 msgstr "Erabili _tekla bakarreko lasterbideak"
 
-#: src/client/components/components-preferences-window.vala:84
+#: src/client/components/components-preferences-window.vala:156
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr "Gaitu <Ctrl> sakatzea behar ez duten lasterbideak posta-ekintzetarako"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:95
+#: src/client/components/components-preferences-window.vala:167
 msgid "_Watch for new mail when closed"
 msgstr "_Zaindu posta berririk iritsi den aplikazioa itxitakoan"
 
 #. / Translators: Preferences tooltip
-#: src/client/components/components-preferences-window.vala:99
+#: src/client/components/components-preferences-window.vala:171
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary-k abian jarraituko du leiho guztiak itxi ondoren"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:117
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Hobespenak"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:179
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Pluginak"
 
@@ -1444,27 +1440,27 @@ msgstr "Bilatu '%s' kontua"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but one is not provided.
-#: src/client/components/components-validator.vala:390
+#: src/client/components/components-validator.vala:394
 msgid "An email address is required"
 msgstr "Helbide elektroniko bat behar da"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but the address is invalid.
-#: src/client/components/components-validator.vala:394
+#: src/client/components/components-validator.vala:398
 msgid "Not a valid email address"
 msgstr "Ez da baliozko helbide elektronikoa"
 
 #. Translators: Tooltip used when an entry requires a valid,
 #. resolvable server name to be entered, but one is not
 #. provided.
-#: src/client/components/components-validator.vala:440
+#: src/client/components/components-validator.vala:444
 msgid "A server name is required"
 msgstr "Zerbitzari-izena behar da"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. server name to be entered, but it was unable to be
 #. looked-up in the DNS.
-#: src/client/components/components-validator.vala:445
+#: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
 msgstr "Ezin izan da zerbitzari-izena kontsultatu"
 
@@ -1524,7 +1520,9 @@ msgstr "Errorea bidalitako mezua gordetzean"
 msgid "_OK"
 msgstr "_Ados"
 
-#: src/client/components/stock.vala:19 ui/password-dialog.glade:196
+#: src/client/components/stock.vala:19
+#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: ui/password-dialog.glade:196
 msgid "_Cancel"
 msgstr "_Utzi"
 
@@ -1548,7 +1546,9 @@ msgstr "_Baztertu"
 msgid "_Help"
 msgstr "_Laguntza"
 
-#: src/client/components/stock.vala:26 ui/components-attachment-pane-menus.ui:7
+#: src/client/components/stock.vala:26
+#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Ireki"
 
@@ -1578,6 +1578,10 @@ msgstr "_Gorde"
 msgid "_Keep"
 msgstr "_Mantendu"
 
+#: src/client/composer/composer-editor.vala:675
+msgid "Select Color"
+msgstr "Hautatu kolorea"
+
 #: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "Estekako URLak ez du formatu zuzena, adibidez http://adibidea.com"
@@ -1591,23 +1595,23 @@ msgid "Invalid email address"
 msgstr "Posta-helbide baliogabea"
 
 #. / Translators: Title for an empty composer window
-#: src/client/composer/composer-widget.vala:30
+#: src/client/composer/composer-widget.vala:32
 msgid "New Message"
 msgstr "Mezu berria"
 
-#: src/client/composer/composer-widget.vala:217
+#: src/client/composer/composer-widget.vala:167
 msgid "Saved"
 msgstr "Gordeta"
 
-#: src/client/composer/composer-widget.vala:218
+#: src/client/composer/composer-widget.vala:168
 msgid "Saving"
 msgstr "Gordetzen"
 
-#: src/client/composer/composer-widget.vala:219
+#: src/client/composer/composer-widget.vala:169
 msgid "Error saving"
 msgstr "Errorea gordetzean"
 
-#: src/client/composer/composer-widget.vala:220
+#: src/client/composer/composer-widget.vala:170
 msgid "Press Backspace to delete quote"
 msgstr "Sakatu atzerako tekla aipamena ezabatzeko"
 
@@ -1616,7 +1620,7 @@ msgstr "Sakatu atzerako tekla aipamena ezabatzeko"
 #. checking, include all variants of each word. No spaces are
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
-#: src/client/composer/composer-widget.vala:236
+#: src/client/composer/composer-widget.vala:186
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -1625,108 +1629,104 @@ msgstr "erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipe
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. Keep, Discard or Cancel.
-#: src/client/composer/composer-widget.vala:843
+#: src/client/composer/composer-widget.vala:865
 msgid "Do you want to keep or discard this draft message?"
 msgstr "Zirriborro-mezua mantendu ala baztertu nahi duzu?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
-#: src/client/composer/composer-widget.vala:869
+#: src/client/composer/composer-widget.vala:891
 msgid "Do you want to discard this draft message?"
 msgstr "Zirriborro-mezua baztertu nahi duzu?"
 
-#: src/client/composer/composer-widget.vala:1508
+#: src/client/composer/composer-widget.vala:1443
 msgid "Send message with an empty subject and body?"
 msgstr "Bidali gairik eta gorputzik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1510
+#: src/client/composer/composer-widget.vala:1445
 msgid "Send message with an empty subject?"
 msgstr "Bidali gairik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1512
+#: src/client/composer/composer-widget.vala:1447
 msgid "Send message with an empty body?"
 msgstr "Bidali gorputzik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1521
+#: src/client/composer/composer-widget.vala:1456
 msgid "Send message without an attachment?"
 msgstr "Bidali eranskinik gabeko mezua?"
 
-#: src/client/composer/composer-widget.vala:1825
+#: src/client/composer/composer-widget.vala:1775
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” dagoeneko erantsita dago bidalia izateko."
 
-#: src/client/composer/composer-widget.vala:1861
-#: src/client/composer/composer-widget.vala:1911
+#: src/client/composer/composer-widget.vala:1807
+#: src/client/composer/composer-widget.vala:1857
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” fitxategi hutsa da."
 
-#: src/client/composer/composer-widget.vala:1899
+#: src/client/composer/composer-widget.vala:1845
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” ez da aurkitu."
 
-#: src/client/composer/composer-widget.vala:1905
+#: src/client/composer/composer-widget.vala:1851
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” karpeta bat da."
 
-#: src/client/composer/composer-widget.vala:1924
+#: src/client/composer/composer-widget.vala:1870
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” ezin izan da ireki irakurtzeko."
 
-#: src/client/composer/composer-widget.vala:1932
+#: src/client/composer/composer-widget.vala:1878
 msgid "Cannot add attachment"
 msgstr "Ezin da eranskina gehitu"
 
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: src/client/composer/composer-widget.vala:1949
+msgid "Images"
+msgstr "Irudiak"
+
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:1989
+#: src/client/composer/composer-widget.vala:2013
 #: src/client/conversation-viewer/conversation-email.vala:542
-#: src/client/util/util-email.vala:235 ui/conversation-message.ui:312
+#: src/client/util/util-email.vala:249 ui/conversation-message.ui:312
 msgid "To:"
 msgstr "Hona:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:1995
+#: src/client/composer/composer-widget.vala:2019
 #: src/client/conversation-viewer/conversation-email.vala:547
-#: src/client/util/util-email.vala:240 ui/conversation-message.ui:357
+#: src/client/util/util-email.vala:254 ui/conversation-message.ui:357
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2001
+#: src/client/composer/composer-widget.vala:2025
 #: src/client/conversation-viewer/conversation-email.vala:552
 #: ui/conversation-message.ui:402
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2007
+#: src/client/composer/composer-widget.vala:2031
 msgid "Reply-To: "
 msgstr "Erantzun honi: "
-
-#: src/client/composer/composer-widget.vala:2259
-msgid "Select Color"
-msgstr "Hautatu kolorea"
 
 #. Displayed in the From dropdown to indicate an
 #. "alternate email address" for an account.  The first
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2445
+#: src/client/composer/composer-widget.vala:2149
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s %2$s bidez"
-
-#. Translators: This is the name of the file chooser filter
-#. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2802
-msgid "Images"
-msgstr "Irudiak"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
@@ -1741,51 +1741,51 @@ msgid "Search for more languages"
 msgstr "Bilatu hizkuntza gehiago"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:335
+#: src/client/conversation-list/conversation-list-view.vala:339
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Eraman berriketa _zakarrontzira"
 msgstr[1] "Eraman berriketak _zakarrontzira"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:347
+#: src/client/conversation-list/conversation-list-view.vala:351
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_Ezabatu berriketa"
 msgstr[1] "_Ezabatu berriketak"
 
-#: src/client/conversation-list/conversation-list-view.vala:360
+#: src/client/conversation-list/conversation-list-view.vala:364
 #: ui/main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "Markatu _irakurrita gisa"
 
-#: src/client/conversation-list/conversation-list-view.vala:368
+#: src/client/conversation-list/conversation-list-view.vala:372
 #: ui/main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "Markatu i_rakurri gabeko gisa"
 
-#: src/client/conversation-list/conversation-list-view.vala:376
+#: src/client/conversation-list/conversation-list-view.vala:380
 #: ui/main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "Ke_ndu izarra"
 
-#: src/client/conversation-list/conversation-list-view.vala:383
+#: src/client/conversation-list/conversation-list-view.vala:387
 #: ui/main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "_Izarra"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:392
+#: src/client/conversation-list/conversation-list-view.vala:396
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Erantzun"
 
-#: src/client/conversation-list/conversation-list-view.vala:398
+#: src/client/conversation-list/conversation-list-view.vala:402
 msgid "R_eply All"
 msgstr "Erantzun _denei"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:404
+#: src/client/conversation-list/conversation-list-view.vala:408
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "A_urrera"
@@ -1796,19 +1796,19 @@ msgstr "Ni"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:537
-#: src/client/util/util-email.vala:226
+#: src/client/util/util-email.vala:240
 msgid "From:"
 msgstr "Nondik:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
 #: src/client/conversation-viewer/conversation-email.vala:557
-#: src/client/util/util-email.vala:231
+#: src/client/util/util-email.vala:245
 msgid "Date:"
 msgstr "Data:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
 #: src/client/conversation-viewer/conversation-email.vala:567
-#: src/client/util/util-email.vala:229
+#: src/client/util/util-email.vala:243
 msgid "Subject:"
 msgstr "Gaia:"
 
@@ -1854,22 +1854,22 @@ msgid "Image"
 msgstr "Irudia"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1304
+#: src/client/conversation-viewer/conversation-message.vala:1305
 msgid "Remote images not shown"
 msgstr "Urruneko irudiak ez dira erakutsi"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1306
+#: src/client/conversation-viewer/conversation-message.vala:1307
 msgid "Only show remote images from senders you trust."
 msgstr "Erakutsi fidagarriak diren bidaltzaileen urruneko irudiak soilik."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1310
+#: src/client/conversation-viewer/conversation-message.vala:1311
 msgid "Show"
 msgstr "Erakutsi"
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1314
+#: src/client/conversation-viewer/conversation-message.vala:1315
 msgid "Always show from sender"
 msgstr "Erakutsi beti bidaltzailetik"
 
@@ -1995,8 +1995,8 @@ msgstr "Errorea gertatu da zerbitzariaren ziurtagiria prozesatzean"
 #. / Translators: Title for problem report dialog error
 #. / information pane
 #. Dialog title for displaying technical details of a problem. Same as the button that invokes it.
-#: src/client/dialogs/dialogs-problem-details-dialog.vala:100
-#: ui/problem-details-dialog.ui:12
+#: src/client/dialogs/dialogs-problem-details-dialog.vala:99
+#: ui/problem-details-dialog.ui:17
 msgid "Details"
 msgstr "Xehetasunak"
 
@@ -2007,26 +2007,32 @@ msgstr "Xehetasunak"
 msgid "Geary requires your email password to continue"
 msgstr "Geary-k zure postaren pasahitza behar du jarraitzeko"
 
-#. Label displaying total number of email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:30
+#. Translators: Label displaying total number of email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:42
 #, c-format
 msgid "%d message"
 msgid_plural "%d messages"
 msgstr[0] "Mezu %d"
 msgstr[1] "%d mezu"
 
-#. / Label displaying number of unread email messages in a folder
-#: src/client/folder-list/folder-list-folder-entry.vala:37
+#. Translators: Label displaying number of unread email
+#. messages in a folder. String substitution is the actual
+#. number.
+#: src/client/folder-list/folder-list-folder-entry.vala:52
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
 msgstr[0] "%d irakurri gabe"
 msgstr[1] "%d irakurri gabe"
 
-#. / This string represents the divider between two messages: "n messages" and "n unread",
-#. / shown in the folder list as a tooltip.  Please use your languages conventions for
-#. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
-#: src/client/folder-list/folder-list-folder-entry.vala:43
+#. Translators: This string represents the divider between two
+#. messages: "n messages" and "n unread", shown in the folder
+#. list as a tooltip.  Please use your languages conventions
+#. for combining the two, i.e. a comma (",") for English; "6
+#. messages, 3 unread"
+#: src/client/folder-list/folder-list-folder-entry.vala:60
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
@@ -2041,14 +2047,6 @@ msgid "%d result"
 msgid_plural "%d results"
 msgstr[0] "Emaitza %d"
 msgstr[1] "%d emaitza"
-
-#: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:4
-msgid "Desktop Notifications"
-msgstr "Mahaigaineko jakinarazpenak"
-
-#: src/client/plugin/desktop-notifications/desktop-notifications.plugin.desktop.in:5
-msgid "Displays desktop notifications when new email is delivered"
-msgstr "Mahaigaineko jakinarazpenak bistaratzen ditu mezu berriak jaso direnean"
 
 #. / Notification body when a message as been received
 #. / and other unread messages have not been
@@ -2094,19 +2092,123 @@ msgstr[1] "%s, %d mezu berri guztira"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:284
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:282
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "Mezu berria"
 msgstr[1] "Mezu berriak"
 
-#: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:4
-msgid "Folder Highlight"
-msgstr "Karpeta nabarmentzea"
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+msgid "Email Templates"
+msgstr "Posta elektronikorako txantiloiak"
 
-#: src/client/plugin/folder-highlight/folder-highlight.plugin.desktop.in:5
-msgid "Highlights folders that have newly delivered mail"
-msgstr "Mezu berriak jaso dituzten karpetak nabarmentzen ditu"
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+msgid "Create reusable templates for sending email"
+msgstr "Sortu txantiloi berrerabilgarriak posta-mezuak bidaltzeko"
+
+#. Translators: Templates folder name alternatives. Separate names
+#. using a vertical bar and put the most common localized name to
+#. the front for the default. English names do not need to be
+#. included.
+#: src/client/plugin/email-templates/email-templates.vala:29
+#: src/client/plugin/mail-merge/mail-merge.vala:29
+msgid "Templates | Template Mail | Template Email | Template E-Mail"
+msgstr "Txantiloiak | Posta-txantiloia | Posta elektronikoko txantiloia | Posta-mezuen txantiloia"
+
+#. Translators: The name of the folder used to
+#. store email templates
+#: src/client/plugin/email-templates/email-templates.vala:201
+msgid "Templates"
+msgstr "Txantiloiak"
+
+#. Translators: Info bar button label for creating a
+#. new email template
+#: src/client/plugin/email-templates/email-templates.vala:282
+msgid "New"
+msgstr "Berria"
+
+#. Translators: Infobar status label for an email template
+#: src/client/plugin/email-templates/email-templates.vala:293
+msgid "Message template"
+msgstr "Mezu-txantiloia"
+
+#. Translators: Info bar button label for sending an
+#. email template
+#: src/client/plugin/email-templates/email-templates.vala:297
+msgid "Send"
+msgstr "Bidali"
+
+#. Translators: Info bar button label for editing an
+#. existing email template
+#. Translators: Info bar button label for editing a draft
+#. email
+#: src/client/plugin/email-templates/email-templates.vala:305
+#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/special-folders/special-folders.vala:187
+msgid "Edit"
+msgstr "Editatu"
+
+#. / Translators: Menu item label for invoking mail
+#. / merge in composer
+#. / Translators: File chooser title after invoking mail
+#. / merge in composer
+#. Translators: The name of the folder used to
+#. display merged email
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.vala:288
+#: src/client/plugin/mail-merge/mail-merge.vala:389
+#: src/client/plugin/mail-merge/mail-merge.vala:488
+msgid "Mail Merge"
+msgstr "Posta-konbinazioa"
+
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+msgid "Fill in and send email templates using a spreadsheet"
+msgstr "Bete eta bidali posta elektronikoko txantiloiak kalkulu-orri bat erabilita"
+
+#. Translators: Info bar label for starting sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:118
+msgid "Start"
+msgstr "Hasi"
+
+#. Translators: Info bar label for pausing sending a mail
+#. merge
+#: src/client/plugin/mail-merge/mail-merge.vala:130
+msgid "Pause"
+msgstr "Pausatu"
+
+#. Translators: Info bar description for the mail merge
+#. folder. The first string substitution the number of email
+#. already sent, the second is the total number to send.
+#: src/client/plugin/mail-merge/mail-merge.vala:240
+#, c-format
+msgid "Sent %u of %u"
+msgid_plural "Sent %u of %u"
+msgstr[0] "%u / %u bidali dira"
+msgstr[1] "%u / %u bidali dira"
+
+#. Translators: Infobar status label for an email mail merge
+#. template
+#: src/client/plugin/mail-merge/mail-merge.vala:324
+msgid "Mail merge template"
+msgstr "Posta-konbinazioko txantiloia"
+
+#. Translators: Info bar button label for performing a
+#. mail-merge on an email template
+#: src/client/plugin/mail-merge/mail-merge.vala:328
+msgid "Merge"
+msgstr "Konbinatu"
+
+#. / Translators: Action bar menu button label for
+#. / mail-merge plugin
+#: src/client/plugin/mail-merge/mail-merge.vala:377
+msgid "Insert field"
+msgstr "Txertatu eremua"
+
+#. / Translators: File chooser filer label
+#: src/client/plugin/mail-merge/mail-merge.vala:396
+msgid "Comma separated values (CSV)"
+msgstr "Komaz bereizitako balioak (CSV)"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Messaging Menu"
@@ -2116,18 +2218,10 @@ msgstr "Mezuen menua"
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "Unity-ren mezuen menuaren jakinarazpenak bistaratzen ditu mezu berriak daudenean"
 
-#: src/client/plugin/messaging-menu/messaging-menu.vala:75
+#: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
 msgid "%s — New Messages"
 msgstr "%s — Mezu berriak"
-
-#: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:4
-msgid "Notification Badge"
-msgstr "Jakinarazpenak"
-
-#: src/client/plugin/notification-badge/notification-badge.plugin.desktop.in:5
-msgid "Displays a dock badge showing the number of new messages"
-msgstr "Mezu berrien kopurua erakusten duen atrakatutako jakinarazpen bat bistaratzen du"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Sent Sound"
@@ -2137,42 +2231,32 @@ msgstr "Soinua bidalitakoan"
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "Mahaigainak mezu bidalientzako duen soinua erreproduzitzen du mezu bat bidaltzen denean"
 
-#: src/client/plugin/special-folders/special-folders.plugin.desktop.in:4
-msgid "Special Folders"
-msgstr "Karpeta bereziak"
-
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
-#: src/client/plugin/special-folders/special-folders.vala:140
+#: src/client/plugin/special-folders/special-folders.vala:167
 msgid "Empty"
 msgstr "Hutsa"
 
 #. Translators: Info bar status message for a draft email
-#: src/client/plugin/special-folders/special-folders.vala:152
+#: src/client/plugin/special-folders/special-folders.vala:179
 msgid "Draft message"
 msgstr "Mezu-zirriborroa"
 
 #. Translators: Info bar status description for a draft
 #. email
-#: src/client/plugin/special-folders/special-folders.vala:155
+#: src/client/plugin/special-folders/special-folders.vala:182
 msgid "This message has not yet been sent."
 msgstr "Mezu hau ez da oraindik bidali."
 
-#. Translators: Info bar button label for editing a draft
-#. email
-#: src/client/plugin/special-folders/special-folders.vala:160
-msgid "Edit"
-msgstr "Editatu"
-
 #. Translators: Info bar status message for an sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:171
+#: src/client/plugin/special-folders/special-folders.vala:198
 msgid "Message not saved"
 msgstr "Mezua ez da gorde"
 
 #. Translators: Info bar status description for a sent but
 #. unsaved email
-#: src/client/plugin/special-folders/special-folders.vala:174
+#: src/client/plugin/special-folders/special-folders.vala:201
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Mezu hau bidali da, baina ez da gorde zure kontuan."
 
@@ -2244,32 +2328,37 @@ msgstr "Atzo"
 msgid "%A"
 msgstr "%A"
 
-#. / 12 hours format for datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:216
+#. / 12 hours format for datetime that a message being replied
+#. / to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:218
 msgid "%a, %b %-e, %Y at %l:%M %P"
 msgstr "%a, %b %-e, %Y, %l:%M %P"
 
-#. / 24 hours format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:220
+#. / 24 hours format for the datetime that a message being
+#. / replied to was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:224
 msgid "%a, %b %-e, %Y at %H:%M"
 msgstr "%a, %b %-e, %Y, %H:%M"
 
-#. / Format for the datetime that a message being replied to was received
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:224
+#. / Format for the datetime that a message being replied to
+#. / was received See
+#. / http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: src/client/util/util-date.vala:230
 msgid "%a, %b %-e, %Y at %X"
 msgstr "%a, %b %-e, %Y, %X"
 
-#: src/client/util/util-email.vala:38
+#. Translators: Label used when an email has a missing or
+#. an empty subject
+#: src/client/util/util-email.vala:50
 msgid "(No subject)"
 msgstr "(Gairik ez)"
 
 #. / Translators: This is shown for displaying a list of email
 #. / recipients that happens to be empty, i.e. contains no
 #. / email addresses.
-#: src/client/util/util-email.vala:134
+#: src/client/util/util-email.vala:148
 msgid "(No recipients)"
 msgstr "(Hartzailerik ez)"
 
@@ -2278,7 +2367,7 @@ msgstr "(Hartzailerik ez)"
 #. / addresses. The first (string) substitution is
 #. / address of the first, the second substitution is
 #. / the number of n - 1 remaining recipients.
-#: src/client/util/util-email.vala:146
+#: src/client/util/util-email.vala:160
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
@@ -2288,26 +2377,26 @@ msgstr[1] "%s eta beste %d"
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: src/client/util/util-email.vala:179
+#: src/client/util/util-email.vala:193
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%2$s(e)k %1$s(e)an idatzita:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: src/client/util/util-email.vala:186
+#: src/client/util/util-email.vala:200
 #, c-format
 msgid "%s wrote:"
 msgstr "'%s'(e)k idatzita:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: src/client/util/util-email.vala:192
+#: src/client/util/util-email.vala:206
 #, c-format
 msgid "On %s:"
 msgstr "%s(e)an:"
 
-#: src/client/util/util-email.vala:221
+#: src/client/util/util-email.vala:235
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Birbidalitako mezua ----------"
 
@@ -2547,7 +2636,7 @@ msgstr "irakurri gabe"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:884
+#: src/engine/imap-engine/imap-engine-generic-account.vala:998
 msgid "Drafts | Draft"
 msgstr "Zirriborroak | Zirriborroa | Drafts | Draft"
 
@@ -2555,13 +2644,13 @@ msgstr "Zirriborroak | Zirriborroa | Drafts | Draft"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:893
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1007
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | Sent E-Mail"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:898
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1012
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Bidalitako elementuak"
@@ -2570,7 +2659,7 @@ msgstr "Bidalitako elementuak"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:908
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1022
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2580,13 +2669,13 @@ msgstr "Baztergarria | Baztergarriak | Posta baztergarria | Mezu baztergarria | 
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:918
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1032
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Zakarrontzia | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:923
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1037
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Ezabatutako elementuak"
@@ -2595,21 +2684,21 @@ msgstr "Ezabatutako elementuak"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:933
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1047
 msgid "Archive | Archives"
 msgstr "Artxiboa | Artxiboak"
 
-#: src/engine/rfc822/rfc822-message.vala:461
+#: src/engine/rfc822/rfc822-message.vala:528
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Ezin izan da “%s” elementuaren mime mota zehaztu."
 
-#: src/engine/rfc822/rfc822-message.vala:472
+#: src/engine/rfc822/rfc822-message.vala:539
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Ezin izan da “%s” mime motaren eduki mota zehaztu “%s” elementurako."
 
-#: src/engine/rfc822/rfc822-message.vala:1003
+#: src/engine/rfc822/rfc822-message.vala:1013
 msgid "(no subject)"
 msgstr "(gairik ez)"
 
@@ -2618,14 +2707,14 @@ msgid "Add an account"
 msgstr "Gehitu kontua"
 
 #: ui/accounts_editor_add_pane.ui:53
-msgid "Create"
-msgstr "Sorrera"
+msgid "_Create"
+msgstr "_Sortu"
 
-#: ui/accounts_editor_add_pane.ui:130 ui/accounts_editor_servers_pane.ui:125
+#: ui/accounts_editor_add_pane.ui:131 ui/accounts_editor_servers_pane.ui:125
 msgid "Receiving"
 msgstr "Jasotzen"
 
-#: ui/accounts_editor_add_pane.ui:178 ui/accounts_editor_servers_pane.ui:165
+#: ui/accounts_editor_add_pane.ui:179 ui/accounts_editor_servers_pane.ui:165
 msgid "Sending"
 msgstr "Bidaltzen"
 
@@ -2711,6 +2800,168 @@ msgstr "Fi_datu zerbitzari honetaz"
 msgid "_Don’t Trust This Server"
 msgstr "_Ez fidatu zerbitzari honetaz"
 
+#: ui/composer-editor.ui:100
+msgid "Bold text"
+msgstr "Testu lodia"
+
+#: ui/composer-editor.ui:124
+msgid "Italic text"
+msgstr "Testu etzana"
+
+#: ui/composer-editor.ui:148
+msgid "Underline text"
+msgstr "Testu azpimarratua"
+
+#: ui/composer-editor.ui:172
+msgid "Strikethrough text"
+msgstr "Testu marratua"
+
+#: ui/composer-editor.ui:205
+msgid "Insert bulleted list"
+msgstr "Txertatu buletdun zerrenda"
+
+#: ui/composer-editor.ui:229
+msgid "Insert numbered list"
+msgstr "Txertatu zenbakitutako zerrenda"
+
+#: ui/composer-editor.ui:262
+msgid "Indent or quote text"
+msgstr "Koskatu edo aipatu testua"
+
+#: ui/composer-editor.ui:286
+msgid "Un-indent or unquote text"
+msgstr "Kendu koska edo aipua testuari"
+
+#: ui/composer-editor.ui:315
+msgid "Remove text formatting"
+msgstr "Kendu testuaren formatua"
+
+#: ui/composer-editor.ui:334
+msgid "Change font type"
+msgstr "Aldatu letra-tipoa"
+
+#: ui/composer-editor.ui:349
+msgid "Sans Serif"
+msgstr "Sans Serif"
+
+#: ui/composer-editor.ui:360
+msgid "Serif"
+msgstr "Serif"
+
+#: ui/composer-editor.ui:371
+msgid "Fixed Width"
+msgstr "Zabalera finkoa"
+
+#: ui/composer-editor.ui:397
+msgid "Change font color"
+msgstr "Aldatu letra-kolorea"
+
+#: ui/composer-editor.ui:412
+msgid "Change font size"
+msgstr "Aldatu letra-tamaina"
+
+#: ui/composer-editor.ui:447
+msgid "Insert or update text link"
+msgstr "Txertatu edo eguneratu testuaren esteka"
+
+#: ui/composer-editor.ui:471
+msgid "Insert an image"
+msgstr "Txertatu irudi bat"
+
+#: ui/composer-editor.ui:513
+msgid "Undo last edit"
+msgstr "Desegin azken edizioa"
+
+#: ui/composer-editor.ui:537
+msgid "Redo last edit"
+msgstr "Berregin azken edizioa"
+
+#: ui/composer-editor.ui:566 ui/composer-editor.ui:591
+msgid "Attach a file"
+msgstr "Erantsi fitxategi bat"
+
+#: ui/composer-editor.ui:615
+msgid "Add original attachments"
+msgstr "Gehitu jatorrizko eranskinak"
+
+#: ui/composer-editor.ui:660
+msgid "More options"
+msgstr "Aukera gehiago"
+
+#: ui/composer-editor.ui:680
+msgid "Show formatting toolbar"
+msgstr "Erakutsi formatuaren tresna-barra"
+
+#: ui/composer-editor.ui:698
+msgid "Select spell checking languages"
+msgstr "Hautatu ortografia-egiaztapenaren hizkuntzak"
+
+#: ui/composer-editor.ui:723
+msgid "S_ans Serif"
+msgstr "S_ans serif"
+
+#: ui/composer-editor.ui:728
+msgid "S_erif"
+msgstr "S_erif"
+
+#: ui/composer-editor.ui:733
+msgid "_Fixed Width"
+msgstr "_Zabalera finkoa"
+
+#: ui/composer-editor.ui:743
+msgid "_Small"
+msgstr "_Txikia"
+
+#: ui/composer-editor.ui:748
+msgid "_Medium"
+msgstr "Ta_rtekoa"
+
+#: ui/composer-editor.ui:753
+msgid "Lar_ge"
+msgstr "_Handia"
+
+#: ui/composer-editor.ui:763
+msgid "_Rich Text"
+msgstr "Testu a_beratsa"
+
+#: ui/composer-editor.ui:768
+msgid "_Plain Text"
+msgstr "_Testu soila"
+
+#: ui/composer-editor-menus.ui:8
+msgid "_Undo"
+msgstr "_Desegin"
+
+#: ui/composer-editor-menus.ui:12
+msgid "_Redo"
+msgstr "_Berregin"
+
+#: ui/composer-editor-menus.ui:18 ui/composer-editor-menus.ui:36
+msgid "Cu_t"
+msgstr "_Ebaki"
+
+#: ui/composer-editor-menus.ui:22 ui/composer-editor-menus.ui:40
+#: ui/conversation-message-menus.ui:37
+msgid "_Copy"
+msgstr "_Kopiatu"
+
+#: ui/composer-editor-menus.ui:26 ui/composer-editor-menus.ui:44
+msgid "_Paste"
+msgstr "_Itsatsi"
+
+#: ui/composer-editor-menus.ui:30
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Itsatsi _formaturik gabe"
+
+#: ui/composer-editor-menus.ui:50
+msgid "Select _All"
+msgstr "Hautatu _dena"
+
+#: ui/composer-editor-menus.ui:57 ui/conversation-message-menus.ui:43
+msgid "_Inspect…"
+msgstr "Ik_uskatu…"
+
 #: ui/composer-headerbar.ui:23 ui/composer-headerbar.ui:107
 msgid "Detach the composer from the window"
 msgstr "Askatu konposatzailea leihotik"
@@ -2753,205 +3004,43 @@ msgstr "Eguneratu"
 msgid "Delete this link"
 msgstr "Ezabatu esteka hau"
 
-#: ui/composer-menus.ui:8
-msgid "_Undo"
-msgstr "_Desegin"
-
-#: ui/composer-menus.ui:12
-msgid "_Redo"
-msgstr "_Berregin"
-
-#: ui/composer-menus.ui:18 ui/composer-menus.ui:36
-msgid "Cu_t"
-msgstr "_Ebaki"
-
-#: ui/composer-menus.ui:22 ui/composer-menus.ui:40
-#: ui/conversation-message-menus.ui:37
-msgid "_Copy"
-msgstr "_Kopiatu"
-
-#: ui/composer-menus.ui:26 ui/composer-menus.ui:44
-msgid "_Paste"
-msgstr "_Itsatsi"
-
-#: ui/composer-menus.ui:30
-msgctxt "Clipboard paste as plain text"
-msgid "Paste _Without Formatting"
-msgstr "Itsatsi _formaturik gabe"
-
-#: ui/composer-menus.ui:50
-msgid "Select _All"
-msgstr "Hautatu _dena"
-
-#: ui/composer-menus.ui:57 ui/conversation-message-menus.ui:43
-msgid "_Inspect…"
-msgstr "Ik_uskatu…"
-
 #. Geary account mail will be sent from
-#: ui/composer-widget.ui:60
+#: ui/composer-widget.ui:61
 msgid "_From"
 msgstr "Nor_k"
 
 #. Address(es) e-mail is to be sent to
-#: ui/composer-widget.ui:130
+#: ui/composer-widget.ui:131
 msgid "_To"
 msgstr "Nor_i"
 
-#: ui/composer-widget.ui:158
+#: ui/composer-widget.ui:159
 msgid "Show Cc, Bcc, and Reply-To fields"
 msgstr "Erakutsi 'Cc', 'Bcc' eta 'Erantzun honi' eremuak"
 
-#: ui/composer-widget.ui:219
+#: ui/composer-widget.ui:220
 msgid "_Cc"
 msgstr "_Cc"
 
-#: ui/composer-widget.ui:267
+#: ui/composer-widget.ui:268
 msgid "_Bcc"
 msgstr "_Bcc"
 
-#: ui/composer-widget.ui:315
+#: ui/composer-widget.ui:316
 msgid "_Reply-To"
 msgstr "_Erantzun honi"
 
-#: ui/composer-widget.ui:372
+#: ui/composer-widget.ui:373
 msgid "_Subject"
 msgstr "_Gaia"
 
-#: ui/composer-widget.ui:445
+#: ui/composer-widget.ui:446
 msgid "Drop files here"
 msgstr "Jaregin fitxategiak hemen"
 
-#: ui/composer-widget.ui:461
+#: ui/composer-widget.ui:462
 msgid "To add them as attachments"
 msgstr "Eranskin gisa gehitzeko"
-
-#: ui/composer-widget.ui:602
-msgid "Bold text"
-msgstr "Testu lodia"
-
-#: ui/composer-widget.ui:626
-msgid "Italic text"
-msgstr "Testu etzana"
-
-#: ui/composer-widget.ui:650
-msgid "Underline text"
-msgstr "Testu azpimarratua"
-
-#: ui/composer-widget.ui:674
-msgid "Strikethrough text"
-msgstr "Testu marratua"
-
-#: ui/composer-widget.ui:707
-msgid "Insert bulleted list"
-msgstr "Txertatu buletdun zerrenda"
-
-#: ui/composer-widget.ui:731
-msgid "Insert numbered list"
-msgstr "Txertatu zenbakitutako zerrenda"
-
-#: ui/composer-widget.ui:764
-msgid "Indent or quote text"
-msgstr "Koskatu edo aipatu testua"
-
-#: ui/composer-widget.ui:788
-msgid "Un-indent or unquote text"
-msgstr "Kendu koska edo aipua testuari"
-
-#: ui/composer-widget.ui:817
-msgid "Remove text formatting"
-msgstr "Kendu testuaren formatua"
-
-#: ui/composer-widget.ui:836
-msgid "Change font type"
-msgstr "Aldatu letra-tipoa"
-
-#: ui/composer-widget.ui:851
-msgid "Sans Serif"
-msgstr "Sans Serif"
-
-#: ui/composer-widget.ui:862
-msgid "Serif"
-msgstr "Serif"
-
-#: ui/composer-widget.ui:873
-msgid "Fixed Width"
-msgstr "Zabalera finkoa"
-
-#: ui/composer-widget.ui:899
-msgid "Change font color"
-msgstr "Aldatu letra-kolorea"
-
-#: ui/composer-widget.ui:914
-msgid "Change font size"
-msgstr "Aldatu letra-tamaina"
-
-#: ui/composer-widget.ui:949
-msgid "Insert or update text link"
-msgstr "Txertatu edo eguneratu testuaren esteka"
-
-#: ui/composer-widget.ui:973
-msgid "Insert an image"
-msgstr "Txertatu irudi bat"
-
-#: ui/composer-widget.ui:1015
-msgid "Undo last edit"
-msgstr "Desegin azken edizioa"
-
-#: ui/composer-widget.ui:1039
-msgid "Redo last edit"
-msgstr "Berregin azken edizioa"
-
-#: ui/composer-widget.ui:1068 ui/composer-widget.ui:1093
-msgid "Attach a file"
-msgstr "Erantsi fitxategi bat"
-
-#: ui/composer-widget.ui:1117
-msgid "Add original attachments"
-msgstr "Gehitu jatorrizko eranskinak"
-
-#: ui/composer-widget.ui:1162
-msgid "More options"
-msgstr "Aukera gehiago"
-
-#: ui/composer-widget.ui:1182
-msgid "Show formatting toolbar"
-msgstr "Erakutsi formatuaren tresna-barra"
-
-#: ui/composer-widget.ui:1200
-msgid "Select spell checking languages"
-msgstr "Hautatu ortografia-egiaztapenaren hizkuntzak"
-
-#: ui/composer-widget.ui:1263
-msgid "S_ans Serif"
-msgstr "S_ans serif"
-
-#: ui/composer-widget.ui:1268
-msgid "S_erif"
-msgstr "S_erif"
-
-#: ui/composer-widget.ui:1273
-msgid "_Fixed Width"
-msgstr "_Zabalera finkoa"
-
-#: ui/composer-widget.ui:1283
-msgid "_Small"
-msgstr "_Txikia"
-
-#: ui/composer-widget.ui:1288
-msgid "_Medium"
-msgstr "Ta_rtekoa"
-
-#: ui/composer-widget.ui:1293
-msgid "Lar_ge"
-msgstr "_Handia"
-
-#: ui/composer-widget.ui:1303
-msgid "_Rich Text"
-msgstr "Testu a_beratsa"
-
-#: ui/composer-widget.ui:1308
-msgid "_Plain Text"
-msgstr "_Testu soila"
 
 #: ui/components-attachment-pane.ui:29 ui/components-attachment-pane.ui:47
 msgid "Select all attachments"
@@ -2969,40 +3058,50 @@ msgstr "Ireki hautatutako eranskinak"
 msgid "Save _All"
 msgstr "Gorde _dena"
 
-#: ui/components-inspector-error-view.ui:33
+#: ui/components-inspector-error-view.ui:31
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
-"the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
-"or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
-"\">new bug report</a>."
-msgstr "Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">posta-zerrendara</a> edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">akatsen jakinarazpen berri bati</a>."
+"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
+"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">new bug report</a>."
+msgstr "Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktu-kanaletara</a> edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">akatsen jakinarazpen berri bati</a>."
 
-#: ui/components-inspector-error-view.ui:49
+#: ui/components-inspector-error-view.ui:47
 msgid "Details:"
 msgstr "Xehetasunak:"
 
 #. Tooltip for inspector button
-#: ui/components-inspector.ui:20
-msgid "Toggle appending new log entries"
-msgstr "Aktibatu/desaktibatu egunkari-sarrera berriak eranstea"
-
-#. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:37 ui/problem-details-dialog.ui:19
+#: ui/components-inspector.ui:19 ui/problem-details-dialog.ui:24
 msgid "Search for matching log entries"
 msgstr "Bilatu bat datozen egunkari-sarrerak"
 
 #. Tooltip for inspector button
+#: ui/components-inspector.ui:35
+msgid "Toggle appending new log entries"
+msgstr "Aktibatu/desaktibatu egunkari-sarrera berriak eranstea"
+
+#. Tooltip for inspector button
+#: ui/components-inspector.ui:55
+msgid "Add a marker entry to the log"
+msgstr "Gehitu markatzaile-sarrera bat egunkariari"
+
+#. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:63 ui/problem-details-dialog.ui:46
+#: ui/components-inspector.ui:81 ui/problem-details-dialog.ui:51
 msgid "Save logs entries and details"
 msgstr "Gorde egunkari-sarrerak eta xehetasunak"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
-#: ui/components-inspector.ui:84 ui/problem-details-dialog.ui:62
+#: ui/components-inspector.ui:101 ui/problem-details-dialog.ui:67
 msgid "Copy to clipboard"
 msgstr "Kopiatu arbelean"
+
+#. Tooltip for inspector button
+#: ui/components-inspector.ui:121
+msgid "Clears all log entries"
+msgstr "Egunkari-sarrera guztiak garbitzen ditu"
 
 #: ui/conversation-contact-popover.ui:146
 msgid "New Conversation…"
@@ -3203,7 +3302,7 @@ msgstr "etiketa"
 msgid "Conversation Shortcuts"
 msgstr "Berriketen lasterbideak"
 
-#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:355
+#: ui/gtk/help-overlay.ui:13 ui/gtk/help-overlay.ui:377
 msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Ekintzak"
@@ -3218,37 +3317,37 @@ msgctxt "shortcut window"
 msgid "Reply to sender"
 msgstr "Erantzun bidaltzaileari"
 
-#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:269
+#: ui/gtk/help-overlay.ui:31 ui/gtk/help-overlay.ui:281
 msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Erantzun denei"
 
-#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:276
+#: ui/gtk/help-overlay.ui:38 ui/gtk/help-overlay.ui:288
 msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Aurrera"
 
-#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:283
+#: ui/gtk/help-overlay.ui:45 ui/gtk/help-overlay.ui:295
 msgctxt "shortcut window"
 msgid "Un-mark/mark read"
 msgstr "Markatu irakurritako gisa/kendu marka"
 
-#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:290
+#: ui/gtk/help-overlay.ui:52 ui/gtk/help-overlay.ui:302
 msgctxt "shortcut window"
 msgid "Mark/un-mark starred"
 msgstr "Markatu izarrarekin/kendu marka"
 
-#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:297
+#: ui/gtk/help-overlay.ui:59 ui/gtk/help-overlay.ui:309
 msgctxt "shortcut window"
 msgid "Archive conversations"
 msgstr "Artxibatu berriketak"
 
-#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:304
+#: ui/gtk/help-overlay.ui:66 ui/gtk/help-overlay.ui:326
 msgctxt "shortcut window"
 msgid "Move conversations"
 msgstr "Aldatu berriketak lekuz"
 
-#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:311
+#: ui/gtk/help-overlay.ui:73 ui/gtk/help-overlay.ui:333
 msgctxt "shortcut window"
 msgid "Label conversations"
 msgstr "Gehitu etiketa berriketei"
@@ -3258,12 +3357,12 @@ msgctxt "shortcut window"
 msgid "Trash conversations"
 msgstr "Eraman berriketak zakarrontzira"
 
-#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:318
+#: ui/gtk/help-overlay.ui:87 ui/gtk/help-overlay.ui:340
 msgctxt "shortcut window"
 msgid "Junk conversations"
 msgstr "Baztertu berriketak"
 
-#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:325
+#: ui/gtk/help-overlay.ui:95 ui/gtk/help-overlay.ui:347
 msgctxt "shortcut window"
 msgid "Delete conversations"
 msgstr "Ezabatu berriketak"
@@ -3278,7 +3377,7 @@ msgctxt "shortcut window"
 msgid "Search for conversations"
 msgstr "Bilatu berriketak"
 
-#: ui/gtk/help-overlay.ui:115
+#: ui/gtk/help-overlay.ui:115 ui/gtk/help-overlay.ui:354
 msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Aurkitu uneko berriketan"
@@ -3318,7 +3417,7 @@ msgctxt "shortcut window"
 msgid "Reset zoom"
 msgstr "Berrezarri zooma"
 
-#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:375
+#: ui/gtk/help-overlay.ui:188 ui/gtk/help-overlay.ui:404
 msgctxt "shortcut window"
 msgid "General"
 msgstr "Orokorra"
@@ -3368,121 +3467,125 @@ msgctxt "shortcut window"
 msgid "Focus next/previous message"
 msgstr "Enfokatu aurreko/hurrengo mezua"
 
-#: ui/gtk/help-overlay.ui:258
-msgctxt "shortcut window"
-msgid "Single-key shortcuts"
+#: ui/gtk/help-overlay.ui:260
+msgid "Single-key Shortcuts"
 msgstr "Tekla bakarreko lasterbideak"
 
-#: ui/gtk/help-overlay.ui:262
+#: ui/gtk/help-overlay.ui:265
+msgctxt "shortcut window"
+msgid "Single-key shortcuts (if enabled)"
+msgstr "Tekla bakarreko lasterbideak (gaituta badaude)"
+
+#: ui/gtk/help-overlay.ui:274
 msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Erantzun bidaltzaileari "
 
-#: ui/gtk/help-overlay.ui:332
-msgctxt "shortcut window"
-msgid "Find in current conversations"
-msgstr "Aurkitu uneko berriketetan"
-
-#: ui/gtk/help-overlay.ui:339
+#: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Hautatu hurrengo/aurreko berriketak"
 
-#: ui/gtk/help-overlay.ui:351
+#: ui/gtk/help-overlay.ui:373
 msgid "Composer Shortcuts"
 msgstr "Konposatzailearen lasterbideak"
 
-#: ui/gtk/help-overlay.ui:359
+#: ui/gtk/help-overlay.ui:381
 msgctxt "shortcut window"
 msgid "Send"
 msgstr "Bidali"
 
-#: ui/gtk/help-overlay.ui:366
+#: ui/gtk/help-overlay.ui:388
 msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Gehitu eranskina"
 
-#: ui/gtk/help-overlay.ui:379
+#: ui/gtk/help-overlay.ui:395
+msgctxt "shortcut window"
+msgid "Detach the composer"
+msgstr "Askatu konposatzailea"
+
+#: ui/gtk/help-overlay.ui:408
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Itxi konposatzaile-leihoa"
 
-#: ui/gtk/help-overlay.ui:386
+#: ui/gtk/help-overlay.ui:415
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Askatu konposatzaile-leihoa"
 
-#: ui/gtk/help-overlay.ui:393
+#: ui/gtk/help-overlay.ui:422
 msgctxt "shortcut window"
 msgid "Editing"
 msgstr "Edizioa"
 
-#: ui/gtk/help-overlay.ui:398
+#: ui/gtk/help-overlay.ui:427
 msgctxt "shortcut window"
 msgid "Move selection to the clipboard"
 msgstr "Eraman hautapena arbelera"
 
-#: ui/gtk/help-overlay.ui:405
+#: ui/gtk/help-overlay.ui:434
 msgctxt "shortcut window"
 msgid "Copy selection to clipboard"
 msgstr "Kopiatu hautapena arbelean"
 
-#: ui/gtk/help-overlay.ui:412
+#: ui/gtk/help-overlay.ui:441
 msgctxt "shortcut window"
 msgid "Paste from the clipboard"
 msgstr "Itsatsi arbeletik"
 
-#: ui/gtk/help-overlay.ui:419
+#: ui/gtk/help-overlay.ui:448
 msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Aipatu testua"
 
-#: ui/gtk/help-overlay.ui:426
+#: ui/gtk/help-overlay.ui:455
 msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Kendu aipua testuari"
 
-#: ui/gtk/help-overlay.ui:435
+#: ui/gtk/help-overlay.ui:464
 msgctxt "shortcut window"
 msgid "Rich text editing"
 msgstr "Testu aberatseko edizioa"
 
-#: ui/gtk/help-overlay.ui:439
+#: ui/gtk/help-overlay.ui:468
 msgctxt "shortcut window"
 msgid "Paste without formatting"
 msgstr "Itsatsi formaturik gabe"
 
-#: ui/gtk/help-overlay.ui:446
+#: ui/gtk/help-overlay.ui:475
 msgctxt "shortcut window"
 msgid "Bold text"
 msgstr "Testu lodia"
 
-#: ui/gtk/help-overlay.ui:453
+#: ui/gtk/help-overlay.ui:482
 msgctxt "shortcut window"
 msgid "Italicize text"
 msgstr "Testu etzana"
 
-#: ui/gtk/help-overlay.ui:460
+#: ui/gtk/help-overlay.ui:489
 msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Testu azpimarratua"
 
-#: ui/gtk/help-overlay.ui:467
+#: ui/gtk/help-overlay.ui:496
 msgctxt "shortcut window"
 msgid "Strike text"
 msgstr "Testu marratua"
 
-#: ui/gtk/help-overlay.ui:474
+#: ui/gtk/help-overlay.ui:503
 msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Kendu formatua"
 
-#: ui/gtk/help-overlay.ui:481
+#: ui/gtk/help-overlay.ui:510
 msgctxt "shortcut window"
 msgid "Insert an image"
 msgstr "Txertatu irudi bat"
 
-#: ui/gtk/help-overlay.ui:488
+#: ui/gtk/help-overlay.ui:517
 msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Txertatu esteka"
@@ -3551,6 +3654,40 @@ msgstr "_Autentifikatu"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Geary-ren eguneratzea abian…"
+
+#~ msgid "Log periodic activity"
+#~ msgstr "Erregistratu aldiko jarduera"
+
+#~ msgid "Log IMAP network serialization"
+#~ msgstr "Erregistratu IMAP sarearen serializatzea"
+
+#~ msgid "Desktop Notifications"
+#~ msgstr "Mahaigaineko jakinarazpenak"
+
+#~ msgid "Displays desktop notifications when new email is delivered"
+#~ msgstr ""
+#~ "Mahaigaineko jakinarazpenak bistaratzen ditu mezu berriak jaso direnean"
+
+#~ msgid "Folder Highlight"
+#~ msgstr "Karpeta nabarmentzea"
+
+#~ msgid "Highlights folders that have newly delivered mail"
+#~ msgstr "Mezu berriak jaso dituzten karpetak nabarmentzen ditu"
+
+#~ msgid "Notification Badge"
+#~ msgstr "Jakinarazpenak"
+
+#~ msgid "Displays a dock badge showing the number of new messages"
+#~ msgstr ""
+#~ "Mezu berrien kopurua erakusten duen atrakatutako jakinarazpen bat "
+#~ "bistaratzen du"
+
+#~ msgid "Special Folders"
+#~ msgstr "Karpeta bereziak"
+
+#~ msgctxt "shortcut window"
+#~ msgid "Find in current conversations"
+#~ msgstr "Aurkitu uneko berriketetan"
 
 #~ msgid "Moved %d message to %s"
 #~ msgid_plural "Moved %d messages to %s"
