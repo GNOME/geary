@@ -436,29 +436,21 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                             Cancellable? cancellable)
     throws Error {
         Gee.Map<Command, StatusResponse>? responses = null;
-        int token = yield this.cmd_mutex.claim_async(cancellable);
+        var token = yield this.cmd_mutex.claim(cancellable);
 
         // set up collectors
         this.list_collector = list_results;
         this.status_collector = status_results;
 
-        Error? cmd_err = null;
         try {
             responses = yield session.send_multiple_commands_async(
                 cmds, cancellable
             );
-        } catch (Error err) {
-            cmd_err = err;
-        }
-
-        // tear down collectors
-        this.list_collector = null;
-        this.status_collector = null;
-
-        this.cmd_mutex.release(ref token);
-
-        if (cmd_err != null) {
-            throw cmd_err;
+        } finally {
+            // tear down collectors
+            this.list_collector = null;
+            this.status_collector = null;
+            token.release();
         }
 
         return responses;

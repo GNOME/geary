@@ -209,9 +209,9 @@ public class Geary.App.SearchFolder :
         GLib.Cancellable? cancellable = null)
     throws GLib.Error {
         debug("Waiting for checking contains");
-        int result_mutex_token = yield this.result_mutex.claim_async(cancellable);
+        var result_mutex_token = yield this.result_mutex.claim(cancellable);
         var existing_ids = this.ids;
-        result_mutex.release(ref result_mutex_token);
+        result_mutex_token.release();
 
         debug("Checking contains");
         return Geary.traverse(
@@ -229,10 +229,10 @@ public class Geary.App.SearchFolder :
         Cancellable? cancellable = null
     ) throws GLib.Error {
         debug("Waiting to list email");
-        int result_mutex_token = yield this.result_mutex.claim_async(cancellable);
+        var result_mutex_token = yield this.result_mutex.claim(cancellable);
         var existing_entries = this.entries;
         var existing_ids = this.ids;
-        result_mutex.release(ref result_mutex_token);
+        result_mutex_token.release();
 
         debug("Listing email");
         var engine_ids = new Gee.LinkedList<EmailIdentifier>();
@@ -420,7 +420,7 @@ public class Geary.App.SearchFolder :
 
         debug("Waiting to append to search results");
         try {
-            int result_mutex_token = yield this.result_mutex.claim_async(
+            var result_mutex_token = yield this.result_mutex.claim(
                 cancellable
             );
             try {
@@ -432,8 +432,7 @@ public class Geary.App.SearchFolder :
                     new AccountProblemReport(this.account.information, error)
                 );
             }
-
-            this.result_mutex.release(ref result_mutex_token);
+            result_mutex_token.release();
         } catch (GLib.IOError.CANCELLED mutex_err) {
             // all good
         } catch (GLib.Error mutex_err) {
@@ -449,7 +448,7 @@ public class Geary.App.SearchFolder :
 
         debug("Waiting to update search results");
         try {
-            int result_mutex_token = yield this.result_mutex.claim_async(
+            var result_mutex_token = yield this.result_mutex.claim(
                 cancellable
             );
             try {
@@ -460,7 +459,7 @@ public class Geary.App.SearchFolder :
                 );
             }
 
-            this.result_mutex.release(ref result_mutex_token);
+            result_mutex_token.release();
         } catch (GLib.IOError.CANCELLED mutex_err) {
             // all good
         } catch (GLib.Error mutex_err) {
@@ -478,7 +477,7 @@ public class Geary.App.SearchFolder :
 
         debug("Waiting to remove from search results");
         try {
-            int result_mutex_token = yield this.result_mutex.claim_async(
+            var result_mutex_token = yield this.result_mutex.claim(
                 cancellable
             );
 
@@ -500,7 +499,7 @@ public class Geary.App.SearchFolder :
                 }
             }
 
-            this.result_mutex.release(ref result_mutex_token);
+            result_mutex_token.release();
         } catch (GLib.IOError.CANCELLED mutex_err) {
             // all good
         } catch (GLib.Error mutex_err) {

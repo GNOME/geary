@@ -140,23 +140,18 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     }
 
     private async void do_prefetch_async() {
-        int token = Nonblocking.Mutex.INVALID_TOKEN;
+        Nonblocking.Mutex.Token? token = null;
         try {
-            token = yield mutex.claim_async(cancellable);
+            token = yield mutex.claim(cancellable);
             yield do_prefetch_batch_async();
         } catch (Error err) {
             if (!(err is IOError.CANCELLED))
                 debug("Error while prefetching emails for %s: %s", folder.to_string(), err.message);
-        }
-
-        // this round is done
-        active_sem.blind_notify();
-
-        if (token != Nonblocking.Mutex.INVALID_TOKEN) {
-            try {
-                mutex.release(ref token);
-            } catch (Error release_err) {
-                debug("Unable to release email prefetcher mutex: %s", release_err.message);
+        } finally {
+            // this round is done
+            this.active_sem.blind_notify();
+            if (token != null) {
+                token.release();
             }
         }
     }

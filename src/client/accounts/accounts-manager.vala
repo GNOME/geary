@@ -351,19 +351,11 @@ public class Accounts.Manager : GLib.Object {
         // Ensure only one async task is saving an info at once, since
         // at least the Engine can cause multiple saves to be called
         // in quick succession when updating special folder config.
-        int token = yield info.write_lock.claim_async(cancellable);
-
-        GLib.Error? thrown = null;
+        var token = yield info.write_lock.claim(cancellable);
         try {
             yield save_account_locked(info, cancellable);
-        } catch (GLib.Error err) {
-            thrown = err;
-        }
-
-        info.write_lock.release(ref token);
-
-        if (thrown != null) {
-            throw thrown;
+        } finally {
+            token.release();
         }
     }
 

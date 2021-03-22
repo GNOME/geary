@@ -155,25 +155,16 @@ public class ConversationListStore : Gtk.ListStore {
         // "scan-started" signals as messages come in fast and furious, but only want to process
         // previews one at a time, otherwise it's possible to issue multiple requests for the
         // same set
-        int token;
         try {
-            token = yield refresh_mutex.claim_async(this.cancellable);
-        } catch (Error err) {
-            debug("Unable to claim refresh mutex: %s", err.message);
-
-            return;
-        }
-
-        preview_monitor.notify_start();
-
-        yield do_refresh_previews_async(conversation_monitor);
-
-        preview_monitor.notify_finish();
-
-        try {
-            refresh_mutex.release(ref token);
-        } catch (Error err) {
-            debug("Unable to release refresh mutex: %s", err.message);
+            var token = yield refresh_mutex.claim(this.cancellable);
+            preview_monitor.notify_start();
+            yield do_refresh_previews_async(conversation_monitor);
+            preview_monitor.notify_finish();
+            token.release();
+        } catch (GLib.IOError.CANCELLED mutex_err) {
+            // fine
+        } catch (GLib.Error mutex_err) {
+            warning("Unable to release refresh mutex: %s", mutex_err.message);
         }
     }
 

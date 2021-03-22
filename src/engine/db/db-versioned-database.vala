@@ -147,23 +147,15 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
             // means overall it might take a bit longer, but it keeps
             // things usable in the meantime.  See
             // <https://bugzilla.gnome.org/show_bug.cgi?id=724475>.
-            int token = yield VersionedDatabase.upgrade_mutex.claim_async(
+            var token = yield VersionedDatabase.upgrade_mutex.claim(
                 cancellable
             );
-
-            Error? locked_err = null;
             try {
                 yield execute_upgrade(
                     cx, db_version, upgrade_script, cancellable
                 );
-            } catch (Error err) {
-                locked_err = err;
-            }
-
-            VersionedDatabase.upgrade_mutex.release(ref token);
-
-            if (locked_err != null) {
-                throw locked_err;
+            } finally {
+                token.release();
             }
         }
 

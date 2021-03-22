@@ -977,9 +977,9 @@ public class Application.Client : Gtk.Application {
     private async void create_controller() {
         bool first_run = false;
         bool open_failed = false;
-        int mutex_token = Geary.Nonblocking.Mutex.INVALID_TOKEN;
+        Geary.Nonblocking.Mutex.Token? token = null;
         try {
-            mutex_token = yield this.controller_mutex.claim_async();
+            token = yield this.controller_mutex.claim();
             if (this.controller == null) {
                 message(
                     "%s %s%s prefix=%s exec_dir=%s is_installed=%s",
@@ -1007,13 +1007,8 @@ public class Application.Client : Gtk.Application {
             dialog.show();
         }
 
-        if (mutex_token != Geary.Nonblocking.Mutex.INVALID_TOKEN) {
-            try {
-                this.controller_mutex.release(ref mutex_token);
-            } catch (GLib.Error error) {
-                warning("Failed to release controller mutex: %s",
-                        error.message);
-            }
+        if (token != null) {
+            token.release();
         }
 
         if (open_failed) {
@@ -1033,12 +1028,12 @@ public class Application.Client : Gtk.Application {
     // Closes the controller, if running
     private async void destroy_controller() {
         try {
-            int mutex_token = yield this.controller_mutex.claim_async();
+            var token = yield this.controller_mutex.claim();
             if (this.controller != null) {
                 yield this.controller.close();
                 this.controller = null;
             }
-            this.controller_mutex.release(ref mutex_token);
+            token.release();
         } catch (GLib.Error err) {
             warning("Error destroying controller: %s", err.message);
         }

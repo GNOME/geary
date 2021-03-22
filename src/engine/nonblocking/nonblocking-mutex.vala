@@ -1,9 +1,9 @@
 /*
- * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2018 Michael Gratton <mike@vee.net>
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2018-2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
@@ -12,16 +12,65 @@
  * Two methods can be used for executing code protected by this
  * mutex. The easiest is to create a {@link CriticalSection} delegate
  * and pass it to {@link execute_locked}. This will manage acquiring
- * the lock as needed. The lower-level method is to call {@link
- * claim_async}, execute the critical section, then ensure {@link
- * release} is always called afterwards.
+ * the lock as needed. The lower-level method is to call {@link claim}
+ * to claim a token, execute the critical section, then ensure {@link
+ * Token.release} is called on the token afterwards.
  *
  * This class is ''not'' thread safe and should only be used by
  * asynchronous tasks.
  */
 public class Geary.Nonblocking.Mutex : BaseObject {
 
-    public const int INVALID_TOKEN = -1;
+
+    private const int INVALID_TOKEN = -1;
+
+
+    /**
+     * The object returned when claiming a mutex.
+     *
+     * To release the mutex, return the token instance by calling the
+     * token's {@link release} method or passing it to {@link
+     * Mutex.release} on the mutex it was obtained from.
+     */
+    public class Token : GLib.Object {
+
+        /** The mutex this token was obtained from. */
+        public Mutex owner { get; private set; }
+
+        /** Internal token identifier. */
+        internal int id { get; private set; }
+
+        internal Token(int id, Mutex owner) {
+            this.id = id;
+            this.owner = owner;
+        }
+
+        /**
+         * Releases the lock at the end of executing a critical section.
+         *
+         * It is essential this method (or {@link Mutex.release} is
+         * called after the critical section has executed, else the
+         * lock will not be released.
+         *
+         * The token will be modified by this call, calling it again
+         * will have no effect.
+         *
+         * @see Mutex.release
+         */
+        public void release() {
+            try {
+                this.owner.release(this);
+            } catch (GLib.Error err) {
+                warning("Error releasing token: %s", err.message);
+            }
+        }
+
+        /** Invalidates the token after use.*/
+        internal void invalidate() {
+            this.id = INVALID_TOKEN;
+        }
+
+    }
 
     /** A delegate that can be executed by this lock. */
     public delegate void CriticalSection() throws GLib.Error;
@@ -52,15 +101,15 @@ public class Geary.Nonblocking.Mutex : BaseObject {
      * //target//.
      */
     public async void execute_locked(Mutex.CriticalSection target,
-                                     Cancellable? cancellable = null)
-        throws Error {
-        int token = yield claim_async(cancellable);
+                                     GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        var token = yield claim(cancellable);
         try {
             target();
         } finally {
             try {
-                release(ref token);
-            } catch (Error err) {
+                release(token);
+            } catch (GLib.Error err) {
                 debug("Mutex error releasing token: %s", err.message);
             }
         }
@@ -75,40 +124,49 @@ public class Geary.Nonblocking.Mutex : BaseObject {
      * @return A token which must be passed to {@link release} when
      * the critical section has completed executing.
      */
-    public async int claim_async(Cancellable? cancellable = null) throws Error {
+    public async Token claim(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         for (;;) {
             if (!locked) {
                 locked = true;
                 do {
-                    locked_token = next_token++;
+                    this.locked_token = this.next_token++;
                 } while (locked_token == INVALID_TOKEN);
 
-                return locked_token;
+                return new Token(locked_token, this);
             }
 
-            yield spinlock.wait_async(cancellable);
+            yield this.spinlock.wait_async(cancellable);
         }
     }
 
     /**
      * Releases the lock at the end of executing a critical section.
      *
-     * The token returned by {@link claim_async} must be supplied as a
-     * parameter.  It will be modified by this call so it can't be
+     * The token returned by {@link claim} must be supplied as a
+     * parameter. It will be modified by this call so it can't be
      * reused.
      *
-     * Throws IOError.INVALID_ARGUMENT if the token was not the one
-     * returned by claim_async.
+     * Throws {@link GLib.IOError.INVALID_ARGUMENT} if the token was
+     * not the one returned by {@link claim}.
+     *
+     * @see Token.release
      */
-    public void release(ref int token) throws Error {
-        if (token != locked_token || token == INVALID_TOKEN)
-            throw new IOError.INVALID_ARGUMENT("Token %d is not the lock token", token);
+    public void release(Token token) throws GLib.Error {
+        if (token.id != this.locked_token ||
+            token.id == INVALID_TOKEN ||
+            token.owner != this) {
+            throw new GLib.IOError.INVALID_ARGUMENT(
+                "Token %d is not the lock token", token.id
+            );
+        }
 
-        locked = false;
-        token = INVALID_TOKEN;
-        locked_token = INVALID_TOKEN;
+        token.invalidate();
 
-        spinlock.notify();
+        this.locked = false;
+        this.locked_token = INVALID_TOKEN;
+
+        this.spinlock.notify();
     }
 
 }

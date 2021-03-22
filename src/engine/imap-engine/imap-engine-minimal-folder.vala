@@ -224,23 +224,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Claim the lifecycle_mutex here so we don't try to re-open when
         // the folder is in the middle of being closed.
         bool opening = false;
-        Error? open_err = null;
+
+        var token = yield this.lifecycle_mutex.claim(cancellable);
         try {
-            int token = yield this.lifecycle_mutex.claim_async(cancellable);
-            try {
-                opening = yield open_locked(open_flags, cancellable);
-            } catch (Error err) {
-                open_err = err;
-            }
-            this.lifecycle_mutex.release(ref token);
-        } catch (Error err) {
-            // oh well
+            opening = yield open_locked(open_flags, cancellable);
+        } finally {
+            token.release();
         }
-
-        if (open_err != null) {
-            throw open_err;
-        }
-
         return opening;
     }
 
@@ -747,7 +737,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                                        Cancellable? cancellable) {
         bool is_closing = false;
         try {
-            int token = yield this.lifecycle_mutex.claim_async(cancellable);
+            var token = yield this.lifecycle_mutex.claim(cancellable);
             // Don't ever decrement to zero here,
             // close_internal_locked will do that later when it's
             // appropriate to do so, after having flushed the replay
@@ -761,11 +751,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                     local_reason, remote_reason, cancellable,
                     (obj, res) => {
                         this.close_internal_locked.end(res);
-                        try {
-                            this.lifecycle_mutex.release(ref token);
-                        } catch (Error err) {
-                            // oh well
-                        }
+                        token.release();
                     }
                 );
             } else {
@@ -774,7 +760,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 } else {
                     is_closing = true;
                 }
-                this.lifecycle_mutex.release(ref token);
+                token.release();
             }
         } catch (Error err) {
             // oh well
@@ -894,15 +880,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private async void force_close(Folder.CloseReason local_reason,
                                    Folder.CloseReason remote_reason) {
         try {
-            int token = yield this.lifecycle_mutex.claim_async(null);
+            var token = yield this.lifecycle_mutex.claim(null);
             // Check we actually need to do the close in case the
             // folder was in the process of closing anyway
             if (this.open_count > 0) {
                 yield close_internal_locked(local_reason, remote_reason, null);
             }
-            this.lifecycle_mutex.release(ref token);
-        } catch (Error err) {
-            // oh well
+            token.release();
+        } catch (GLib.Error mutex_err) {
+            warning("Failed to acquire lifecycle mutex: %s", mutex_err.message);
         }
     }
 
@@ -994,7 +980,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      */
     private async void open_remote_session() {
         try {
-            int token = yield this.remote_mutex.claim_async(this.open_cancellable);
+            var token = yield this.remote_mutex.claim(this.open_cancellable);
 
             // Ensure we are open already and guard against someone
             // else having called this just before we did.
@@ -1007,9 +993,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 this.opening_monitor.notify_finish();
             }
 
-            this.remote_mutex.release(ref token);
-        } catch (Error err) {
-            // Lock error
+            token.release();
+        } catch (GLib.Error mutex_err) {
+            warning("Failed to acquire remote mutex: %s", mutex_err.message);
         }
     }
 

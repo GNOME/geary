@@ -125,21 +125,14 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     /**
      * Enables IMAP IDLE for the session, if supported.
      */
-    public async void enable_idle(Cancellable? cancellable)
-        throws Error {
-        ClientSession session = get_session();
-        int token = yield this.cmd_mutex.claim_async(cancellable);
-        Error? cmd_err = null;
+    public async void enable_idle(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        var session = get_session();
+        var token = yield this.cmd_mutex.claim(cancellable);
         try {
             session.enable_idle();
-        } catch (Error err) {
-            cmd_err = err;
-        }
-
-        this.cmd_mutex.release(ref token);
-
-        if (cmd_err != null) {
-            throw cmd_err;
+        } finally {
+            token.release();
         }
     }
 
@@ -305,27 +298,18 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         throws GLib.Error {
         ClientSession session = get_session();
         Gee.Map<Command, StatusResponse>? responses = null;
-        int token = yield this.cmd_mutex.claim_async(cancellable);
 
+        var token = yield this.cmd_mutex.claim(cancellable);
         this.fetch_accumulator = fetch_results;
         this.search_accumulator = search_results;
-
-        Error? cmd_err = null;
         try {
             responses = yield session.send_multiple_commands_async(
                 cmds, cancellable
             );
-        } catch (Error err) {
-            cmd_err = err;
-        }
-
-        this.fetch_accumulator = null;
-        this.search_accumulator = null;
-
-        this.cmd_mutex.release(ref token);
-
-        if (cmd_err != null) {
-            throw cmd_err;
+        } finally {
+            this.fetch_accumulator = null;
+            this.search_accumulator = null;
+            token.release();
         }
 
         foreach (Command cmd in responses.keys) {
