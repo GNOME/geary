@@ -84,6 +84,9 @@ public class Geary.Db.DatabaseConnection : Context, Connection {
         throws GLib.Error {
         this._database = database;
 
+        // async transactions are executed in the thread pool, so lock
+        // to ensure consistency if multiple constructed
+        // simultaneously
         lock (next_cx_number) {
             this.cx_number = next_cx_number++;
         }

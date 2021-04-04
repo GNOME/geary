@@ -424,6 +424,8 @@ public class Geary.Outbox.Folder :
     //
 
     private int64 do_get_next_ordering(Db.Connection cx, Cancellable? cancellable) throws Error {
+        // Geary.Db executes SQlite transactions in a thread pool, so
+        // this needs to be thread-safe.
         lock (next_ordering) {
             if (next_ordering == 0) {
                 Db.Statement stmt = cx.prepare("SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable");

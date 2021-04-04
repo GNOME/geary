@@ -32,7 +32,7 @@ public class Geary.Db.Database : Context {
     public File? file { get; private set; }
 
     /**
-     * The path passed to Sqlite when opening the database.
+     * The path passed to Sqlite when constructing the database.
      *
      * This will be the path to the database file on disk for
      * persistent databases, else {@link MEMORY_PATH} for transient
@@ -217,6 +217,7 @@ public class Geary.Db.Database : Context {
         return cx;
     }
 
+    // This method must be thread-safe
     private DatabaseConnection internal_open_connection(bool is_primary,
                                                         GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -381,6 +382,8 @@ public class Geary.Db.Database : Context {
             );
         }
 
+        // async transactions are executed in the thread pool, so lock
+        // to ensure consistency if multiple added simultaneously
         lock (this.outstanding_async_jobs) {
             this.outstanding_async_jobs++;
         }
@@ -404,7 +407,8 @@ public class Geary.Db.Database : Context {
         // No-op by default;
     }
 
-    // This method must be thread-safe.
+    // Invoked by the thread pool to execute a transaction. As such,
+    // this method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
         // *never* use primary connection for threaded operations
         var cx = job.default_cx;
