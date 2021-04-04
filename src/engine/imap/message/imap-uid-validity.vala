@@ -15,8 +15,12 @@
 public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData {
     /**
      * Minimum valid value for a {@link UIDValidity}.
+     *
+     * This is smaller than the non-zero minimum RFC 3501 specifies, since at
+     * least one mail server has been observed to return zero values. See Issue
+     * #1183.
      */
-    public const int64 MIN = 1;
+    public const int64 MIN = 0;
 
     /**
      * Maximum valid value for a {@link UIDValidity}.
