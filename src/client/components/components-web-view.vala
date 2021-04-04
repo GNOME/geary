@@ -27,8 +27,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     public const string CID_URL_PREFIX = "cid:";
 
     // Keep these in sync with GearyWebExtension
-    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
-    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+    private const string MESSAGE_ENABLE_REMOTE_LOAD = "__enable_remote_load__";
+    private const string MESSAGE_EXCEPTION = "__exception__";
+    private const string MESSAGE_RETURN_VALUE = "__return__";
 
     // WebKit message handler names
     private const string COMMAND_STACK_CHANGED = "command_stack_changed";
@@ -252,14 +253,15 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     /**
-     * Determines if any remote resources are loaded during page load.
+     * Specifies whether loading remote resources is currently permitted.
      *
-     * This must be set before HTML loaded to have any effect, that
-     * is, before calling {@link load_html}. Afterwards, you must call
-     * {@link load_remote_resources} instead.
+     * If false, any remote resources contained in HTML loaded into
+     * the view will be blocked.
+     *
+     * @see load_remote_resources
      */
-    public bool enable_loading_remote_resources {
-        get; set; default = false;
+    public bool is_load_remote_resources_enabled {
+        get; private set; default = false;
     }
 
     public string document_font {
@@ -433,14 +435,19 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /**
      * Load any remote resources that were previously blocked.
      *
-     * This method will ensure any remote resources that were blocked
+     * Calling this before calling {@link load_html} will enable any
+     * remote resources to be loaded as the HTML is loaded. Calling it
+     * afterwards wil ensure any remote resources that were blocked
      * during initial HTML page load are now loaded.
      *
-     * @see enable_loading_remote_resources
+     * @see is_load_remote_resources_enabled
      */
-    public void load_remote_resources() {
-        this.enable_loading_remote_resources = true;
-        this.call_void.begin(Util.JS.callable("loadRemoteResources"), null);
+    public async void load_remote_resources(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.is_load_remote_resources_enabled = true;
+        yield this.call_void(
+            Util.JS.callable(MESSAGE_ENABLE_REMOTE_LOAD), null
+        );
     }
 
     /**
@@ -639,7 +646,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         );
         if (response != null) {
             var response_name = response.name;
-            if (response_name == MESSAGE_EXCEPTION_NAME) {
+            if (response_name == MESSAGE_EXCEPTION) {
                 var exception = new GLib.VariantDict(response.parameters);
                 var name = exception.lookup_value("name", GLib.VariantType.STRING) as string;
                 var message = exception.lookup_value("message", GLib.VariantType.STRING) as string;
@@ -662,7 +669,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                 }
 
                 throw new Util.JS.Error.EXCEPTION(log_message);
-            } else if (response_name != MESSAGE_RETURN_VALUE_NAME) {
+            } else if (response_name != MESSAGE_RETURN_VALUE) {
                 throw new Util.JS.Error.TYPE(
                     "Method call %s returned unknown name: %s",
                     target.to_string(),
@@ -822,7 +829,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private bool on_message_received(WebKit.UserMessage message) {
-        if (message.name == MESSAGE_EXCEPTION_NAME) {
+        if (message.name == MESSAGE_EXCEPTION) {
             var detail = new GLib.VariantDict(message.parameters);
             var name = detail.lookup_value("name", GLib.VariantType.STRING) as string;
             var log_message = detail.lookup_value("message", GLib.VariantType.STRING) as string;

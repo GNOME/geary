@@ -876,9 +876,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.primary_contact != null &&
             this.primary_contact.load_remote_resources
         );
-        this.web_view.enable_loading_remote_resources = (
-            this.load_remote_resources || contact_load_images
-        );
+        if (this.load_remote_resources || contact_load_images) {
+            yield this.web_view.load_remote_resources(load_cancelled);
+        }
 
         show_placeholder_pane(null);
 
@@ -1152,7 +1152,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
         if (this.web_view != null) {
-            this.web_view.load_remote_resources();
+            this.web_view.load_remote_resources.begin(null);
         }
         if (update_email_flag) {
             flag_remote_images();

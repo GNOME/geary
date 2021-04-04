@@ -73,31 +73,28 @@ PageState.prototype = {
         this._contentLoaded();
     },
     loadRemoteResources: function() {
-        if (window._gearyAllowRemoteResourceLoads == false) {
-            window._gearyAllowRemoteResourceLoads = true;
-            const TYPES = "*[src], *[srcset]";
-            for (const element of document.body.querySelectorAll(TYPES)) {
-                let src = "";
-                try {
-                    src = element.src;
-                } catch (e) {
-                    // fine
-                }
-                if (src != "") {
-                    element.src = "";
-                    element.src = src;
-                }
+        const TYPES = "*[src], *[srcset]";
+        for (const element of document.body.querySelectorAll(TYPES)) {
+            let src = "";
+            try {
+                src = element.src;
+            } catch (e) {
+                // fine
+            }
+            if (src != "") {
+                element.src = "";
+                element.src = src;
+            }
 
-                let srcset = "";
-                try {
-                    srcset = element.srcset;
-                } catch (e) {
-                    // fine
-                }
-                if (srcset != "") {
-                    element.srcset = "";
-                    element.srcset = srcset;
-                }
+            let srcset = "";
+            try {
+                srcset = element.srcset;
+            } catch (e) {
+                // fine
+            }
+            if (srcset != "") {
+                element.srcset = "";
+                element.srcset = srcset;
             }
         }
     },
