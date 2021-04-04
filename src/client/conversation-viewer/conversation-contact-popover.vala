@@ -43,7 +43,8 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Grid contact_pane;
 
-    [GtkChild] private unowned Gtk.Image avatar;
+    [GtkChild]
+    private Hdy.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Label contact_name;
 
@@ -82,6 +83,16 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
         this.load_remote_button.role = CHECK;
 
+        this.contact.bind_property("display-name",
+                                   this.avatar,
+                                   "text",
+                                   BindingFlags.SYNC_CREATE);
+
+        this.contact.bind_property("avatar",
+                                   this.avatar,
+                                   "loadable-icon",
+                                   BindingFlags.SYNC_CREATE);
+
         this.actions.add_action_entries(ACTION_ENTRIES, this);
         insert_action_group(ACTION_GROUP, this.actions);
 
@@ -92,32 +103,6 @@ public class Conversation.ContactPopover : Gtk.Popover {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar() {
-        var main = this.get_toplevel() as Application.MainWindow;
-        if (main != null) {
-            int window_scale = get_scale_factor();
-            int pixel_size = (
-                Application.Client.AVATAR_SIZE_PIXELS * window_scale
-            );
-            try {
-                Gdk.Pixbuf? avatar_buf = yield contact.load_avatar(
-                    this.mailbox,
-                    pixel_size,
-                    this.load_cancellable
-                );
-                if (avatar_buf != null) {
-                    this.avatar.set_from_surface(
-                        Gdk.cairo_surface_create_from_pixbuf(
-                            avatar_buf, window_scale, get_window()
-                        )
-                    );
-                }
-            } catch (GLib.Error err) {
-                debug("Conversation load failed: %s", err.message);
-            }
-        }
-    }
-
     public override void destroy() {
         this.contact.changed.disconnect(this.on_contact_changed);
         this.load_cancellable.cancel();

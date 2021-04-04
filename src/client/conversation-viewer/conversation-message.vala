@@ -335,7 +335,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private GLib.DateTime? local_date = null;
 
-    [GtkChild] private unowned Gtk.Image avatar;
+    [GtkChild] private unowned Hdy.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Revealer compact_revealer;
     [GtkChild] private unowned Gtk.Label compact_from;
@@ -822,30 +822,17 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     this.primary_originator, cancellable
                 );
 
-                int window_scale = get_scale_factor();
-                int pixel_size =
-                    Application.Client.AVATAR_SIZE_PIXELS * window_scale;
-                Gdk.Pixbuf? avatar_buf = yield this.primary_contact.load_avatar(
-                    this.primary_originator,
-                    pixel_size,
-                    cancellable
-                );
-                if (avatar_buf != null) {
-                    this.avatar.set_from_surface(
-                        Gdk.cairo_surface_create_from_pixbuf(
-                            avatar_buf, window_scale, get_window()
-                        )
-                    );
+                if (this.primary_contact != null) {
+                    this.primary_contact.bind_property("display-name",
+                                                       this.avatar,
+                                                       "text",
+                                                       BindingFlags.SYNC_CREATE);
+                    this.primary_contact.bind_property("avatar",
+                                                       this.avatar,
+                                                       "loadable-icon",
+                                                       BindingFlags.SYNC_CREATE);
                 }
-            } else {
-                this.avatar.set_from_icon_name(
-                    "avatar-default-symbolic", Gtk.IconSize.DIALOG
-                );
-                this.avatar.set_pixel_size(
-                    Application.Client.AVATAR_SIZE_PIXELS
-                );
             }
-
 
             // Preview headers
             this.compact_from.set_text(
@@ -1268,7 +1255,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 address_child.contact,
                 address
             );
-            popover.load_avatar.begin();
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.load_remote_resources_changed.connect((enabled) => {
                     if (this.primary_contact.equal_to(address_child.contact) &&

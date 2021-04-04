@@ -125,8 +125,7 @@ public class Composer.WidgetTest : TestCase {
             new Geary.App.EmailStore(mock_account),
             new Application.ContactStore(
                 mock_account,
-                Folks.IndividualAggregator.dup(),
-                new Application.AvatarStore()
+                Folks.IndividualAggregator.dup()
             )
         );
     }

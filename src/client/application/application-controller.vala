@@ -73,9 +73,6 @@ internal class Application.Controller :
         get; private set;
     }
 
-    // Avatar store for the application.
-    private Application.AvatarStore avatars = new Application.AvatarStore();
-
     // Primary collection of the application's open accounts
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
@@ -317,7 +314,6 @@ internal class Application.Controller :
         } catch (GLib.Error err) {
             warning("Error closing plugin manager: %s", err.message);
         }
-        this.avatars.close();
         this.pending_mailtos.clear();
         this.composer_widgets.clear();
 
@@ -983,7 +979,7 @@ internal class Application.Controller :
             account,
             new Geary.App.SearchFolder(account, account.local_folder_root),
             new Geary.App.EmailStore(account),
-            new Application.ContactStore(account, this.folks, this.avatars)
+            new Application.ContactStore(account, this.folks)
         );
         this.accounts.set(account.information, context);
 

@@ -19,6 +19,14 @@ public class Application.Contact : Geary.BaseObject {
     /** The human-readable name of the contact. */
     public string display_name { get; private set; }
 
+    /** The avatar of the contact. */
+    public GLib.LoadableIcon? avatar { get {
+      if (this.individual != null)
+        return this.individual.avatar;
+      else
+        return null;
+    }}
+
     /** Determines if {@link display_name} the same as its email address. */
     public bool display_name_is_email { get; private set; default = false; }
 
@@ -265,21 +273,6 @@ public class Application.Contact : Geary.BaseObject {
         );
     }
 
-    /** Returns the avatar for this contact. */
-    public async Gdk.Pixbuf? load_avatar(Geary.RFC822.MailboxAddress source,
-                                         int pixel_size,
-                                         GLib.Cancellable cancellable)
-        throws GLib.Error {
-        Gdk.Pixbuf? avatar = null;
-        ContactStore? store = this.store;
-        if (store != null) {
-            avatar = yield store.avatars.load(
-                this, source, pixel_size, cancellable
-            );
-        }
-        return avatar;
-    }
-
     /** Sets remote resource loading for this contact. */
     public async void set_remote_resource_loading(bool enabled,
                                                   GLib.Cancellable? cancellable)
@@ -332,8 +325,13 @@ public class Application.Contact : Geary.BaseObject {
             Geary.RFC822.MailboxAddress.is_valid_address(name);
     }
 
+    private void on_individual_avatar_notify() {
+        notify_property("avatar");
+    }
+
     private void update_from_individual(Folks.Individual? replacement) {
         if (this.individual != null) {
+            this.individual.notify["avatar"].disconnect(this.on_individual_avatar_notify);
             this.individual.notify.disconnect(this.on_individual_notify);
             this.individual.removed.disconnect(this.on_individual_removed);
         }
@@ -341,6 +339,7 @@ public class Application.Contact : Geary.BaseObject {
         this.individual = replacement;
 
         if (this.individual != null) {
+            this.individual.notify["avatar"].connect(this.on_individual_avatar_notify);
             this.individual.notify.connect(this.on_individual_notify);
             this.individual.removed.connect(this.on_individual_removed);
         }
