@@ -15,7 +15,6 @@ src/client/accounts/accounts-manager.vala
 src/client/accounts/accounts-signature-web-view.vala
 src/client/application/application-account-context.vala
 src/client/application/application-attachment-manager.vala
-src/client/application/application-avatar-store.vala
 src/client/application/application-certificate-manager.vala
 src/client/application/application-client.vala
 src/client/application/application-command.vala
