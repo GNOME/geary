@@ -594,7 +594,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             });
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.notify["has-selection"].connect(on_selection_changed);
-        this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
         this.web_view.remote_resource_load_blocked.connect(on_remote_resources_blocked);
         this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
@@ -783,7 +782,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     /** Shows and initialises the progress meter. */
-    public void start_progress_loading( ) {
+    public void start_progress_loading() {
         this.progress_pulse.reset();
         this.body_progress.fraction = 0.1;
         this.show_progress_timeout.start();
@@ -791,7 +790,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     /** Hides the progress meter. */
-    public void stop_progress_loading( ) {
+    public void stop_progress_loading() {
         this.body_progress.fraction = 1.0;
         this.show_progress_timeout.reset();
         this.hide_progress_timeout.start();
@@ -1145,7 +1144,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void show_images(bool update_email_flag) {
-        start_progress_loading();
         if (this.remote_images_info_bar != null) {
             this.info_bars.remove(this.remote_images_info_bar);
             this.remote_images_info_bar = null;
@@ -1203,25 +1201,18 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.body_progress.hide();
     }
 
-    private void on_is_loading_notify() {
-        if (this.web_view != null) {
-            if (this.web_view.is_loading) {
-                start_progress_loading();
-            } else {
-                stop_progress_loading();
-            }
-        }
-    }
-
     private void on_resource_load_started(WebKit.WebView view,
                                           WebKit.WebResource res,
                                           WebKit.URIRequest req) {
         // Cache the resource to allow images to be saved
         this.resources[res.get_uri()] = res;
 
-        // We only want to show the body loading progress meter if we
-        // are actually loading some images, so do it here rather than
-        // in on_is_loading_notify.
+        // Kick off the progress timer if this is the first or next in
+        // a batch
+        if (this.remote_resources_loaded == this.remote_resources_requested) {
+            start_progress_loading();
+        }
+
         this.remote_resources_requested++;
         res.finished.connect(() => {
                 this.remote_resources_loaded++;
