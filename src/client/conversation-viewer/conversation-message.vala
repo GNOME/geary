@@ -596,7 +596,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.web_view.notify["has-selection"].connect(on_selection_changed);
         this.web_view.notify["is-loading"].connect(on_is_loading_notify);
         this.web_view.resource_load_started.connect(on_resource_load_started);
-        this.web_view.remote_image_load_blocked.connect(on_remote_images_blocked);
+        this.web_view.remote_resource_load_blocked.connect(on_remote_resources_blocked);
         this.web_view.internal_resource_loaded.connect(trigger_internal_resource_loaded);
         this.web_view.content_loaded.connect(trigger_content_loaded);
         this.web_view.set_hexpand(true);
@@ -877,9 +877,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.primary_contact != null &&
             this.primary_contact.load_remote_resources
         );
-        if (this.load_remote_resources || contact_load_images) {
-            this.web_view.allow_remote_image_loading();
-        }
+        this.web_view.enable_loading_remote_resources = (
+            this.load_remote_resources || contact_load_images
+        );
 
         show_placeholder_pane(null);
 
@@ -1154,7 +1154,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         this.remote_resources_requested = 0;
         this.remote_resources_loaded = 0;
         if (this.web_view != null) {
-            this.web_view.load_remote_images();
+            this.web_view.load_remote_resources();
         }
         if (update_email_flag) {
             flag_remote_images();
@@ -1398,7 +1398,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         selection_changed(this.web_view.has_selection);
     }
 
-    private void on_remote_images_blocked() {
+    private void on_remote_resources_blocked() {
         if (this.remote_images_info_bar == null) {
             this.remote_images_info_bar = new Components.InfoBar(
                 // Translators: Info bar status message

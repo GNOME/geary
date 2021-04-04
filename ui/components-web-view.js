@@ -72,7 +72,7 @@ PageState.prototype = {
         this.updatePreferredHeight();
         this._contentLoaded();
     },
-    loadRemoteImages: function() {
+    loadRemoteResources: function() {
         window._gearyAllowRemoteResourceLoads = true;
         let images = document.getElementsByTagName("IMG");
         for (let i = 0; i < images.length; i++) {

@@ -11,8 +11,8 @@
  *
  * This provides common functionality expected by the client for
  * displaying HTML, such as common WebKit settings, desktop font
- * integration, Inspector support, and remote and inline image
- * handling.
+ * integration, Inspector support, and remote and inline resource
+ * handling for content such as images and videos.
  */
 public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
@@ -23,7 +23,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** URI for internal message body page loads. */
     public const string INTERNAL_URL_BODY = INTERNAL_URL_PREFIX + "body";
 
-    /** URI Scheme and delimiter for images loaded by Content-ID. */
+    /** URI Scheme and delimiter for resources loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
 
     // Keep these in sync with GearyWebExtension
@@ -35,7 +35,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private const string CONTENT_LOADED = "content_loaded";
     private const string DOCUMENT_MODIFIED = "document_modified";
     private const string PREFERRED_HEIGHT_CHANGED = "preferred_height_changed";
-    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remote_image_load_blocked";
+    private const string REMOTE_RESOURCE_LOAD_BLOCKED = "remote_resource_load_blocked";
     private const string SELECTION_CHANGED = "selection_changed";
 
     private const double ZOOM_DEFAULT = 1.0;
@@ -251,6 +251,17 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Determines if any remote resources are loaded during page load.
+     *
+     * This must be set before HTML loaded to have any effect, that
+     * is, before calling {@link load_html}. Afterwards, you must call
+     * {@link load_remote_resources} instead.
+     */
+    public bool enable_loading_remote_resources {
+        get; set; default = false;
+    }
+
     public string document_font {
         get {
             return _document_font;
@@ -312,8 +323,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** Emitted when the view has loaded a resource added to it. */
     public signal void internal_resource_loaded(string name);
 
-    /** Emitted when a remote image load was disallowed. */
-    public signal void remote_image_load_blocked();
+    /** Emitted when a remote resource load was disallowed. */
+    public signal void remote_resource_load_blocked();
 
 
     protected WebView(Application.Configuration config,
@@ -420,20 +431,16 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     /**
-     * Allows loading any remote images found during page load.
+     * Load any remote resources that were previously blocked.
      *
-     * This must be called before HTML content is loaded to have any
-     * effect.
+     * This method will ensure any remote resources that were blocked
+     * during initial HTML page load are now loaded.
+     *
+     * @see enable_loading_remote_resources
      */
-    public void allow_remote_image_loading() {
-        this.run_javascript.begin("_gearyAllowRemoteResourceLoads = true", null);
-    }
-
-    /**
-     * Load any remote images previously that were blocked.
-     */
-    public void load_remote_images() {
-        this.call_void.begin(Util.JS.callable("loadRemoteImages"), null);
+    public void load_remote_resources() {
+        this.enable_loading_remote_resources = true;
+        this.call_void.begin(Util.JS.callable("loadRemoteResources"), null);
     }
 
     /**
@@ -599,7 +606,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
         );
         register_message_callback(
-            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+            REMOTE_RESOURCE_LOAD_BLOCKED, on_remote_resource_load_blocked
         );
         register_message_callback(
             SELECTION_CHANGED, on_selection_changed
@@ -797,8 +804,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         document_modified();
     }
 
-    private void on_remote_image_load_blocked(GLib.Variant? parameters) {
-        remote_image_load_blocked();
+    private void on_remote_resource_load_blocked(GLib.Variant? parameters) {
+        remote_resource_load_blocked();
     }
 
     private void on_content_loaded(GLib.Variant? parameters) {

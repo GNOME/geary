@@ -72,13 +72,13 @@ public class GearyWebExtension : Object {
             // Always load internal resources
             should_load = true;
         } else {
-            // Only load anything else if remote image loading is
+            // Only load anything else if remote resources loading is
             // permitted
-            if (should_load_remote_images(page)) {
+            if (should_load_remote_resources(page)) {
                 should_load = true;
             } else {
                 page.send_message_to_view.begin(
-                    new WebKit.UserMessage("remote_image_load_blocked", null),
+                    new WebKit.UserMessage("remote_resource_load_blocked", null),
                     null
                 );
             }
@@ -87,7 +87,7 @@ public class GearyWebExtension : Object {
         return should_load ? Gdk.EVENT_PROPAGATE : Gdk.EVENT_STOP; // LOL
     }
 
-    private bool should_load_remote_images(WebKit.WebPage page) {
+    private bool should_load_remote_resources(WebKit.WebPage page) {
         bool should_load = false;
         WebKit.Frame frame = page.get_main_frame();
         JSC.Context context = frame.get_js_context();
