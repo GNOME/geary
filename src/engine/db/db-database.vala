@@ -31,6 +31,18 @@ public class Geary.Db.Database : Context {
      */
     public File? file { get; private set; }
 
+    /** Indicates whether the database has been opened. */
+    public bool is_open { get; private set; }
+
+    /** The set of flags the database was opened with, if any. */
+    public DatabaseFlags flags { get; private set; }
+
+    /** {@inheritDoc} */
+    public override Logging.Source? logging_parent {
+        get { return _logging_parent; }
+    }
+    private weak Logging.Source? _logging_parent = null;
+
     /**
      * The path passed to Sqlite when constructing the database.
      *
@@ -38,31 +50,9 @@ public class Geary.Db.Database : Context {
      * persistent databases, else {@link MEMORY_PATH} for transient
      * databases.
      */
-    public string path { get; private set; }
-
-    public DatabaseFlags flags { get; private set; }
-
-    private bool _is_open = false;
-    public bool is_open {
-        get {
-            lock (_is_open) {
-                return _is_open;
-            }
-        }
-
-        private set {
-            lock (_is_open) {
-                _is_open = value;
-            }
-        }
-    }
-
-    /** {@inheritDoc} */
-    public override Logging.Source? logging_parent { get { return _logging_parent; } }
-    private weak Logging.Source? _logging_parent = null;
+    internal string path { get; private set; }
 
     private DatabaseConnection? primary = null;
-    private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
 
     /**
@@ -382,12 +372,6 @@ public class Geary.Db.Database : Context {
             );
         }
 
-        // async transactions are executed in the thread pool, so lock
-        // to ensure consistency if multiple added simultaneously
-        lock (this.outstanding_async_jobs) {
-            this.outstanding_async_jobs++;
-        }
-
         this.thread_pool.add(new_job);
     }
 
@@ -427,11 +411,6 @@ public class Geary.Db.Database : Context {
             job.execute(cx);
         } else {
             job.failed(open_err);
-        }
-
-        lock (outstanding_async_jobs) {
-            assert(outstanding_async_jobs > 0);
-            --outstanding_async_jobs;
         }
     }
 
