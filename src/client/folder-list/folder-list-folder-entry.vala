@@ -80,20 +80,29 @@ public class FolderList.FolderEntry :
         entry_changed();
     }
 
-    public bool internal_drop_received(Application.MainWindow main_window,
+    public bool internal_drop_received(Sidebar.Tree parent,
                                        Gdk.DragContext context,
                                        Gtk.SelectionData data) {
-        // Copy or move?
-        Gdk.ModifierType mask;
-        double[] axes = new double[2];
-        context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            main_window.folder_list.copy_conversation(folder);
-        } else {
-            main_window.folder_list.move_conversation(folder);
-        }
+        var handled = false;
+        var folders = parent as FolderList.Tree;
+        if (folders != null) {
+            switch (context.get_selected_action()) {
+            case MOVE:
+                folders.move_conversation(folder);
+                handled = true;
+                break;
 
-        return true;
+            case COPY:
+                folders.copy_conversation(folder);
+                handled = true;
+                break;
+
+            default:
+                // noop
+                break;
+            }
+        }
+        return handled;
     }
 
     public override int get_count() {
