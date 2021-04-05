@@ -11,8 +11,11 @@ public class FolderList.InboxesBranch : Sidebar.Branch {
         get; private set; default = new Gee.HashMap<Geary.Account, InboxFolderEntry>(); }
 
     public InboxesBranch() {
-        base(new Sidebar.Header(_("Inboxes")),
-            Sidebar.Branch.Options.NONE, inbox_comparator);
+        base(
+            new Sidebar.Header(_("Inboxes")),
+            STARTUP_OPEN_GROUPING,
+            inbox_comparator
+        );
     }
 
     private static int inbox_comparator(Sidebar.Entry a, Sidebar.Entry b) {

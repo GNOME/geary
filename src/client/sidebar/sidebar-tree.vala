@@ -641,8 +641,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         associate_entry(insertion_iter, entry);
         associate_children(branch, entry, insertion_iter);
 
-        if (branch.is_auto_open_on_new_child())
+        if (branch.is_auto_open_on_new_child() || parent is Grouping) {
             expand_to_entry(entry);
+        }
     }
 
     private void on_branch_entry_removed(Sidebar.Branch branch, Sidebar.Entry entry) {
