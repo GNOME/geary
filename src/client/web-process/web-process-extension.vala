@@ -33,14 +33,15 @@ public class GearyWebExtension : Object {
     private const string PAGE_STATE_OBJECT_NAME = "geary";
 
     // Keep these in sync with Components.WebView
-    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
-    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+    private const string MESSAGE_EXCEPTION = "__exception__";
+    private const string MESSAGE_ENABLE_REMOTE_LOAD = "__enable_remote_load__";
+    private const string MESSAGE_RETURN_VALUE = "__return__";
 
     private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
 
     private const string EXTENSION_CLASS_VAR = "_GearyWebExtension";
     private const string EXTENSION_CLASS_SEND = "send";
-    private const string REMOTE_LOAD_VAR = "_gearyAllowRemoteResourceLoads";
+    private const string EXTENSION_CLASS_ALLOW_REMOTE_LOAD = "allowRemoteResourceLoad";
 
     private WebKit.WebExtension extension;
 
@@ -72,13 +73,13 @@ public class GearyWebExtension : Object {
             // Always load internal resources
             should_load = true;
         } else {
-            // Only load anything else if remote image loading is
+            // Only load anything else if remote resources loading is
             // permitted
-            if (should_load_remote_images(page)) {
+            if (should_load_remote_resources(page)) {
                 should_load = true;
             } else {
                 page.send_message_to_view.begin(
-                    new WebKit.UserMessage("remote_image_load_blocked", null),
+                    new WebKit.UserMessage("remote_resource_load_blocked", null),
                     null
                 );
             }
@@ -87,19 +88,8 @@ public class GearyWebExtension : Object {
         return should_load ? Gdk.EVENT_PROPAGATE : Gdk.EVENT_STOP; // LOL
     }
 
-    private bool should_load_remote_images(WebKit.WebPage page) {
-        bool should_load = false;
-        WebKit.Frame frame = page.get_main_frame();
-        JSC.Context context = frame.get_js_context();
-        try {
-            should_load = Util.JS.to_bool(context.get_value(REMOTE_LOAD_VAR));
-        } catch (GLib.Error err) {
-            debug(
-                "Error checking PageState::allowRemoteImages: %s",
-                err.message
-            );
-        }
-        return should_load;
+    private bool should_load_remote_resources(WebKit.WebPage page) {
+        return page.get_data<string>(EXTENSION_CLASS_ALLOW_REMOTE_LOAD) != null;
     }
 
     private WebKit.UserMessage to_exception_message(string? name,
@@ -128,7 +118,7 @@ public class GearyWebExtension : Object {
             detail.insert_value("column_number", new GLib.Variant.uint32(column_number));
         }
         return new WebKit.UserMessage(
-            MESSAGE_EXCEPTION_NAME,
+            MESSAGE_EXCEPTION,
             detail.end()
         );
     }
@@ -144,8 +134,6 @@ public class GearyWebExtension : Object {
                                           WebKit.UserMessage message) {
         WebKit.Frame frame = page.get_main_frame();
         JSC.Context context = frame.get_js_context();
-        JSC.Value page_state = context.get_value(PAGE_STATE_OBJECT_NAME);
-
         try {
             JSC.Value[]? call_param = null;
             GLib.Variant? message_param = message.parameters;
@@ -166,9 +154,23 @@ public class GearyWebExtension : Object {
                 }
             }
 
-            JSC.Value ret = page_state.object_invoke_methodv(
-                message.name, call_param
-            );
+            JSC.Value page_state = context.get_value(PAGE_STATE_OBJECT_NAME);
+            JSC.Value? ret = null;
+            if (message.name == MESSAGE_ENABLE_REMOTE_LOAD) {
+                page.set_data<string>(
+                    EXTENSION_CLASS_ALLOW_REMOTE_LOAD,
+                    EXTENSION_CLASS_ALLOW_REMOTE_LOAD
+                );
+                if (!page_state.is_undefined()) {
+                    ret = page_state.object_invoke_methodv(
+                        "loadRemoteResources", null
+                    );
+                }
+            } else {
+                ret = page_state.object_invoke_methodv(
+                    message.name, call_param
+                );
+            }
 
             // Must send a reply, even for void calls, otherwise
             // WebKitGTK will complain. So return a message return
@@ -190,8 +192,8 @@ public class GearyWebExtension : Object {
             } else {
                 message.send_reply(
                     new WebKit.UserMessage(
-                        MESSAGE_RETURN_VALUE_NAME,
-                        Util.JS.value_to_variant(ret)
+                        MESSAGE_RETURN_VALUE,
+                        ret != null ? Util.JS.value_to_variant(ret) : null
                     )
                 );
             }
@@ -266,11 +268,6 @@ public class GearyWebExtension : Object {
         context.set_value(
             EXTENSION_CLASS_VAR,
             new JSC.Value.object(context, extension_class, extension_class)
-        );
-
-        context.set_value(
-            REMOTE_LOAD_VAR,
-            new JSC.Value.boolean(context, false)
         );
     }
 

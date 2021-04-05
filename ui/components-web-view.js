@@ -72,14 +72,30 @@ PageState.prototype = {
         this.updatePreferredHeight();
         this._contentLoaded();
     },
-    loadRemoteImages: function() {
-        window._gearyAllowRemoteResourceLoads = true;
-        let images = document.getElementsByTagName("IMG");
-        for (let i = 0; i < images.length; i++) {
-            let img = images.item(i);
-            let src = img.src;
-            img.src = "";
-            img.src = src;
+    loadRemoteResources: function() {
+        const TYPES = "*[src], *[srcset]";
+        for (const element of document.body.querySelectorAll(TYPES)) {
+            let src = "";
+            try {
+                src = element.src;
+            } catch (e) {
+                // fine
+            }
+            if (src != "") {
+                element.src = "";
+                element.src = src;
+            }
+
+            let srcset = "";
+            try {
+                srcset = element.srcset;
+            } catch (e) {
+                // fine
+            }
+            if (srcset != "") {
+                element.srcset = "";
+                element.srcset = srcset;
+            }
         }
     },
     setEditable: function(enabled) {

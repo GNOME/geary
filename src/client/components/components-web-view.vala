@@ -11,8 +11,8 @@
  *
  * This provides common functionality expected by the client for
  * displaying HTML, such as common WebKit settings, desktop font
- * integration, Inspector support, and remote and inline image
- * handling.
+ * integration, Inspector support, and remote and inline resource
+ * handling for content such as images and videos.
  */
 public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
@@ -23,19 +23,20 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** URI for internal message body page loads. */
     public const string INTERNAL_URL_BODY = INTERNAL_URL_PREFIX + "body";
 
-    /** URI Scheme and delimiter for images loaded by Content-ID. */
+    /** URI Scheme and delimiter for resources loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
 
     // Keep these in sync with GearyWebExtension
-    private const string MESSAGE_RETURN_VALUE_NAME = "__return__";
-    private const string MESSAGE_EXCEPTION_NAME = "__exception__";
+    private const string MESSAGE_ENABLE_REMOTE_LOAD = "__enable_remote_load__";
+    private const string MESSAGE_EXCEPTION = "__exception__";
+    private const string MESSAGE_RETURN_VALUE = "__return__";
 
     // WebKit message handler names
     private const string COMMAND_STACK_CHANGED = "command_stack_changed";
     private const string CONTENT_LOADED = "content_loaded";
     private const string DOCUMENT_MODIFIED = "document_modified";
     private const string PREFERRED_HEIGHT_CHANGED = "preferred_height_changed";
-    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remote_image_load_blocked";
+    private const string REMOTE_RESOURCE_LOAD_BLOCKED = "remote_resource_load_blocked";
     private const string SELECTION_CHANGED = "selection_changed";
 
     private const double ZOOM_DEFAULT = 1.0;
@@ -251,6 +252,18 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
+    /**
+     * Specifies whether loading remote resources is currently permitted.
+     *
+     * If false, any remote resources contained in HTML loaded into
+     * the view will be blocked.
+     *
+     * @see load_remote_resources
+     */
+    public bool is_load_remote_resources_enabled {
+        get; private set; default = false;
+    }
+
     public string document_font {
         get {
             return _document_font;
@@ -312,8 +325,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /** Emitted when the view has loaded a resource added to it. */
     public signal void internal_resource_loaded(string name);
 
-    /** Emitted when a remote image load was disallowed. */
-    public signal void remote_image_load_blocked();
+    /** Emitted when a remote resource load was disallowed. */
+    public signal void remote_resource_load_blocked();
 
 
     protected WebView(Application.Configuration config,
@@ -420,20 +433,21 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     /**
-     * Allows loading any remote images found during page load.
+     * Load any remote resources that were previously blocked.
      *
-     * This must be called before HTML content is loaded to have any
-     * effect.
+     * Calling this before calling {@link load_html} will enable any
+     * remote resources to be loaded as the HTML is loaded. Calling it
+     * afterwards wil ensure any remote resources that were blocked
+     * during initial HTML page load are now loaded.
+     *
+     * @see is_load_remote_resources_enabled
      */
-    public void allow_remote_image_loading() {
-        this.run_javascript.begin("_gearyAllowRemoteResourceLoads = true", null);
-    }
-
-    /**
-     * Load any remote images previously that were blocked.
-     */
-    public void load_remote_images() {
-        this.call_void.begin(Util.JS.callable("loadRemoteImages"), null);
+    public async void load_remote_resources(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.is_load_remote_resources_enabled = true;
+        yield this.call_void(
+            Util.JS.callable(MESSAGE_ENABLE_REMOTE_LOAD), null
+        );
     }
 
     /**
@@ -599,7 +613,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
         );
         register_message_callback(
-            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+            REMOTE_RESOURCE_LOAD_BLOCKED, on_remote_resource_load_blocked
         );
         register_message_callback(
             SELECTION_CHANGED, on_selection_changed
@@ -632,7 +646,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         );
         if (response != null) {
             var response_name = response.name;
-            if (response_name == MESSAGE_EXCEPTION_NAME) {
+            if (response_name == MESSAGE_EXCEPTION) {
                 var exception = new GLib.VariantDict(response.parameters);
                 var name = exception.lookup_value("name", GLib.VariantType.STRING) as string;
                 var message = exception.lookup_value("message", GLib.VariantType.STRING) as string;
@@ -655,7 +669,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                 }
 
                 throw new Util.JS.Error.EXCEPTION(log_message);
-            } else if (response_name != MESSAGE_RETURN_VALUE_NAME) {
+            } else if (response_name != MESSAGE_RETURN_VALUE) {
                 throw new Util.JS.Error.TYPE(
                     "Method call %s returned unknown name: %s",
                     target.to_string(),
@@ -797,8 +811,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         document_modified();
     }
 
-    private void on_remote_image_load_blocked(GLib.Variant? parameters) {
-        remote_image_load_blocked();
+    private void on_remote_resource_load_blocked(GLib.Variant? parameters) {
+        remote_resource_load_blocked();
     }
 
     private void on_content_loaded(GLib.Variant? parameters) {
@@ -815,7 +829,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private bool on_message_received(WebKit.UserMessage message) {
-        if (message.name == MESSAGE_EXCEPTION_NAME) {
+        if (message.name == MESSAGE_EXCEPTION) {
             var detail = new GLib.VariantDict(message.parameters);
             var name = detail.lookup_value("name", GLib.VariantType.STRING) as string;
             var log_message = detail.lookup_value("message", GLib.VariantType.STRING) as string;
