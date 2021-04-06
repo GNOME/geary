@@ -82,7 +82,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         GLib.TimeZone? timezone = null;
         if (tz[0] != '\0') {
             string tz_string = (string) tz;
-            timezone = new GLib.TimeZone.identifier(tz_string);
+            timezone = GLib.TimeZone.new_from_identifier(tz_string);
             if (timezone == null) {
                 warning("Invalid INTERNALDATE timezone \"%s\"", tz_string);
             }
