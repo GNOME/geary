@@ -1351,7 +1351,6 @@ public class Application.MainWindow :
         );
 
         this.conversation_viewer.hexpand = true;
-        this.conversation_size_group.add_widget(this.conversation_viewer);
         this.conversation_viewer_box.add(this.conversation_viewer);
 
         // Main toolbar

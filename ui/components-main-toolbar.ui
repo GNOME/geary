@@ -9,9 +9,9 @@
     <child>
       <object class="HdyLeaflet" id="conversations_leaflet">
         <property name="visible">True</property>
+        <property name="hexpand">True</property>
         <property name="can_swipe_back">True</property>
         <property name="transition_type">over</property>
-        <property name="hexpand_set">True</property>
         <child>
           <object class="HdyHeaderBar" id="folder_header">
             <property name="visible">True</property>
@@ -212,6 +212,12 @@
       </packing>
     </child>
   </template>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="conversations_leaflet"/>
+      <widget name="conversation_header"/>
+    </widgets>
+  </object>
   <object class="HdyHeaderGroup" id="conversations_header_group">
     <property name="decorate-all" bind-source="conversations_leaflet" bind-property="folded" bind-flags="sync-create"/>
     <headerbars>
