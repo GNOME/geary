@@ -18,10 +18,6 @@
   min-width: 250px;
 }
 
-.geary-folder-frame .sidebar .cell {
-  padding: 9px 6px;
-}
-
 .geary-conversation-frame > border {
   border-left-width: 0;
   border-top-width: 0;
@@ -29,15 +25,10 @@
   min-width: 360px;
 }
 
-treeview.sidebar {
-  border: none;
-}
-
 geary-conversation-viewer {
   min-width: 360px;
 }
 
-/* For 3-pane mode only */
 .geary-sidebar-pane-separator.vertical .conversation-frame > border {
   border-bottom-width: 0;
 }
@@ -401,6 +392,20 @@ dialog.geary-remove-confirm .dialog-action-box {
 }
 
 /* FolderList.Tree */
+
+treeview.sidebar {
+  border: none;
+}
+
+treeview.sidebar .cell {
+  padding: 9px 6px;
+}
+treeview.sidebar .cell:dir(ltr) {
+  padding-left: 0px;
+}
+treeview.sidebar .cell:dir(rtl) {
+  padding-right: 0px;
+}
 
 treeview.sidebar:drop(active).after,
 treeview.sidebar:drop(active).before,
