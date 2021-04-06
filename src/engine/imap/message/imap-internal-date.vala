@@ -79,14 +79,25 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         if (month < 0)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": bad month", internaldate);
 
-        // TODO: verify timezone
+        GLib.TimeZone? timezone = null;
+        if (tz[0] != '\0') {
+            string tz_string = (string) tz;
+            timezone = new GLib.TimeZone.identifier(tz_string);
+            if (timezone == null) {
+                warning("Invalid INTERNALDATE timezone \"%s\"", tz_string);
+            }
+        }
+        if (timezone == null) {
+            // If no timezone listed, ISO 8601 says to use local time.
+            timezone = new GLib.TimeZone.local();
+        }
 
-        // if no timezone listed, ISO 8601 says to use local time
-        TimeZone timezone = (tz[0] != '\0') ? new TimeZone((string) tz) : new TimeZone.local();
-
-        // assemble into DateTime, which validates the time as well (this is why we want to keep
-        // original around, for other reasons) ... month is 1-based in DateTime
-        DateTime datetime = new DateTime(timezone, year, month + 1, day, hour, min, sec);
+        // assemble into DateTime, which validates the time as well
+        // (this is why we want to keep original around, for other
+        // reasons) ... month is 1-based in DateTime
+        var datetime = new GLib.DateTime(
+            timezone, year, month + 1, day, hour, min, sec
+        );
 
         return new InternalDate(internaldate, datetime);
     }
