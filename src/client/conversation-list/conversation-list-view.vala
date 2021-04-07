@@ -43,6 +43,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
         base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
+        set_grid_lines(Gtk.TreeViewGridLines.HORIZONTAL);
 
         this.config = config;
 
