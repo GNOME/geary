@@ -115,18 +115,10 @@ public class Sidebar.Tree : Gtk.TreeView {
         end_column.set_cell_data_func(unread_renderer, counter_renderer_function);
         end_column.pack_start(unread_renderer, false);
         end_column.add_attribute(unread_renderer, "counter", Columns.COUNTER);
-
-        // Expander arrows.
-        SidebarExpanderRenderer expander_renderer = new SidebarExpanderRenderer(this);
-        expander_renderer.toggle.connect(toggle_branch_expansion);
-        end_column.set_cell_data_func(expander_renderer, expander_renderer_function);
-        end_column.pack_start(expander_renderer, false);
         append_column(end_column);
 
         set_headers_visible(false);
         set_enable_search(false);
-        set_search_column(-1);
-        set_show_expanders(false);
         set_reorderable(false);
         set_enable_tree_lines(false);
         set_grid_lines(Gtk.TreeViewGridLines.NONE);
@@ -169,10 +161,6 @@ public class Sidebar.Tree : Gtk.TreeView {
             return;
         }
         renderer.visible = !(wrapper.entry is Sidebar.Header);
-    }
-
-    public void expander_renderer_function(Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        renderer.visible = renderer.is_expander;
     }
 
     public void counter_renderer_function(Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
@@ -641,8 +629,9 @@ public class Sidebar.Tree : Gtk.TreeView {
         associate_entry(insertion_iter, entry);
         associate_children(branch, entry, insertion_iter);
 
-        if (branch.is_auto_open_on_new_child())
+        if (branch.is_auto_open_on_new_child() || parent is Grouping) {
             expand_to_entry(entry);
+        }
     }
 
     private void on_branch_entry_removed(Sidebar.Branch branch, Sidebar.Entry entry) {

@@ -34,7 +34,10 @@ public class FolderList.AccountBranch : Sidebar.Branch {
 
     public AccountBranch(Geary.Account account) {
         base(new Sidebar.Header(account.information.display_name),
-             Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
+             STARTUP_OPEN_GROUPING | STARTUP_EXPAND_TO_FIRST_CHILD,
+             normal_folder_comparator,
+             special_folder_comparator
+        );
 
         this.account = account;
         // Translators: The name of the folder group containing
