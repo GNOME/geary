@@ -38,7 +38,6 @@ src/client/application/secret-mediator.vala
 src/client/client-action.vala
 src/client/components/components-attachment-pane.vala
 src/client/components/components-conversation-actions.vala
-src/client/components/components-conversation-action-bar.vala
 src/client/components/components-entry-undo.vala
 src/client/components/components-in-app-notification.vala
 src/client/components/components-info-bar-stack.vala
@@ -458,8 +457,6 @@ ui/components-attachment-pane.ui
 ui/components-attachment-pane-menus.ui
 ui/components-attachment-view.ui
 ui/components-conversation-actions.ui
-ui/components-conversation-action-bar.ui
-ui/components-conversation-header-bar.ui
 ui/components-in-app-notification.ui
 ui/components-info-bar.ui
 ui/components-inspector-error-view.ui

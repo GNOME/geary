@@ -307,9 +307,6 @@ public class Application.MainWindow :
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
 
-    // Actions in the Conversation HeaderBar or ActionBar
-    private Components.ConversationActions conversation_actions;
-
     public Components.InfoBarStack conversation_list_info_bars {
         get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
     }
@@ -344,12 +341,18 @@ public class Application.MainWindow :
     [GtkChild] private unowned Gtk.Box main_layout;
     [GtkChild] private unowned Hdy.Leaflet main_leaflet;
     [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
+
     [GtkChild] private unowned Gtk.Box folder_box;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
+
     [GtkChild] private unowned Gtk.Box conversation_list_box;
     [GtkChild] private unowned Gtk.ScrolledWindow conversation_list_scrolled;
+    [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
+    [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
+
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
-    [GtkChild] private unowned Components.ConversationActionBar conversation_viewer_action_bar;
+    [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
+    [GtkChild] private unowned Components.ConversationActions conversation_viewer_actions;
     [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
     [GtkChild] private unowned Gtk.SizeGroup folder_separator_size_group;
     [GtkChild] private unowned Gtk.SizeGroup conversations_size_group;
@@ -359,8 +362,6 @@ public class Application.MainWindow :
     [GtkChild] private unowned Hdy.SwipeGroup conversation_swipe_group;
 
     [GtkChild] private unowned Gtk.Overlay overlay;
-
-    private Components.ConversationActionBar action_bar;
 
     private Components.InfoBarStack info_bars =
         new Components.InfoBarStack(SINGLE);
@@ -758,11 +759,9 @@ public class Application.MainWindow :
                 this.folder_list.deselect_folder();
             }
 
-            update_conversation_actions(NONE);
             update_title();
-            this.conversation_actions.update_trash_button(
-                !this.is_shift_down && this.selected_folder_supports_trash
-            );
+            update_conversation_actions(NONE);
+            update_trash_action();
 
             this.conversation_viewer.show_loading();
             this.previous_selection_was_interactive = is_interactive;
@@ -1293,19 +1292,8 @@ public class Application.MainWindow :
         this.conversation_viewer_box.add(this.conversation_viewer);
 
 
-        // Setup conversation actions
-        this.conversation_actions = new Components.ConversationActions();
-        this.conversation_actions.move_folder_menu.folder_selected.connect(on_move_conversation);
-        this.conversation_actions.copy_folder_menu.folder_selected.connect(on_copy_conversation);
-        this.conversation_actions.bind_property("find-open",
-                                                this.conversation_viewer.conversation_find_bar,
-                                                "search-mode-enabled",
-                                                BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-
         // Main toolbar
-        this.main_toolbar = new Components.MainToolbar(
-            config, conversation_viewer_action_bar
-        );
+        this.main_toolbar = new Components.MainToolbar(config);
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
                                              this.folder_separator_size_group,
                                              this.conversations_size_group,
@@ -1313,16 +1301,22 @@ public class Application.MainWindow :
                                              this.conversation_size_group);
         this.main_toolbar.add_to_swipe_groups(this.conversations_swipe_group,
                                               this.conversation_swipe_group);
-        this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
-            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        this.main_toolbar.bind_property(
+            "search-open",
+            this.search_bar, "search-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.main_toolbar.bind_property(
+            "find-open",
+            this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
         if (config.desktop_environment == UNITY) {
             this.main_toolbar.show_close_button = false;
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         }
-
-        this.main_toolbar.add_conversation_actions(this.conversation_actions);
 
         this.main_layout.pack_start(this.info_bars, false, true, 0);
 
@@ -1333,12 +1327,6 @@ public class Application.MainWindow :
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
         this.status_bar.show_all();
-
-        // Action bar
-        this.action_bar = new Components.ConversationActionBar();
-        this.conversation_list_box.add_with_properties(action_bar,
-                                                       "pack-type", Gtk.PackType.END,
-                                                       "position", 0);
     }
 
     /** {@inheritDoc} */
@@ -1538,7 +1526,9 @@ public class Application.MainWindow :
         // setting it again.
         this.conversation_list_view.select_conversations(to_select);
 
-        this.conversation_actions.selected_conversations = to_select.size;
+        this.conversation_list_actions.selected_conversations = to_select.size;
+        this.main_toolbar.conversation_actions.selected_conversations = to_select.size;
+
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
             case 0:
@@ -1772,16 +1762,25 @@ public class Application.MainWindow :
 
         this.update_context_dependent_actions.begin(sensitive);
         switch (count) {
-            case NONE:
-                    conversation_actions.take_ownership(null);
-                break;
-            case SINGLE:
-                this.main_toolbar.add_conversation_actions(this.conversation_actions);
-                break;
-            case MULTIPLE:
-                this.action_bar.add_conversation_actions(this.conversation_actions);
-                break;
+        case NONE:
+            this.conversation_list_actions_revealer.reveal_child = false;
+            break;
+        case SINGLE:
+            this.conversation_list_actions_revealer.reveal_child = false;
+            break;
+        case MULTIPLE:
+            this.conversation_list_actions_revealer.reveal_child = true;
+            break;
         }
+    }
+
+    private void update_trash_action() {
+        var show_trash = (
+            !this.is_shift_down &&
+            this.selected_folder_supports_trash
+        );
+        this.conversation_list_actions.update_trash_button(show_trash);
+        this.main_toolbar.conversation_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
@@ -1837,9 +1836,7 @@ public class Application.MainWindow :
 
     private void set_shift_key_down(bool down) {
         this.is_shift_down = down;
-        this.conversation_actions.update_trash_button(
-            !down && this.selected_folder_supports_trash
-        );
+        update_trash_action();
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
@@ -1866,7 +1863,7 @@ public class Application.MainWindow :
                     conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_list_view;
                 } else {
-                    if (this.conversation_actions.selected_conversations == 1 &&
+                    if (this.conversation_list_view.get_selected().size == 1 &&
                         this.selected_folder.properties.email_total > 0) {
                         main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                         focus = this.conversation_viewer.visible_child;

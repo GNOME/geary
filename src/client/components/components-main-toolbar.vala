@@ -14,20 +14,18 @@
 [GtkTemplate (ui = "/org/gnome/Geary/components-main-toolbar.ui")]
 public class Components.MainToolbar : Hdy.Leaflet {
 
-    // How wide the left pane should be. Auto-synced with our settings
-    public int left_pane_width { get; set; }
 
-    // Used to form the title of the folder header
     public string account { get; set; }
+
     public string folder { get; set; }
 
-    // Close button settings
     public bool show_close_button { get; set; default = true; }
 
-    // Search bar
     public bool search_open { get; set; default = false; }
 
-    private ConversationActionBar conversation_viewer_action_bar;
+    public bool find_open { get; set; default = false; }
+
+    [GtkChild] public unowned ConversationActions conversation_actions;
 
     [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
 
@@ -37,36 +35,42 @@ public class Components.MainToolbar : Hdy.Leaflet {
 
     [GtkChild] private unowned Gtk.Separator folder_separator;
 
-    // Conversations header elements
+    // Conversation list header elements
     [GtkChild] private unowned Hdy.HeaderBar conversations_header;
-    [GtkChild] private unowned Gtk.ToggleButton search_conversations_button;
+    [GtkChild] private unowned Gtk.ToggleButton search_button;
 
     [GtkChild] private unowned Gtk.Separator conversations_separator;
 
-    // Conversation header elements
-    [GtkChild] private unowned ConversationHeaderBar conversation_header;
+    // Conversation viewer header elements
+    [GtkChild] private unowned Hdy.HeaderBar conversation_header;
+    [GtkChild] private unowned Gtk.ToggleButton find_button;
 
     [GtkChild] private unowned Hdy.HeaderGroup header_group;
 
-    Gtk.SizeGroup conversation_group;
+    private Gtk.SizeGroup conversation_group;
 
-    public MainToolbar(Application.Configuration config,
-                       ConversationActionBar action_bar) {
+
+    public MainToolbar(Application.Configuration config) {
         if (config.desktop_environment != UNITY) {
             this.bind_property("account", this.conversations_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.conversations_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
-        this.conversation_viewer_action_bar = action_bar;
-        this.conversation_header.action_bar = action_bar;
 
         // Assemble the main/mark menus
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/components-main-toolbar-menus.ui");
         MenuModel main_menu = (MenuModel) builder.get_object("main_menu");
 
-        // Setup folder header elements
         this.main_menu_button.popover = new Gtk.Popover.from_model(null, main_menu);
-        this.bind_property("search-open", this.search_conversations_button, "active",
-            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        this.bind_property(
+            "search-open",
+            this.search_button, "active",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.bind_property(
+            "find-open",
+            this.find_button, "active",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
     }
 
     public void set_conversation_header(Hdy.HeaderBar header) {
@@ -105,10 +109,6 @@ public class Components.MainToolbar : Hdy.Leaflet {
                                     Hdy.SwipeGroup conversation_group) {
         conversations_group.add_swipeable(this.conversations_leaflet);
         conversation_group.add_swipeable(this);
-    }
-
-    public void add_conversation_actions(ConversationActions actions) {
-        conversation_header.add_conversation_actions(actions);
     }
 
     public void show_main_menu() {

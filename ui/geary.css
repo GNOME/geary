@@ -18,6 +18,10 @@
   min-width: 250px;
 }
 
+geary-conversation-list revealer {
+  margin: 6px;
+}
+
 .geary-conversation-frame > border {
   border-left-width: 0;
   border-top-width: 0;
@@ -54,6 +58,10 @@ geary-conversation-viewer {
 
 infobar flowboxchild {
 	padding: 0px;
+}
+
+revealer components-conversation-actions {
+  margin: 6px;
 }
 
 /* FolderPopover */
