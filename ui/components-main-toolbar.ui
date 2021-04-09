@@ -6,7 +6,7 @@
     <property name="visible">True</property>
     <property name="icon_name">mail-archive-symbolic</property>
   </object>
-  <template class="MainToolbar" parent="HdyLeaflet">
+  <template class="ComponentsMainToolbar" parent="HdyLeaflet">
     <property name="visible">True</property>
     <property name="can_swipe_back">True</property>
     <property name="transition_type">over</property>
@@ -19,7 +19,7 @@
         <child>
           <object class="HdyHeaderBar" id="folder_header">
             <property name="visible">True</property>
-            <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
+            <property name="show_close_button" bind-source="ComponentsMainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
             <property name="title">Mail</property>
             <child>
               <object class="GtkMenuButton" id="main_menu_button">
@@ -60,7 +60,7 @@
           <object class="HdyHeaderBar" id="conversations_header">
             <property name="visible">True</property>
             <property name="hexpand">True</property>
-            <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
+            <property name="show_close_button" bind-source="ComponentsMainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
             <child>
               <object class="GtkButton" id="conversations_back">
                 <property name="receives_default">False</property>
@@ -144,8 +144,8 @@
     </child>
     <child>
       <object class="ComponentsConversationHeaderBar" id="conversation_header">
-        <property name="show_close_button" bind-source="MainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
-        <property name="folded" bind-source="MainToolbar" bind-property="folded" bind-flags="sync-create"/>
+        <property name="show_close_button" bind-source="ComponentsMainToolbar" bind-property="show_close_button" bind-flags="sync-create"/>
+        <property name="folded" bind-source="ComponentsMainToolbar" bind-property="folded" bind-flags="sync-create"/>
       </object>
       <packing>
         <property name="name">conversation</property>
@@ -160,7 +160,7 @@
     </headerbars>
   </object>
   <object class="HdyHeaderGroup" id="header_group">
-    <property name="decorate-all" bind-source="MainToolbar" bind-property="folded" bind-flags="sync-create"/>
+    <property name="decorate-all" bind-source="ComponentsMainToolbar" bind-property="folded" bind-flags="sync-create"/>
     <headerbars>
       <headerbar name="conversations_header_group"/>
       <headerbar name="conversation_header"/>

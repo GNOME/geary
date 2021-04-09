@@ -302,7 +302,7 @@ public class Application.MainWindow :
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
-    public MainToolbar main_toolbar { get; private set; }
+    public Components.MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
@@ -1303,7 +1303,9 @@ public class Application.MainWindow :
                                                 BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         // Main toolbar
-        this.main_toolbar = new MainToolbar(config, conversation_viewer_action_bar);
+        this.main_toolbar = new Components.MainToolbar(
+            config, conversation_viewer_action_bar
+        );
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
                                              this.folder_separator_size_group,
                                              this.conversations_size_group,

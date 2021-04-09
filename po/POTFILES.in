@@ -44,6 +44,7 @@ src/client/components/components-in-app-notification.vala
 src/client/components/components-info-bar-stack.vala
 src/client/components/components-info-bar.vala
 src/client/components/components-inspector.vala
+src/client/components/components-main-toolbar.vala
 src/client/components/components-placeholder-pane.vala
 src/client/components/components-preferences-window.vala
 src/client/components/components-problem-report-info-bar.vala
@@ -54,7 +55,6 @@ src/client/components/components-web-view.vala
 src/client/components/count-badge.vala
 src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala
-src/client/components/main-toolbar.vala
 src/client/components/monitored-progress-bar.vala
 src/client/components/monitored-spinner.vala
 src/client/components/status-bar.vala
@@ -465,6 +465,8 @@ ui/components-info-bar.ui
 ui/components-inspector-error-view.ui
 ui/components-inspector-log-view.ui
 ui/components-inspector.ui
+ui/components-main-toolbar.ui
+ui/components-main-toolbar-menus.ui
 ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui
 ui/conversation-email.ui
@@ -476,7 +478,5 @@ ui/conversation-viewer.ui
 ui/find_bar.glade
 ui/folder-popover.ui
 ui/gtk/help-overlay.ui
-ui/main-toolbar.ui
-ui/main-toolbar-menus.ui
 ui/password-dialog.glade
 ui/problem-details-dialog.ui

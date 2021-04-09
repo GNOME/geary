@@ -21,6 +21,8 @@
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-error-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-log-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-system-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-main-toolbar.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-main-toolbar-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-editor.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-editor-menus.ui</file>
@@ -41,8 +43,6 @@
     <file compressed="true" preprocess="xml-stripblanks">find_bar.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">folder-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">main-toolbar.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">main-toolbar-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">problem-details-dialog.ui</file>
     <file compressed="true">signature-web-view.js</file>

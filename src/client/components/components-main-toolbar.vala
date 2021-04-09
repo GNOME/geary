@@ -1,23 +1,33 @@
-/* Copyright 2017 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2017 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Draws the main toolbar.
-[GtkTemplate (ui = "/org/gnome/Geary/main-toolbar.ui")]
-public class MainToolbar : Hdy.Leaflet {
+
+/**
+ * The toolbar for the main window.
+ *
+ * @see Application.MainWindow
+ */
+[GtkTemplate (ui = "/org/gnome/Geary/components-main-toolbar.ui")]
+public class Components.MainToolbar : Hdy.Leaflet {
+
     // How wide the left pane should be. Auto-synced with our settings
     public int left_pane_width { get; set; }
+
     // Used to form the title of the folder header
     public string account { get; set; }
     public string folder { get; set; }
+
     // Close button settings
     public bool show_close_button { get; set; default = true; }
+
     // Search bar
     public bool search_open { get; set; default = false; }
 
-    private Components.ConversationActionBar conversation_viewer_action_bar;
+    private ConversationActionBar conversation_viewer_action_bar;
 
     [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
 
@@ -34,14 +44,14 @@ public class MainToolbar : Hdy.Leaflet {
     [GtkChild] private unowned Gtk.Separator conversations_separator;
 
     // Conversation header elements
-    [GtkChild] private unowned Components.ConversationHeaderBar conversation_header;
+    [GtkChild] private unowned ConversationHeaderBar conversation_header;
 
     [GtkChild] private unowned Hdy.HeaderGroup header_group;
 
     Gtk.SizeGroup conversation_group;
 
     public MainToolbar(Application.Configuration config,
-                       Components.ConversationActionBar action_bar) {
+                       ConversationActionBar action_bar) {
         if (config.desktop_environment != UNITY) {
             this.bind_property("account", this.conversations_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.conversations_header, "subtitle", BindingFlags.SYNC_CREATE);
@@ -50,7 +60,7 @@ public class MainToolbar : Hdy.Leaflet {
         this.conversation_header.action_bar = action_bar;
 
         // Assemble the main/mark menus
-        Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
+        Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/components-main-toolbar-menus.ui");
         MenuModel main_menu = (MenuModel) builder.get_object("main_menu");
 
         // Setup folder header elements
@@ -97,7 +107,7 @@ public class MainToolbar : Hdy.Leaflet {
         conversation_group.add_swipeable(this);
     }
 
-    public void add_conversation_actions(Components.ConversationActions actions) {
+    public void add_conversation_actions(ConversationActions actions) {
         conversation_header.add_conversation_actions(actions);
     }
 

@@ -41,7 +41,7 @@ public class Components.ConversationActions : GLib.Object {
             new Gtk.Builder.from_resource("/org/gnome/Geary/components-conversation-actions.ui");
         // Assemble the mark menus
         Gtk.Builder menu_builder =
-            new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
+            new Gtk.Builder.from_resource("/org/gnome/Geary/components-main-toolbar-menus.ui");
         MenuModel mark_menu = (MenuModel) menu_builder.get_object("mark_message_menu");
 
         this.mark_copy_move_buttons = (Gtk.Box) builder.get_object("mark_copy_move_buttons");
