@@ -25,7 +25,8 @@ public class Components.MainToolbar : Hdy.Leaflet {
 
     public bool find_open { get; set; default = false; }
 
-    [GtkChild] public unowned ConversationActions conversation_actions;
+    [GtkChild] public unowned ConversationActions full_actions;
+    [GtkChild] public unowned ConversationActions compact_actions;
 
     [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
 

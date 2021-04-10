@@ -1527,7 +1527,8 @@ public class Application.MainWindow :
         this.conversation_list_view.select_conversations(to_select);
 
         this.conversation_list_actions.selected_conversations = to_select.size;
-        this.main_toolbar.conversation_actions.selected_conversations = to_select.size;
+        this.main_toolbar.full_actions.selected_conversations = to_select.size;
+        this.main_toolbar.compact_actions.selected_conversations = to_select.size;
 
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
@@ -1780,7 +1781,8 @@ public class Application.MainWindow :
             this.selected_folder_supports_trash
         );
         this.conversation_list_actions.update_trash_button(show_trash);
-        this.main_toolbar.conversation_actions.update_trash_button(show_trash);
+        this.main_toolbar.full_actions.update_trash_button(show_trash);
+        this.main_toolbar.compact_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
