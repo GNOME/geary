@@ -167,9 +167,10 @@
             </child>
           </object>
         </child>
-        <child>
-          <object class="HdySqueezer">
+        <child type="title">
+          <object class="HdySqueezer" id="actions_squeezer">
             <property name="visible">True</property>
+            <property name="hexpand">True</property>
             <child>
               <object class="ComponentsConversationActions" id="full_actions">
                 <property name="visible">True</property>

@@ -16,6 +16,8 @@ public class Components.ConversationActions : Gtk.Box {
 
     public bool show_response_actions { get; construct; }
 
+    public bool pack_justified { get; construct; }
+
     public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
 
     public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
@@ -45,7 +47,6 @@ public class Components.ConversationActions : Gtk.Box {
 
     // GObject style constuction to support loading via GTK Builder files
     construct {
-
         // Assemble the mark menus
         Gtk.Builder menu_builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/components-main-toolbar-menus.ui"
@@ -62,6 +63,11 @@ public class Components.ConversationActions : Gtk.Box {
         this.response_buttons.set_visible(this.show_response_actions);
         this.mark_copy_move_buttons.set_visible(this.show_conversation_actions);
         this.archive_trash_delete_buttons.set_visible(this.show_conversation_actions);
+
+        if (this.pack_justified) {
+            this.archive_trash_delete_buttons.hexpand = true;
+            this.archive_trash_delete_buttons.halign = END;
+        }
     }
 
     public void update_trash_button(bool show_trash) {

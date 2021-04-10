@@ -108,6 +108,7 @@
                                 <property name="visible">True</property>
                                 <property name="show_conversation_actions">True</property>
                                 <property name="show_response_actions">False</property>
+                                <property name="pack_justified">True</property>
                                 <property name="hexpand">True</property>
                               </object>
                             </child>
@@ -155,7 +156,6 @@
                             <property name="visible">True</property>
                             <property name="show_conversation_actions">False</property>
                             <property name="show_response_actions">True</property>
-                            <property name="hexpand">True</property>
                           </object>
                         </child>
                       </object>
