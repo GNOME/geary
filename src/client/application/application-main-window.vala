@@ -2332,11 +2332,25 @@ public class Application.MainWindow :
     }
 
     private void on_show_copy_menu() {
-        this.conversation_actions.copy_message_button.clicked();
+        if (this.is_conversation_list_shown &&
+            this.conversation_list_actions_revealer.child_revealed) {
+            this.conversation_list_actions.show_copy_menu();
+        } else if (this.is_conversation_viewer_shown) {
+            this.main_toolbar.shown_actions.show_copy_menu();
+        } else {
+            this.error_bell();
+        }
     }
 
     private void on_show_move_menu() {
-        this.conversation_actions.move_message_button.clicked();
+        if (this.is_conversation_list_shown &&
+            this.conversation_list_actions_revealer.child_revealed) {
+            this.conversation_list_actions.show_move_menu();
+        } else if (this.is_conversation_viewer_shown) {
+            this.main_toolbar.shown_actions.show_move_menu();
+        } else {
+            this.error_bell();
+        }
     }
 
     private void on_conversation_up() {

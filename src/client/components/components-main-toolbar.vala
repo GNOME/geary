@@ -1,5 +1,6 @@
 /*
  * Copyright © 2017 Software Freedom Conservancy Inc.
+ * Copyright © 2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -25,6 +26,12 @@ public class Components.MainToolbar : Hdy.Leaflet {
 
     public bool find_open { get; set; default = false; }
 
+    public ConversationActions shown_actions {
+        get {
+            return (ConversationActions) this.actions_squeezer.visible_child;
+        }
+    }
+
     [GtkChild] public unowned ConversationActions full_actions;
     [GtkChild] public unowned ConversationActions compact_actions;
 
@@ -44,6 +51,7 @@ public class Components.MainToolbar : Hdy.Leaflet {
 
     // Conversation viewer header elements
     [GtkChild] private unowned Hdy.HeaderBar conversation_header;
+    [GtkChild] private unowned Hdy.Squeezer actions_squeezer;
     [GtkChild] private unowned Gtk.ToggleButton find_button;
 
     [GtkChild] private unowned Hdy.HeaderGroup header_group;
