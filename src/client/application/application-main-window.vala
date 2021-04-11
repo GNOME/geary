@@ -282,6 +282,29 @@ public class Application.MainWindow :
         get; private set; default = null;
     }
 
+    /** Specifies if the conversation list is currently displayed. */
+    public bool is_conversation_list_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
+                (!this.inner_leaflet.folded ||
+                 this.inner_leaflet.visible_child_name == CONVERSATION_LIST)
+            );
+        }
+    }
+
+    /** Specifies if the conversation viewer is currently displayed. */
+    public bool is_conversation_viewer_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == CONVERSATION_VIEWER) &&
+                !this.has_composer
+            );
+        }
+    }
+
     /** The attachment manager for this window. */
     public AttachmentManager attachments { get; private set; }
 
