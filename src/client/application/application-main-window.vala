@@ -71,10 +71,17 @@ public class Application.MainWindow :
         { ACTION_ZOOM, on_zoom, "s" },
     };
 
-    private const int STATUS_BAR_HEIGHT = 18;
-    private const int UPDATE_UI_INTERVAL = 60;
-    private const int MIN_CONVERSATION_COUNT = 50;
+    // Handy leaflet children names
+    private const string INNER_LEAFLET = "inner_leaflet";
+    private const string FOLDER_LIST = "folder_list";
+    private const string CONVERSATION_LIST = "conversation_list";
+    private const string CONVERSATION_VIEWER = "conversation_viewer";
 
+    private const int STATUS_BAR_HEIGHT = 18;
+
+    private const int UPDATE_UI_INTERVAL = 60;
+
+    private const int MIN_CONVERSATION_COUNT = 50;
 
     static construct {
         // Set up default keybindings
@@ -339,8 +346,12 @@ public class Application.MainWindow :
 
 
     [GtkChild] private unowned Gtk.Box main_layout;
-    [GtkChild] private unowned Hdy.Leaflet main_leaflet;
-    [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
+
+    // Folds the inner leaftlet and conversation viewer
+    [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
+
+    // Folds the folder list and the conversation list
+    [GtkChild] private unowned Hdy.Leaflet inner_leaflet;
 
     [GtkChild] private unowned Gtk.Box folder_box;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
@@ -892,11 +903,11 @@ public class Application.MainWindow :
 
     /** Shows the appopriate window menu, if any. */
     public void show_window_menu() {
-        if (this.main_leaflet.folded) {
-            this.main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.outer_leaflet.folded) {
+            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
         }
-        if (this.conversations_leaflet.folded) {
-            this.conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.inner_leaflet.folded) {
+            this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
         }
         this.main_toolbar.show_main_menu();
     }
@@ -948,7 +959,7 @@ public class Application.MainWindow :
                 this.conversation_viewer.do_compose(composer);
             }
             // Show the correct leaflet
-            this.main_leaflet.set_visible_child_name("conversation");
+            this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);
         }
     }
 
@@ -1857,17 +1868,17 @@ public class Application.MainWindow :
     private void focus_next_pane() {
         var focus = get_focus();
 
-        if (main_leaflet.folded) {
-            if (main_leaflet.visible_child_name == "conversations") {
-                if (conversations_leaflet.folded &&
-                    conversations_leaflet.visible_child_name == "folder" ||
+        if (this.outer_leaflet.folded) {
+            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+                if (this.inner_leaflet.folded &&
+                    this.inner_leaflet.visible_child_name == FOLDER_LIST ||
                     focus == this.folder_list) {
-                    conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_list_view;
                 } else {
                     if (this.conversation_list_view.get_selected().size == 1 &&
                         this.selected_folder.properties.email_total > 0) {
-                        main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                        this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                         focus = this.conversation_viewer.visible_child;
                     }
                 }
@@ -1895,11 +1906,11 @@ public class Application.MainWindow :
     private void focus_previous_pane() {
         var focus = get_focus();
 
-        if (main_leaflet.folded) {
-            if (main_leaflet.visible_child_name == "conversations") {
-                if (conversations_leaflet.folded) {
-                    if (conversations_leaflet.visible_child_name == "conversations") {
-                        conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.outer_leaflet.folded) {
+            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+                if (this.inner_leaflet.folded) {
+                    if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
+                        this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
                         focus = this.folder_list;
                     }
                 } else {
@@ -1909,7 +1920,7 @@ public class Application.MainWindow :
                         focus = this.conversation_list_view;
                 }
             } else {
-                main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
                 focus = this.conversation_list_view;
             }
         } else if (focus != null) {
@@ -2013,11 +2024,12 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private void on_main_leaflet_visible_child_changed() {
-        if (main_leaflet.child_transition_running)
+    private void on_outer_leaflet_visible_child_changed() {
+        if (this.outer_leaflet.child_transition_running)
             return;
 
-        if (main_leaflet.visible_child_name == "conversations" && main_leaflet.folded)
+        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET &&
+            this.outer_leaflet.folded)
             if (this.conversation_viewer.current_composer != null) {
                 this.conversation_viewer.current_composer.activate_close_action();
             }
@@ -2230,8 +2242,9 @@ public class Application.MainWindow :
 
     private void on_conversation_activated(Geary.App.Conversation activated, bool single) {
         if (single) {
-            if (main_leaflet.folded)
+            if (this.outer_leaflet.folded) {
                 focus_next_pane();
+            }
         } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
