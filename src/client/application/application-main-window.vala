@@ -1741,7 +1741,8 @@ public class Application.MainWindow :
     }
 
     private void load_more() {
-        if (this.conversations != null) {
+        if (this.is_conversation_list_shown &&
+            this.conversations != null) {
             this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
         }
     }
