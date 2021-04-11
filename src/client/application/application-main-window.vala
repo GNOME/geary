@@ -262,7 +262,19 @@ public class Application.MainWindow :
     }
 
 
-    private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
+    private enum ConversationCount {
+        NONE, SINGLE, MULTIPLE;
+
+        public static ConversationCount for_size(int size) {
+            return (
+                size == 0
+                ? NONE
+                : size == 1
+                ? SINGLE
+                : MULTIPLE
+            );
+        }
+    }
 
 
     /** Returns the window's associated client application instance. */
@@ -1808,12 +1820,18 @@ public class Application.MainWindow :
         );
 
         this.update_context_dependent_actions.begin(sensitive);
+        update_conversation_list_actions_revealer(count);
+    }
+
+    private void update_conversation_list_actions_revealer(ConversationCount count) {
         switch (count) {
         case NONE:
             this.conversation_list_actions_revealer.reveal_child = false;
             break;
         case SINGLE:
-            this.conversation_list_actions_revealer.reveal_child = false;
+            this.conversation_list_actions_revealer.reveal_child = (
+                this.outer_leaflet.folded
+            );
             break;
         case MULTIPLE:
             this.conversation_list_actions_revealer.reveal_child = true;
@@ -2060,6 +2078,10 @@ public class Application.MainWindow :
 
     [GtkCallback]
     private void on_outer_leaflet_changed() {
+        int selected = this.conversation_list_view.get_selected().size;
+        update_conversation_list_actions_revealer(
+            ConversationCount.for_size(selected)
+        );
         if (this.has_composer &&
             this.outer_leaflet.folded &&
             (this.is_folder_list_shown || this.is_conversation_list_shown)) {
