@@ -70,12 +70,20 @@ public class Components.ConversationActions : Gtk.Box {
         }
     }
 
-    public void show_copy_menu() {
-        this.copy_message_button.clicked();
+    public void set_move_sensitive(bool is_sensitive) {
+        this.move_message_button.sensitive = is_sensitive;
     }
 
     public void show_move_menu() {
         this.move_message_button.clicked();
+    }
+
+    public void set_copy_sensitive(bool is_sensitive) {
+        this.copy_message_button.sensitive = is_sensitive;
+    }
+
+    public void show_copy_menu() {
+        this.copy_message_button.clicked();
     }
 
     public void update_trash_button(bool show_trash) {

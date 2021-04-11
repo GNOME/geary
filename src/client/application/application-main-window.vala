@@ -420,6 +420,9 @@ public class Application.MainWindow :
 
     [GtkChild] private unowned Gtk.Overlay overlay;
 
+    private Components.ConversationActions[] folder_conversation_actions = {};
+    private FolderPopover[] folder_popovers = {};
+
     private Components.InfoBarStack info_bars =
         new Components.InfoBarStack(SINGLE);
 
@@ -770,12 +773,9 @@ public class Application.MainWindow :
             // selected model.
 
             if (this.selected_folder != null) {
-                this.conversation_actions.copy_folder_menu.enable_disable_folder(
-                    this.selected_folder, true
-                );
-                this.conversation_actions.move_folder_menu.enable_disable_folder(
-                    this.selected_folder, true
-                );
+                foreach (var menu in this.folder_popovers) {
+                    menu.enable_disable_folder(this.selected_folder, true);
+                }
 
                 this.progress_monitor.remove(this.selected_folder.opening_monitor);
                 this.selected_folder.properties.notify.disconnect(update_headerbar);
@@ -856,12 +856,9 @@ public class Application.MainWindow :
                 this.conversation_list_view.set_model(conversations_model);
 
                 // disable copy/move to the new folder
-                this.conversation_actions.copy_folder_menu.enable_disable_folder(
-                    to_select, false
-                );
-                this.conversation_actions.move_folder_menu.enable_disable_folder(
-                    to_select, false
-                );
+                foreach (var menu in this.folder_popovers) {
+                    menu.enable_disable_folder(to_select, false);
+                }
 
                 yield open_conversation_monitor(this.conversations, cancellable);
                 yield this.controller.process_pending_composers();
@@ -1176,8 +1173,9 @@ public class Application.MainWindow :
         foreach (var context in to_add) {
             this.folder_list.add_folder(context);
             if (context.folder.account == this.selected_account) {
-                this.conversation_actions.copy_folder_menu.add_folder(context.folder);
-                this.conversation_actions.move_folder_menu.add_folder(context.folder);
+                foreach (var menu in this.folder_popovers) {
+                    menu.add_folder(context.folder);
+                }
             }
             context.folder.use_changed.connect(on_use_changed);
         }
@@ -1197,8 +1195,9 @@ public class Application.MainWindow :
 
             folder.use_changed.disconnect(on_use_changed);
             if (folder.account == this.selected_account) {
-                this.conversation_actions.copy_folder_menu.remove_folder(folder);
-                this.conversation_actions.move_folder_menu.remove_folder(folder);
+                foreach (var menu in this.folder_popovers) {
+                    menu.remove_folder(folder);
+                }
             }
             this.folder_list.remove_folder(context);
         }
@@ -1348,7 +1347,6 @@ public class Application.MainWindow :
         this.conversation_size_group.add_widget(this.conversation_viewer);
         this.conversation_viewer_box.add(this.conversation_viewer);
 
-
         // Main toolbar
         this.main_toolbar = new Components.MainToolbar(config);
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
@@ -1392,6 +1390,21 @@ public class Application.MainWindow :
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
         this.status_bar.show_all();
+
+        this.folder_conversation_actions = {
+            this.main_toolbar.full_actions,
+            this.main_toolbar.compact_actions,
+            this.conversation_list_actions
+        };
+        foreach (var actions in folder_conversation_actions) {
+            var move = actions.move_folder_menu;
+            this.folder_popovers += move;
+            move.folder_selected.connect(on_move_conversation);
+
+            var copy = actions.copy_folder_menu;
+            this.folder_popovers += copy;
+            copy.folder_selected.connect(on_copy_conversation);
+        }
     }
 
     /** {@inheritDoc} */
@@ -1559,17 +1572,19 @@ public class Application.MainWindow :
     private void select_account(Geary.Account? account) {
         if (this.selected_account != account) {
             if (this.selected_account != null) {
-                this.conversation_actions.copy_folder_menu.clear();
-                this.conversation_actions.move_folder_menu.clear();
+                foreach (var menu in this.folder_popovers) {
+                    menu.clear();
+                }
             }
 
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
-                foreach (Geary.Folder folder in account.list_folders()) {
-                    this.conversation_actions.copy_folder_menu.add_folder(folder);
-                    this.conversation_actions.move_folder_menu.add_folder(folder);
+                foreach (var menu in this.folder_popovers) {
+                    foreach (var folder in account.list_folders()) {
+                        menu.add_folder(folder);
+                    }
                 }
             }
 
@@ -1807,14 +1822,18 @@ public class Application.MainWindow :
         bool move_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Move)
         );
-        this.conversation_actions.move_message_button.set_sensitive(move_enabled);
         get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.set_move_sensitive(move_enabled);
+        }
 
         bool copy_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Copy)
         );
-        this.conversation_actions.copy_message_button.set_sensitive(copy_enabled);
         get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.set_copy_sensitive(copy_enabled);
+        }
 
         get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
             sensitive && (selected_folder is Geary.FolderSupport.Archive)
