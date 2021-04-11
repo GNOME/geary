@@ -410,7 +410,6 @@ public class Application.MainWindow :
 
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
     [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
-    [GtkChild] private unowned Components.ConversationActions conversation_viewer_actions;
     [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
     [GtkChild] private unowned Gtk.SizeGroup folder_separator_size_group;
     [GtkChild] private unowned Gtk.SizeGroup conversations_size_group;
@@ -1368,6 +1367,14 @@ public class Application.MainWindow :
             "find-open",
             this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.main_toolbar.notify["shown-actions"].connect(
+            () => {
+                this.conversation_viewer_actions_revealer.reveal_child = (
+                    this.main_toolbar.shown_actions ==
+                    this.main_toolbar.compact_actions
+                );
+            }
         );
         if (config.desktop_environment == UNITY) {
             this.main_toolbar.show_close_button = false;

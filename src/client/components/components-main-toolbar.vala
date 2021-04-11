@@ -80,6 +80,10 @@ public class Components.MainToolbar : Hdy.Leaflet {
             this.find_button, "active",
             SYNC_CREATE | BIDIRECTIONAL
         );
+
+        this.actions_squeezer.notify["visible-child"].connect_after(
+            () => { notify_property("shown-actions"); }
+        );
     }
 
     public void set_conversation_header(Hdy.HeaderBar header) {
