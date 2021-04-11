@@ -283,6 +283,18 @@ public class Application.MainWindow :
     }
 
     /** Specifies if the conversation list is currently displayed. */
+    public bool is_folder_list_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
+                (!this.inner_leaflet.folded ||
+                 this.inner_leaflet.visible_child_name == FOLDER_LIST)
+            );
+        }
+    }
+
+    /** Specifies if the conversation list is currently displayed. */
     public bool is_conversation_list_shown {
         get {
             return (
@@ -2047,15 +2059,12 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private void on_outer_leaflet_visible_child_changed() {
-        if (this.outer_leaflet.child_transition_running)
-            return;
-
-        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET &&
-            this.outer_leaflet.folded)
-            if (this.conversation_viewer.current_composer != null) {
-                this.conversation_viewer.current_composer.activate_close_action();
-            }
+    private void on_outer_leaflet_changed() {
+        if (this.has_composer &&
+            this.outer_leaflet.folded &&
+            (this.is_folder_list_shown || this.is_conversation_list_shown)) {
+            close_composer(false, false);
+        }
     }
 
     private void on_offline_infobar_response() {
