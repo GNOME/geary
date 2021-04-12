@@ -61,7 +61,9 @@ infobar flowboxchild {
 }
 
 revealer components-conversation-actions {
-  margin: 6px;
+  border: solid @borders;
+  border-top-width: 1px;
+  padding: 6px;
 }
 
 /* FolderPopover */
