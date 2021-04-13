@@ -89,7 +89,7 @@ icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libhandy = dependency('libhandy-1', version: '>= 1.2.1')
+libhandy = dependency('libhandy-1', version: '>= 1.2.1', required: false)
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libpeas_gtk = dependency('libpeas-gtk-1.0', version: '>= 1.24.0')
@@ -137,6 +137,26 @@ libstemmer = declare_dependency(
     libstemmer_dep,
   ],
 )
+
+# Required until libhandy 1.2.1 is GA
+libhandy_vapi = ''
+if not libhandy.found()
+  libhandy_project = subproject(
+    'libhandy',
+    default_options: [
+      'examples=false',
+      'package_subdir=geary',
+      'tests=false',
+    ]
+  )
+  libhandy = declare_dependency(
+    dependencies: [
+      libhandy_project.get_variable('libhandy_dep'),
+      libhandy_project.get_variable('libhandy_vapi')
+    ]
+  )
+  libhandy_vapi = meson.build_root() / 'subprojects' / 'libhandy' / 'src'
+endif
 
 # Optional dependencies
 appstream_util = find_program('appstream-util', required: false)
