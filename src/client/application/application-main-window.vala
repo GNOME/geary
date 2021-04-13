@@ -957,6 +957,13 @@ public class Application.MainWindow :
 
     /** Displays and focuses the search bar for the window. */
     public void show_search_bar(string? text = null) {
+        if (!this.is_conversation_list_shown) {
+            if (this.outer_leaflet.folded) {
+                this.outer_leaflet.set_visible_child_name(INNER_LEAFLET);
+            }
+            this.inner_leaflet.set_visible_child_name(CONVERSATION_LIST);
+        }
+
         this.search_bar.grab_focus();
         if (text != null) {
             this.search_bar.entry.text = text;
