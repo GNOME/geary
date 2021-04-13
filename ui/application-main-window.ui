@@ -101,7 +101,7 @@
                         <child>
                           <object class="GtkRevealer" id="conversation_list_actions_revealer">
                             <property name="visible">True</property>
-                            <property name="reveal-child">True</property>
+                            <property name="reveal-child">False</property>
                             <property name="transition_type">slide-up</property>
                             <child>
                               <object class="ComponentsConversationActions" id="conversation_list_actions">
@@ -149,7 +149,7 @@
                     <child>
                       <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
                         <property name="visible">True</property>
-                        <property name="reveal-child">True</property>
+                        <property name="reveal-child">False</property>
                         <property name="transition_type">slide-up</property>
                         <child>
                           <object class="ComponentsConversationActions" id="conversation_viewer_actions">
