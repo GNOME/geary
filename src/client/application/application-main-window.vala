@@ -1807,7 +1807,7 @@ public class Application.MainWindow :
         bool multiple = (count == MULTIPLE);
 
         get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
-            sensitive && !multiple
+            sensitive && !multiple && this.is_conversation_viewer_shown
         );
 
         bool reply_sensitive = (
@@ -1846,11 +1846,6 @@ public class Application.MainWindow :
             sensitive && (selected_folder is Geary.FolderSupport.Remove)
         );
 
-        this.update_context_dependent_actions.begin(sensitive);
-        update_conversation_list_actions_revealer(count);
-    }
-
-    private void update_conversation_list_actions_revealer(ConversationCount count) {
         switch (count) {
         case NONE:
             this.conversation_list_actions_revealer.reveal_child = false;
@@ -1864,6 +1859,8 @@ public class Application.MainWindow :
             this.conversation_list_actions_revealer.reveal_child = true;
             break;
         }
+
+        this.update_context_dependent_actions.begin(sensitive);
     }
 
     private void update_trash_action() {
@@ -2106,7 +2103,7 @@ public class Application.MainWindow :
     [GtkCallback]
     private void on_outer_leaflet_changed() {
         int selected = this.conversation_list_view.get_selected().size;
-        update_conversation_list_actions_revealer(
+        update_conversation_actions(
             ConversationCount.for_size(selected)
         );
         if (this.has_composer &&
