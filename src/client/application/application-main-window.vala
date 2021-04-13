@@ -2113,10 +2113,33 @@ public class Application.MainWindow :
         update_conversation_actions(
             ConversationCount.for_size(selected)
         );
-        if (this.has_composer &&
-            this.outer_leaflet.folded &&
-            (this.is_folder_list_shown || this.is_conversation_list_shown)) {
-            close_composer(false, false);
+        if (this.outer_leaflet.folded) {
+            // Ensure something useful gets the keyboard focus, given
+            // GNOME/libhandy#179
+            if (this.is_conversation_list_shown) {
+                this.conversation_list_view.grab_focus();
+            } else if (this.is_folder_list_shown) {
+                this.folder_list.grab_focus();
+            }
+
+            // Close any open composer that is no longer visible
+            if (this.has_composer &&
+                (this.is_folder_list_shown || this.is_conversation_list_shown)) {
+                close_composer(false, false);
+            }
+        }
+    }
+
+    [GtkCallback]
+    private void on_inner_leaflet_changed() {
+        if (this.inner_leaflet.folded) {
+            // Ensure something useful gets the keyboard focus, given
+            // GNOME/libhandy#179
+            if (this.is_conversation_list_shown) {
+                this.conversation_list_view.grab_focus();
+            } else if (this.is_folder_list_shown) {
+                this.folder_list.grab_focus();
+            }
         }
     }
 
