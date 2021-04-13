@@ -18,14 +18,14 @@
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="HdyLeaflet" id="main_leaflet">
+              <object class="HdyLeaflet" id="outer_leaflet">
                 <property name="visible">True</property>
                 <property name="can_swipe_back">True</property>
                 <property name="transition_type">over</property>
-                <signal name="notify::visible-child" handler="on_main_leaflet_visible_child_changed" swapped="no"/>
-                <signal name="notify::child-transition-running" handler="on_main_leaflet_visible_child_changed" swapped="no"/>
+                <signal name="notify::folded" handler="on_outer_leaflet_changed" swapped="no"/>
+                <signal name="notify::visible-child" handler="on_outer_leaflet_changed" swapped="no"/>
                 <child>
-                  <object class="HdyLeaflet" id="conversations_leaflet">
+                  <object class="HdyLeaflet" id="inner_leaflet">
                     <property name="visible">True</property>
                     <property name="hexpand_set">True</property>
                     <property name="can_swipe_back">True</property>
@@ -57,7 +57,7 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="name">folder</property>
+                        <property name="name">folder_list</property>
                       </packing>
                     </child>
                     <child>
@@ -98,14 +98,36 @@
                             <property name="position">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkRevealer" id="conversation_list_actions_revealer">
+                            <property name="visible">True</property>
+                            <property name="reveal-child">False</property>
+                            <property name="transition_type">slide-up</property>
+                            <child>
+                              <object class="ComponentsConversationActions" id="conversation_list_actions">
+                                <property name="visible">True</property>
+                                <property name="show_conversation_actions">True</property>
+                                <property name="show_response_actions">False</property>
+                                <property name="pack_justified">True</property>
+                                <property name="hexpand">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="name">conversations</property>
+                        <property name="name">conversation_list</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="name">conversations</property>
+                    <property name="name">inner_leaflet</property>
                   </packing>
                 </child>
                 <child>
@@ -125,8 +147,17 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="ComponentsConversationActionBar" id="conversation_viewer_action_bar">
+                      <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
                         <property name="visible">True</property>
+                        <property name="reveal-child">False</property>
+                        <property name="transition_type">slide-up</property>
+                        <child>
+                          <object class="ComponentsConversationActions" id="conversation_viewer_actions">
+                            <property name="visible">True</property>
+                            <property name="show_conversation_actions">True</property>
+                            <property name="show_response_actions">False</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="pack_type">end</property>
@@ -134,7 +165,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="name">conversation</property>
+                    <property name="name">conversation_viewer</property>
                   </packing>
                 </child>
               </object>
@@ -191,12 +222,12 @@
   </object>
   <object class="HdySwipeGroup" id="conversations_swipe_group">
     <swipeables>
-      <swipeable name="conversations_leaflet"/>
+      <swipeable name="inner_leaflet"/>
     </swipeables>
   </object>
   <object class="HdySwipeGroup" id="conversation_swipe_group">
     <swipeables>
-      <swipeable name="main_leaflet"/>
+      <swipeable name="outer_leaflet"/>
     </swipeables>
   </object>
 </interface>

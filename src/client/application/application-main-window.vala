@@ -71,10 +71,17 @@ public class Application.MainWindow :
         { ACTION_ZOOM, on_zoom, "s" },
     };
 
-    private const int STATUS_BAR_HEIGHT = 18;
-    private const int UPDATE_UI_INTERVAL = 60;
-    private const int MIN_CONVERSATION_COUNT = 50;
+    // Handy leaflet children names
+    private const string INNER_LEAFLET = "inner_leaflet";
+    private const string FOLDER_LIST = "folder_list";
+    private const string CONVERSATION_LIST = "conversation_list";
+    private const string CONVERSATION_VIEWER = "conversation_viewer";
 
+    private const int STATUS_BAR_HEIGHT = 18;
+
+    private const int UPDATE_UI_INTERVAL = 60;
+
+    private const int MIN_CONVERSATION_COUNT = 50;
 
     static construct {
         // Set up default keybindings
@@ -255,7 +262,19 @@ public class Application.MainWindow :
     }
 
 
-    private enum ConversationCount { NONE, SINGLE, MULTIPLE; }
+    private enum ConversationCount {
+        NONE, SINGLE, MULTIPLE;
+
+        public static ConversationCount for_size(int size) {
+            return (
+                size == 0
+                ? NONE
+                : size == 1
+                ? SINGLE
+                : MULTIPLE
+            );
+        }
+    }
 
 
     /** Returns the window's associated client application instance. */
@@ -273,6 +292,41 @@ public class Application.MainWindow :
     /** Conversations for the current folder, null if none selected */
     public Geary.App.ConversationMonitor? conversations {
         get; private set; default = null;
+    }
+
+    /** Specifies if the conversation list is currently displayed. */
+    public bool is_folder_list_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
+                (!this.inner_leaflet.folded ||
+                 this.inner_leaflet.visible_child_name == FOLDER_LIST)
+            );
+        }
+    }
+
+    /** Specifies if the conversation list is currently displayed. */
+    public bool is_conversation_list_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
+                (!this.inner_leaflet.folded ||
+                 this.inner_leaflet.visible_child_name == CONVERSATION_LIST)
+            );
+        }
+    }
+
+    /** Specifies if the conversation viewer is currently displayed. */
+    public bool is_conversation_viewer_shown {
+        get {
+            return (
+                (!this.outer_leaflet.folded ||
+                 this.outer_leaflet.visible_child_name == CONVERSATION_VIEWER) &&
+                !this.has_composer
+            );
+        }
     }
 
     /** The attachment manager for this window. */
@@ -302,13 +356,10 @@ public class Application.MainWindow :
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
-    public MainToolbar main_toolbar { get; private set; }
+    public Components.MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
-
-    // Actions in the Conversation HeaderBar or ActionBar
-    private Components.ConversationActions conversation_actions;
 
     public Components.InfoBarStack conversation_list_info_bars {
         get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
@@ -342,14 +393,23 @@ public class Application.MainWindow :
 
 
     [GtkChild] private unowned Gtk.Box main_layout;
-    [GtkChild] private unowned Hdy.Leaflet main_leaflet;
-    [GtkChild] private unowned Hdy.Leaflet conversations_leaflet;
+
+    // Folds the inner leaftlet and conversation viewer
+    [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
+
+    // Folds the folder list and the conversation list
+    [GtkChild] private unowned Hdy.Leaflet inner_leaflet;
+
     [GtkChild] private unowned Gtk.Box folder_box;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
+
     [GtkChild] private unowned Gtk.Box conversation_list_box;
     [GtkChild] private unowned Gtk.ScrolledWindow conversation_list_scrolled;
+    [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
+    [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
+
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
-    [GtkChild] private unowned Components.ConversationActionBar conversation_viewer_action_bar;
+    [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
     [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
     [GtkChild] private unowned Gtk.SizeGroup folder_separator_size_group;
     [GtkChild] private unowned Gtk.SizeGroup conversations_size_group;
@@ -360,7 +420,8 @@ public class Application.MainWindow :
 
     [GtkChild] private unowned Gtk.Overlay overlay;
 
-    private Components.ConversationActionBar action_bar;
+    private Components.ConversationActions[] folder_conversation_actions = {};
+    private FolderPopover[] folder_popovers = {};
 
     private Components.InfoBarStack info_bars =
         new Components.InfoBarStack(SINGLE);
@@ -712,12 +773,9 @@ public class Application.MainWindow :
             // selected model.
 
             if (this.selected_folder != null) {
-                this.conversation_actions.copy_folder_menu.enable_disable_folder(
-                    this.selected_folder, true
-                );
-                this.conversation_actions.move_folder_menu.enable_disable_folder(
-                    this.selected_folder, true
-                );
+                foreach (var menu in this.folder_popovers) {
+                    menu.enable_disable_folder(this.selected_folder, true);
+                }
 
                 this.progress_monitor.remove(this.selected_folder.opening_monitor);
                 this.selected_folder.properties.notify.disconnect(update_headerbar);
@@ -758,11 +816,9 @@ public class Application.MainWindow :
                 this.folder_list.deselect_folder();
             }
 
-            update_conversation_actions(NONE);
             update_title();
-            this.conversation_actions.update_trash_button(
-                !this.is_shift_down && this.selected_folder_supports_trash
-            );
+            update_conversation_actions(NONE);
+            update_trash_action();
 
             this.conversation_viewer.show_loading();
             this.previous_selection_was_interactive = is_interactive;
@@ -800,12 +856,9 @@ public class Application.MainWindow :
                 this.conversation_list_view.set_model(conversations_model);
 
                 // disable copy/move to the new folder
-                this.conversation_actions.copy_folder_menu.enable_disable_folder(
-                    to_select, false
-                );
-                this.conversation_actions.move_folder_menu.enable_disable_folder(
-                    to_select, false
-                );
+                foreach (var menu in this.folder_popovers) {
+                    menu.enable_disable_folder(to_select, false);
+                }
 
                 yield open_conversation_monitor(this.conversations, cancellable);
                 yield this.controller.process_pending_composers();
@@ -893,11 +946,11 @@ public class Application.MainWindow :
 
     /** Shows the appopriate window menu, if any. */
     public void show_window_menu() {
-        if (this.main_leaflet.folded) {
-            this.main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.outer_leaflet.folded) {
+            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
         }
-        if (this.conversations_leaflet.folded) {
-            this.conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.inner_leaflet.folded) {
+            this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
         }
         this.main_toolbar.show_main_menu();
     }
@@ -949,7 +1002,7 @@ public class Application.MainWindow :
                 this.conversation_viewer.do_compose(composer);
             }
             // Show the correct leaflet
-            this.main_leaflet.set_visible_child_name("conversation");
+            this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);
         }
     }
 
@@ -1120,8 +1173,9 @@ public class Application.MainWindow :
         foreach (var context in to_add) {
             this.folder_list.add_folder(context);
             if (context.folder.account == this.selected_account) {
-                this.conversation_actions.copy_folder_menu.add_folder(context.folder);
-                this.conversation_actions.move_folder_menu.add_folder(context.folder);
+                foreach (var menu in this.folder_popovers) {
+                    menu.add_folder(context.folder);
+                }
             }
             context.folder.use_changed.connect(on_use_changed);
         }
@@ -1141,8 +1195,9 @@ public class Application.MainWindow :
 
             folder.use_changed.disconnect(on_use_changed);
             if (folder.account == this.selected_account) {
-                this.conversation_actions.copy_folder_menu.remove_folder(folder);
-                this.conversation_actions.move_folder_menu.remove_folder(folder);
+                foreach (var menu in this.folder_popovers) {
+                    menu.remove_folder(folder);
+                }
             }
             this.folder_list.remove_folder(context);
         }
@@ -1292,18 +1347,8 @@ public class Application.MainWindow :
         this.conversation_size_group.add_widget(this.conversation_viewer);
         this.conversation_viewer_box.add(this.conversation_viewer);
 
-
-        // Setup conversation actions
-        this.conversation_actions = new Components.ConversationActions();
-        this.conversation_actions.move_folder_menu.folder_selected.connect(on_move_conversation);
-        this.conversation_actions.copy_folder_menu.folder_selected.connect(on_copy_conversation);
-        this.conversation_actions.bind_property("find-open",
-                                                this.conversation_viewer.conversation_find_bar,
-                                                "search-mode-enabled",
-                                                BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-
         // Main toolbar
-        this.main_toolbar = new MainToolbar(config, conversation_viewer_action_bar);
+        this.main_toolbar = new Components.MainToolbar(config);
         this.main_toolbar.add_to_size_groups(this.folder_size_group,
                                              this.folder_separator_size_group,
                                              this.conversations_size_group,
@@ -1311,16 +1356,30 @@ public class Application.MainWindow :
                                              this.conversation_size_group);
         this.main_toolbar.add_to_swipe_groups(this.conversations_swipe_group,
                                               this.conversation_swipe_group);
-        this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
-            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        this.main_toolbar.bind_property(
+            "search-open",
+            this.search_bar, "search-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.main_toolbar.bind_property(
+            "find-open",
+            this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.main_toolbar.notify["shown-actions"].connect(
+            () => {
+                this.conversation_viewer_actions_revealer.reveal_child = (
+                    this.main_toolbar.shown_actions ==
+                    this.main_toolbar.compact_actions
+                );
+            }
+        );
         if (config.desktop_environment == UNITY) {
             this.main_toolbar.show_close_button = false;
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
             this.main_layout.pack_start(main_toolbar, false, true, 0);
         }
-
-        this.main_toolbar.add_conversation_actions(this.conversation_actions);
 
         this.main_layout.pack_start(this.info_bars, false, true, 0);
 
@@ -1332,11 +1391,20 @@ public class Application.MainWindow :
         this.status_bar.add(this.spinner);
         this.status_bar.show_all();
 
-        // Action bar
-        this.action_bar = new Components.ConversationActionBar();
-        this.conversation_list_box.add_with_properties(action_bar,
-                                                       "pack-type", Gtk.PackType.END,
-                                                       "position", 0);
+        this.folder_conversation_actions = {
+            this.main_toolbar.full_actions,
+            this.main_toolbar.compact_actions,
+            this.conversation_list_actions
+        };
+        foreach (var actions in folder_conversation_actions) {
+            var move = actions.move_folder_menu;
+            this.folder_popovers += move;
+            move.folder_selected.connect(on_move_conversation);
+
+            var copy = actions.copy_folder_menu;
+            this.folder_popovers += copy;
+            copy.folder_selected.connect(on_copy_conversation);
+        }
     }
 
     /** {@inheritDoc} */
@@ -1504,17 +1572,19 @@ public class Application.MainWindow :
     private void select_account(Geary.Account? account) {
         if (this.selected_account != account) {
             if (this.selected_account != null) {
-                this.conversation_actions.copy_folder_menu.clear();
-                this.conversation_actions.move_folder_menu.clear();
+                foreach (var menu in this.folder_popovers) {
+                    menu.clear();
+                }
             }
 
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
-                foreach (Geary.Folder folder in account.list_folders()) {
-                    this.conversation_actions.copy_folder_menu.add_folder(folder);
-                    this.conversation_actions.move_folder_menu.add_folder(folder);
+                foreach (var menu in this.folder_popovers) {
+                    foreach (var folder in account.list_folders()) {
+                        menu.add_folder(folder);
+                    }
                 }
             }
 
@@ -1536,7 +1606,10 @@ public class Application.MainWindow :
         // setting it again.
         this.conversation_list_view.select_conversations(to_select);
 
-        this.conversation_actions.selected_conversations = to_select.size;
+        this.conversation_list_actions.selected_conversations = to_select.size;
+        this.main_toolbar.full_actions.selected_conversations = to_select.size;
+        this.main_toolbar.compact_actions.selected_conversations = to_select.size;
+
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
             case 0:
@@ -1749,14 +1822,18 @@ public class Application.MainWindow :
         bool move_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Move)
         );
-        this.conversation_actions.move_message_button.set_sensitive(move_enabled);
         get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.set_move_sensitive(move_enabled);
+        }
 
         bool copy_enabled = (
             sensitive && (selected_folder is Geary.FolderSupport.Copy)
         );
-        this.conversation_actions.copy_message_button.set_sensitive(copy_enabled);
         get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.set_copy_sensitive(copy_enabled);
+        }
 
         get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
             sensitive && (selected_folder is Geary.FolderSupport.Archive)
@@ -1769,17 +1846,33 @@ public class Application.MainWindow :
         );
 
         this.update_context_dependent_actions.begin(sensitive);
+        update_conversation_list_actions_revealer(count);
+    }
+
+    private void update_conversation_list_actions_revealer(ConversationCount count) {
         switch (count) {
-            case NONE:
-                    conversation_actions.take_ownership(null);
-                break;
-            case SINGLE:
-                this.main_toolbar.add_conversation_actions(this.conversation_actions);
-                break;
-            case MULTIPLE:
-                this.action_bar.add_conversation_actions(this.conversation_actions);
-                break;
+        case NONE:
+            this.conversation_list_actions_revealer.reveal_child = false;
+            break;
+        case SINGLE:
+            this.conversation_list_actions_revealer.reveal_child = (
+                this.outer_leaflet.folded
+            );
+            break;
+        case MULTIPLE:
+            this.conversation_list_actions_revealer.reveal_child = true;
+            break;
         }
+    }
+
+    private void update_trash_action() {
+        var show_trash = (
+            !this.is_shift_down &&
+            this.selected_folder_supports_trash
+        );
+        this.conversation_list_actions.update_trash_button(show_trash);
+        this.main_toolbar.full_actions.update_trash_button(show_trash);
+        this.main_toolbar.compact_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
@@ -1835,9 +1928,7 @@ public class Application.MainWindow :
 
     private void set_shift_key_down(bool down) {
         this.is_shift_down = down;
-        this.conversation_actions.update_trash_button(
-            !down && this.selected_folder_supports_trash
-        );
+        update_trash_action();
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
@@ -1856,17 +1947,17 @@ public class Application.MainWindow :
     private void focus_next_pane() {
         var focus = get_focus();
 
-        if (main_leaflet.folded) {
-            if (main_leaflet.visible_child_name == "conversations") {
-                if (conversations_leaflet.folded &&
-                    conversations_leaflet.visible_child_name == "folder" ||
+        if (this.outer_leaflet.folded) {
+            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+                if (this.inner_leaflet.folded &&
+                    this.inner_leaflet.visible_child_name == FOLDER_LIST ||
                     focus == this.folder_list) {
-                    conversations_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_list_view;
                 } else {
-                    if (this.conversation_actions.selected_conversations == 1 &&
+                    if (this.conversation_list_view.get_selected().size == 1 &&
                         this.selected_folder.properties.email_total > 0) {
-                        main_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                        this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                         focus = this.conversation_viewer.visible_child;
                     }
                 }
@@ -1894,11 +1985,11 @@ public class Application.MainWindow :
     private void focus_previous_pane() {
         var focus = get_focus();
 
-        if (main_leaflet.folded) {
-            if (main_leaflet.visible_child_name == "conversations") {
-                if (conversations_leaflet.folded) {
-                    if (conversations_leaflet.visible_child_name == "conversations") {
-                        conversations_leaflet.navigate(Hdy.NavigationDirection.BACK);
+        if (this.outer_leaflet.folded) {
+            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+                if (this.inner_leaflet.folded) {
+                    if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
+                        this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
                         focus = this.folder_list;
                     }
                 } else {
@@ -1908,7 +1999,7 @@ public class Application.MainWindow :
                         focus = this.conversation_list_view;
                 }
             } else {
-                main_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
                 focus = this.conversation_list_view;
             }
         } else if (focus != null) {
@@ -2012,14 +2103,16 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private void on_main_leaflet_visible_child_changed() {
-        if (main_leaflet.child_transition_running)
-            return;
-
-        if (main_leaflet.visible_child_name == "conversations" && main_leaflet.folded)
-            if (this.conversation_viewer.current_composer != null) {
-                this.conversation_viewer.current_composer.activate_close_action();
-            }
+    private void on_outer_leaflet_changed() {
+        int selected = this.conversation_list_view.get_selected().size;
+        update_conversation_list_actions_revealer(
+            ConversationCount.for_size(selected)
+        );
+        if (this.has_composer &&
+            this.outer_leaflet.folded &&
+            (this.is_folder_list_shown || this.is_conversation_list_shown)) {
+            close_composer(false, false);
+        }
     }
 
     private void on_offline_infobar_response() {
@@ -2229,8 +2322,9 @@ public class Application.MainWindow :
 
     private void on_conversation_activated(Geary.App.Conversation activated, bool single) {
         if (single) {
-            if (main_leaflet.folded)
+            if (this.outer_leaflet.folded) {
                 focus_next_pane();
+            }
         } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
@@ -2295,11 +2389,25 @@ public class Application.MainWindow :
     }
 
     private void on_show_copy_menu() {
-        this.conversation_actions.copy_message_button.clicked();
+        if (this.is_conversation_list_shown &&
+            this.conversation_list_actions_revealer.child_revealed) {
+            this.conversation_list_actions.show_copy_menu();
+        } else if (this.is_conversation_viewer_shown) {
+            this.main_toolbar.shown_actions.show_copy_menu();
+        } else {
+            this.error_bell();
+        }
     }
 
     private void on_show_move_menu() {
-        this.conversation_actions.move_message_button.clicked();
+        if (this.is_conversation_list_shown &&
+            this.conversation_list_actions_revealer.child_revealed) {
+            this.conversation_list_actions.show_move_menu();
+        } else if (this.is_conversation_viewer_shown) {
+            this.main_toolbar.shown_actions.show_move_menu();
+        } else {
+            this.error_bell();
+        }
     }
 
     private void on_conversation_up() {

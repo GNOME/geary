@@ -1,34 +1,39 @@
-/* Copyright 2017 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2017 Software Freedom Conservancy Inc.
+ * Copyright © 2021 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 /**
- * Container for actions for a conversation generally placed into the ActionBar or HeaderBar
- * The user of the actions needs to take ownership before they can place the actions in a container
+ * A container of conversation-related actions.
  */
-public class Components.ConversationActions : GLib.Object {
-    public Gtk.Widget? owner { get; private set; }
-    // Copy and Move popovers
+[GtkTemplate (ui = "/org/gnome/Geary/components-conversation-actions.ui")]
+public class Components.ConversationActions : Gtk.Box {
+
+    public bool show_conversation_actions { get; construct; }
+
+    public bool show_response_actions { get; construct; }
+
+    public bool pack_justified { get; construct; }
+
     public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
+
     public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
-    // How many conversations are selected right now. Should automatically be updated.
+
     public int selected_conversations { get; set; }
-    public bool find_open { get; set; }
 
-    public Gtk.Box mark_copy_move_buttons { get; private set; }
-    public Gtk.MenuButton mark_message_button { get; private set; }
-    public Gtk.MenuButton copy_message_button { get; private set; }
-    public Gtk.MenuButton move_message_button { get; private set; }
+    [GtkChild] private unowned Gtk.Box response_buttons { get; }
 
-    public Gtk.Box reply_forward_buttons { get; private set; }
+    [GtkChild] private unowned Gtk.Box mark_copy_move_buttons { get; }
+    [GtkChild] private unowned Gtk.MenuButton mark_message_button { get; }
+    [GtkChild] private unowned Gtk.MenuButton copy_message_button { get;  }
+    [GtkChild] private unowned Gtk.MenuButton move_message_button { get;  }
 
-    public Gtk.Box archive_trash_delete_buttons { get; private set; }
-    private Gtk.Button archive_button;
-    private Gtk.Button trash_delete_button;
-
-    public Gtk.ToggleButton find_button { get; private set; }
+    [GtkChild] private unowned Gtk.Box archive_trash_delete_buttons { get; }
+    [GtkChild] private unowned Gtk.Button archive_button;
+    [GtkChild] private unowned Gtk.Button trash_delete_button;
 
     private bool show_trash_button = true;
 
@@ -36,47 +41,49 @@ public class Components.ConversationActions : GLib.Object {
     private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
     private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
 
-    public ConversationActions() {
-        Gtk.Builder builder =
-            new Gtk.Builder.from_resource("/org/gnome/Geary/components-conversation-actions.ui");
+    static construct {
+        set_css_name("components-conversation-actions");
+    }
+
+    // GObject style constuction to support loading via GTK Builder files
+    construct {
         // Assemble the mark menus
-        Gtk.Builder menu_builder =
-            new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
-        MenuModel mark_menu = (MenuModel) menu_builder.get_object("mark_message_menu");
+        Gtk.Builder menu_builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/components-main-toolbar-menus.ui"
+        );
+        GLib.MenuModel mark_menu = (MenuModel) menu_builder.get_object(
+            "mark_message_menu"
+        );
 
-        this.mark_copy_move_buttons = (Gtk.Box) builder.get_object("mark_copy_move_buttons");
-        this.mark_message_button = (Gtk.MenuButton) builder.get_object("mark_message_button");
-        this.copy_message_button = (Gtk.MenuButton) builder.get_object("copy_message_button");
-        this.move_message_button = (Gtk.MenuButton) builder.get_object("move_message_button");
-
-        this.reply_forward_buttons = (Gtk.Box) builder.get_object("reply_forward_buttons");
-
-        this.archive_trash_delete_buttons = (Gtk.Box) builder.get_object("archive_trash_delete_buttons");
-        this.archive_button = (Gtk.Button) builder.get_object("archive_button");
-        this.trash_delete_button = (Gtk.Button) builder.get_object("trash_delete_button");
-
-        this.find_button = (Gtk.ToggleButton) builder.get_object("find_button");
-
-        this.bind_property("find-open", this.find_button, "active",
-                           BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
         this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
         this.copy_message_button.popover = copy_folder_menu;
         this.move_message_button.popover = move_folder_menu;
+
+        this.response_buttons.set_visible(this.show_response_actions);
+        this.mark_copy_move_buttons.set_visible(this.show_conversation_actions);
+        this.archive_trash_delete_buttons.set_visible(this.show_conversation_actions);
+
+        if (this.pack_justified) {
+            this.archive_trash_delete_buttons.hexpand = true;
+            this.archive_trash_delete_buttons.halign = END;
+        }
     }
 
-    /** Sets the new owner and removes the previous owner and parents of the single actions */
-    public void take_ownership(Gtk.Widget? new_owner) {
-        remove_parent(mark_copy_move_buttons);
-        remove_parent(reply_forward_buttons);
-        remove_parent(archive_trash_delete_buttons);
-        remove_parent(find_button);
-        owner = new_owner;
+    public void set_move_sensitive(bool is_sensitive) {
+        this.move_message_button.sensitive = is_sensitive;
     }
 
-    private void remove_parent (Gtk.Widget widget) {
-        if (widget.parent != null)
-            widget.parent.remove(widget);
+    public void show_move_menu() {
+        this.move_message_button.clicked();
+    }
+
+    public void set_copy_sensitive(bool is_sensitive) {
+        this.copy_message_button.sensitive = is_sensitive;
+    }
+
+    public void show_copy_menu() {
+        this.copy_message_button.clicked();
     }
 
     public void update_trash_button(bool show_trash) {

@@ -27,14 +27,14 @@ public class Composer.Box : Gtk.Frame, Container {
     /** {@inheritDoc} */
     internal Widget composer { get; set; }
 
-    private MainToolbar main_toolbar { get; private set; }
+    private Components.MainToolbar main_toolbar { get; private set; }
 
 
     /** Emitted when the container is closed. */
     public signal void vanished();
 
 
-    public Box(Widget composer, MainToolbar main_toolbar) {
+    public Box(Widget composer, Components.MainToolbar main_toolbar) {
         this.composer = composer;
         this.composer.set_mode(PANED);
 

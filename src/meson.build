@@ -139,6 +139,9 @@ valadoc_vapi_dirs = [
   vapi_dir,
   meson.current_build_dir()
 ]
+if libhandy_vapi != ''
+  valadoc_vapi_dirs += libhandy_vapi
+endif
 
 # Hopefully Meson will get baked-in valadoc support, so we don't have
 # to resort to these kinds of hacks any more. See
@@ -147,7 +150,11 @@ valadoc_vapi_dirs = [
 valadoc_dep_args = []
 foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
-  valadoc_dep_args += dep.name()
+  if dep != libhandy
+    valadoc_dep_args += dep.name()
+  else
+    valadoc_dep_args += 'libhandy-1'
+  endif
 endforeach
 valadoc_dep_args += [ '--pkg', 'icu-uc' ]
 valadoc_dep_args += [ '--pkg', 'libstemmer' ]

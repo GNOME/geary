@@ -29,6 +29,7 @@ variables:
     libappstream-glib-devel libgee-devel libhandy1-devel libicu-devel
     libpeas-devel libsecret-devel libstemmer-devel libunwind-devel
     libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
+    git
   FEDORA_TEST_DEPS: glibc-langpack-en gnutls-utils tar Xvfb xz
 
   # Ubuntu packages
@@ -40,6 +41,7 @@ variables:
     libhandy-1-dev libicu-dev libjson-glib-dev libmessaging-menu-dev
     libpeas-dev libsecret-1-dev libsqlite3-dev libstemmer-dev
     libunwind-dev libwebkit2gtk-4.0-dev libxml2-dev libytnef0-dev
+    git ca-certificates
   UBUNTU_TEST_DEPS: gnutls-bin librsvg2-common locales xauth xvfb
 
 fedora:
