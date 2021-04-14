@@ -555,7 +555,7 @@ public class Application.MainWindow :
             activate_action(get_window_action(ACTION_CONVERSATION_DOWN));
             break;
         default:
-            this.get_window().beep();
+            error_bell();
             break;
         }
     }
@@ -1983,7 +1983,7 @@ public class Application.MainWindow :
         if (focus != null) {
             focus.focus(TAB_FORWARD);
         } else {
-            get_window().beep();
+            error_bell();
         }
     }
 
@@ -2023,7 +2023,7 @@ public class Application.MainWindow :
         if (focus != null) {
             focus.focus(TAB_FORWARD);
         } else {
-            get_window().beep();
+            error_bell();
         }
 
     }
@@ -2040,7 +2040,7 @@ public class Application.MainWindow :
         if (action != null && action.get_enabled()) {
             action.activate(null);
         } else {
-            get_window().beep();
+            error_bell();
         }
     }
 
@@ -2423,7 +2423,7 @@ public class Application.MainWindow :
         } else if (this.is_conversation_viewer_shown) {
             this.main_toolbar.shown_actions.show_copy_menu();
         } else {
-            this.error_bell();
+            error_bell();
         }
     }
 
@@ -2434,7 +2434,7 @@ public class Application.MainWindow :
         } else if (this.is_conversation_viewer_shown) {
             this.main_toolbar.shown_actions.show_move_menu();
         } else {
-            this.error_bell();
+            error_bell();
         }
     }
 
