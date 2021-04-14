@@ -1,3 +1,15 @@
+Version 40.rc
+~~~~~~~~~~~~~
+Released: 2021-04-14
+
+A candidate for the next stable release.
+
+Please see the AppStream file for updated features. Notable build
+changes included in this release:
+
+* Require libhandy 1.2.1
+* Add a dependency on ICU (actually in the last release)
+
 Version 40.alpha
 ~~~~~~~~~~~~~~~~
 Released: 2021-01-18
