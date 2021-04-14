@@ -122,7 +122,6 @@ modules:
         branch: master
     cleanup:
       - /bin
-      - /share
 
   # EDS dependency
   - name: libical
