@@ -92,8 +92,7 @@
                 }
             ],
             "cleanup": [
-                "/bin",
-                "/share"
+                "/bin"
             ]
         },
         {
