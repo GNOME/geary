@@ -853,39 +853,22 @@ public class Sidebar.Tree : Gtk.TreeView {
         return base.button_press_event(event);
     }
 
-    public bool is_keypress_interpreted(Gdk.EventKey event) {
-        switch (Gdk.keyval_name(event.keyval)) {
-            case "F2":
-            case "Delete":
-            case "Return":
-            case "KP_Enter":
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
     public override bool key_press_event(Gdk.EventKey event) {
+        bool handled = false;
         switch (Gdk.keyval_name(event.keyval)) {
-            case "Return":
-            case "KP_Enter":
-                Gtk.TreePath? path = get_current_path();
-                if (path != null)
-                    toggle_branch_expansion(path);
-
-                return true;
-
             case "F2":
-                return rename_in_place();
+                handled = rename_in_place();
+                break;
 
             case "Delete":
                 Gtk.TreePath? path = get_current_path();
-
-                return (path != null) ? destroy_path(path) : false;
+                handled = (path != null) ? destroy_path(path) : false;
+                break;
         }
-
-        return base.key_press_event(event);
+        if (!handled) {
+            handled = base.key_press_event(event);
+        }
+        return handled;
     }
 
     public bool rename_entry_in_place(Sidebar.Entry entry) {

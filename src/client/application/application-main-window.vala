@@ -555,7 +555,7 @@ public class Application.MainWindow :
             activate_action(get_window_action(ACTION_CONVERSATION_DOWN));
             break;
         default:
-            this.get_window().beep();
+            error_bell();
             break;
         }
     }
@@ -957,6 +957,13 @@ public class Application.MainWindow :
 
     /** Displays and focuses the search bar for the window. */
     public void show_search_bar(string? text = null) {
+        if (!this.is_conversation_list_shown) {
+            if (this.outer_leaflet.folded) {
+                this.outer_leaflet.set_visible_child_name(INNER_LEAFLET);
+            }
+            this.inner_leaflet.set_visible_child_name(CONVERSATION_LIST);
+        }
+
         this.search_bar.grab_focus();
         if (text != null) {
             this.search_bar.entry.text = text;
@@ -1741,7 +1748,8 @@ public class Application.MainWindow :
     }
 
     private void load_more() {
-        if (this.conversations != null) {
+        if (this.is_conversation_list_shown &&
+            this.conversations != null) {
             this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
         }
     }
@@ -1806,7 +1814,7 @@ public class Application.MainWindow :
         bool multiple = (count == MULTIPLE);
 
         get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
-            sensitive && !multiple
+            sensitive && !multiple && this.is_conversation_viewer_shown
         );
 
         bool reply_sensitive = (
@@ -1845,11 +1853,6 @@ public class Application.MainWindow :
             sensitive && (selected_folder is Geary.FolderSupport.Remove)
         );
 
-        this.update_context_dependent_actions.begin(sensitive);
-        update_conversation_list_actions_revealer(count);
-    }
-
-    private void update_conversation_list_actions_revealer(ConversationCount count) {
         switch (count) {
         case NONE:
             this.conversation_list_actions_revealer.reveal_child = false;
@@ -1863,6 +1866,8 @@ public class Application.MainWindow :
             this.conversation_list_actions_revealer.reveal_child = true;
             break;
         }
+
+        this.update_context_dependent_actions.begin(sensitive);
     }
 
     private void update_trash_action() {
@@ -1978,7 +1983,7 @@ public class Application.MainWindow :
         if (focus != null) {
             focus.focus(TAB_FORWARD);
         } else {
-            get_window().beep();
+            error_bell();
         }
     }
 
@@ -2018,7 +2023,7 @@ public class Application.MainWindow :
         if (focus != null) {
             focus.focus(TAB_FORWARD);
         } else {
-            get_window().beep();
+            error_bell();
         }
 
     }
@@ -2035,7 +2040,7 @@ public class Application.MainWindow :
         if (action != null && action.get_enabled()) {
             action.activate(null);
         } else {
-            get_window().beep();
+            error_bell();
         }
     }
 
@@ -2105,13 +2110,36 @@ public class Application.MainWindow :
     [GtkCallback]
     private void on_outer_leaflet_changed() {
         int selected = this.conversation_list_view.get_selected().size;
-        update_conversation_list_actions_revealer(
+        update_conversation_actions(
             ConversationCount.for_size(selected)
         );
-        if (this.has_composer &&
-            this.outer_leaflet.folded &&
-            (this.is_folder_list_shown || this.is_conversation_list_shown)) {
-            close_composer(false, false);
+        if (this.outer_leaflet.folded) {
+            // Ensure something useful gets the keyboard focus, given
+            // GNOME/libhandy#179
+            if (this.is_conversation_list_shown) {
+                this.conversation_list_view.grab_focus();
+            } else if (this.is_folder_list_shown) {
+                this.folder_list.grab_focus();
+            }
+
+            // Close any open composer that is no longer visible
+            if (this.has_composer &&
+                (this.is_folder_list_shown || this.is_conversation_list_shown)) {
+                close_composer(false, false);
+            }
+        }
+    }
+
+    [GtkCallback]
+    private void on_inner_leaflet_changed() {
+        if (this.inner_leaflet.folded) {
+            // Ensure something useful gets the keyboard focus, given
+            // GNOME/libhandy#179
+            if (this.is_conversation_list_shown) {
+                this.conversation_list_view.grab_focus();
+            } else if (this.is_folder_list_shown) {
+                this.folder_list.grab_focus();
+            }
         }
     }
 
@@ -2395,7 +2423,7 @@ public class Application.MainWindow :
         } else if (this.is_conversation_viewer_shown) {
             this.main_toolbar.shown_actions.show_copy_menu();
         } else {
-            this.error_bell();
+            error_bell();
         }
     }
 
@@ -2406,7 +2434,7 @@ public class Application.MainWindow :
         } else if (this.is_conversation_viewer_shown) {
             this.main_toolbar.shown_actions.show_move_menu();
         } else {
-            this.error_bell();
+            error_bell();
         }
     }
 
