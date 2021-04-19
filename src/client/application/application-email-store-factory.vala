@@ -55,8 +55,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             foreach (Plugin.EmailIdentifier plugin_id in plugin_ids) {
                 IdImpl? id_impl = plugin_id as IdImpl;
                 if (id_impl != null) {
-                    if (id_impl._account.backing != current_account) {
-                        current_account = id_impl._account.backing;
+                    if (id_impl.account_impl.backing != current_account) {
+                        current_account = id_impl.account_impl.backing;
                         engine_ids = found_accounts.get(current_account);
                         if (engine_ids == null) {
                             engine_ids = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -230,8 +230,8 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         Gee.Hashable<Plugin.EmailIdentifier>, Plugin.EmailIdentifier {
 
 
-        public Plugin.Account account { get { return this._account; } }
-        internal PluginManager.AccountImpl _account { get; private set; }
+        public Plugin.Account account { get { return this.account_impl; } }
+        internal PluginManager.AccountImpl account_impl;
 
         internal Geary.EmailIdentifier backing { get; private set; }
 
@@ -239,12 +239,12 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
         internal IdImpl(Geary.EmailIdentifier backing,
                         PluginManager.AccountImpl account) {
             this.backing = backing;
-            this._account = account;
+            this.account_impl = account;
         }
 
         public GLib.Variant to_variant() {
             return new GLib.Variant.tuple({
-                    this._account.backing.account.information.id,
+                    this.account_impl.backing.account.information.id,
                         new GLib.Variant.variant(this.backing.to_variant())
             });
         }
@@ -257,7 +257,7 @@ internal class Application.EmailStoreFactory : Geary.BaseObject {
             return (
                 impl != null &&
                 this.backing.equal_to(impl.backing) &&
-                this._account.backing == impl._account.backing
+                this.account_impl.backing == impl.account_impl.backing
             );
         }
 
