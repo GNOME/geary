@@ -420,8 +420,8 @@ treeview.sidebar .cell:dir(rtl) {
 treeview.sidebar:drop(active).after,
 treeview.sidebar:drop(active).before,
 treeview.sidebar:drop(active).into {
-  border-top-style: solid;
-  border-bottom-style: solid;
+  border-top: 1px solid @borders;
+  border-bottom: 1px solid @borders;
 }
 
 /* Inspector */
