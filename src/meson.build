@@ -33,9 +33,13 @@ endif
 
 # Symbols for valac's preprocessor must be defined as compiler args,
 # not in the code or in config.h
+vala_defines = []
+
 if get_option('ref_tracking').enabled()
-  geary_vala_args += [ '--define=REF_TRACKING' ]
+  vala_defines += [ '--define=REF_TRACKING' ]
 endif
+
+geary_vala_args += vala_defines
 
 # Common cc options
 geary_c_args = [
@@ -179,7 +183,7 @@ if valadoc.found()
       '--package-version=@0@'.format(meson.project_version()),
       '-b', meson.current_source_dir(),
       '-o', '@OUTPUT@',
-    ] + valadoc_dep_args + valadoc_vapidir_args + [
+    ] + vala_defines + valadoc_dep_args + valadoc_vapidir_args + [
       '@INPUT@'
     ]
   )
