@@ -42,7 +42,7 @@ internal class Application.FolderStoreFactory : Geary.BaseObject {
             var folders = new Gee.LinkedList<Plugin.Folder>();
             var id = target as EmailStoreFactory.IdImpl;
             if (id != null) {
-                var context = id._account.backing;
+                var context = id.account_impl.backing;
                 Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? multi_folders =
                     yield context.account.get_containing_folders_async(
                         Geary.Collection.single(id.backing),
