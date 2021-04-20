@@ -39,6 +39,10 @@ if get_option('ref_tracking').enabled()
   vala_defines += [ '--define=REF_TRACKING' ]
 endif
 
+if gmime.version().version_compare('<=3.2.7')
+  vala_defines += [ '--define=GMIME_STREAM_WRITE_STRING' ]
+endif
+
 geary_vala_args += vala_defines
 
 # Common cc options

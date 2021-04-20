@@ -60,15 +60,23 @@ namespace Geary.Stream {
             return this.written;
         }
 
+#if GMIME_STREAM_WRITE_STRING
         public override ssize_t write(string buf, size_t len) {
-            ssize_t ret = -1;
             try {
-                ret = this.dest.write(buf.data[0:len]);
-                this.written += len;
+                var ret = this.dest.write(buf.data[0:len]);
+#else
+        public override ssize_t write(uint8[] buf) {
+            try {
+                var ret = this.dest.write(buf);
+#endif
+                if (ret > 0) {
+                    this.written += ret;
+                }
+                return ret;
             } catch (IOError err) {
                 // Oh well
+                return -1;
             }
-            return ret;
         }
 
         public override int close() {
