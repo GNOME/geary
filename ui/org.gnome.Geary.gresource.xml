@@ -30,6 +30,8 @@
     <file compressed="true">composer-web-view.css</file>
     <file compressed="true">composer-web-view.js</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-contact-popover.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">conversation-list-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">conversation-list-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-email.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-email-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">conversation-message.ui</file>

@@ -356,7 +356,7 @@ public class Application.MainWindow :
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public Components.MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; }
-    public ConversationListView conversation_list_view  { get; private set; }
+    public ConversationList.View conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
@@ -402,10 +402,10 @@ public class Application.MainWindow :
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
 
     [GtkChild] private unowned Gtk.Box conversation_list_box;
-    [GtkChild] private unowned Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
     [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
 
+    [GtkChild] private unowned Gtk.Frame conversation_frame;
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
     [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
     [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
@@ -787,11 +787,7 @@ public class Application.MainWindow :
                 this.progress_monitor.remove(this.conversations.progress_monitor);
                 close_conversation_monitor(this.conversations);
                 this.conversations = null;
-            }
-            var conversations_model = this.conversation_list_view.get_model();
-            if (conversations_model != null) {
-                this.progress_monitor.remove(conversations_model.preview_monitor);
-                this.conversation_list_view.set_model(null);
+                this.conversation_list_view.set_monitor(null);
             }
 
             this.conversation_list_info_bars.remove_all();
@@ -840,22 +836,18 @@ public class Application.MainWindow :
                     // Include fields for the conversation viewer as well so
                     // conversations can be displayed without having to go
                     // back to the db
-                    ConversationListStore.REQUIRED_FIELDS |
+                    ConversationList.View.REQUIRED_FIELDS |
                     ConversationListBox.REQUIRED_FIELDS |
                     ConversationEmail.REQUIRED_FOR_CONSTRUCT,
                     MIN_CONVERSATION_COUNT
                 );
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
-                conversations_model = new ConversationListStore(
-                    this.conversations, this.application.config
-
-                );
-                this.progress_monitor.add(conversations_model.preview_monitor);
+                //this.progress_monitor.add(conversations_model.preview_monitor);
                 if (inhibit_autoselect) {
                     this.conversation_list_view.inhibit_next_autoselect();
                 }
-                this.conversation_list_view.set_model(conversations_model);
+                this.conversation_list_view.set_monitor(this.conversations);
 
                 // disable copy/move to the new folder
                 foreach (var menu in this.folder_popovers) {
@@ -1334,15 +1326,13 @@ public class Application.MainWindow :
         this.conversation_list_box.pack_start(
             this.conversation_list_info_bars, false, false, 0
         );
-        this.conversation_list_view = new ConversationListView(
-            this.application.config
-        );
-        this.conversation_list_view.load_more.connect(on_load_more);
+
+        this.conversation_list_view = new ConversationList.View(this.application.config);
         this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         this.conversation_list_view.conversation_activated.connect(on_conversation_activated);
-        this.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
-        this.conversation_list_scrolled.add(conversation_list_view);
+        this.conversation_list_view.visible_conversations.notify.connect(on_visible_conversations_changed);
+        this.conversation_frame.add(this.conversation_list_view);
 
         // Conversation viewer
         this.conversation_viewer = new ConversationViewer(
@@ -1568,11 +1558,7 @@ public class Application.MainWindow :
                 this.conversation_viewer.current_list.update_display();
             }
 
-            ConversationListStore? list_store =
-                this.conversation_list_view.get_model() as ConversationListStore;
-            if (list_store != null) {
-                list_store.update_display();
-            }
+            this.conversation_list_view.refresh_times();
         }
     }
 
@@ -1747,13 +1733,6 @@ public class Application.MainWindow :
         }
     }
 
-    private void load_more() {
-        if (this.is_conversation_list_shown &&
-            this.conversations != null) {
-            this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
-        }
-    }
-
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         this.select_conversations.begin(selected, Gee.Collection.empty(), true);
     }
@@ -1775,7 +1754,7 @@ public class Application.MainWindow :
                 // conversations_selected firing from the convo list,
                 // so we need to stop the loading spinner here.
                 if (!this.application.config.autoselect &&
-                    this.conversation_list_view.get_selection().count_selected_rows() == 0) {
+                    this.conversation_list_view.get_selected().size == 0) {
                     this.conversation_viewer.show_none_selected();
                     update_conversation_actions(NONE);
                 }
@@ -2050,7 +2029,7 @@ public class Application.MainWindow :
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
         Gtk.Scrollbar? scrollbar = (
-            this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar
+            this.conversation_list_view.get_vscrollbar() as Gtk.Scrollbar
         );
         if (is_visible() &&
             (scrollbar == null || !scrollbar.get_visible()) &&
@@ -2058,7 +2037,7 @@ public class Application.MainWindow :
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
                   this.selected_folder.to_string());
-            load_more();
+            this.conversation_list_view.load_more(MIN_CONVERSATION_COUNT);
         }
     }
 
@@ -2069,10 +2048,6 @@ public class Application.MainWindow :
         this.controller.report_problem(
             new Geary.ServiceProblemReport(account, account.incoming, err)
         );
-    }
-
-    private void on_load_more() {
-        load_more();
     }
 
     [GtkCallback]
@@ -2305,7 +2280,7 @@ public class Application.MainWindow :
         if (this.selected_folder != null) {
             this.controller.clear_new_messages(
                 this.selected_folder,
-                this.conversation_list_view.get_visible_conversations()
+                this.conversation_list_view.visible_conversations
             );
         }
     }
@@ -2339,9 +2314,9 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
+    private void on_visible_conversations_changed() {
         if (this.selected_folder != null) {
-            this.controller.clear_new_messages(this.selected_folder, visible);
+            this.controller.clear_new_messages(this.selected_folder, this.conversation_list_view.visible_conversations);
         }
     }
 
@@ -2359,7 +2334,7 @@ public class Application.MainWindow :
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
                     this.selected_folder,
-                    this.conversation_list_view.copy_selected()
+                    this.conversation_list_view.get_selected()
                     );
             } else {
                 // TODO: Determine how to map between conversations
@@ -2513,7 +2488,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 Geary.EmailFlags.UNREAD,
                 false,
                 (obj, res) => {
@@ -2532,7 +2507,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 Geary.EmailFlags.UNREAD,
                 true,
                 (obj, res) => {
@@ -2551,7 +2526,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 Geary.EmailFlags.FLAGGED,
                 true,
                 (obj, res) => {
@@ -2570,7 +2545,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 Geary.EmailFlags.FLAGGED,
                 false,
                 (obj, res) => {
@@ -2594,7 +2569,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2613,7 +2588,7 @@ public class Application.MainWindow :
             this.controller.move_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 (obj, res) => {
                     try {
                         this.controller.move_conversations.end(res);
@@ -2633,7 +2608,7 @@ public class Application.MainWindow :
             this.controller.copy_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 (obj, res) => {
                     try {
                         this.controller.copy_conversations.end(res);
@@ -2652,7 +2627,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 ARCHIVE,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2670,7 +2645,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 TRASH,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.get_selected(),
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2686,7 +2661,7 @@ public class Application.MainWindow :
         Geary.FolderSupport.Remove target =
             this.selected_folder as Geary.FolderSupport.Remove;
         Gee.Collection<Geary.App.Conversation> conversations =
-            this.conversation_list_view.copy_selected();
+            this.conversation_list_view.get_selected();
         if (target != null && this.prompt_delete_conversations(conversations.size)) {
             this.controller.delete_conversations.begin(
                 target,

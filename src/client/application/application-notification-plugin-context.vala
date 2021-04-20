@@ -117,7 +117,8 @@ internal class Application.NotificationPluginContext :
                 window == null ||
                 !window.has_toplevel_focus ||
                 window.selected_folder != folder ||
-                window.conversation_list_view.vadjustment.value > 0.0
+                false
+                //window.conversation_list_view.vadjustment.value > 0.0
             )
         );
     }

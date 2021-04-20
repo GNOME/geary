@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkImage" id="flagged_icon">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">starred-symbolic</property>
+    <property name="use-fallback">True</property>
+    <style>
+      <class name="conversation-row-button"/>
+    </style>
+  </object>
+  <object class="GtkImage" id="read_icon">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">mail-read-symbolic</property>
+    <property name="use-fallback">True</property>
+  </object>
+  <object class="GtkImage" id="unflagged_icon">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="icon-name">non-starred-symbolic</property>
+    <property name="use-fallback">True</property>
+  </object>
+  <object class="GtkImage" id="unread_icon">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="pixel-size">16</property>
+    <property name="icon-name">mail-unread-symbolic</property>
+    <property name="use-fallback">True</property>
+  </object>
+  <template class="ConversationListRow" parent="GtkListBoxRow">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkEventBox" id="eventbox">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkBox" id="container">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="has-tooltip">True</property>
+            <property name="spacing">5</property>
+            <property name="baseline-position">top</property>
+            <child>
+              <object class="GtkBox" id="buttons">
+                <property name="width-request">36</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkButton" id="unread">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="image">unread_icon</property>
+                    <property name="relief">none</property>
+                    <property name="valign">center</property>
+                    <property name="always-show-image">True</property>
+                    <signal name="clicked" handler="mark_unread" swapped="no"/>
+                    <style>
+                      <class name="conversation-ephemeral-button"/>
+                      <class name="unread-button"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="flagged">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="image">flagged_icon</property>
+                    <property name="relief">none</property>
+                    <property name="valign">center</property>
+                    <property name="always-show-image">True</property>
+                    <signal name="clicked" handler="mark_flagged" swapped="no"/>
+                    <style>
+                      <class name="conversation-ephemeral-button"/>
+                      <class name="flagged-button"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="Details">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="baseline-position">top</property>
+                <child>
+                  <object class="GtkBox" id="Header">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="participants">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="use-markup">True</property>
+                        <property name="ellipsize">end</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="participants"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="date">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <style>
+                          <class name="date"/>
+                          <class name="tertiary"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="subject">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="ellipsize">end</property>
+                    <property name="single-line-mode">True</property>
+                    <property name="xalign">0</property>
+                    <style>
+                      <class name="subject"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="preview_row">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="preview">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="wrap">True</property>
+                        <property name="wrap-mode">word-char</property>
+                        <property name="ellipsize">end</property>
+                        <property name="lines">1</property>
+                        <property name="xalign">0</property>
+                        <style>
+                          <class name="preview"/>
+                          <class name="tertiary"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="count_badge">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="valign">center</property>
+                        <style>
+                          <class name="count-badge"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <style>
+      <class name="conversation-list"/>
+    </style>
+  </template>
+</interface>

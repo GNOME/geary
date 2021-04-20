@@ -9,6 +9,7 @@
  */
 public class CountBadge : Geary.BaseObject {
     public const string UNREAD_BG_COLOR = "#888888";
+	public const int SPACING = 6;
 
     private const int FONT_SIZE_MESSAGE_COUNT = 8;
 
@@ -63,7 +64,7 @@ public class CountBadge : Geary.BaseObject {
         Pango.Rectangle? logical_rect;
         layout_num.get_pixel_extents(out ink_rect, out logical_rect);
         if (ctx != null) {
-            double bg_width = logical_rect.width + FormattedConversationData.SPACING;
+            double bg_width = logical_rect.width + SPACING;
             double bg_height = logical_rect.height;
             double radius = bg_height / 2.0;
             double degrees = Math.PI / 180.0;
@@ -87,7 +88,7 @@ public class CountBadge : Geary.BaseObject {
             Pango.cairo_show_layout(ctx, layout_num);
         }
 
-        width = logical_rect.width + FormattedConversationData.SPACING;
+        width = logical_rect.width + SPACING;
         height = logical_rect.height;
     }
 }

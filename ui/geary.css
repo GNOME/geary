@@ -57,7 +57,7 @@ geary-conversation-viewer {
 }
 
 infobar flowboxchild {
-	padding: 0px;
+    padding: 0px;
 }
 
 revealer components-conversation-actions {
@@ -65,6 +65,86 @@ revealer components-conversation-actions {
   border-top-width: 1px;
   padding: 6px;
 }
+
+
+/* Conversation List */
+row.conversation-list {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-right: 0.5em;
+}
+
+row.conversation-list.drag-n-drop {
+    background: @theme_base_color;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+row.conversation-list label {
+    margin-bottom: .4em;
+}
+
+row.conversation-list .tertiary {
+  opacity: 0.7;
+  font-size: 0.8em;
+}
+
+row.conversation-list .subject {
+  font-size: 0.9em;
+}
+
+row.conversation-list .date {
+    margin-left: 1em;
+}
+
+/* Unread styling */
+row.conversation-list.unread .preview {
+  opacity: 1;
+}
+
+row.conversation-list.unread .subject {
+  font-weight: bold;
+}
+
+row.conversation-list.unread .participants {
+  font-weight: bold;
+}
+
+row.conversation-list.unread .unread-button {
+  opacity: 1;
+}
+
+/* Hover buttons */
+row.conversation-list .conversation-ephemeral-button {
+  opacity: 0;
+  margin: 2px;
+  border-radius: 50%;
+  border: none;
+}
+
+row.conversation-list:hover .conversation-ephemeral-button {
+  opacity: 1;
+}
+
+row.conversation-list:selected .conversation-ephemeral-button {
+  opacity: 1;
+}
+
+
+row.conversation-list.flagged .flagged-button {
+  opacity: 1;
+}
+
+
+row.conversation-list .count-badge {
+  background: #888888;
+  color: white;
+  min-width: 1.5em;
+  border-radius: 1em;
+  font-size: .8em;
+  font-weight: bold;
+}
+
 
 /* FolderPopover */
 
@@ -407,17 +487,22 @@ popover.geary-editor > grid > button.geary-setting-remove {
 }
 
 dialog.geary-remove-confirm .dialog-vbox {
-	margin: 12px;
+    margin: 12px;
 }
 
 dialog.geary-remove-confirm .dialog-action-box {
-	margin: 6px;
+    margin: 6px;
 }
 
 /* FolderList.Tree */
 
 treeview.sidebar {
   border: none;
+}
+
+treeview:selected.sidebar {
+  background: alpha(@theme_text_color, 0.1);
+  color: @theme_text_color;
 }
 
 treeview.sidebar .cell {

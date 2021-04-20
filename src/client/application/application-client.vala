@@ -1203,7 +1203,7 @@ public class Application.Client : Gtk.Application {
         MainWindow? current = this.last_active_main_window;
         if (current != null) {
             folder = current.selected_folder;
-            conversations = current.conversation_list_view.copy_selected();
+            conversations = current.conversation_list_view.get_selected();
         }
         this.new_window.begin(folder, conversations);
     }
