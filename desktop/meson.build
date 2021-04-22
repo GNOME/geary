@@ -39,7 +39,10 @@ foreach desktop_file: desktop_output
     test(
       'desktop-file-validate',
       desktop_file_validate,
-      args: [ desktop_file.full_path() ]
+      args: [ desktop_file.full_path() ],
+      depends: [
+        desktop_file,
+      ]
     )
   endif
 endforeach
@@ -69,6 +72,9 @@ if appstream_util.found()
     appstream_util,
     args: [
       'validate-relax', '--nonet', appdata_merged.full_path()
+    ],
+    depends: [
+      appdata_merged,
     ]
   )
 endif

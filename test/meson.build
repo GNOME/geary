@@ -168,5 +168,13 @@ test_integration_bin = executable('test-integration',
   c_args: geary_c_args,
 )
 
-test('engine-tests', test_engine_bin)
-test('client-tests', test_client_bin)
+test(
+  'engine-tests',
+  test_engine_bin,
+  depends: [ engine_lib ]
+)
+test(
+  'client-tests',
+  test_client_bin,
+  depends: [ client_lib, web_process ]
+)
