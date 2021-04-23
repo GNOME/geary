@@ -1,3 +1,91 @@
+Version 40.0
+~~~~~~~~~~~~
+Released: 2021-04-23
+
+A stable feature release.
+
+Enhancements included in this release:
+ * Visual refresh including updated icon and interface
+ * Add support for half-screen, portrait and small displays
+ * Improved performance when displaying large conversations
+ * Upgraded full-text search engine
+ * Improved search for languages such as Thai and Chinese
+ * Improved keyboard shortcuts
+ * Improved server compatibility
+ * Numerous user interface translation updates
+ * Numerous bug fixes and user interface improvements
+
+Changes since 40.rc:
+
+ * Build fixes for future versions of vala, gmime, and meson.
+
+Thanks to those who contributed bug fixes and enhancements to this
+release:
+
+ * Adrien Plazas
+ * Arnaud Ferraris
+ * Björn Daase
+ * Carlos Langoni
+ * Chris Heywood
+ * Douglas Fuller
+ * Guido Günther
+ * James Westman
+ * Jeremias Ortega
+ * John Renner
+ * Julian Sparber
+ * Marek Benc
+ * Marek Černocký
+ * Michael Catanzaro
+ * Michał Kopeć
+ * Rico Tzschichholz
+ * Thami Memel
+ * Thomas Lauerman
+ * Tobias Bernard
+ * Yuri Edward
+
+Thanks also to those who contributed translations for the interface:
+
+ * Alan Mortensen (da)
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Asier Sarasua Garmendia (eu)
+ * Balázs Úr (hu)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Dušan Kazik (sk)
+ * Dz Chen (zh_CN)
+ * Efstathios Iosifidis (el)
+ * Emin Tufan Çetin (tr)
+ * Enrico Nicoletto (pt_BR)
+ * Fabio Tomat (fur)
+ * Federico Bruni (it)
+ * Florentina Mușat (ro)
+ * Fran Dieguez (gl)
+ * Goran Vidović (hr)
+ * Hugo Carvalho (pt)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Kukuh Syafaat (id)
+ * Marek Černocký (cs)
+ * Nathan Follens (nl)
+ * Piotr Drąg (pl)
+ * Rodrigo Costa (pt_BR)
+ * Tim Sabsch (de)
+ * Viktor Illmer (de)
+ * Yosef Or Boczko (he)
+ * Yuri Chornoivan (uk)
+ * Źmicier Turok (be)
+ * Аляксей (be)
+ * Мирослав Николић (sr)
+
+And for the online help manual:
+
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Federico Bruni (it)
+ * Jordi Mas (ca)
+ * Marek Černocký (cs)
+
 Version 40.rc
 ~~~~~~~~~~~~~
 Released: 2021-04-14

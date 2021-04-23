@@ -88,7 +88,7 @@
   <translation type="gettext">geary</translation>
 
   <releases>
-    <release version="40.0">
+    <release version="40.0" date="2021-04-23">
       <description>
         <p>Enhancements included in this release:</p>
         <ul>
@@ -99,8 +99,8 @@
           <li>Improved search for languages such as Thai and Chinese</li>
           <li>Improved keyboard shortcuts</li>
           <li>Improved server compatibility</li>
-          <li>Numerous bug fixes and user interface improvements</li>
           <li>Numerous user interface translation updates</li>
+          <li>Numerous bug fixes and user interface improvements</li>
         </ul>
       </description>
     </release>
