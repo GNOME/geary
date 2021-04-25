@@ -111,18 +111,6 @@ modules:
       - /bin
       - /share
 
-  # Geary dependency
-  - name: libhandy
-    buildsystem: meson
-    config-opts:
-      - "-Dglade_catalog=disabled"
-    sources:
-      - type: git
-        url: "https://gitlab.gnome.org/GNOME/libhandy.git"
-        branch: master
-    cleanup:
-      - /bin
-
   # EDS dependency
   - name: libical
     buildsystem: cmake-ninja

@@ -79,23 +79,6 @@
             ]
         },
         {
-            "name": "libhandy",
-            "buildsystem": "meson",
-            "config-opts": [
-                "-Dglade_catalog=disabled"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libhandy.git",
-                    "branch": "master"
-                }
-            ],
-            "cleanup": [
-                "/bin"
-            ]
-        },
-        {
             "name": "libical",
             "buildsystem": "cmake-ninja",
             "config-opts": [
