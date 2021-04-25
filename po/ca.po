@@ -3347,7 +3347,7 @@ msgid "Copy Email _Address"
 msgstr "_Copia l'adreça del correu electrònic"
 
 #: ui/conversation-message-menus.ui:27
-msgid "Save _Image As…"
+msgid "A_nomena i desa la imatge…"
 msgstr "Desa la _imatge com…"
 
 #: ui/conversation-message-menus.ui:33
