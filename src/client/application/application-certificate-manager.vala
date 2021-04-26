@@ -6,23 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Required because GCR's VAPI is behind-the-times. See:
-// https://gitlab.gnome.org/GNOME/gcr/merge_requests/7
-extern async bool gcr_trust_add_pinned_certificate_async(
-    Gcr.Certificate cert,
-    string purpose,
-    string peer,
-    Cancellable? cancellable
-) throws Error;
-extern bool gcr_trust_is_certificate_pinned(
-    Gcr.Certificate cert,
-    string purpose,
-    string peer,
-    Cancellable? cancellable
-) throws Error;
-
-
-// All of the below basically exists since cert pinning using GCR
+// All of the code below basically exists since cert pinning using GCR
 // stopped working (GNOME/gcr#10) after gnome-keyring stopped
 // advertising its PKCS11 module (GNOME/gnome-keyring#20). To work
 // around, this piggy-backs off of the GIO infrastructure and adds a
@@ -295,7 +279,7 @@ internal class Application.TlsDatabase : GLib.TlsDatabase {
         }
         if (save) {
             if (this.use_gcr) {
-                yield gcr_trust_add_pinned_certificate_async(
+                yield Gcr.trust_add_pinned_certificate_async(
                     new Gcr.SimpleCertificate(certificate.certificate.data),
                     GLib.TlsDatabase.PURPOSE_AUTHENTICATE_SERVER,
                     id,
@@ -454,7 +438,7 @@ internal class Application.TlsDatabase : GLib.TlsDatabase {
                 // Cert not found in memory, check with GCR if
                 // enabled.
                 if (this.use_gcr) {
-                    is_pinned = gcr_trust_is_certificate_pinned(
+                    is_pinned = Gcr.trust_is_certificate_pinned(
                         new Gcr.SimpleCertificate(chain.certificate.data),
                         GLib.TlsDatabase.PURPOSE_AUTHENTICATE_SERVER,
                         id,
