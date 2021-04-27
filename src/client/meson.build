@@ -193,8 +193,9 @@ if webkit2gtk.version().version_compare('<2.31')
   client_vala_args += [ '--define=WEBKIT_PLUGINS_SUPPORTED' ]
 endif
 
-# Main client application library
-client_lib = shared_library(
+# Main client application library. Built as both shared and static, so
+# the client tests can access internal symbols via the static library.
+client_lib = both_libraries(
   client_package,
   client_vala_sources + geary_resources,
   dependencies: client_dependencies,

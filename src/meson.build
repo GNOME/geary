@@ -24,6 +24,7 @@ configure_file(output: 'config.h', configuration: conf)
 geary_vala_args = [
   '--abi-stability',
   '--enable-checking',
+  '--hide-internal',
 ]
 
 # Remove once libhandy 1.0 has been packaged and is widely available
