@@ -207,7 +207,7 @@
                 {
                     "type": "git",
                     "url": "https://github.com/jstedfast/gmime.git",
-                    "branch": "3.2.7"
+                    "branch": "master"
                 }
             ]
         },

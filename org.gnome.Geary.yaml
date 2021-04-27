@@ -211,9 +211,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/jstedfast/gmime.git
-        # Pin to 3.2.7 until 3.2.8 is released, or the mainline branch
-        # is pre-bumped to same.
-        branch: 3.2.7
+        branch: master
 
   # Geary dependency
   - name: libpeas
