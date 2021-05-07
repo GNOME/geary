@@ -1703,7 +1703,7 @@ msgstr "_Cco"
 #. / Translators: Label for composer Reply-To address entry
 #: src/client/composer/composer-widget.vala:518
 msgid "_Reply to"
-msgstr "_Respon a:"
+msgstr "_Respon a"
 
 #. / Translators: Label for composer Subject line entry
 #: src/client/composer/composer-widget.vala:526
