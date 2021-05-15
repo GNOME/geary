@@ -1335,16 +1335,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                            string href,
                                            Gdk.Rectangle location) {
         string text_href = text;
-        if (Uri.parse_scheme(text_href) == null) {
+        if (GLib.Uri.parse_scheme(text_href) == null) {
             text_href = "http://" + text_href;
         }
-        string text_label = Soup.URI.decode(text_href);
+        string? text_label = GLib.Uri.unescape_string(text_href) ?? _("(unknown)");
 
         string anchor_href = href;
-        if (Uri.parse_scheme(anchor_href) == null) {
+        if (GLib.Uri.parse_scheme(anchor_href) == null) {
             anchor_href = "http://" + anchor_href;
         }
-        string anchor_label = Soup.URI.decode(anchor_href);
+        string anchor_label = GLib.Uri.unescape_string(anchor_href) ?? _("(unknown)");
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-message-link-popover.ui"

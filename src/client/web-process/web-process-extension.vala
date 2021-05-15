@@ -68,7 +68,12 @@ public class GearyWebExtension : Object {
                                  WebKit.URIRequest request,
                                  WebKit.URIResponse? response) {
         bool should_load = false;
-        Soup.URI? uri = new Soup.URI(request.get_uri());
+        GLib.Uri? uri = null;
+        try {
+            uri = GLib.Uri.parse(request.get_uri(), NONE);
+        } catch (GLib.UriError err) {
+            warning("Invalid request URI: %s", err.message);
+        }
         if (uri != null && uri.get_scheme() in ALLOWED_SCHEMES) {
             // Always load internal resources
             should_load = true;

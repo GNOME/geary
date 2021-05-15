@@ -168,7 +168,6 @@ client_dependencies = [
   libpeas,
   libpeas_gtk,
   libsecret,
-  libsoup,
   libxml,
   posix,
   webkit2gtk,

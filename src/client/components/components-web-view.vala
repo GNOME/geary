@@ -696,7 +696,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private bool handle_internal_response(WebKit.URISchemeRequest request) {
-        string name = soup_uri_decode(request.get_path());
+        string name = GLib.Uri.unescape_string(request.get_path());
         Geary.Memory.Buffer? buf = this.internal_resources[name];
         bool handled = false;
         if (buf != null) {
@@ -853,6 +853,3 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
 }
-
-// XXX this needs to be moved into the libsoup bindings
-extern string soup_uri_decode(string part);

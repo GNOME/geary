@@ -16,7 +16,6 @@ plugin_dependencies = [
   libhandy,
   libmath,
   libpeas,
-  libsoup,
   webkit2gtk,
 ]
 

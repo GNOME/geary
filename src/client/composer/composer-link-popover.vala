@@ -52,7 +52,7 @@ public class Composer.LinkPopover : Gtk.Popover {
 
 
     /** Emitted when the link URL has changed. */
-    public signal void link_changed(Soup.URI? uri, bool is_valid);
+    public signal void link_changed(GLib.Uri? uri, bool is_valid);
 
     /** Emitted when the link URL was activated. */
     public signal void link_activate();
@@ -99,9 +99,13 @@ public class Composer.LinkPopover : Gtk.Popover {
         bool is_valid = false;
         bool is_nominal = false;
         bool is_mailto = false;
-        Soup.URI? url = null;
+        GLib.Uri? url = null;
         if (!is_empty) {
-            url = new Soup.URI(text);
+            try {
+                url = GLib.Uri.parse(text, PARSE_RELAXED);
+            } catch (GLib.UriError err) {
+                debug("Invalid link URI: %s", err.message);
+            }
             if (url != null) {
                 is_valid = true;
 
