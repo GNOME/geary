@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary gnome-3-38\n"
-"POT-Creation-Date: 2020-11-22 08:43+0000\n"
-"PO-Revision-Date: 2020-12-03 21:55+0700\n"
+"POT-Creation-Date: 2020-12-03 14:57+0000\n"
+"PO-Revision-Date: 2021-05-31 18:14+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <gnome-l10n-id@googlegroups.com>\n"
 "Language: id\n"
@@ -19,7 +19,7 @@ msgstr ""
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
 msgid "translator-credits"
-msgstr "Andika Triwidada <andika@gmail.com>, 2020"
+msgstr "Andika Triwidada <andika@gmail.com>, 2020, 2021."
 
 #. (itstool) path: page/title
 #: C/accounts.page:10
@@ -265,11 +265,10 @@ msgstr ""
 "pesan ke tong sampah jika Anda berubah pikiran. Klik <gui style=\"button"
 "\">Batalkan</gui> pada pemberitahuan pop-up yang muncul, atau ketik "
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq>, atau buka folder, temukan "
-"pesan, lalu pindahkan kembali ke <gui>Inbox</gui> Anda."
+"pesan, lalu pindahkan kembali ke <gui>Kotak Masuk</gui> Anda"
 
 #. (itstool) path: page/p
 #: C/archive.page:34
-#, fuzzy
 msgid ""
 "While both <gui style=\"button\">Archive</gui> and <gui style=\"button"
 "\">Trash</gui> removes conversations from your <gui>Inbox</gui> folder, "
@@ -279,12 +278,12 @@ msgid ""
 "to be hidden from <link xref=\"search\"/>, and they will likely be deleted "
 "in the future."
 msgstr ""
-"Meskipun Arsip <gui style=\"button\">dan</gui> <gui style=\"button\">Sampah</"
-"gui> menghapus percakapan dari folder <gui>Kotak Masuk</gui> Anda, ada "
-"perbedaan penting. Mengklik Arsip <gui style=\"button\">akan</gui> "
+"Meskipun <gui style=\"button\">Arsip</gui> dan <gui style=\"button\">Tong "
+"Sampah</gui> menghapus percakapan dari folder <gui>Kotak Masuk</gui> Anda, "
+"ada perbedaan penting. Mengklik <gui style=\"button\">Arsip</gui> akan "
 "memastikan percakapan Anda disimpan sehingga Anda bisa menemukannya lagi "
-"nanti. Mengklik <gui style=\"button\">Sampah</gui> akan menyebabkan "
-"percakapan disembunyikan <link xref=\"search\"/> dari , dan kemungkinan akan "
+"nanti. Mengklik <gui style=\"button\">Tong Sampah</gui> akan menyebabkan "
+"percakapan disembunyikan dari <link xref=\"search\"/>, dan kemungkinan akan "
 "dihapus di masa mendatang."
 
 #. (itstool) path: page/title
@@ -372,14 +371,13 @@ msgstr "Apa yang Anda harapkan terjadi?"
 
 #. (itstool) path: section/p
 #: C/bugs.page:44
-#, fuzzy
 msgid ""
 "Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
 "key><key>I</key></keyseq> to open it, select and save any relevant log "
 "files, and attach them to the bug report."
 msgstr ""
-"File log dapat diakses melalui Pemeriksa Geary, tekan <keyseq> <key>Alt</"
-"key><key>I untuk</key> </keyseq> membukanya, memilih dan menyimpan file log "
+"Berkas log dapat diakses melalui Pemeriksa Geary, tekan <keyseq><key>Alt</"
+"key><key>I</key></keyseq> untuk membukanya, memilih dan menyimpan berkas log "
 "yang relevan, dan melampirkannya ke laporan bug."
 
 #. (itstool) path: page/title
@@ -540,7 +538,6 @@ msgstr "Limitasi"
 
 #. (itstool) path: page/p
 #: C/limits.page:11
-#, fuzzy
 msgid ""
 "Geary is still in early development. Geary supports IMAP and has been tested "
 "with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
@@ -549,10 +546,10 @@ msgid ""
 "offline mode."
 msgstr ""
 "Geary masih dalam pengembangan awal. Geary mendukung IMAP dan telah diuji "
-"dengan Gmail, Yahoo, dan server email Dovecot gratis. Dukungan eksperimental "
-"untuk Outlook.com disediakan. Geary mungkin belum bekerja dengan baik dengan "
-"beberapa server IMAP. Saat ini Geary masih kehilangan banyak fitur termasuk "
-"mode offline."
+"dengan Gmail, Yahoo, dan server surel Dovecot yang bebas. Dukungan "
+"eksperimental untuk Outlook.com disediakan. Geary mungkin belum bekerja "
+"dengan baik dengan beberapa server IMAP. Saat ini Geary masih kekurangan "
+"banyak fitur termasuk mode luring."
 
 #. (itstool) path: page/p
 #: C/limits.page:17
@@ -707,7 +704,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/overview.page:67
-#, fuzzy
 msgid ""
 "Click on any of the sender’s or receiver’s names or email address for a "
 "message to open the <em>contact menu</em>, which displays additional "
@@ -720,15 +716,15 @@ msgid ""
 "them to the address book, and update the remote image loading preference for "
 "that address."
 msgstr ""
-"Klik salah satu nama atau alamat email pengirim atau penerima untuk pesan "
-"untuk membuka <em>menu kontak</em>, yang menampilkan informasi dan opsi "
-"tambahan untuk alamat email. Anda bisa memulai percakapan baru, menyalin "
-"alamat email ke clipboard, dan mencari percakapan terkait. Jika alamat email "
-"ada di buku alamat desktop Anda, itu akan menampilkan foto kontak, nama "
-"pilihan, dan apakah itu adalah kontak favorit. Anda juga dapat membuka "
-"kontak di buku alamat. Jika alamat email belum ada, Anda dapat memilih untuk "
-"menambahkannya ke buku alamat, dan memperbarui preferensi pemuatan gambar "
-"jarak jauh untuk alamat tersebut."
+"Klik salah satu nama atau alamat surel pengirim atau penerima agar pesan "
+"membuka <em>menu kontak</em>, yang menampilkan informasi dan opsi tambahan "
+"untuk alamat surel. Anda bisa memulai percakapan baru, menyalin alamat surel "
+"ke papan klip, dan mencari percakapan terkait. Jika alamat surel ada di buku "
+"alamat desktop Anda, itu akan menampilkan foto kontak, nama pilihan, dan "
+"apakah itu adalah kontak favorit. Anda juga dapat membuka kontak di buku "
+"alamat. Jika alamat surel belum ada, Anda dapat memilih untuk menambahkannya "
+"ke buku alamat, dan memperbarui preferensi pemuatan gambar jarak jauh untuk "
+"alamat tersebut."
 
 #. (itstool) path: section/p
 #: C/overview.page:79
@@ -1400,7 +1396,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:112
-#, fuzzy
 msgid ""
 "To select languages for spell-checking, click the <gui style=\"button"
 "\">Spell check</gui> button on the formatting toolbar, and the language "
@@ -1410,7 +1405,7 @@ msgid ""
 "typing its name in the search box, then click the <gui style=\"button\">+</"
 "gui> button to add it."
 msgstr ""
-"Untuk memilih bahasa untuk pemeriksaan ejaan, klik tombol <gui style=\"button"
+"Untuk memilih bahasa bagi pemeriksaan ejaan, klik tombol <gui style=\"button"
 "\">Periksa ejaan</gui> pada bilah alat pemformatan, dan popover pilihan "
 "bahasa akan muncul. Klik pada bahasa dalam daftar untuk mengaktifkan atau "
 "menonaktifkannya, dan klik tombol <gui style=\"button\">-</gui> untuk "
