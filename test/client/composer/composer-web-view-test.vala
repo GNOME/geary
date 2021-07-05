@@ -24,6 +24,12 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
         add_test("get_text_with_url_link", get_text_with_named_link);
         add_test("get_text_with_surrounding_nbsps", get_text_with_surrounding_nbsps);
         add_test("update_signature", update_signature);
+
+        try {
+            WebView.load_resources();
+        } catch (Error err) {
+            GLib.assert_not_reached();
+        }
     }
 
     public void load_resources() throws Error {
