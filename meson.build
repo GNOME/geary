@@ -55,7 +55,7 @@ valac = meson.get_compiler('vala')
 
 target_glib = '2.66'
 target_gtk = '3.24.23'
-target_vala = '0.48.11'
+target_vala = '0.48.18'
 target_webkit = '2.30'
 
 if not valac.version().version_compare('>=' + target_vala)
