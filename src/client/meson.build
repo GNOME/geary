@@ -166,7 +166,6 @@ client_dependencies = [
   libhandy,
   libmath,
   libpeas,
-  libpeas_gtk,
   libsecret,
   libxml,
   posix,
