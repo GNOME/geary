@@ -101,6 +101,20 @@ test_client_sources = [
   geary_resources
 ]
 
+test_js_sources = [
+  'test-case.vala',
+  'test-js.vala',
+
+  'client/components/components-web-view-test-case.vala',
+
+  'js/components-page-state-test.vala',
+  'js/composer-page-state-test.vala',
+  'js/conversation-page-state-test.vala',
+
+  geary_compiled_schema,
+  geary_resources
+]
+
 test_integration_sources = [
   'test-case.vala',
   'test-integration.vala',
@@ -151,6 +165,21 @@ test_client_bin = executable('test-client',
   build_rpath: client_build_dir,
 )
 
+test_js_dependencies = [
+  client_internal_dep,
+  vala_unit_dep,
+]
+test_js_dependencies += client_dependencies
+
+test_js_bin = executable('test-js',
+  test_js_sources + libmock_sources,
+  dependencies: test_js_dependencies,
+  include_directories: config_h_dir,
+  vala_args: geary_vala_args,
+  c_args: geary_c_args,
+  build_rpath: client_build_dir,
+)
+
 # Integration tests
 
 test_integration_bin = executable('test-integration',
@@ -176,5 +205,10 @@ test(
 test(
   'client-tests',
   test_client_bin,
+  depends: [ client_lib, web_process ]
+)
+test(
+  'js-tests',
+  test_js_bin,
   depends: [ client_lib, web_process ]
 )
