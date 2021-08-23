@@ -12,12 +12,8 @@ body {
   font-size: medium !important;
 }
 
-body.plain, body.plain * {
-  font-family: monospace !important;
-  font-weight: normal;
-  font-style: normal;
-  font-size: medium !important;
-  color: black !important;
+body.plain {
+  font-family: monospace;
   text-decoration: none;
 }
 
