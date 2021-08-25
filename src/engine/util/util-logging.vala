@@ -78,9 +78,9 @@ namespace Geary.Logging {
                 var parts = debug_var.split(",");
                 if ("fatal-warnings" in parts) {
                     Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
+                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_CRITICAL;
                 }
                 if ("fatal-criticals" in parts) {
-                    Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_WARNING;
                     Logging.set_breakpoint_on |= GLib.LogLevelFlags.LEVEL_CRITICAL;
                 }
             }
