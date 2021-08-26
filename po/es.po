@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-04-14 12:19+0000\n"
-"PO-Revision-Date: 2021-05-12 11:20+0200\n"
+"POT-Creation-Date: 2021-05-31 11:16+0000\n"
+"PO-Revision-Date: 2021-08-26 17:45+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 40.0\n"
+"X-Generator: Poedit 3.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -116,12 +116,12 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Compatible con GMail, Yahoo! Mail, Outlook.com y otros servidores IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "Geary mostrando una conversación"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "Geary mostrando el editor de texto enriquecido"
 
@@ -169,8 +169,7 @@ msgstr "Mostrar u ocultar la barra de herramientas de formato"
 
 #: desktop/org.gnome.Geary.gschema.xml:27
 msgid "True if the formatting toolbar in the composer is shown."
-msgstr ""
-"Cierto si si se muestra la barra de herramientas de formato en el editor"
+msgstr "Cierto si se muestra la barra de herramientas de formato en el editor."
 
 #: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Autoselect next message"
@@ -255,7 +254,7 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Advisory strategy for full-text searching"
-msgstr "Estrategia de asesoriamento para la búsqueda de textos completos."
+msgstr "Estrategia de asesoramiento para la búsqueda de textos completos"
 
 #: desktop/org.gnome.Geary.gschema.xml:85
 msgid ""
@@ -397,7 +396,7 @@ msgstr "Su nombre"
 #: src/client/accounts/accounts-editor-add-pane.vala:590
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
-msgstr "Dirección de corre-e:"
+msgstr "Dirección de correo-e"
 
 #. Translators: Placeholder for the default sender address
 #. when adding an account
@@ -814,12 +813,10 @@ msgid "_Replace"
 msgstr "_Reemplazar"
 
 #: src/client/application/application-client.vala:34
-#| msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright © 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/application-client.vala:35
-#| msgid "Copyright 2016-2020 Geary Development Team."
 msgid "Copyright © 2016-2021 Geary Development Team."
 msgstr "Copyright 2016-2021 Equipo de desarrollo de Geary."
 
@@ -1634,15 +1631,15 @@ msgstr "_Mantener"
 msgid "Select Color"
 msgstr "Seleccionar color"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "El URL del enlace no tiene el formato correcto, ej. http://ejemplo.com"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "Enlace a URL no válido"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Dirección correo-e no válida"
 
@@ -1800,7 +1797,7 @@ msgstr "Cco:"
 #. Translators: Human-readable version of the RFC 822 Reply-To header
 #: src/client/composer/composer-widget.vala:2114
 msgid "Reply-To: "
-msgstr "Responder a:"
+msgstr "Responder a: "
 
 #. Displayed in the From dropdown to indicate an
 #. "alternate email address" for an account.  The first
@@ -1939,6 +1936,11 @@ msgstr ", "
 msgid "Image"
 msgstr "Imagen"
 
+#: src/client/conversation-viewer/conversation-message.vala:1341
+#: src/client/conversation-viewer/conversation-message.vala:1347
+msgid "(unknown)"
+msgstr "(desconocido)"
+
 #. Translators: Info bar status message
 #: src/client/conversation-viewer/conversation-message.vala:1396
 msgid "Remote images not shown"
@@ -1947,7 +1949,7 @@ msgstr "Imágenes remotas no mostradas"
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1398
 msgid "Only show remote images from senders you trust."
-msgstr "Mostrar sólo las imágenes remotas de los remitentes en los que confíe"
+msgstr "Mostrar sólo las imágenes remotas de los remitentes en los que confíe."
 
 #. Translators: Info bar button label
 #: src/client/conversation-viewer/conversation-message.vala:1402
@@ -1963,7 +1965,7 @@ msgstr "Mostrar siempre el remitente"
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
 msgid "No conversations selected"
-msgstr "No hay ninguna conversación seleccionada."
+msgstr "No hay ninguna conversación seleccionada"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
@@ -2397,7 +2399,7 @@ msgstr "%-e de %B de %Y a las %-l:%M %P"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:87
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%-e de %B de %Y a las %-H:%M."
+msgstr "%-e de %B de %Y a las %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -2799,7 +2801,7 @@ msgstr "Archivo | Archivos"
 #: src/engine/rfc822/rfc822-message.vala:551
 #, c-format
 msgid "Could not determine mime type for “%s”."
-msgstr "No se pudo determinar el tipo MIME de «%s»"
+msgstr "No se pudo determinar el tipo MIME de «%s»."
 
 #: src/engine/rfc822/rfc822-message.vala:562
 #, c-format
@@ -2862,7 +2864,7 @@ msgstr "Cuentas"
 
 #: ui/accounts_editor_list_pane.ui:59
 msgid "To get started, select an email provider below."
-msgstr "Para empezar seleccione a continuación un proveedor de correo-e"
+msgstr "Para empezar seleccione a continuación un proveedor de correo-e."
 
 #: ui/accounts_editor_list_pane.ui:73
 msgid "Welcome to Geary"
@@ -3146,7 +3148,7 @@ msgstr ""
 "Si el problema es grave o persiste, copie y envíe estos detalles a la <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/Contact\">lista de correo</a> o "
 "envíe un <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">nuevo "
-"informe de error.</a>"
+"informe de error</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3368,7 +3370,7 @@ msgstr "1/1/1970\t"
 
 #: ui/conversation-message.ui:91
 msgid "Preview body text."
-msgstr "Vista previa del texto del cuerpo"
+msgstr "Vista previa del texto del cuerpo."
 
 #: ui/conversation-message.ui:182
 msgid "Sent by:"
@@ -3431,7 +3433,7 @@ msgstr "Conversación nueva"
 #: ui/gtk/help-overlay.ui:23
 msgctxt "shortcut window"
 msgid "Reply to sender"
-msgstr "Responder al remitente "
+msgstr "Responder al remitente"
 
 #: ui/gtk/help-overlay.ui:30 ui/gtk/help-overlay.ui:450
 msgctxt "shortcut window"
@@ -3664,7 +3666,7 @@ msgstr "Abrir una ventana nueva"
 #: ui/gtk/help-overlay.ui:375
 msgctxt "shortcut window"
 msgid "Close the current window"
-msgstr "Cerrar la ventana actual."
+msgstr "Cerrar la ventana actual"
 
 #: ui/gtk/help-overlay.ui:382
 msgctxt "shortcut window"
