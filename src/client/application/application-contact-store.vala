@@ -116,7 +116,7 @@ public class Application.ContactStore : Geary.BaseObject {
 
         Folks.SearchView view = new Folks.SearchView(
             this.individuals,
-            new Folks.SimpleQuery(query, FOLKS_GENERAL_MATCH_FIELDS)
+            new Folks.SimpleQuery("%".concat(query, "%"), FOLKS_GENERAL_MATCH_FIELDS)
         );
         yield view.prepare();
 
@@ -158,7 +158,7 @@ public class Application.ContactStore : Geary.BaseObject {
 
         Gee.Collection<Geary.Contact> engine_results =
             yield this.account.contact_store.search(
-                query, min_importance, limit, cancellable
+                "%".concat(query, "%"), min_importance, limit, cancellable
             );
         foreach (Geary.Contact contact in engine_results) {
             string email_key = to_cache_key(contact.email);
