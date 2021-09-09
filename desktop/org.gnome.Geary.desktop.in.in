@@ -16,6 +16,7 @@ StartupNotify=true
 DBusActivatable=true
 Actions=compose;new-window
 X-GNOME-UsesNotifications=true
+# Translators: Do NOT translate or transliterate this text (these are enum types)!
 X-Purism-FormFactor=Workstation;Mobile;
 
 [Desktop Action compose]
