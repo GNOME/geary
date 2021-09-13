@@ -15,8 +15,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-04-14 12:19+0000\n"
-"PO-Revision-Date: 2021-05-05 14:36+0100\n"
+"POT-Creation-Date: 2021-05-31 11:16+0000\n"
+"PO-Revision-Date: 2021-09-13 18:21+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese (https://l10n.gnome.org/teams/pt/)\n"
 "Language: pt\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.3\n"
+"X-Generator: Poedit 3.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -115,12 +115,12 @@ msgstr ""
 "IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "O Geary a mostrar uma conversa"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "O Geary a mostrar o editor de texto melhorado"
 
@@ -1630,16 +1630,16 @@ msgstr "Manter"
 msgid "Select Color"
 msgstr "Escolha a cor"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr ""
 "O URL da ligação não está formatado corretamente, ex. http://exemplo.pt"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "URL da ligação inválido"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Endereço de correio inválido"
 
@@ -1935,6 +1935,11 @@ msgstr ", "
 #: src/client/conversation-viewer/conversation-message.vala:1133
 msgid "Image"
 msgstr "Imagem"
+
+#: src/client/conversation-viewer/conversation-message.vala:1341
+#: src/client/conversation-viewer/conversation-message.vala:1347
+msgid "(unknown)"
+msgstr "(desconhecido)"
 
 #. Translators: Info bar status message
 #: src/client/conversation-viewer/conversation-message.vala:1396
