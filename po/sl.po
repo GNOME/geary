@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2021-10-18 12:08+0000\n"
-"PO-Revision-Date: 2021-10-26 22:05+0200\n"
+"PO-Revision-Date: 2021-10-27 09:34+0200\n"
 "Last-Translator: Matej Urbančič <mateju@src.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -69,16 +69,16 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Program Geary je odjemalec elektronske pošte za GNOME, ki je zasnovan na "
-"logiki zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil "
-"prek preglednega modernega vmesnika."
+"Program Geary je odjemalec elektronske pošte za GNOME, zasnovan za napredno "
+"zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil v "
+"preglednem modernem vmesniku."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
-"Sistem pogovorov omogoča branje niza sporočil brez nepotrebnega klikanja med "
+"Sistem pogovorov omogoča branje niza sporočil brez odvečnega klikanja med "
 "sporočili."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
@@ -87,15 +87,15 @@ msgstr "Program Geary omogoča:"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:28
 msgid "Quick email account setup"
-msgstr "Hitro nastavitev računa elektronske pošte"
+msgstr "Hitro nastavljanje računov elektronske pošte"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:29
 msgid "Shows related messages together in conversations"
-msgstr "Zbiranje povezanih sporočil v obliki pogovora"
+msgstr "Zbiranje povezanih sporočil v niti pogovora"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:30
 msgid "Fast, full text and keyword search"
-msgstr "Hitro iskanje po celotnem besedilu s ključnimi besedami"
+msgstr "Hitro iskanje po besedilu sporočil s ključnimi besedami"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:31
 msgid "Full-featured HTML and plain text message composer"
@@ -103,7 +103,7 @@ msgstr "Zmogljivo skladanje sporočil v besedilnem ali oblikovanem zapisu HTML"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:32
 msgid "Desktop notification of new mail"
-msgstr "Obvestila o prispeli pošti"
+msgstr "Namizna obvestila o prispeli pošti"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
@@ -114,7 +114,7 @@ msgstr ""
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
-msgstr "Prikaz sporočil, zbranih v pogovor"
+msgstr "Prikaz sporočil, zbranih v pogovorno nit"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:55
@@ -175,6 +175,8 @@ msgstr "Samodejno izberi naslednje sporočilo"
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid "True if we should autoselect the next available conversation."
 msgstr ""
+"Izbrana možnost določa, da bo samodejno izbran naslednji razpoložljiv "
+"pogovor."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Display message previews"
@@ -186,15 +188,15 @@ msgstr "Izbrano, če naj bo prikazan kratek predogled vsakega sporočila."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Use single key shortcuts"
-msgstr "Omogoči enotipkovne bližnjice"
+msgstr "Omogoči eno-tipkovne bližnjice"
 
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
-"Omogoči tipkovne bližnjice za delo s elektronskimi sporočili, ki ne "
-"zahtevajo pritisnjene tipke <CTRL>, za uporabo kot v programu Gmail."
+"Omogoči tipkovne bližnjice za vodenje elektronske pošte, ki ne zahtevajo "
+"pritisnjene tipke <CTRL>, kot je to mogoče v programu Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:52
 msgid "Languages that shall be used in the spell checker"
@@ -205,16 +207,20 @@ msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
 msgstr ""
+"Seznam jezikovnih določil POSIX, z izpraznjenim seznamom za preverjanje "
+"črkovanja, in praznim seznamom privzeto določenih jezikih namizja."
 
 #: desktop/org.gnome.Geary.gschema.xml:60
 msgid "Languages that are displayed in the spell checker popover"
-msgstr ""
+msgstr "Jeziki na seznamu preverjalnikov črkovanja"
 
 #: desktop/org.gnome.Geary.gschema.xml:61
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
+"Seznam jezikov, ki so vedno na seznamu pojavnega okna za preverjanje "
+"črkovanja."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Notify of new mail at startup"
@@ -222,15 +228,16 @@ msgstr "Ob zagonu obvesti o novi prispeli pošti"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
 msgid "True to notify of new mail at startup."
-msgstr "Izbrana možnost omogoči obvestila o prispeli pošti ob zagonu."
+msgstr "Izbrana možnost omogoči obvestila o prispeli pošti ob zagonu programa."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
-msgstr "Vprašaj ob odpiranju priloge"
+msgstr "Vprašaj pred odpiranjem priloge"
 
 #: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to ask when opening an attachment."
-msgstr "Odpre pogovorno okno za odpiranje priloge."
+msgstr ""
+"Zahteva potrditev pred odpiranjem pogovornega okna za odpiranje priloge."
 
 #: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Whether to compose emails in HTML"
@@ -244,12 +251,13 @@ msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Advisory strategy for full-text searching"
-msgstr "Priporočljiva strategija za iskanje po celotnem besedilu sporočil"
+msgstr "Priporočljiva strategija iskanja po celotnem besedilu sporočil"
 
 #: desktop/org.gnome.Geary.gschema.xml:85
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
+"Ustrezne vrednosti so »natančno«, »zadržano«, »agresivno« in »splošno«."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Zoom of conversation viewer"
@@ -276,6 +284,8 @@ msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr ""
+"Čas v sekundah preden je sporočilo dejansko poslano. Vrednost 0 onemogoči to "
+"možnost."
 
 #: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Brief notification display time"
@@ -285,7 +295,7 @@ msgstr "Čas prikaza hitrega obvestila"
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
-msgstr ""
+msgstr "Čas v sekundah, ki določa trajanje prikaza obvestila."
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "List of optional plugins"
@@ -303,6 +313,8 @@ msgstr "Ali so bile prenesene stare nastavitve"
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
+"Možnost onemogoči preverjanje za opuščeno shemo »org.yorba.geary« in "
+"kopiranje vrednosti v odložišče."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -455,6 +467,9 @@ msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
 msgstr ""
+"S tem bodo odstranjeni podatki iz programa, izbrisana bodo krajevno "
+"shranjena sporočila, na strežniku, ki omogoča storitev, pa ne bo nobenih "
+"sprememb."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
@@ -952,7 +967,7 @@ msgstr "Matej Urbančič <mateju@src.gnome.org>"
 #: src/client/application/application-client.vala:1101
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr ""
-"MOžnost »--hidden« je opuščena in bo v prihodnjih različicah odstranjena."
+"Možnost »--hidden« je opuščena in bo v prihodnjih različicah odstranjena."
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1148,7 +1163,7 @@ msgstr "Elektronsko sporočilo je poslano za %s"
 #: src/client/application/application-controller.vala:2512
 #, c-format
 msgid "Email to %s queued for delivery"
-msgstr ""
+msgstr "Elektronsko sporočilo za %s je uvrščeno v vrsto za pošiljanje"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
@@ -1722,7 +1737,7 @@ msgstr "_Skp"
 #. / Translators: Label for composer Reply-To address entry
 #: src/client/composer/composer-widget.vala:518
 msgid "_Reply to"
-msgstr "_Odgovori"
+msgstr "_Odgovori na"
 
 #. / Translators: Label for composer Subject line entry
 #: src/client/composer/composer-widget.vala:526
@@ -2379,7 +2394,7 @@ msgstr "Pošlji zvok"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
 msgid "Plays the desktop sent-mail sound when an email is sent"
-msgstr ""
+msgstr "Predvaja zvok ob pošiljanju elektronskega sporočila"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
@@ -2653,7 +2668,7 @@ msgstr "za"
 #: src/client/util/util-email.vala:691
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
-msgstr "mene"
+msgstr "zame"
 
 #. / Translators: Can be typed in the search box after "from:"
 #. / i.e.: "from:me". Matches conversations were sent by the
@@ -2666,7 +2681,7 @@ msgstr "mene"
 #: src/client/util/util-email.vala:704
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
-msgstr "mene"
+msgstr "od mene"
 
 #. Boolean operators
 #. /////////////////////////////////////////////////////////
@@ -3190,6 +3205,10 @@ msgid ""
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
 msgstr ""
+"Če je težava resna in se stalno ponavlja, shranite podrobnosti napake in jih "
+"pošljite po enem izmed <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
+"\">možnih stikov</a> oziroma pripnite podatke k <a href=\"https://wiki.gnome."
+"org/Apps/Geary/ReportingABug\">poročilu o hrošču</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
