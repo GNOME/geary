@@ -16,16 +16,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-03-03 11:14+0000\n"
-"PO-Revision-Date: 2021-03-29 02:24+0300\n"
-"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
+"POT-Creation-Date: 2021-05-31 11:16+0000\n"
+"PO-Revision-Date: 2021-11-05 11:52+0200\n"
+"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Hebrew <yoseforb@gmail.com>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n>2||n==0) ? 1 : 2\n"
-"X-Generator: Gtranslator 3.38.0\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==2 ? 1 : n>10 && n%10==0 ? "
+"2 : 3);\n"
+"X-Generator: Poedit 3.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -40,7 +41,7 @@ msgstr "שליחת קבצים באמצעות Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:643
+#: src/client/application/application-main-window.vala:704
 msgid "Geary"
 msgstr "Geary"
 
@@ -111,12 +112,12 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "תואם עם Gmail, Yahoo! Mail, Outlook.com ושרתי IMAP אחרים"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "‏Geary מציג תכתובת"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "‏Geary מציג יצירת הודעה בטקסט עשיר"
 
@@ -453,14 +454,10 @@ msgstr "הסרת חשבון"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:219
 #, c-format
-#| msgid "Remove Account"
 msgid "Remove Account: %s"
 msgstr "הסרת חשבון: %s"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:221
-#| msgid ""
-#| "Removing an account will remove it from Geary and delete locally cached "
-#| "email data from your computer, but not from your service provider."
 msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
@@ -606,16 +603,17 @@ msgstr "ארבע שנים אחורנית"
 msgid "%d day back"
 msgid_plural "%d days back"
 msgstr[0] "יום אחד אחורה"
-msgstr[1] "‏%d ימים אחורה"
-msgstr[2] "יומיים אחורה"
+msgstr[1] "יומיים אחורה"
+msgstr[2] "‏%d ימים אחורה"
+msgstr[3] "‏%d ימים אחורה"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2150
+#: src/client/application/application-main-window.vala:2270
 msgid "Undo"
 msgstr "ביטול"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2133
+#: src/client/application/application-main-window.vala:2253
 msgid "Redo"
 msgstr "ביצוע חוזר"
 
@@ -710,7 +708,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:589
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "התחברות"
 
@@ -791,7 +789,7 @@ msgstr "ללא כותרת"
 #: src/client/application/application-attachment-manager.vala:222
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "כבר קיים קובץ בשם „%s“. האם להחליפו?"
+msgstr "כבר קיים קובץ בשם „%s“. להחליפו?"
 
 #. / Translators: Dialog secondary label when prompting to
 #. / overwrite a file. The string substitution is the parent
@@ -807,12 +805,10 @@ msgid "_Replace"
 msgstr "ה_חלפה"
 
 #: src/client/application/application-client.vala:34
-#| msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
-msgstr "כל הזכויות שמורות © למוסד לחופש התכנה בע״מ. 2016"
+msgstr "כל הזכויות שמורות 2016 © למוסד לחופש התכנה בע״מ."
 
 #: src/client/application/application-client.vala:35
-#| msgid "Copyright 2016-2020 Geary Development Team."
 msgid "Copyright © 2016-2021 Geary Development Team."
 msgstr "כל הזכויות שמורות © 2016-2021 צוות פיתוח Geary."
 
@@ -963,135 +959,145 @@ msgstr ""
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
-#: src/client/application/application-client.vala:1110
+#: src/client/application/application-client.vala:1101
 msgid "The `--hidden` option is deprecated and will be removed in the future."
 msgstr "The `--hidden` option is deprecated and will be removed in the future."
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1143
+#: src/client/application/application-client.vala:1134
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Unrecognised program argument: “%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:496
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "ארעה בעיה בשליחת דואר עבור %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:504
+#: src/client/application/application-controller.vala:500
 msgid "Email will not be sent until re-connected"
 msgstr "לא ישלח כל דוא״ל עד שתתבצע התחברות מחודשת"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:603
+#: src/client/application/application-controller.vala:599
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "תכתובת סומנה"
 msgstr[1] "תכתובות סומנו"
 msgstr[2] "תכתובות סומנו"
+msgstr[3] ""
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:609
+#: src/client/application/application-controller.vala:605
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "בוטל סימון תכתובת"
 msgstr[1] "בוטלו סימון תכתובות"
 msgstr[2] "בוטלו סימון תכתובות"
+msgstr[3] ""
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:635
-#: src/client/application/application-controller.vala:719
+#: src/client/application/application-controller.vala:631
+#: src/client/application/application-controller.vala:715
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
 msgstr[0] "תכתובת הועברה אל %s"
 msgstr[1] "תכתובות הועברו אל %s"
 msgstr[2] "תכתובות הועברו אל %s"
+msgstr[3] "תכתובות הועברו אל %s"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:643
-#: src/client/application/application-controller.vala:665
+#: src/client/application/application-controller.vala:639
+#: src/client/application/application-controller.vala:661
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
 msgstr[0] "תכתובת שוחזרה אל %s"
 msgstr[1] "תכתובות שוחזרו אל %s"
 msgstr[2] "תכתובות שוחזרו אל %s"
+msgstr[3] "תכתובות שוחזרו אל %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:686
+#: src/client/application/application-controller.vala:682
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "תכתובת אורכבה"
 msgstr[1] "תכתובות אורכבו"
 msgstr[2] "תכתובות אורכבו"
+msgstr[3] ""
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:742
+#: src/client/application/application-controller.vala:738
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "הודעה שוחזרה אל %s"
 msgstr[1] "הודעות שוחזרו אל %s"
 msgstr[2] "הודעות שוחזרו אל %s"
+msgstr[3] "הודעות שוחזרו אל %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:763
+#: src/client/application/application-controller.vala:759
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "הודעה אורכבה אל %s"
 msgstr[1] "הודעות אורכבו אל %s"
 msgstr[2] "הודעות אורכבו אל %s"
+msgstr[3] ""
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:798
+#: src/client/application/application-controller.vala:794
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
 msgstr[0] "הודעה הועברה אל %s"
 msgstr[1] "הודעות הועברו אל %s"
 msgstr[2] "הודעות הועברו אל %s"
+msgstr[3] "הודעות הועברו אל %s"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:826
+#: src/client/application/application-controller.vala:822
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
 msgstr[0] "תכתובת סומנה בתווית %s"
 msgstr[1] "תכתובות סומנו בתווית %s"
 msgstr[2] "תכתובות סומנו בתווית %s"
+msgstr[3] "תכתובות סומנו בתווית %s"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:834
+#: src/client/application/application-controller.vala:830
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "בוטל סימון תכתובת בתווית %s"
 msgstr[1] "בוטל סימון תכתובות בתווית %s"
 msgstr[2] "בוטל סימון תכתובות בתווית %s"
+msgstr[3] "בוטל סימון תכתובות בתווית %s"
 
-#: src/client/application/application-controller.vala:1341
+#: src/client/application/application-controller.vala:1337
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "לא ניתן לפתוח את מסד הנתונים עבור %s"
 
-#: src/client/application/application-controller.vala:1342
+#: src/client/application/application-controller.vala:1338
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1114,20 +1120,20 @@ msgstr ""
 "יצירה מחדש של מסד הנתונים תמחק את כל הדוא״ל המקומי ואת כל הקבצים המצורפים "
 "שלו. <b> הדואר על השרת שלך לא יושפע.</b>"
 
-#: src/client/application/application-controller.vala:1344
+#: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
 msgstr "_יצירה מחדש"
 
-#: src/client/application/application-controller.vala:1344
+#: src/client/application/application-controller.vala:1340
 msgid "E_xit"
 msgstr "י_ציאה"
 
-#: src/client/application/application-controller.vala:1354
+#: src/client/application/application-controller.vala:1350
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "לא ניתן ליצור מחדש מסד נתונים עבור „%s”"
 
-#: src/client/application/application-controller.vala:1355
+#: src/client/application/application-controller.vala:1351
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1139,100 +1145,98 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1522
+#: src/client/application/application-controller.vala:1518
 #, c-format
 msgid "Email sent to %s"
 msgstr "נשלחת הודעה אל %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2516
+#: src/client/application/application-controller.vala:2512
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "הודעה אל %s ממתינה בתור לשליחה"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2580
+#: src/client/application/application-controller.vala:2576
 #, c-format
 msgid "Email to %s saved"
 msgstr "נשמרה הודעה אל %s"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2595
-#: src/client/application/application-controller.vala:2653
+#: src/client/application/application-controller.vala:2591
+#: src/client/application/application-controller.vala:2649
 msgid "Composer could not be restored"
 msgstr "לא ניתן לאחזר את יוצר ההודעות"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2638
+#: src/client/application/application-controller.vala:2634
 #, c-format
 msgid "Email to %s discarded"
 msgstr "הודעה אל %s הושלכה"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
-#| msgid "Geary update in progress…"
 msgid "Account update in progress"
 msgstr "עדכון החשבון בתהליך"
 
 #. / Translators: Window title for account database upgrade
 #. / dialog
 #: src/client/application/application-database-manager.vala:80
-#| msgid "Account name"
 msgid "Account update"
 msgstr "עדכון חשבון"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:575
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "פועל בצורה לא מקוונת"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:577
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "לא ניתן לשלוח או לקבל הודעות עד להתחברות מחודשת."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:584
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "בעיית התחברות"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:586
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "החשבון דיווח על התחברות או ססמה לא נכונה."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:593
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "יש לנסות להתחבר שוב, ססמתך תידרש"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:600
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "בעיית אבטחה"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:602
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "החשבון דיווח על שרת לא אמין."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:605
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "בדיקה"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:609
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "בדיקת פרטי אבטחת ההתחברות"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:652
+#: src/client/application/application-main-window.vala:713
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1240,51 +1244,53 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1043
-#: src/client/folder-list/folder-list-account-branch.vala:43
+#: src/client/application/application-main-window.vala:1103
+#: src/client/folder-list/folder-list-account-branch.vala:46
 msgid "Labels"
 msgstr "תוויות"
 
-#: src/client/application/application-main-window.vala:1358
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "ריקון כל הדואר מהתיקייה %s?"
 
-#: src/client/application/application-main-window.vala:1359
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "פעולה זו תמחוק את הדואר מ־Geary וכן משרת הדוא״ל שלך."
 
-#: src/client/application/application-main-window.vala:1360
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "פעולה זאת לא ניתנת לביטול."
 
-#: src/client/application/application-main-window.vala:1361
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "ריקון %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1418
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "האם ברצונך למחוק תכתובת זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק תכתובות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק תכתובות אלה לצמיתות?"
+msgstr[3] ""
 
-#: src/client/application/application-main-window.vala:1423
-#: src/client/application/application-main-window.vala:1438
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "מחיקה"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "האם ברצונך למחוק הודעה זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק הודעות אלה לצמיתות?"
+msgstr[3] ""
 
-#: src/client/application/application-main-window.vala:1724
+#: src/client/application/application-main-window.vala:1804
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1316,48 +1322,54 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "לא ל_שאול אותי שוב"
 
-#: src/client/components/components-conversation-actions.vala:90
+#: src/client/components/components-conversation-actions.vala:97
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "סימון תכתובת"
 msgstr[1] "סימון תכתובות"
 msgstr[2] "סימון תכתובות"
+msgstr[3] ""
 
-#: src/client/components/components-conversation-actions.vala:95
+#: src/client/components/components-conversation-actions.vala:102
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "הוספת תווית לתכתובת"
 msgstr[1] "הוספת תווית לתכתובות"
 msgstr[2] "הוספת תווית לתכתובות"
+msgstr[3] ""
 
-#: src/client/components/components-conversation-actions.vala:100
+#: src/client/components/components-conversation-actions.vala:107
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "העברת תכתובת"
 msgstr[1] "העברת תכתובות"
 msgstr[2] "העברת תכתובות"
+msgstr[3] ""
 
-#: src/client/components/components-conversation-actions.vala:105
-#: src/client/conversation-list/conversation-list-view.vala:445
+#: src/client/components/components-conversation-actions.vala:112
+#: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "תיוק תכתובת בארכיון"
 msgstr[1] "תיוק תכתובות בארכיון"
 msgstr[2] "תיוק תכתובות בארכיון"
+msgstr[3] ""
 
-#: src/client/components/components-conversation-actions.vala:116
+#: src/client/components/components-conversation-actions.vala:123
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "העברת תכתובת לאשפה"
 msgstr[1] "העברת תכתובות לאשפה"
 msgstr[2] "העברת תכתובות לאשפה"
+msgstr[3] ""
 
-#: src/client/components/components-conversation-actions.vala:126
+#: src/client/components/components-conversation-actions.vala:133
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "מחיקת תכתובת"
 msgstr[1] "מחיקת תכתובות"
 msgstr[2] "מחיקת תכתובות"
+msgstr[3] ""
 
 #: src/client/components/components-info-bar.vala:248
 msgid "Information"
@@ -1601,7 +1613,7 @@ msgstr "_סגירה"
 msgid "_Discard"
 msgstr "השל_כה"
 
-#: src/client/components/stock.vala:25 ui/main-toolbar-menus.ui:42
+#: src/client/components/stock.vala:25 ui/components-main-toolbar-menus.ui:42
 msgid "_Help"
 msgstr "_עזרה"
 
@@ -1611,7 +1623,7 @@ msgstr "_עזרה"
 msgid "_Open"
 msgstr "_פתיחה"
 
-#: src/client/components/stock.vala:27 ui/main-toolbar-menus.ui:32
+#: src/client/components/stock.vala:27 ui/components-main-toolbar-menus.ui:32
 msgid "_Preferences"
 msgstr "הע_דפות"
 
@@ -1641,15 +1653,15 @@ msgstr "_שמירה"
 msgid "Select Color"
 msgstr "בחירת צבע"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "קישור URL לא מובנה כראוי, לדוגמה http://example.com"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "קישור URL לא תקין"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "כתובת דוא״ל לא תקינה"
 
@@ -1707,7 +1719,6 @@ msgstr "עותק _מוסתר"
 
 #. / Translators: Label for composer Reply-To address entry
 #: src/client/composer/composer-widget.vala:518
-#| msgid "Reply to:"
 msgid "_Reply to"
 msgstr "לה_שיב אל"
 
@@ -1806,7 +1817,7 @@ msgstr "עותק מוסתר:"
 #. Translators: Human-readable version of the RFC 822 Reply-To header
 #: src/client/composer/composer-widget.vala:2114
 msgid "Reply-To: "
-msgstr "להשיב אל:"
+msgstr "להשיב אל: "
 
 #. Displayed in the From dropdown to indicate an
 #. "alternate email address" for an account.  The first
@@ -1831,53 +1842,55 @@ msgid "Search for more languages"
 msgstr "חיפוש שפות נוספות"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:389
+#: src/client/conversation-list/conversation-list-view.vala:390
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "העברת תכתובת ל_אשפה"
 msgstr[1] "העברת תכתובות ל_אשפה"
 msgstr[2] "העברת תכתובות ל_אשפה"
+msgstr[3] ""
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:401
+#: src/client/conversation-list/conversation-list-view.vala:402
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_מחיקת תכתובת"
 msgstr[1] "_מחיקת תכתובות"
 msgstr[2] "_מחיקת תכתובות"
+msgstr[3] ""
 
-#: src/client/conversation-list/conversation-list-view.vala:414
-#: ui/main-toolbar-menus.ui:5
+#: src/client/conversation-list/conversation-list-view.vala:415
+#: ui/components-main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "סימון כ_נקרא"
 
-#: src/client/conversation-list/conversation-list-view.vala:422
-#: ui/main-toolbar-menus.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:423
+#: ui/components-main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "סימון כ_לא נקרא"
 
-#: src/client/conversation-list/conversation-list-view.vala:430
-#: ui/main-toolbar-menus.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:431
+#: ui/components-main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "ה_סרת כוכב"
 
-#: src/client/conversation-list/conversation-list-view.vala:437
-#: ui/main-toolbar-menus.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:438
+#: ui/components-main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "סימון ב_כוכב"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:454
+#: src/client/conversation-list/conversation-list-view.vala:455
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "לה_שיב"
 
-#: src/client/conversation-list/conversation-list-view.vala:460
+#: src/client/conversation-list/conversation-list-view.vala:461
 msgid "R_eply All"
 msgstr "להשיב ל_כולם"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:466
+#: src/client/conversation-list/conversation-list-view.vala:467
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "ה_עברה"
@@ -1921,12 +1934,12 @@ msgstr "להציג פחות"
 #. number of extra email to be shown.
 #: src/client/conversation-viewer/conversation-message.vala:260
 #, c-format
-#| msgid "%d more…"
 msgid "%d more…"
 msgid_plural "%d more…"
-msgstr[0] "עוד %d…"
-msgstr[1] "עוד %d…"
-msgstr[2] "עוד %d…"
+msgstr[0] "אחד נוסף…"
+msgstr[1] "שניים נוספים…"
+msgstr[2] "‫%d נוספים…"
+msgstr[3] "‫%d נוספים…"
 
 #. Compact headers. These are partially done here and partially
 #. in load_contacts.
@@ -1938,34 +1951,39 @@ msgstr "אין שולח"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1025
+#: src/client/conversation-viewer/conversation-message.vala:1011
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1147
+#: src/client/conversation-viewer/conversation-message.vala:1133
 msgid "Image"
 msgstr "תמונה"
 
+#: src/client/conversation-viewer/conversation-message.vala:1341
+#: src/client/conversation-viewer/conversation-message.vala:1347
+msgid "(unknown)"
+msgstr "(לא ידוע)"
+
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1419
+#: src/client/conversation-viewer/conversation-message.vala:1396
 msgid "Remote images not shown"
 msgstr "תמונות מרוחקות לא מוצגות"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1421
+#: src/client/conversation-viewer/conversation-message.vala:1398
 msgid "Only show remote images from senders you trust."
 msgstr "הצגת תמונות מרוחקות רק משולחים אמינים לך."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1425
+#: src/client/conversation-viewer/conversation-message.vala:1402
 msgid "Show"
 msgstr "הצגה"
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1429
+#: src/client/conversation-viewer/conversation-message.vala:1406
 msgid "Always show from sender"
 msgstr "תמיד להציג תמונות משולח זה"
 
@@ -2115,8 +2133,9 @@ msgstr "‏Geary דורש את ססמת הדוא״ל שלך כדי להמשיך"
 msgid "%d message"
 msgid_plural "%d messages"
 msgstr[0] "הודעה אחת"
-msgstr[1] "%d הודעות"
-msgstr[2] "שתי הודעות"
+msgstr[1] "שתי הודעות"
+msgstr[2] "‫%d הודעות"
+msgstr[3] "‫%d הודעות"
 
 #. Translators: Label displaying number of unread email
 #. messages in a folder. String substitution is the actual
@@ -2126,8 +2145,9 @@ msgstr[2] "שתי הודעות"
 msgid "%d unread"
 msgid_plural "%d unread"
 msgstr[0] "אחת לא נקראה"
-msgstr[1] "%d לא נקראו"
-msgstr[2] "%d לא נקראו"
+msgstr[1] "שתיים לא נקראו"
+msgstr[2] "‫%d לא נקראו"
+msgstr[3] "‫%d לא נקראו"
 
 #. Translators: This string represents the divider between two
 #. messages: "n messages" and "n unread", shown in the folder
@@ -2139,7 +2159,7 @@ msgstr[2] "%d לא נקראו"
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: src/client/folder-list/folder-list-inboxes-branch.vala:14
+#: src/client/folder-list/folder-list-inboxes-branch.vala:15
 msgid "Inboxes"
 msgstr "תיבות דואר נכנס"
 
@@ -2147,16 +2167,17 @@ msgstr "תיבות דואר נכנס"
 #, c-format
 msgid "%d result"
 msgid_plural "%d results"
-msgstr[0] "%d תוצאות"
-msgstr[1] "%d תוצאות"
-msgstr[2] "%d תוצאות"
+msgstr[0] "תוצאה אחת"
+msgstr[1] "שתי תוצאות"
+msgstr[2] "‫%d תוצאות"
+msgstr[3] "‫%d תוצאות"
 
 #. / Notification body when a message as been received
 #. / and other unread messages have not been
 #. / seen. First string substitution is the message
 #. / subject and the second is the number of unseen
 #. / messages
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:138
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:126
 #, c-format
 msgid ""
 "%s\n"
@@ -2165,26 +2186,30 @@ msgid_plural ""
 "%s\n"
 "(%d other new messages)"
 msgstr[0] ""
-"%s\n"
-"(%d הודעה חדשה אחת)"
+"‫%s‬\n"
+"‫‫‫‫(הודעה חדשה אחת)"
 msgstr[1] ""
-"%s\n"
-"(%d הודעות חדשות)"
+"‫%s‬‬\n"
+"‫‫‫‫(שתי הודעות חדשות)"
 msgstr[2] ""
-"%s\n"
-"(שתי הודעות חדשות)"
+"‫%s‬\n"
+"‫‫‫‫‏‫(%d הודעות חדשות)"
+msgstr[3] ""
+"‫%s‬‬‬\n"
+"‫‫‫‫‏‫(%d הודעות חדשות)"
 
 #. / Notification body when multiple messages have been
 #. / received at the same time and other unseen messages
 #. / exist. String substitution is the number of new
 #. / messages that have arrived.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:157
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:159
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "הודעה חדשה אחת"
-msgstr[1] "%d הודעות חדשות"
-msgstr[2] "שתי הודעות חדשות"
+msgstr[1] "שתי הודעות חדשות"
+msgstr[2] "‫%d הודעות חדשות"
+msgstr[3] "‫%d הודעות חדשות"
 
 #. / Notification body when multiple messages have been
 #. / received at the same time and some unseen messages
@@ -2192,22 +2217,24 @@ msgstr[2] "שתי הודעות חדשות"
 #. / above with the number of new messages that have
 #. / arrived, number substitution is the total number
 #. / of unseen messages.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:167
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:169
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
-msgstr[0] "%s, %d הודעה חדשה סך הכל"
-msgstr[1] "%s, %d הודעות חדשות סך הכל"
-msgstr[2] "%s, %d הודעות חדשות סך הכל"
+msgstr[0] "‫%s, הודעה חדשה אחת סך הכול"
+msgstr[1] "‫%s, שתי הודעות חדשות סך הכול"
+msgstr[2] "‫%s, %d הודעות חדשות סך הכל"
+msgstr[3] "‫%s, %d הודעות חדשות סך הכול"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:282
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:278
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "הודעה חדשה"
 msgstr[1] "הודעות חדשות"
 msgstr[2] "שתי הודעות חדשות"
+msgstr[3] ""
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Email Templates"
@@ -2299,6 +2326,7 @@ msgid_plural "Sent %u of %u"
 msgstr[0] "נשלח %u מתוך %u"
 msgstr[1] "נשלחו %u מתוך %u"
 msgstr[2] "נשלחו %u מתוך %u"
+msgstr[3] "נשלחו %u מתוך %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
@@ -2328,7 +2356,6 @@ msgid "Messaging Menu"
 msgstr "תפריט הודעה"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
-#| msgid "Show _notifications for new mail"
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "הצגת תפריט התרעות של Unity על קבלת דואר חדש"
 
@@ -2422,16 +2449,18 @@ msgstr "עכשיו"
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "לפני דקה"
-msgstr[1] "לפני %d דקות"
-msgstr[2] "לפני שתי דקות"
+msgstr[1] "לפני שתי דקות"
+msgstr[2] "לפני %d דקות"
+msgstr[3] "לפני %d דקות"
 
 #: src/client/util/util-date.vala:166
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "לפני שעה"
-msgstr[1] "לפני %d שעות"
-msgstr[2] "לפני שעתיים"
+msgstr[1] "לפני שעתיים"
+msgstr[2] "לפני %d שעות"
+msgstr[3] "לפני %d שעות"
 
 #: src/client/util/util-date.vala:173
 msgid "Yesterday"
@@ -2466,9 +2495,10 @@ msgstr "(אין נמענים)"
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
-msgstr[0] "‏%s ועוד אחד"
-msgstr[1] "‏%s ועוד %d"
-msgstr[2] "‏%s ועוד שניים"
+msgstr[0] "‏%s ואחד נוסף"
+msgstr[1] "‏%s ושניים נוספים"
+msgstr[2] "‏%s ו־%d נוספים"
+msgstr[3] "‏%s ו־%d נוספים"
 
 #. / GLib g_date_time_format format string for the date and
 #. / time that a message being replied to was
@@ -2480,7 +2510,6 @@ msgstr[2] "‏%s ועוד שניים"
 #. / use mm/dd/yyyy since it could be confused with
 #. / dd/mm/yyyy) and must include the time zone.
 #: src/client/util/util-email.vala:194
-#| msgid "%a, %b %-e, %Y at %X"
 msgid "%a, %b %-e %Y at %X %Z"
 msgstr "%a %-e ב%b %Y, בשעה %X %Z"
 
@@ -2808,7 +2837,7 @@ msgstr "ארכיון | ארכיב | ארכיונים | ארכיבים | Archive 
 #: src/engine/rfc822/rfc822-message.vala:551
 #, c-format
 msgid "Could not determine mime type for “%s”."
-msgstr "לא ניתן לקבוע את סוג הקובץ עבור „%s”"
+msgstr "לא ניתן לקבוע את סוג הקובץ עבור „%s”."
 
 #: src/engine/rfc822/rfc822-message.vala:562
 #, c-format
@@ -3128,29 +3157,21 @@ msgstr "פתיחת הקבצים הנבחרים"
 msgid "Save _All"
 msgstr "_שמירת הכול"
 
-#: ui/components-conversation-actions.ui:76
+#: ui/components-conversation-actions.ui:17
 msgid "Reply"
 msgstr "להשיב"
 
-#: ui/components-conversation-actions.ui:97
+#: ui/components-conversation-actions.ui:38
 msgid "Reply All"
 msgstr "להשיב לכולם"
 
-#: ui/components-conversation-actions.ui:118
+#: ui/components-conversation-actions.ui:59
 msgid "Forward"
 msgstr "העברה"
 
-#: ui/components-conversation-actions.ui:147
+#: ui/components-conversation-actions.ui:156
 msgid "_Archive"
 msgstr "תיוק ב_ארכיון"
-
-#: ui/components-conversation-actions.ui:191
-msgid "Toggle find bar"
-msgstr "הצגת סרגל החיפוש"
-
-#: ui/components-conversation-header-bar.ui:20 ui/main-toolbar.ui:76
-msgid "Back"
-msgstr "אחורה"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
@@ -3200,47 +3221,80 @@ msgstr "העתקה ללוח הגזירים"
 msgid "Clears all log entries"
 msgstr "ניקוי כל רשומות היומן"
 
-#: ui/conversation-contact-popover.ui:132
+#: ui/components-main-toolbar.ui:72 ui/components-main-toolbar.ui:158
+msgid "Back"
+msgstr "אחורה"
+
+#: ui/components-main-toolbar.ui:89
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "יצירת הודעה"
+
+#: ui/components-main-toolbar.ui:105
+msgid "Toggle search bar"
+msgstr "הצגת סרגל החיפוש"
+
+#: ui/components-main-toolbar.ui:195
+msgid "Toggle find bar"
+msgstr "הצגת סרגל החיפוש"
+
+#: ui/components-main-toolbar-menus.ui:21
+msgid "Toggle as _Junk"
+msgstr "סימון/ביטול סימון כ_זבל"
+
+#: ui/components-main-toolbar-menus.ui:28
+msgid "_Accounts"
+msgstr "_חשבונות"
+
+#: ui/components-main-toolbar-menus.ui:36
+msgid "_Keyboard Shortcuts"
+msgstr "_צירופי מקשים"
+
+#: ui/components-main-toolbar-menus.ui:47
+msgid "_About Geary"
+msgstr "על _אודות Geary"
+
+#: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
 msgstr "תכתובת חדשה…"
 
-#: ui/conversation-contact-popover.ui:144
+#: ui/conversation-contact-popover.ui:146
 msgid "Copy Email Address"
 msgstr "העתקת כתובת דוא״ל"
 
-#: ui/conversation-contact-popover.ui:165
+#: ui/conversation-contact-popover.ui:167
 msgid "Save in Contacts…"
 msgstr "שמירה באנשי הקשר…"
 
-#: ui/conversation-contact-popover.ui:177
+#: ui/conversation-contact-popover.ui:179
 msgid "Show Conversations"
 msgstr "הצגת תכתובות"
 
-#: ui/conversation-contact-popover.ui:189
+#: ui/conversation-contact-popover.ui:191
 msgid "Open in Contacts"
 msgstr "פתיחה באנשי קשר"
 
-#: ui/conversation-contact-popover.ui:201
+#: ui/conversation-contact-popover.ui:203
 msgid "Always Load Remote Images"
 msgstr "תמיד לטעון תמונות מרוחקות"
 
 #. Title label on contact popover
-#: ui/conversation-contact-popover.ui:240
+#: ui/conversation-contact-popover.ui:242
 msgid "Deceptive email address"
 msgstr "כתובת דוא״ל מטעה"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:268
+#: ui/conversation-contact-popover.ui:270
 msgid "This email address is:"
 msgstr "כתובת דוא״ל זו היא:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:291
+#: ui/conversation-contact-popover.ui:293
 msgid "But was forged as:"
 msgstr "אבל הוצגה כ:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:314
+#: ui/conversation-contact-popover.ui:316
 msgid "The sender may not be trustworthy"
 msgstr "השולח עשוי להיות לא אמין"
 
@@ -3349,7 +3403,7 @@ msgstr "1/1/1970\t"
 
 #: ui/conversation-message.ui:91
 msgid "Preview body text."
-msgstr "תצוגה מקדימה של גוף הטקסט"
+msgstr "תצוגה מקדימה של גוף הטקסט."
 
 #: ui/conversation-message.ui:182
 msgid "Sent by:"
@@ -3624,7 +3678,6 @@ msgid "Insert a link"
 msgstr "הכנסת קישור"
 
 #: ui/gtk/help-overlay.ui:346
-#| msgid "Application Menu"
 msgid "Application Shortcuts"
 msgstr "צירופי מקשים ליישום"
 
@@ -3659,7 +3712,6 @@ msgid "Keyboard navigation"
 msgstr "ניווט באמצעות המקלדת"
 
 #: ui/gtk/help-overlay.ui:395
-#| msgid "Select Color"
 msgctxt "shortcut window"
 msgid "Select Inbox"
 msgstr "בחירת דואר נכנס"
@@ -3691,37 +3743,12 @@ msgstr "קיצורים באמצעות מקש יחיד (אם מאופשר)"
 #: ui/gtk/help-overlay.ui:443
 msgctxt "shortcut window"
 msgid "Reply to sender "
-msgstr "להשיב לשולח"
+msgstr "להשיב לשולח "
 
 #: ui/gtk/help-overlay.ui:530
 msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "בחירת התכתובת הבאה/הקודמת"
-
-#: ui/main-toolbar.ui:93
-msgctxt "tooltip"
-msgid "Compose Message"
-msgstr "יצירת הודעה"
-
-#: ui/main-toolbar.ui:109
-msgid "Toggle search bar"
-msgstr "הצגת סרגל החיפוש"
-
-#: ui/main-toolbar-menus.ui:21
-msgid "Toggle as _Junk"
-msgstr "סימון/ביטול סימון כ_זבל"
-
-#: ui/main-toolbar-menus.ui:28
-msgid "_Accounts"
-msgstr "_חשבונות"
-
-#: ui/main-toolbar-menus.ui:36
-msgid "_Keyboard Shortcuts"
-msgstr "_צירופי מקשים"
-
-#: ui/main-toolbar-menus.ui:47
-msgid "_About Geary"
-msgstr "על _אודות Geary"
 
 #: ui/password-dialog.glade:66
 msgid "SMTP Credentials"
