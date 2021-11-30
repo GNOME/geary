@@ -8,16 +8,16 @@
 
 // Defined by CMake build script.
 extern const string GETTEXT_PACKAGE;
-extern const string _APP_ID;
-extern const string _BUILD_ROOT_DIR;
-extern const string _GSETTINGS_DIR;
-extern const string _INSTALL_PREFIX;
-extern const string _NAME_SUFFIX;
+public extern const string _APP_ID;
+public extern const string _BUILD_ROOT_DIR;
+public extern const string _GSETTINGS_DIR;
+public extern const string _INSTALL_PREFIX;
+public extern const string _NAME_SUFFIX;
 extern const string _PLUGINS_DIR;
 extern const string _PROFILE;
 extern const string _REVNO;
-extern const string _SOURCE_ROOT_DIR;
-extern const string _VERSION;
+public extern const string _SOURCE_ROOT_DIR;
+public extern const string _VERSION;
 extern const string _WEB_EXTENSIONS_DIR;
 
 
