@@ -199,6 +199,11 @@ internal class Geary.Smtp.ClientConnection : BaseObject, Logging.Source {
             }
         }
 
+        if (!String.is_empty(fqdn) && !("." in fqdn)) {
+            debug("Ignoring hostname, because it is not a FQDN: %s", fqdn);
+            fqdn = null;
+        }
+
         // try EHLO first, then fall back on HELO
         EhloRequest ehlo = !String.is_empty(fqdn) ? new EhloRequest(fqdn) : new EhloRequest.for_local_address(local_addr);
         Response response = yield transaction_async(ehlo, cancellable);
