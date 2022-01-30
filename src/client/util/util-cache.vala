@@ -12,7 +12,7 @@ public class Util.Cache.Lru<T> : Geary.BaseObject {
     private class CacheEntry<T> {
 
 
-        public static int lru_compare(CacheEntry<T> a, CacheEntry<T> b) {
+        public static int lru_compare(CacheEntry a, CacheEntry b) {
             if (a.key == b.key) {
                 return 0;
             }
