@@ -373,6 +373,8 @@ public class Application.Client : Gtk.Application {
         // Calls Gtk.init(), amongst other things
         base.startup();
         Hdy.init();
+        Hdy.StyleManager.get_default().set_color_scheme(
+            Hdy.ColorScheme.PREFER_LIGHT);
 
         this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
