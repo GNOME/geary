@@ -1,0 +1,1515 @@
+# Russian translation for geary.
+# Copyright (C) 2022 geary's COPYRIGHT HOLDER
+# This file is distributed under the same license as the geary package.
+# Sergej A. <sw@atrus.ru>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: geary mainline\n"
+"POT-Creation-Date: 2022-02-06 16:56+0000\n"
+"PO-Revision-Date: 2022-03-02 22:50+1000\n"
+"Last-Translator: Ser82-png <sw@atrus.ru>\n"
+"Language-Team: Russian <gnome-cyr@gnome.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.3\n"
+
+#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+msgctxt "_"
+msgid "translator-credits"
+msgstr "Ser82-png <sw@atrus.ru>, 2022"
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
+msgid "Accounts"
+msgstr "Учётные записи"
+
+#. (itstool) path: section/title
+#: C/accounts.page:13
+msgid "Accounts Editor"
+msgstr "Редактор учётных записей"
+
+#. (itstool) path: section/p
+#: C/accounts.page:15
+msgid ""
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
+msgstr ""
+"Учётные записи электронной почты можно добавлять, обновлять и удалять с "
+"помощью <em>редактора учетных записей</em>. Чтобы открыть его, нажмите "
+"кнопку меню приложения Geary в главном окне над списком папок, затем "
+"выберите <gui>Учётные записи</gui> во всплывающем меню."
+
+#. (itstool) path: section/p
+#: C/accounts.page:20
+msgid ""
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
+msgstr ""
+"Чтобы изменить порядок отображения учётных записей в списке, щёлкните и "
+"перетащите маркер учётной записи в редакторе учётных записей или выберите "
+"учётную запись с помощью <key>Tab</key>, затем используйте "
+"<keyseq><key>Ctrl</key><key>↑</key></keyseq> и <keyseq><key>Ctrl</"
+"key><key>↓</key></keyseq>, чтобы изменить положение выбранной учётной записи."
+
+#. (itstool) path: section/title
+#: C/accounts.page:29
+msgid "Adding accounts"
+msgstr "Добавление учётных записей"
+
+#. (itstool) path: section/p
+#: C/accounts.page:31
+msgid ""
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
+msgstr ""
+"Geary будет автоматически использовать любые учётные записи электронной "
+"почты, которые вы добавили через панель <app>Сетевые учётные записи</app> в "
+"<app>Настройках</app> GNOME. Если у вас нет учётных записей, добавленных в "
+"<app>Сетевые учётные записи</app>, то будет предложено добавить учётную "
+"запись при первом запуске Geary."
+
+#. (itstool) path: section/p
+#: C/accounts.page:37
+msgid ""
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
+msgstr ""
+"Чтобы добавить дополнительные учётные записи, откройте редактор учётных "
+"записей, затем выберите соответствующего поставщика услуг электронной почты "
+"из списка в нижней части окна. Для провайдеров, поддерживаемых <app>Сетевыми "
+"учётными записями</app>, будут открыты <app>Настройки</app> GNOME, и там вам "
+"будет предложено ввести информацию об учётной записи. Для других провайдеров "
+"электронной почты Geary попросит ввести информацию об учётной записи "
+"вручную. После ввода настроек щёлкните <gui>Создать</gui>, и информация об "
+"учётной записи будет проверена, а затем добавлена в список."
+
+#. (itstool) path: section/title
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Обновление существующих учётных записей"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
+msgstr ""
+"Чтобы обновить существующие учётные записи, откройте редактор учётных "
+"записей и выберите учётную запись, которую хотите обновить. Geary отобразит "
+"настройки учётной записи. Там вы сможете добавлять и удалять дополнительные "
+"адреса электронной почты отправителя, редактировать подпись электронной "
+"почты и осуществлять другие настройки."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr ""
+"Параметр <gui>Загружать почту</gui> позволяет указать, за какой период Geary "
+"будет загружать и хранить локально почту. Geary может использовать только "
+"локально доступную почту при отображении и поиске переписки."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+"Чтобы изменить настройки сервера для учётной записи, прокрутите окно до "
+"нижней части и нажмите <gui>Параметры сервера</gui>. Отобразятся настройки "
+"сервера, и вы сможете внести необходимые изменения. После этого щёлкните "
+"<gui>Применить</gui>, и Geary проверит настройки, а затем обновит учётную "
+"запись. Обратите внимание, что для учётных записей, добавленных через панель "
+"<app>Сетевые учётные записи</app> в <app>Настройках</app> GNOME, нельзя "
+"изменить имя сервера, настройки безопасности, логин или пароль."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr ""
+"Пункт <gui>Сохранить черновик электронной почты на сервере</gui> определяет, "
+"будут ли сохраняться копии сообщений электронной почты в папке "
+"<gui>Черновики</gui>. Если этот параметр отключен, вы не сможете сохранять "
+"черновики сообщений при закрытии редактора."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr ""
+"Пункт <gui>Сохранить отправленную электронную почту на сервере</gui> "
+"определяет, будет ли Geary сохранять копии отправленных электронных "
+"сообщений, в папку <gui>Отправленные</gui>. Если параметр отключен, вы не "
+"сможете просматривать отправленные вами сообщения, если только сервер "
+"автоматически не сохранит их для вас."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
+msgid "Removing accounts"
+msgstr "Удаление учётных записей"
+
+#. (itstool) path: section/p
+#: C/accounts.page:85
+msgid ""
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
+msgstr ""
+"Учётные записи, добавленные через панель <app>Сетевые учётные записи</app> в "
+"<app>Настройках</app> GNOME, должны быть удалены оттуда. Для этого откройте "
+"<app>Сетевые учётные записи</app>, выберите необходимую запись и нажмите "
+"<gui>Удалить</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr ""
+"Чтобы удалить учётную запись, добавленную через Geary, откройте редактор "
+"учётных записей и выберите запись, которую хотите удалить. Geary отобразит "
+"настройки учётной записи. Прокрутите окно до нижней части и нажмите "
+"<gui>Удалить учётную запись</gui>. Вам будет предложено подтвердить "
+"удаление. После подтверждения, если вы передумаете, то ещё сможете отменить "
+"удаление записи, нажав <gui>Отменить</gui> во всплывающем уведомлении или "
+"нажав <keyseq><key>Ctrl</key><key>U</key></keyseq>."
+
+#. (itstool) path: page/title
+#: C/archive.page:8
+msgid "Archive, trash and delete messages"
+msgstr "Архивация, перемещение в корзину и удаление сообщений"
+
+#. (itstool) path: page/p
+#: C/archive.page:10
+msgid ""
+"Geary lets you archive messages if your server supports it. Clicking the "
+"<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
+"from the current folder to the <gui>Archive</gui> folder for most email "
+"services, or to <gui>All Mail</gui> for GMail. Archiving helps keep your "
+"email organised by moving old and replied-to email out of the way."
+msgstr ""
+"Geary позволяет архивировать сообщения, если сервер поддерживает эту "
+"функцию. Нажатие кнопки <gui style=\"button\">Архив</gui> на панели "
+"инструментов перемещает беседу из текущей папки в папку <gui>Архив</gui> для "
+"большинства почтовых служб или в папку <gui>Вся почта</gui> для Gmail. "
+"Архивирование помогает поддерживать порядок в электронной почте, удаляя "
+"старые и отвеченные письма."
+
+#. (itstool) path: page/p
+#: C/archive.page:17
+msgid ""
+"To move conversations to the <gui>Trash</gui> folder, select them and click "
+"the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
+"conversations, hold down <key>Shift</key> and click the <gui style=\"button"
+"\">Delete</gui> button that appears in place of the <gui>Trash</gui> button, "
+"or open the conversation in the <gui>Trash</gui> folder and click <gui style="
+"\"button\">Delete</gui> there."
+msgstr ""
+"Чтобы переместить беседы в папку <gui>Корзина</gui>, выберите их и нажмите "
+"кнопку <gui style=\"button\">Корзина</gui> на панели инструментов. Чтобы "
+"навсегда удалить беседы, удерживайте нажатой клавишу <key>Shift</key> "
+"щёлкните кнопку <gui style=\"button\">Удалить</gui>, которая появится вместо "
+"кнопки <gui>Корзина</gui>, или откройте беседу в папке <gui>Корзина</gui> и "
+"там нажмите <gui style=\"button\">Удалить</gui>."
+
+#. (itstool) path: note/title
+#: C/archive.page:26
+msgid "Undoing changes"
+msgstr "Отмена изменений"
+
+#. (itstool) path: note/p
+#: C/archive.page:27
+msgid ""
+"Note that you can always undo archiving or trashing a message if you change "
+"your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification "
+"that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open "
+"the folder, find the message, then move it back to your <gui>Inbox</gui>"
+msgstr ""
+"Обратите внимание, что если вы передумаете, то всегда сможете отменить "
+"архивирование или удаление сообщения. Щёлкните <gui style=\"button"
+"\">Отменить</gui> в появившемся всплывающем уведомлении или нажмите "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq>, или откройте соответствующую "
+"папку, найдите сообщение и переместите его обратно в папку <gui>Входящие</"
+"gui>"
+
+#. (itstool) path: page/p
+#: C/archive.page:34
+msgid ""
+"While both <gui style=\"button\">Archive</gui> and <gui style=\"button"
+"\">Trash</gui> removes conversations from your <gui>Inbox</gui> folder, "
+"there is an important difference. Clicking <gui style=\"button\">Archive</"
+"gui> will ensure your conversations are kept so you can find them again "
+"later. Clicking <gui style=\"button\">Trash</gui> will cause conversations "
+"to be hidden from <link xref=\"search\"/>, and they will likely be deleted "
+"in the future."
+msgstr ""
+"Хотя и <gui style=\"button\">Архив</gui> и <gui style=\"button\">Корзина</"
+"gui> удаляют беседы из папки <gui>Входящие</gui>, между ними есть важное "
+"различие. Нажав кнопку <gui style=\"button\">Архив</gui>, ваши разговоры "
+"будут сохранены, чтобы вы могли найти их позже. Нажатие кнопки <gui style="
+"\"button\">Корзина</gui> приведёт к тому, что беседы будут недоступны для "
+"<link xref=\"search\"/> и, вероятно, в будущем будут удалены."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Need help with Geary?"
+msgstr "Нужна помощь с Geary?"
+
+#. (itstool) path: section/title
+#: C/bugs.page:13
+msgid "Getting support"
+msgstr "Получение поддержки"
+
+#. (itstool) path: section/p
+#: C/bugs.page:15
+msgid ""
+"If you are having trouble using Geary, please <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
+"about the problem."
+msgstr ""
+"Если у вас возникли проблемы с использованием Geary, пожалуйста <link href="
+"\"https://wiki.gnome.org/Apps/Geary/Contact\">свяжитесь</link> с сообществом "
+"Geary по поводу проблемы."
+
+#. (itstool) path: section/title
+#: C/bugs.page:21
+msgid "Reporting bugs"
+msgstr "Сообщение об ошибках"
+
+#. (itstool) path: section/p
+#: C/bugs.page:23
+msgid ""
+"If you suspect you have found a bug in Geary, please follow the <link href="
+"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"guidelines</link> so the problem can be diagnosed and fixed."
+msgstr ""
+"Если вы подозреваете, что обнаружили ошибку в Geary, следуйте <link href="
+"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">руководству по "
+"сообщениям об ошибках</link>, чтобы можно было диагностировать проблему и "
+"устранить её."
+
+#. (itstool) path: section/p
+#: C/bugs.page:28
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr ""
+"Чтобы помочь диагностировать проблему как можно быстрее, пожалуйста, "
+"включите в сообщение следующую информацию:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:32
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr "Версия Geary и метод установки (Пакет? Flathub? Исходный код?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:34
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "Ваш рабочий стол (GNOME? KDE? Что-то другое?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:35
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
+msgstr ""
+"Ваша операционная система и её версия (Ubuntu 16.04? Fedora 28? Собственная "
+"сборка?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:37
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr ""
+"Поставщик электронной почты (Gmail, Yahoo!, Outlook.com или кто-то ещё?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:39
+msgid "Steps to reproduce the bug"
+msgstr "Действия по воспроизведению ошибки"
+
+#. (itstool) path: item/p
+#: C/bugs.page:40
+msgid "What happened?"
+msgstr "Что случилось?"
+
+#. (itstool) path: item/p
+#: C/bugs.page:41
+msgid "What did you expect to happen?"
+msgstr "Что вы ожидали?"
+
+#. (itstool) path: section/p
+#: C/bugs.page:44
+msgid ""
+"Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
+"key><key>I</key></keyseq> to open it, select and save any relevant log "
+"files, and attach them to the bug report."
+msgstr ""
+"Доступ к файлам журнала можно получить через Geary Inspector, нажмите "
+"<keyseq><key>Alt</key><key>I</key></keyseq>, чтобы открыть его, выберите и "
+"сохраните любые соответствующие файлы журнала и прикрепите их к отчёту об "
+"ошибке."
+
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Вклад в Geary"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr ""
+"Хотите помочь улучшить Geary? Вы можете внести свой вклад несколькими "
+"способами:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Сообщения об "
+"ошибках</link>—— сообщайте о новых ошибках или запрашивайте новые функции"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Перевод</link>—"
+"переводите пользовательский интерфейс и руководство пользователя Geary на "
+"новые языки"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
+"link>—fix bugs and add new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Разработка</"
+"link>—участвуйте в исправлении ошибок и добавлении новых функций"
+
+#. (itstool) path: page/p
+#: C/contributing.page:23
+msgid ""
+"See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
+"link> for more information and options for contributing financially to "
+"Geary's development."
+msgstr ""
+"Для получения более подробной информации смотрите <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contribute\">wiki</link>. А также можете поддержать "
+"развитие Geary финансово."
+
+#. (itstool) path: page/title
+#: C/index.page:6
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Geary</span>"
+
+#. (itstool) path: section/title
+#: C/index.page:12
+msgid "Introduction"
+msgstr "Введение"
+
+#. (itstool) path: section/title
+#: C/index.page:16
+msgid "Using Geary"
+msgstr "Использование Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:20
+msgid "Contributing and getting support"
+msgstr "Вклад и получение поддержки"
+
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Отметить или переместить беседы"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Отметить беседу"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Geary позволяет применять одну или несколько <em>меток</em> к каждой беседе. "
+"Метки Geary соответствуют меткам в Gmail или обычным папкам в других "
+"почтовых сервисах."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"Чтобы отметить одну или несколько бесед, сначала выберите беседу(ы), а затем "
+"выполните одно из следующих действий:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr ""
+"Щёлкните кнопку <gui>Метка</gui> на панели инструментов и выберите метку из "
+"появившегося раскрывающегося меню."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Удерживая нажатой клавишу <key>Ctrl</key>, перетащите беседу(ы) из списка "
+"бесед на метку на боковой панели."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Переместить беседу в папку или метку"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"Чтобы переместить одну или несколько бесед в папку или на метку, сначала "
+"выберите беседу(ы), а затем выполните одно из следующих действий:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr ""
+"Щёлкните кнопку <gui>Переместить</gui> на панели инструментов и в "
+"появившемся раскрывающемся меню выберите папку или метку."
+
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Перетащите беседу(ы) из списка бесед в папку или метку на боковой панели."
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Ограничения"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Geary всё ещё находится на ранней стадии разработки. Geary поддерживает IMAP "
+"и был протестирован с Gmail, Yahoo и бесплатным почтовым сервером Dovecot. "
+"Предоставляется экспериментальная поддержка Outlook.com. Geary может пока не "
+"работать с некоторыми серверами IMAP. В настоящее время Geary по-прежнему не "
+"хватает многих функций, включая автономный режим."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr ""
+"Чтобы узнать больше о функциях, над которыми мы работаем, и о будущих "
+"возможностях Geary, посетите <link href=\"https://wiki.gnome.org/Apps/Geary"
+"\">вики-страницу Geary</link>."
+
+#. (itstool) path: page/title
+#. (itstool) path: section/title
+#: C/overview.page:9 C/shortcuts.page:13
+msgid "Overview"
+msgstr "Обзор"
+
+#. (itstool) path: page/p
+#: C/overview.page:11
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary — приложение электронной почты для рабочего стола GNOME 3, построенное "
+"по принципу обмена сообщениями — беседами. Позволяет читать, находить и "
+"отправлять электронную почту с простым и современным интерфейсом."
+
+#. (itstool) path: page/p
+#: C/overview.page:15
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Беседы позволяют читать переписку целиком без необходимости искать и "
+"переходить от сообщения к сообщению."
+
+#. (itstool) path: page/p
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr ""
+"Главное окно Geary разделено на несколько областей: список папок, список "
+"бесед и область просмотра бесед."
+
+#. (itstool) path: section/title
+#: C/overview.page:22
+msgid "Folder list"
+msgstr "Список папок"
+
+#. (itstool) path: section/p
+#: C/overview.page:24
+msgid ""
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
+msgstr ""
+"В <em>списке папок</em> отображаются все <em>папки</em> и <em>метки</em> для "
+"ваших учётных записей электронной почты. Geary использует термин <em>метка</"
+"em> для любой папки, созданной вами для систематизации сообщений электронной "
+"почты."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+"Выберите папку или метку, чтобы отобразить содержащиеся в ней беседы в "
+"области списка бесед."
+
+#. (itstool) path: section/title
+#: C/overview.page:34
+msgid "Conversation list"
+msgstr "Список бесед"
+
+#. (itstool) path: section/p
+#: C/overview.page:36
+msgid ""
+"The <em>conversation list</em> displays a list of conversations in the "
+"selected folder. Newer conversations appear at the top."
+msgstr ""
+"В <em>списке бесед</em> отображается список бесед из выбранной папки. Новые "
+"беседы отображаются вверху списка."
+
+#. (itstool) path: section/p
+#: C/overview.page:40
+msgid ""
+"Each sender’s name appears bold if there are unread messages from that "
+"sender. If a conversation has more than one message, Geary displays a count "
+"of messages in the conversation."
+msgstr ""
+"Имя каждого отправителя выделяется жирным шрифтом, если от него есть "
+"непрочитанные сообщения. Если в беседе несколько сообщений, Geary показывает "
+"количество имеющихся в беседе сообщений."
+
+#. (itstool) path: section/p
+#: C/overview.page:44
+msgid ""
+"Geary does not automatically download all messages in all of your mail "
+"folders. When you first visit your Inbox or any other folder, Geary "
+"downloads the most recent messages in that folder. To see more messages, "
+"simply scroll down the conversation list and Geary will fetch more messages "
+"automatically."
+msgstr ""
+"Geary не загружает автоматически все сообщения во все ваши почтовые папки. "
+"Когда вы впервые посещаете папку «Входящие» или любую другую папку, Geary "
+"загружает самые последние сообщения из этой папки. Чтобы увидеть больше "
+"сообщений, просто прокрутите список бесед вниз, и Geary автоматически "
+"подгрузит другие сообщения."
+
+#. (itstool) path: section/p
+#: C/overview.page:50
+msgid ""
+"Some commands in Geary can act on a group of conversations. To select "
+"multiple conversations, hold down the <key>Ctrl</key> key and click each "
+"conversation in turn in the conversation list. Alternatively, click the "
+"first conversation in a range, then hold down <key>Shift</key> and click the "
+"last conversation."
+msgstr ""
+"Некоторые команды в Geary могут быть применены к группе бесед. Чтобы выбрать "
+"несколько бесед, удерживайте нажатой клавишу <key>Ctrl</key> и щёлкайте "
+"каждую беседу по очереди в списке бесед. Либо щёлкните первую беседу в "
+"требуемом диапазоне, затем, удерживая нажатой клавишу <key>Shift</key>, "
+"щёлкните последнюю."
+
+#. (itstool) path: section/title
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Область просмотра бесед"
+
+#. (itstool) path: section/p
+#: C/overview.page:60
+msgid ""
+"The <em>conversation viewer</em> displays all email messages in the selected "
+"conversation, with the oldest message at the top."
+msgstr ""
+"В <em>области просмотра бесед</em> отображаются все сообщения электронной "
+"почты в выбранной беседе, причем самое старое сообщение находится сверху."
+
+#. (itstool) path: section/p
+#: C/overview.page:63
+msgid ""
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
+"header to collapse it."
+msgstr ""
+"Во время просмотра беседы Geary сворачивает сообщения, которые вы уже "
+"прочитали. Щёлкните свернутые сообщения, чтобы снова развернуть их. Щёлкните "
+"заголовок развернутого сообщения, чтобы вновь свернуть его."
+
+#. (itstool) path: section/p
+#: C/overview.page:67
+msgid ""
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
+msgstr ""
+"Щёлкните на любое имя отправителя или получателя или адрес электронной почты "
+"сообщения, чтобы открыть <em>меню контакта</em>, в котором отображается "
+"дополнительная информация и параметры, связанные с данным адресом "
+"электронной почты. Вы можете начать новую беседу, скопировать адрес "
+"электронной почты в буфер обмена и выполнить поиск связанных бесед. Если "
+"адрес электронной почты присутствует в адресной книге вашего настольного "
+"компьютера, он покажет фотографию контакта, предпочтительное имя и является "
+"ли он избранным контактом. Вы также можете открыть контакт в адресной книге. "
+"Если адрес электронной почты еще не указан, вы можете добавить его в "
+"адресную книгу и обновить настройки удалённой загрузки изображений для этого "
+"адреса."
+
+#. (itstool) path: section/p
+#: C/overview.page:79
+msgid ""
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
+msgstr ""
+"Нажмите кнопку со звездочкой рядом с каждым сообщением, чтобы пометить его "
+"звездочкой или снять отметку. При просмотре сообщений вся беседа будет "
+"помечена звездочкой. Когда вы вернётесь к просмотру беседы, Geary покажет "
+"отмеченное сообщение первым."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr ""
+"Щёлкните кнопку меню, присутствующую в каждом сообщении, чтобы открыть "
+"<em>меню сообщений</em>, с помощью которого вы можете ответить на сообщение "
+"и переслать его, обновить, отметить как прочитанное или непрочитанное, "
+"распечатать и т. д."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
+msgstr ""
+"Любые вложения в сообщении отображаются в нижней части сообщения. Дважды "
+"щёлкните вложение, чтобы открыть его, или используйте кнопки «Открыть» и "
+"«Сохранить», чтобы открыть и сохранить выбранные вложения."
+
+#. (itstool) path: page/title
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Параметры"
+
+#. (itstool) path: page/p
+#: C/preferences.page:12
+msgid ""
+"Geary allows you to customise how it works via its <gui style=\"group"
+"\">Preferences</gui> window. To open the window, select <gui style=\"menuitem"
+"\">Preferences</gui> from the application menu on the main window's toolbar. "
+"You can change the following options:"
+msgstr ""
+"В окне <gui style=\"group\">Параметры</gui> можно настроить работу Geary. "
+"Чтобы открыть это окно, выберите <gui style=\"menuitem\">Параметры</gui> в "
+"меню приложения на панели инструментов главного окна. Вы можете изменить "
+"следующие настройки:"
+
+#. (itstool) path: item/title
+#: C/preferences.page:19
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Автопереход к следующему сообщению</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:20
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+"Когда эта опция включена, Geary автоматически выбирает последнее сообщение в "
+"папке при входе в неё. Кроме того, после архивирования сообщения Geary "
+"автоматически выбирает соседнее."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Показывать предпросмотр бесед</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:27
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+"Включает предварительный просмотр сообщений в списке бесед. Предварительный "
+"просмотр показывает первые несколько строк каждого сообщения."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+msgid "<gui>Use three pane view</gui>"
+msgstr "<gui>Использовать трехпанельный интерфейс</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:32
+msgid ""
+"Show the folder list, the conversation list, and the messages side-by-side-"
+"by-side in three panes. If not selected, the folder list and conversation "
+"list will be stacked vertically in a single pane."
+msgstr ""
+"Рядом друг с другом на трех панелях отображаются: список папок, список бесед "
+"и сообщения . Если параметр отключен, то список папок и список бесед будут "
+"располагаться вертикально на одной панели."
+
+#. (itstool) path: item/title
+#: C/preferences.page:38
+msgid "<gui>Use single key email shortcuts</gui>"
+msgstr "<gui>Использовать одноклавишные комбинации клавиш</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:39
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
+"\"shortcuts\"/> for details."
+msgstr ""
+"Включает сочетания клавиш для действий с электронной почтой, которые не "
+"требуют нажатия <key>Ctrl</key>. Они соответствуют клавишам, используемым "
+"GMail. Подробнее смотрите <link xref=\"shortcuts\"/>."
+
+#. (itstool) path: item/title
+#: C/preferences.page:44
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Следить за поступлением новых писем при закрытом приложении</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:45
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
+msgstr ""
+"Geary будет следить за вашими учётными записями на наличие новой почты, даже "
+"если главное окно закрыто. Для этого приложение будет автоматически "
+"запускаться при входе в систему на компьютере и продолжать работу после "
+"того, как вы закроете все окна."
+
+#. (itstool) path: page/title
+#: C/search.page:10
+msgid "Search"
+msgstr "Поиск"
+
+#. (itstool) path: page/p
+#: C/search.page:12
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) and start typing. Results will appear after a brief delay."
+msgstr ""
+"Geary поддерживает полнотекстовый поиск для каждой учётной записи. Чтобы "
+"начать поиск, выберите папку, связанную с учётной записью, в которой вы "
+"хотите выполнить поиск. Затем щёлкните поле поиска на панели инструментов "
+"(или нажмите <keyseq><key>Ctrl</key><key>S</key></keyseq>) и начните вводить "
+"текст. Результаты появятся после небольшой задержки."
+
+#. (itstool) path: page/p
+#: C/search.page:16
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr ""
+"В полнотекстовый поиск будут включёны: текст сообщения электронной почты, "
+"адреса электронной почты (кому, от и копия), строки темы сообщения и имена "
+"файлов вложений."
+
+#. (itstool) path: page/p
+#: C/search.page:19
+msgid ""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for \"walk"
+"\" will also match \"walking\" and \"walked.\""
+msgstr ""
+"Ключевые слова, соответствующие вашему запросу, будут выделяться в окне "
+"сообщения. Geary находит разные формы одного и того же слова, например, при "
+"поиске «walk», также будут найдены «walking» и «walked»."
+
+#. (itstool) path: section/title
+#: C/search.page:23
+msgid "Search operators"
+msgstr "Операторы поиска"
+
+#. (itstool) path: section/p
+#: C/search.page:24
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr "Geary поддерживает следующие операторы для ограничения области поиска:"
+
+#. (itstool) path: td/p
+#: C/search.page:27
+msgid "<input>attachment:<var>filename</var></input>"
+msgstr "<input>attachment:<var>название_файла</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:28
+msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgstr ""
+"Находит сообщения с вложениями, имя которых соответствует параметру "
+"<var>название_файла</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:31
+msgid "<input>bcc:<var>recipient</var></input>"
+msgstr "<input>bcc:<var>получатель</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:32
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
+msgstr ""
+"Находит сообщения, в которых <var>получатель </var> совпадает с содержанием "
+"полей «Скрытая копия»."
+
+#. (itstool) path: td/p
+#: C/search.page:35
+msgid "<input>body:<var>text</var></input>"
+msgstr "<input>body:<var>текст</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:36
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr "Находит сообщения, содержимое которых содержит <var>текст</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:39
+msgid "<input>cc:<var>recipient</var></input>"
+msgstr "<input>cc:<var>получатель</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:40
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
+msgstr ""
+"Находит сообщения, в которых <var>получатель</var> совпадает с содержанием "
+"полей «Копия»."
+
+#. (itstool) path: td/p
+#: C/search.page:43
+msgid "<input>from:<var>sender</var></input>"
+msgstr "<input>from:<var>отправитель</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:44
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr ""
+"Находит собщения, в которых <var>отправитель</var> совпадает с содержанием "
+"полей «От»."
+
+#. (itstool) path: td/p
+#: C/search.page:47
+msgid "<input>is:read</input>"
+msgstr "<input>is:read</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:48
+msgid "Finds messages that have been marked as read."
+msgstr "Находит сообщения, отмеченные как прочитанные."
+
+#. (itstool) path: td/p
+#: C/search.page:51
+msgid "<input>is:starred</input>"
+msgstr "<input>is:starred</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:52
+msgid "Finds messages that have been marked as starred."
+msgstr "Находит сообщения, отмеченные звёздочкой."
+
+#. (itstool) path: td/p
+#: C/search.page:55
+msgid "<input>is:unread</input>"
+msgstr "<input>is:unread</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:56
+msgid "Finds messages that have been marked as not read."
+msgstr "Находит сообщения, отмеченные как непрочитанные."
+
+#. (itstool) path: td/p
+#: C/search.page:59
+msgid "<input>subject:<var>text</var></input>"
+msgstr "<input>subject:<var>текст</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:60
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr "Находит сообщения, тема которых содержит <var>текст</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:63
+msgid "<input>to:<var>recipient</var></input>"
+msgstr "<input>to:<var>получатель</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:64
+msgid ""
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
+msgstr ""
+"Находит сообщения, в которых <var>получатель</var> соответствует полям "
+"электронной почты «Кому», «Копия» или «Скрытая копия»."
+
+#. (itstool) path: section/p
+#: C/search.page:68
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
+"input>, and <input>to</input> operators support <input>me</input> as their "
+"argument, which searches for the account's email address in the appropriate "
+"context."
+msgstr ""
+"В качестве особого случая операторы <input>bcc</input>, <input>cc</input>, "
+"<input>from</input> и <input>to</input> поддерживают в качестве аргумента "
+"<input>me</input>, использование которого позволяет искать адрес электронной "
+"почты учётной записи в соответствующем контексте."
+
+#. (itstool) path: page/title
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Комбинации клавиш"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:14
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"help to discover the full list. To open the shortcuts help, select <gui "
+"style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
+"main window's toolbar, or using the keyboard shortcuts listed below."
+msgstr ""
+"У Geary есть сочетания клавиш для наиболее распространенных операций. "
+"Используйте встроенную справку, чтобы открыть полный их список. Для открытия "
+"справки по сочетаниям клавиш, выберите <gui style=\"menuitem\">Комбинации "
+"клавиш</gui> в меню на панели инструментов главного окна или используйте "
+"комбинации клавиш, перечисленные ниже."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:20
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Для доступа к интерактивной справке от Geary можно использовать следующие "
+"сочетания клавиш:"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:24
+msgid "Display this online help manual"
+msgstr "Показать интерактивное справочное руководство"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:25
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:28
+msgid "Display all keyboard shortcuts"
+msgstr "Показать все комбинации клавиш"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:29
+msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+
+#. (itstool) path: section/title
+#: C/shortcuts.page:37
+msgid "Single key shortcuts"
+msgstr "Простые комбинации клавиш"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:39
+msgid ""
+"You can enable keyboard shortcuts for email actions that do not require "
+"pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"preferences\"/> for details."
+msgstr ""
+"Вы можете включить комбинации клавиш для действий с электронной почтой, "
+"которые не требуют нажатия <key>Ctrl</key>. Они соответствуют клавишам, "
+"используемым GMail. Подробнее смотрите <link xref=\"preferences\"/>."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:43
+msgid ""
+"The full list of single key shortcuts enabled by this preference can be "
+"found via the keyboard shortcuts help, above."
+msgstr ""
+"Полный список комбинаций клавиш, включаемых этой настройкой, можно найти в "
+"справке по комбинациям клавиш."
+
+#. (itstool) path: page/title
+#: C/star.page:10
+msgid "Star a message or mark it as read/unread"
+msgstr ""
+"Пометить сообщение звёздочкой или отметить его как прочитанное/непрочитанное"
+
+#. (itstool) path: section/title
+#: C/star.page:12
+msgid "Star messages"
+msgstr "Сообщения, отмеченные звёздочкой"
+
+#. (itstool) path: section/p
+#: C/star.page:13
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr ""
+"Вы можете помечать важные для себя сообщения. Чтобы отметить беседу, "
+"щёлкните значок звездочки в списке бесед. Также вы можете отметить отдельное "
+"сообщение, щёлкнув звездочку в правом верхнем углу в самом сообщении."
+
+#. (itstool) path: section/p
+#: C/star.page:15
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr ""
+"В учётных записях Gmail отмеченные звёздочкой сообщения отображаются в папке "
+"«Помеченные»."
+
+#. (itstool) path: section/title
+#: C/star.page:18
+msgid "Mark messages as read or unread"
+msgstr "Обозначение сообщений как прочитанные или непрочитанные"
+
+#. (itstool) path: section/p
+#: C/star.page:19
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr ""
+"Во время чтения сообщения Geary автоматически отмечает его как прочитанное. "
+"Чтобы вручную отметить беседу как прочитанную или непрочитанную, щёлкните "
+"значок кружка в списке бесед."
+
+#. (itstool) path: section/p
+#: C/star.page:22
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr ""
+"Кроме того, вы можете использовать пункт <gui>Отметить как Непрочитанное</"
+"gui> в меню <gui>Отметить беседу</gui> на панели инструментов для "
+"переключения состояния выбранного(ых) общения(ий)."
+
+#. (itstool) path: section/p
+#: C/star.page:25
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"Чтобы пометить отдельное сообщение как прочитанное, выберите <gui>Отметить "
+"как Прочитанное</gui> в раскрывающемся меню."
+
+#. (itstool) path: page/title
+#: C/write.page:7
+msgid "Writing new email and replying"
+msgstr "Написание нового письма и ответа"
+
+#. (itstool) path: section/title
+#: C/write.page:10
+msgid "Composing and replying"
+msgstr "Написать и ответить"
+
+#. (itstool) path: section/p
+#: C/write.page:12
+msgid ""
+"To start a new email conversation, click the <gui style=\"button\">Compose</"
+"gui> button on the toolbar. Type the email address of the people to receive "
+"the message in the <gui style=\"input\">To</gui> text field, and a subject "
+"line in the <gui style=\"input\">Subject</gui> field. You can then type your "
+"message in the text area below these. Once the message is ready to send, "
+"click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq> to send the message."
+msgstr ""
+"Чтобы начать новую переписку по электронной почте, нажмите кнопку <gui style="
+"\"button\">Создать сообщение</gui> на панели инструментов. Введите адреса "
+"электронной почты человека, который получит сообщение, в текстовое поле <gui "
+"style=\"input\">Кому</gui> и тему сообщения в поле <gui style=\"input"
+"\">Тема</gui>. Затем вы можете ввести свое сообщение в текстовую область под "
+"ними. Когда сообщение будет готово к отправке, щёлкните кнопку <gui style="
+"\"button\">Отправить</gui> или нажмите <keyseq><key>Ctrl</key><key>Enter</"
+"key></keyseq> для отправки сообщения."
+
+#. (itstool) path: note/title
+#: C/write.page:23
+msgid "Undoing sending"
+msgstr "Отмена отправки"
+
+#. (itstool) path: note/p
+#: C/write.page:24
+msgid ""
+"When sending an email, Geary will wait 5 seconds before delivering the "
+"message. During this time, you will be able to click <gui style=\"button"
+"\">Undo</gui> on the pop-up notification that appears or type "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
+"more changes to it."
+msgstr ""
+"При отправке электронного письма Geary будет ожидать 5 секунд, прежде чем "
+"доставить сообщение. В течение этого времени вы можете нажать кнопку <gui "
+"style=\"button\">Отменить</gui> в появившемся всплывающем уведомлении или "
+"нажать <keyseq><key>Ctrl</key><key>Z</key></keyseq>, чтобы повторно открыть "
+"электронное письмо и внести в него дополнительные изменения."
+
+#. (itstool) path: section/p
+#: C/write.page:32
+msgid ""
+"To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
+"and <gui style=\"input\">Reply-to</gui> fields, click the <gui style=\"input"
+"\">More options</gui> button at the end of the <gui style=\"input\">To</gui> "
+"field. Cc allows you to send a copy of the email to other, secondary "
+"recipients. Bcc is similar, but the Bcc list is hidden from recipients. The "
+"Reply-To field specifies an email address to reply to, if recipients should "
+"reply to a different email address than the sender's."
+msgstr ""
+"Чтобы отобразить поля <gui style=\"input\">Копия</gui>, <gui style=\"input"
+"\">Скрытая копия</gui> и <gui style=\"input\">Ответить</gui>, нажмите кнопку "
+"<gui style=\"input\">Дополнительные параметры</gui> в конце поля <gui style="
+"\"input\">Кому</gui>. «Копия» позволяет отправить копию сообщения "
+"электронной почты другим вторичным получателям. «Скрытая копия» аналогична "
+"«Копии», но получатели не видят других получателей из этого списка. Поле "
+"«Ответить» указывает адрес электронной почты, на который следует ответить, "
+"если необходимо отвечать на адрес электронной почты отличный от адреса "
+"отправителя."
+
+#. (itstool) path: section/p
+#: C/write.page:41
+msgid ""
+"When entering an email address into any of these fields, Geary will provide "
+"suggestions from your desktop address book and from previously sent and "
+"received email messages. To choose one of these suggestions, simply click on "
+"it."
+msgstr ""
+"При вводе адреса электронной почты в любое из этих полей Geary будет "
+"предлагать варианты из вашей адресной книги, а также из ранее отправленных и "
+"полученных сообщений электронной почты. Чтобы выбрать один из этих "
+"вариантов, просто нажмите на него."
+
+#. (itstool) path: section/p
+#: C/write.page:46
+msgid ""
+"To reply to the currently selected conversation, click one of the <gui style="
+"\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui style="
+"\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
+"forwarded email composer for the latest message in the conversation."
+msgstr ""
+"Чтобы ответить в текущей беседе, нажмите одну из кнопок <gui style=\"button"
+"\">Ответить</gui>, <gui style=\"button\">Ответить всем</gui> или <gui style="
+"\"button\">Переслать</gui> на панели инструментов. Это откроет окно "
+"редактора ответа или переадресованного сообщения для последнего сообщения в "
+"беседе."
+
+#. (itstool) path: section/p
+#: C/write.page:52
+msgid ""
+"When replying, the message being replied to will be quoted and copied into "
+"the footer of the new reply. This can be deleted before typing a reply by "
+"pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
+"by selecting the desired text in a message and clicking <gui style=\"button"
+"\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
+"text will be quoted."
+msgstr ""
+"При ответе исходное сообщение будет процитировано и помещено в нижнюю часть "
+"ответа. Его можно удалить перед вводом ответа, нажав <key>Backspace</key>. "
+"Кроме того, можно выборочно процитировать текст, выделив нужный фрагмент в "
+"сообщении и нажав <gui style=\"button\">Ответить</gui> или <gui style="
+"\"button\">Ответить всем</gui>. Процитирован будет только выделенный текст."
+
+#. (itstool) path: section/p
+#: C/write.page:60
+msgid ""
+"To reply to a specific email message, open the message menu in the top "
+"corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>."
+msgstr ""
+"Чтобы ответить на определённое сообщение, откройте меню в верхнем правом "
+"углу открытого сообщения и выберите <gui>Ответить</gui>, <gui>Ответить всем</"
+"gui> или <gui>Переслать</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:66
+msgid "Text formatting, images and attachments"
+msgstr "Форматированный текст, изображения и вложения"
+
+#. (itstool) path: section/p
+#: C/write.page:68
+msgid ""
+"Geary's email composer lets you use text styles such as <em>bold</em> and "
+"<em>italic</em>, indent text to quote it, and links to web pages. Simply "
+"select the text and click the appropriate button on the formatting toolbar "
+"at the bottom of the composer area."
+msgstr ""
+"Редактор электронной почты Geary позволяет использовать такие стили текста, "
+"как <em>полужирный текст</em> и <em>курсив</em>, отступ текста для его "
+"цитирования и ссылки на веб-страницы. Для этого просто выделите текст и "
+"нажмите соответствующую кнопку на панели инструментов форматирования в "
+"нижней части редактора."
+
+#. (itstool) path: section/p
+#: C/write.page:74
+msgid ""
+"Bulleted and numbered lists can be inserted or removed by clicking the <gui "
+"style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
+"list</gui> buttons on the formatting toolbar. The level of indentation of "
+"list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
+"<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
+msgstr ""
+"Можно вставлять и удалять маркированные и нумерованные списки, щёлкая кнопки "
+"<gui style=\"button\">Вставить маркированный список</gui> и <gui style="
+"\"button\">Вставить нумерованный список</gui> на панели инструментов "
+"форматирования. Уровень отступа элементов списка можно настроить с помощью "
+"кнопок <gui style=\"button\">Добавить отступы или цитирование текста</gui> и "
+"<gui style=\"button\">Отменить отступы или цитирование текста</gui>."
+
+#. (itstool) path: section/p
+#: C/write.page:81
+msgid ""
+"Images can be inserted into rich text messages by clicking the <gui style="
+"\"button\">Insert Image</gui> button on the formatting toolbar and selecting "
+"the image to attach, by dragging an image from the <gui>Files</gui> "
+"application into the email body and then dropping it, or by pasting an image "
+"that has been copied to the clipboard from another application."
+msgstr ""
+"В текстовые сообщения с форматированием можно добавлять изображения, нажав "
+"кнопку <gui style=\"button\">Вставить изображение</gui> на панели "
+"инструментов форматирования, перетащив изображение из приложения <gui>Файлы</"
+"gui > в сообщение, или вставив изображение из буфера обмена, которое было "
+"скопировано в другом приложении."
+
+#. (itstool) path: section/p
+#: C/write.page:88
+msgid ""
+"Documents, music, videos, and other files can be attached to the email by "
+"clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
+"the composer window and selecting the document to attach, or by dragging a "
+"file from the <gui>Files</gui> application to the composer window, and "
+"dropping it either on the text fields at the top of the window or on the "
+"toolbar at the bottom."
+msgstr ""
+"Документы, музыку, видео и другие файлы можно прикрепить к электронному "
+"письму, нажав кнопку <gui style=\"button\">Вложить файл</gui> в нижней части "
+"окна редактора сообщений и выбрав документ для прикрепления, или перетащив "
+"файл из приложения <gui>Файлы</gui> либо в текстовое поле окна редактора, "
+"либо на панель инструментов внизу."
+
+#. (itstool) path: section/p
+#: C/write.page:96
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts\"/> for details."
+msgstr ""
+"В редакторе доступно несколько комбинаций клавиш; подробности смотрите в "
+"разделе <link xref=\"shortcuts\"/>."
+
+#. (itstool) path: section/p
+#: C/write.page:99
+msgid ""
+"You may specify a signature to be inserted into the footer of email in the "
+"composer via the <link xref=\"accounts\"/> dialog."
+msgstr ""
+"Вы можете настроить подпись, которая будет вставлена в конце электронного "
+"письма в редакторе через диалоговое окно <link xref=\"accounts\"/>."
+
+#. (itstool) path: section/title
+#: C/write.page:104
+msgid "Checking spelling"
+msgstr "Проверка орфографии"
+
+#. (itstool) path: section/p
+#: C/write.page:106
+msgid ""
+"Geary supports spell-checking your composed email in one or more languages, "
+"as you type. To enable spell-checking, first ensure your computer has spell-"
+"check dictionaries installed for the desired languages. Consult your "
+"computer's help to determine how to install dictionaries if not present."
+msgstr ""
+"Geary поддерживает проверку орфографии на одном или нескольких языках по "
+"мере ввода электронного письма. Чтобы включить проверку орфографии, сначала "
+"убедитесь, что на вашем компьютере установлены словари для нужных языков. "
+"Обратитесь к справочной информации вашей системы, чтобы определить, как "
+"установить словари, если они отсутствуют."
+
+#. (itstool) path: section/p
+#: C/write.page:112
+msgid ""
+"To select languages for spell-checking, click the <gui style=\"button"
+"\">Spell check</gui> button on the formatting toolbar, and the language "
+"selection popover will appear. Click on a language in the list to toggle it "
+"on or off, and click the <gui style=\"button\">-</gui> button to remove it "
+"from the list. If a language does not appear in the list, search for it by "
+"typing its name in the search box, then click the <gui style=\"button\">+</"
+"gui> button to add it."
+msgstr ""
+"Чтобы выбрать языки для проверки правописания, нажмите кнопку <gui style="
+"\"button\">Проверка орфографии</gui> на панели инструментов форматирования, "
+"после чего появится окно выбора языка. Щёлкните язык из списка, чтобы "
+"включить или отключить проверку орфографии на нём, или нажмите кнопку <gui "
+"style=\"button\">-</gui>, чтобы удалить его из списка. Если язык не "
+"отображается в списке, найдите его, введя его название в поле поиска, а "
+"затем добавьте, нажав кнопку <gui style=\"button\">+</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:123
+msgid "Saving drafts and restoring discarded messages"
+msgstr "Сохранение черновиков и восстановление удаленных сообщений"
+
+#. (itstool) path: section/p
+#: C/write.page:125
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type on the server after a short delay."
+msgstr ""
+"Если почтовые серверы поддерживают создание черновиков, то Geary "
+"автоматически будет сохранять сообщение по мере его ввода на сервере с "
+"небольшой задержкой."
+
+#. (itstool) path: section/p
+#: C/write.page:129
+msgid ""
+"To edit an existing draft, select the <gui>Drafts</gui> folder in the folder "
+"list, select the message, and click \"Edit Draft\" in the conversation "
+"viewer."
+msgstr ""
+"Чтобы отредактировать существующий черновик, перейдите в папку "
+"<gui>Черновики</gui> в списке папок и выберите необходимое сообщение, затем "
+"щёлкните кнопку «Редактировать черновик» в области просмотра бесед."
+
+#. (itstool) path: section/p
+#: C/write.page:133
+msgid "Geary will delete the draft when you send the message."
+msgstr "После отправки сообщения черновик будет удалён."
+
+#. (itstool) path: note/p
+#: C/write.page:136
+msgid ""
+"If you save or discard a composed email, you can re-open it by clicking <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or by "
+"typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. Composers can be "
+"reopened for up to 30 minutes after they are closed. After that, you will "
+"need to re-open the message via the <gui>Drafts</gui> folder, if present."
+msgstr ""
+"Если вы сохранили или отменили электронное письмо, то можете повторно "
+"открыть его, нажав <gui style=\"button\">Отменить</gui> в появившемся "
+"всплывающем уведомлении или нажав <keyseq><key>Ctrl</key><key>Z</key></"
+"keyseq>. Окно редактирования можно снова открыть в течение 30 минут после "
+"закрытия сообщения. После этого для повторного открытия вам нужно будет "
+"воспользоваться папкой <gui>Черновики</gui>, если она есть."
+
+#. (itstool) path: section/title
+#: C/write.page:146
+msgid "Plain text messages"
+msgstr "Обычные текстовые сообщения"
+
+#. (itstool) path: section/p
+#: C/write.page:148
+msgid ""
+"Geary can also send plain text messages. Press the <gui style=\"button"
+"\">More options</gui> button at the end of the bottom toolbar, then choose "
+"\"Rich Text\" or \"Plain Text\". Plain text mode is useful when sending "
+"email to mailing lists that prohibit rich text (HTML) messages, or when "
+"sending email to people that do no use modern clients like Geary."
+msgstr ""
+"Также Geary может отправлять и обычные текстовые сообщения. Нажмите кнопку "
+"<gui style=\"button\">Дополнительные параметры</gui> в нижней панели "
+"инструментов, затем выберите «Форматированный текст» или «Простой текст». "
+"Режим обычного текста удобен при отправке электронной почты в списки "
+"рассылки, которые запрещают сообщения в формате RTF (HTML), или при отправке "
+"электронной почты людям, которые не используют современные почтовые клиенты, "
+"такие как Geary."
+
+#. (itstool) path: section/p
+#: C/write.page:155
+msgid ""
+"In plain text mode, text will be automatically wrapped using soft line "
+"breaks so that it is no longer than 74 characters wide, and indented text "
+"will be wrapped and quoted using a “&gt;” character for each level of "
+"quoting."
+msgstr ""
+"В режиме простого текста строки будут автоматически переноситься с помощью "
+"мягких переносов так, чтобы ширина строки не превышала 74 символа, а текст с "
+"отступом будет обтекаться и заключаться в кавычки с использованием «&gt;» - "
+"символа для каждого уровня цитирования."
