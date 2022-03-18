@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '43.dev',
   license: 'LGPL2.1+',
-  meson_version: '>= 0.55',
+  meson_version: '>= 0.59',
 )
 
 # Determine the type of build
@@ -34,9 +34,9 @@ lib_dir = geary_prefix / get_option('libdir')
 locale_dir = geary_prefix / get_option('localedir')
 
 # Source dirs
-metadata_dir = meson.source_root() / 'bindings'/ 'metadata'
-po_dir = meson.source_root() / 'po'
-vapi_dir = meson.source_root() / 'bindings' / 'vapi'
+metadata_dir = meson.project_source_root() / 'bindings'/ 'metadata'
+po_dir = meson.project_source_root() / 'po'
+vapi_dir = meson.project_source_root() / 'bindings' / 'vapi'
 
 # Compiler configuration
 add_project_arguments([
@@ -153,7 +153,7 @@ if not libhandy.found()
       libhandy_project.get_variable('libhandy_vapi')
     ]
   )
-  libhandy_vapi = meson.build_root() / 'subprojects' / 'libhandy' / 'src'
+  libhandy_vapi = meson.project_build_root() / 'subprojects' / 'libhandy' / 'src'
 endif
 
 # Optional dependencies
