@@ -221,8 +221,12 @@ endif
 
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
-# Post-install scripts
-meson.add_install_script('build-aux' / 'post_install.py')
+# Post-install script
+gnome.post_install(
+  gtk_update_icon_cache: true,
+  glib_compile_schemas: true,
+  update_desktop_database: true,
+)
 
 # Subfolders
 subdir('desktop')
