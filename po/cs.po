@@ -3320,7 +3320,7 @@ msgstr "Označit jako nepřečtené z_de"
 #. to the trash folder
 #: ui/conversation-email-menus.ui:50
 msgid "Move message to _Trash"
-msgstr "Vyhodit_t zprávu do koše"
+msgstr "Vyhodi_t zprávu do koše"
 
 #. Translators: Menu item to delete a single, specific message
 #: ui/conversation-email-menus.ui:57
