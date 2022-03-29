@@ -147,6 +147,8 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     [GtkChild] private unowned Gtk.Image font_color_icon;
     [GtkChild] private unowned Gtk.MenuButton more_options_button;
 
+    private Gtk.GestureMultiPress click_gesture;
+
 
     internal signal void insert_image(bool from_clipboard);
 
@@ -168,7 +170,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
 
         this.body = new WebView(config);
         this.body.command_stack_changed.connect(on_command_state_changed);
-        this.body.button_release_event_done.connect(on_button_release);
         this.body.context_menu.connect(on_context_menu);
         this.body.cursor_context_changed.connect(on_cursor_context_changed);
         this.body.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
@@ -178,6 +179,10 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         this.body.set_vexpand(true);
         this.body.show();
         this.body_container.add(this.body);
+
+        this.click_gesture = new Gtk.GestureMultiPress(this.body);
+        this.click_gesture.pressed.connect(this.on_button_press);
+        this.click_gesture.released.connect(this.on_button_release);
 
         this.actions.add_action_entries(ACTIONS, this);
         this.actions.change_action_state(
@@ -318,17 +323,20 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         return this.actions.lookup_action(action_name) as GLib.SimpleAction;
     }
 
-    private bool on_button_release(Gdk.Event event) {
+    private void on_button_press(int n_press, double x, double y) {
+        this.body.grab_focus();
+    }
+
+    private void on_button_release(int n_press, double x, double y) {
         // Show the link popover on mouse release (instead of press)
         // so the user can still select text with a link in it,
         // without the popover immediately appearing and raining on
         // their text selection parade.
         if (this.pointer_url != null &&
             this.config.compose_as_html) {
-            Gdk.EventButton? button = (Gdk.EventButton) event;
             Gdk.Rectangle location = Gdk.Rectangle();
-            location.x = (int) button.x;
-            location.y = (int) button.y;
+            location.x = (int) x;
+            location.y = (int) y;
 
             this.new_link_popover.begin(
                 LinkPopover.Type.EXISTING_LINK, this.pointer_url,
@@ -339,7 +347,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
                     popover.popup();
                 });
         }
-        return Gdk.EVENT_PROPAGATE;
     }
 
     private bool on_context_menu(WebKit.WebView view,

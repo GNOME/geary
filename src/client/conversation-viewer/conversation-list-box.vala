@@ -471,6 +471,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             this.view = view;
             this.is_expanded = true;
             add(this.view);
+
+            this.focus_on_click = false;
         }
 
     }

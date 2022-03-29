@@ -140,9 +140,6 @@ public class Composer.WebView : Components.WebView {
     /** Emitted when an image file has been dropped on the composer */
     public signal void image_file_dropped(string filename, string type, uint8[] contents);
 
-    /** Workaround for WebView eating the button event */
-    internal signal bool button_release_event_done(Gdk.Event event);
-
 
     public WebView(Application.Configuration config) {
         base(config);
@@ -519,15 +516,6 @@ public class Composer.WebView : Components.WebView {
         }
 
         return flowed.str;
-    }
-
-    public override bool button_release_event(Gdk.EventButton event) {
-        // WebView seems to unconditionally consume button events, so
-        // to show a link popopver after the view has processed one,
-        // we need to emit our own.
-        bool ret = base.button_release_event(event);
-        button_release_event_done(event);
-        return ret;
     }
 
     private void on_cursor_context_changed(GLib.Variant? parameters) {
