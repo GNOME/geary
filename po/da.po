@@ -3,21 +3,23 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 # Nikolaj64 <nikolajholmquist@gmail.com>, 2013, 2014.
 # Ask Hjorth Larsen <asklarsen@gmail.com>, 2016.
-# Alan Mortensen <alanmortensen.am@gmail.com>, 2016-20.
+# Alan Mortensen <alanmortensen.am@gmail.com>, 2016-20, 22.
 # scootergrisen, 2020-2021.
 #
 msgid ""
-msgstr "Project-Id-Version: geary\n"
+msgstr ""
+"Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-05 13:37+0000\n"
-"PO-Revision-Date: 2021-05-05 00:00+0200\n"
-"Last-Translator: scootergrisen\n"
+"POT-Creation-Date: 2021-05-31 11:16+0000\n"
+"PO-Revision-Date: 2022-03-21 17:15+0100\n"
+"Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.3\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -64,7 +66,8 @@ msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
-msgstr "Geary er et lille e-mailprogram til GNOME 3-skrivebordet som er bygget op "
+msgstr ""
+"Geary er et lille e-mailprogram til GNOME 3-skrivebordet som er bygget op "
 "omkring samtaler. Det lader dig læse, finde og sende e-mail via en enkel, "
 "moderne brugerflade."
 
@@ -72,7 +75,8 @@ msgstr "Geary er et lille e-mailprogram til GNOME 3-skrivebordet som er bygget o
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
-msgstr "Samtaler lader dig læse en hel samtale uden at skulle finde hver enkelt "
+msgstr ""
+"Samtaler lader dig læse en hel samtale uden at skulle finde hver enkelt "
 "besked frem én ad gangen."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
@@ -116,7 +120,8 @@ msgstr "Geary som redigering af formateret tekst ser ud"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Mail;E-mail;Email;Post;E-post;Brev;E-brev;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr ""
+"Mail;E-mail;Email;Post;E-post;Brev;E-brev;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:22
 msgid "Compose Message"
@@ -182,7 +187,8 @@ msgstr "Brug genveje med én tast"
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
-msgstr "Aktiverer genveje til e-mailhandlinger, som ikke kræver at <Ctrl> trykkes "
+msgstr ""
+"Aktiverer genveje til e-mailhandlinger, som ikke kræver at <Ctrl> trykkes "
 "ned for at emulerer dem, der bruges af Gmail."
 
 #: desktop/org.gnome.Geary.gschema.xml:52
@@ -193,7 +199,8 @@ msgstr "Sprog der skal bruges til stavekontrol"
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
-msgstr "En liste over POSIX-lokaliteter hvor den tomme liste deaktiverer "
+msgstr ""
+"En liste over POSIX-lokaliteter hvor den tomme liste deaktiverer "
 "stavekontrol og nul-listen bruger skrivebordssprog som standard."
 
 #: desktop/org.gnome.Geary.gschema.xml:60
@@ -263,7 +270,8 @@ msgstr "Forsinkelse hvor afsendelse af e-mail kan fortrydes"
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
-msgstr "Antal sekunder, der skal ventes, inden en e-mail sendes. Indstil til nul "
+msgstr ""
+"Antal sekunder, der skal ventes, inden en e-mail sendes. Indstil til nul "
 "eller mindre for at deaktivere."
 
 #: desktop/org.gnome.Geary.gschema.xml:109
@@ -291,7 +299,8 @@ msgstr "Hvorvidt de gamle indstillinger blev overført"
 #: desktop/org.gnome.Geary.gschema.xml:123
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
-msgstr "Falsk for at tjekke for det gamle “org.yorba.geary”-skema og kopiere dets "
+msgstr ""
+"Falsk for at tjekke for det gamle “org.yorba.geary”-skema og kopiere dets "
 "værdier."
 
 #. Translators: In-app notification label, when
@@ -444,7 +453,8 @@ msgstr "Fjern konto: %s"
 msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
-msgstr "Det vil fjerne den i Geary, og e-maildata, der er gemt lokalt, slettes fra "
+msgstr ""
+"Det vil fjerne den i Geary, og e-maildata, der er gemt lokalt, slettes fra "
 "computeren. Der slettes ikke noget hos din e-mailudbyder."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
@@ -778,7 +788,8 @@ msgstr "Filen “%s” findes allerede. Vil du erstatte den?"
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
-msgstr "Filen findes allerede i “%s”. Hvis den erstattes, overskrives dens indhold."
+msgstr ""
+"Filen findes allerede i “%s”. Hvis den erstattes, overskrives dens indhold."
 
 #: src/client/application/application-attachment-manager.vala:236
 msgid "_Replace"
@@ -932,7 +943,8 @@ msgstr "Om %s"
 #. <yamada.taro@example.com>
 #: src/client/application/application-client.vala:591
 msgid "translator-credits"
-msgstr "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
+msgstr ""
+"Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
 "Ask Hjorth Larsen <asklarsen@gmail.com>\n"
 "Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "\n"
@@ -1072,7 +1084,8 @@ msgid ""
 "\n"
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
-msgstr "Der opstod en fejl under åbningen af den lokale e-maildatabase til denne "
+msgstr ""
+"Der opstod en fejl under åbningen af den lokale e-maildatabase til denne "
 "konto. Dette sker sikkert på grund af, at databasefilen er beskadiget\n"
 "\n"
 "%s\n"
@@ -1102,7 +1115,8 @@ msgid ""
 "Error during rebuild:\n"
 "\n"
 "%s"
-msgstr "Der opstod en fejl under genopbygning:\n"
+msgstr ""
+"Der opstod en fejl under genopbygning:\n"
 "\n"
 "%s"
 
@@ -1159,7 +1173,8 @@ msgstr "Arbejder offline"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
-msgstr "Du kan ikke sende eller modtage e-mails, indtil forbindelsen er genoprettet."
+msgstr ""
+"Du kan ikke sende eller modtage e-mails, indtil forbindelsen er genoprettet."
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:645
@@ -1169,7 +1184,8 @@ msgstr "Loginproblem"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
-msgstr "En konto har rapporteret et forkert login eller en forkert adgangskode."
+msgstr ""
+"En konto har rapporteret et forkert login eller en forkert adgangskode."
 
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:654
@@ -1273,7 +1289,8 @@ msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
-msgstr "Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
+msgstr ""
+"Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
 "folk, du stoler på."
 
 #: src/client/components/components-attachment-pane.vala:375
@@ -1386,7 +1403,8 @@ msgstr "Brug genveje med én _tast til e-mail"
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
-msgstr "Aktivér tastaturgenveje til e-mailhandlinger som ikke kræver tryk på <Ctrl>"
+msgstr ""
+"Aktivér tastaturgenveje til e-mailhandlinger som ikke kræver tryk på <Ctrl>"
 
 # oversættelse med vilje indirekte (se forklaring nedenfor)
 #. / Translators: Preferences label
@@ -1600,15 +1618,15 @@ msgstr "_Behold"
 msgid "Select Color"
 msgstr "Vælg farve"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "Link-URL er ikke korrekt formateret, f.eks. http://eksempel.dk"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "Ugyldig link-URL"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Ugyldig e-mailadresse"
 
@@ -1642,7 +1660,8 @@ msgstr "Tryk på Tilbagetast for at slette citat"
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
-msgstr "vedhæft|vedhæfte|vedhæftet|vedhæfter|vedlagt|vedlægger|vedlægge|vedhæftede"
+msgstr ""
+"vedhæft|vedhæfte|vedhæftet|vedhæfter|vedlagt|vedlægger|vedlægge|vedhæftede"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -1903,6 +1922,11 @@ msgstr ", "
 msgid "Image"
 msgstr "Billede"
 
+#: src/client/conversation-viewer/conversation-message.vala:1341
+#: src/client/conversation-viewer/conversation-message.vala:1347
+msgid "(unknown)"
+msgstr "(ukendt)"
+
 #. Translators: Info bar status message
 #: src/client/conversation-viewer/conversation-message.vala:1396
 msgid "Remote images not shown"
@@ -1990,14 +2014,16 @@ msgstr "Identiteten af %s-mailserveren ved %s:%u kunne ikke godkendes."
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
-msgstr "Hvis du vælger “Stol på serveren” eller “Stol altid på serveren”, kan dit "
+msgstr ""
+"Hvis du vælger “Stol på serveren” eller “Stol altid på serveren”, kan dit "
 "brugernavn og din adgangskode blive sendt uden sikkerhed."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
-msgstr "Hvis du vælger “Stol ikke på serveren”, vil Geary ikke forbinde til denne "
+msgstr ""
+"Hvis du vælger “Stol ikke på serveren”, vil Geary ikke forbinde til denne "
 "server."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
@@ -2008,14 +2034,16 @@ msgstr "Geary vil ikke tilføje eller opdatere denne e-mailkonto."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
-msgstr "Hvis du vælger “Stol ikke på serveren”, vil Geary holde op med at tilgå "
+msgstr ""
+"Hvis du vælger “Stol ikke på serveren”, vil Geary holde op med at tilgå "
 "denne konto."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
-msgstr "Kontakt din systemadministrator eller e-mailudbyder, hvis du har spørgsmål "
+msgstr ""
+"Kontakt din systemadministrator eller e-mailudbyder, hvis du har spørgsmål "
 "vedrørende disse problemer."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
@@ -2024,7 +2052,8 @@ msgstr "Serverens certifikat er ikke signeret af en kendt autoritet"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s identity does not match the identity in the certificate"
-msgstr "Serverens identitet stemmer ikke overens med identiteten i certifikatet"
+msgstr ""
+"Serverens identitet stemmer ikke overens med identiteten i certifikatet"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:82
 msgid "The server’s certificate has expired"
@@ -2701,7 +2730,8 @@ msgstr "Kladder | Kladde"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr "Sent | Sendt mail | Sendt email | Sendt e-Mail | Sendt | Sendte | Sendt mail "
+msgstr ""
+"Sent | Sendt mail | Sendt email | Sendt e-Mail | Sendt | Sendte | Sendt mail "
 "| Sendt email | Sendt e-mail | Sendte e-mails | Sendt post"
 
 #. The localised name(s) of the Sent folder name as used
@@ -2719,7 +2749,8 @@ msgstr "Sendt post"
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
-msgstr "Uønsket | Spam | Uønsket mail | Uønsket e-mail | Uønsket e-mail | Masse e-"
+msgstr ""
+"Uønsket | Spam | Uønsket mail | Uønsket e-mail | Uønsket e-mail | Masse e-"
 "mail | Masse-e-mail"
 
 #. List of general possible folder names to match for the
@@ -3090,7 +3121,8 @@ msgid ""
 "one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
-msgstr "Hvis problemet er alvorligt eller bliver ved, så gem og send disse detaljer "
+msgstr ""
+"Hvis problemet er alvorligt eller bliver ved, så gem og send disse detaljer "
 "til enten en af <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
 "\">kontaktkanalerne</a> eller vedhæftet en <a href=\"https://wiki.gnome.org/"
 "Apps/Geary/ReportingABug\">ny fejlrapport</a>."
@@ -3275,12 +3307,14 @@ msgstr "Bedragerisk link fundet"
 
 #: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
-msgstr "Afsenderen af denne e-mail forsøger måske at lede dig til det forkerte "
+msgstr ""
+"Afsenderen af denne e-mail forsøger måske at lede dig til det forkerte "
 "websted."
 
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr "Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
+msgstr ""
+"Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
