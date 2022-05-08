@@ -273,7 +273,7 @@ class Geary.Imap.DeserializerTest : TestCase {
     public void gmail_broken_flags() throws GLib.Error {
         // As of 2020-05-01, GMail does not correctly quote email
         // flags. See #746
-        string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $Forwarded $MDNSent $NotPhishing $Phishing Junk LoadRemoteImages NonJunk OIB-Seen-INBOX OIB-Seen-Unsubscribe OIB-Seen-[Gmail]/Important OIB-Seen-[Gmail]/Spam OIB-Seen-[Gmail]/Tous les messages)""";
+        string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $Forwarded $MDNSent $NotPhishing $Phishing Junk LoadRemoteImages NonJunk OIB-Seen-INBOX OIB-Seen-Unsubscribe [GMail]/Sent_Mail OIB-Seen-[Gmail]/Important OIB-Seen-[Gmail]/Spam OIB-Seen-[Gmail]/Tous les messages)""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
         this.deser.quirks = new Imap.Quirks();

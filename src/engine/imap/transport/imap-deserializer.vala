@@ -562,6 +562,12 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
         char ch = *((char *) user);
         switch (ch) {
             case '[':
+                // "[" is a valid character for flags (and used by Gmail)
+                if (this.is_parsing_flags) {
+                    append_to_string(ch);
+                    return State.FLAG;
+                }
+
                 // open response code
                 ResponseCode response_code = new ResponseCode();
                 push(response_code);
