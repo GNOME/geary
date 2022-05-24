@@ -10,13 +10,14 @@
 # Pedro Albuquerque <palbuquerque73@gmail.com>, 2015.
 # Tiago Santos <tiagofsantos81@sapo.pt>, 2014 - 2016.
 # João Nuno Matos <joaonmatos@gmail.com>, 2019.
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2020, 2021, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-31 11:16+0000\n"
-"PO-Revision-Date: 2021-09-13 18:21+0100\n"
+"POT-Creation-Date: 2022-04-07 17:27+0000\n"
+"PO-Revision-Date: 2022-05-24 15:32+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese (https://l10n.gnome.org/teams/pt/)\n"
 "Language: pt\n"
@@ -24,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -414,7 +415,7 @@ msgstr "pessoa@exemplo.pt"
 #: src/client/accounts/accounts-editor-add-pane.vala:608
 #: src/client/accounts/accounts-editor-servers-pane.vala:881
 msgid "Login name"
-msgstr "Login"
+msgstr "Nome de acesso"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
@@ -478,7 +479,7 @@ msgstr ""
 #: src/client/plugin/mail-merge/mail-merge.vala:392
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
-msgstr "_Cancelar"
+msgstr "Cancelar"
 
 #. Translators: Label in the account editor for the user's
 #. custom name for an account.
@@ -716,14 +717,14 @@ msgstr "TLS"
 #: src/client/accounts/accounts-editor-row.vala:539
 #: src/client/application/application-main-window.vala:650
 msgid "Login"
-msgstr "Início de sessão"
+msgstr "Acesso"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
 #: src/client/accounts/accounts-editor-row.vala:546
 msgid "No login needed"
-msgstr "Não é necessário iniciar sessão"
+msgstr "Não é necessário acesso"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
@@ -809,7 +810,7 @@ msgstr ""
 
 #: src/client/application/application-attachment-manager.vala:236
 msgid "_Replace"
-msgstr "Substitui_r"
+msgstr "Substituir"
 
 #: src/client/application/application-client.vala:34
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
@@ -1112,7 +1113,7 @@ msgstr ""
 
 #: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
-msgstr "_Reconstruir"
+msgstr "Reconstruir"
 
 #: src/client/application/application-controller.vala:1340
 msgid "E_xit"
@@ -1192,7 +1193,7 @@ msgstr "Não poderá enviar ou receber correio até retomar a sua ligação."
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:645
 msgid "Login problem"
-msgstr "Problema ao iniciar sessão"
+msgstr "Problema de acesso"
 
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:647
@@ -1202,8 +1203,7 @@ msgstr "Uma conta alertou que as suas credenciais de acesso não eram corretas."
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
-msgstr ""
-"Tente iniciar sessão de novo. A sua palavra-passe será pedida novamente"
+msgstr "Tente aceder novamente. A sua palavra-passe será solicidada"
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:661
@@ -1308,7 +1308,7 @@ msgstr ""
 
 #: src/client/components/components-attachment-pane.vala:375
 msgid "Don’t _ask me again"
-msgstr "Não pergunt_ar novamente"
+msgstr "Não perguntar novamente"
 
 #: src/client/components/components-conversation-actions.vala:97
 msgid "Mark conversation"
@@ -1400,7 +1400,7 @@ msgstr "Cancelar"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:124
 msgid "_Automatically select next message"
-msgstr "Selecionar mensagem seguinte _automaticamente"
+msgstr "Selecionar mensagem seguinte automaticamente"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:134
@@ -1410,7 +1410,7 @@ msgstr "Mostrar antevisão da conversa"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:144
 msgid "Use _single key email shortcuts"
-msgstr "Usar atalho_s de tecla única"
+msgstr "Usar atalhos de tecla única"
 
 #: src/client/components/components-preferences-window.vala:146
 msgid ""
@@ -1494,7 +1494,7 @@ msgstr "Por favor, transmita-nos os detalhes do problema, se este persistir."
 #. for a problem report.
 #: src/client/components/components-problem-report-info-bar.vala:94
 msgid "_Details"
-msgstr "_Detalhes"
+msgstr "Detalhes"
 
 #. Translators: Tooltip for viewing technical details for
 #. a problem report.
@@ -1506,7 +1506,7 @@ msgstr "Ver detalhes técnicos acerca do erro"
 #. connection
 #: src/client/components/components-problem-report-info-bar.vala:103
 msgid "_Retry"
-msgstr "Tenta_r de novo"
+msgstr "Tentar novamente"
 
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
@@ -1576,19 +1576,19 @@ msgstr "Aceitar"
 
 #: src/client/components/stock.vala:21
 msgid "_About"
-msgstr "_Acerca"
+msgstr "Acerca"
 
 #: src/client/components/stock.vala:22
 msgid "_Add"
-msgstr "_Adicionar"
+msgstr "Adicionar"
 
 #: src/client/components/stock.vala:23
 msgid "_Close"
-msgstr "Fe_char"
+msgstr "Fechar"
 
 #: src/client/components/stock.vala:24
 msgid "_Discard"
-msgstr "_Descartar"
+msgstr "Descartar"
 
 #: src/client/components/stock.vala:25 ui/components-main-toolbar-menus.ui:42
 msgid "_Help"
@@ -1602,12 +1602,12 @@ msgstr "Abrir"
 
 #: src/client/components/stock.vala:27 ui/components-main-toolbar-menus.ui:32
 msgid "_Preferences"
-msgstr "_Preferências"
+msgstr "Preferências"
 
 #. Translators: Menu item to print a single, specific message
 #: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
 msgid "_Print…"
-msgstr "Im_primir…"
+msgstr "Imprimir…"
 
 #: src/client/components/stock.vala:29
 msgid "_Quit"
@@ -1615,7 +1615,7 @@ msgstr "Sair"
 
 #: src/client/components/stock.vala:30
 msgid "_Remove"
-msgstr "_Remover"
+msgstr "Remover"
 
 #: src/client/components/stock.vala:31
 #: ui/components-attachment-pane-menus.ui:11
@@ -1690,22 +1690,22 @@ msgstr "Para"
 #. / Translators: Label for composer CC address entry
 #: src/client/composer/composer-widget.vala:502
 msgid "_Cc"
-msgstr "_Cc"
+msgstr "Cc"
 
 #. / Translators: Label for composer BCC address entry
 #: src/client/composer/composer-widget.vala:510
 msgid "_Bcc"
-msgstr "_Bcc"
+msgstr "Bcc"
 
 #. / Translators: Label for composer Reply-To address entry
 #: src/client/composer/composer-widget.vala:518
 msgid "_Reply to"
-msgstr "_Responder a"
+msgstr "Responder a"
 
 #. / Translators: Label for composer Subject line entry
 #: src/client/composer/composer-widget.vala:526
 msgid "_Subject"
-msgstr "As_sunto"
+msgstr "Assunto"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
@@ -1838,7 +1838,7 @@ msgstr[1] "Eliminar conversas"
 #: src/client/conversation-list/conversation-list-view.vala:415
 #: ui/components-main-toolbar-menus.ui:5
 msgid "Mark as _Read"
-msgstr "Marca_r como Lida"
+msgstr "Marcar como Lida"
 
 #: src/client/conversation-list/conversation-list-view.vala:423
 #: ui/components-main-toolbar-menus.ui:9
@@ -1859,11 +1859,11 @@ msgstr "Favorita"
 #: src/client/conversation-list/conversation-list-view.vala:455
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
-msgstr "_Responder"
+msgstr "Responder"
 
 #: src/client/conversation-list/conversation-list-view.vala:461
 msgid "R_eply All"
-msgstr "Respond_er a todos"
+msgstr "Responder a todos"
 
 #. Translators: Menu item to forward a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:467
@@ -2014,7 +2014,7 @@ msgstr "Escolha um ficheiro"
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "_Attach"
-msgstr "_Anexar"
+msgstr "Anexar"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:36
 #, c-format
@@ -2815,7 +2815,7 @@ msgstr "Adicionar conta"
 
 #: ui/accounts_editor_add_pane.ui:47
 msgid "_Create"
-msgstr "_Criar"
+msgstr "Criar"
 
 #: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
@@ -2876,7 +2876,7 @@ msgstr "Ligação insegura"
 
 #: ui/certificate_warning_dialog.glade:26
 msgid "_Always Trust This Server"
-msgstr "Confi_ar sempre neste servidor"
+msgstr "Confiar sempre neste servidor"
 
 #: ui/certificate_warning_dialog.glade:39
 msgid "_Trust This Server"
@@ -2984,15 +2984,15 @@ msgstr "Selecionar idioma da verificação ortográfica"
 
 #: ui/composer-editor.ui:658
 msgid "S_ans Serif"
-msgstr "S_ans Serif"
+msgstr "Sans Serif"
 
 #: ui/composer-editor.ui:663
 msgid "S_erif"
-msgstr "S_erif"
+msgstr "Serif"
 
 #: ui/composer-editor.ui:668
 msgid "_Fixed Width"
-msgstr "Largura _Fixa"
+msgstr "Largura Fixa"
 
 #: ui/composer-editor.ui:678
 msgid "_Small"
@@ -3000,19 +3000,19 @@ msgstr "Pequeno"
 
 #: ui/composer-editor.ui:683
 msgid "_Medium"
-msgstr "_Médio"
+msgstr "Médio"
 
 #: ui/composer-editor.ui:688
 msgid "Lar_ge"
-msgstr "_Grande"
+msgstr "Grande"
 
 #: ui/composer-editor.ui:698
 msgid "_Rich Text"
-msgstr "Texto melho_rado"
+msgstr "Texto melhorado"
 
 #: ui/composer-editor.ui:703
 msgid "_Plain Text"
-msgstr "Texto sim_ples"
+msgstr "Texto simples"
 
 #: ui/composer-editor-menus.ui:8
 msgid "_Undo"
@@ -3020,16 +3020,16 @@ msgstr "Desfazer"
 
 #: ui/composer-editor-menus.ui:12
 msgid "_Redo"
-msgstr "_Refazer"
+msgstr "Refazer"
 
 #: ui/composer-editor-menus.ui:18 ui/composer-editor-menus.ui:36
 msgid "Cu_t"
-msgstr "Cor_tar"
+msgstr "Cortar"
 
 #: ui/composer-editor-menus.ui:22 ui/composer-editor-menus.ui:40
 #: ui/conversation-message-menus.ui:37
 msgid "_Copy"
-msgstr "_Copiar"
+msgstr "Copiar"
 
 #: ui/composer-editor-menus.ui:26 ui/composer-editor-menus.ui:44
 msgid "_Paste"
@@ -3042,11 +3042,11 @@ msgstr "Colar sem formatação"
 
 #: ui/composer-editor-menus.ui:50
 msgid "Select _All"
-msgstr "Selecion_ar tudo"
+msgstr "Selecionar tudo"
 
 #: ui/composer-editor-menus.ui:57 ui/conversation-message-menus.ui:43
 msgid "_Inspect…"
-msgstr "_Inspecionar…"
+msgstr "Inspecionar…"
 
 #: ui/composer-headerbar.ui:20 ui/composer-headerbar.ui:96
 msgid "Detach the composer from the window"
@@ -3116,7 +3116,7 @@ msgstr "Abrir os anexos selecionados"
 
 #: ui/components-attachment-pane-menus.ui:17
 msgid "Save _All"
-msgstr "Guard_ar tudo"
+msgstr "Guardar tudo"
 
 #: ui/components-conversation-actions.ui:17
 msgid "Reply"
@@ -3132,7 +3132,7 @@ msgstr "Reencaminhar"
 
 #: ui/components-conversation-actions.ui:156
 msgid "_Archive"
-msgstr "_Arquivar"
+msgstr "Arquivar"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
@@ -3206,7 +3206,7 @@ msgstr "Marcar/desmarcar como lixo eletrónico"
 
 #: ui/components-main-toolbar-menus.ui:28
 msgid "_Accounts"
-msgstr "Cont_as"
+msgstr "Contas"
 
 #: ui/components-main-toolbar-menus.ui:36
 msgid "_Keyboard Shortcuts"
@@ -3214,7 +3214,7 @@ msgstr "Teclas de atalho"
 
 #: ui/components-main-toolbar-menus.ui:47
 msgid "_About Geary"
-msgstr "_Acerca do Geary"
+msgstr "Acerca do Geary"
 
 #: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
@@ -3277,17 +3277,17 @@ msgstr "Não marcar esta mensagem como favorita"
 #. Translators: Menu item to reply to a specific message.
 #: ui/conversation-email-menus.ui:15
 msgid "Reply to _All"
-msgstr "Responder _a todos"
+msgstr "Responder a todos"
 
 #. Translators: Menu item to mark a specific message as
 #. read.
 #: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
-msgstr "_Marcar como lida"
+msgstr "Marcar como lida"
 
 #: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
-msgstr "_Marcar como não lida"
+msgstr "Marcar como não lida"
 
 #. Translators: Menu item to mark all messages in a
 #. conversation from this one as unread.
@@ -3309,7 +3309,7 @@ msgstr "Eliminar mensagem…"
 #. Translators: Menu item to view the source for a message
 #: ui/conversation-email-menus.ui:69
 msgid "_View Source"
-msgstr "_Ver código fonte"
+msgstr "Ver código fonte"
 
 #: ui/conversation-message-link-popover.ui:49
 msgid "But actually goes to:"
@@ -3335,27 +3335,27 @@ msgstr ""
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
-msgstr "Abrir Ligaçã_o"
+msgstr "Abrir Ligação"
 
 #: ui/conversation-message-menus.ui:11
 msgid "Copy Link _Address"
-msgstr "Copiar Endereço da Lig_ação"
+msgstr "Copiar Endereço da Ligação"
 
 #: ui/conversation-message-menus.ui:17
 msgid "_New Conversation…"
-msgstr "_Nova Conversa…"
+msgstr "Nova Conversa…"
 
 #: ui/conversation-message-menus.ui:21
 msgid "Copy Email _Address"
-msgstr "Copi_ar Endereço Eletrónico"
+msgstr "Copiar Endereço Eletrónico"
 
 #: ui/conversation-message-menus.ui:27
 msgid "Save _Image As…"
-msgstr "Guardar _Imagem Como…"
+msgstr "Guardar Imagem Como…"
 
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
-msgstr "_Selecionar Tudo"
+msgstr "Selecionar Tudo"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3403,11 +3403,11 @@ msgstr "Anterior"
 
 #: ui/find_bar.glade:97
 msgid "_Next"
-msgstr "Segui_nte"
+msgstr "Seguinte"
 
 #: ui/find_bar.glade:114
 msgid "_Case sensitive"
-msgstr "Sensível a maiús_culas"
+msgstr "Sensível a maiúsculas"
 
 #: ui/find_bar.glade:132
 msgid "label"
@@ -3724,11 +3724,11 @@ msgstr "Utilizador"
 
 #: ui/password-dialog.glade:140
 msgid "_Remember password"
-msgstr "Memo_rizar palavra-passe"
+msgstr "Memorizar palavra-passe"
 
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
-msgstr "_Autenticar"
+msgstr "Autenticar"
 
 #~ msgid "Position of folder list pane"
 #~ msgstr "Posição do painel da lista de pastas"
