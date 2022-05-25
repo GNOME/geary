@@ -6,20 +6,28 @@
 # Translators:
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
 # Asier Sarasua Garmendia <asiersarasua@ni.eus>, 2019, 2020, 2021, 2022.
+# Porrumentzio <porrumentzio@riseup.net>, 2022.
 #
 msgid ""
-msgstr "Project-Id-Version: geary-0.4.1\n"
+msgstr ""
+"Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-15 12:19+0000\n"
-"PO-Revision-Date: 2022-02-02 10:00+0100\n"
-"Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
-"Language-Team: Basque <librezale@librezale.eus>\n"
+"POT-Creation-Date: 2022-04-07 17:27+0000\n"
+"PO-Revision-Date: 2022-05-20 23:33+0200\n"
+"Last-Translator: Porrumentzio <porrumentzio@riseup.net>\n"
+"Language-Team: Basque <Librezale>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "eu/)\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-DL-Team: eu\n"
+"X-DL-Module: geary\n"
+"X-DL-Branch: mainline\n"
+"X-DL-Domain: po\n"
+"X-DL-State: None\n"
+"X-Generator: Gtranslator 40.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -66,13 +74,18 @@ msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
-msgstr "Geary posta elektronikoko aplikazio bat da, berriketen inguruan eraikitakoa eta GNOME 3 mahaigainean dabilena. Interfaze garbi eta modernoa du eta posta-mezuak irakurri, aurkitu eta bidaltzeko balio dizu."
+msgstr ""
+"Geary posta elektronikoko aplikazio bat da, berriketen inguruan eraikitakoa "
+"eta GNOME 3 mahaigainean dabilena. Interfaze garbi eta modernoa du eta posta-"
+"mezuak irakurri, aurkitu eta bidaltzeko balio dizu."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
-msgstr "Berriketak erabilita, eztabaida osoak irakur daitezke mezu batetik hurrengora jauzi egin behar izan gabe."
+msgstr ""
+"Berriketak erabilita, eztabaida osoak irakur daitezke mezu batetik "
+"hurrengora jauzi egin behar izan gabe."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
 msgid "Geary’s features include:"
@@ -100,7 +113,9 @@ msgstr "Mezu berrien jakinarazpena mahaigainean"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "GMail, Yahoo! Mail, Outlook.com eta beste IMAP zerbitzari batzuekin bateragarria"
+msgstr ""
+"GMail, Yahoo! Mail, Outlook.com eta beste IMAP zerbitzari batzuekin "
+"bateragarria"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:50
@@ -181,7 +196,9 @@ msgstr "Erabili tekla bakarreko lasterbideak"
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
-msgstr "<Ctrl> sakatzea behar ez duten lasterbideak gaitzen ditu posta-ekintzetarako, Gmail-ek erabiltzen dituenak emulatzeko."
+msgstr ""
+"<Ctrl> sakatzea behar ez duten lasterbideak gaitzen ditu posta-"
+"ekintzetarako, Gmail-ek erabiltzen dituenak emulatzeko."
 
 #: desktop/org.gnome.Geary.gschema.xml:52
 msgid "Languages that shall be used in the spell checker"
@@ -191,7 +208,9 @@ msgstr "Ortografia-egiaztatzailean erabiliko diren hizkuntzak"
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
-msgstr "POSIX hizkuntzen zerrenda bat, zerrenda hutsak ortografia egiaztatzea desgaitzen du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
+msgstr ""
+"POSIX hizkuntzen zerrenda bat, zerrenda k ortografia egiaztatzea desgaitzen "
+"du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
 
 #: desktop/org.gnome.Geary.gschema.xml:60
 msgid "Languages that are displayed in the spell checker popover"
@@ -201,7 +220,8 @@ msgstr "Ortografia-egiaztatzailearen bunbuiloan bistaratuko diren hizkuntzak"
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
-msgstr "Ortografia-egiaztatzailearen bunbuiloan beti bistaratuko diren hizkuntzak"
+msgstr ""
+"Ortografia-egiaztatzailearen bunbuiloan beti bistaratuko diren hizkuntzak"
 
 #: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Notify of new mail at startup"
@@ -225,7 +245,8 @@ msgstr "Mezuak HTML formatuan sortuko diren ala ez"
 
 #: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to compose emails in HTML; false for plain text."
-msgstr "Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
+msgstr ""
+"Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
 
 #: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Advisory strategy for full-text searching"
@@ -234,7 +255,9 @@ msgstr "Testu osoak bilatzeko gomendatzen den estrategia"
 #: desktop/org.gnome.Geary.gschema.xml:85
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr "Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), “aggressive” (erasokorra) eta “horizon” (zeruertza)."
+msgstr ""
+"Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), "
+"“aggressive” (erasokorra) eta “horizon” (zeruertza)."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Zoom of conversation viewer"
@@ -260,7 +283,9 @@ msgstr "Desegin mezua bidaltzearen atzerapena"
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
-msgstr "Mezu bat bidali baino lehen igaroko den segundo kopurua. Ezarri zero balioa desgaitzeko."
+msgstr ""
+"Mezu bat bidali baino lehen igaroko den segundo kopurua. Ezarri zero balioa "
+"desgaitzeko."
 
 #: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Brief notification display time"
@@ -287,7 +312,9 @@ msgstr "Ezarpen zaharrak migratuko diren ala ez"
 #: desktop/org.gnome.Geary.gschema.xml:123
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
-msgstr "Faltsua “org.yorba.geary”-eskema zaharra egiaztatzeko eta haren balioak kopiatzeko."
+msgstr ""
+"Faltsua “org.yorba.geary”-eskema zaharra egiaztatzeko eta haren balioak "
+"kopiatzeko."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -439,7 +466,10 @@ msgstr "Kendu kontua: %s"
 msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
-msgstr "Kontua kendu egingo da Geary aplikaziotik eta lokalean gordetako posta-datuak ordenagailutik ezabatuko dira. Ez da ezer ezabatuko zerbitzu-hornitzailean."
+msgstr ""
+"Kontua kendu egingo da Geary aplikaziotik eta lokalean gordetako posta-"
+"datuak ordenagailutik ezabatuko dira. Ez da ezer ezabatuko zerbitzu-"
+"hornitzailean."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
@@ -772,7 +802,9 @@ msgstr "'%s' izeneko fitxategia badago lehendik. Ordeztea nahi duzu?"
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
-msgstr "'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia gainidatziko da."
+msgstr ""
+"'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia "
+"gainidatziko da."
 
 #: src/client/application/application-attachment-manager.vala:236
 msgid "_Replace"
@@ -1060,13 +1092,17 @@ msgid ""
 "\n"
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
-msgstr "Errorea gertatu da kontu honen lokaleko postaren datu-basea irekitzean. Baliteke datu-basearen fitxategia hondatuta egotea direktorio honetan:\n"
+msgstr ""
+"Errorea gertatu da kontu honen lokaleko postaren datu-basea irekitzean. "
+"Baliteke datu-basearen fitxategia hondatuta egotea direktorio honetan:\n"
 "\n"
 "%s\n"
 "\n"
-"Geary-k datu-basea berreraiki eta zerbitzariarekin berriro sinkroniza dezake, edo irten.\n"
+"Geary-k datu-basea berreraiki eta zerbitzariarekin berriro sinkroniza "
+"dezake, edo irten.\n"
 "\n"
-"Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
+"Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) "
+"ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
 
 #: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
@@ -1087,7 +1123,8 @@ msgid ""
 "Error during rebuild:\n"
 "\n"
 "%s"
-msgstr "Errorea berreraikitzean:\n"
+msgstr ""
+"Errorea berreraikitzean:\n"
 "\n"
 "%s"
 
@@ -1258,7 +1295,9 @@ msgstr "Ziur zaude eranskin horiek ireki nahi dituzula?"
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
-msgstr "Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu fidagarrietako fitxategiak bakarrik ireki."
+msgstr ""
+"Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu "
+"fidagarrietako fitxategiak bakarrik ireki."
 
 #: src/client/components/components-attachment-pane.vala:375
 msgid "Don’t _ask me again"
@@ -1625,7 +1664,9 @@ msgstr "Sakatu atzerako tekla aipamena ezabatzeko"
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
-msgstr "erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipena|atxikitzea|atxikimendua"
+msgstr ""
+"erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipena|"
+"atxikitzea|atxikimendua"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -1978,13 +2019,18 @@ msgstr "%s posta-zerbitzariak %s:%u(e)n duen nortasuna ezin izan da egiaztatu."
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
-msgstr "“Fidatu zerbitzari honetaz” edo “Fidatu beti zerbitzari honetaz” hautatzen bada, zure erabiltzaile-izena eta pasahitza segurua ez den moduan transmititzeko arriskua dago."
+msgstr ""
+"“Fidatu zerbitzari honetaz” edo “Fidatu beti zerbitzari honetaz” hautatzen "
+"bada, zure erabiltzaile-izena eta pasahitza segurua ez den moduan "
+"transmititzeko arriskua dago."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
-msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, beharbada Geary-k ezin izango du zerbitzaria atzitu."
+msgstr ""
+"“Ez fidatu zerbitzari honetaz” hautatzen bada, beharbada Geary-k ezin izango "
+"du zerbitzaria atzitu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
@@ -1994,13 +2040,17 @@ msgstr "Geary-k ez du posta-kontu hau gehituko edo eguneratuko."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
-msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, Geary-k kontu hau atzitzeari utziko dio."
+msgstr ""
+"“Ez fidatu zerbitzari honetaz” hautatzen bada, Geary-k kontu hau atzitzeari "
+"utziko dio."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
-msgstr "Jarri harremanetan zure sistema-administratzailearekin edo zerbitzu-hornitzailearekin auzi horiei buruzko galderarik baduzu."
+msgstr ""
+"Jarri harremanetan zure sistema-administratzailearekin edo zerbitzu-"
+"hornitzailearekin auzi horiei buruzko galderarik baduzu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
@@ -2099,9 +2149,11 @@ msgid ""
 msgid_plural ""
 "%s\n"
 "(%d other new messages)"
-msgstr[0] "%s\n"
+msgstr[0] ""
+"%s\n"
 "(beste mezu berri %d)"
-msgstr[1] "%s\n"
+msgstr[1] ""
+"%s\n"
 "(beste %d mezu berri)"
 
 #. / Notification body when multiple messages have been
@@ -2151,7 +2203,9 @@ msgstr "Sortu txantiloi berrerabilgarriak posta-mezuak bidaltzeko"
 #: src/client/plugin/email-templates/email-templates.vala:29
 #: src/client/plugin/mail-merge/mail-merge.vala:29
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
-msgstr "Txantiloiak | Posta-txantiloia | Posta elektronikoko txantiloia | Posta-mezuen txantiloia"
+msgstr ""
+"Txantiloiak | Posta-txantiloia | Posta elektronikoko txantiloia | Posta-"
+"mezuen txantiloia"
 
 #. Translators: The name of the folder used to
 #. store email templates
@@ -2201,7 +2255,8 @@ msgstr "Posta-konbinazioa"
 
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
 msgid "Fill in and send email templates using a spreadsheet"
-msgstr "Bete eta bidali posta elektronikoko txantiloiak kalkulu-orri bat erabilita"
+msgstr ""
+"Bete eta bidali posta elektronikoko txantiloiak kalkulu-orri bat erabilita"
 
 #. Translators: Info bar label for starting sending a mail
 #. merge
@@ -2254,7 +2309,9 @@ msgstr "Mezuen menua"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr "Unity-ren mezuen menuaren jakinarazpenak bistaratzen ditu mezu berriak daudenean"
+msgstr ""
+"Unity-ren mezuen menuaren jakinarazpenak bistaratzen ditu mezu berriak "
+"daudenean"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2267,13 +2324,15 @@ msgstr "Soinua bidalitakoan"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
 msgid "Plays the desktop sent-mail sound when an email is sent"
-msgstr "Mahaigainak mezu bidalientzako duen soinua erreproduzitzen du mezu bat bidaltzen denean"
+msgstr ""
+"Mahaigainak mezu bidalientzako duen soinua erreproduzitzen du mezu bat "
+"bidaltzen denean"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
 #: src/client/plugin/special-folders/special-folders.vala:167
 msgid "Empty"
-msgstr "Hutsa"
+msgstr "Hustu"
 
 #. Translators: Info bar status message for a draft email
 #: src/client/plugin/special-folders/special-folders.vala:179
@@ -2681,7 +2740,9 @@ msgstr "Zirriborroak | Zirriborroa | Drafts | Draft"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr "Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | Sent E-Mail"
+msgstr ""
+"Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | "
+"Sent E-Mail"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
@@ -2698,7 +2759,10 @@ msgstr "Bidalitako elementuak"
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
-msgstr "Baztergarria | Baztergarriak | Posta baztergarria | Mezu baztergarria | Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
+msgstr ""
+"Baztergarria | Baztergarriak | Posta baztergarria | Mezu baztergarria | Junk "
+"| Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
+"Bulk E-Mail"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -3068,7 +3132,11 @@ msgid ""
 "one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
-msgstr "Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktu-kanaletara</a> edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">akatsen jakinarazpen berri bati</a>."
+msgstr ""
+"Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktu-kanaletara</a> "
+"edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">akatsen jakinarazpen berri bati</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3249,11 +3317,14 @@ msgstr "Esteka iruzurtia aurkitu da"
 
 #: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
-msgstr "Posta-mezua bidali dizunak okerreko webgunera eraman nahi dizula dirudi."
+msgstr ""
+"Posta-mezua bidali dizunak okerreko webgunera eraman nahi dizula dirudi."
 
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr "Ez bazaude seguru, hitz egin bidaltzailearekin eta galdetu aurrera egin baino lehen."
+msgstr ""
+"Ez bazaude seguru, hitz egin bidaltzailearekin eta galdetu aurrera egin "
+"baino lehen."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
