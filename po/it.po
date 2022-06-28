@@ -1042,8 +1042,8 @@ msgstr[1] "Conversazioni ripristinate in %s"
 #: src/client/application/application-controller.vala:686
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
-msgstr[0] "Conversazione archiviata in %s"
-msgstr[1] "Conversazioni archiviate in %s"
+msgstr[0] "Conversazione archiviata"
+msgstr[1] "Conversazioni archiviate"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
