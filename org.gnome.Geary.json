@@ -46,11 +46,9 @@
     "modules": [
         {
             "name": "gnome-online-accounts",
+            "buildsystem": "meson",
             "config-opts": [
-                "--disable-telepathy",
-                "--disable-documentation",
-                "--disable-backend",
-                "--enable-debug=no"
+                "-Dgoabackend=false"
             ],
             "sources": [
                 {
@@ -93,8 +91,8 @@
             "sources": [
                 {
                     "type": "archive",
-                    "url": "https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz",
-                    "sha256": "09fecacaf75ba5a242159e3a9758a5446b5ce4d0ab684f98a7040864e1d1286f"
+                    "url": "https://github.com/libical/libical/releases/download/v3.0.14/libical-3.0.14.tar.gz",
+                    "sha256": "4284b780356f1dc6a01f16083e7b836e63d3815e27ed0eaaad684712357ccc8f"
                 }
             ],
             "cleanup": [
@@ -136,7 +134,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
-                    "branch": "master"
+                    "branch": "a4e8d81239ba9168a7b42e87b29ec65243d52e64"
                 }
             ],
             "cleanup": [
@@ -193,6 +191,7 @@
         },
         {
             "name": "gsound",
+            "buildsystem": "meson",
             "sources": [
                 {
                     "type": "git",
@@ -251,7 +250,7 @@
             "build-commands": [
                 "make libstemmer.so -j$FLATPAK_BUILDER_N_JOBS",
                 "install -Dm644 include/libstemmer.h /app/include/libstemmer.h",
-                "install -Dm644 libstemmer.so.0.0.0 /app/lib/libstemmer.so.0.0.0",
+                "install -Dm644 libstemmer.so /app/lib/libstemmer.so.0.0.0",
                 "ln -s libstemmer.so.0.0.0 /app/lib/libstemmer.so.0",
                 "ln -s libstemmer.so.0 /app/lib/libstemmer.so"
             ]

@@ -1,123 +1,69 @@
-Description: Build libstemmer as a shared library.
-Author: Stefano Rivera <stefanor@debian.org>
-Forwarded: http://news.gmane.org/find-root.php?message_id=%3c20110821220427.GC1738%40bach.rivera.co.za%3e
-Last-Update: 2021-07-05
+ GNUmakefile           | 15 +++++++--------
+ libstemmer/symbol.map |  6 ++++++
+ 2 files changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/GNUmakefile b/GNUmakefile
-index 23a730f..e18b58a 100644
---- a/GNUmakefile
-+++ b/GNUmakefile
-@@ -167,12 +167,13 @@ CPPFLAGS=
+diff --git c/GNUmakefile i/GNUmakefile
+index 98eb1fa..86e4855 100644
+--- c/GNUmakefile
++++ i/GNUmakefile
+@@ -170,20 +170,19 @@ C_OTHER_OBJECTS = $(C_OTHER_SOURCES:.c=.o)
+ JAVA_CLASSES = $(JAVA_SOURCES:.java=.class)
+ JAVA_RUNTIME_CLASSES=$(JAVARUNTIME_SOURCES:.java=.class)
+ 
+-CFLAGS=-O2 -W -Wall -Wmissing-prototypes -Wmissing-declarations
+-CPPFLAGS=
++CFLAGS+=-fPIC -W -Wall -Wmissing-prototypes -Wmissing-declarations
  
  INCLUDES=-Iinclude
  
--all: snowball libstemmer.o stemwords $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
-+all: snowball libstemmer.so stemwords $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
+-all: snowball$(EXEEXT) libstemmer.a stemwords$(EXEEXT) $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
++all: snowball$(EXEEXT) libstemmer.so stemwords$(EXEEXT) $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
+ 
+ algorithms.mk: libstemmer/mkalgorithms.pl libstemmer/modules.txt
+ 	libstemmer/mkalgorithms.pl algorithms.mk libstemmer/modules.txt
  
  clean:
  	rm -f $(COMPILER_OBJECTS) $(RUNTIME_OBJECTS) \
- 	      $(LIBSTEMMER_OBJECTS) $(LIBSTEMMER_UTF8_OBJECTS) $(STEMWORDS_OBJECTS) snowball \
--	      libstemmer.o stemwords \
-+	      $(wildcard libstemmer.so*) libstemmer.a \
-+	          stemwords \
+ 	      $(LIBSTEMMER_OBJECTS) $(LIBSTEMMER_UTF8_OBJECTS) $(STEMWORDS_OBJECTS) snowball$(EXEEXT) \
+-	      libstemmer.a stemwords$(EXEEXT) \
++	      libstemmer.so stemwords$(EXEEXT) \
                libstemmer/modules.h \
                libstemmer/modules_utf8.h \
  	      $(C_LIB_SOURCES) $(C_LIB_HEADERS) $(C_LIB_OBJECTS) \
-@@ -187,7 +188,7 @@ clean:
-               libstemmer/mkinc.mak libstemmer/mkinc_utf8.mak \
-               libstemmer/libstemmer.c libstemmer/libstemmer_utf8.c \
- 	      algorithms.mk
--	rm -rf dist
-+	rm -rf dist .shared
- 	-rmdir $(c_src_dir)
- 	-rmdir $(python_output_dir)
- 	-rmdir $(js_output_dir)
-@@ -211,14 +212,20 @@ libstemmer/modules_utf8.h libstemmer/mkinc_utf8.mak: libstemmer/mkmodules.pl lib
+@@ -222,19 +221,19 @@ libstemmer/modules_utf8.h libstemmer/mkinc_utf8.mak: libstemmer/mkmodules.pl lib
  
  libstemmer/libstemmer.o: libstemmer/modules.h $(C_LIB_HEADERS)
  
--libstemmer.o: libstemmer/libstemmer.o $(RUNTIME_OBJECTS) $(C_LIB_OBJECTS)
+-libstemmer.a: libstemmer/libstemmer.o $(RUNTIME_OBJECTS) $(C_LIB_OBJECTS)
 -	$(AR) -cru $@ $^
 +libstemmer.so: libstemmer/libstemmer.o $(RUNTIME_OBJECTS) $(C_LIB_OBJECTS)
-+	$(CC) $(CFLAGS) -shared $(LDFLAGS) \
-+	      -Wl,-soname,libstemmer.so.0 \
-+	      -o $@.0.0.0 ${^:%=.shared/%}
-+	ln -s $@.0.0.0 $@.0
-+	ln -s $@.0.0.0 $@
-+	$(AR) -crs ${@:.so=.a} $^
++	$(CC) $(CFLAGS) -shared $(LDFLAGS) -Wl,-soname,$@,-version-script,libstemmer/symbol.map -o $@ $^
  
  examples/%.o: examples/%.c
  	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c -o $@ $<
  
--stemwords: $(STEMWORDS_OBJECTS) libstemmer.o
-+stemwords: $(STEMWORDS_OBJECTS) libstemmer.so
+-stemwords$(EXEEXT): $(STEMWORDS_OBJECTS) libstemmer.a
++stemwords$(EXEEXT): $(STEMWORDS_OBJECTS) libstemmer.so
  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
-+	$(CC) $(CFLAGS) $(LDFLAGS) -g -o $@ $(STEMWORDS_OBJECTS) -L. -lstemmer
  
  tests/%.o: tests/%.c
  	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c -o $@ $<
-@@ -264,7 +271,6 @@ $(c_src_dir)/stem_ISO_8859_2_%.c $(c_src_dir)/stem_ISO_8859_2_%.h: algorithms/%.
- 	./snowball charsets/ISO-8859-2.sbl $< -o $${o} -eprefix $${l}_ISO_8859_2_ -r ../runtime
  
- $(c_src_dir)/stem_%.o: $(c_src_dir)/stem_%.c $(c_src_dir)/stem_%.h
--	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c -o $@ $<
+-stemtest$(EXEEXT): $(STEMTEST_OBJECTS) libstemmer.a
++stemtest$(EXEEXT): $(STEMTEST_OBJECTS) libstemmer.so
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
  
- $(java_src_dir)/%Stemmer.java: algorithms/%.sbl snowball
- 	@mkdir -p $(java_src_dir)
-@@ -506,13 +512,14 @@ check_koi8r: $(KOI8_R_algorithms:%=check_koi8r_%)
- # a sibling to this one.
- STEMMING_DATA ?= ../snowball-data
- STEMMING_DATA_ABS := $(abspath $(STEMMING_DATA))
-+STEMWORDS=LD_LIBRARY_PATH=.:$(LD_LIBRARY_PATH) ./stemwords
- 
- check_utf8_%: $(STEMMING_DATA)/% stemwords
- 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer with UTF-8"
- 	@if test -f '$</voc.txt.gz' ; then \
--	  gzip -dc '$</voc.txt.gz'|./stemwords -c UTF_8 -l `echo $<|sed 's!.*/!!'` -o tmp.txt; \
-+	  gzip -dc '$</voc.txt.gz'|$(STEMWORDS) -c UTF_8 -l `echo $<|sed 's!.*/!!'` -o tmp.txt; \
- 	else \
--	  ./stemwords -c UTF_8 -l `echo $<|sed 's!.*/!!'` -i $</voc.txt -o tmp.txt; \
-+	  $(STEMWORDS) -c UTF_8 -l `echo $<|sed 's!.*/!!'` -i $</voc.txt -o tmp.txt; \
- 	fi
- 	@if test -f '$</output.txt.gz' ; then \
- 	  gzip -dc '$</output.txt.gz'|diff -u - tmp.txt; \
-@@ -524,7 +531,7 @@ check_utf8_%: $(STEMMING_DATA)/% stemwords
- check_iso_8859_1_%: $(STEMMING_DATA)/% stemwords
- 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer with ISO_8859_1"
- 	@$(ICONV) -fUTF8 -tISO8859-1 '$</voc.txt' |\
--	    ./stemwords -c ISO_8859_1 -l `echo $<|sed 's!.*/!!'` -o tmp.txt
-+	    $(STEMWORDS) -c ISO_8859_1 -l `echo $<|sed 's!.*/!!'` -o tmp.txt
- 	@$(ICONV) -fUTF8 -tISO8859-1 '$</output.txt' |\
- 	    diff -u - tmp.txt
- 	@rm tmp.txt
-@@ -532,7 +539,7 @@ check_iso_8859_1_%: $(STEMMING_DATA)/% stemwords
- check_iso_8859_2_%: $(STEMMING_DATA)/% stemwords
- 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer with ISO_8859_2"
- 	@$(ICONV) -fUTF8 -tISO8859-2 '$</voc.txt' |\
--	    ./stemwords -c ISO_8859_2 -l `echo $<|sed 's!.*/!!'` -o tmp.txt
-+	    $(STEMWORDS) -c ISO_8859_2 -l `echo $<|sed 's!.*/!!'` -o tmp.txt
- 	@$(ICONV) -fUTF8 -tISO8859-2 '$</output.txt' |\
- 	    diff -u - tmp.txt
- 	@rm tmp.txt
-@@ -540,7 +547,7 @@ check_iso_8859_2_%: $(STEMMING_DATA)/% stemwords
- check_koi8r_%: $(STEMMING_DATA)/% stemwords
- 	@echo "Checking output of `echo $<|sed 's!.*/!!'` stemmer with KOI8R"
- 	@$(ICONV) -fUTF8 -tKOI8-R '$</voc.txt' |\
--	    ./stemwords -c KOI8_R -l `echo $<|sed 's!.*/!!'` -o tmp.txt
-+	    $(STEMWORDS) -c KOI8_R -l `echo $<|sed 's!.*/!!'` -o tmp.txt
- 	@$(ICONV) -fUTF8 -tKOI8-R '$</output.txt' |\
- 	    diff -u - tmp.txt
- 	@rm tmp.txt
-@@ -726,4 +733,9 @@ ada/bin/generate:
- ada/bin/stemwords: $(ADA_SOURCES)
- 	cd ada && $(gprbuild) -Pstemwords -p
- 
-+%.o: %.c
-+	@mkdir -p $(shell dirname ${@:%=.shared/%})
-+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -fPIC -o ${@:%=.shared/%} $<
-+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
-+
- .SUFFIXES: .class .java
--- 
-2.30.2
+ csharp_stemwords$(EXEEXT): $(CSHARP_STEMWORDS_SOURCES) $(CSHARP_RUNTIME_SOURCES) $(CSHARP_SOURCES)
+diff --git c/libstemmer/symbol.map i/libstemmer/symbol.map
+new file mode 100644
+index 0000000..7a3d423
+--- /dev/null
++++ i/libstemmer/symbol.map
+@@ -0,0 +1,6 @@
++SB_STEMMER_0 {
++    global:
++        sb_stemmer_*;
++    local:
++        *;
++};
 
