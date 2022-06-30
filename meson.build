@@ -224,17 +224,6 @@ files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 # Post-install scripts
 meson.add_install_script('build-aux' / 'post_install.py')
 
-# GNOME Builder doesn't support YAML manifests, so generate a JSON
-# version from the YAML and commit it. :( GNOME/gnome-builder#520
-yaml_to_json = find_program('build-aux' / 'yaml_to_json.py')
-custom_target(
-  'org.gnome.Geary.json',
-  build_by_default: true,
-  command: [yaml_to_json, '@INPUT@', meson.source_root(), '@OUTPUT@'],
-  input: files('org.gnome.Geary.yaml'),
-  output: 'org.gnome.Geary.json'
-)
-
 # Subfolders
 subdir('desktop')
 subdir('help')
