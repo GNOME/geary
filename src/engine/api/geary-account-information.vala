@@ -54,7 +54,8 @@ public class Geary.AccountInformation : BaseObject {
                     value = email_domain;
                 } else {
                     string[] host_parts = this.incoming.host.split(".");
-                    if (host_parts.length > 2) {
+                    // If first part is an integer, looks like an ip so ignore it
+                    if (host_parts.length > 2 && int.parse(host_parts[0]) == 0) {
                         host_parts = host_parts[1:host_parts.length];
                     }
                     value = string.joinv(".", host_parts);
