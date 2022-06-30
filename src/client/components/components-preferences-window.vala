@@ -163,6 +163,16 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         startup_notifications_row.activatable_widget = startup_notifications;
         startup_notifications_row.add(startup_notifications);
 
+        var trust_images = new Gtk.Switch();
+        trust_images.valign = CENTER;
+
+        var trust_images_row = new Hdy.ActionRow();
+        /// Translators: Preferences label
+        trust_images_row.title = _("_Always load images");
+        trust_images_row.use_underline = true;
+        trust_images_row.activatable_widget = autoselect;
+        trust_images_row.add(trust_images);
+
         var group = new Hdy.PreferencesGroup();
         /// Translators: Preferences group title
         //group.title = _("General");
@@ -172,6 +182,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(display_preview_row);
         group.add(single_key_shortucts_row);
         group.add(startup_notifications_row);
+        group.add(trust_images_row);
 
         var page = new Hdy.PreferencesPage();
         /// Translators: Preferences page title
@@ -208,6 +219,13 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
                 startup_notifications,
                 "state"
+            );
+            config.bind_with_mapping(
+                Application.Configuration.IMAGES_TRUSTED_DOMAINS,
+                trust_images,
+                "state",
+                (GLib.SettingsBindGetMappingShared) settings_trust_images_getter,
+                (GLib.SettingsBindSetMappingShared) settings_trust_images_setter
             );
         }
 
@@ -252,4 +270,17 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         return Gdk.EVENT_PROPAGATE;
     }
 
+    private static bool settings_trust_images_getter(GLib.Value value, GLib.Variant variant, void* user_data) {
+        var domains = variant.get_strv();
+        value.set_boolean(domains.length > 0 && domains[0] == "*");
+        return true;
+    }
+
+    private static GLib.Variant settings_trust_images_setter(GLib.Value value, GLib.VariantType expected_type, void* user_data) {
+        var trusted = value.get_boolean();
+        string[] values = {};
+        if (trusted)
+            values += "*";
+        return new GLib.Variant.strv(values);
+    }
 }

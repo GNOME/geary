@@ -45,4 +45,21 @@
       </item>
     </section>
   </menu>
+  <menu id="show_images_menu">
+    <section>
+      <attribute name="label" translatable="yes">Show images</attribute>
+      <item>
+        <attribute name="label" translatable="yes">For this message</attribute>
+        <attribute name="action">msg.show-images-message</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">For this sender</attribute>
+        <attribute name="action">msg.show-images-sender</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">For this domain</attribute>
+        <attribute name="action">msg.show-images-domain</attribute>
+      </item>
+   </section>
+  </menu>
 </interface>

@@ -159,6 +159,19 @@ row.geary-folder-popover-list-row > label {
   border-width: 0;
 }
 
+.geary-message infobar box button {
+  background: alpha(black, 0.1);
+  color: alpha(@theme_text_color, 0.7);
+  border: none;
+  box-shadow: none;
+}
+
+.geary-message infobar box button:hover,
+.geary-message infobar box button:checked {
+  background: alpha(black, 0.2);
+  color: @theme_text_color;
+}
+
 grid.geary-message-summary {
   border-top: 4px solid transparent;
   padding: 12px;

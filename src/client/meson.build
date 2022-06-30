@@ -138,6 +138,7 @@ client_vala_sources = files(
 
   'util/util-avatar.vala',
   'util/util-cache.vala',
+  'util/util-contact.vala',
   'util/util-date.vala',
   'util/util-email.vala',
   'util/util-files.vala',

@@ -41,6 +41,8 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     private GLib.Cancellable load_cancellable = new GLib.Cancellable();
 
+    private Application.Configuration config;
+
     [GtkChild] private unowned Gtk.Grid contact_pane;
 
     [GtkChild] private unowned Hdy.Avatar avatar;
@@ -74,11 +76,13 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     public ContactPopover(Gtk.Widget relative_to,
                           Application.Contact contact,
-                          Geary.RFC822.MailboxAddress mailbox) {
+                          Geary.RFC822.MailboxAddress mailbox,
+                          Application.Configuration config) {
 
         this.relative_to = relative_to;
         this.contact = contact;
         this.mailbox = mailbox;
+        this.config = config;
 
         this.load_remote_button.role = CHECK;
 
@@ -143,7 +147,10 @@ public class Conversation.ContactPopover : Gtk.Popover {
                 actions.lookup_action(ACTION_LOAD_REMOTE);
             load_remote.set_state(
                 new GLib.Variant.boolean(
-                    is_desktop || this.contact.load_remote_resources
+                    is_desktop ||
+                    Util.Contact.should_load_images(
+                        this.contact,
+                        this.config)
                 )
             );
         } else {
@@ -177,6 +184,14 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     private async void set_load_remote_resources(bool enabled) {
         try {
+            // Remove all contact email domains from trusted list
+            // Otherwise, user may not understand why images are always shown
+            if (!enabled) {
+                var email_addresses = this.contact.email_addresses;
+                foreach (Geary.RFC822.MailboxAddress email in email_addresses) {
+                    this.config.remove_images_trusted_domain(email.domain);
+                }
+            }
             yield this.contact.set_remote_resource_loading(enabled, null);
             load_remote_resources_changed(enabled);
         } catch (GLib.Error err) {

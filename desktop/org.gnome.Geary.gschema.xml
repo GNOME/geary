@@ -97,6 +97,12 @@
         <description>The last recorded size of the detached composer window.</description>
     </key>
 
+    <key name="images-trusted-domains" type="as">
+        <default>[]</default>
+        <summary>Allow images for these domains</summary>
+        <description>Images from these domains will be trusted</description>
+    </key>
+
     <key name="undo-send-delay" type="i">
         <default>5</default>
         <summary>Undo sending email delay</summary>

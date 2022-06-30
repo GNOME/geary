@@ -40,6 +40,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private const string ACTION_OPEN_LINK = "open-link";
     private const string ACTION_SAVE_IMAGE = "save-image";
     private const string ACTION_SELECT_ALL = "select-all";
+    private const string ACTION_SHOW_IMAGES_MESSAGE = "show-images-message";
+    private const string ACTION_SHOW_IMAGES_SENDER = "show-images-sender";
+    private const string ACTION_SHOW_IMAGES_DOMAIN = "show-images-domain";
 
 
     // Widget used to display sender/recipient email addresses in
@@ -377,6 +380,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private MenuModel context_menu_main;
     private MenuModel? context_menu_inspector = null;
 
+    // Menu model for creating the show images menu
+    private MenuModel show_images_menu;
+
     // Address fields that can be search through
     private Gee.List<ContactFlowBoxChild> searchable_addresses =
         new Gee.LinkedList<ContactFlowBoxChild>();
@@ -396,6 +402,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private int remote_resources_requested = 0;
 
     private int remote_resources_loaded = 0;
+
+    private bool authenticated_message = false;
 
     // Timeouts for showing the progress bar and hiding it when
     // complete. The former is so that when loading cached images it
@@ -504,6 +512,12 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             .activate.connect(on_link_activated);
         add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
+        add_action(ACTION_SHOW_IMAGES_MESSAGE, true)
+            .activate.connect(on_show_images);
+        add_action(ACTION_SHOW_IMAGES_SENDER, true)
+            .activate.connect(on_show_images_sender);
+        add_action(ACTION_SHOW_IMAGES_DOMAIN, true)
+            .activate.connect(on_show_images_domain);
         insert_action_group("msg", message_actions);
 
         // Context menu
@@ -515,6 +529,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         context_menu_email = (MenuModel) builder.get_object("context_menu_email");
         context_menu_image = (MenuModel) builder.get_object("context_menu_image");
         context_menu_main = (MenuModel) builder.get_object("context_menu_main");
+
+        show_images_menu = (MenuModel) builder.get_object("show_images_menu");
+
         if (config.enable_inspector) {
             context_menu_inspector =
                 (MenuModel) builder.get_object("context_menu_inspector");
@@ -872,11 +889,15 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             initialize_web_view();
         }
 
-        bool contact_load_images = (
-            this.primary_contact != null &&
-            this.primary_contact.load_remote_resources
+        bool contact_load_images = Util.Contact.should_load_images(
+            this.primary_contact, this.config
         );
-        if (this.load_remote_resources || contact_load_images) {
+        this.authenticated_message = message.auth_results != null && (
+            message.auth_results.is_dkim_valid() ||
+            message.auth_results.is_dmarc_valid()
+        );
+        if (this.load_remote_resources || (
+                contact_load_images && this.authenticated_message)) {
             yield this.web_view.load_remote_resources(load_cancelled);
         }
 
@@ -1244,7 +1265,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             Conversation.ContactPopover popover = new Conversation.ContactPopover(
                 address_child,
                 address_child.contact,
-                address
+                address,
+                this.config
             );
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.load_remote_resources_changed.connect((enabled) => {
@@ -1391,48 +1413,45 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private void on_remote_resources_blocked() {
         if (this.remote_images_info_bar == null) {
-            this.remote_images_info_bar = new Components.InfoBar(
-                // Translators: Info bar status message
-                _("Remote images not shown"),
-                // Translators: Info bar description
-                _("Only show remote images from senders you trust.")
-            );
-            var show = this.remote_images_info_bar.add_button(
-                // Translators: Info bar button label
-                _("Show"), 1
-            );
-            this.remote_images_info_bar.add_button(
-                // Translators: Info bar button label
-                _("Always show from sender"), 2
-            );
-            this.remote_images_info_bar.response.connect(on_remote_images_response);
-            var buttons = this.remote_images_info_bar.get_action_area() as Gtk.ButtonBox;
-            if (buttons != null) {
-                buttons.set_child_non_homogeneous(show, true);
+            /* If message is authenticated, user is allowed to whitelist
+             * images loading for sender/domain sender.
+             */
+            if (this.authenticated_message) {
+                this.remote_images_info_bar = new Components.InfoBar(
+                    // Translators: Info bar status message
+                    _("Remote images not shown"),
+                    // Translators: Info bar description
+                    _("Only show remote images from senders you trust.")
+                );
+
+                var menu_image = new Gtk.Image();
+                menu_image.icon_name = "view-more-symbolic";
+
+                var menu_button = new Gtk.MenuButton();
+                menu_button.use_popover = true;
+                menu_button.image = menu_image;
+                menu_button.menu_model = this.show_images_menu;
+                menu_button.halign = Gtk.Align.END;
+                menu_button.hexpand =true;
+                menu_button.show_all();
+
+                this.remote_images_info_bar.get_action_area().add(menu_button);
+            } else {
+                this.remote_images_info_bar = new Components.InfoBar(
+                    // Translators: Info bar status message
+                    _("Remote images not shown"),
+                    // Translators: Info bar description
+                    _("This message can't be trusted.")
+                );
+                this.remote_images_info_bar.add_button(
+                    // Translators: Info bar button label
+                    _("Show"), 1
+                );
+                this.remote_images_info_bar.response.connect(() => {
+                    show_images(true);
+                });
             }
             this.info_bars.add(this.remote_images_info_bar);
-        }
-    }
-
-    private void on_remote_images_response(Components.InfoBar info_bar, int response_id) {
-        switch (response_id) {
-        case 1:
-            // Show images for the message
-            show_images(true);
-            break;
-        case 2:
-            // Show images for sender
-            show_images(false);
-            if (this.primary_contact != null) {
-                this.primary_contact.set_remote_resource_loading.begin(
-                    true, null
-                );
-            }
-            break;
-        default:
-            this.info_bars.remove(this.remote_images_info_bar);
-            this.remote_images_info_bar = null;
-            break;
         }
     }
 
@@ -1481,6 +1500,30 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                         );
                     }
                 });
+        }
+    }
+
+    private void on_show_images(Variant? param) {
+        show_images(true);
+    }
+
+    private void on_show_images_sender(Variant? param) {
+        show_images(false);
+        if (this.primary_contact != null) {
+            this.primary_contact.set_remote_resource_loading.begin(
+                true, null
+            );
+        }
+    }
+
+    private void on_show_images_domain(Variant? param) {
+        show_images(false);
+        if (this.primary_contact != null) {
+            var email_addresses = this.primary_contact.email_addresses;
+            foreach (Geary.RFC822.MailboxAddress email in email_addresses) {
+                this.config.add_images_trusted_domain(email.domain);
+                break;
+            }
         }
     }
 

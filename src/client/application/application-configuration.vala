@@ -30,6 +30,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
     public const string WINDOW_WIDTH_KEY = "window-width";
+    public const string IMAGES_TRUSTED_DOMAINS = "images-trusted-domains";
 
 
     public enum DesktopEnvironment {
@@ -156,6 +157,16 @@ public class Application.Configuration : Geary.BaseObject {
         settings.bind(key, object, property, flags);
     }
 
+    public void bind_with_mapping(string key, Object object, string property,
+        SettingsBindGetMappingShared get_mapping,
+        SettingsBindSetMappingShared set_mapping,
+        SettingsBindFlags flags = GLib.SettingsBindFlags.DEFAULT) {
+        settings.bind_with_mapping(
+            key, object, property, flags,
+            get_mapping, set_mapping, null, null
+        );
+    }
+
     private void set_boolean(string name, bool value) {
         if (!settings.set_boolean(name, value))
             message("Unable to set configuration value %s = %s", name, value.to_string());
@@ -176,6 +187,34 @@ public class Application.Configuration : Geary.BaseObject {
     /** Sets the saved size of the composer window. */
     public void set_composer_window_size(int[] value) {
         this.settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
+    }
+
+    /** Returns list of trusted domains for which images loading is allowed. */
+    public string[] get_images_trusted_domains() {
+        return this.settings.get_strv(IMAGES_TRUSTED_DOMAINS);
+    }
+
+    /** Sets list of trusted domains for which images loading is allowed. */
+    public void set_images_trusted_domains(string[] value) {
+        this.settings.set_strv(IMAGES_TRUSTED_DOMAINS, value);
+    }
+
+    /** Adds domain to trusted list for which images loading is allowed. */
+    public void add_images_trusted_domain(string domain) {
+        var domains = get_images_trusted_domains();
+        domains += domain;
+        set_images_trusted_domains(domains);
+    }
+
+    /** Removes domain from trusted for which images loading is allowed. */
+    public void remove_images_trusted_domain(string domain) {
+        var domains = get_images_trusted_domains();
+        string[] new_domains = {};
+        foreach (var _domain in domains) {
+            if (domain != _domain)
+                new_domains += _domain;
+        }
+        set_images_trusted_domains(new_domains);
     }
 
     /**
