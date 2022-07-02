@@ -20,6 +20,7 @@
         "--talk-name=org.freedesktop.secrets",
         "--talk-name=org.gnome.Contacts",
         "--talk-name=org.gnome.ControlCenter",
+        "--talk-name=org.gnome.Settings",
         "--talk-name=org.gnome.OnlineAccounts",
         "--talk-name=org.gnome.evolution.dataserver.*",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
