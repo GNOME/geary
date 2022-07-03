@@ -195,6 +195,11 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
 
         if (kinetic) this.conversation_scroller.kinetic_scrolling = true;
+
+        // Set a minimal composer height
+        composer.set_size_request(
+            -1, this.conversation_scroller.get_allocated_height() / 3 * 2
+        );
     }
 
     /**
