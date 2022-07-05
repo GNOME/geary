@@ -16,6 +16,7 @@ StartupNotify=true
 DBusActivatable=true
 Actions=compose;new-window
 X-GNOME-UsesNotifications=true
+X-Purism-FormFactor=Workstation;Mobile;
 
 [Desktop Action compose]
 Name=Compose Message
