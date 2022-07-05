@@ -856,15 +856,27 @@ public class Accounts.Manager : GLib.Object {
         // This method was based on the implementation from:
         // https://gitlab.gnome.org/GNOME/gnome-calendar/blob/master/src/gcal-source-dialog.c,
         // Courtesy Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
-        GLib.DBusProxy settings = yield new GLib.DBusProxy.for_bus(
-            GLib.BusType.SESSION,
-            GLib.DBusProxyFlags.NONE,
-            null,
-            "org.gnome.ControlCenter",
-            "/org/gnome/ControlCenter",
-            "org.gtk.Actions",
-            cancellable
-        );
+        try {
+            GLib.DBusProxy settings = yield new GLib.DBusProxy.for_bus(
+                GLib.BusType.SESSION,
+                GLib.DBusProxyFlags.NONE,
+                null,
+                "org.gnome.Settings",
+                "/org/gnome/Settings",
+                "org.gtk.Actions",
+                cancellable
+            );
+        } catch (GLib.Error) {
+            GLib.DBusProxy settings = yield new GLib.DBusProxy.for_bus(
+                GLib.BusType.SESSION,
+                GLib.DBusProxyFlags.NONE,
+                null,
+                "org.gnome.ControlCenter",
+                "/org/gnome/ControlCenter",
+                "org.gtk.Actions",
+                cancellable
+            );
+        }
 
         // @s "launch-panel"
         // @av [<@(sav) ("online-accounts", [<@s "add">, <@s "google">])>]
