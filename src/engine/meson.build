@@ -205,7 +205,6 @@ engine_vala_sources = files(
   'imap-engine/other/imap-engine-other-folder.vala',
   'imap-engine/outlook/imap-engine-outlook-account.vala',
   'imap-engine/outlook/imap-engine-outlook-folder.vala',
-  'imap-engine/outlook/imap-engine-outlook-drafts-folder.vala',
   'imap-engine/replay-ops/imap-engine-abstract-list-email.vala',
   'imap-engine/replay-ops/imap-engine-copy-email.vala',
   'imap-engine/replay-ops/imap-engine-create-email.vala',
