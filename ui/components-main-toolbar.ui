@@ -92,7 +92,7 @@
                 <child>
                   <object class="GtkImage" id="compose_new_message_image">
                     <property name="visible">True</property>
-                    <property name="icon_name">text-editor-symbolic</property>
+                    <property name="icon_name">mail-message-new-symbolic</property>
                   </object>
                 </child>
               </object>
