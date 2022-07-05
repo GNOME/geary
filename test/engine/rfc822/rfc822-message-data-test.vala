@@ -763,7 +763,7 @@ ttp://p.ebaystatic.com/aw/email/Welcome_Day_0/spacer.gif" width=3D"5" heigh=
 t=3D"1" alt=3D"" border=3D"0" style=3D"display:block; width: 5px !important=
 "></td>
 </tr>
-<![if ! gte mso 9]>
+<!--[if ! gte mso 9]>
 <tr>
 <td style=3D"border-collapse: collapse !important;
 border-spacing: 0; !important; padding: 0"><img src=3D"http://p.ebaystatic.=
@@ -803,7 +803,7 @@ ttp://p.ebaystatic.com/aw/email/Welcome_Day_0/spacer.gif" width=3D"5" heigh=
 t=3D"1" alt=3D"" border=3D"0" style=3D"display:block; width: 5px !important=
 "></td>
 </tr>
-<![if ! gte mso 9]>
+<!--[if ! gte mso 9]>
 <tr>
 <td style=3D"border-collapse: collapse !important;
 border-spacing: 0; !important; padding: 0"><img src=3D"http://p.ebaystatic.=
