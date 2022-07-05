@@ -50,9 +50,6 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
             }
         }
 
-        if (use == DRAFTS)
-            return new OutlookDraftsFolder(this, local_folder);
-
         return new OutlookFolder(this, local_folder, use);
     }
 
