@@ -36,6 +36,11 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
     private const string HEADER_BCC = "Bcc";
+    private const string[] HEADER_AUTH_RESULTS = {
+        "ARC-Authentication-Results",
+        "Authentication-Results",
+        "X-Original-Authentication-Results"
+    };
 
     /** Options to use when serialising a message in RFC 822 format. */
     [Flags]
@@ -108,6 +113,14 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
     public Date? date { get { return this._date; } }
     private Date? _date = null;
 
+    /**
+     * {@inheritDoc}
+     *
+     * Value will be valid if {@link Field.AUTH_RESULTS} is set.
+     */
+    public RFC822.AuthenticationResults? auth_results { get { return this._auth_results; } }
+    private RFC822.AuthenticationResults? _auth_results = null;
+
     /** Value of the X-Mailer header. */
     public string? mailer { get; protected set; default = null; }
 
@@ -158,6 +171,14 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
         var message_id = message.get_message_id();
         if (message_id != null) {
             this._message_id = new MessageID(message_id);
+        }
+
+        foreach (string field in HEADER_AUTH_RESULTS) {
+            var auth_results = message.get_header(field);
+            if (auth_results != null) {
+                this._auth_results = new AuthenticationResults(auth_results);
+                break;
+            }
         }
 
         // Since these headers may be specified multiple times, we

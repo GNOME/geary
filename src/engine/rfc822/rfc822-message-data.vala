@@ -619,3 +619,25 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
     }
 
 }
+
+public class Geary.RFC822.AuthenticationResults :
+    Geary.MessageData.StringMessageData {
+
+    public AuthenticationResults(string value) {
+        base(value);
+    }
+
+    /**
+     * Returns the authentication result for dkim.
+     */
+    public bool is_dkim_valid() {
+        return /^.*;[ ]*dkim=pass.*$/i.match(this.value);
+    }
+
+     /**
+     * Returns the authentication result for dmarc.
+     */
+    public bool is_dmarc_valid() {
+        return /^.*;[ ]*dmarc=pass.*$/i.match(this.value);
+    }
+}
