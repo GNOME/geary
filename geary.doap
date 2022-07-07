@@ -22,9 +22,16 @@ interface.</description>
 
   <maintainer>
     <foaf:Person>
-      <foaf:name>Michael Gratton</foaf:name>
-      <foaf:mbox rdf:resource="mailto:mike@vee.net"/>
-      <gnome:userid>mjog</gnome:userid>
+      <foaf:name>Cédric Bellegarde</foaf:name>
+      <foaf:mbox rdf:resource="mailto:cedric.bellegarde@adishatz.org"/>
+      <gnome:userid>cbellegarde</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Niels De Graef</foaf:name>
+      <foaf:mbox rdf:resource="mailto:nielsdegraef@gmail.com"/>
+      <gnome:userid>nielsdg</gnome:userid>
     </foaf:Person>
   </maintainer>
 
