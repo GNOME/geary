@@ -631,13 +631,13 @@ public class Geary.RFC822.AuthenticationResults :
      * Returns the authentication result for dkim.
      */
     public bool is_dkim_valid() {
-        return /^.*;[ ]*dkim=pass.*$/i.match(this.value);
+        return /^.*dkim=pass.*$/i.match(this.value);
     }
 
      /**
      * Returns the authentication result for dmarc.
      */
     public bool is_dmarc_valid() {
-        return /^.*;[ ]*dmarc=pass.*$/i.match(this.value);
+        return /^.*dmarc=pass.*$/i.match(this.value);
     }
 }
