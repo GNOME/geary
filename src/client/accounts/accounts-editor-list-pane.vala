@@ -11,6 +11,12 @@
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_list_pane.ui")]
 internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
+    private static Geary.ServiceProvider[] SERVICE_PROVIDERS = {
+        Geary.ServiceProvider.GMAIL,
+        Geary.ServiceProvider.OUTLOOK,
+        Geary.ServiceProvider.YAHOO,
+        Geary.ServiceProvider.OTHER
+    };
 
     private static int ordinal_sort(Gtk.ListBoxRow a, Gtk.ListBoxRow b) {
         AccountListRow? account_a = a as AccountListRow;
@@ -98,10 +104,19 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         }
 
         this.service_list.set_header_func(Editor.seperator_headers);
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.GMAIL));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.OUTLOOK));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.YAHOO));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.OTHER));
+        foreach (var service_provider in SERVICE_PROVIDERS) {
+            var service_provider_row = new AddServiceProviderRow(service_provider);
+            this.service_list.add(service_provider_row);
+            service_provider_row.goa_missing.connect (() => {
+                this.editor.add_notification(
+                        new Components.InAppNotification(
+                            // Translators: In-app notification label, when
+                            // GNOME Online Accounts are missing
+                            _("Online accounts are missing")
+                        )
+                    );
+            });
+        }
 
         this.accounts.account_added.connect(on_account_added);
         this.accounts.account_status_changed.connect(on_account_status_changed);
@@ -434,6 +449,7 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
         "go-next-symbolic", Gtk.IconSize.SMALL_TOOLBAR
     );
 
+    public signal void goa_missing();
 
     public AddServiceProviderRow(Geary.ServiceProvider provider) {
         this.provider = provider;
@@ -481,7 +497,14 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
                 } catch (GLib.Error err) {
                     debug("Failed to add %s via GOA: %s",
                           this.provider.to_string(), err.message);
-                    add_local = true;
+                    switch (this.provider) {
+                    case Geary.ServiceProvider.GMAIL:
+                        this.goa_missing();
+                        break;
+                    default:
+                        add_local = true;
+                        break;
+                    }
                 }
 
                 if (add_local) {
