@@ -87,14 +87,6 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         Gtk.ListStore model = (Gtk.ListStore) this.model;
         string completion_key = this.current_key;
         if (!Geary.String.is_empty_or_whitespace(completion_key)) {
-            // Append a placeholder row here if the model is empty to
-            // work around the issue descried in
-            // https://gitlab.gnome.org/GNOME/gtk/merge_requests/939
-            Gtk.TreeIter iter;
-            if (!model.get_iter_first(out iter)) {
-                model.append(out iter);
-            }
-
             this.search_cancellable = new GLib.Cancellable();
             this.search_contacts.begin(completion_key, this.search_cancellable);
         } else {
