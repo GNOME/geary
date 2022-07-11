@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-04-07 17:27+0000\n"
-"PO-Revision-Date: 2022-05-24 15:32+0100\n"
+"POT-Creation-Date: 2022-07-10 11:17+0000\n"
+"PO-Revision-Date: 2022-07-11 16:09+0100\n"
 "Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Language-Team: Portuguese (https://l10n.gnome.org/teams/pt/)\n"
 "Language: pt\n"
@@ -25,11 +25,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
-msgstr "Enviar por email"
+msgstr "Enviar por e-mail"
 
 #: desktop/geary-attach.contract.desktop.in:6
 msgid "Send files using Geary"
@@ -131,11 +131,11 @@ msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
 "Mail;E-mail;Correio;Correio Eletrónico;IMAP;Gmail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Escrever mensagem"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Nova janela"
 
@@ -278,10 +278,18 @@ msgid "The last recorded size of the detached composer window."
 msgstr "O último tamanho registado da janela do compositor destacada."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Permitir imagens para estes domínios"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "As imagens destes domínios serão de confiança"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Desfazer atraso de envio de e-mail"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -289,11 +297,11 @@ msgstr ""
 "O número de segundos a aguardar antes de enviar um e-mail. Defina para zero "
 "ou menos para desativar."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Tempo de exibição de notificação breve"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
@@ -301,19 +309,19 @@ msgstr ""
 "A duração de tempo, em segundos, pelo qual as notificações breves devem ser "
 "exibidas."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Lista de plugins opcionais"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Plugins listados aqui serão carregados no arranque."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Se migramos as definições antigas"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -962,10 +970,10 @@ msgstr "Sobre o %s"
 msgid "translator-credits"
 msgstr ""
 "Sérgio Marques <smarquespt@gmail.com>\n"
+"Hugo Carvalho <hugokarvalho@hotmail.com>\n"
 "Pedro Albuquerque <palbuquerque73@gmail.com>\n"
 "Tiago Santos <tiagofsantos81@sapo.pt>\n"
-"João Nuno Matos <joaonmatos@gmail.com>\n"
-"Hugo Carvalho <hugokarvalho@hotmail.com>"
+"João Nuno Matos <joaonmatos@gmail.com>"
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
@@ -1429,13 +1437,18 @@ msgstr "Procurar novas mensagens quando o Geary está fechado"
 msgid "Geary will keep running after all windows are closed"
 msgstr "O Geary vai continuar a correr quando todas as janelas foram fechadas"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "Carregar _sempre imagens"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Preferências"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Extensões"
 
@@ -1893,14 +1906,14 @@ msgstr "Data:"
 msgid "Subject:"
 msgstr "Assunto:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Este endereço poderá ter sido forjado"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Mostrar menos"
 
@@ -1908,7 +1921,7 @@ msgstr "Mostrar menos"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1919,47 +1932,48 @@ msgstr[1] "%d mais…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Sem remetente"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Imagem"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(desconhecido)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Imagens remotas não estão a ser mostradas"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Apenas veja imagens remotas de remetentes de confiança."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "Mostrar"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Não se pode confiar nesta mensagem."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Mostrar sempre do remetente"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Mostrar"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2794,18 +2808,18 @@ msgstr "Eliminar itens"
 msgid "Archive | Archives"
 msgstr "Arquivos | Arquivos"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Não foi possível determinar o tipo mime para “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "Não foi possível determinar o tipo de conteúdo para o tipo mime “%s” em “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(sem assunto)"
 
@@ -3335,27 +3349,43 @@ msgstr ""
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
-msgstr "Abrir Ligação"
+msgstr "Abrir ligação"
 
 #: ui/conversation-message-menus.ui:11
 msgid "Copy Link _Address"
-msgstr "Copiar Endereço da Ligação"
+msgstr "Copiar endereço da ligação"
 
 #: ui/conversation-message-menus.ui:17
 msgid "_New Conversation…"
-msgstr "Nova Conversa…"
+msgstr "Nova conversa…"
 
 #: ui/conversation-message-menus.ui:21
 msgid "Copy Email _Address"
-msgstr "Copiar Endereço Eletrónico"
+msgstr "Copiar endereço eletrónico"
 
 #: ui/conversation-message-menus.ui:27
 msgid "Save _Image As…"
-msgstr "Guardar Imagem Como…"
+msgstr "Guardar imagem como…"
 
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
-msgstr "Selecionar Tudo"
+msgstr "Selecionar tudo"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Mostrar imagens"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Para esta mensagem"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Para este remetente"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Para este domínio"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3367,7 +3397,7 @@ msgstr "1/1/1970\t"
 
 #: ui/conversation-message.ui:91
 msgid "Preview body text."
-msgstr "Amostra do corpo da mensagem."
+msgstr "Pré-visualizar o corpo da mensagem."
 
 #: ui/conversation-message.ui:182
 msgid "Sent by:"
@@ -3520,17 +3550,17 @@ msgstr "Vista"
 #: ui/gtk/help-overlay.ui:164
 msgctxt "shortcut window"
 msgid "Zoom in"
-msgstr "Aumentar o zoom"
+msgstr "Aumentar"
 
 #: ui/gtk/help-overlay.ui:171
 msgctxt "shortcut window"
 msgid "Zoom out"
-msgstr "Diminuir o zoom"
+msgstr "Diminuir"
 
 #: ui/gtk/help-overlay.ui:178
 msgctxt "shortcut window"
 msgid "Reset zoom"
-msgstr "Repor o zoom"
+msgstr "Repor ampliação"
 
 #: ui/gtk/help-overlay.ui:190
 msgid "Composer Shortcuts"
@@ -3653,7 +3683,7 @@ msgstr "Mostrar a ajuda"
 #: ui/gtk/help-overlay.ui:361
 msgctxt "shortcut window"
 msgid "Show keyboard shortcuts"
-msgstr "Mostrar os atalhos de teclado"
+msgstr "Mostrar as teclas de atalho"
 
 #: ui/gtk/help-overlay.ui:368
 msgctxt "shortcut window"
@@ -3729,6 +3759,9 @@ msgstr "Memorizar palavra-passe"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "Autenticar"
+
+#~ msgid "Always show from sender"
+#~ msgstr "Mostrar sempre do remetente"
 
 #~ msgid "Position of folder list pane"
 #~ msgstr "Posição do painel da lista de pastas"
