@@ -120,7 +120,6 @@
                 "-DENABLE_CANBERRA=OFF",
                 "-DENABLE_EXAMPLES=OFF",
                 "-DENABLE_GOA=ON",
-                "-DENABLE_GOOGLE=OFF",
                 "-DENABLE_GTK=ON",
                 "-DENABLE_GTK_DOC=OFF",
                 "-DENABLE_INSTALLED_TESTS=OFF",
@@ -133,8 +132,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git",
-                    "branch": "a4e8d81239ba9168a7b42e87b29ec65243d52e64"
+                    "url": "https://gitlab.gnome.org/GNOME/evolution-data-server.git"
                 }
             ],
             "cleanup": [

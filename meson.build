@@ -67,7 +67,7 @@ glib = dependency('glib-2.0', version: '>=' + target_glib)
 gmime = dependency('gmime-3.0', version: '>= 3.2.4')
 gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
 sqlite = dependency('sqlite3', version: '>= 3.24')
-webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
+webkit2gtk = dependency('webkit2gtk-4.1', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 # We need appdata.its from appstream-glib:
@@ -87,7 +87,7 @@ gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
-javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
+javascriptcoregtk = dependency('javascriptcoregtk-4.1', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
 libhandy = dependency('libhandy-1', version: '>= 1.2.1', required: false)
 libmath = cc.find_library('m')
@@ -103,7 +103,7 @@ libunwind_generic_dep = dependency(
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef'))
 posix = valac.find_library('posix')
-webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
+webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.1', version: '>=' + target_webkit)
 
 # System dependencies above ensures appropriate versions for the
 # following libraries, but the declared dependency is what we actually
