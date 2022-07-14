@@ -181,6 +181,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         this.body_container.add(this.body);
 
         this.click_gesture = new Gtk.GestureMultiPress(this.body);
+        this.click_gesture.propagation_phase = CAPTURE;
         this.click_gesture.pressed.connect(this.on_button_press);
         this.click_gesture.released.connect(this.on_button_release);
 
