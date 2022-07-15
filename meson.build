@@ -119,7 +119,7 @@ icu_uc = declare_dependency(
 if libunwind_dep.found()
   # We need to add native lib to the search path for these so Flatpak
   # builds can find it.
-  unwind_lib = libunwind_dep.get_pkgconfig_variable('libdir')
+  unwind_lib = libunwind_dep.get_variable(pkgconfig: 'libdir')
   libunwind = declare_dependency(
      dependencies: [
        valac.find_library('libunwind', dirs: [vapi_dir, unwind_lib]),
@@ -207,7 +207,7 @@ vala_unit_dep = vala_unit_proj.get_variable('vala_unit_dep')
 
 # Language detection
 
-iso_codes_dir = iso_codes.get_pkgconfig_variable('prefix')/'share'/'xml'/'iso-codes'
+iso_codes_dir = iso_codes.get_variable(pkgconfig: 'prefix')/'share'/'xml'/'iso-codes'
 
 iso_639_xml = get_option('iso_639_xml')
 if iso_639_xml == ''

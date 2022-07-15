@@ -10,7 +10,7 @@ if libmessagingmenu_dep.found()
   # Vala libs manually
   messaging_menu_dependencies += declare_dependency(
     include_directories: include_directories(
-      libmessagingmenu_dep.get_pkgconfig_variable('includedir')
+      libmessagingmenu_dep.get_variable(pkgconfig: 'includedir')
     ),
     dependencies: [
       valac.find_library('MessagingMenu-1.0', dirs: [ '/usr/share/vala/vapi' ]),
