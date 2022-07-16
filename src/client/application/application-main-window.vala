@@ -27,7 +27,6 @@ public class Application.MainWindow :
     public const string ACTION_SEARCH = "search";
     public const string ACTION_SELECT_INBOX = "select-inbox";
     public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
-    public const string ACTION_SHOW_MARK_MENU = "show-mark-menu";
     public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
     public const string ACTION_TOGGLE_JUNK = "toggle-conversation-junk";
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
@@ -61,7 +60,6 @@ public class Application.MainWindow :
         { ACTION_CONVERSATION_UP, on_conversation_up },
         { ACTION_CONVERSATION_DOWN, on_conversation_down },
         // Message marking actions
-        { ACTION_SHOW_MARK_MENU, on_show_mark_menu },
         { ACTION_MARK_AS_READ, on_mark_as_read },
         { ACTION_MARK_AS_UNREAD, on_mark_as_unread },
         { ACTION_MARK_AS_STARRED, on_mark_as_starred },
@@ -673,6 +671,10 @@ public class Application.MainWindow :
         this.cert_problem_infobar.get_action_area().add(cert_retry);
 
         this.conversation_list_view.grab_focus();
+
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.mark_message_button_toggled.connect(on_show_mark_menu);
+        }
     }
 
     ~MainWindow() {
@@ -1399,10 +1401,9 @@ public class Application.MainWindow :
 
         this.folder_conversation_actions = {
             this.main_toolbar.full_actions,
-            this.main_toolbar.compact_actions,
             this.conversation_list_actions
         };
-        foreach (var actions in folder_conversation_actions) {
+        foreach (var actions in this.folder_conversation_actions) {
             var move = actions.move_folder_menu;
             this.folder_popovers += move;
             move.folder_selected.connect(on_move_conversation);
@@ -1827,7 +1828,7 @@ public class Application.MainWindow :
         get_window_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
 
         bool move_enabled = (
-            sensitive && (selected_folder is Geary.FolderSupport.Move)
+            sensitive && (this.selected_folder is Geary.FolderSupport.Move)
         );
         get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
         foreach (var actions in this.folder_conversation_actions) {
@@ -1835,21 +1836,28 @@ public class Application.MainWindow :
         }
 
         bool copy_enabled = (
-            sensitive && (selected_folder is Geary.FolderSupport.Copy)
+            sensitive && (this.selected_folder is Geary.FolderSupport.Copy)
         );
         get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
         foreach (var actions in this.folder_conversation_actions) {
             actions.set_copy_sensitive(copy_enabled);
         }
 
+        bool mark_enabled = (
+            sensitive && (this.selected_folder is Geary.FolderSupport.Mark)
+        );
+        foreach (var actions in this.folder_conversation_actions) {
+            actions.set_mark_sensitive(mark_enabled);
+        }
+
         get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(
-            sensitive && (selected_folder is Geary.FolderSupport.Archive)
+            sensitive && (this.selected_folder is Geary.FolderSupport.Archive)
         );
         get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(
             sensitive && this.selected_folder_supports_trash
         );
         get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(
-            sensitive && (selected_folder is Geary.FolderSupport.Remove)
+            sensitive && (this.selected_folder is Geary.FolderSupport.Remove)
         );
 
         switch (count) {
@@ -1876,7 +1884,6 @@ public class Application.MainWindow :
         );
         this.conversation_list_actions.update_trash_button(show_trash);
         this.main_toolbar.full_actions.update_trash_button(show_trash);
-        this.main_toolbar.compact_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
@@ -1915,10 +1922,6 @@ public class Application.MainWindow :
                 supported_operations.add_all(selected_operations.get_values());
             }
 
-            get_window_action(ACTION_SHOW_MARK_MENU).set_enabled(
-                sensitive &&
-                (typeof(Geary.FolderSupport.Mark) in supported_operations)
-            );
             get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))

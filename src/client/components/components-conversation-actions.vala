@@ -60,6 +60,11 @@ public class Components.ConversationActions : Gtk.Box {
         this.copy_message_button.popover = copy_folder_menu;
         this.move_message_button.popover = move_folder_menu;
 
+        this.mark_message_button.toggled.connect((button) => {
+            if (button.active)
+                mark_message_button_toggled();
+        });
+
         this.response_buttons.set_visible(this.show_response_actions);
         this.mark_copy_move_buttons.set_visible(this.show_conversation_actions);
         this.archive_trash_delete_buttons.set_visible(this.show_conversation_actions);
@@ -82,6 +87,10 @@ public class Components.ConversationActions : Gtk.Box {
         this.copy_message_button.sensitive = is_sensitive;
     }
 
+    public void set_mark_sensitive(bool is_sensitive) {
+        this.mark_message_button.sensitive = is_sensitive;
+    }
+
     public void show_copy_menu() {
         this.copy_message_button.clicked();
     }
@@ -90,6 +99,9 @@ public class Components.ConversationActions : Gtk.Box {
         this.show_trash_button = show_trash;
         update_conversation_buttons();
     }
+
+    /** Fired when the user toggles the mark message button. */
+    public signal void mark_message_button_toggled();
 
     /** Updates tooltip text depending on number of conversations selected. */
     private void update_conversation_buttons() {
