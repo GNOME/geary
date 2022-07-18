@@ -68,12 +68,21 @@ revealer components-conversation-actions {
 
 /* FolderPopover */
 
+.geary-folder-popover-list {
+    border: 1px solid @borders;
+    border-radius: 3px;
+    padding: 0px;
+}
+
 row.geary-folder-popover-list-row {
   padding: 6px;
-  border-color: @borders;
-  border-style: groove;
-  border-bottom-width: 1px;
+  border-bottom: 1px solid @borders;
 }
+
+row.geary-folder-popover-list-row:last-child {
+  border-bottom: none;
+}
+
 row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }

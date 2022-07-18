@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <template class="FolderPopoverRow" parent="GtkListBoxRow">
+    <child>
+      <object class="GtkBox" id="container">
+        <property name="visible">True</property>
+        <property name="margin_start">6</property>
+        <property name="margin_end">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
+        <property name="orientation">horizontal</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkImage" id="image">
+            <property name="visible">True</property>
+            <property name="halign">start</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label">
+            <property name="visible">True</property>
+            <property name="halign">start</property>
+            <property name="hexpand">True</property>
+            <property name="has_tooltip">True</property>
+            <property name="ellipsize">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <style>
+      <class name="geary-folder-popover-list-row"/>
+    </style>
+  </template>
+</interface>

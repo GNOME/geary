@@ -46,6 +46,17 @@ public class Application.FolderContext : Geary.BaseObject,
         return this.folder.path.compare_to(other.folder.path);
     }
 
+    private string get_default_icon_name() {
+        var service_provider = this.folder.account.information.service_provider;
+
+        switch (service_provider) {
+        case Geary.ServiceProvider.GMAIL:
+            return "tag-symbolic";
+        default:
+            return "folder-symbolic";
+        }
+    }
+
     private void update() {
         this.display_name = Util.I18n.to_folder_display_name(this.folder);
 
@@ -88,7 +99,7 @@ public class Application.FolderContext : Geary.BaseObject,
             break;
 
         default:
-            this.icon_name = "tag-symbolic";
+            this.icon_name = get_default_icon_name();
             break;
         }
 

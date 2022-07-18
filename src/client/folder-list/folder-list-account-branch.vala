@@ -43,7 +43,18 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         // Translators: The name of the folder group containing
         // folders created by people (as opposed to special-use
         // folders)
-        user_folder_group = new SpecialGrouping(2, _("Labels"), "tag-symbolic");
+        string name, icon_name;
+        switch (account.information.service_provider) {
+        case Geary.ServiceProvider.GMAIL:
+            name = _("Labels");
+            icon_name = "tag-symbolic";
+            break;
+        default:
+            name = _("Folders");
+            icon_name = "folder-symbolic";
+            break;
+        }
+        user_folder_group = new SpecialGrouping(2, name, icon_name);
         folder_entries = new Gee.HashMap<Geary.FolderPath, FolderEntry>();
 
         this.display_name = account.information.display_name;

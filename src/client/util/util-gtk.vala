@@ -227,4 +227,13 @@ namespace Util.Gtk {
         };
     }
 
+    /* Connect this to Gtk.Widget.query_tooltip signal, will only show tooltip if label ellipsized */
+    public bool query_tooltip_label(global::Gtk.Widget widget, int x, int y, bool keyboard, global::Gtk.Tooltip tooltip) {
+        global::Gtk.Label label = widget as global::Gtk.Label;
+        if (label.get_layout().is_ellipsized()) {
+            tooltip.set_markup(label.label);
+            return true;
+        }
+        return false;
+    }
 }

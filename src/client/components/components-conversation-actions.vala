@@ -24,6 +24,8 @@ public class Components.ConversationActions : Gtk.Box {
 
     public int selected_conversations { get; set; }
 
+    public Geary.ServiceProvider service_provider { get; set; }
+
     [GtkChild] private unowned Gtk.Box response_buttons { get; }
 
     [GtkChild] private unowned Gtk.Box mark_copy_move_buttons { get; }
@@ -56,6 +58,7 @@ public class Components.ConversationActions : Gtk.Box {
         );
 
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
+        this.notify["service-provider"].connect(() => update_conversation_buttons());
         this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
         this.copy_message_button.popover = copy_folder_menu;
         this.move_message_button.popover = move_folder_menu;
@@ -110,11 +113,7 @@ public class Components.ConversationActions : Gtk.Box {
             "Mark conversations",
             this.selected_conversations
             );
-        this.copy_message_button.tooltip_text = ngettext(
-            "Add label to conversation",
-            "Add label to conversations",
-            this.selected_conversations
-            );
+
         this.move_message_button.tooltip_text = ngettext(
             "Move conversation",
             "Move conversations",
@@ -125,6 +124,33 @@ public class Components.ConversationActions : Gtk.Box {
             "Archive conversations",
             this.selected_conversations
             );
+
+        var copy_icon_name = "edit-copy-symbolic";
+        var move_icon_name = "edit-cut-symbolic";
+        switch (this.service_provider) {
+        case Geary.ServiceProvider.GMAIL:
+            this.copy_message_button.tooltip_text = ngettext(
+                "Add label to conversation",
+                "Add label to conversations",
+                this.selected_conversations
+                );
+            copy_icon_name = "tag-symbolic";
+            move_icon_name = "folder-symbolic";
+            break;
+        default:
+            this.copy_message_button.tooltip_text = ngettext(
+                "Copy conversation",
+                "Copy conversations",
+                this.selected_conversations
+                );
+            break;
+        }
+        this.copy_message_button.set_image(
+            new Gtk.Image.from_icon_name(copy_icon_name, Gtk.IconSize.BUTTON)
+        );
+        this.move_message_button.set_image(
+            new Gtk.Image.from_icon_name(move_icon_name, Gtk.IconSize.BUTTON)
+        );
 
         if (this.show_trash_button) {
             this.trash_delete_button.action_name = Action.Window.prefix(

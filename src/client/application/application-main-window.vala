@@ -1179,11 +1179,23 @@ public class Application.MainWindow :
 
     /** Adds a folder to the window. */
     private void add_folders(Gee.Collection<FolderContext> to_add) {
+        // Build map between path and display name for
+        // special directories
+        var map = new Gee.HashMap<string,string>();
+        foreach (var context in to_add) {
+            var folder = context.folder;
+            if (folder.used_as == Geary.Folder.SpecialUse.NONE)
+                continue;
+            map.set(
+                folder.path.to_string().substring(1),
+                context.display_name
+            );
+        }
         foreach (var context in to_add) {
             this.folder_list.add_folder(context);
             if (context.folder.account == this.selected_account) {
                 foreach (var menu in this.folder_popovers) {
-                    menu.add_folder(context.folder);
+                    menu.add_folder(context, map);
                 }
             }
             context.folder.use_changed.connect(on_use_changed);
@@ -1588,9 +1600,28 @@ public class Application.MainWindow :
             this.search_bar.set_account(account);
 
             if (account != null) {
+                var service_provider = account.information.service_provider;
+                this.conversation_list_actions.service_provider = service_provider;
+                this.main_toolbar.full_actions.service_provider = service_provider;
+                this.main_toolbar.compact_actions.service_provider = service_provider;
+
                 foreach (var menu in this.folder_popovers) {
-                    foreach (var folder in account.list_folders()) {
-                        menu.add_folder(folder);
+                    var folders = account.list_folders();
+                    // Build map between path and display name for
+                    // special directories
+                    var map = new Gee.HashMap<string,string>();
+                    foreach (var folder in folders) {
+                        var context = new Application.FolderContext(folder);
+                        if (folder.used_as == Geary.Folder.SpecialUse.NONE)
+                            continue;
+                        map.set(
+                            folder.path.to_string().substring(1),
+                            context.display_name
+                        );
+                    }
+                    foreach (var folder in folders) {
+                        var context = new Application.FolderContext(folder);
+                        menu.add_folder(context, map);
                     }
                 }
             }
