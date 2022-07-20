@@ -455,7 +455,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     Application.Configuration config,
                     Application.AccountContext initial_account,
                     Geary.Folder? save_to = null) {
-        components_reflow_box_get_type();
         base_ref();
         this.application = application;
         this.config = config;

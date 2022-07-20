@@ -6,9 +6,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-[CCode (cname = "components_reflow_box_get_type")]
-private extern Type components_reflow_box_get_type();
-
 /**
  * A widget for editing the body of an email message.
  */
@@ -155,7 +152,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
 
     internal Editor(Application.Configuration config) {
         base_ref();
-        components_reflow_box_get_type();
         this.config = config;
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
