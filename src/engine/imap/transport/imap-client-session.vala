@@ -108,6 +108,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     }
 
     public enum DisconnectReason {
+        NULL,
         LOCAL_CLOSE,
         LOCAL_ERROR,
         REMOTE_CLOSE,
@@ -277,7 +278,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     }
 
     /** Specifies the reason the session was disconnected, if any. */
-    public DisconnectReason? disconnected { get; private set; default = null; }
+    public DisconnectReason disconnected { get; private set; default = NULL; }
 
     /**
      * Set of IMAP extensions reported as being supported by the server.
