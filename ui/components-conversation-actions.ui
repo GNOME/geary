@@ -90,7 +90,7 @@
             <child>
               <object class="GtkImage" id="mark_message_image">
                 <property name="visible">True</property>
-                <property name="icon_name">marker-symbolic</property>
+                <property name="icon_name">checkbox-checked-symbolic</property>
               </object>
             </child>
           </object>

@@ -1,57 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="16px"
+   viewBox="0 0 16 16"
+   width="16px"
    version="1.1"
-   width="16"
-   height="16"
-   id="svg7384"
+   id="svg8"
    sodipodi:docname="mail-archive-symbolic.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1191"
-     inkscape:window-height="650"
-     id="namedview10"
-     showgrid="false"
-     inkscape:zoom="14.75"
-     inkscape:cx="3.5254237"
-     inkscape:cy="7.4576271"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg7384" />
-  <title
-     id="title9167">Gnome Symbolic Icon Theme</title>
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs9" />
-  <metadata
-     id="metadata90">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>Gnome Symbolic Icon Theme</dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <path
-     inkscape:connector-curvature="0"
-     style="display:inline;fill:#bebebe;fill-opacity:1;fill-rule:nonzero;stroke:none;enable-background:new"
-     d="M 4,1 C 3,1 3,2 3,2 H 13 C 13,2 13,1 12,1 Z M 3,3 C 2.02773,3 2,4 2,4 H 14 C 14,4 14,3 13,3 Z M 2,5 A 1.0001,1.0001 0 0 0 1,6 v 9 a 1.0001,1.0001 0 0 0 1,1 h 12 a 1.0001,1.0001 0 0 0 1,-1 V 6 A 1.0001,1.0001 0 0 0 14,5 Z m 2.60156,2 h 6.79883 L 8,9.71875 Z M 3,8.277344 l 5,4.001953 5,-4 V 14 H 3 Z"
-     id="path8812-7" />
+     id="defs12" />
+  <sodipodi:namedview
+     id="namedview10"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="5.9296875"
+     inkscape:cx="20.068511"
+     inkscape:cy="20.827404"
+     inkscape:window-width="1920"
+     inkscape:window-height="1043"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g6" />
+  <g
+     fill="#2e3436"
+     id="g6">
+    <path
+       d="M 1.800781,4.965531 C 1.542969,5.016312 1.316406,5.172562 1.167969,5.391312 0.863281,5.85225 0.984375,6.473344 1.445312,6.778031 l 5.167969,3.445313 c 0.835938,0.558594 1.9375,0.558594 2.773438,0 L 14.554688,6.778031 C 15.015625,6.473344 15.136719,5.85225 14.832031,5.391312 14.527344,4.930375 13.90625,4.809281 13.445312,5.113969 L 8.277344,8.559281 c -0.171875,0.113281 -0.382813,0.113281 -0.554688,0 L 2.554688,5.113969 C 2.332031,4.965531 2.0625,4.91475 1.800781,4.965531 Z m 0,0"
+       id="path2"
+       style="stroke-width:1" />
+    <path
+       d="m 3,3.946 c -1.644531,0 -3,1.355469 -3,3 v 6 c 0,1.644531 1.355469,3 3,3 h 10 c 1.644531,0 3,-1.355469 3,-3 v -6 c 0,-1.644531 -1.355469,-3 -3,-3 z m 0,2 h 10 c 0.570312,0 1,0.429688 1,1 v 6 c 0,0.570312 -0.429688,1 -1,1 H 3 c -0.570312,0 -1,-0.429688 -1,-1 v -6 c 0,-0.570312 0.429688,-1 1,-1 z m 0,0"
+       id="path4"
+       style="stroke-width:1" />
+    <rect
+       style="fill:#2e3436;fill-opacity:1;stroke-width:0.925071"
+       id="rect591"
+       width="10.646218"
+       height="1.1976285"
+       x="2.6768909"
+       y="1.895"
+       ry="0.59881425" />
+    <rect
+       style="fill:#2e3436;fill-opacity:1;stroke-width:0.810551"
+       id="rect591-3"
+       width="8.17346"
+       height="1.1976285"
+       x="3.91327"
+       y="0"
+       ry="0.59881425" />
+  </g>
 </svg>
