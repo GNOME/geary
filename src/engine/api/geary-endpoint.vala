@@ -66,11 +66,6 @@ public class Geary.Endpoint : BaseObject {
     /** Transport security method to use when connecting. */
     public TlsNegotiationMethod tls_method { get; private set; }
 
-    /** Transport security certificate validation requirements. */
-    public TlsCertificateFlags tls_validation_flags {
-        get; set; default = TlsCertificateFlags.VALIDATE_ALL;
-    }
-
     /**
      * When set, TLS has reported certificate issues.
      *
@@ -172,7 +167,6 @@ public class Geary.Endpoint : BaseObject {
 
         if (this.tls_method == TlsNegotiationMethod.TRANSPORT) {
             socket_client.set_tls(true);
-            socket_client.set_tls_validation_flags(tls_validation_flags);
             socket_client.event.connect(on_socket_client_event);
         }
 
@@ -185,7 +179,6 @@ public class Geary.Endpoint : BaseObject {
         // Setting this on Ubuntu 18.04 breaks some TLS
         // connections. See issue #217.
         // tls_cx.server_identity = this.remote;
-        tls_cx.validation_flags = this.tls_validation_flags;
         if (Endpoint.default_tls_database != null) {
             tls_cx.set_database(Endpoint.default_tls_database);
         }
