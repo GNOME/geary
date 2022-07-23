@@ -11,7 +11,7 @@
 # joachimj <joachim.j@gmail.com>, 2013
 # TommyBrunn <tommy.brunn@gmail.com>, 2012
 # Mattias Eriksson <snaggen@gmail.com>, 2014, 2015.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2016, 2018, 2019, 2020, 2021.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2016, 2018, 2019, 2020, 2021, 2022.
 # Josef Andersson <l10nl18nsweja@gmail.com>, 2016, 2017, 2018.
 # Luna Jernberg <droidbittin@gmail.com>, 2020.
 #
@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-15 12:19+0000\n"
-"PO-Revision-Date: 2021-05-15 15:45+0200\n"
+"POT-Creation-Date: 2022-07-08 20:23+0000\n"
+"PO-Revision-Date: 2022-07-09 09:32+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -131,11 +131,11 @@ msgstr "Geary visande rich text-redigeraren"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "E-post;Epost;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Skriv meddelande"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Nytt fönster"
 
@@ -275,10 +275,18 @@ msgstr ""
 "Den senast lagrade storleken för det frikopplade textinmatningsfönstret."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Tillåt bilder för dessa domäner"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Kommer lita på bilder från dessa domäner"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Fördröjning för att kunna ångra sändande av e-post"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -286,29 +294,29 @@ msgstr ""
 "Antalet sekunder att vänta innan ett e-postmeddelande skickas. Ställ in till "
 "noll eller mindre för att inaktivera."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Visningstid för korta aviseringar"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Längden i sekunder som korta aviseringar ska visas."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Lista över valfria insticksmoduler"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Insticksmoduler som listas här kommer läsas in vid uppstart."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Huruvida de gamla inställningarna migrerades"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -1430,13 +1438,18 @@ msgstr "_Kontrollera om det finns ny e-post vid avslut"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary kommer att fortsätta köra efter att alla fönster stängts"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "Läs _alltid in bilder"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Inställningar"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Insticksmoduler"
 
@@ -1894,14 +1907,14 @@ msgstr "Datum:"
 msgid "Subject:"
 msgstr "Ämne:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "E-postadressen kan ha förfalskats"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Visa mindre"
 
@@ -1909,7 +1922,7 @@ msgstr "Visa mindre"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1920,47 +1933,48 @@ msgstr[1] "%d till…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Ingen avsändare"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Bild"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(okänd)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Fjärrbilder visas inte"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Visa endast fjärrbilder från avsändare du litar på."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "Visa"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Kan inte lita på detta meddelande."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Visa alltid från avsändare"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Visa"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2789,17 +2803,17 @@ msgstr "Borttaget"
 msgid "Archive | Archives"
 msgstr "Arkiv | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Kunde inte avgöra mimetyp för ”%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Kunde inte avgöra innehållstyp för mimetypen ”%s” på ”%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(inget ämne)"
 
@@ -3136,9 +3150,9 @@ msgid ""
 "ReportingABug\">new bug report</a>."
 msgstr ""
 "Om problemet är allvarligt eller kvarstår, spara och skicka dessa detaljer "
-"till en av <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
-"\">kontaktvägarna</a> eller bifoga dem till en <a href=\"https://wiki.gnome."
-"org/Apps/Geary/ReportingABug\">ny felrapport</a>."
+"till en av <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"Contact\">kontaktvägarna</a> eller bifoga dem till en <a href=\"https://wiki."
+"gnome.org/Apps/Geary/ReportingABug\">ny felrapport</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3348,6 +3362,22 @@ msgstr "_Spara bild som…"
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "Välj _alla"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Visa bilder"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "För detta meddelande"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "För denna avsändare"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "För denna domän"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3721,3 +3751,6 @@ msgstr "_Kom ihåg lösenord"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Autentisera"
+
+#~ msgid "Always show from sender"
+#~ msgstr "Visa alltid från avsändare"
