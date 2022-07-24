@@ -15,8 +15,8 @@
         <property name="visible">True</property>
         <child>
           <object class="GtkBox" id="main_layout">
-            <property name="visible">True</property>
-            <property name="orientation">vertical</property>
+            <property name="visible">False</property>
+            <property name="orientation">horizontal</property>
             <child>
               <object class="HdyLeaflet" id="outer_leaflet">
                 <property name="visible">True</property>
