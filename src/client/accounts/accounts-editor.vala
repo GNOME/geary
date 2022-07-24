@@ -210,7 +210,7 @@ public class Accounts.Editor : Gtk.Dialog {
             );
             throw err;
         } catch (Application.CertificateManagerError err) {
-            debug("Unexpected error pinning cert: %s", err.message);
+            debug("Unexpected error pinning : %s", err.message);
             throw err;
         }
     }

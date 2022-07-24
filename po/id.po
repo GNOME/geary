@@ -6,21 +6,21 @@
 # Andika Triwidada <andika@gmail.com>, 2012-2014
 # elementary Indonesia <elementaryindo@gmail.com>, 2012, 2013
 # Mohamad Hasan Al Banna, 2013
-# Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021, 2022.
+# Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-07-10 11:17+0000\n"
-"PO-Revision-Date: 2022-07-24 12:09+0700\n"
-"Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
+"POT-Creation-Date: 2021-05-15 12:19+0000\n"
+"PO-Revision-Date: 2021-05-31 17:31+0700\n"
+"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -124,11 +124,11 @@ msgstr "Geary menunjukkan penyusun rich text"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Surat;Surel;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:23
+#: desktop/org.gnome.Geary.desktop.in.in:22
 msgid "Compose Message"
 msgstr "Susun Pesan"
 
-#: desktop/org.gnome.Geary.desktop.in.in:27
+#: desktop/org.gnome.Geary.desktop.in.in:26
 msgid "New Window"
 msgstr "Jendela Baru"
 
@@ -266,18 +266,10 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Ukuran yang terekam terakhir dari jendela penyusun yang terpisah."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
-msgid "Allow images for these domains"
-msgstr "Izinkan gambar untuk domain ini"
-
-#: desktop/org.gnome.Geary.gschema.xml:103
-msgid "Images from these domains will be trusted"
-msgstr "Gambar dari domain ini akan dipercaya"
-
-#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Batalkan tundaan pengiriman surel"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -285,30 +277,30 @@ msgstr ""
 "Berapa detik menunggu sebelum mengirim sebuah surel. Atur ke nol atau kurang "
 "untuk menonaktifkan."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Brief notification display time"
 msgstr "Waktu tampilan pemberitahuan singkat"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:110
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 "Lamanya waktu dalam detik di mana pemberitahuan singkat harus ditampilkan."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid "List of optional plugins"
 msgstr "Daftar plugin opsional"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:117
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Plugin yang tercantum di sini akan dimuat pada startup."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Whether we migrated the old settings"
 msgstr "Apakah kita memigrasikan pengaturan lama"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -957,7 +949,7 @@ msgid "translator-credits"
 msgstr ""
 "Andika Triwidada <andika@gmail.com>, 2012, 2013, 2016, 2017, 2019-2021\n"
 "Dani Pratomo <elementaryindo@gmail.com>, 2012.\n"
-"Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021, 2022."
+"Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021."
 
 #. / Warning printed to the console when a deprecated
 #. / command line option is used.
@@ -1423,18 +1415,13 @@ msgstr "A_wasi surat baru ketika ditutup"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary akan terus berjalan setelah semua jendela ditutup"
 
-#. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:171
-msgid "_Always load images"
-msgstr "Selalu muat g_ambar"
-
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:189
+#: src/client/components/components-preferences-window.vala:178
 msgid "Preferences"
 msgstr "Preferensi"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:234
 msgid "Plugins"
 msgstr "Pengaya"
 
@@ -1892,14 +1879,14 @@ msgstr "Tanggal:"
 msgid "Subject:"
 msgstr "Subjek:"
 
-#: src/client/conversation-viewer/conversation-message.vala:131
+#: src/client/conversation-viewer/conversation-message.vala:128
 msgid "This email address may have been forged"
 msgstr "Alamat surel ini mungkin telah dipalsukan"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:237
+#: src/client/conversation-viewer/conversation-message.vala:234
 msgid "Show less"
 msgstr "Tampilkan lebih sedikit"
 
@@ -1907,7 +1894,7 @@ msgstr "Tampilkan lebih sedikit"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:263
+#: src/client/conversation-viewer/conversation-message.vala:260
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1918,48 +1905,47 @@ msgstr[1] "%d lagi…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:550
+#: src/client/conversation-viewer/conversation-message.vala:533
 msgid "No sender"
 msgstr "Tidak ada pengirim"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1032
+#: src/client/conversation-viewer/conversation-message.vala:1011
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1154
+#: src/client/conversation-viewer/conversation-message.vala:1133
 msgid "Image"
 msgstr "Citra"
 
-#: src/client/conversation-viewer/conversation-message.vala:1363
-#: src/client/conversation-viewer/conversation-message.vala:1369
+#: src/client/conversation-viewer/conversation-message.vala:1341
+#: src/client/conversation-viewer/conversation-message.vala:1347
 msgid "(unknown)"
 msgstr "(tak diketahui)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1422
-#: src/client/conversation-viewer/conversation-message.vala:1442
+#: src/client/conversation-viewer/conversation-message.vala:1396
 msgid "Remote images not shown"
 msgstr "Citra remote tidak ditampilkan"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1424
+#: src/client/conversation-viewer/conversation-message.vala:1398
 msgid "Only show remote images from senders you trust."
 msgstr "Hanya tampilkan citra remote dari pengirim yang Anda percayai."
 
-#. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1444
-msgid "This message can't be trusted."
-msgstr "Pesan ini tidak dapat dipercaya."
-
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1448
+#: src/client/conversation-viewer/conversation-message.vala:1402
 msgid "Show"
 msgstr "Tampil"
+
+#. Translators: Info bar button label
+#: src/client/conversation-viewer/conversation-message.vala:1406
+msgid "Always show from sender"
+msgstr "Selalu tampilkan dari pengirim"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2787,17 +2773,17 @@ msgstr "Dihapus"
 msgid "Archive | Archives"
 msgstr "Arsip | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:551
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Tidak dapat menentukan tipe mime untuk \"%s\"."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:562
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Tidak dapat menentukan tipe isi untuk tipe mime \"%s\" pada \"%s\"."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1015
 msgid "(no subject)"
 msgstr "(tanpa perihal)"
 
@@ -3347,22 +3333,6 @@ msgstr "Simpan C_itra Sebagai…"
 msgid "_Select All"
 msgstr "Pilih _Semua"
 
-#: ui/conversation-message-menus.ui:50
-msgid "Show images"
-msgstr "Tampilkan gambar"
-
-#: ui/conversation-message-menus.ui:52
-msgid "For this message"
-msgstr "Untuk pesan ini"
-
-#: ui/conversation-message-menus.ui:56
-msgid "For this sender"
-msgstr "Untuk pengirim ini"
-
-#: ui/conversation-message-menus.ui:60
-msgid "For this domain"
-msgstr "Untuk domain ini"
-
 #: ui/conversation-message.ui:54
 msgid "From <email>"
 msgstr "Dari <surel>"
@@ -3735,6 +3705,3 @@ msgstr "_Ingat sandi"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "Otentik_asikan"
-
-#~ msgid "Always show from sender"
-#~ msgstr "Selalu tampilkan dari pengirim"

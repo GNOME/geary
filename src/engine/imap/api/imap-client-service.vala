@@ -558,7 +558,7 @@ public class Geary.Imap.ClientService : Geary.ClientService {
         var session = source as ClientSession;
         if (session != null &&
             session.protocol_state == NOT_CONNECTED &&
-            session.disconnected != ClientSession.DisconnectReason.NULL) {
+            session.disconnected != null) {
             debug(
                 "Session disconnected: %s: %s",
                 session.to_string(),

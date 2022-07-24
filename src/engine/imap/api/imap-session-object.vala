@@ -109,11 +109,10 @@ public abstract class Geary.Imap.SessionObject : BaseObject, Logging.Source {
             // Disconnect reason will null when the session is being
             // logged out but the logout command has not yet been
             // completed.
-            var reason =
-                this.session.disconnected ==
-                    ClientSession.DisconnectReason.NULL ?
-                ClientSession.DisconnectReason.LOCAL_CLOSE :
-                this.session.disconnected;
+            var reason = (
+                this.session.disconnected ??
+                ClientSession.DisconnectReason.LOCAL_CLOSE
+            );
             close();
             disconnected(reason);
         }
