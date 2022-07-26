@@ -23,7 +23,7 @@ variables:
 
   # Fedora packages
   FEDORA_DEPS:
-    meson vala cmake desktop-file-utils enchant2-devel folks-devel gcr3-devel
+    meson vala desktop-file-utils enchant2-devel folks-devel gcr3-devel
     glib2-devel gmime30-devel gnome-online-accounts-devel gspell-devel
     gsound-devel gtk3-devel iso-codes-devel json-glib-devel itstool
     libappstream-glib-devel libgee-devel libhandy1-devel libicu-devel
