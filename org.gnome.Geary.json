@@ -273,7 +273,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/geary.git",
-                    "branch": "mainline"
+                    "branch": "main"
                 }
             ]
         }
