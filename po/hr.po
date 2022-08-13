@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-31 11:16+0000\n"
-"PO-Revision-Date: 2021-10-02 15:02+0200\n"
+"POT-Creation-Date: 2022-07-14 21:54+0000\n"
+"PO-Revision-Date: 2022-08-13 19:16+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian (http://www.transifex.com/projects/p/geary/language/"
 "hr/)\n"
@@ -20,9 +20,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Poedit 2.3\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -127,11 +127,11 @@ msgstr "Geary prikazuje sastavljača obogaćenog tekstom"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Pošta;E-pošta;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Sastavljanje poruke"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Novi prozor"
 
@@ -272,10 +272,18 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Posljednja spremljena veličina odvojenog prozora sastavljača."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Dopusti slike za ove domene"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Slike s ovih domena biti će pouzdane"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Odgoda slanja e-pošte"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -283,29 +291,29 @@ msgstr ""
 "Broj sekundi za čekanje prije slanja e-pošte. Postavi na nulu ili manje za "
 "onemogućavanje."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Vrijeme prikaza poruka sastanka"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Trajanje u sekundama, vremena prikaza poruka sastanka."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Popis neobaveznih priključaka"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Priključci prikazani ovdje biti će učitani pri pokretanju."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Trebamo li prenijeti stare postavke"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -1444,13 +1452,18 @@ msgstr "_Nadgledaj novu e-poštu kada se zatvori"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary će nastaviti biti pokrenut nakon što se svi prozori zatvore"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "_Uvijek učitaj slike"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Osobitosti"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Priključci"
 
@@ -1641,7 +1654,7 @@ msgstr "_Spremi"
 msgid "_Keep"
 msgstr "_Zadrži"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Odabir boje"
 
@@ -1907,14 +1920,14 @@ msgstr "Datum:"
 msgid "Subject:"
 msgstr "Predmet:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Ova adresa e-pošte može biti zaboravljena"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Prikaži manje"
 
@@ -1922,7 +1935,7 @@ msgstr "Prikaži manje"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1934,47 +1947,48 @@ msgstr[2] "%d više…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Bez pošiljatelja"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Slika"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(nepoznato)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Udaljene slike nisu prikazane"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Samo prikaži udaljene slike od pošiljatelja kojima vjerujete."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "Prikaži"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Ova poruka nije pouzdana."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Uvijek prikaži pošiljatelja"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Prikaži"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2044,8 +2058,9 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Odabirom \"Vjeruj ovom poslužitelju\" ili \"Uvijek vjeruj ovom poslužitelju"
-"\" može prouzrokovati da vaše ime i lozinka budu preneseni nesigurno."
+"Odabirom \"Vjeruj ovom poslužitelju\" ili \"Uvijek vjeruj ovom "
+"poslužitelju\" može prouzrokovati da vaše ime i lozinka budu preneseni "
+"nesigurno."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
@@ -2813,17 +2828,17 @@ msgstr "Obrisane stavke"
 msgid "Archive | Archives"
 msgstr "Arhiva | Arhive"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Nemoguće otkrivanje mime vrste za “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Nemoguće otkrivanje vrste sadržaja za mime vrstu “%s” na “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(bez predmeta)"
 
@@ -3161,8 +3176,8 @@ msgid ""
 msgstr ""
 "Ako je problem ozbiljan i nastavi se, spremite i pošaljite ove pojedinosti "
 "na <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kanal kontakta</a> "
-"ili priložite kao <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
-"\">novi izvještaj greške</a>."
+"ili priložite kao <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">novi izvještaj greške</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3372,6 +3387,22 @@ msgstr "Spremi _sliku kao…"
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "_Odaberi sve"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Prikaži slike"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Za ovu poruku"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Za ovog pošiljatelja"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Za ovu domenu"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3745,6 +3776,9 @@ msgstr "_Zapamti lozinku"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Ovjera"
+
+#~ msgid "Always show from sender"
+#~ msgstr "Uvijek prikaži pošiljatelja"
 
 #~ msgid "%a, %b %-e, %Y at %l:%M %P"
 #~ msgstr "%a, %-e. %b, %Y u %H:%M"
