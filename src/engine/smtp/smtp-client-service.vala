@@ -197,6 +197,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here — we're already cancelled.
             } catch (EngineError.NOT_FOUND err) {
+                email_handled = true;
                 debug("Queued email %s not found in outbox, ignoring: %s",
                       id.to_string(), err.message);
             } catch (GLib.Error err) {
