@@ -10,23 +10,23 @@
 # Yaron Shahrabani <sh.yaron@gmail.com>, 2012-2013
 # yoseforb <yoseforb@gmail.com>, 2013
 # yoseforb <yoseforb@gmail.com>, 2013
-# Yosef Or Boczko <yoseforb@gmail.com>, 2013-2021.
+# Yosef Or Boczko <yoseforb@gmail.com>, 2013-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-31 11:16+0000\n"
-"PO-Revision-Date: 2021-11-05 11:52+0200\n"
-"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
-"Language-Team: Hebrew <yoseforb@gmail.com>\n"
+"POT-Creation-Date: 2022-08-18 15:43+0000\n"
+"PO-Revision-Date: 2022-08-18 20:41+0300\n"
+"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
+"Language-Team: Hebrew <>\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==2 ? 1 : n>10 && n%10==0 ? "
-"2 : 3);\n"
-"X-Generator: Poedit 3.0\n"
+"2 : 3)\n"
+"X-Generator: Gtranslator 40.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -127,11 +127,11 @@ msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
 "דואר;דואר אלקטרוני;דוא״ל;דואל;מייל;אימייל;Gmail;GMaillYahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "יצירת הודעה"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "חלון חדש"
 
@@ -270,10 +270,18 @@ msgid "The last recorded size of the detached composer window."
 msgstr "The last recorded size of the detached composer window."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Allow images for these domains"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Images from these domains will be trusted"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Undo sending email delay"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -281,11 +289,11 @@ msgstr ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Brief notification display time"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
@@ -293,19 +301,19 @@ msgstr ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "List of optional plugins"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Plugins listed here will be loaded on startup."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Whether we migrated the old settings"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -988,7 +996,7 @@ msgid_plural "Conversations marked"
 msgstr[0] "תכתובת סומנה"
 msgstr[1] "תכתובות סומנו"
 msgstr[2] "תכתובות סומנו"
-msgstr[3] ""
+msgstr[3] "תכתובות סומנו"
 
 #. / Translators: Label for in-app notification
 #: src/client/application/application-controller.vala:605
@@ -997,7 +1005,7 @@ msgid_plural "Conversations un-marked"
 msgstr[0] "בוטל סימון תכתובת"
 msgstr[1] "בוטלו סימון תכתובות"
 msgstr[2] "בוטלו סימון תכתובות"
-msgstr[3] ""
+msgstr[3] "בוטלו סימון תכתובות"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1034,7 +1042,7 @@ msgid_plural "Conversations archived"
 msgstr[0] "תכתובת אורכבה"
 msgstr[1] "תכתובות אורכבו"
 msgstr[2] "תכתובות אורכבו"
-msgstr[3] ""
+msgstr[3] "תכתובות אורכבו"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
@@ -1051,10 +1059,10 @@ msgstr[3] "הודעות שוחזרו אל %s"
 #: src/client/application/application-controller.vala:759
 msgid "Message archived"
 msgid_plural "Messages archived"
-msgstr[0] "הודעה אורכבה אל %s"
-msgstr[1] "הודעות אורכבו אל %s"
-msgstr[2] "הודעות אורכבו אל %s"
-msgstr[3] ""
+msgstr[0] "הודעה אורכבה"
+msgstr[1] "הודעות אורכבו"
+msgstr[2] "הודעות אורכבו"
+msgstr[3] "הודעות אורכבו"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1274,7 +1282,7 @@ msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "האם ברצונך למחוק תכתובת זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק תכתובות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק תכתובות אלה לצמיתות?"
-msgstr[3] ""
+msgstr[3] "האם ברצונך למחוק תכתובת זו לצמיתות?"
 
 #: src/client/application/application-main-window.vala:1497
 #: src/client/application/application-main-window.vala:1512
@@ -1288,7 +1296,7 @@ msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "האם ברצונך למחוק הודעה זו לצמיתות?"
 msgstr[1] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 msgstr[2] "האם ברצונך למחוק הודעות אלה לצמיתות?"
-msgstr[3] ""
+msgstr[3] "האם ברצונך למחוק הודעות אלה לצמיתות?"
 
 #: src/client/application/application-main-window.vala:1804
 #, c-format
@@ -1328,7 +1336,7 @@ msgid_plural "Mark conversations"
 msgstr[0] "סימון תכתובת"
 msgstr[1] "סימון תכתובות"
 msgstr[2] "סימון תכתובות"
-msgstr[3] ""
+msgstr[3] "סימון תכתובות"
 
 #: src/client/components/components-conversation-actions.vala:102
 msgid "Add label to conversation"
@@ -1336,7 +1344,7 @@ msgid_plural "Add label to conversations"
 msgstr[0] "הוספת תווית לתכתובת"
 msgstr[1] "הוספת תווית לתכתובות"
 msgstr[2] "הוספת תווית לתכתובות"
-msgstr[3] ""
+msgstr[3] "הוספת תווית לתכתובות"
 
 #: src/client/components/components-conversation-actions.vala:107
 msgid "Move conversation"
@@ -1344,7 +1352,7 @@ msgid_plural "Move conversations"
 msgstr[0] "העברת תכתובת"
 msgstr[1] "העברת תכתובות"
 msgstr[2] "העברת תכתובות"
-msgstr[3] ""
+msgstr[3] "העברת תכתובות"
 
 #: src/client/components/components-conversation-actions.vala:112
 #: src/client/conversation-list/conversation-list-view.vala:446
@@ -1353,7 +1361,7 @@ msgid_plural "Archive conversations"
 msgstr[0] "תיוק תכתובת בארכיון"
 msgstr[1] "תיוק תכתובות בארכיון"
 msgstr[2] "תיוק תכתובות בארכיון"
-msgstr[3] ""
+msgstr[3] "תיוק תכתובות בארכיון"
 
 #: src/client/components/components-conversation-actions.vala:123
 msgid "Move conversation to Trash"
@@ -1361,7 +1369,7 @@ msgid_plural "Move conversations to Trash"
 msgstr[0] "העברת תכתובת לאשפה"
 msgstr[1] "העברת תכתובות לאשפה"
 msgstr[2] "העברת תכתובות לאשפה"
-msgstr[3] ""
+msgstr[3] "העברת תכתובות לאשפה"
 
 #: src/client/components/components-conversation-actions.vala:133
 msgid "Delete conversation"
@@ -1369,7 +1377,7 @@ msgid_plural "Delete conversations"
 msgstr[0] "מחיקת תכתובת"
 msgstr[1] "מחיקת תכתובות"
 msgstr[2] "מחיקת תכתובות"
-msgstr[3] ""
+msgstr[3] "מחיקת תכתובות"
 
 #: src/client/components/components-info-bar.vala:248
 msgid "Information"
@@ -1452,13 +1460,19 @@ msgstr "_קבלת הודעות חדשות גם לאחר סגירת החלון"
 msgid "Geary will keep running after all windows are closed"
 msgstr "‏Geary ימשיך לפעול גם לאחר סגירת כל החלונות"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+#| msgid "Always Load Remote Images"
+msgid "_Always load images"
+msgstr "_תמיד לטעון תמונות"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "העדפות"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "תוספים"
 
@@ -1649,7 +1663,7 @@ msgstr "_שמירה"
 msgid "_Keep"
 msgstr "_שמירה"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "בחירת צבע"
 
@@ -1848,7 +1862,7 @@ msgid_plural "Move conversations to _Trash"
 msgstr[0] "העברת תכתובת ל_אשפה"
 msgstr[1] "העברת תכתובות ל_אשפה"
 msgstr[2] "העברת תכתובות ל_אשפה"
-msgstr[3] ""
+msgstr[3] "העברת תכתובות ל_אשפה"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:402
@@ -1857,7 +1871,7 @@ msgid_plural "_Delete conversations"
 msgstr[0] "_מחיקת תכתובת"
 msgstr[1] "_מחיקת תכתובות"
 msgstr[2] "_מחיקת תכתובות"
-msgstr[3] ""
+msgstr[3] "_מחיקת תכתובות"
 
 #: src/client/conversation-list/conversation-list-view.vala:415
 #: ui/components-main-toolbar-menus.ui:5
@@ -1917,14 +1931,14 @@ msgstr "תאריך:"
 msgid "Subject:"
 msgstr "נושא:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "יתכן וכתובת דוא״ל זו זויפה"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "להציג פחות"
 
@@ -1932,7 +1946,7 @@ msgstr "להציג פחות"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1945,47 +1959,49 @@ msgstr[3] "‫%d נוספים…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "אין שולח"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "תמונה"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(לא ידוע)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "תמונות מרוחקות לא מוצגות"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "הצגת תמונות מרוחקות רק משולחים אמינים לך."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "הצגה"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+#| msgid "This message has not yet been sent."
+msgid "This message can't be trusted."
+msgstr "לא ניתן לסמוך על הודעה זו."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "תמיד להציג תמונות משולח זה"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "הצגה"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2232,9 +2248,9 @@ msgstr[3] "‫%s, %d הודעות חדשות סך הכול"
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "הודעה חדשה"
-msgstr[1] "הודעות חדשות"
-msgstr[2] "שתי הודעות חדשות"
-msgstr[3] ""
+msgstr[1] "שתי הודעות חדשות"
+msgstr[2] "הודעות חדשות"
+msgstr[3] "הודעות חדשות"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Email Templates"
@@ -2834,17 +2850,17 @@ msgstr "אשפה"
 msgid "Archive | Archives"
 msgstr "ארכיון | ארכיב | ארכיונים | ארכיבים | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "לא ניתן לקבוע את סוג הקובץ עבור „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "לא ניתן לקבוע את סוג תוכן סוג הקובץ „%s” ב־„%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(ללא נושא)"
 
@@ -3181,8 +3197,9 @@ msgid ""
 "ReportingABug\">new bug report</a>."
 msgstr ""
 "אם הבעיה קריטית או מתמשכת, נא לשמור ולשלוח את הפרטים באחד מ<a href=\"https://"
-"wiki.gnome.org/Apps/Geary/Contact\">ערוצי הקשר</a> או לצרף אל <a href="
-"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">דיווח על תקלה חדשה</a>."
+"wiki.gnome.org/Apps/Geary/Contact\">ערוצי הקשר</a> או לצרף אל <a "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">דיווח על תקלה חדשה</"
+"a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3392,6 +3409,25 @@ msgstr "שמירת _תמונה בשם…"
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "בחירת ה_כול"
+
+#: ui/conversation-message-menus.ui:50
+#| msgid "Show less"
+msgid "Show images"
+msgstr "הצגת תמונות"
+
+#: ui/conversation-message-menus.ui:52
+#| msgid "Draft message"
+msgid "For this message"
+msgstr "בהודעה זו"
+
+#: ui/conversation-message-menus.ui:56
+#| msgid "No sender"
+msgid "For this sender"
+msgstr "משולח זה"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "לתחום זה"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3765,6 +3801,9 @@ msgstr "שמירת ה_ססמה"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "אי_מות"
+
+#~ msgid "Always show from sender"
+#~ msgstr "תמיד להציג תמונות משולח זה"
 
 #~ msgid "Position of folder list pane"
 #~ msgstr "Position of folder list pane"
