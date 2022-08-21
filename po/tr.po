@@ -9,16 +9,16 @@
 # Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2021.
 # Muhammet Kara <muhammetk@gmail.com>, 2014-2021.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2016-2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-15 12:19+0000\n"
-"PO-Revision-Date: 2021-05-28 00:22+0300\n"
-"Last-Translator: Muhammet Kara <muhammetk@gmail.com>\n"
+"POT-Creation-Date: 2022-07-10 11:17+0000\n"
+"PO-Revision-Date: 2022-08-21 21:00+0300\n"
+"Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnometurk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -128,11 +128,11 @@ msgstr "Geary zengin metin oluşturucusunu gösteriyor"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Posta;E-posta;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "İleti Oluştur"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Yeni Pencere"
 
@@ -193,7 +193,7 @@ msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
-"Gmailʼin kullandığına benzemek için eposta eylemlerinde <Ctrl>ʼye basmayı "
+"Gmailʼin kullandığına benzemek için e-posta eylemlerinde <Ctrl>ʼye basmayı "
 "gerektirmeyen kısayolları etkinleştirir."
 
 #: desktop/org.gnome.Geary.gschema.xml:52
@@ -272,40 +272,48 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Ayrılmış oluşturucu penceresinin kaydedilen son boyutu."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
-msgid "Undo sending email delay"
-msgstr "Eposta göndermeyi geri alma gecikmesi"
+msgid "Allow images for these domains"
+msgstr "Bu alan adları için görüntülere izin ver"
 
 #: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Bu alan adlarından görüntülere güvenilecek"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
+msgid "Undo sending email delay"
+msgstr "E-posta göndermeyi geri alma gecikmesi"
+
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr ""
-"Eposta gönderilmeden önce beklenecek saniye. Devre dışı bırakmak için sıfır "
+"E-posta gönderilmeden önce beklenecek saniye. Devre dışı bırakmak için sıfır "
 "veya daha azına belirleyin."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Özet bildirim gösterim zamanı"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Özet bildirimlerin gösterileceği zamanın saniye türünde uzunluğu."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "İsteğe bağlı eklenti listesi"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Burada listelenen eklentiler başlangıçta yüklenecek."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Eski ayarları taşıyıp taşımayacağımız"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -1121,21 +1129,21 @@ msgstr ""
 #: src/client/application/application-controller.vala:1518
 #, c-format
 msgid "Email sent to %s"
-msgstr "Şun(lar)a eposta gönderildi: %s"
+msgstr "Şun(lar)a e-posta gönderildi: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2512
 #, c-format
 msgid "Email to %s queued for delivery"
-msgstr "Şun(lar)a gidecek eposta iletim sırasında: %s"
+msgstr "Şun(lar)a gidecek e-posta iletim sırasında: %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2576
 #, c-format
 msgid "Email to %s saved"
-msgstr "Şun(lar)a gidecek eposta kaydedildi: %s"
+msgstr "Şun(lar)a gidecek e-posta kaydedildi: %s"
 
 #. / Translators: A label for an in-app notification.
 #: src/client/application/application-controller.vala:2591
@@ -1148,7 +1156,7 @@ msgstr "Oluşturucu kurtarılamadı"
 #: src/client/application/application-controller.vala:2634
 #, c-format
 msgid "Email to %s discarded"
-msgstr "Şun(lar)a gidecek eposta gözden çıkarıldı: %s"
+msgstr "Şun(lar)a gidecek e-posta gözden çıkarıldı: %s"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
@@ -1383,14 +1391,14 @@ msgstr "Konuşma ön izlemesini _göster"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:144
 msgid "Use _single key email shortcuts"
-msgstr "_Tek tuşlu eposta kısayolları kullan"
+msgstr "_Tek tuşlu e-posta kısayolları kullan"
 
 #: src/client/components/components-preferences-window.vala:146
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr ""
-"<Ctrl>ʼye basmayı gerektirmeyen eposta eylemleri için klavye kısayollarını "
+"<Ctrl>ʼye basmayı gerektirmeyen e-posta eylemleri için klavye kısayollarını "
 "etkinleştir"
 
 #. / Translators: Preferences label
@@ -1403,13 +1411,18 @@ msgstr "Kapatıldığında yeni postayı _gözetle"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary, tüm pencereler kapatıldıktan sonra çalışmayı sürdürecek"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "Görüntüleri _hep yükle"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Tercihler"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Eklentiler"
 
@@ -1864,14 +1877,14 @@ msgstr "Tarih:"
 msgid "Subject:"
 msgstr "Konu:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Bu e-posta adresi taklit edilmiş olabilir"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Daha az göster"
 
@@ -1879,7 +1892,7 @@ msgstr "Daha az göster"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1889,48 +1902,48 @@ msgstr[0] "diğer %d…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Gönderen yok"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Resim"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
-#| msgid "Unknown"
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(bilinmiyor)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Uzaktaki resimler gösterilmiyor"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
-msgstr "Yalnızca güvendiğiniz göndericilerden gelen uzak resimleri göster."
+msgstr "Yalnızca güvendiğiniz gönderenlerden gelen uzak resimleri göster."
+
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Bu ileti güvenilmez."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
+#: src/client/conversation-viewer/conversation-message.vala:1448
 msgid "Show"
 msgstr "Göster"
-
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Gönderenden her zaman göster"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2707,7 +2720,7 @@ msgstr ""
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1020
 msgctxt "Outlook localised name"
 msgid "Sent Items"
-msgstr "Gönderilmiş Ögeler"
+msgstr "Gönderilmiş Öğeler"
 
 #. List of general possible folder names to match for the
 #. Junk/Spam mailbox. Separate names using a vertical bar
@@ -2718,8 +2731,8 @@ msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
 msgstr ""
-"Önemsiz | İstenmeyen | Önemsiz Posta | Önemsiz Eposta | Toplu Posta | Toplu "
-"Eposta | Toplu E-posta"
+"Önemsiz | İstenmeyen | Önemsiz Posta | Önemsiz Eposta | Önemsiz E-Posta "
+"| Toplu Posta | Toplu Eposta | Toplu E-Posta"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -2734,7 +2747,7 @@ msgstr "Çöp | Çöp | Çöp Kutusu"
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1045
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
-msgstr "Silinen Ögeler"
+msgstr "Silinmiş Öğeler"
 
 #. List of general possible folder names to match for the
 #. Archive mailbox. Separate names using a vertical bar
@@ -2744,17 +2757,17 @@ msgstr "Silinen Ögeler"
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "“%s” için mime türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "“%2$s” üstündeki “%1$s” mime türü için içerik türü saptanamadı."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(konu yok)"
 
@@ -3207,7 +3220,7 @@ msgstr "Ama şuymuş gibi durur:"
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:316
 msgid "The sender may not be trustworthy"
-msgstr "Gönderici güvenilir olmayabilir"
+msgstr "Gönderen güvenilir olmayabilir"
 
 #: ui/conversation-email.ui:24
 msgid "Save all attachments"
@@ -3274,12 +3287,12 @@ msgstr "Aldatıcı bağlantı bulundu"
 
 #: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
-msgstr "E-posta göndericisi sizi yanlış web sitesine yönlendiriyor olabilir."
+msgstr "E-posta göndereni sizi yanlış web sitesine yönlendiriyor olabilir."
 
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
-"Emin değilseniz devam etmeden önce göndericiyle iletişime geçin ve sorun."
+"Emin değilseniz sürdürmeden önce gönderenle iletişime geçin ve sorun."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
@@ -3304,6 +3317,22 @@ msgstr "_Resmi Farklı Kaydet…"
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "Tümünü _Seç"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Resimleri göster"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Bu ileti için"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Bu gönderen için"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Bu alan adı için"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3677,998 +3706,3 @@ msgstr "Parolayı _anımsa"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Kimlik Doğrula"
-
-#~ msgid "Confirm removing: %s"
-#~ msgstr "Kaldırmayı onayla: %s"
-
-#~ msgid "Remove account"
-#~ msgstr "Hesabı kaldır"
-
-#~ msgid "_Reply-To"
-#~ msgstr "_Şuna Yanıtla"
-
-#~ msgid "%a, %b %-e, %Y at %l:%M %P"
-#~ msgstr "%a, %b %-e, %Y / %l:%M %P"
-
-#~ msgid "%a, %b %-e, %Y at %H:%M"
-#~ msgstr "%a, %b %-e, %Y / %H:%M"
-
-#~ msgid "Position of folder list pane"
-#~ msgstr "Klasör listesi bölmesinin konumu"
-
-#~ msgid "Position of the folder list Paned grabber."
-#~ msgstr "Klasör listesi bölmesi yakalayıcının konumu."
-
-#~ msgid "Position of folder list pane when horizontal"
-#~ msgstr "Klasör listesi bölmesinin yataykenki konumu"
-
-#~ msgid ""
-#~ "Position of the folder list Paned grabber in the horizontal orientation."
-#~ msgstr "Yatay yönelimde klasör listesi bölmesi yakalayıcının konumu."
-
-#~ msgid "Position of folder list pane when vertical"
-#~ msgstr "Klasör listesi bölmesinin dikeykenki konumu"
-
-#~ msgid ""
-#~ "Position of the folder list Paned grabber in the vertical orientation."
-#~ msgstr "Dikey yönelimde klasör listesi bölmesi yakalayıcının konumu."
-
-#~ msgid "Orientation of the folder list pane"
-#~ msgstr "Klasör listesi bölmesinin konumlandırması"
-
-#~ msgid "True if the folder list Paned is in the horizontal orientation."
-#~ msgstr "Eğer klasör listesi bölmesi yatay yönelimdeyse doğru."
-
-#~ msgid "Position of message list pane"
-#~ msgstr "İleti listesi bölmesinin konumu"
-
-#~ msgid "Position of the message list Paned grabber."
-#~ msgstr "İleti listesi bölmesi yakalayıcının konumu."
-
-#~ msgid "Use _three pane view"
-#~ msgstr "_Üç bölmeli görünümü kullan"
-
-#~ msgid "Desktop Notifications"
-#~ msgstr "Masaüstü Bildirimleri"
-
-#~ msgid "Folder Highlight"
-#~ msgstr "Klasör Vurgulama"
-
-#~ msgid "Notification Badge"
-#~ msgstr "Bildirim Rozeti"
-
-#~ msgid "Special Folders"
-#~ msgstr "Özel Klasörler"
-
-#~ msgid "Displays desktop notifications when new email is delivered"
-#~ msgstr "Yeni posta ulaştırıldığında masaüstü bildirimi gösterir"
-
-#~ msgid "Highlights folders that have newly delivered mail"
-#~ msgstr "Yeni ulaşan posta barındıran klasörleri vurgular"
-
-#~ msgid "Displays a dock badge showing the number of new messages"
-#~ msgstr "Yeni ileti sayısını gösteren rozet görüntülenir"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Find in current conversations"
-#~ msgstr "Geçerli konuşmalarda bul"
-
-#~ msgid "Log periodic activity"
-#~ msgstr "Dönemsel etkinliği kayda al"
-
-#~ msgid "Log IMAP network serialization"
-#~ msgstr "IMAP ağ serileştirmeyi kayda al"
-
-#~ msgid "Sent Mail"
-#~ msgstr "Gönderilmiş Postalar"
-
-#~ msgid "Spam"
-#~ msgstr "İstenmeyen"
-
-#~ msgid "From"
-#~ msgstr "Gönderen"
-
-#~ msgid "Edit Draft"
-#~ msgstr "Taslağı Düzenle"
-
-#~ msgid "Show Images"
-#~ msgstr "Resimleri Göster"
-
-#~ msgid "Empty _Spam…"
-#~ msgstr "_İstenmeyeni boşalt…"
-
-#~ msgid "Empty _Trash…"
-#~ msgstr "_Çöpü boşalt…"
-
-#~ msgid ""
-#~ "Your computer does not appear to be connected to the Internet.\n"
-#~ "You will not be able to send or receive email until it is re-connected."
-#~ msgstr ""
-#~ "Bilgisayarınız internete bağlı görünmüyor.\n"
-#~ "Yeniden bağlanana dek e-posta gönderemez veya alamazsınız."
-
-#~ msgid ""
-#~ "An account has reported an untrusted server.\n"
-#~ "Please check the server configuration and try again."
-#~ msgstr ""
-#~ "Hesap güvenilmeyen bir sunucu bildirdi.\n"
-#~ "Sunucu ayarlarınızı denetleyip yeniden deneyin."
-
-#~ msgid ""
-#~ "An account has reported an incorrect login or password.\n"
-#~ "Please check your login name and try again."
-#~ msgstr ""
-#~ "Hesap yanlış bir giriş veya parola bildirdi.\n"
-#~ "Lütfen giriş adınızı denetleyip yeniden deneyin."
-
-#~ msgid "Open this link"
-#~ msgstr "Bu bağlantıyı aç"
-
-#~ msgid "Enable or disable rich text mode"
-#~ msgstr "Zengin metin kipini etkinleştir veya devre dışı bırak"
-
-#~ msgid "C_olor"
-#~ msgstr "R_enk"
-
-#~ msgid "Show Extended Fields"
-#~ msgstr "Genişletilmiş Alanları Göster"
-
-#~ msgid "Indexing %s account"
-#~ msgstr "%s hesabı dizinleniyor"
-
-#~ msgid "Successfully sent mail to %s."
-#~ msgstr "Posta, %s adresine başarıyla gönderildi."
-
-#~ msgid "Detach (Ctrl+D)"
-#~ msgstr "Ayır (Ctrl+D)"
-
-#~ msgid "Attach File (Ctrl+T)"
-#~ msgstr "Dosya Ekle (Ctrl+T)"
-
-#~ msgid "Send (Ctrl+Enter)"
-#~ msgstr "Gönder (Ctrl+Enter)"
-
-#~ msgid "Redo last edit  (Ctrl+Shift+Z)"
-#~ msgstr "Son düzenlemeyi yinele (Ctrl+Shift+Z)"
-
-#~ msgid "Bold (Ctrl+B)"
-#~ msgstr "Kalın (Ctrl+B)"
-
-#~ msgid "Italic (Ctrl+I)"
-#~ msgstr "Eğik (Ctrl+I)"
-
-#~ msgid "Underline (Ctrl+U)"
-#~ msgstr "Altı çizili (Ctrl+U)"
-
-#~ msgid "Strikethrough (Ctrl+K)"
-#~ msgstr "Üstü çizili (Ctrl+K)"
-
-#~ msgid "Insert ordered list"
-#~ msgstr "Sıralı liste yerleştir"
-
-#~ msgid "Quote text  (Ctrl+])"
-#~ msgstr "Metni alıntıla  (Ctrl+])"
-
-#~ msgid "Unquote text  (Ctrl+[)"
-#~ msgstr "Metni alıntılama (Ctrl+[)"
-
-#~ msgid "Insert an image (Ctrl+G)"
-#~ msgstr "Resim yerleştir (Ctrl+G)"
-
-#~ msgid "Remove selection formatting (Ctrl+Space)"
-#~ msgstr "Seçimin biçimlendirmesini kaldır (Ctrl+Boşluk)"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Archive conversation"
-#~ msgstr "Konuşmayı arşivle"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Move conversation"
-#~ msgstr "Konuşmayı taşı"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Move to Spam"
-#~ msgstr "İstenmeyene taşı"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Delete conversation"
-#~ msgstr "Konuşmayı sil"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Focus the next pane"
-#~ msgstr "Sonraki bölmeye odaklan"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Focus the conversation list"
-#~ msgstr "Konuşma listesine odaklan"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Select the conversation down"
-#~ msgstr "Alt konuşmayı seç"
-
-#~ msgid "Enable notification sounds"
-#~ msgstr "Bildirim seslerini etkinleştir"
-
-#~ msgid "True to play sounds for notifications and sending."
-#~ msgstr "Gönderimler ve bildirimler için ses oynatılacaksa doğru."
-
-#~ msgid "True to show notification bubbles."
-#~ msgstr "Bildirim balonlarını göstermek için doğru."
-
-#~ msgid "Moved %d message to %s"
-#~ msgid_plural "Moved %d messages to %s"
-#~ msgstr[0] "%d ileti %s içine taşındı"
-
-#~ msgid "Error emptying %s"
-#~ msgstr "%s boşaltılırken hata"
-
-#~ msgid "Trashed %d message"
-#~ msgid_plural "Trashed %d messages"
-#~ msgstr[0] "%d ileti çöpe atıldı"
-
-#~ msgid "Archived %d message"
-#~ msgid_plural "Archived %d messages"
-#~ msgstr[0] "%d ileti arşivlendi"
-
-#~ msgid "Failed to open default text editor."
-#~ msgstr "Öntanımlı metin düzenleyici açılamadı."
-
-#~ msgid "Display program version and revision id"
-#~ msgstr "Program sürümünü ve düzelti kimliğini göster"
-
-#~ msgid "Inspector opened"
-#~ msgstr "İnceleyici açıldı"
-
-#~ msgid "column"
-#~ msgstr "sütun"
-
-#~ msgid "Display the message menu"
-#~ msgstr "İleti menüsünü göster"
-
-#~ msgid "Mark as S_pam"
-#~ msgstr "İ_stenmeyen olarak imle"
-
-#~ msgid "Mark as not S_pam"
-#~ msgstr "İ_stenen olarak imle"
-
-#~ msgid "Reading"
-#~ msgstr "Okuma"
-
-#~ msgid "_Play notification sounds"
-#~ msgstr "Bildirim seslerini _oynat"
-
-#~ msgid "Show _notifications for new mail"
-#~ msgstr "Yeni postalar için _bildirimleri göster"
-
-#~ msgid "Close the draft message?"
-#~ msgid_plural "Close all draft messages?"
-#~ msgstr[0] "Tüm taslak iletiyi kapat?"
-
-#~ msgid "Archive conversation (A)"
-#~ msgid_plural "Archive conversations (A)"
-#~ msgstr[0] "Konuşmayı arşivle (A)"
-
-#~ msgid "Move conversation to Trash (Delete, Backspace)"
-#~ msgid_plural "Move conversations to Trash (Delete, Backspace)"
-#~ msgstr[0] "Konuşmayı çöpe taşı (Del tuşu, Silme Tuşu)"
-
-#~ msgid "Delete conversation (Shift+Delete)"
-#~ msgid_plural "Delete conversations (Shift+Delete)"
-#~ msgstr[0] "Konuşmayı sil (Shift+Delete)"
-
-#~ msgid "_Trash"
-#~ msgstr "_Çöp"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Delete"
-#~ msgstr "Sil"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Jump to search box"
-#~ msgstr "Arama kutusuna atla"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Find next/previous in current conversation"
-#~ msgstr "Şimdiki konuşmada öncekini/sonrakini bul"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Compose a new message"
-#~ msgstr "Yeni ileti yaz"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Archive"
-#~ msgstr "Arşiv"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Move the conversation"
-#~ msgstr "Konuşmayı taşı"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Mark read"
-#~ msgstr "Okunmuş olarak imle"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Unstar"
-#~ msgstr "Yıldızı kaldır"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Jump to next (older) conversation"
-#~ msgstr "Sonraki (eski) konuşmaya atla"
-
-#~ msgctxt "shortcut window"
-#~ msgid "Jump to previous (newer) conversation"
-#~ msgstr "Önceki (yeni) konuşmaya atla"
-
-#~ msgid "List of the languages to use in the spell checker."
-#~ msgstr "Yazım denetleyicide kullanılacak dillerin listesi."
-
-#~ msgid "Undo move (Ctrl+Z)"
-#~ msgstr "Taşımayı geri al (Ctrl+Z)"
-
-#~ msgid "Undo trash (Ctrl+Z)"
-#~ msgstr "Çöpten geri al (Ctrl+Z)"
-
-#~ msgid "Undo archive (Ctrl+Z)"
-#~ msgstr "Arşivden geri al (Ctrl+Z)"
-
-#~ msgid "Undo (Ctrl+Z)"
-#~ msgstr "Geri al (Ctrl+Z)"
-
-#~| msgid "A problem occurred checking mail for %s"
-#~ msgid "A problem occurred checking email for %s"
-#~ msgstr "%s için e-posta denetlenirken sorun oluştu"
-
-#~| msgid "Messages will not be received until checked."
-#~ msgid "Email will not be received until re-connected"
-#~ msgstr "Yeniden bağlanana dek e-posta alınmayacak"
-
-#~| msgid "A problem occurred sending mail for %s"
-#~ msgid "A problem occurred with account %s"
-#~ msgstr "%s hesabıyla ilgili sorun oluştu"
-
-#~ msgid ""
-#~ "Something went wrong, please file a bug report if the problem persists"
-#~ msgstr ""
-#~ "Bir şeyler yanlış gitti, eğer sorun kalıcıysa lütfen hata bildiriminde "
-#~ "bulunun"
-
-#~| msgid "Open selected attachments"
-#~ msgid "Copy selected log entries"
-#~ msgstr "Seçilen günlük girdilerini kopyala"
-
-#~| msgctxt "shortcut window"
-#~| msgid "General"
-#~ msgid "General"
-#~ msgstr "Genel"
-
-#~ msgid "Retry"
-#~ msgstr "Yeniden dene"
-
-#~ msgid ""
-#~ "Geary encountered a problem connecting to an account.\n"
-#~ "Please check your Internet connection, the server configuration and try "
-#~ "again."
-#~ msgstr ""
-#~ "Geary hesaba bağlanmakta sorunla karşılaştı.\n"
-#~ "Lütfen internet erişiminizi ve sunucu ayarlarınızı denetleyip yeniden "
-#~ "deneyin."
-
-#~ msgid ""
-#~ "Copy technical details to clipboard for pasting into an email or bug "
-#~ "report"
-#~ msgstr ""
-#~ "Teknik ayrıntıları e-postaya veya hata bildirimine yapıştırmak için "
-#~ "panoya kopyala"
-
-#~ msgid "mail-send"
-#~ msgstr "mail-send"
-
-#~ msgid "org.gnome.Geary"
-#~ msgstr "org.gnome.Geary"
-
-#~ msgid "Base URL to look up contact avatars"
-#~ msgstr "Kişi avatarlarının aranıp bulunacağı temel URL"
-
-#~ msgid ""
-#~ "A Gravatar or Libravatar compatible URL, set to the empty string to "
-#~ "disable."
-#~ msgstr ""
-#~ "Gravatar veya Libravatar uyumlu URL, devre dışı bırakmak için dizgeyi boş "
-#~ "bırakın."
-
-#~ msgid "Save drafts on server"
-#~ msgstr "Taslakları sunucuya kaydet"
-
-#~ msgid "Output debugging information"
-#~ msgstr "Çıktı hata ayıklama bilgisi"
-
-#~ msgid "Allow inspection of WebView"
-#~ msgstr "WebView denetimine izin ver"
-
-#~ msgid "Please report comments, suggestions and bugs to:"
-#~ msgstr "Lütfen yorumlarınızı, önerilerinizi ve hataları bildirin:"
-
-#~ msgid "Failed to parse command line options: %s\n"
-#~ msgstr "Komut satırı seçenekleri ayrıştırılamadı: %s\n"
-
-#~ msgid "Problem connecting to incoming server for %s"
-#~ msgstr "%s için gelen sunucusuna bağlanmada sorun"
-
-#~ msgid ""
-#~ "Could not connect to %s, check your Internet access and the server name "
-#~ "and try again"
-#~ msgstr ""
-#~ "%s konumuna bağlanılamadı, lütfen İnternet erişiminizi ve sunucu adını "
-#~ "denetleyin ve yeniden deneyin"
-
-#~ msgid "Problem connecting to outgoing server for %s"
-#~ msgstr "%s için giden sunucusuna bağlanmada sorun"
-
-#~ msgid "Problem communicating with incoming server for %s"
-#~ msgstr "%s için gelen sunucusuyla iletişime geçmede sorun"
-
-#~ msgid ""
-#~ "Network error talking to %s, check your Internet access and try again"
-#~ msgstr ""
-#~ "%s ile konuşurken ağ hatası, İnternet erişiminizi gözden geçirin ve "
-#~ "yeniden deneyin"
-
-#~ msgid "Problem communicating with outgoing mail server"
-#~ msgstr "%s için giden posta sunucusuyla iletişime geçmede sorun"
-
-#~ msgid ""
-#~ "Geary did not understand a message from %s or vice versa, please file a "
-#~ "bug report"
-#~ msgstr ""
-#~ "Geary %s konumundan gelen iletiyi anlamadı veya tam tersi, lütfen hata "
-#~ "bildiriminde bulunun"
-
-#~ msgid ""
-#~ "Could not communicate with %s for %s, check the server name and try again "
-#~ "in a moment"
-#~ msgstr ""
-#~ "%2$s için %1$s ile iletişim kurulamadı, sunucu adını gözden geçirin ve "
-#~ "hemen yeniden deneyin"
-
-#~ msgid "Incoming mail server password required for %s"
-#~ msgstr "%s için gelen posta sunucusu parolası gerekiyor"
-
-#~ msgid "Messages cannot be received without the correct password."
-#~ msgstr "İletiler doğru parola olmadan alınamaz."
-
-#~ msgid "Retry receiving email, you will be prompted for a password"
-#~ msgstr "E-posta almayı yeniden dene, parola girmeniz gerekecek"
-
-#~ msgid "Outgoing mail server password required for %s"
-#~ msgstr "%s için giden posta sunucusu parolası gerekiyor"
-
-#~ msgid "Messages cannot be sent without the correct password."
-#~ msgstr "İletiler doğru parola olmadan gönderilemez."
-
-#~ msgid "Retry sending queued messages, you will be prompted for a password"
-#~ msgstr ""
-#~ "Kuyruğa alınmış iletileri göndermeyi yeniden dene, parola girmeniz "
-#~ "gerekecek"
-
-#~ msgid "Incoming mail server security is not trusted for %s"
-#~ msgstr "%s için gelen posta sunucusu güvenliği güvenilir değil"
-
-#~ msgid "Check security details"
-#~ msgstr "Güvenlik ayrıntılarını gözden geçirin"
-
-#~ msgid "Outgoing mail server security is not trusted for %s"
-#~ msgstr "%s için giden posta sunucusu güvenli değil"
-
-#~ msgid "Messages cannot be sent until checked."
-#~ msgstr "Gözden geçirilmeden iletiler gönderilemez."
-
-#~ msgid "A database problem has occurred"
-#~ msgstr "Veri tabanı sorunu oluştu"
-
-#~ msgid "Messages for %s must be downloaded again."
-#~ msgstr "%s için iletiler yeniden indirilmelidir."
-
-#~ msgid "Open"
-#~ msgstr "Aç"
-
-#~ msgctxt "Default clock format"
-#~ msgid "%l:%M %P"
-#~ msgstr "%l:%M %P"
-
-#~ msgid "%x"
-#~ msgstr "%x"
-
-#~ msgid "Send New _Message…"
-#~ msgstr "Yeni _İleti Gönder…"
-
-#~ msgid "Search for messages from"
-#~ msgstr "Şuradan iletiler için ara"
-
-#~ msgid "A_ccounts"
-#~ msgstr "_Hesaplar"
-
-#~ msgid "Empty Spam or Trash folders"
-#~ msgstr "İstenmeyen ya da Çöp klasörlerini boşalt"
-
-#~ msgid "Delete conversations (Shift+Delete)"
-#~ msgstr "Konuşmaları sil (Shift+Delete)"
-
-#~ msgid "Move conversations to Trash (Delete, Backspace)"
-#~ msgstr "Konuşmaları çöpe taşı (Del tuşu, Silme Tuşu)"
-
-#~ msgid "Archive conversations (A)"
-#~ msgstr "Konuşmaları arşivle (A)"
-
-#~ msgid "Add label to conversations"
-#~ msgstr "Konuşmaları etiketle"
-
-#~ msgid "Retry connecting now"
-#~ msgstr "Şimdi bağlanmayı yeniden dene"
-
-#~ msgid "Try reconnecting now"
-#~ msgstr "Şimdi yeniden bağlanmayı dene"
-
-#~ msgid "Problem with connection to incoming server for %s"
-#~ msgstr "%s için gelen sunucusuyla bağlantıda sorun"
-
-#~ msgid "Problem with connection to outgoing server for %s"
-#~ msgstr "%s için giden sunucusuyla bağlantıda sorun"
-
-#~ msgid "To: "
-#~ msgstr "Kime: "
-
-#~ msgid "Cc: "
-#~ msgstr "Cc: "
-
-#~ msgid "Bcc: "
-#~ msgstr "Bcc: "
-
-#~ msgid "From: %s\n"
-#~ msgstr "Gönderen: %s\n"
-
-#~ msgid "Subject: %s\n"
-#~ msgstr "Konu: %s\n"
-
-#~ msgid "Date: %s\n"
-#~ msgstr "Tarih: %s\n"
-
-#~ msgid "To: %s\n"
-#~ msgstr "Kime: %s\n"
-
-#~ msgid "Cc: %s\n"
-#~ msgstr "Cc: %s\n"
-
-#~ msgid "Unable to store server trust exception"
-#~ msgstr "Sunucu güven ayrıcalığı depolanamadı"
-
-#~ msgid ""
-#~ "Geary encountered an error sending an email.  If the problem persists, "
-#~ "please manually delete the email from your Outbox folder."
-#~ msgstr ""
-#~ "Geary e-posta gönderilirken bir hata ile karşılaştı.  Eğer sorun sürerse "
-#~ "lütfen e-postayı Giden klasöründen elle siliniz."
-
-#~ msgid ""
-#~ "Geary encountered an error saving a sent message to Sent Mail.  The "
-#~ "message will stay in your Outbox folder until you delete it."
-#~ msgstr ""
-#~ "Geary, Gönderilmiş Postaya gönderilmiş iletiyi kaydederken bir hata ile "
-#~ "karşılaştı.  İleti, siz silene kadar Giden klasörünüzde kalacak."
-
-#~ msgid "Unable to open local mailbox for %s"
-#~ msgstr "%s için yerel posta kutusu açılamadı"
-
-#~ msgid ""
-#~ "There was an error opening the local mail database for this account. This "
-#~ "is possibly due to a file permissions problem.\n"
-#~ "\n"
-#~ "Please check that you have read/write permissions for all files in this "
-#~ "directory:\n"
-#~ "\n"
-#~ "%s"
-#~ msgstr ""
-#~ "Bu hesap için yerel posta veri tabanı açılırken bir hata oluştu. Hata "
-#~ "görünüşe bakılırsa dosya izin sorunlarından kaynaklanmaktadır.\n"
-#~ "\n"
-#~ "Lütfen bu dizindeki tüm dosyalar için okuma/yazma izniniz olup "
-#~ "olmadığınızı denetleyin:\n"
-#~ "\n"
-#~ "%s"
-
-#~ msgid ""
-#~ "The version number of the local mail database is formatted for a newer "
-#~ "version of Geary. Unfortunately, the database cannot be “rolled back” to "
-#~ "work with this version of Geary.\n"
-#~ "\n"
-#~ "Please install the latest version of Geary and try again."
-#~ msgstr ""
-#~ "Yerel posta veri tabanı sürüm numarası daha yeni bir Geary sürümü için "
-#~ "biçimlendirildi. Ne yazık ki; veri tabanı, Geary uygulamasının bu sürümü "
-#~ "ile çalışabilmesi için “geri alınır” durumda değildir.\n"
-#~ "\n"
-#~ "Lütfen Geary uygulamasının son sürümünü kurun ve yeniden deneyin."
-
-#~ msgid ""
-#~ "There was an error opening the local account. This is probably due to "
-#~ "connectivity issues.\n"
-#~ "\n"
-#~ "Please check your network connection and restart Geary."
-#~ msgstr ""
-#~ "Yerel hesap açılırken bir hata oluştu. Hata görünüşe bakılırsa bağlantı "
-#~ "sorunları nedeniyle oluştu.\n"
-#~ "\n"
-#~ "Lütfen ağ bağlantılarınızı denetleyin ve Geary uygulamasını yeniden "
-#~ "başlatın."
-
-#~ msgid "Geary will exit if you have no other open email accounts."
-#~ msgstr "Eğer başka açık e-posta hesabı yoksa Geary çıkacak."
-
-#~ msgid "Additional addresses for %s"
-#~ msgstr "%s için ek adresler"
-
-#~ msgid "First Last"
-#~ msgstr "Ad Soyad"
-
-#~ msgid "Enter your account information to get started."
-#~ msgstr "Başlamak için hesap bilginizi giriniz."
-
-#~ msgid "Preview"
-#~ msgstr "Ön izle"
-
-#~ msgid "Remem_ber passwords"
-#~ msgstr "Parolaları _anımsa"
-
-#~ msgid "Remem_ber password"
-#~ msgstr "Parolayı _anımsa"
-
-#~ msgid "Unable to validate:\n"
-#~ msgstr "Doğrulanamadı:\n"
-
-#~ msgid "        • Invalid account nickname.\n"
-#~ msgstr "        • Geçersiz hesap takma adı.\n"
-
-#~ msgid "        • Email address already added to Geary.\n"
-#~ msgstr "        • E-posta adresi zaten Geary’e eklenmiş.\n"
-
-#~ msgid "        • IMAP connection error.\n"
-#~ msgstr "        • IMAP bağlantı hatası.\n"
-
-#~ msgid "        • IMAP username or password incorrect.\n"
-#~ msgstr "        • IMAP kullanıcı adı veya parola hatalı.\n"
-
-#~ msgid "        • SMTP connection error.\n"
-#~ msgstr "        • SMTP bağlantı hatası.\n"
-
-#~ msgid "        • SMTP username or password incorrect.\n"
-#~ msgstr "        • SMTP kullanıcı adı veya parola hatalı.\n"
-
-#~ msgid "        • Connection error.\n"
-#~ msgstr "        • Bağlantı hatası.\n"
-
-#~ msgid "        • Username or password incorrect.\n"
-#~ msgstr "        • Kullanıcı adı veya parola hatalı.\n"
-
-#~ msgid "Your settings are insecure"
-#~ msgstr "Ayarlarınız güvensiz"
-
-#~ msgid ""
-#~ "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means "
-#~ "your username and password could be read by another person on the "
-#~ "network.  Are you sure you want to do this?"
-#~ msgstr ""
-#~ "IMAP ve/veya SMTP ayarlarınız SSL veya TLS belirtmiyor.  Bunun anlamı "
-#~ "kullanıcı adınız ve parolanız ağdaki başka biri tarafından okunabilir "
-#~ "demektir. Bunu yapmak istediğinize emin misiniz?"
-
-#~ msgid "Co_ntinue"
-#~ msgstr "Devam _et"
-
-#~ msgid "IMAP"
-#~ msgstr "IMAP"
-
-#~ msgid "SMTP"
-#~ msgstr "SMTP"
-
-#~ msgid "Other"
-#~ msgstr "Diğer"
-
-#~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-#~ msgstr "<span weight=\"bold\" size=\"larger\">Hesap kaldırılamadı</span> "
-
-#~ msgid ""
-#~ "A composer window associated with this account is currently open. Send or "
-#~ "discard the message and try again."
-#~ msgstr ""
-#~ "Bu hesapla bağlantılı bir oluşturucu penceresi açık. İletiyi gönderip "
-#~ "veya gözden çıkarıp yeniden deneyin."
-
-#~ msgid "Please wait while Geary validates your account."
-#~ msgstr "Lütfen Geary hesabınızı doğrulayana kadar bekleyin."
-
-#~ msgid ""
-#~ "Some email services require additional addresses be configured on the "
-#~ "server.  Contact your email provider for more information."
-#~ msgstr ""
-#~ "Bazı e-posta hizmetleri ek adreslerin sunucuda kurulu olmasını "
-#~ "gerektirir.  Daha çok bilgi için e-posta sağlayıcınıza başvurun."
-
-#~ msgid "E_mail address"
-#~ msgstr "E-_posta adresi"
-
-#~ msgid "_Password"
-#~ msgstr "_Parola"
-
-#~ msgid "S_ervice"
-#~ msgstr "H_izmet"
-
-#~ msgid "N_ame"
-#~ msgstr "_Ad"
-
-#~ msgid "N_ickname"
-#~ msgstr "_Takma Ad"
-
-#~ msgid "Work, Home, etc."
-#~ msgstr "İş, Ev, vs."
-
-#~ msgid "Addi_tional email addresses…"
-#~ msgstr "E_k e-posta adresleri…"
-
-#~ msgid "IMAP settings"
-#~ msgstr "IMAP ayarları"
-
-#~ msgid "Se_rver"
-#~ msgstr "Su_nucu"
-
-#~ msgid "P_ort"
-#~ msgstr "Bağlantı N_oktası"
-
-#~ msgid "Ser_ver"
-#~ msgstr "Sun_ucu"
-
-#~ msgid "Por_t"
-#~ msgstr "Bağlan_tı Noktası"
-
-#~ msgid "User_name"
-#~ msgstr "Kullanıcı _adı"
-
-#~ msgid "Pass_word"
-#~ msgstr "Paro_la"
-
-#~ msgid "SMTP password"
-#~ msgstr "SMTP parola"
-
-#~ msgid "_Username"
-#~ msgstr "_Kullanıcı adı"
-
-#~ msgid "IMAP password"
-#~ msgstr "IMAP parola"
-
-#~ msgid "Encr_yption"
-#~ msgstr "Şif_releme"
-
-#~ msgid "Encrypt_ion"
-#~ msgstr "Şifrele_me"
-
-#~ msgid "STARTTLS"
-#~ msgstr "STARTTLS"
-
-#~ msgid "No authentication re_quired"
-#~ msgstr "Kimlik doğrulama ge_rekli değil"
-
-#~ msgid "Use IMAP cre_dentials"
-#~ msgstr "IMAP kim_liğini kullan"
-
-#~ msgid "Composer"
-#~ msgstr "Oluşturucu"
-
-#~ msgid "Si_gn emails (HTML allowed):"
-#~ msgstr "E-postaları im_zala (HTML izinli):"
-
-#~ msgid "Storage"
-#~ msgstr "Depolama"
-
-#~ msgid ""
-#~ "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove "
-#~ "this account?</span> "
-#~ msgstr ""
-#~ "<span weight=\"bold\" size=\"larger\">Bu hesabı kaldırmak istediğinize "
-#~ "emin misiniz?</span> "
-
-#~ msgid ""
-#~ "All email associated with this account will be removed from your "
-#~ "computer. This will not affect email on the server."
-#~ msgstr ""
-#~ "Bu hesapla ilişkili tüm iletiler bilgisayarınızdan kaldırılacak. Bu işlem "
-#~ "sunucudaki iletilerinizi etkilemeyecek."
-
-#~ msgid "Nickname:"
-#~ msgstr "Takma ad:"
-
-#~ msgid "Default attachments directory"
-#~ msgstr "Öntanımlı ek dizini"
-
-#~ msgid "Location used when opening and saving attachments."
-#~ msgstr "Ekleri açarken veya kaydederken kullanılan konum."
-
-#~ msgid "Default print output directory"
-#~ msgstr "Öntanımlı yazdırma çıktı dizini"
-
-#~ msgid "Location used when printing to a file."
-#~ msgstr "Dosyaya yazdırılırken kullanılacak konum."
-
-#~ msgid "Geary will run in the background and notify of new mail"
-#~ msgstr "Geary arka planda çalışacak ve yeni postayı bildirecek"
-
-#~ msgid ""
-#~ "Geary encountered an error while connecting to the server.  Please try "
-#~ "again in a few moments."
-#~ msgstr ""
-#~ "Geary, sunucuya bağlanırken bir hatayla karşılaştı.  Lütfen bir süre "
-#~ "sonra yeniden deneyin."
-
-#~ msgid "Geary Email"
-#~ msgstr "Geary E-posta"
-
-#~ msgid "Geary Mail"
-#~ msgstr "Geary Posta"
-
-#~ msgid "_Mark as…"
-#~ msgstr "…olarak _imle"
-
-#~ msgid "Add label"
-#~ msgstr "Etiket ekle"
-
-#~ msgid "_Label"
-#~ msgstr "_Etiketle"
-
-#~ msgid "_Move"
-#~ msgstr "_Taşı"
-
-#~ msgid "Compose new message (Ctrl+N, N)"
-#~ msgstr "Yeni ileti oluştur (Ctrl+N, N)"
-
-#~ msgid "Reply (Ctrl+R, R)"
-#~ msgstr "Yanıtla (Ctrl+R, R)"
-
-#~ msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-#~ msgstr "Tümünü yanıtla (Ctrl+Shift+R, Shift+R)"
-
-#~ msgid "Forward (Ctrl+L, F)"
-#~ msgstr "Yönlendir (Ctrl+L, F)"
-
-#~ msgid "Try Again"
-#~ msgstr "Yeniden Dene"
-
-#~ msgid "Mail Client"
-#~ msgstr "Posta İstemcisi"
-
-#~| msgid "%s - Composer Inspector"
-#~ msgid "%s — Composer Inspector"
-#~ msgstr "%s — Düzenleyici Denetçisi"
-
-#~ msgid " (Invalid?)"
-#~ msgstr " (Geçersiz?)"
-
-#~| msgid "%s - Conversation Inspector"
-#~ msgid "%s — Conversation Inspector"
-#~ msgstr "%s — Konuşma Denetçisi"
-
-#~ msgid "none"
-#~ msgstr "hiçbiri"
-
-#~ msgid "Copy _Link"
-#~ msgstr "_Bağlantıyı Kopyala"
-
-#~ msgid "Link (Ctrl+L)"
-#~ msgstr "Bağlantı (Ctrl+L)"
-
-#~ msgid "Enable _spell checking"
-#~ msgstr "_Yazım denetimini etkinleştir"
-
-#~ msgid "_Inspect..."
-#~ msgstr "_Denetle..."
-
-#~ msgid "%i match"
-#~ msgid_plural "%i matches"
-#~ msgstr[0] "%i eşleşme"
-
-#~ msgid "%i match (wrapped)"
-#~ msgid_plural "%i matches (wrapped)"
-#~ msgstr[0] "%i eşleşme (sarılı)"
-
-#~ msgid "No search results found."
-#~ msgstr "Hiç arama sonucu bulunamadı."
-
-#~ msgid "Select _Message"
-#~ msgstr "_İletiyi Seç"
-
-#~ msgid "Save A_ttachment..."
-#~ msgid_plural "Save All A_ttachments..."
-#~ msgstr[0] "E_klentiyi kaydet..."
-
-#~ msgid "_Left"
-#~ msgstr "_Sol"
-
-#~ msgid "_Right"
-#~ msgstr "_Sağ"
-
-#~ msgid "_Center"
-#~ msgstr "_Orta"
-
-#~ msgid "_Justify"
-#~ msgstr "_Doğrula"
-
-#~ msgctxt "Label"
-#~ msgid "Close and Save"
-#~ msgstr "Kapat ve Kaydet"
-
-#~ msgctxt "Short Label"
-#~ msgid "Close and Save"
-#~ msgstr "Kapat ve Kaydet"
-
-#~ msgctxt "Tooltip"
-#~ msgid "Close and Save"
-#~ msgstr "Kapat ve Kaydet"
-
-#~ msgctxt "Label"
-#~ msgid "Close and Discard"
-#~ msgstr "Kapat ve At"
-
-#~ msgctxt "Short Label"
-#~ msgid "Close and Discard"
-#~ msgstr "Kapat ve At"
-
-#~ msgctxt "Tooltip"
-#~ msgid "Close and Discard"
-#~ msgstr "Kapat ve At"
-
-#~ msgid "Large"
-#~ msgstr "Büyük"
-
-#~ msgid "Medium"
-#~ msgstr "Orta"
-
-#~ msgid "Small"
-#~ msgstr "Küçük"
-
-#~ msgid "Detach"
-#~ msgstr "Ayır"
-
-#~ msgid "_Attach File"
-#~ msgstr "Dosya _Ekle"
-
-#~ msgid "_Include Original Attachments"
-#~ msgstr "Özgün Ekleri _İçer"
-
-#~ msgid "Spelling language"
-#~ msgstr "Yazım dili"
-
-#~ msgid "Copyright 2011-2014 Yorba Foundation"
-#~ msgstr "Telif Hakkı 2011-2014 Yorba Foundation"
-
-#~ msgid "_Donate"
-#~ msgstr "_Bağış Yap"
-
-#~ msgid "Do you want to discard the unsaved message?"
-#~ msgstr "Kaydedilmemiş iletiyi iptal etmek istiyor musunuz?"
-
-#~ msgid "Archive conversation (Delete, Backspace, A)"
-#~ msgstr "Konuşmayı arşivle (Delete, Backspace, A)"
-
-#~ msgid "Password:"
-#~ msgstr "Şifre:"
-
-#~ msgid "Port:"
-#~ msgstr "Port:"
-
-#~ msgid "SSL"
-#~ msgstr "SSL"
-
-#~ msgid "SSL/TLS encryption:"
-#~ msgstr "SSL/TLS şifrelemesi:"
-
-#~ msgid "Server:"
-#~ msgstr "Sunucu:"
-
-#~ msgid "Unable to login to email server"
-#~ msgstr "E-posta sunucusuna giriş yapılamıyor"
