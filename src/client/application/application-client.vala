@@ -210,10 +210,7 @@ public class Application.Client : Gtk.Application {
      */
     public bool is_background_service {
         get {
-            return (
-                (this.flags & ApplicationFlags.IS_SERVICE) != 0 ||
-                this.start_hidden
-            );
+            return this.config.startup_notifications;
         }
     }
 
