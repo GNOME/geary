@@ -228,8 +228,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 (GLib.SettingsBindSetMappingShared) settings_trust_images_setter
             );
         }
-
-        this.delete_event.connect(on_delete);
     }
 
     private void add_plugin_pane() {
@@ -259,15 +257,6 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
 
     private void on_close() {
         close();
-    }
-
-    private bool on_delete() {
-        // Sync startup notification option with file state
-        Application.Client? application = this.application;
-        if (application != null) {
-            application.autostart.sync_with_config();
-        }
-        return Gdk.EVENT_PROPAGATE;
     }
 
     private static bool settings_trust_images_getter(GLib.Value value, GLib.Variant variant, void* user_data) {

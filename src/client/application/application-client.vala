@@ -375,9 +375,7 @@ public class Application.Client : Gtk.Application {
 
         this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
-        this.autostart = new StartupManager(
-            this.config, this.get_desktop_directory()
-        );
+        this.autostart = new StartupManager(this);
 
         // Ensure all geary windows have an icon
         Gtk.Window.set_default_icon_name(APP_ID);
