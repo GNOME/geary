@@ -25,9 +25,9 @@ public class Application.StartupManager : GLib.Object {
         ).get_child(AUTOSTART_FOLDER)
         .get_child(AUTOSTART_DESKTOP_FILE);
 
-        // Connect startup-notifications option callback
-        config.settings.changed[Configuration.STARTUP_NOTIFICATIONS_KEY].connect(
-            on_startup_notification_change
+        // Connect run-in-background option callback
+        config.settings.changed[Configuration.RUN_IN_BACKGROUND_KEY].connect(
+            on_run_in_background_change
         );
     }
 
@@ -74,12 +74,12 @@ public class Application.StartupManager : GLib.Object {
      * the file doesn't exist).
      */
     public void sync_with_config() {
-        this.config.startup_notifications = this.startup_file.query_exists();
+        this.config.run_in_background = this.startup_file.query_exists();
     }
 
-    private void on_startup_notification_change() {
+    private void on_run_in_background_change() {
         try {
-            if (this.config.startup_notifications) {
+            if (this.config.run_in_background) {
                 install_startup_file();
             } else {
                 delete_startup_file();

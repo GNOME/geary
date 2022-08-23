@@ -25,7 +25,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string SINGLE_KEY_SHORTCUTS = "single-key-shortcuts";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
     public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
-    public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
+    public const string RUN_IN_BACKGROUND_KEY = "run-in-background";
     public const string UNDO_SEND_DELAY = "undo-send-delay";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
@@ -101,9 +101,9 @@ public class Application.Configuration : Geary.BaseObject {
 
     public bool single_key_shortcuts { get; set; default = false; }
 
-    public bool startup_notifications {
-        get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
-        set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
+    public bool run_in_background {
+        get { return settings.get_boolean(RUN_IN_BACKGROUND_KEY); }
+        set { set_boolean(RUN_IN_BACKGROUND_KEY, value); }
     }
 
     private const string CLOCK_FORMAT_KEY = "clock-format";

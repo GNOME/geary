@@ -216,7 +216,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 "state"
             );
             config.bind(
-                Application.Configuration.STARTUP_NOTIFICATIONS_KEY,
+                Application.Configuration.RUN_IN_BACKGROUND_KEY,
                 startup_notifications,
                 "state"
             );

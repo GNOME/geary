@@ -61,10 +61,10 @@
         <description>List of languages that are always displayed in the popover of the spell checker.</description>
     </key>
 
-    <key name="startup-notifications" type="b">
+    <key name="run-in-background" type="b">
         <default>false</default>
-        <summary>Notify of new mail at startup</summary>
-        <description>True to notify of new mail at startup.</description>
+        <summary>Run application in background on logon and when closed</summary>
+        <description>True to run application in background.</description>
     </key>
 
     <key name="ask-open-attachment" type="b">

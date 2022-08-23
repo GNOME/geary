@@ -210,7 +210,7 @@ public class Application.Client : Gtk.Application {
      */
     public bool is_background_service {
         get {
-            return this.config.startup_notifications;
+            return this.config.run_in_background;
         }
     }
 
@@ -1151,7 +1151,7 @@ public class Application.Client : Gtk.Application {
     private async void update_autostart_file() {
         try {
             this.autostart.delete_startup_file();
-            if (this.config.startup_notifications) {
+            if (this.config.run_in_background) {
                 this.autostart.install_startup_file();
             }
         } catch (GLib.Error err) {
