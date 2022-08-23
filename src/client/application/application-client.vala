@@ -75,7 +75,6 @@ public class Application.Client : Gtk.Application {
     private const string OPTION_LOG_REPLAY_QUEUE = "log-replay-queue";
     private const string OPTION_LOG_SMTP = "log-smtp";
     private const string OPTION_LOG_SQL = "log-sql";
-    private const string OPTION_HIDDEN = "hidden";
     private const string OPTION_NEW_WINDOW = "new-window";
     private const string OPTION_QUIT = "quit";
     private const string OPTION_REVOKE_CERTS = "revoke-certs";
@@ -100,9 +99,6 @@ public class Application.Client : Gtk.Application {
         { OPTION_DEBUG, 'd', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Print debug logging"), null },
-        { OPTION_HIDDEN, 0, 0, GLib.OptionArg.NONE, null,
-          /// Command line option
-          N_("Start with the main window hidden (deprecated)"), null },
         { OPTION_INSPECTOR, 'i', 0, GLib.OptionArg.NONE, null,
           /// Command line option
           N_("Enable WebKitGTK Inspector in web views"), null },
@@ -250,7 +246,6 @@ public class Application.Client : Gtk.Application {
 
     private File exec_dir;
     private string binary;
-    private bool start_hidden = false;
     private Gtk.CssProvider single_key_shortcuts = new Gtk.CssProvider();
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
@@ -1091,20 +1086,6 @@ public class Application.Client : Gtk.Application {
             Geary.Db.Context.enable_sql_logging = true;
         }
 
-        if (options.contains(OPTION_HIDDEN)) {
-            warning(
-                /// Warning printed to the console when a deprecated
-                /// command line option is used.
-                _("The `--hidden` option is deprecated and will be removed in the future.")
-            );
-            this.start_hidden = true;
-            // Update the autostart file so that it stops using the
-            // --hidden option.
-            this.update_autostart_file.begin();
-            // Then manually start the controller
-            this.create_controller.begin();
-            activated = true;
-        }
         if (options.contains(OPTION_NEW_WINDOW)) {
             activate_action(Action.Application.NEW_WINDOW, null);
             activated = true;
@@ -1145,18 +1126,6 @@ public class Application.Client : Gtk.Application {
         }
 
         return -1;
-    }
-
-    /** Removes and re-adds the autostart file if needed. */
-    private async void update_autostart_file() {
-        try {
-            this.autostart.delete_startup_file();
-            if (this.config.run_in_background) {
-                this.autostart.install_startup_file();
-            }
-        } catch (GLib.Error err) {
-            warning("Could not update autostart file");
-        }
     }
 
     private void add_app_accelerators(string action,
