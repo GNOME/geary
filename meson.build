@@ -93,6 +93,7 @@ libhandy = dependency('libhandy-1', version: '>= 1.2.1', required: false)
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
+libsoup = dependency('libsoup-3.0')
 libstemmer_dep = cc.find_library('stemmer')
 libunwind_dep = dependency(
   'libunwind', version: '>= 1.1', required: get_option('libunwind')

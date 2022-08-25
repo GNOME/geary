@@ -34,6 +34,7 @@ client_vala_sources = files(
   'application/goa-mediator.vala',
   'application/secret-mediator.vala',
 
+  'accounts/accounts-autoconfig.vala',
   'accounts/accounts-editor.vala',
   'accounts/accounts-editor-add-pane.vala',
   'accounts/accounts-editor-edit-pane.vala',

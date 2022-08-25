@@ -7,34 +7,29 @@
     <property name="title" translatable="yes">Add an account</property>
     <property name="has_subtitle">False</property>
     <child>
-      <object class="GtkGrid">
+      <object class="GtkButton" id="back_button">
         <property name="visible">True</property>
+        <property name="receives_default">True</property>
+        <signal name="clicked" handler="on_back_button_clicked" swapped="no"/>
         <child>
-          <object class="GtkButton" id="back_button">
+          <object class="GtkImage">
             <property name="visible">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="on_back_button_clicked" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="no_show_all">True</property>
-                <property name="icon_name">go-previous-symbolic</property>
-              </object>
-            </child>
+            <property name="no_show_all">True</property>
+            <property name="icon_name">go-previous-symbolic</property>
           </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
         </child>
       </object>
+      <packing>
+        <property name="pack_type">start</property>
+        <property name="position">1</property>
+      </packing>
     </child>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="column_spacing">12</property>
         <child>
-          <object class="GtkSpinner" id="create_spinner">
+          <object class="GtkSpinner" id="action_spinner">
             <property name="visible">True</property>
           </object>
           <packing>
@@ -43,16 +38,13 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="create_button">
-            <property name="label" translatable="yes">_Create</property>
+          <object class="GtkButton" id="action_button">
+            <property name="label" translatable="yes">_Next</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="receives_default">True</property>
             <property name="use_underline">True</property>
-            <signal name="clicked" handler="on_create_button_clicked" swapped="no"/>
-            <style>
-              <class name="suggested-action"/>
-            </style>
+            <signal name="clicked" handler="on_action_button_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -89,13 +81,14 @@
                 <property name="visible">True</property>
                 <property name="margin">24</property>
                 <child>
-                  <object class="GtkGrid" id="pane_content">
+                  <object class="GtkStack" id="stack">
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkFrame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">in</property>
+                        <property name="valign">start</property>
                         <child>
                           <object class="GtkListBox" id="details_list">
                             <property name="visible">True</property>
@@ -105,102 +98,98 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
+                        <property name="name">user_settings</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkGrid" id="receiving_panel">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
+                        <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkGrid" id="receiving_panel">
                             <property name="visible">True</property>
-                            <property name="halign">start</property>
-                            <property name="label" translatable="yes">Receiving</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                            <style>
-                              <class name="geary-settings-heading"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkFrame">
-                            <property name="visible">True</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkListBox" id="receiving_list">
+                              <object class="GtkLabel">
                                 <property name="visible">True</property>
-                                <property name="selection_mode">none</property>
-                                <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Receiving</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                                <style>
+                                  <class name="geary-settings-heading"/>
+                                </style>
                               </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkFrame">
+                                <property name="visible">True</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkListBox" id="receiving_list">
+                                    <property name="visible">True</property>
+                                    <property name="selection_mode">none</property>
+                                    <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
-                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkGrid" id="sending_panel">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Sending</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                </attributes>
+                                <style>
+                                  <class name="geary-settings-heading"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkFrame">
+                                <property name="visible">True</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkListBox" id="sending_list">
+                                    <property name="visible">True</property>
+                                    <property name="selection_mode">none</property>
+                                    <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                          </object>
                         </child>
                       </object>
                       <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
+                        <property name="name">server_settings</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkGrid" id="sending_panel">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="halign">start</property>
-                            <property name="label" translatable="yes">Sending</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                            <style>
-                              <class name="geary-settings-heading"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkFrame">
-                            <property name="visible">True</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">in</property>
-                            <child>
-                              <object class="GtkListBox" id="sending_list">
-                                <property name="visible">True</property>
-                                <property name="selection_mode">none</property>
-                                <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <style>
-                      <class name="geary-accounts-editor-pane-content"/>
-                    </style>
-
                   </object>
                 </child>
               </object>

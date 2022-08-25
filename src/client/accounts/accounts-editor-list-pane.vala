@@ -31,7 +31,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     /** {@inheritDoc} */
     internal Gtk.Widget initial_widget {
         get {
-            return this.show_welcome ? this.service_list : this.accounts_list;
+            return this.accounts_list;
         }
     }
 
@@ -73,10 +73,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     [GtkChild] private unowned Gtk.Frame accounts_list_frame;
 
-    [GtkChild] private unowned Gtk.Label add_service_label;
-
-    [GtkChild] private unowned Gtk.ListBox service_list;
-
     private Gee.Map<Geary.AccountInformation,EditorEditPane> edit_pane_cache =
         new Gee.HashMap<Geary.AccountInformation,EditorEditPane>();
 
@@ -96,12 +92,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         foreach (Geary.AccountInformation account in this.accounts.iterable()) {
             add_account(account, this.accounts.get_status(account));
         }
-
-        this.service_list.set_header_func(Editor.seperator_headers);
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.GMAIL));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.OUTLOOK));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.YAHOO));
-        this.service_list.add(new AddServiceProviderRow(Geary.ServiceProvider.OTHER));
 
         this.accounts.account_added.connect(on_account_added);
         this.accounts.account_status_changed.connect(on_account_status_changed);
@@ -128,8 +118,8 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         base.destroy();
     }
 
-    internal void show_new_account(Geary.ServiceProvider provider) {
-        this.editor.push(new EditorAddPane(this.editor, provider));
+    internal void show_new_account() {
+        this.editor.push(new EditorAddPane(this.editor));
     }
 
     internal void show_existing_account(Geary.AccountInformation account) {
@@ -171,13 +161,11 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             // pane and service list.
             this.welcome_panel.show();
             this.accounts_list_frame.hide();
-            this.add_service_label.hide();
         } else {
             // There are some accounts available, so show them and
             // the full add service UI.
             this.welcome_panel.hide();
             this.accounts_list_frame.show();
-            this.add_service_label.show();
         }
     }
 
@@ -266,21 +254,9 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
     }
 
     [GtkCallback]
-    private bool on_list_keynav_failed(Gtk.Widget widget,
-                                       Gtk.DirectionType direction) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-        if (direction == Gtk.DirectionType.DOWN &&
-            widget == this.accounts_list) {
-            this.service_list.child_focus(direction);
-            ret = Gdk.EVENT_STOP;
-        } else if (direction == Gtk.DirectionType.UP &&
-            widget == this.service_list) {
-            this.accounts_list.child_focus(direction);
-            ret = Gdk.EVENT_STOP;
-        }
-        return ret;
+    private void on_add_button_clicked() {
+        show_new_account();
     }
-
 }
 
 
@@ -419,75 +395,6 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         if (parent != null) {
             parent.invalidate_sort();
         }
-    }
-
-}
-
-
-private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
-
-
-    internal Geary.ServiceProvider provider;
-
-    private Gtk.Label service_name = new Gtk.Label("");
-    private Gtk.Image next_icon = new Gtk.Image.from_icon_name(
-        "go-next-symbolic", Gtk.IconSize.SMALL_TOOLBAR
-    );
-
-
-    public AddServiceProviderRow(Geary.ServiceProvider provider) {
-        this.provider = provider;
-
-        // Translators: Label for adding a generic email account
-        string? name = null;
-        switch (provider) {
-        case Geary.ServiceProvider.GMAIL:
-            name = _("Gmail");
-            break;
-
-        case Geary.ServiceProvider.OUTLOOK:
-            name = _("Outlook.com");
-            break;
-
-        case Geary.ServiceProvider.YAHOO:
-            name = _("Yahoo");
-            break;
-
-        case Geary.ServiceProvider.OTHER:
-            name = _("Other email providers");
-            break;
-        }
-        this.service_name.set_text(name);
-        this.service_name.set_hexpand(true);
-        this.service_name.halign = Gtk.Align.START;
-        this.service_name.show();
-
-        this.next_icon.show();
-
-        this.layout.add(this.service_name);
-        this.layout.add(this.next_icon);
-    }
-
-    public override void activated(EditorListPane pane) {
-        pane.accounts.add_goa_account.begin(
-            this.provider, pane.op_cancellable,
-            (obj, res) => {
-                bool add_local = false;
-                try {
-                    pane.accounts.add_goa_account.end(res);
-                } catch (GLib.IOError.NOT_SUPPORTED err) {
-                    // Not a supported type, so don't bother logging the error
-                    add_local = true;
-                } catch (GLib.Error err) {
-                    debug("Failed to add %s via GOA: %s",
-                          this.provider.to_string(), err.message);
-                    add_local = true;
-                }
-
-                if (add_local) {
-                    pane.show_new_account(this.provider);
-                }
-            });
     }
 
 }

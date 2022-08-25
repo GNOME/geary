@@ -37,30 +37,28 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
     [GtkChild] private unowned Gtk.HeaderBar header;
 
-    [GtkChild] private unowned Gtk.Grid pane_content;
+    [GtkChild] private unowned Gtk.Stack stack;
 
     [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
 
     [GtkChild] private unowned Gtk.ListBox details_list;
 
-    [GtkChild] private unowned Gtk.Grid receiving_panel;
-
     [GtkChild] private unowned Gtk.ListBox receiving_list;
-
-    [GtkChild] private unowned Gtk.Grid sending_panel;
 
     [GtkChild] private unowned Gtk.ListBox sending_list;
 
-    [GtkChild] private unowned Gtk.Button create_button;
+    [GtkChild] private unowned Gtk.Button action_button;
 
     [GtkChild] private unowned Gtk.Button back_button;
 
-    [GtkChild] private unowned Gtk.Spinner create_spinner;
+    [GtkChild] private unowned Gtk.Spinner action_spinner;
 
     private NameRow real_name;
     private EmailRow email = new EmailRow();
     private string last_valid_email = "";
     private string last_valid_hostname = "";
+
+    private GLib.Cancellable auto_config_cancellable = new GLib.Cancellable();
 
     private HostnameRow imap_hostname = new HostnameRow(Geary.Protocol.IMAP);
     private TransportSecurityRow imap_tls = new TransportSecurityRow();
@@ -76,31 +74,18 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private bool controls_valid = false;
 
 
-    internal EditorAddPane(Editor editor, Geary.ServiceProvider provider) {
+    internal EditorAddPane(Editor editor) {
         this.editor = editor;
-        this.provider = provider;
+        this.provider = Geary.ServiceProvider.OTHER;
 
         this.accounts = editor.application.controller.account_manager;
         this.engine = editor.application.engine;
 
-        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
+        this.stack.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
         this.receiving_list.set_header_func(Editor.seperator_headers);
         this.sending_list.set_header_func(Editor.seperator_headers);
-
-        if (provider != Geary.ServiceProvider.OTHER) {
-            this.details_list.add(
-                new ServiceProviderRow<EditorAddPane>(
-                    provider,
-                    // Translators: Label for adding an email account
-                    // account for a generic IMAP service provider.
-                    _("All others")
-                )
-            );
-            this.receiving_panel.hide();
-            this.sending_panel.hide();
-        }
 
         this.real_name = new NameRow(this.accounts.get_account_name());
 
@@ -130,18 +115,14 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.smtp_password.validator.state_changed.connect(on_validated);
         this.smtp_password.value.activate.connect(on_activated);
 
-        if (provider == Geary.ServiceProvider.OTHER) {
-            this.receiving_list.add(this.imap_hostname);
-            this.receiving_list.add(this.imap_tls);
-            this.receiving_list.add(this.imap_login);
-            this.receiving_list.add(this.imap_password);
+        this.receiving_list.add(this.imap_hostname);
+        this.receiving_list.add(this.imap_tls);
+        this.receiving_list.add(this.imap_login);
+        this.receiving_list.add(this.imap_password);
 
-            this.sending_list.add(this.smtp_hostname);
-            this.sending_list.add(this.smtp_tls);
-            this.sending_list.add(this.smtp_auth);
-        } else {
-            this.details_list.add(this.imap_password);
-        }
+        this.sending_list.add(this.smtp_hostname);
+        this.sending_list.add(this.smtp_tls);
+        this.sending_list.add(this.smtp_auth);
     }
 
     internal Gtk.HeaderBar get_header() {
@@ -169,7 +150,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         account.outgoing = new_smtp_service();
         account.untrusted_host.connect(on_untrusted_host);
 
-        if (this.provider == Geary.ServiceProvider.OTHER) {
+        if (this.provider == Geary.ServiceProvider.OTHER &&
+                this.imap_hostname.get_visible()) {
             bool imap_valid = false;
             bool smtp_valid = false;
 
@@ -302,30 +284,22 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             Geary.Protocol.IMAP, this.provider
         );
 
-        if (this.provider == Geary.ServiceProvider.OTHER) {
-            service.credentials = new Geary.Credentials(
-                Geary.Credentials.Method.PASSWORD,
-                this.imap_login.value.get_text().strip(),
-                this.imap_password.value.get_text().strip()
-            );
+        service.credentials = new Geary.Credentials(
+            Geary.Credentials.Method.PASSWORD,
+            this.imap_login.value.get_text().strip(),
+            this.imap_password.value.get_text().strip()
+        );
 
-            Components.NetworkAddressValidator host =
-                (Components.NetworkAddressValidator)
-                this.imap_hostname.validator;
-            GLib.NetworkAddress address = host.validated_address;
-            service.host = address.hostname;
-            service.port = (uint16) address.port;
-            service.transport_security = this.imap_tls.value.method;
+        Components.NetworkAddressValidator host =
+            (Components.NetworkAddressValidator)
+            this.imap_hostname.validator;
+        GLib.NetworkAddress address = host.validated_address;
+        service.host = address.hostname;
+        service.port = (uint16) address.port;
+        service.transport_security = this.imap_tls.value.method;
 
-            if (service.port == 0) {
-                service.port = service.get_default_port();
-            }
-        } else {
-            service.credentials = new Geary.Credentials(
-                Geary.Credentials.Method.PASSWORD,
-                this.email.value.get_text().strip(),
-                this.imap_password.value.get_text().strip()
-            );
+        if (service.port == 0) {
+            service.port = service.get_default_port();
         }
 
         return service;
@@ -336,96 +310,121 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             Geary.Protocol.SMTP, this.provider
         );
 
-        if (this.provider == Geary.ServiceProvider.OTHER) {
-            service.credentials_requirement = this.smtp_auth.value.source;
-            if (service.credentials_requirement ==
-                    Geary.Credentials.Requirement.CUSTOM) {
-                service.credentials = new Geary.Credentials(
-                    Geary.Credentials.Method.PASSWORD,
-                    this.smtp_login.value.get_text().strip(),
-                    this.smtp_password.value.get_text().strip()
-                );
-            }
+        service.credentials_requirement = this.smtp_auth.value.source;
+        if (service.credentials_requirement ==
+                Geary.Credentials.Requirement.CUSTOM) {
+            service.credentials = new Geary.Credentials(
+                Geary.Credentials.Method.PASSWORD,
+                this.smtp_login.value.get_text().strip(),
+                this.smtp_password.value.get_text().strip()
+            );
+        }
 
-            Components.NetworkAddressValidator host =
-                (Components.NetworkAddressValidator)
-                this.smtp_hostname.validator;
-            GLib.NetworkAddress address = host.validated_address;
+        Components.NetworkAddressValidator host =
+            (Components.NetworkAddressValidator)
+            this.smtp_hostname.validator;
+        GLib.NetworkAddress address = host.validated_address;
 
-            service.host = address.hostname;
-            service.port = (uint16) address.port;
-            service.transport_security = this.smtp_tls.value.method;
+        service.host = address.hostname;
+        service.port = (uint16) address.port;
+        service.transport_security = this.smtp_tls.value.method;
 
-            if (service.port == 0) {
-                service.port = service.get_default_port();
-            }
+        if (service.port == 0) {
+            service.port = service.get_default_port();
         }
 
         return service;
     }
 
     private void check_validation() {
+        bool server_settings_visible = this.stack.get_visible_child_name() == "server_settings";
         bool controls_valid = true;
-        foreach (Gtk.ListBox list in new Gtk.ListBox[] {
+        Gtk.ListBox[] list_boxes;
+        if (server_settings_visible) {
+            list_boxes = new Gtk.ListBox[] {
                 this.details_list, this.receiving_list, this.sending_list
-            }) {
-            list.foreach((child) => {
+            };
+        } else {
+            list_boxes = new Gtk.ListBox[] { this.details_list };
+        }
+        foreach (Gtk.ListBox list_box in list_boxes) {
+            list_box.foreach((child) => {
                     AddPaneRow? validatable = child as AddPaneRow;
                     if (validatable != null && !validatable.validator.is_valid) {
                         controls_valid = false;
                     }
                 });
         }
-        this.create_button.set_sensitive(controls_valid);
+        this.action_button.set_sensitive(controls_valid);
         this.controls_valid = controls_valid;
     }
 
     private void update_operation_ui(bool is_running) {
-        this.create_spinner.visible = is_running;
-        this.create_spinner.active = is_running;
-        this.create_button.sensitive = !is_running;
+        this.action_spinner.visible = is_running;
+        this.action_spinner.active = is_running;
+        this.action_button.sensitive = !is_running;
         this.back_button.sensitive = !is_running;
         this.sensitive = !is_running;
     }
 
-    private void on_validated(Components.Validator.Trigger reason) {
-        check_validation();
-        if (this.controls_valid && reason == Components.Validator.Trigger.ACTIVATED) {
-            this.create_button.clicked();
-        }
+    private void switch_to_user_settings() {
+        this.stack.set_visible_child_name("user_settings");
+        this.action_button.set_label(_("_Next"));
+        this.action_button.set_sensitive(true);
+        this.action_button.get_style_context().remove_class("suggested-action");
     }
 
-    private void on_activated() {
-        if (this.controls_valid) {
-            this.create_button.clicked();
-        }
+    private void switch_to_server_settings() {
+        this.stack.set_visible_child_name("server_settings");
+        this.action_button.set_label(_("_Create"));
+        this.action_button.set_sensitive(false);
+        this.action_button.get_style_context().add_class("suggested-action");
     }
 
-    private void on_email_changed() {
-        Gtk.Entry imap_login_entry = this.imap_login.value;
-        Gtk.Entry smtp_login_entry = this.smtp_login.value;
+    private void set_server_settings_from_autoconfig(AutoConfig auto_config,
+                                                     GLib.AsyncResult res)
+            throws Accounts.AutoConfigError {
+        AutoConfigValues auto_config_values = auto_config.get_config.end(res);
         Gtk.Entry imap_hostname_entry = this.imap_hostname.value;
         Gtk.Entry smtp_hostname_entry = this.smtp_hostname.value;
-        string email = "";
-        string hostname = "";
-        string imap_hostname = "";
-        string smtp_hostname = "";
+        TlsComboBox imap_tls_combo_box = this.imap_tls.value;
+        TlsComboBox smtp_tls_combo_box = this.smtp_tls.value;
+
+        imap_hostname_entry.text = auto_config_values.imap_server +
+             ":" + auto_config_values.imap_port;
+        smtp_hostname_entry.text = auto_config_values.smtp_server +
+             ":" + auto_config_values.smtp_port;
+        imap_tls_combo_box.method = auto_config_values.imap_tls_method;
+        smtp_tls_combo_box.method = auto_config_values.smtp_tls_method;
+
+        this.imap_hostname.hide();
+        this.smtp_hostname.hide();
+        this.imap_tls.hide();
+        this.smtp_tls.hide();
+
+        switch (auto_config_values.id) {
+        case "googlemail.com":
+            this.provider = Geary.ServiceProvider.GMAIL;
+            break;
+        case "hotmail.com":
+            this.provider = Geary.ServiceProvider.OUTLOOK;
+            break;
+        default:
+            this.provider = Geary.ServiceProvider.OTHER;
+            break;
+        }
+    }
+
+    private void set_server_settings_from_hostname(string hostname) {
+        Gtk.Entry imap_hostname_entry = this.imap_hostname.value;
+        Gtk.Entry smtp_hostname_entry = this.smtp_hostname.value;
+        string smtp_hostname = "smtp." + hostname;
+        string imap_hostname = "imap." + hostname;
         string last_imap_hostname = "";
         string last_smtp_hostname = "";
 
-        if (this.email.validator.state == Components.Validator.Validity.VALID) {
-            email = this.email.value.text;
-            hostname = email.split("@")[1];
-            smtp_hostname = "smtp." + hostname;
-            imap_hostname = "imap." + hostname;
-        }
-
-        if (imap_login_entry.text == this.last_valid_email) {
-            imap_login_entry.text = email;
-        }
-        if (smtp_login_entry.text == this.last_valid_email) {
-            smtp_login_entry.text = email;
-        }
+        this.imap_hostname.show();
+        this.smtp_hostname.show();
 
         if (this.last_valid_hostname != "") {
             last_imap_hostname = "imap." + this.last_valid_hostname;
@@ -437,9 +436,102 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         if (smtp_hostname_entry.text == last_smtp_hostname) {
             smtp_hostname_entry.text = smtp_hostname;
         }
+        this.last_valid_hostname = hostname;
+    }
+
+    private void add_goa_account() {
+        this.accounts.add_goa_account.begin(
+            this.provider, this.op_cancellable,
+            (obj, res) => {
+                bool add_local = false;
+                try {
+                    this.accounts.add_goa_account.end(res);
+                } catch (GLib.IOError.NOT_SUPPORTED err) {
+                    // Not a supported type, so don't bother logging the error
+                    add_local = true;
+                } catch (GLib.Error err) {
+                    debug("Failed to add %s via GOA: %s",
+                          this.provider.to_string(), err.message);
+                    add_local = true;
+                }
+                // Google Mail does not support "Less secure apps" anymore
+                if (add_local) {
+                    switch (this.provider) {
+                    case Geary.ServiceProvider.GMAIL:
+                        this.editor.add_notification(
+                            new Components.InAppNotification(
+                                // Translators: In-app notification label, when
+                                // GNOME Online Accounts are missing
+                                _("Online accounts are missing")
+                            )
+                        );
+                        add_local = false;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+
+                if (add_local) {
+                    switch_to_server_settings();
+                } else {
+                    this.editor.pop();
+                }
+            }
+        );
+    }
+
+    private void on_validated(Components.Validator.Trigger reason) {
+        check_validation();
+        if (this.controls_valid && reason == Components.Validator.Trigger.ACTIVATED) {
+            this.action_button.clicked();
+        }
+    }
+
+    private void on_activated() {
+        if (this.controls_valid) {
+            this.action_button.clicked();
+        }
+    }
+
+    private void on_email_changed() {
+        Gtk.Entry imap_login_entry = this.imap_login.value;
+        Gtk.Entry smtp_login_entry = this.smtp_login.value;
+
+        this.auto_config_cancellable.cancel();
+
+        if (this.email.validator.state != Components.Validator.Validity.VALID) {
+            return;
+        }
+
+        string email = this.email.value.text;
+        string hostname = email.split("@")[1];
+
+        // Do not update entries if changed by user
+        if (imap_login_entry.text == this.last_valid_email) {
+            imap_login_entry.text = email;
+        }
+        if (smtp_login_entry.text == this.last_valid_email) {
+            smtp_login_entry.text = email;
+        }
 
         this.last_valid_email = email;
-        this.last_valid_hostname = hostname;
+
+        // Try to get configuration from Thunderbird autoconfig service
+        this.action_spinner.visible = true;
+        this.action_spinner.active = true;
+        this.auto_config_cancellable = new GLib.Cancellable();
+        var auto_config = new AutoConfig(this.auto_config_cancellable);
+        auto_config.get_config.begin(hostname, (obj, res) => {
+            try {
+                set_server_settings_from_autoconfig(auto_config, res);
+            } catch (Accounts.AutoConfigError err) {
+                debug("Error getting auto configuration: %s", err.message);
+                set_server_settings_from_hostname(hostname);
+            }
+            this.action_spinner.visible = false;
+            this.action_spinner.active = false;
+        });
     }
 
     private void on_smtp_auth_changed() {
@@ -474,13 +566,29 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     [GtkCallback]
-    private void on_create_button_clicked() {
-        this.validate_account.begin(this.op_cancellable);
+    private void on_action_button_clicked() {
+        if (this.stack.get_visible_child_name() == "user_settings") {
+            switch (this.provider) {
+            case Geary.ServiceProvider.GMAIL:
+            case Geary.ServiceProvider.OUTLOOK:
+                add_goa_account();
+                break;
+            case Geary.ServiceProvider.OTHER:
+                switch_to_server_settings();
+                break;
+            }
+        } else {
+            this.validate_account.begin(this.op_cancellable);
+        }
     }
 
     [GtkCallback]
     private void on_back_button_clicked() {
-        this.editor.pop();
+        if (this.stack.get_visible_child_name() == "user_settings") {
+            this.editor.pop();
+        } else {
+            switch_to_user_settings();
+        }
     }
 
     [GtkCallback]

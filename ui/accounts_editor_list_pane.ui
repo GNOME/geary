@@ -7,6 +7,19 @@
     <property name="title" translatable="yes">Accounts</property>
     <property name="has_subtitle">False</property>
     <property name="show_close_button">True</property>
+    <child>
+      <object class="GtkButton" id="add_button">
+        <property name="label" translatable="yes">_Add</property>
+        <property name="tooltip_text" translatable="yes">Add an account</property>
+        <property name="visible">True</property>
+        <property name="receives_default">True</property>
+        <property name="use_underline">True</property>
+        <signal name="clicked" handler="on_add_button_clicked"/>
+        <style>
+          <class name="suggested-action"/>
+        </style>
+      </object>
+    </child>
   </object>
   <object class="GtkAdjustment" id="pane_adjustment">
     <property name="upper">100</property>
@@ -103,7 +116,6 @@
                           <object class="GtkListBox" id="accounts_list">
                             <property name="visible">True</property>
                             <property name="selection_mode">none</property>
-                            <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
                             <signal name="row-activated" handler="on_row_activated" swapped="no"/>
                           </object>
                         </child>
@@ -115,53 +127,9 @@
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkLabel" id="add_service_label">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Add an account</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                        <style>
-                          <class name="geary-settings-heading"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame">
-                        <property name="visible">True</property>
-                        <property name="valign">start</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkListBox" id="service_list">
-                            <property name="width_request">0</property>
-                            <property name="visible">True</property>
-                            <property name="valign">start</property>
-                            <property name="selection_mode">none</property>
-                            <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
-                            <signal name="row-activated" handler="on_row_activated" swapped="no"/>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
                     <style>
                       <class name="geary-accounts-editor-pane-content"/>
                     </style>
-
                   </object>
                 </child>
               </object>
