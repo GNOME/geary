@@ -95,9 +95,9 @@ This is the second line.
     public void duplicate_mailbox() throws GLib.Error {
         Message dup = string_to_message(DUPLICATE_TO);
 
-        assert(dup.to.size == 2);
+        assert(dup.to.size == 1);
         assert_addresses(
-            dup.to, "John Doe 1 <jdoe1@machine.example>, John Doe 2 <jdoe2@machine.example>"
+            dup.to, "John Doe 2 <jdoe2@machine.example>"
         );
     }
 
