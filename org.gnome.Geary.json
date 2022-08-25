@@ -203,8 +203,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/jstedfast/gmime.git",
-                    "branch": "master"
+                    "url": "https://gitlab.gnome.org/GNOME/gmime.git",
+                    "branch": "6bff5288f9c108160dd56dd20a9c6608aa55f791"
                 }
             ]
         },
