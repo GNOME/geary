@@ -283,10 +283,6 @@ internal class Accounts.ServiceProviderRow<PaneType> :
             label = _("Outlook.com");
             break;
 
-        case Geary.ServiceProvider.YAHOO:
-            label = _("Yahoo");
-            break;
-
         case Geary.ServiceProvider.OTHER:
             label = other_type_label;
             break;

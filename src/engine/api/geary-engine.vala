@@ -218,26 +218,17 @@ public class Geary.Engine : BaseObject {
                 );
             break;
 
-            case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount(
-                    config, local, incoming_remote, outgoing_remote
-                );
-            break;
-
             case ServiceProvider.OUTLOOK:
                 account = new ImapEngine.OutlookAccount(
                     config, local, incoming_remote, outgoing_remote
                 );
             break;
 
-            case ServiceProvider.OTHER:
+            default:
                 account = new ImapEngine.OtherAccount(
                     config, local, incoming_remote, outgoing_remote
                 );
             break;
-
-            default:
-                assert_not_reached();
         }
 
         config.notify["ordinal"].connect(on_account_ordinal_changed);

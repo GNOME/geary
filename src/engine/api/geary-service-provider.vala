@@ -12,7 +12,6 @@
 
 public enum Geary.ServiceProvider {
     GMAIL,
-    YAHOO,
     OUTLOOK,
     OTHER;
 
@@ -34,9 +33,6 @@ public enum Geary.ServiceProvider {
         case GMAIL:
             ImapEngine.GmailAccount.setup_account(service);
             break;
-        case YAHOO:
-            ImapEngine.YahooAccount.setup_account(service);
-            break;
         case OUTLOOK:
             ImapEngine.OutlookAccount.setup_account(service);
             break;
@@ -50,9 +46,6 @@ public enum Geary.ServiceProvider {
         switch (this) {
         case GMAIL:
             ImapEngine.GmailAccount.setup_service(service);
-            break;
-        case YAHOO:
-            ImapEngine.YahooAccount.setup_service(service);
             break;
         case OUTLOOK:
             ImapEngine.OutlookAccount.setup_service(service);

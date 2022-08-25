@@ -115,7 +115,6 @@ internal class Accounts.EditorServersPane :
             this.account, this.commands, this.op_cancellable
         );
         switch (account.service_provider) {
-        case YAHOO:
         case OTHER:
             add_row(this.details_list, this.save_sent);
             break;

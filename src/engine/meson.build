@@ -222,8 +222,6 @@ engine_vala_sources = files(
   'imap-engine/replay-ops/imap-engine-replay-update.vala',
   'imap-engine/replay-ops/imap-engine-server-search-email.vala',
   'imap-engine/replay-ops/imap-engine-user-close.vala',
-  'imap-engine/yahoo/imap-engine-yahoo-account.vala',
-  'imap-engine/yahoo/imap-engine-yahoo-folder.vala',
 
   'memory/memory-buffer.vala',
   'memory/memory-byte-buffer.vala',

@@ -329,10 +329,6 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
             details = _("Outlook.com");
             break;
 
-        case Geary.ServiceProvider.YAHOO:
-            details = _("Yahoo");
-            break;
-
         case Geary.ServiceProvider.OTHER:
             // no-op: Use the generated label
             break;

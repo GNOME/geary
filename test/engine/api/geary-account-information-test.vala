@@ -41,14 +41,6 @@ class Geary.AccountInformationTest : TestCase {
                 new RFC822.MailboxAddress(null, "test1@example.com")
             ).save_sent
         );
-        assert_true(
-            new AccountInformation(
-                "test",
-                ServiceProvider.YAHOO,
-                new Mock.CredentialsMediator(),
-                new RFC822.MailboxAddress(null, "test1@example.com")
-            ).save_sent
-        );
     }
 
     public void test_sender_mailboxes() throws GLib.Error {
