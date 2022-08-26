@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-07-10 11:17+0000\n"
-"PO-Revision-Date: 2022-07-10 15:51+0300\n"
+"POT-Creation-Date: 2022-08-26 10:56+0000\n"
+"PO-Revision-Date: 2022-08-26 14:20+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -132,11 +132,11 @@ msgstr ""
 "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;електронка;"
 "імап;аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:23
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Скласти лист"
 
-#: desktop/org.gnome.Geary.desktop.in.in:27
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Нове вікно"
 
@@ -232,12 +232,13 @@ msgstr ""
 "правопису."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Сповіщати про нову пошту під час запуску"
+msgid "Run application in background on logon and when closed"
+msgstr ""
+"Запускати програму у фоновому режимі при вході та закритті головного вікна"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
-msgstr "Значення «true» означає «сповіщати про нову пошту під час запуску»."
+msgid "True to run application in background."
+msgstr "«True», якщо слід працювати у фоновому режимі."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
@@ -841,133 +842,128 @@ msgid "Visit the Geary web site"
 msgstr "Відвідати сайт Geary"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Виводити діагностичні повідомлення"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Запустити із прихованим головним вікном (застаріле)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Увімкнути ревізор WebKitGTK на панелях вебперегляду"
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Журнал спостереження за спілкуванням"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 msgid "Log IMAP network deserialization"
 msgstr ""
 "Записувати до журналу розкладення роботи з мережею IMAP у послідовну форму"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Журнал нормування тек"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Журнал мережевої діяльності IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr "Журнал черги відповідей IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Журнал мережевої діяльності SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Журнал запитів баз даних (породжує багато повідомлень)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Виконати штатне завершення роботи"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Відкрити нове вікно"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Відкликати усі пришпилені сертифікати TLS сервера"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Показати версію програми"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Версія Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Модифікація Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "Версія GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "Версія GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "Версія WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Стільничне середовище"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Невідомий"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Назва дистрибутива"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Поширений випуск"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr "Префікс встановлення"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
 msgstr "Інформація про %s"
@@ -975,21 +971,13 @@ msgstr "Інформація про %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:581
 msgid "translator-credits"
 msgstr "Daniel Korostil <ted.korostiled@gmail.com>"
 
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1101
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr ""
-"Параметр «--hidden» вважається застарілим. Його буде вилучено у майбутніх "
-"версіях програми."
-
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1134
+#: src/client/application/application-client.vala:1110
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Нерозпізнаний аргумент команди: «%s»"
@@ -1329,6 +1317,10 @@ msgstr[3] "Остаточно вилучити цей лист?"
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary хоче працювати у фоновому режимі"
+
 #. Translators: The first argument will be a
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
@@ -1490,7 +1482,6 @@ msgstr "Geary продовжуватиме працювати після зак�
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:171
-#| msgid "Always Load Remote Images"
 msgid "_Always load images"
 msgstr "З_авжди завантажувати зображення"
 
@@ -1500,7 +1491,7 @@ msgid "Preferences"
 msgstr "Параметри"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Додатки"
 
@@ -1693,7 +1684,7 @@ msgstr "З_берегти"
 msgid "_Keep"
 msgstr "_Зберегти"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Вибрати колір"
 
@@ -2027,7 +2018,6 @@ msgstr ""
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
-#| msgid "This message has not yet been sent."
 msgid "This message can't be trusted."
 msgstr "Цьому повідомленню не можна довіряти."
 
@@ -3464,17 +3454,14 @@ msgid "_Select All"
 msgstr "Ви_брати все"
 
 #: ui/conversation-message-menus.ui:50
-#| msgid "Show less"
 msgid "Show images"
 msgstr "Показати зображення"
 
 #: ui/conversation-message-menus.ui:52
-#| msgid "Draft message"
 msgid "For this message"
 msgstr "Для цього повідомлення"
 
 #: ui/conversation-message-menus.ui:56
-#| msgid "No sender"
 msgid "For this sender"
 msgstr "Для цього відправника"
 
@@ -3854,6 +3841,21 @@ msgstr "_Запам'ятати пароль"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Засвідчення"
+
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Сповіщати про нову пошту під час запуску"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr "Значення «true» означає «сповіщати про нову пошту під час запуску»."
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Запустити із прихованим головним вікном (застаріле)"
+
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr ""
+#~ "Параметр «--hidden» вважається застарілим. Його буде вилучено у майбутніх "
+#~ "версіях програми."
 
 #~ msgid "Always show from sender"
 #~ msgstr "Завжди показувати від відправника"
