@@ -155,7 +155,6 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     }
 
     private Gee.Queue<Components.InfoBar> available;
-    private int last_allocated_height = 0;
 
 
     construct {
@@ -212,19 +211,16 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             // so show it
             this.visible = true;
             base.add(next);
-            this.size_allocate.connect(on_allocation_changed);
             next.revealed = true;
-            next.notify["revealed"].connect(on_revealed);
         } else if (current != null && next != current) {
             // Currently showing an info bar but should be showing
             // something else, so start hiding it
-            current.notify["revealed"].disconnect(on_revealed);
+            current.notify["revealed"].connect(on_revealed);
             current.revealed = false;
         } else if (current == null && next == null) {
             // Not currently showing anything and there's nothing to
             // show, so hide the frame
             this.visible = false;
-            this.last_allocated_height = 0;
         }
     }
 
@@ -242,27 +238,11 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
         update();
     }
 
-    private void on_allocation_changed() {
-        var current = this.current_info_bar;
-        if (current != null) {
-            Gtk.Allocation alloc;
-            get_allocation(out alloc);
-            bool shrinking = this.last_allocated_height > alloc.height;
-            this.last_allocated_height = alloc.height;
-            if (shrinking && alloc.height < 2) {
-                this.size_allocate.disconnect(on_allocation_changed);
-                this.available.remove(current);
-                base.remove(current);
-                update();
-            }
-        }
-    }
-
     private void on_revealed(GLib.Object target, GLib.ParamSpec param) {
-        var current = this.current_info_bar;
-        if (current == target && !current.revealed) {
-            remove(current);
-        }
+        var info_bar = target as Components.InfoBar;
+        target.notify["revealed"].disconnect(on_revealed);
+        base.remove(info_bar);
+        remove(info_bar);
     }
 
 }
