@@ -349,10 +349,7 @@ public class Application.PluginManager : GLib.Object {
     internal class ComposerImpl : Geary.BaseObject, Plugin.Composer {
 
 
-        public bool can_send {
-            get { return this.backing.can_send; }
-            set { this.backing.can_send = value; }
-        }
+        public bool can_send { get; set; default = false; }
 
         public Plugin.Account? sender_context {
             get {
@@ -397,6 +394,12 @@ public class Application.PluginManager : GLib.Object {
             this.backing = backing;
             this.application = application;
             this._action_group_name = application.plugin.action_group_name + "-cmp";
+            backing.bind_property(
+                "can-send",
+                this,
+                "can-send",
+                BindingFlags.SYNC_CREATE |
+                BindingFlags.BIDIRECTIONAL);
         }
 
         public void save_to_folder(Plugin.Folder? location) {

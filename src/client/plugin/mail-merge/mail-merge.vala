@@ -287,6 +287,12 @@ public class Plugin.MailMerge :
                 /// merge in composer
                 new Actionable(_("Mail Merge"), load_action)
             );
+            composer.bind_property(
+                "can-send",
+                load_action,
+                "enabled",
+                BindingFlags.SYNC_CREATE |
+                BindingFlags.INVERT_BOOLEAN);
         }
     }
 
