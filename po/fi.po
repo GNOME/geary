@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-05-31 11:16+0000\n"
-"PO-Revision-Date: 2021-09-10 18:04+0300\n"
+"POT-Creation-Date: 2022-08-26 10:56+0000\n"
+"PO-Revision-Date: 2022-08-30 22:19+0300\n"
 "Last-Translator: Jiri Grönroos <jiri.gronroos+l10n@iki.fi>\n"
 "Language-Team: suomi <lokalisointi-lista@googlegroups.com>\n"
 "Language: fi\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -124,11 +124,11 @@ msgstr "Geary ja viestin kirjoitusikkuna"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;sähköposti;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Lähetä viesti"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Uusi ikkuna"
 
@@ -213,13 +213,12 @@ msgid ""
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Ilmoita uusista viesteistä käynnistyksen yhteydessä"
+msgid "Run application in background on logon and when closed"
+msgstr "Suorita sovellus taustalla kirjautumisen yhteydessä tai suljettaessa"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
+msgid "True to run application in background."
 msgstr ""
-"Tosi jos uusista viesteistä halutaan ilmoitettavan käynnistyksen yhteydessä."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
@@ -266,38 +265,48 @@ msgid "The last recorded size of the detached composer window."
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Salli kuvat näistä verkkotunnuksista"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Kuvat, jotka ovat näistä verkkotunnuksista, ovat luotettuja"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Sähköpostin lähettämisen kumoamisen viive"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr ""
+"Aika sekunneissa, mikä odotetaan ennen viestin lähettämistä. Aseta nollaksi "
+"tai pienemmäksi luvuksi poistaaksesi käytöstä."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr ""
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Luettelo valinnaisista liitännäisistä"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Tässä listatut liitännäiset ladataan sovelluksen käynnistyessä."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Tehtiinkö vanhojen asetusten migraatio"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -809,27 +818,22 @@ msgid "Visit the Geary web site"
 msgstr "Vieraile Gearyn verkkosivustolla"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Tulosta vianetsintälokitus"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Käynnistä pääikkuna piilotettuna (vanhennettu)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr ""
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Lokita keskustelujen tarkkailu"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 #, fuzzy
 #| msgid "Log folder normalization"
 msgid "Log IMAP network deserialization"
@@ -837,106 +841,106 @@ msgstr "Lokita kansioiden normalisointi"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Lokita kansioiden normalisointi"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Lokita IMAP-verkkotoiminta"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr ""
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Lokita SMTP-verkkotoiminta"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Lokita tietokantaan kohdistuvat kyselyt (luo paljon viestejä)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Suorita siisti lopetus"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Avaa uusi ikkuna"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Kumoa kaikki kiinnitetyt TLS-palvelinvarmenteet"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Näytä sovelluksen versio"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Geary-versio"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr ""
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "GTK-versio"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "GLib-versio"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "WebKitGTK-versio"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Työpöytäympäristö"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Tuntematon"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Jakelun nimi"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Jakelun versio"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr ""
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
 msgstr "Tietoja %ssta"
@@ -944,20 +948,13 @@ msgstr "Tietoja %ssta"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:581
 msgid "translator-credits"
 msgstr "Jiri Grönroos"
 
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1101
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr ""
-"Valinta `--hidden`on vanhennettu ja se poistetaan tulevissa versioissa."
-
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1134
+#: src/client/application/application-client.vala:1110
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Tunnistamaton ohjelma-argumentti: “%s”"
@@ -1269,6 +1266,10 @@ msgstr[1] "Haluatko poistaa nämä viestit pysyvästi?"
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary haluaa olla käynnissä taustalla"
+
 #. Translators: The first argument will be a
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
@@ -1416,13 +1417,18 @@ msgstr "_Tarkkaile uusia viestejä suljettuna"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary jatkaa käynnissä olemista kun kaikki ikkunat on suljettu"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "Lataa _aina kuvat"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Asetukset"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Liitännäiset"
 
@@ -1613,7 +1619,7 @@ msgstr "_Tallenna"
 msgid "_Keep"
 msgstr "Säil_ytä"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Valitse väri"
 
@@ -1880,14 +1886,14 @@ msgstr "Päiväys:"
 msgid "Subject:"
 msgstr "Aihe:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Tämä sähköpostiosoite saattaa olla väärennetty"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Näytä vähemmän"
 
@@ -1895,7 +1901,7 @@ msgstr "Näytä vähemmän"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1906,47 +1912,48 @@ msgstr[1] "%d lisää…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Ei lähettäjää"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Kuva"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(tuntematon)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Etäkuvia ei näytetä"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Näytä etäkuvat vain lähettäjiltä, joihin luotat."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "Näytä"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Tähän viestiin ei voida luottaa."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Näytä aina lähettäjältä"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Näytä"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2778,17 +2785,17 @@ msgstr "Poistetut"
 msgid "Archive | Archives"
 msgstr "Arkisto | Arkistot | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Kohteen “%s” MIME-tyyppia ei voitu selvittää."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(ei aihetta)"
 
@@ -3340,6 +3347,22 @@ msgstr "T_allenna kuva nimellä…"
 msgid "_Select All"
 msgstr "Valitse _kaikki"
 
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Näytä kuvat"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Tämän viestin kohdalla"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Tämän lähettäjän kohdalla"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Tämän verkkotunnuksen kohdalla"
+
 #: ui/conversation-message.ui:54
 msgid "From <email>"
 msgstr "Lähettäjä <email>"
@@ -3713,6 +3736,25 @@ msgstr "_Muista salasana"
 msgid "_Authenticate"
 msgstr "_Tunnistaudu"
 
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Ilmoita uusista viesteistä käynnistyksen yhteydessä"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr ""
+#~ "Tosi jos uusista viesteistä halutaan ilmoitettavan käynnistyksen "
+#~ "yhteydessä."
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Käynnistä pääikkuna piilotettuna (vanhennettu)"
+
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr ""
+#~ "Valinta `--hidden`on vanhennettu ja se poistetaan tulevissa versioissa."
+
+#~ msgid "Always show from sender"
+#~ msgstr "Näytä aina lähettäjältä"
+
 #~ msgid "Position of message list pane"
 #~ msgstr "Viestiluettelopaneelin sijainti"
 
@@ -3768,9 +3810,6 @@ msgstr "_Tunnistaudu"
 
 #~ msgid "Edit Draft"
 #~ msgstr "Muokkaa luonnosta"
-
-#~ msgid "Show Images"
-#~ msgstr "Näytä kuvat"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Find in current conversations"
