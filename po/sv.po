@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-07-08 20:23+0000\n"
-"PO-Revision-Date: 2022-07-09 09:32+0200\n"
+"POT-Creation-Date: 2022-08-30 19:20+0000\n"
+"PO-Revision-Date: 2022-09-02 00:18+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.1\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -43,7 +43,7 @@ msgstr "Skicka filer med Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:704
+#: src/client/application/application-main-window.vala:706
 msgid "Geary"
 msgstr "Geary"
 
@@ -129,13 +129,13 @@ msgstr "Geary visande rich text-redigeraren"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "E-post;Epost;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mail;E-post;Epost;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:23
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Skriv meddelande"
 
-#: desktop/org.gnome.Geary.desktop.in.in:27
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Nytt fönster"
 
@@ -224,12 +224,12 @@ msgstr ""
 "Lista över språk som alltid visas i stavningskontrollens kontextfönster."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Avisera om ny e-post vid uppstart"
+msgid "Run application in background on logon and when closed"
+msgstr "Kör programmet i bakgrunden vid inloggning och när det stängs"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
-msgstr "True för att avisera om ny e-post vid uppstart."
+msgid "True to run application in background."
+msgstr "True (sant) för att köra programmet i bakgrunden."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
@@ -618,12 +618,12 @@ msgstr[0] "%d dag tillbaka"
 msgstr[1] "%d dagar tillbaka"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2273
 msgid "Undo"
 msgstr "Ångra"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2253
+#: src/client/application/application-main-window.vala:2256
 msgid "Redo"
 msgstr "Gör om"
 
@@ -718,7 +718,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:650
+#: src/client/application/application-main-window.vala:648
 msgid "Login"
 msgstr "Inloggning"
 
@@ -829,132 +829,127 @@ msgid "Visit the Geary web site"
 msgstr "Besök Gearys webbplats"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Skriv ut felsökningsloggning"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Starta Geary med huvudfönstret dolt (föråldrat)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Aktivera WebKitGTK-inspektör i webbvyer"
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Logga konversationsövervakning"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 msgid "Log IMAP network deserialization"
 msgstr "Logga avserialisering av IMAP-nätverksdata"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Logga mappsynkronisering"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Logga IMAP-nätverksaktivitet"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr "Logga IMAP-händelser"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Logga SMTP-nätverksaktivitet"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Logga databasförfrågningar (detta genererar många meddelanden)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Avsluta"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Öppna ett nytt fönster"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Återkalla alla nålade TLS-servercertifikat"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Visa programversion"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Geary-version"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Geary-revision"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "GTK-version"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "GLib-version"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "WebKitGTK-version"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Skrivbordsmiljö"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Okänd"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Distributionsnamn"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Distributionsutgåva"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr "Installationsprefix"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -962,7 +957,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:581
 msgid "translator-credits"
 msgstr ""
 "Joachim Johansson <joachim.j@gmail.com>\n"
@@ -974,15 +969,9 @@ msgstr ""
 "Skicka synpunkter på översättningen till\n"
 "<tp-sv@listor.tp-sv.se>"
 
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1101
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "Flaggan ”--hidden” är föråldrad och kommer att tas bort i framtiden."
-
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1134
+#: src/client/application/application-client.vala:1110
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Okänt programargument: ”%s”"
@@ -1187,56 +1176,56 @@ msgid "Account update"
 msgstr "Kontouppdatering"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:634
 msgid "Working offline"
 msgstr "Arbetar frånkopplad"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:636
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Du kommer inte att kunna skicka eller ta emot e-post innan du är ansluten "
 "igen."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:643
 msgid "Login problem"
 msgstr "Inloggningsproblem"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:645
 msgid "An account has reported an incorrect login or password."
 msgstr "Ett konto har rapporterat en felaktig inloggning eller lösenord."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:652
 msgid "Retry login, you will be prompted for your password"
 msgstr "Försök igen att logga in, du kommer att efterfrågas om ditt lösenord"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:659
 msgid "Security problem"
 msgstr "Säkerhetsproblem"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:661
 msgid "An account has reported an untrusted server."
 msgstr "Ett konto har rapporterat en opålitlig server."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:664
 msgid "Check"
 msgstr "Kontrollera"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:668
 msgid "Check the security details for the connection"
 msgstr "Kontrollera anslutningens säkerhetsdetaljer"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:713
+#: src/client/application/application-main-window.vala:715
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1244,52 +1233,56 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1103
+#: src/client/application/application-main-window.vala:1105
 #: src/client/folder-list/folder-list-account-branch.vala:46
 msgid "Labels"
 msgstr "Etiketter"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1433
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Ta bort alla e-postmeddelanden från din mapp %s?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1434
 msgid "This removes the email from Geary and your email server."
 msgstr "Detta tar bort e-postmeddelanden från Geary och din e-postserver."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1435
 msgid "This cannot be undone."
 msgstr "Detta kan inte ångras."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1436
 #, c-format
 msgid "Empty %s"
 msgstr "Töm %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1493
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Vill du radera denna konversation permanent?"
 msgstr[1] "Vill du radera dessa konversationer permanent?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1498
+#: src/client/application/application-main-window.vala:1513
 msgid "Delete"
 msgstr "Radera"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1508
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Vill du radera detta meddelande permanent?"
 msgstr[1] "Vill du radera dessa meddelanden permanent?"
 
-#: src/client/application/application-main-window.vala:1804
+#: src/client/application/application-main-window.vala:1805
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
+
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary vill köra i bakgrunden"
 
 #. Translators: The first argument will be a
 #. description of the document type, the second will
@@ -1318,38 +1311,38 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Fråga _inte igen"
 
-#: src/client/components/components-conversation-actions.vala:97
+#: src/client/components/components-conversation-actions.vala:109
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Markera konversation"
 msgstr[1] "Markera konversationer"
 
-#: src/client/components/components-conversation-actions.vala:102
+#: src/client/components/components-conversation-actions.vala:114
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Lägg till etikett till konversation"
 msgstr[1] "Lägg till etikett till konversationer"
 
-#: src/client/components/components-conversation-actions.vala:107
+#: src/client/components/components-conversation-actions.vala:119
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Flytta konversation"
 msgstr[1] "Flytta konversationer"
 
-#: src/client/components/components-conversation-actions.vala:112
+#: src/client/components/components-conversation-actions.vala:124
 #: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arkivera konversation"
 msgstr[1] "Arkivera konversationer"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:135
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Flytta konversation till papperskorgen"
 msgstr[1] "Flytta konversationer till papperskorgen"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:145
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Radera konversation"
@@ -1449,7 +1442,7 @@ msgid "Preferences"
 msgstr "Inställningar"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Insticksmoduler"
 
@@ -1640,7 +1633,7 @@ msgstr "_Spara"
 msgid "_Keep"
 msgstr "_Behåll"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Välj färg"
 
@@ -2435,7 +2428,7 @@ msgstr[1] "%dh sedan"
 
 #: src/client/util/util-date.vala:173
 msgid "Yesterday"
-msgstr "Igår"
+msgstr "I går"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -3751,6 +3744,20 @@ msgstr "_Kom ihåg lösenord"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Autentisera"
+
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Avisera om ny e-post vid uppstart"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr "True för att avisera om ny e-post vid uppstart."
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Starta Geary med huvudfönstret dolt (föråldrat)"
+
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr ""
+#~ "Flaggan ”--hidden” är föråldrad och kommer att tas bort i framtiden."
 
 #~ msgid "Always show from sender"
 #~ msgstr "Visa alltid från avsändare"
