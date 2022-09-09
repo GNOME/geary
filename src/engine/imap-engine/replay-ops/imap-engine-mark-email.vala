@@ -7,6 +7,7 @@
 private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation {
     private MinimalFolder engine;
     private Gee.List<ImapDB.EmailIdentifier> to_mark = new Gee.ArrayList<ImapDB.EmailIdentifier>();
+    private Gee.List<Imap.UID> to_mark_uids = new Gee.ArrayList<Imap.UID>();
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
@@ -48,6 +49,10 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         yield engine.local_folder.mark_email_async(original_flags.keys, flags_to_add, flags_to_remove,
             cancellable);
 
+        // We can't rely on email identifier for remote replay
+        // An email identifier id can match multiple uids
+        to_mark_uids = yield engine.local_folder.get_email_uids_async(to_mark, cancellable);
+
         // Notify using flags from DB.
         Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
             original_flags.keys, cancellable);
@@ -60,9 +65,8 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     public override async void replay_remote_async(Imap.FolderSession remote)
         throws GLib.Error {
         // potentially empty due to writebehind operation
-        if (original_flags.size > 0) {
-            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
-                ImapDB.EmailIdentifier.to_uids(original_flags.keys));
+        if (to_mark_uids.size > 0) {
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(to_mark_uids);
             yield remote.mark_email_async(
                 msg_sets, flags_to_add, flags_to_remove, cancellable
             );

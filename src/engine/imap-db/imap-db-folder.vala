@@ -1122,6 +1122,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             unread_updated(unread_status);
     }
 
+    internal async Gee.List<Imap.UID>? get_email_uids_async(
+        Gee.Collection<EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.List<Imap.UID> uids = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+            uids = do_get_email_uids(cx, ids, cancellable);
+
+            return Db.TransactionOutcome.SUCCESS;
+        }, cancellable);
+
+        return uids;
+    }
+
     internal async Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? get_email_flags_async(
         Gee.Collection<EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = null;
@@ -1880,6 +1892,21 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
 
         return builder.str;
+    }
+
+    private Gee.List<Imap.UID>? do_get_email_uids(Db.Connection cx,
+        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids, ListFlags.NONE,
+            cancellable);
+        if (locs == null)
+            return null;
+
+        Gee.List<Imap.UID> uids = new Gee.ArrayList<Imap.UID>();
+        foreach (LocationIdentifier location in locs) {
+            uids.insert(0, location.uid);
+        }
+
+        return (uids.size > 0) ? uids : null;
     }
 
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? do_get_email_flags(Db.Connection cx,
