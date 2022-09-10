@@ -310,8 +310,6 @@ src/engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
 src/engine/imap-engine/replay-ops/imap-engine-replay-update.vala
 src/engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-user-close.vala
-src/engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
-src/engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 src/engine/imap/message/imap-data-format.vala
 src/engine/imap/message/imap-envelope.vala
 src/engine/imap/message/imap-fetch-body-data-specifier.vala
