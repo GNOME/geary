@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-08-26 10:56+0000\n"
-"PO-Revision-Date: 2022-08-30 00:08+0200\n"
+"POT-Creation-Date: 2022-09-10 11:23+0000\n"
+"PO-Revision-Date: 2022-09-10 21:18+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -34,8 +34,8 @@ msgstr "Fájlok küldése a Geary használatával"
 #: desktop/geary-autostart.desktop.in.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:704
+#: src/client/accounts/accounts-editor-servers-pane.vala:551
+#: src/client/application/application-main-window.vala:706
 msgid "Geary"
 msgstr "Geary"
 
@@ -327,21 +327,15 @@ msgstr ""
 msgid "Failed to store certificate"
 msgstr "A tanúsítvány tárolása meghiúsult"
 
-#. Translators: Label for adding an email account
-#. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:98
-msgid "All others"
-msgstr "Az összes többi"
-
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:185
-#: src/client/accounts/accounts-editor-servers-pane.vala:313
+#: src/client/accounts/accounts-editor-add-pane.vala:167
+#: src/client/accounts/accounts-editor-servers-pane.vala:312
 msgid "Check your receiving login and password"
 msgstr "Ellenőrizze a fogadó bejelentkezési nevet és jelszót"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:200
-#: src/client/accounts/accounts-editor-servers-pane.vala:326
+#: src/client/accounts/accounts-editor-add-pane.vala:182
+#: src/client/accounts/accounts-editor-servers-pane.vala:325
 msgid "Check your receiving server details"
 msgstr "Ellenőrizze a fogadó kiszolgáló részleteit"
 
@@ -350,50 +344,65 @@ msgstr "Ellenőrizze a fogadó kiszolgáló részleteit"
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:222
-#: src/client/accounts/accounts-editor-servers-pane.vala:347
+#: src/client/accounts/accounts-editor-add-pane.vala:204
+#: src/client/accounts/accounts-editor-servers-pane.vala:346
 msgid "Check your sending login and password"
 msgstr "Ellenőrizze a küldő bejelentkezési nevet és jelszót"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:236
-#: src/client/accounts/accounts-editor-servers-pane.vala:360
+#: src/client/accounts/accounts-editor-add-pane.vala:218
+#: src/client/accounts/accounts-editor-servers-pane.vala:359
 msgid "Check your sending server details"
 msgstr "Ellenőrizze a küldő kiszolgáló részleteit"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:251
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 msgid "Check your email address and password"
 msgstr "Ellenőrizze az e-mail címét és jelszavát"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:262
+#: src/client/accounts/accounts-editor-add-pane.vala:244
 msgid "Could not connect, check your network"
 msgstr "Nem sikerült kapcsolódni, ellenőrizze a hálózatot"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:275
+#: src/client/accounts/accounts-editor-add-pane.vala:257
 msgid "An unexpected problem occurred"
 msgstr "Váratlan probléma történt"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:293
+#: src/client/accounts/accounts-editor-add-pane.vala:275
 #, c-format
 msgid "Account not created: %s"
 msgstr "A fiók nincs létrehozva: %s"
 
+#: src/client/accounts/accounts-editor-add-pane.vala:372
+#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+msgid "_Next"
+msgstr "_Következő"
+
+#: src/client/accounts/accounts-editor-add-pane.vala:379
+msgid "_Create"
+msgstr "_Létrehozás"
+
+#. Translators: In-app notification label, when
+#. GNOME Online Accounts are missing
+#: src/client/accounts/accounts-editor-add-pane.vala:465
+msgid "Online accounts are missing"
+msgstr "Az Online fiókok hiányoznak"
+
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:573
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 msgid "Your name"
 msgstr "Az Ön neve"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:590
+#: src/client/accounts/accounts-editor-add-pane.vala:698
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "E-mail cím"
@@ -403,7 +412,7 @@ msgstr "E-mail cím"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:594
+#: src/client/accounts/accounts-editor-add-pane.vala:702
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "szemely@example.com"
@@ -412,15 +421,15 @@ msgstr "szemely@example.com"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:608
-#: src/client/accounts/accounts-editor-servers-pane.vala:881
+#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Bejelentkezési név"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:622
-#: src/client/accounts/accounts-editor-servers-pane.vala:1003
+#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Jelszó"
@@ -429,14 +438,14 @@ msgstr "Jelszó"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:644
-#: src/client/accounts/accounts-editor-servers-pane.vala:725
+#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "IMAP-kiszolgáló"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:647
+#: src/client/accounts/accounts-editor-add-pane.vala:755
 msgid "imap.example.com"
 msgstr "imap.example.com"
 
@@ -444,14 +453,14 @@ msgstr "imap.example.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:653
-#: src/client/accounts/accounts-editor-servers-pane.vala:731
+#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "SMTP-kiszolgáló"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:656
+#: src/client/accounts/accounts-editor-add-pane.vala:764
 msgid "smtp.example.com"
 msgstr "smtp.example.com"
 
@@ -476,7 +485,7 @@ msgstr ""
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "Mé_gse"
@@ -614,55 +623,43 @@ msgid_plural "%d days back"
 msgstr[0] "%d napra visszamenőleg"
 msgstr[1] "%d napra visszamenőleg"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2270
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2273
 msgid "Undo"
 msgstr "Visszavonás"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2253
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+#: src/client/application/application-main-window.vala:2256
 msgid "Redo"
 msgstr "Újra"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:349
-#: src/client/accounts/accounts-editor-list-pane.vala:445
+#: src/client/accounts/accounts-editor-list-pane.vala:325
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:353
-#: src/client/accounts/accounts-editor-list-pane.vala:449
+#: src/client/accounts/accounts-editor-list-pane.vala:329
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:357
-#: src/client/accounts/accounts-editor-list-pane.vala:453
-#: src/client/accounts/accounts-editor-row.vala:287
-msgid "Yahoo"
-msgstr "Yahoo"
-
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:379
+#: src/client/accounts/accounts-editor-list-pane.vala:351
 msgid "This account has been disabled"
 msgstr "Ezt a fiókot letiltották"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:388
+#: src/client/accounts/accounts-editor-list-pane.vala:360
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Ennél a fióknál probléma történt és nem érhető el"
-
-#: src/client/accounts/accounts-editor-list-pane.vala:457
-msgid "Other email providers"
-msgstr "Egyéb e-mail szolgáltatók"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:563
+#: src/client/accounts/accounts-editor-list-pane.vala:466
 #, c-format
 msgid "Account “%s” removed"
 msgstr "A(z) „%s” fiók eltávolítva"
@@ -670,7 +667,7 @@ msgstr "A(z) „%s” fiók eltávolítva"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:570
+#: src/client/accounts/accounts-editor-list-pane.vala:473
 #, c-format
 msgid "Account “%s” restored"
 msgstr "A(z) „%s” fiók visszaállítva"
@@ -683,30 +680,30 @@ msgstr "Húzza az elem mozgatásához"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:299
+#: src/client/accounts/accounts-editor-row.vala:295
 msgid "Service provider"
 msgstr "Szolgáltató"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:473
+#: src/client/accounts/accounts-editor-row.vala:469
 msgid "Connection security"
 msgstr "Kapcsolat biztonsága"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:484
-#: src/client/accounts/accounts-editor-servers-pane.vala:752
-#: src/client/accounts/accounts-editor-servers-pane.vala:967
+#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-servers-pane.vala:751
+#: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Nincs"
 
-#: src/client/accounts/accounts-editor-row.vala:491
+#: src/client/accounts/accounts-editor-row.vala:487
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:498
+#: src/client/accounts/accounts-editor-row.vala:494
 msgid "TLS"
 msgstr "TLS"
 
@@ -714,35 +711,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:650
+#: src/client/accounts/accounts-editor-row.vala:535
+#: src/client/application/application-main-window.vala:648
 msgid "Login"
 msgstr "Bejelentkezés"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:546
+#: src/client/accounts/accounts-editor-row.vala:542
 msgid "No login needed"
 msgstr "Nem szükséges bejelentkezés"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:554
+#: src/client/accounts/accounts-editor-row.vala:550
 msgid "Use same login as receiving"
 msgstr "Ugyanazon bejelentkezési név használata mint fogadáshoz"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:562
+#: src/client/accounts/accounts-editor-row.vala:558
 msgid "Use a different login"
 msgstr "Eltérő bejelentkezési név használata"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:374
+#: src/client/accounts/accounts-editor-servers-pane.vala:373
 #, c-format
 msgid "Account not updated: %s"
 msgstr "A fiók nincs frissítve: %s"
@@ -750,23 +747,23 @@ msgstr "A fiók nincs frissítve: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:537
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
 msgid "Account source"
 msgstr "Fiók forrása"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:549
+#: src/client/accounts/accounts-editor-servers-pane.vala:548
 msgid "GNOME Online Accounts"
 msgstr "GNOME Online fiókok"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:608
+#: src/client/accounts/accounts-editor-servers-pane.vala:607
 msgid "Save draft email on server"
 msgstr "Piszkozat e-mail mentése a kiszolgálón"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:663
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
 msgid "Save sent email on server"
 msgstr "Elküldött e-mail mentése a kiszolgálón"
 
@@ -775,12 +772,12 @@ msgstr "Elküldött e-mail mentése a kiszolgálón"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:953
+#: src/client/accounts/accounts-editor-servers-pane.vala:952
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s OAuth2 használatával"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:963
+#: src/client/accounts/accounts-editor-servers-pane.vala:962
 msgid "Use receiving server login"
 msgstr "Fogadó kiszolgáló bejelentkezési nevének használata"
 
@@ -1170,55 +1167,55 @@ msgid "Account update"
 msgstr "Fiókfrissítés"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:634
 msgid "Working offline"
 msgstr "Kapcsolat nélküli munka"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:636
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Nem lesz képes leveleket küldeni vagy fogadni, amíg nem kapcsolódik újra."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:643
 msgid "Login problem"
 msgstr "Bejelentkezési probléma"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:645
 msgid "An account has reported an incorrect login or password."
 msgstr "Egy fiók helytelen bejelentkezési nevet vagy jelszót jelentett."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:652
 msgid "Retry login, you will be prompted for your password"
 msgstr "Bejelentkezés újrapróbálása, a jelszava bekérésre fog kerülni"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:659
 msgid "Security problem"
 msgstr "Biztonsági probléma"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:661
 msgid "An account has reported an untrusted server."
 msgstr "Egy fiók nem megbízható kiszolgálót jelentett."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:664
 msgid "Check"
 msgstr "Ellenőrzés"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:668
 msgid "Check the security details for the connection"
 msgstr "A kapcsolat biztonsági részleteinek ellenőrzése"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:713
+#: src/client/application/application-main-window.vala:715
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1226,50 +1223,50 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1103
+#: src/client/application/application-main-window.vala:1105
 #: src/client/folder-list/folder-list-account-branch.vala:46
 msgid "Labels"
 msgstr "Címkék"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1433
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Minden levelet kiürít a(z) %s mappából?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1434
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Ez eltávolítja a levelet a Geary programból és a levelezőkiszolgálóról."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1435
 msgid "This cannot be undone."
 msgstr "Ez nem vonható vissza."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1436
 #, c-format
 msgid "Empty %s"
 msgstr "%s ürítése"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1493
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Véglegesen törölni szeretné ezt a beszélgetést?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a beszélgetéseket?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1498
+#: src/client/application/application-main-window.vala:1513
 msgid "Delete"
 msgstr "Törlés"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1508
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Véglegesen törölni szeretné ezt a levelet?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a leveleket?"
 
-#: src/client/application/application-main-window.vala:1804
+#: src/client/application/application-main-window.vala:1805
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1305,38 +1302,38 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Ne _kérdezze újra"
 
-#: src/client/components/components-conversation-actions.vala:97
+#: src/client/components/components-conversation-actions.vala:109
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Beszélgetés megjelölése"
 msgstr[1] "Beszélgetések megjelölése"
 
-#: src/client/components/components-conversation-actions.vala:102
+#: src/client/components/components-conversation-actions.vala:114
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Címke hozzáadása a beszélgetéshez"
 msgstr[1] "Címke hozzáadása a beszélgetésekhez"
 
-#: src/client/components/components-conversation-actions.vala:107
+#: src/client/components/components-conversation-actions.vala:119
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Beszélgetés áthelyezése"
 msgstr[1] "Beszélgetések áthelyezése"
 
-#: src/client/components/components-conversation-actions.vala:112
+#: src/client/components/components-conversation-actions.vala:124
 #: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Beszélgetés archiválása"
 msgstr[1] "Beszélgetések archiválása"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:135
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Beszélgetés áthelyezése a Kukába"
 msgstr[1] "Beszélgetések áthelyezése a Kukába"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:145
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Beszélgetés törlése"
@@ -1427,7 +1424,6 @@ msgstr "A Geary továbbra is futni fog az összes ablak bezárása után"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:171
-#| msgid "Always Load Remote Images"
 msgid "_Always load images"
 msgstr "Képek betöltésének _engedélyezése"
 
@@ -1580,7 +1576,7 @@ msgstr "_OK"
 msgid "_About"
 msgstr "_Névjegy"
 
-#: src/client/components/stock.vala:22
+#: src/client/components/stock.vala:22 ui/accounts_editor_list_pane.ui:12
 msgid "_Add"
 msgstr "_Hozzáadás"
 
@@ -1597,7 +1593,7 @@ msgid "_Help"
 msgstr "_Súgó"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: src/client/plugin/mail-merge/mail-merge.vala:397
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Megnyitás"
@@ -1962,7 +1958,6 @@ msgstr "A távoli képek megjelenítése csak a megbízható feladóktól."
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
-#| msgid "This message has not yet been sent."
 msgid "This message can't be trusted."
 msgstr "Ez a levél nem lehet megbízható."
 
@@ -2255,7 +2250,7 @@ msgstr "Küldés"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/mail-merge/mail-merge.vala:342
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Szerkesztés"
@@ -2268,8 +2263,8 @@ msgstr "Szerkesztés"
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 #: src/client/plugin/mail-merge/mail-merge.vala:288
-#: src/client/plugin/mail-merge/mail-merge.vala:389
-#: src/client/plugin/mail-merge/mail-merge.vala:488
+#: src/client/plugin/mail-merge/mail-merge.vala:395
+#: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Körlevél"
 
@@ -2301,24 +2296,24 @@ msgstr[1] "%u / %u elküldve"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:330
 msgid "Mail merge template"
 msgstr "Körlevélsablon"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:328
+#: src/client/plugin/mail-merge/mail-merge.vala:334
 msgid "Merge"
 msgstr "Egyesítés"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:377
+#: src/client/plugin/mail-merge/mail-merge.vala:383
 msgid "Insert field"
 msgstr "Mező beszúrása"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:396
+#: src/client/plugin/mail-merge/mail-merge.vala:402
 msgid "Comma separated values (CSV)"
 msgstr "Vesszővel elválasztott értékek (CSV)"
 
@@ -2814,19 +2809,15 @@ msgstr "A(z) „%s” MIME-típus tartalomtípusa nem határozható meg ennél: 
 msgid "(no subject)"
 msgstr "(nincs tárgy)"
 
-#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:13
 msgid "Add an account"
 msgstr "Fiók hozzáadása"
 
-#: ui/accounts_editor_add_pane.ui:47
-msgid "_Create"
-msgstr "_Létrehozás"
-
-#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Fogadás"
 
-#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Küldés"
 
@@ -2863,11 +2854,11 @@ msgstr "Fiók eltávolítása a Geary programból"
 msgid "Accounts"
 msgstr "Fiókok"
 
-#: ui/accounts_editor_list_pane.ui:59
+#: ui/accounts_editor_list_pane.ui:72
 msgid "To get started, select an email provider below."
 msgstr "Kezdéshez válasszon egy e-mail szolgáltatót lent."
 
-#: ui/accounts_editor_list_pane.ui:73
+#: ui/accounts_editor_list_pane.ui:86
 msgid "Welcome to Geary"
 msgstr "Üdvözli a Geary"
 
@@ -3363,17 +3354,14 @@ msgid "_Select All"
 msgstr "Ö_sszes kijelölése"
 
 #: ui/conversation-message-menus.ui:50
-#| msgid "Show less"
 msgid "Show images"
 msgstr "Képek megjelenítése"
 
 #: ui/conversation-message-menus.ui:52
-#| msgid "Draft message"
 msgid "For this message"
 msgstr "Ennél a levélnél"
 
 #: ui/conversation-message-menus.ui:56
-#| msgid "No sender"
 msgid "For this sender"
 msgstr "Ennél a küldőnél"
 
@@ -3424,10 +3412,6 @@ msgstr "Keresés:"
 #: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Előző"
-
-#: ui/find_bar.glade:97
-msgid "_Next"
-msgstr "_Következő"
 
 #: ui/find_bar.glade:114
 msgid "_Case sensitive"
