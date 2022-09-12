@@ -7,15 +7,15 @@
 # Alfredo Hernández <aldomann.designs@gmail.com>, 2012
 # martin.steghoefer <martin@steghoefer.de>, 2013
 # Gerard Bertran <bertran.gerardo@gmail.com>, 2017
-# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017, 2020
+# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017, 2020, 2022
 # Jordi Serratosa <jordis@softcatala.cat>, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-03-07 13:41+0000\n"
-"PO-Revision-Date: 2020-04-25 08:20+0200\n"
-"Last-Translator: Carles Ferrando Garcia <carles.ferrando@gmail.com>\n"
+"POT-Creation-Date: 2022-09-10 11:23+0000\n"
+"PO-Revision-Date: 2022-09-11 08:20+0200\n"
+"Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan (http://www.transifex.com/projects/p/geary/language/ca/)\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
@@ -36,8 +36,8 @@ msgstr "Enviar fitxers a través de Geary"
 #: desktop/geary-autostart.desktop.in.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:643
+#: src/client/accounts/accounts-editor-servers-pane.vala:551
+#: src/client/application/application-main-window.vala:706
 msgid "Geary"
 msgstr "Geary"
 
@@ -113,12 +113,12 @@ msgstr ""
 "Compatible amb GMail, Yahoo! Mail, Outlook.com i d'altres servidors IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "Geary mostrant una conversa"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "Geary mostrant l'editor de text enriquit"
 
@@ -128,11 +128,11 @@ msgstr "Geary mostrant l'editor de text enriquit"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Redacta un missatge"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Finestra nova"
 
@@ -225,12 +225,12 @@ msgstr ""
 "ortogràfic."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Notifica'm el correu nou a l'inici"
+msgid "Run application in background on logon and when closed"
+msgstr "Executa l'aplicació en segon pla en entrar i quan es tanqui"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
-msgstr "Cert per a notificar l'arribada d'un correu nou a l'inici."
+msgid "True to run application in background."
+msgstr "Cert per a executar l'aplicació en segon pla."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
@@ -277,10 +277,18 @@ msgid "The last recorded size of the detached composer window."
 msgstr "El darrer registre de la mida de la finestra separada de l'editor."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Permet imatges per a aquests dominis"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Es confiarà en les imatges d'aquests dominis"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Retard per a desfer l'enviament del correu"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -288,30 +296,30 @@ msgstr ""
 "El nombre de segons a esperar abans d'enviar un correu electrònic. Establiu-"
 "ho a zero o menys per a inhabilitar-ho."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Temps per a mostrar una notificació breu"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 "El temps en segons durant el qual s'han de mostrar les notificacions breus."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Llista de connectors opcionals"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Els connectors llistats aquí es carregaran a l'inici."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Si hem de migrar els paràmetres antics"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -325,21 +333,15 @@ msgstr ""
 msgid "Failed to store certificate"
 msgstr "Ha fallat l'emmagatzematge del certificat"
 
-#. Translators: Label for adding an email account
-#. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:98
-msgid "All others"
-msgstr "Tots els altres"
-
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:185
-#: src/client/accounts/accounts-editor-servers-pane.vala:313
+#: src/client/accounts/accounts-editor-add-pane.vala:167
+#: src/client/accounts/accounts-editor-servers-pane.vala:312
 msgid "Check your receiving login and password"
 msgstr "Comproveu la recepció de l'usuari i la contrasenya"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:200
-#: src/client/accounts/accounts-editor-servers-pane.vala:326
+#: src/client/accounts/accounts-editor-add-pane.vala:182
+#: src/client/accounts/accounts-editor-servers-pane.vala:325
 msgid "Check your receiving server details"
 msgstr "Comproveu la recepció dels detalls del servidor"
 
@@ -348,50 +350,65 @@ msgstr "Comproveu la recepció dels detalls del servidor"
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:222
-#: src/client/accounts/accounts-editor-servers-pane.vala:347
+#: src/client/accounts/accounts-editor-add-pane.vala:204
+#: src/client/accounts/accounts-editor-servers-pane.vala:346
 msgid "Check your sending login and password"
 msgstr "Comproveu l'usuari i contrasenya enviats"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:236
-#: src/client/accounts/accounts-editor-servers-pane.vala:360
+#: src/client/accounts/accounts-editor-add-pane.vala:218
+#: src/client/accounts/accounts-editor-servers-pane.vala:359
 msgid "Check your sending server details"
 msgstr "Comproveu els detalls del servidor enviats"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:251
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 msgid "Check your email address and password"
 msgstr "Comproveu la vostra adreça de correu i la contrasenya"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:262
+#: src/client/accounts/accounts-editor-add-pane.vala:244
 msgid "Could not connect, check your network"
 msgstr "No s'ha pogut fer la connexió, comproveu la vostra xarxa"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:275
+#: src/client/accounts/accounts-editor-add-pane.vala:257
 msgid "An unexpected problem occurred"
 msgstr "Ha succeït un problema inesperat"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:293
+#: src/client/accounts/accounts-editor-add-pane.vala:275
 #, c-format
 msgid "Account not created: %s"
 msgstr "Compte no creat: %s"
 
+#: src/client/accounts/accounts-editor-add-pane.vala:372
+#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+msgid "_Next"
+msgstr "_Següent"
+
+#: src/client/accounts/accounts-editor-add-pane.vala:379
+msgid "_Create"
+msgstr "_Crea"
+
+#. Translators: In-app notification label, when
+#. GNOME Online Accounts are missing
+#: src/client/accounts/accounts-editor-add-pane.vala:465
+msgid "Online accounts are missing"
+msgstr "Falten comptes en línia"
+
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:573
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 msgid "Your name"
 msgstr "El vostre nom"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:590
+#: src/client/accounts/accounts-editor-add-pane.vala:698
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "Adreça de correu electrònic"
@@ -401,7 +418,7 @@ msgstr "Adreça de correu electrònic"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:594
+#: src/client/accounts/accounts-editor-add-pane.vala:702
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "correu_personal@exemple.com"
@@ -410,15 +427,15 @@ msgstr "correu_personal@exemple.com"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:608
-#: src/client/accounts/accounts-editor-servers-pane.vala:881
+#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Nom d'usuari"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:622
-#: src/client/accounts/accounts-editor-servers-pane.vala:1003
+#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Contrasenya"
@@ -427,14 +444,14 @@ msgstr "Contrasenya"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:644
-#: src/client/accounts/accounts-editor-servers-pane.vala:725
+#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "Servidor IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:647
+#: src/client/accounts/accounts-editor-add-pane.vala:755
 msgid "imap.example.com"
 msgstr "imap.exemple.com"
 
@@ -442,14 +459,14 @@ msgstr "imap.exemple.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:653
-#: src/client/accounts/accounts-editor-servers-pane.vala:731
+#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "Servidor SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:656
+#: src/client/accounts/accounts-editor-add-pane.vala:764
 msgid "smtp.example.com"
 msgstr "smtp.exemple.com"
 
@@ -475,7 +492,7 @@ msgstr ""
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "_Cancel·la"
@@ -613,55 +630,43 @@ msgid_plural "%d days back"
 msgstr[0] "Últim dia"
 msgstr[1] "Últims %d dies"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2150
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2273
 msgid "Undo"
 msgstr "Desfés"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2133
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+#: src/client/application/application-main-window.vala:2256
 msgid "Redo"
 msgstr "Refés"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:349
-#: src/client/accounts/accounts-editor-list-pane.vala:445
+#: src/client/accounts/accounts-editor-list-pane.vala:325
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:353
-#: src/client/accounts/accounts-editor-list-pane.vala:449
+#: src/client/accounts/accounts-editor-list-pane.vala:329
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:357
-#: src/client/accounts/accounts-editor-list-pane.vala:453
-#: src/client/accounts/accounts-editor-row.vala:287
-msgid "Yahoo"
-msgstr "Yahoo"
-
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:379
+#: src/client/accounts/accounts-editor-list-pane.vala:351
 msgid "This account has been disabled"
 msgstr "Aquest compte ha estat inhabilitat"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:388
+#: src/client/accounts/accounts-editor-list-pane.vala:360
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Aquest compte té un problema i no està disponible"
-
-#: src/client/accounts/accounts-editor-list-pane.vala:457
-msgid "Other email providers"
-msgstr "Altres proveïdors de correu"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:563
+#: src/client/accounts/accounts-editor-list-pane.vala:466
 #, c-format
 msgid "Account “%s” removed"
 msgstr "El compte «%s» ha estat eliminat"
@@ -669,7 +674,7 @@ msgstr "El compte «%s» ha estat eliminat"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:570
+#: src/client/accounts/accounts-editor-list-pane.vala:473
 #, c-format
 msgid "Account “%s” restored"
 msgstr "El compte «%s» ha estat restaurat"
@@ -682,30 +687,30 @@ msgstr "Arrossega per a moure aquest element"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:299
+#: src/client/accounts/accounts-editor-row.vala:295
 msgid "Service provider"
 msgstr "Proveïdor de servei"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:473
+#: src/client/accounts/accounts-editor-row.vala:469
 msgid "Connection security"
 msgstr "Seguretat de la connexió"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:484
-#: src/client/accounts/accounts-editor-servers-pane.vala:752
-#: src/client/accounts/accounts-editor-servers-pane.vala:967
+#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-servers-pane.vala:751
+#: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Cap"
 
-#: src/client/accounts/accounts-editor-row.vala:491
+#: src/client/accounts/accounts-editor-row.vala:487
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:498
+#: src/client/accounts/accounts-editor-row.vala:494
 msgid "TLS"
 msgstr "TLS"
 
@@ -713,35 +718,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:589
+#: src/client/accounts/accounts-editor-row.vala:535
+#: src/client/application/application-main-window.vala:648
 msgid "Login"
 msgstr "Nom d'usuari"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:546
+#: src/client/accounts/accounts-editor-row.vala:542
 msgid "No login needed"
 msgstr "No s'ha d'iniciar sessió"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:554
+#: src/client/accounts/accounts-editor-row.vala:550
 msgid "Use same login as receiving"
 msgstr "Usa el mateix nom d'usuari que en la recepció"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:562
+#: src/client/accounts/accounts-editor-row.vala:558
 msgid "Use a different login"
 msgstr "Useu un nom d'usuari diferent"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:374
+#: src/client/accounts/accounts-editor-servers-pane.vala:373
 #, c-format
 msgid "Account not updated: %s"
 msgstr "Compte no actualitzat: %s"
@@ -749,23 +754,23 @@ msgstr "Compte no actualitzat: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:537
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
 msgid "Account source"
 msgstr "Origen del compte"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:549
+#: src/client/accounts/accounts-editor-servers-pane.vala:548
 msgid "GNOME Online Accounts"
 msgstr "Comptes en línia GNOME"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:608
+#: src/client/accounts/accounts-editor-servers-pane.vala:607
 msgid "Save draft email on server"
 msgstr "Desa l'esborrany del missatge al servidor"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:663
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
 msgid "Save sent email on server"
 msgstr "Desa els missatges enviats al servidor"
 
@@ -774,12 +779,12 @@ msgstr "Desa els missatges enviats al servidor"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:953
+#: src/client/accounts/accounts-editor-servers-pane.vala:952
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s està emprant OAuth2"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:963
+#: src/client/accounts/accounts-editor-servers-pane.vala:962
 msgid "Use receiving server login"
 msgstr "Utilitza el nom d'usuari del servidor de recepció"
 
@@ -825,132 +830,127 @@ msgid "Visit the Geary web site"
 msgstr "Visiteu el lloc web del Geary"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Imprimeix el registre de depuració"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Comença amb la finestra principal oculta (obsolet)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Habilita l'inspector WebKitGTK a les vistes web"
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Registra el seguiment de les converses"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 msgid "Log IMAP network deserialization"
 msgstr "Registra la deserialització de xarxa IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Registra la normalització de carpetes"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Registra l'activitat de xarxa d'IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr "Registra la cua de reproducció IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Registra l'activitat de xarxa de SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Registra les consultes a la base de dades (genera molts missatges)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Realitza la sortida amb èxit"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Obre una finestra nova"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Revoca tots els certificats del servidor amb advertències TLS"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Mostra la versió del programa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Versió del Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Revisió del Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "Versió de GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "Versió de GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "Versió de WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Entorn d'escriptori"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Desconegut"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Nom de la distribució"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Versió de la distribució"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr "Prefix d'instal·lació"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
 msgstr "Quant al %s"
@@ -958,7 +958,7 @@ msgstr "Quant al %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:581
 msgid "translator-credits"
 msgstr ""
 "Martin Steghöfer <martin@steghoefer.de>, 2013\n"
@@ -966,39 +966,33 @@ msgstr ""
 "Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017, 2020\n"
 "Carles Ferrando Garcia <carles.ferrando@gmail.com>, 2019"
 
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1110
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "L'opció «--hidden» està en desús i s'eliminarà en el futur."
-
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1143
+#: src/client/application/application-client.vala:1110
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argument del programa no reconegut: «%s»"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:496
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "S'ha produït un error en enviar el correu per a %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:504
+#: src/client/application/application-controller.vala:500
 msgid "Email will not be sent until re-connected"
 msgstr "No s'enviarà el correu electrònic fins que us torneu a connectar"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:603
+#: src/client/application/application-controller.vala:599
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "S'ha marcat la conversa"
 msgstr[1] "S'han marcat les converses"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:609
+#: src/client/application/application-controller.vala:605
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "S'ha desmarcat la conversa"
@@ -1007,8 +1001,8 @@ msgstr[1] "S'han desmarcat les converses"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:635
-#: src/client/application/application-controller.vala:719
+#: src/client/application/application-controller.vala:631
+#: src/client/application/application-controller.vala:715
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1020,8 +1014,8 @@ msgstr[1] "S'han mogut les converses a %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:643
-#: src/client/application/application-controller.vala:665
+#: src/client/application/application-controller.vala:639
+#: src/client/application/application-controller.vala:661
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1029,7 +1023,7 @@ msgstr[0] "S'ha restaurat la conversa a %s"
 msgstr[1] "S'han restaurat les converses a %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:686
+#: src/client/application/application-controller.vala:682
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "S'ha arxivat la conversa"
@@ -1037,7 +1031,7 @@ msgstr[1] "S'han arxivat les converses"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:742
+#: src/client/application/application-controller.vala:738
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1045,7 +1039,7 @@ msgstr[0] "S'ha restaurat el missatge a %s"
 msgstr[1] "S'han restaurat els missatges a %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:763
+#: src/client/application/application-controller.vala:759
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "S'ha arxivat el missatge"
@@ -1054,7 +1048,7 @@ msgstr[1] "S'han arxivat els missatges"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:798
+#: src/client/application/application-controller.vala:794
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1064,7 +1058,7 @@ msgstr[1] "S'han mogut els missatges a %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:826
+#: src/client/application/application-controller.vala:822
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1074,19 +1068,19 @@ msgstr[1] "S'han etiquetat les converses com a %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:834
+#: src/client/application/application-controller.vala:830
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "Conversa desetiquetada com a %s"
 msgstr[1] "Converses desetiquetades com a %s"
 
-#: src/client/application/application-controller.vala:1341
+#: src/client/application/application-controller.vala:1337
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "No es pot obrir la base de dades per a %s"
 
-#: src/client/application/application-controller.vala:1342
+#: src/client/application/application-controller.vala:1338
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n"
@@ -1105,20 +1099,20 @@ msgstr ""
 "\n"
 "La reconstrucció de la base de dades va destruir tot el correu local i els seus annexos. <b>El correu al servidor no es veurà afectat.</b>"
 
-#: src/client/application/application-controller.vala:1344
+#: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
 msgstr "_Reconstrueix"
 
-#: src/client/application/application-controller.vala:1344
+#: src/client/application/application-controller.vala:1340
 msgid "E_xit"
 msgstr "_Surt"
 
-#: src/client/application/application-controller.vala:1354
+#: src/client/application/application-controller.vala:1350
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "No es pot reconstruir la base de dades de «%s»"
 
-#: src/client/application/application-controller.vala:1355
+#: src/client/application/application-controller.vala:1351
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1131,34 +1125,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1522
+#: src/client/application/application-controller.vala:1518
 #, c-format
 msgid "Email sent to %s"
 msgstr "Correu enviat a %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2516
+#: src/client/application/application-controller.vala:2512
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Correu a %s s'ha posat a la cua d'enviament"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2580
+#: src/client/application/application-controller.vala:2576
 #, c-format
 msgid "Email to %s saved"
 msgstr "Corre a %s desat"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2595
-#: src/client/application/application-controller.vala:2653
+#: src/client/application/application-controller.vala:2591
+#: src/client/application/application-controller.vala:2649
 msgid "Composer could not be restored"
 msgstr "No s'ha pogut restaurar l'editor"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2638
+#: src/client/application/application-controller.vala:2634
 #, c-format
 msgid "Email to %s discarded"
 msgstr "S'ha descartat el correu a %s"
@@ -1175,57 +1169,57 @@ msgid "Account update"
 msgstr "Actualització del compte"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:575
+#: src/client/application/application-main-window.vala:634
 msgid "Working offline"
 msgstr "Treballa fora de línia"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:577
+#: src/client/application/application-main-window.vala:636
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "No podreu enviar ni rebre correus electrònics fins que us torneu a "
 "connectar."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:584
+#: src/client/application/application-main-window.vala:643
 msgid "Login problem"
 msgstr "Problema amb l'inici de sessió"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:586
+#: src/client/application/application-main-window.vala:645
 msgid "An account has reported an incorrect login or password."
 msgstr "Un compte ha informat d'un nom d'usuari o contrasenya incorrecte."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:593
+#: src/client/application/application-main-window.vala:652
 msgid "Retry login, you will be prompted for your password"
 msgstr ""
 "Torneu a iniciar la sessió, se us preguntarà per la vostra contrasenya"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:600
+#: src/client/application/application-main-window.vala:659
 msgid "Security problem"
 msgstr "Problema de seguretat"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:602
+#: src/client/application/application-main-window.vala:661
 msgid "An account has reported an untrusted server."
 msgstr "Un compte ha informat d'un servidor no fiable."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:605
+#: src/client/application/application-main-window.vala:664
 msgid "Check"
 msgstr "Comprovació"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:609
+#: src/client/application/application-main-window.vala:668
 msgid "Check the security details for the connection"
 msgstr "Comprova els detalls de seguretat per a la connexió"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:652
+#: src/client/application/application-main-window.vala:715
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
@@ -1233,54 +1227,58 @@ msgstr "%s — %s"
 #. Translators: The name of the folder group containing
 #. folders created by people (as opposed to special-use
 #. folders)
-#: src/client/application/application-main-window.vala:1043
-#: src/client/folder-list/folder-list-account-branch.vala:43
+#: src/client/application/application-main-window.vala:1105
+#: src/client/folder-list/folder-list-account-branch.vala:46
 msgid "Labels"
 msgstr "Etiquetes"
 
-#: src/client/application/application-main-window.vala:1358
+#: src/client/application/application-main-window.vala:1433
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Buida tot el correu electrònic de la carpeta %s?"
 
-#: src/client/application/application-main-window.vala:1359
+#: src/client/application/application-main-window.vala:1434
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Això elimina el correu electrònic del Geary i del servidor de correu "
 "electrònic."
 
-#: src/client/application/application-main-window.vala:1360
+#: src/client/application/application-main-window.vala:1435
 msgid "This cannot be undone."
 msgstr "Això no es pot desfer."
 
-#: src/client/application/application-main-window.vala:1361
+#: src/client/application/application-main-window.vala:1436
 #, c-format
 msgid "Empty %s"
 msgstr "Buida %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1418
+#: src/client/application/application-main-window.vala:1493
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Voleu suprimir aquesta conversa permanentment?"
 msgstr[1] "Voleu suprimir aquestes converses permanentment?"
 
-#: src/client/application/application-main-window.vala:1423
-#: src/client/application/application-main-window.vala:1438
+#: src/client/application/application-main-window.vala:1498
+#: src/client/application/application-main-window.vala:1513
 msgid "Delete"
 msgstr "Suprimeix"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1508
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Voleu suprimir aquest missatge permanentment?"
 msgstr[1] "Voleu suprimir aquests missatges permanentment?"
 
-#: src/client/application/application-main-window.vala:1724
+#: src/client/application/application-main-window.vala:1805
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
+
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary vol executar-se en segon pla"
 
 #. Translators: The first argument will be a
 #. description of the document type, the second will
@@ -1310,38 +1308,38 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "No m'ho tornis a pregunt_ar"
 
-#: src/client/components/components-conversation-actions.vala:90
+#: src/client/components/components-conversation-actions.vala:109
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Marca la conversa"
 msgstr[1] "Marca les converses"
 
-#: src/client/components/components-conversation-actions.vala:95
+#: src/client/components/components-conversation-actions.vala:114
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Afegeix etiqueta a la conversa"
 msgstr[1] "Afegeix etiqueta a les converses"
 
-#: src/client/components/components-conversation-actions.vala:100
+#: src/client/components/components-conversation-actions.vala:119
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Mou la conversa"
 msgstr[1] "Mou les converses"
 
-#: src/client/components/components-conversation-actions.vala:105
-#: src/client/conversation-list/conversation-list-view.vala:445
+#: src/client/components/components-conversation-actions.vala:124
+#: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arxiva la conversa"
 msgstr[1] "Arxiva les converses"
 
-#: src/client/components/components-conversation-actions.vala:116
+#: src/client/components/components-conversation-actions.vala:135
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Mou la conversa a la paperera"
 msgstr[1] "Mou les converses a la paperera"
 
-#: src/client/components/components-conversation-actions.vala:126
+#: src/client/components/components-conversation-actions.vala:145
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Suprimeix la conversa"
@@ -1430,13 +1428,18 @@ msgstr "_Vigila si arriba correu nou quan s'ha tancat"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary continuarà funcionant després de tancar totes les finestres"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "_Carrega sempre les imatges"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Preferències"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Connectors"
 
@@ -1582,7 +1585,7 @@ msgstr "_D'acord"
 msgid "_About"
 msgstr "_Quant a"
 
-#: src/client/components/stock.vala:22
+#: src/client/components/stock.vala:22 ui/accounts_editor_list_pane.ui:12
 msgid "_Add"
 msgstr "_Afegeix"
 
@@ -1594,17 +1597,17 @@ msgstr "Tanc_a"
 msgid "_Discard"
 msgstr "_Descarta"
 
-#: src/client/components/stock.vala:25 ui/main-toolbar-menus.ui:42
+#: src/client/components/stock.vala:25 ui/components-main-toolbar-menus.ui:42
 msgid "_Help"
 msgstr "A_juda"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: src/client/plugin/mail-merge/mail-merge.vala:397
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Obre"
 
-#: src/client/components/stock.vala:27 ui/main-toolbar-menus.ui:32
+#: src/client/components/stock.vala:27 ui/components-main-toolbar-menus.ui:32
 msgid "_Preferences"
 msgstr "_Preferències"
 
@@ -1630,20 +1633,20 @@ msgstr "De_sa"
 msgid "_Keep"
 msgstr "_Mantén"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Selecciona el color"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr ""
 "L'URL de l'enllaç no té el format correcte, per exemple, http://exemple.com"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "Enllaç URL no vàlid"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Adreça de correu electrònic no vàlida"
 
@@ -1825,51 +1828,51 @@ msgid "Search for more languages"
 msgstr "Cerca més idiomes"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:389
+#: src/client/conversation-list/conversation-list-view.vala:390
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "_Mou la conversa a la paperera"
 msgstr[1] "_Mou les converses a la paperera"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:401
+#: src/client/conversation-list/conversation-list-view.vala:402
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_Suprimeix la conversa"
 msgstr[1] "_Suprimeix les converses"
 
-#: src/client/conversation-list/conversation-list-view.vala:414
-#: ui/main-toolbar-menus.ui:5
+#: src/client/conversation-list/conversation-list-view.vala:415
+#: ui/components-main-toolbar-menus.ui:5
 msgid "Mark as _Read"
 msgstr "Ma_rca com a llegit"
 
-#: src/client/conversation-list/conversation-list-view.vala:422
-#: ui/main-toolbar-menus.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:423
+#: ui/components-main-toolbar-menus.ui:9
 msgid "Mark as _Unread"
 msgstr "Marca com a no _llegit"
 
-#: src/client/conversation-list/conversation-list-view.vala:430
-#: ui/main-toolbar-menus.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:431
+#: ui/components-main-toolbar-menus.ui:17
 msgid "U_nstar"
 msgstr "_No destaquis"
 
-#: src/client/conversation-list/conversation-list-view.vala:437
-#: ui/main-toolbar-menus.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:438
+#: ui/components-main-toolbar-menus.ui:13
 msgid "_Star"
 msgstr "_Destaca"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:454
+#: src/client/conversation-list/conversation-list-view.vala:455
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Respon"
 
-#: src/client/conversation-list/conversation-list-view.vala:460
+#: src/client/conversation-list/conversation-list-view.vala:461
 msgid "R_eply All"
 msgstr "R_espon a tots"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:466
+#: src/client/conversation-list/conversation-list-view.vala:467
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Reenvia"
@@ -1896,14 +1899,14 @@ msgstr "Data:"
 msgid "Subject:"
 msgstr "Assumpte:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Aquesta adreça de correu electrònic pot haver estat falsificada"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Mostra menys"
 
@@ -1911,7 +1914,7 @@ msgstr "Mostra menys"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1922,42 +1925,48 @@ msgstr[1] "%d més…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Sense remitent"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1025
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1147
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Imatge"
 
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
+msgid "(unknown)"
+msgstr "(desconegut)"
+
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1419
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Les imatges remotes no es mostren"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1421
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Només es mostren les imatges remotes de remitents de confiança."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1425
-msgid "Show"
-msgstr "Mostra"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "No es pot confiar en aquest missatge."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1429
-msgid "Always show from sender"
-msgstr "Mostra sempre des del remitent"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Mostra"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2141,7 +2150,7 @@ msgstr[1] "%d no llegits"
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: src/client/folder-list/folder-list-inboxes-branch.vala:14
+#: src/client/folder-list/folder-list-inboxes-branch.vala:15
 msgid "Inboxes"
 msgstr "Safates d'entrada"
 
@@ -2157,7 +2166,7 @@ msgstr[1] "%d resultats"
 #. / seen. First string substitution is the message
 #. / subject and the second is the number of unseen
 #. / messages
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:138
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:126
 #, c-format
 msgid ""
 "%s\n"
@@ -2176,7 +2185,7 @@ msgstr[1] ""
 #. / received at the same time and other unseen messages
 #. / exist. String substitution is the number of new
 #. / messages that have arrived.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:157
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:159
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
@@ -2189,7 +2198,7 @@ msgstr[1] "%d missatges nous"
 #. / above with the number of new messages that have
 #. / arrived, number substitution is the total number
 #. / of unseen messages.
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:167
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:169
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
@@ -2198,7 +2207,7 @@ msgstr[1] "%s, %d missatges nous totals"
 
 #. / Notification title when new messages have been
 #. / received
-#: src/client/plugin/desktop-notifications/desktop-notifications.vala:282
+#: src/client/plugin/desktop-notifications/desktop-notifications.vala:278
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "Missatge nou"
@@ -2249,7 +2258,7 @@ msgstr "Envia"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/mail-merge/mail-merge.vala:342
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Edita"
@@ -2262,8 +2271,8 @@ msgstr "Edita"
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 #: src/client/plugin/mail-merge/mail-merge.vala:288
-#: src/client/plugin/mail-merge/mail-merge.vala:389
-#: src/client/plugin/mail-merge/mail-merge.vala:488
+#: src/client/plugin/mail-merge/mail-merge.vala:395
+#: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Combinació de correu"
 
@@ -2296,24 +2305,24 @@ msgstr[1] "Enviats %u de %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:330
 msgid "Mail merge template"
 msgstr "Plantilla de combinació de correu"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:328
+#: src/client/plugin/mail-merge/mail-merge.vala:334
 msgid "Merge"
 msgstr "Combina"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:377
+#: src/client/plugin/mail-merge/mail-merge.vala:383
 msgid "Insert field"
 msgstr "Insereix un camp"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:396
+#: src/client/plugin/mail-merge/mail-merge.vala:402
 msgid "Comma separated values (CSV)"
 msgstr "Valors separats per comes (CSV)"
 
@@ -2809,35 +2818,31 @@ msgstr "Elements suprimits"
 msgid "Archive | Archives"
 msgstr "Arxiu | Arxius"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "No s'ha pogut determinar el tipus mime per a «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "No s'ha pogut determinar el tipus de contingut per al tipus MIME «%s» a "
 "«%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(sense assumpte)"
 
-#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:13
 msgid "Add an account"
 msgstr "Afegeix un compte"
 
-#: ui/accounts_editor_add_pane.ui:47
-msgid "_Create"
-msgstr "_Crea"
-
-#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Recepció"
 
-#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "S'està enviant"
 
@@ -2874,11 +2879,11 @@ msgstr "Elimina el compte del Geary"
 msgid "Accounts"
 msgstr "Comptes"
 
-#: ui/accounts_editor_list_pane.ui:59
+#: ui/accounts_editor_list_pane.ui:72
 msgid "To get started, select an email provider below."
 msgstr "Per a començar selecciona un proveïdor de correu a sota."
 
-#: ui/accounts_editor_list_pane.ui:73
+#: ui/accounts_editor_list_pane.ui:86
 msgid "Welcome to Geary"
 msgstr "Us donem la benvinguda al Geary"
 
@@ -3136,29 +3141,21 @@ msgstr "Obre els fitxers adjunts seleccionats"
 msgid "Save _All"
 msgstr "De_sa-ho tot"
 
-#: ui/components-conversation-actions.ui:76
+#: ui/components-conversation-actions.ui:17
 msgid "Reply"
 msgstr "Respon"
 
-#: ui/components-conversation-actions.ui:97
+#: ui/components-conversation-actions.ui:38
 msgid "Reply All"
 msgstr "Respon a tots"
 
-#: ui/components-conversation-actions.ui:118
+#: ui/components-conversation-actions.ui:59
 msgid "Forward"
 msgstr "Reenvia"
 
-#: ui/components-conversation-actions.ui:147
+#: ui/components-conversation-actions.ui:156
 msgid "_Archive"
 msgstr "_Arxiva"
-
-#: ui/components-conversation-actions.ui:191
-msgid "Toggle find bar"
-msgstr "Selecciona la barra de cerca"
-
-#: ui/components-conversation-header-bar.ui:20 ui/main-toolbar.ui:76
-msgid "Back"
-msgstr "Enrere"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
@@ -3209,47 +3206,80 @@ msgstr "Copia al porta-retalls"
 msgid "Clears all log entries"
 msgstr "Neteja totes les entrades del registre"
 
-#: ui/conversation-contact-popover.ui:132
+#: ui/components-main-toolbar.ui:72 ui/components-main-toolbar.ui:158
+msgid "Back"
+msgstr "Enrere"
+
+#: ui/components-main-toolbar.ui:89
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "Redacta un missatge"
+
+#: ui/components-main-toolbar.ui:105
+msgid "Toggle search bar"
+msgstr "Selecciona la barra de cerca"
+
+#: ui/components-main-toolbar.ui:195
+msgid "Toggle find bar"
+msgstr "Selecciona la barra de cerca"
+
+#: ui/components-main-toolbar-menus.ui:21
+msgid "Toggle as _Junk"
+msgstr "_Marca com a correu brossa"
+
+#: ui/components-main-toolbar-menus.ui:28
+msgid "_Accounts"
+msgstr "_Comptes"
+
+#: ui/components-main-toolbar-menus.ui:36
+msgid "_Keyboard Shortcuts"
+msgstr "Dreceres de _teclat"
+
+#: ui/components-main-toolbar-menus.ui:47
+msgid "_About Geary"
+msgstr "_Quant a Geary"
+
+#: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
 msgstr "Mou la conversa…"
 
-#: ui/conversation-contact-popover.ui:144
+#: ui/conversation-contact-popover.ui:146
 msgid "Copy Email Address"
 msgstr "Copia l'adreça de correu"
 
-#: ui/conversation-contact-popover.ui:165
+#: ui/conversation-contact-popover.ui:167
 msgid "Save in Contacts…"
 msgstr "Desa als contactes…"
 
-#: ui/conversation-contact-popover.ui:177
+#: ui/conversation-contact-popover.ui:179
 msgid "Show Conversations"
 msgstr "Mostra les converses"
 
-#: ui/conversation-contact-popover.ui:189
+#: ui/conversation-contact-popover.ui:191
 msgid "Open in Contacts"
 msgstr "Obre als contactes"
 
-#: ui/conversation-contact-popover.ui:201
+#: ui/conversation-contact-popover.ui:203
 msgid "Always Load Remote Images"
 msgstr "Carrega sempre les imatges remotes"
 
 #. Title label on contact popover
-#: ui/conversation-contact-popover.ui:240
+#: ui/conversation-contact-popover.ui:242
 msgid "Deceptive email address"
 msgstr "Adreça de correu electrònic enganyosa"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:268
+#: ui/conversation-contact-popover.ui:270
 msgid "This email address is:"
 msgstr "Aquesta adreça de correu electrònic és:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:291
+#: ui/conversation-contact-popover.ui:293
 msgid "But was forged as:"
 msgstr "Però ha estat falsificada com a:"
 
 #. Contact popover label
-#: ui/conversation-contact-popover.ui:314
+#: ui/conversation-contact-popover.ui:316
 msgid "The sender may not be trustworthy"
 msgstr "El remitent potser no és de confiança"
 
@@ -3347,12 +3377,28 @@ msgid "Copy Email _Address"
 msgstr "_Copia l'adreça del correu electrònic"
 
 #: ui/conversation-message-menus.ui:27
-msgid "A_nomena i desa la imatge…"
-msgstr "Desa la _imatge com…"
+msgid "Save _Image As…"
+msgstr "D_esa la imatge com a…"
 
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "_Selecciona-ho tot"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Mostra les imatges"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Per a aquest missatge"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Per a aquest remitent"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Per a aquest domini"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3397,10 +3443,6 @@ msgstr "Troba:"
 #: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Anterior"
-
-#: ui/find_bar.glade:97
-msgid "_Next"
-msgstr "_Següent"
 
 #: ui/find_bar.glade:114
 msgid "_Case sensitive"
@@ -3711,31 +3753,6 @@ msgctxt "shortcut window"
 msgid "Select next/previous conversations"
 msgstr "Selecciona la conversa següent o anterior"
 
-#: ui/main-toolbar.ui:93
-msgctxt "tooltip"
-msgid "Compose Message"
-msgstr "Redacta un missatge"
-
-#: ui/main-toolbar.ui:109
-msgid "Toggle search bar"
-msgstr "Selecciona la barra de cerca"
-
-#: ui/main-toolbar-menus.ui:21
-msgid "Toggle as _Junk"
-msgstr "_Marca com a correu brossa"
-
-#: ui/main-toolbar-menus.ui:28
-msgid "_Accounts"
-msgstr "_Comptes"
-
-#: ui/main-toolbar-menus.ui:36
-msgid "_Keyboard Shortcuts"
-msgstr "Dreceres de _teclat"
-
-#: ui/main-toolbar-menus.ui:47
-msgid "_About Geary"
-msgstr "_Quant a Geary"
-
 #: ui/password-dialog.glade:66
 msgid "SMTP Credentials"
 msgstr "Credencials SMTP"
@@ -3751,6 +3768,33 @@ msgstr "_Recorda la contrasenya"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Autenticació"
+
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Notifica'm el correu nou a l'inici"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr "Cert per a notificar l'arribada d'un correu nou a l'inici."
+
+#~ msgid "All others"
+#~ msgstr "Tots els altres"
+
+#~ msgid "Yahoo"
+#~ msgstr "Yahoo"
+
+#~ msgid "Other email providers"
+#~ msgstr "Altres proveïdors de correu"
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Comença amb la finestra principal oculta (obsolet)"
+
+#~ msgid "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr "L'opció «--hidden» està en desús i s'eliminarà en el futur."
+
+#~ msgid "Always show from sender"
+#~ msgstr "Mostra sempre des del remitent"
+
+#~ msgid "A_nomena i desa la imatge…"
+#~ msgstr "Desa la _imatge com…"
 
 #~ msgid "Position of folder list pane"
 #~ msgstr "Posició del plafó de la llista de carpetes"
