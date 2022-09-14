@@ -51,7 +51,7 @@ public class Components.ConversationActions : Gtk.Box {
     construct {
         // Assemble the mark menus
         Gtk.Builder menu_builder = new Gtk.Builder.from_resource(
-            "/org/gnome/Geary/components-main-toolbar-menus.ui"
+            "/org/gnome/Geary/components-menu-conversation.ui"
         );
         GLib.MenuModel mark_menu = (MenuModel) menu_builder.get_object(
             "mark_message_menu"

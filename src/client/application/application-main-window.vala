@@ -354,7 +354,6 @@ public class Application.MainWindow :
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
-    public Components.MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
@@ -389,8 +388,9 @@ public class Application.MainWindow :
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
 
-
-    [GtkChild] private unowned Gtk.Box main_layout;
+    [GtkChild] private unowned Components.ApplicationHeaderBar application_headerbar;
+    [GtkChild] private unowned Components.ConversationListHeaderBar conversation_list_headerbar;
+    [GtkChild] public unowned Components.ConversationHeaderBar conversation_headerbar;
 
     // Folds the inner leaftlet and conversation viewer
     [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
@@ -408,28 +408,17 @@ public class Application.MainWindow :
 
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
     [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
-    [GtkChild] private unowned Gtk.SizeGroup folder_size_group;
-    [GtkChild] private unowned Gtk.SizeGroup folder_separator_size_group;
-    [GtkChild] private unowned Gtk.SizeGroup conversations_size_group;
-    [GtkChild] private unowned Gtk.SizeGroup conversations_separator_size_group;
-    [GtkChild] private unowned Gtk.SizeGroup conversation_size_group;
-    [GtkChild] private unowned Hdy.SwipeGroup conversations_swipe_group;
-    [GtkChild] private unowned Hdy.SwipeGroup conversation_swipe_group;
 
     [GtkChild] private unowned Gtk.Overlay overlay;
+
+    [GtkChild] private unowned Components.InfoBarStack info_bars;
 
     private Components.ConversationActions[] folder_conversation_actions = {};
     private FolderPopover[] folder_popovers = {};
 
-    private Components.InfoBarStack info_bars =
-        new Components.InfoBarStack(SINGLE);
-
     private Components.InfoBar offline_infobar;
-
     private Components.InfoBar cert_problem_infobar;
-
     private Components.InfoBar auth_problem_infobar;
-
     private Components.ProblemReportInfoBar? service_problem_infobar = null;
 
     /** Fired when the user requests an account status be retried. */
@@ -715,8 +704,8 @@ public class Application.MainWindow :
             title = _("%s — %s").printf(folder_name, account_name);
         }
         this.title = title;
-        this.main_toolbar.account = account_name ?? "";
-        this.main_toolbar.folder = folder_name?? "";
+        this.conversation_list_headerbar.account = account_name ?? "";
+        this.conversation_list_headerbar.folder = folder_name?? "";
     }
 
     /** Updates the window's account status info bars. */
@@ -954,7 +943,7 @@ public class Application.MainWindow :
         if (this.inner_leaflet.folded) {
             this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
         }
-        this.main_toolbar.show_main_menu();
+        this.application_headerbar.show_app_menu();
     }
 
     /** Displays and focuses the search bar for the window. */
@@ -1367,41 +1356,24 @@ public class Application.MainWindow :
         this.conversation_viewer.hexpand = true;
         this.conversation_viewer_box.add(this.conversation_viewer);
 
-        // Main toolbar
-        this.main_toolbar = new Components.MainToolbar(config);
-        this.main_toolbar.add_to_size_groups(this.folder_size_group,
-                                             this.folder_separator_size_group,
-                                             this.conversations_size_group,
-                                             this.conversations_separator_size_group,
-                                             this.conversation_size_group);
-        this.main_toolbar.add_to_swipe_groups(this.conversations_swipe_group,
-                                              this.conversation_swipe_group);
-        this.main_toolbar.bind_property(
+        this.conversation_list_headerbar.bind_property(
             "search-open",
             this.search_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
         );
-        this.main_toolbar.bind_property(
+        this.conversation_headerbar.bind_property(
             "find-open",
             this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
         );
-        this.main_toolbar.notify["shown-actions"].connect(
+        this.conversation_headerbar.notify["shown-actions"].connect(
             () => {
                 this.conversation_viewer_actions_revealer.reveal_child = (
-                    this.main_toolbar.shown_actions ==
-                    this.main_toolbar.compact_actions
+                    this.conversation_headerbar.shown_actions ==
+                    this.conversation_headerbar.compact_actions
                 );
             }
         );
-        if (config.desktop_environment == UNITY) {
-            this.main_toolbar.show_close_button = false;
-            this.main_layout.pack_start(main_toolbar, false, true, 0);
-        } else {
-            this.main_layout.pack_start(main_toolbar, false, true, 0);
-        }
-
-        this.main_layout.pack_start(this.info_bars, false, true, 0);
 
         // Status bar
         this.status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
@@ -1412,7 +1384,7 @@ public class Application.MainWindow :
         this.status_bar.show_all();
 
         this.folder_conversation_actions = {
-            this.main_toolbar.full_actions,
+            this.conversation_headerbar.full_actions,
             this.conversation_list_actions
         };
         foreach (var actions in this.folder_conversation_actions) {
@@ -1645,8 +1617,8 @@ public class Application.MainWindow :
         this.conversation_list_view.select_conversations(to_select);
 
         this.conversation_list_actions.selected_conversations = to_select.size;
-        this.main_toolbar.full_actions.selected_conversations = to_select.size;
-        this.main_toolbar.compact_actions.selected_conversations = to_select.size;
+        this.conversation_headerbar.full_actions.selected_conversations = to_select.size;
+        this.conversation_headerbar.compact_actions.selected_conversations = to_select.size;
 
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
@@ -1833,8 +1805,8 @@ public class Application.MainWindow :
             }
 
             if (count > 0) {
-                this.main_toolbar.folder = _("%s (%d)").printf(
-                    this.main_toolbar.folder, count
+                this.conversation_list_headerbar.folder = _("%s (%d)").printf(
+                    this.conversation_list_headerbar.folder, count
                 );
             }
         }
@@ -1914,7 +1886,7 @@ public class Application.MainWindow :
             this.selected_folder_supports_trash
         );
         this.conversation_list_actions.update_trash_button(show_trash);
-        this.main_toolbar.full_actions.update_trash_button(show_trash);
+        this.conversation_headerbar.full_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
@@ -2147,12 +2119,15 @@ public class Application.MainWindow :
             ConversationCount.for_size(selected)
         );
         if (this.outer_leaflet.folded) {
+            this.conversation_list_headerbar.show_close_button = true;
             // Ensure something useful gets the keyboard focus, given
             // GNOME/libhandy#179
             if (this.is_conversation_list_shown) {
                 this.conversation_list_view.grab_focus();
             } else if (this.is_folder_list_shown) {
                 this.folder_list.grab_focus();
+            } else {
+                this.conversation_headerbar.back_button.visible = true;
             }
 
             // Close any open composer that is no longer visible
@@ -2160,19 +2135,27 @@ public class Application.MainWindow :
                 (this.is_folder_list_shown || this.is_conversation_list_shown)) {
                 close_composer(false, false);
             }
+        } else {
+            this.conversation_list_headerbar.show_close_button = false;
+            this.conversation_headerbar.back_button.visible = false;
         }
     }
 
     [GtkCallback]
     private void on_inner_leaflet_changed() {
         if (this.inner_leaflet.folded) {
+            this.application_headerbar.show_close_button = true;
             // Ensure something useful gets the keyboard focus, given
             // GNOME/libhandy#179
             if (this.is_conversation_list_shown) {
+                this.conversation_list_headerbar.back_button.visible = true;
                 this.conversation_list_view.grab_focus();
             } else if (this.is_folder_list_shown) {
                 this.folder_list.grab_focus();
             }
+        } else {
+            this.application_headerbar.show_close_button = false;
+            this.conversation_list_headerbar.back_button.visible = false;
         }
     }
 
@@ -2454,7 +2437,7 @@ public class Application.MainWindow :
             this.conversation_list_actions_revealer.child_revealed) {
             this.conversation_list_actions.show_copy_menu();
         } else if (this.is_conversation_viewer_shown) {
-            this.main_toolbar.shown_actions.show_copy_menu();
+            this.conversation_headerbar.shown_actions.show_copy_menu();
         } else {
             error_bell();
         }
@@ -2465,7 +2448,7 @@ public class Application.MainWindow :
             this.conversation_list_actions_revealer.child_revealed) {
             this.conversation_list_actions.show_move_menu();
         } else if (this.is_conversation_viewer_shown) {
-            this.main_toolbar.shown_actions.show_move_menu();
+            this.conversation_headerbar.shown_actions.show_move_menu();
         } else {
             error_bell();
         }

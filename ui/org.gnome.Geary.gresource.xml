@@ -13,14 +13,17 @@
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-conversation-actions.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-application.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-conversation-list.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-conversation.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-in-app-notification.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-info-bar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-error-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-log-view.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-inspector-system-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-main-toolbar.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-main-toolbar-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-menu-application.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">components-menu-conversation.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-editor.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">composer-editor-menus.ui</file>

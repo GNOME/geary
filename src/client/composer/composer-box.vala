@@ -27,19 +27,19 @@ public class Composer.Box : Gtk.Frame, Container {
     /** {@inheritDoc} */
     internal Widget composer { get; set; }
 
-    private Components.MainToolbar main_toolbar { get; private set; }
+    private Components.ConversationHeaderBar headerbar { get; private set; }
 
 
     /** Emitted when the container is closed. */
     public signal void vanished();
 
 
-    public Box(Widget composer, Components.MainToolbar main_toolbar) {
+    public Box(Widget composer, Components.ConversationHeaderBar headerbar) {
         this.composer = composer;
         this.composer.set_mode(PANED);
 
-        this.main_toolbar = main_toolbar;
-        this.main_toolbar.set_conversation_header(composer.header);
+        this.headerbar = headerbar;
+        this.headerbar.set_conversation_header(composer.header);
 
         get_style_context().add_class("geary-composer-box");
         this.halign = Gtk.Align.FILL;
@@ -54,7 +54,7 @@ public class Composer.Box : Gtk.Frame, Container {
     public void close() {
         vanished();
 
-        this.main_toolbar.remove_conversation_header(composer.header);
+        this.headerbar.remove_conversation_header(composer.header);
         remove(this.composer);
         destroy();
     }

@@ -150,7 +150,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         var main_window = get_toplevel() as Application.MainWindow;
         if (main_window != null) {
             Composer.Box box = new Composer.Box(
-                composer, main_window.main_toolbar
+                composer, main_window.conversation_headerbar
             );
             this.current_composer = composer;
 

@@ -37,6 +37,14 @@
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
+                          <object class="ComponentsApplicationHeaderBar" id="application_headerbar">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkFrame" id="folder_frame">
                             <property name="visible">True</property>
                             <property name="vexpand">True</property>
@@ -54,7 +62,7 @@
                           </object>
                           <packing>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
@@ -78,6 +86,14 @@
                       <object class="GtkBox" id="conversation_list_box">
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
+                        <child>
+                          <object class="ComponentsConversationListHeaderBar" id="conversation_list_headerbar">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                         <child>
                           <object class="GtkFrame" id="conversation_frame">
                             <property name="visible">True</property>
@@ -150,6 +166,14 @@
                     <property name="hexpand">True</property>
                     <property name="orientation">vertical</property>
                     <child>
+                      <object class="ComponentsConversationHeaderBar" id="conversation_headerbar">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
                         <property name="visible">True</property>
                         <property name="reveal-child">False</property>
@@ -175,12 +199,15 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">0</property>
+                <property name="pack_type">start</property>
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="ComponentsInfoBarStack" id="info_bars">
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
             </child>
             <style>
               <class name="geary-main-layout"/>
@@ -196,50 +223,4 @@
       <class name="geary-main-window"/>
     </style>
   </template>
-  <object class="GtkSizeGroup">
-    <widgets>
-      <widget name="inner_leaflet"/>
-      <widget name="conversation_viewer_box"/>
-    </widgets>
-  </object>
-  <object class="GtkSizeGroup" id="folder_size_group">
-    <property name="mode">horizontal</property>
-    <widgets>
-      <widget name="folder_box"/>
-    </widgets>
-  </object>
-  <object class="GtkSizeGroup" id="folder_separator_size_group">
-    <property name="mode">horizontal</property>
-    <widgets>
-      <widget name="folder_separator"/>
-    </widgets>
-  </object>
-  <object class="GtkSizeGroup" id="conversations_size_group">
-    <property name="mode">horizontal</property>
-    <widgets>
-      <widget name="conversation_list_box"/>
-    </widgets>
-  </object>
-  <object class="GtkSizeGroup" id="conversations_separator_size_group">
-    <property name="mode">horizontal</property>
-    <widgets>
-      <widget name="conversations_separator"/>
-    </widgets>
-  </object>
-  <object class="GtkSizeGroup" id="conversation_size_group">
-    <property name="mode">horizontal</property>
-    <widgets>
-      <widget name="conversation_viewer_box"/>
-    </widgets>
-  </object>
-  <object class="HdySwipeGroup" id="conversations_swipe_group">
-    <swipeables>
-      <swipeable name="inner_leaflet"/>
-    </swipeables>
-  </object>
-  <object class="HdySwipeGroup" id="conversation_swipe_group">
-    <swipeables>
-      <swipeable name="outer_leaflet"/>
-    </swipeables>
-  </object>
 </interface>
