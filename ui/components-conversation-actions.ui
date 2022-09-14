@@ -82,25 +82,6 @@
       <object class="GtkBox" id="mark_copy_move_buttons">
         <property name="visible">True</property>
         <child>
-          <object class="GtkMenuButton" id="mark_message_button">
-            <property name="visible">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="mark_message_image">
-                <property name="visible">True</property>
-                <property name="icon_name">checkbox-checked-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkMenuButton" id="copy_message_button">
             <property name="visible">True</property>
             <property name="focus_on_click">False</property>
@@ -116,7 +97,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">1</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -131,6 +112,28 @@
                 <property name="icon_name">folder-symbolic</property>
               </object>
             </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="mark_message_button">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="always_show_image">True</property>
+            <child>
+              <object class="GtkImage" id="mark_message_image">
+                <property name="visible">True</property>
+                <property name="icon_name">pan-down-symbolic</property>
+              </object>
+            </child>
+            <style>
+              <class name="thin-button"/>
+            </style>
           </object>
           <packing>
             <property name="expand">False</property>

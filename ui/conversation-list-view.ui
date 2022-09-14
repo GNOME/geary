@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.38.2 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <template class="ConversationListView" parent="GtkScrolledWindow">
+    <property name="width-request">250</property>
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkViewport">
+        <property name="visible">True</property>
+        <property name="shadow-type">none</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkListBox" id="list">
+            <property name="name">conversation-list</property>
+            <property name="visible">True</property>
+            <property name="selection-mode">single</property>
+            <property name="activate-on-single-click">false</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

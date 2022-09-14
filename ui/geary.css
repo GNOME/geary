@@ -8,13 +8,7 @@
 
 /* MainWindow */
 
-.geary-folder-frame > border {
-  border-left-width: 0;
-  border-top-width: 0;
-  border-right-width: 0;
-}
-
-.geary-folder-frame {
+.geary-folder {
   min-width: 300px;
 }
 
@@ -22,19 +16,12 @@ geary-conversation-list revealer {
   margin: 6px;
 }
 
-.geary-conversation-frame > border {
-  border-left-width: 0;
-  border-top-width: 0;
-  border-right-width: 0;
+geary-conversation-list {
   min-width: 360px;
 }
 
 geary-conversation-viewer {
   min-width: 360px;
-}
-
-.geary-sidebar-pane-separator.vertical .conversation-frame > border {
-  border-bottom-width: 0;
 }
 
 .geary-overlay {
@@ -57,13 +44,96 @@ geary-conversation-viewer {
 }
 
 infobar flowboxchild {
-	padding: 0px;
+  padding: 0px;
 }
 
 revealer components-conversation-actions {
   border: solid @borders;
   border-top-width: 1px;
   padding: 6px;
+}
+
+
+/* Conversation List */
+row.conversation-list {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-right: 0.5em;
+}
+
+row.conversation-list.drag-n-drop {
+  background: @theme_base_color;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+row.conversation-list label {
+  margin-bottom: .4em;
+}
+
+row.conversation-list .tertiary {
+  opacity: 0.7;
+  font-size: 0.8em;
+}
+
+row.conversation-list .subject {
+  font-size: 0.9em;
+}
+
+row.conversation-list .date {
+  margin-left: 1em;
+}
+
+/* Unread styling */
+row.conversation-list.unread .preview {
+  opacity: 1;
+}
+
+row.conversation-list.unread .subject {
+  font-weight: bold;
+}
+
+row.conversation-list.unread .participants {
+  font-weight: bold;
+}
+
+row.conversation-list.unread .unread-button {
+  opacity: 1;
+}
+
+/* Hover buttons */
+row.conversation-list .conversation-ephemeral-button {
+  opacity: 0;
+  margin: 2px;
+  border-radius: 50%;
+  border: none;
+}
+
+row.conversation-list:hover .conversation-ephemeral-button {
+  opacity: 1;
+}
+
+row.conversation-list.starred .flagged-button {
+  opacity: 1;
+}
+
+row.conversation-list:selected .conversation-ephemeral-button {
+  opacity: 1;
+}
+
+row.conversation-list .count-badge {
+  background: #888888;
+  color: white;
+  min-width: 1.5em;
+  border-radius: 1em;
+  font-size: .8em;
+  font-weight: bold;
+}
+
+row.conversation-list check  {
+  border-radius: 50%;
+  padding: 2px;
+  margin: 6px;
 }
 
 /* FolderPopover */
@@ -440,11 +510,11 @@ popover.geary-editor > grid > button.geary-setting-remove {
 }
 
 dialog.geary-remove-confirm .dialog-vbox {
-	margin: 12px;
+    margin: 12px;
 }
 
 dialog.geary-remove-confirm .dialog-action-box {
-	margin: 6px;
+    margin: 6px;
 }
 
 /* FolderList.Tree */
@@ -488,4 +558,11 @@ dialog.geary-upgrade grid {
 
 dialog.geary-upgrade label {
   margin-top: 12px;
+}
+
+/* Misc */
+
+.thin-button {
+  padding-left: 4px;
+  padding-right: 4px;
 }

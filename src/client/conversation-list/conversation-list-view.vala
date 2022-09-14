@@ -1,666 +1,699 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright © 2022 John Renner <john@jrenner.net>
+ * Copyright © 2022 Cédric Bellegarde <cedric.bellegarde@adishatz.org>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
-    const int LOAD_MORE_HEIGHT = 100;
+/**
+ * Represents in folder conversations list.
+ *
+ */
+[GtkTemplate (ui = "/org/gnome/Geary/conversation-list-view.ui")]
+public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
+    /**
+     * The fields that must be available on any ConversationMonitor
+     * passed to ConversationList.View
+     */
+    public const Geary.Email.Field REQUIRED_FIELDS = (
+        Geary.Email.Field.ENVELOPE |
+        Geary.Email.Field.FLAGS |
+        Geary.Email.Field.PROPERTIES
+    );
 
+    [CCode(notify = false)]
+    public bool selection_mode_enabled {
+        get {
+            return this.list.get_selection_mode() == Gtk.SelectionMode.MULTIPLE;
+        }
+        set {
+            Gtk.SelectionMode mode = value ? Gtk.SelectionMode.MULTIPLE : Gtk.SelectionMode.SINGLE;
+            if (this.list.get_selection_mode() != mode) {
+                this.list.set_selection_mode(mode);
+                notify_property("selection-mode-enabled");
+            }
+        }
+    }
+
+    public Gee.Set<Geary.App.Conversation> selected {
+        get; set; default = new Gee.HashSet<Geary.App.Conversation>();
+    }
 
     private Application.Configuration config;
 
-    private bool enable_load_more = true;
+    private Gtk.GestureMultiPress press_gesture;
+    private Gtk.GestureLongPress long_press_gesture;
+    private Gtk.EventControllerKey key_event_controller;
+    private Gdk.ModifierType last_modifier_type;
 
-    private bool reset_adjustment = false;
-    private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
-    private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
-    private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
-    private Geary.IdleManager selection_update;
-    private Gtk.GestureMultiPress gesture;
+    [GtkChild] private unowned Gtk.ListBox list;
 
-    // Determines if the next folder scan should avoid selecting a
-    // conversation when autoselect is enabled
-    private bool should_inhibit_autoselect = false;
+    /*
+     * Use to restore selected row when exiting selection/edition
+     */
+    private Gtk.ListBoxRow? to_restore_row = null;
 
-
-    public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
-
-    // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
-    public signal void conversation_activated(Geary.App.Conversation activated, bool single = false);
-
-    public virtual signal void load_more() {
-        enable_load_more = false;
-    }
-
-    public signal void mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
-                                          Geary.NamedFlag flag);
-
-    public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
-
-
-    public ConversationListView(Application.Configuration config) {
-        base_ref();
-        set_show_expanders(false);
-        set_headers_visible(false);
-        set_grid_lines(Gtk.TreeViewGridLines.HORIZONTAL);
-
+    public View(Application.Configuration config) {
         this.config = config;
 
-        append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
-            new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
-            0));
+        this.notify["selection-mode-enabled"].connect(on_selection_mode_changed);
 
-        Gtk.TreeSelection selection = get_selection();
-        selection.set_mode(Gtk.SelectionMode.MULTIPLE);
-        style_updated.connect(on_style_changed);
+        this.list.selected_rows_changed.connect(on_selected_rows_changed);
+        this.list.row_activated.connect(on_row_activated);
 
-        notify["vadjustment"].connect(on_vadjustment_changed);
+        this.list.set_header_func(header_func);
 
-        key_press_event.connect(on_key_press);
-        button_press_event.connect(on_button_press);
-        gesture = new Gtk.GestureMultiPress(this);
-        gesture.pressed.connect(on_gesture_pressed);
+        this.vadjustment.value_changed.connect(maybe_load_more);
+        this.vadjustment.value_changed.connect(update_visible_conversations);
 
-        // Set up drag and drop.
-        Gtk.drag_source_set(this, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
+        this.press_gesture = new Gtk.GestureMultiPress(this.list);
+        this.press_gesture.set_button(0);
+        this.press_gesture.released.connect(on_press_gesture_released);
+
+        this.long_press_gesture = new Gtk.GestureLongPress(this.list);
+        this.long_press_gesture.propagation_phase = CAPTURE;
+        this.long_press_gesture.pressed.connect((n_press, x, y) => {
+            Row? row = (Row) this.list.get_row_at_y((int) y);
+            if (row != null) {
+                this.list.unselect_all();
+                this.selection_mode_enabled = true;
+            }
+        });
+
+        this.key_event_controller = new Gtk.EventControllerKey(this.list);
+        this.key_event_controller.key_pressed.connect(on_key_event_controller_key_pressed);
+
+        Gtk.drag_source_set(this.list, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
-
-        this.config.settings.changed[
-            Application.Configuration.DISPLAY_PREVIEW_KEY
-        ].connect(on_display_preview_changed);
-
-        // Watch for mouse events.
-        motion_notify_event.connect(on_motion_notify_event);
-        leave_notify_event.connect(on_leave_notify_event);
-
-        // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
-        // remove it.
-        unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
-        assert(binding_set != null);
-        Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
-
-        this.selection_update = new Geary.IdleManager(do_selection_changed);
-        this.selection_update.priority = Geary.IdleManager.Priority.LOW;
-
-        this.visible = true;
+        this.list.drag_begin.connect(on_drag_begin);
+        this.list.drag_end.connect(on_drag_end);
     }
 
-    ~ConversationListView() {
-        base_unref();
+    static construct {
+        set_css_name("conversation-list");
     }
 
-    public override void destroy() {
-        this.selection_update.reset();
-        base.destroy();
-    }
-
-    public new ConversationListStore? get_model() {
-        return base.get_model() as ConversationListStore;
-    }
-
-    public new void set_model(ConversationListStore? new_store) {
-        ConversationListStore? old_store = get_model();
-        if (old_store != null) {
-            old_store.conversations.scan_started.disconnect(on_scan_started);
-            old_store.conversations.scan_completed.disconnect(on_scan_completed);
-
-            old_store.conversations_added.disconnect(on_conversations_added);
-            old_store.conversations_removed.disconnect(on_conversations_removed);
-            old_store.row_inserted.disconnect(on_rows_changed);
-            old_store.rows_reordered.disconnect(on_rows_changed);
-            old_store.row_changed.disconnect(on_rows_changed);
-            old_store.row_deleted.disconnect(on_rows_changed);
-            old_store.destroy();
-        }
-
-        if (new_store != null) {
-            new_store.conversations.scan_started.connect(on_scan_started);
-            new_store.conversations.scan_completed.connect(on_scan_completed);
-
-            new_store.row_inserted.connect(on_rows_changed);
-            new_store.rows_reordered.connect(on_rows_changed);
-            new_store.row_changed.connect(on_rows_changed);
-            new_store.row_deleted.connect(on_rows_changed);
-            new_store.conversations_removed.connect(on_conversations_removed);
-            new_store.conversations_added.connect(on_conversations_added);
-        }
-
-        // Disconnect the selection handler since we don't want to
-        // fire selection signals while changing the model.
-        Gtk.TreeSelection selection = get_selection();
-        selection.changed.disconnect(on_selection_changed);
-        base.set_model(new_store);
-        this.selected.clear();
-        selection.changed.connect(on_selection_changed);
-    }
-
-    /** Returns a read-only iteration of the current selection. */
-    public Gee.Set<Geary.App.Conversation> get_selected() {
-        return this.selected.read_only_view;
-    }
-
-    /** Returns a copy of the current selection. */
-    public Gee.Set<Geary.App.Conversation> copy_selected() {
-        var copy = new Gee.HashSet<Geary.App.Conversation>();
-        copy.add_all(this.selected);
-        return copy;
-    }
-
-    public void inhibit_next_autoselect() {
-        this.should_inhibit_autoselect = true;
-    }
-
-    public void scroll(Gtk.ScrollType where) {
-        Gtk.TreeSelection selection = get_selection();
-        weak Gtk.TreeModel model;
-        GLib.List<Gtk.TreePath> selected = selection.get_selected_rows(out model);
-        Gtk.TreePath? target_path = null;
-        Gtk.TreeIter? target_iter = null;
-        if (selected.length() > 0) {
-            switch (where) {
-            case STEP_UP:
-                target_path = selected.first().data;
-                model.get_iter(out target_iter, target_path);
-                if (model.iter_previous(ref target_iter)) {
-                    target_path = model.get_path(target_iter);
-                } else {
-                    this.get_window().beep();
-                }
-                break;
-
-            case STEP_DOWN:
-                target_path = selected.last().data;
-                model.get_iter(out target_iter, target_path);
-                if (model.iter_next(ref target_iter)) {
-                    target_path = model.get_path(target_iter);
-                } else {
-                    this.get_window().beep();
-                }
-                break;
-
-            default:
-                // no-op
-                break;
-            }
-
-            set_cursor(target_path, null, false);
+    // -------
+    //   UI
+    // -------
+    private void header_func(Gtk.ListBoxRow row, Gtk.ListBoxRow? before) {
+        if (before != null) {
+            var sep = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+            sep.show();
+            row.set_header(sep);
         }
     }
 
-    private void check_load_more() {
-        ConversationListStore? model = get_model();
-        Geary.App.ConversationMonitor? conversations = (model != null)
-            ? model.conversations
-            : null;
-        if (conversations != null) {
-            // Check if we're at the very bottom of the list. If we
-            // are, it's time to issue a load_more signal.
-            Gtk.Adjustment adjustment = ((Gtk.Scrollable) this).get_vadjustment();
-            double upper = adjustment.get_upper();
-            double threshold = upper - adjustment.page_size - LOAD_MORE_HEIGHT;
-            if (this.is_visible() &&
-                conversations.can_load_more &&
-                adjustment.get_value() >= threshold) {
-                load_more();
-            }
+    /**
+     * Updates the display of the received time on each list row.
+     *
+     * Because the received time is displayed as relative to the current time,
+     * it must be periodically updated. ConversationList.View does not do this
+     * automatically but instead it must be externally scheduled
+     */
+    public void refresh_times() {
+        this.list.foreach((child) => {
+            var row = (Row) child;
+            row.refresh_time();
+        });
+    }
 
-            schedule_visible_conversations_changed();
+    // -------------------
+    //  Model Management
+    // -------------------
+
+    /**
+     * The currently bound model
+     */
+    private Model? model;
+
+    /**
+     * Set the conversation monitor which the listview is displaying
+     */
+    public void set_monitor(Geary.App.ConversationMonitor? monitor) {
+        if (this.model != null) {
+            this.model.conversations_loaded.disconnect(on_conversations_loaded);
+            this.model.conversations_removed.disconnect(on_conversations_removed);
+            this.model.conversation_updated.disconnect(on_conversation_updated);
+        }
+        if (monitor == null) {
+            this.model = null;
+            this.list.bind_model(null, row_factory);
+        } else {
+            this.model = new Model(monitor);
+            this.list.bind_model(this.model, row_factory);
+            this.model.conversations_loaded.connect(on_conversations_loaded);
+            this.model.conversations_removed.connect(on_conversations_removed);
+            this.model.conversation_updated.connect(on_conversation_updated);
         }
     }
 
-    private void on_scan_started() {
-        this.enable_load_more = false;
-    }
-
-    private void on_scan_completed() {
-        this.enable_load_more = true;
-        check_load_more();
-
-        // Select the first conversation, if autoselect is enabled,
-        // nothing has been selected yet and we're not showing a
-        // composer.
-        if (this.config.autoselect &&
-            !this.should_inhibit_autoselect &&
-            get_selection().count_selected_rows() == 0) {
-            var parent = get_toplevel() as Application.MainWindow;
-            if (parent != null && !parent.has_composer) {
-                set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
-            }
-        }
-
-        this.should_inhibit_autoselect = false;
-    }
-
-    private void on_conversations_added(bool start) {
-        Gtk.Adjustment? adjustment = get_adjustment();
-        if (start) {
-            // If we were at the top, we want to stay there after
-            // conversations are added.
-            this.reset_adjustment = adjustment != null && adjustment.get_value() == 0;
-        } else if (this.reset_adjustment && adjustment != null) {
-            // Pump the loop to make sure the new conversations are
-            // taking up space in the window.  Without this, setting
-            // the adjustment here is a no-op because as far as it's
-            // concerned, it's already at the top.
-            while (Gtk.events_pending())
-                Gtk.main_iteration();
-
-            adjustment.set_value(0);
-        }
-        this.reset_adjustment = false;
-    }
-
-    private void on_conversations_removed(bool start) {
-        if (!this.config.autoselect) {
-            Gtk.SelectionMode mode = start
-                // Stop GtkTreeView from automatically selecting the
-                // next row after the removed rows
-                ? Gtk.SelectionMode.NONE
-                // Allow the user to make selections again
-                : Gtk.SelectionMode.MULTIPLE;
-            get_selection().set_mode(mode);
+    /**
+     * Attempt to load more conversations from the current monitor
+     */
+    public void load_more(int request) {
+        if (model != null) {
+            model.load_more(request);
         }
     }
 
-    private Gtk.Adjustment? get_adjustment() {
-        Gtk.ScrolledWindow? parent = get_parent() as Gtk.ScrolledWindow;
-        if (parent == null) {
-            debug("Parent was not scrolled window");
-            return null;
-        }
+    public void scroll(Gtk.ScrollType scroll_type) {
+        Gtk.ListBoxRow row = this.list.get_selected_row();
 
-        return parent.get_vadjustment();
-    }
-
-    private void on_gesture_pressed(int n_press, double x, double y) {
-        if (gesture.get_current_button() != Gdk.BUTTON_PRIMARY)
+        if (row == null) {
             return;
+        }
 
-        Gtk.TreePath? path;
-        get_path_at_pos((int) x, (int) y, out path, null, null, null);
+        int index = row.get_index();
+        if (scroll_type == Gtk.ScrollType.STEP_UP) {
+            row = this.list.get_row_at_index(index + 1);
+        } else {
+            row = this.list.get_row_at_index(index - 1);
+        }
 
-        // If the user clicked in an empty area, do nothing.
-        if (path == null)
-            return;
-
-        Geary.App.Conversation? c = get_model().get_conversation_at_path(path);
-        if (c == null)
-            return;
-
-        Gdk.Event event = gesture.get_last_event(gesture.get_current_sequence());
-        Gdk.ModifierType modifiers = Gtk.accelerator_get_default_mod_mask();
-
-        Gdk.ModifierType state_mask;
-        event.get_state(out state_mask);
-
-        if ((state_mask & modifiers) == 0 && n_press == 1) {
-            conversation_activated(c, true);
-        } else if ((state_mask & modifiers) == Gdk.ModifierType.SHIFT_MASK && n_press == 2) {
-            conversation_activated(c);
+        if (row != null) {
+            this.list.select_row(row);
         }
     }
 
-    private bool on_key_press(Gdk.EventKey event) {
-        if (this.selected.size != 1)
-            return false;
-
-        Geary.App.Conversation? c = this.selected.to_array()[0];
-        if (c == null)
-            return false;
-
-        Gdk.ModifierType modifiers = Gtk.accelerator_get_default_mod_mask();
-
-        if (event.keyval == Gdk.Key.Return ||
-            event.keyval == Gdk.Key.ISO_Enter ||
-            event.keyval == Gdk.Key.KP_Enter ||
-            event.keyval == Gdk.Key.space ||
-            event.keyval == Gdk.Key.KP_Space)
-            conversation_activated(c, !((event.state & modifiers) == Gdk.ModifierType.SHIFT_MASK));
-        return false;
+    private Gtk.Widget row_factory(Object convo_obj) {
+        var convo = (Geary.App.Conversation) convo_obj;
+        var row = new Row(config, convo, this.selection_mode_enabled);
+        row.toggle_flag.connect(on_toggle_flags);
+        row.toggle_selection.connect(on_toggle_selection);
+        return row;
     }
 
-    private bool on_button_press(Gdk.EventButton event) {
-        // Get the coordinates on the cell as well as the clicked path.
-        int cell_x;
-        int cell_y;
-        Gtk.TreePath? path;
-        get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
 
-        // If the user clicked in an empty area, do nothing.
-        if (path == null)
-            return false;
+    // --------------------
+    //  Right-click Popup
+    // --------------------
+    private void context_menu(Row row, Gdk.Rectangle? rect=null) {
+        if (!row.is_selected()) {
+            this.list.unselect_all();
+            this.list.select_row(row);
+        }
 
-        // Handle clicks to toggle read and starred status.
-        if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0 &&
-            (event.state & Gdk.ModifierType.CONTROL_MASK) == 0 &&
-            event.type == Gdk.EventType.BUTTON_PRESS) {
+        var popup_menu = construct_popover(row, this.list.get_selected_rows().length());
+        if (rect != null) {
+            popup_menu.set_pointing_to(rect);
+        }
+        popup_menu.popup();
+    }
 
-            // Click positions depend on whether the preview is enabled.
-            bool read_clicked = false;
-            bool star_clicked = false;
-            if (this.config.display_preview) {
-                read_clicked = cell_x < 25 && cell_y >= 14 && cell_y <= 30;
-                star_clicked = cell_x < 25 && cell_y >= 40 && cell_y <= 62;
+    private Gtk.Popover construct_popover(Row row, uint selection_size) {
+        GLib.Menu context_menu_model = new GLib.Menu();
+        var main = get_toplevel() as Application.MainWindow;
+
+        if (main != null) {
+            if (!main.is_shift_down) {
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "Move conversation to _Trash",
+                        "Move conversations to _Trash",
+                        selection_size
+                    ),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_TRASH_CONVERSATION
+                    )
+                );
             } else {
-                read_clicked = cell_x < 25 && cell_y >= 8 && cell_y <= 22;
-                star_clicked = cell_x < 25 && cell_y >= 28 && cell_y <= 43;
+                context_menu_model.append(
+                    /// Translators: Context menu item
+                    ngettext(
+                        "_Delete conversation",
+                        "_Delete conversations",
+                        selection_size
+                    ),
+                    Action.Window.prefix(
+                        Application.MainWindow.ACTION_DELETE_CONVERSATION
+                    )
+                );
             }
+        }
 
-            // Get the current conversation.  If it's selected, we'll apply the mark operation to
-            // all selected conversations; otherwise, it just applies to this one.
-            Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            Gee.Collection<Geary.App.Conversation> to_mark = (
-                this.selected.contains(conversation)
-                ? copy_selected()
-                : Geary.Collection.single(conversation)
+        if (row.conversation.is_unread()) {
+            context_menu_model.append(
+                _("Mark as _Read"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_MARK_AS_READ
+                )
             );
-
-            if (read_clicked) {
-                mark_conversations(to_mark, Geary.EmailFlags.UNREAD);
-                return true;
-            } else if (star_clicked) {
-                mark_conversations(to_mark, Geary.EmailFlags.FLAGGED);
-                return true;
-            }
         }
 
-        // Check if changing the selection will require any composers
-        // to be closed, but only on the first click of a
-        // double/triple click, so that double-clicking a draft
-        // doesn't attempt to load it then close it straight away.
-        if (event.type == Gdk.EventType.BUTTON_PRESS &&
-            !get_selection().path_is_selected(path)) {
-            var parent = get_toplevel() as Application.MainWindow;
-            if (parent != null && !parent.close_composer(false)) {
-                return true;
-            }
+        if (row.conversation.has_any_read_message()) {
+            context_menu_model.append(
+                _("Mark as _Unread"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_MARK_AS_UNREAD
+                )
+            );
         }
 
-        if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
-            Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
+        if (row.conversation.is_flagged()) {
+            context_menu_model.append(
+                _("U_nstar"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_MARK_AS_UNSTARRED
+                )
+            );
+        } else {
+            context_menu_model.append(
+                _("_Star"),
+                Action.Window.prefix(
+                    Application.MainWindow.ACTION_MARK_AS_STARRED
+                )
+            );
+        }
 
-            GLib.Menu context_menu_model = new GLib.Menu();
-            var main = get_toplevel() as Application.MainWindow;
-            if (main != null) {
-                if (!main.is_shift_down) {
-                    context_menu_model.append(
-                        /// Translators: Context menu item
-                        ngettext(
-                            "Move conversation to _Trash",
-                            "Move conversations to _Trash",
-                            this.selected.size
-                        ),
-                        Action.Window.prefix(
-                            Application.MainWindow.ACTION_TRASH_CONVERSATION
-                        )
-                    );
-                } else {
-                    context_menu_model.append(
-                        /// Translators: Context menu item
-                        ngettext(
-                            "_Delete conversation",
-                            "_Delete conversations",
-                            this.selected.size
-                        ),
-                        Action.Window.prefix(
-                            Application.MainWindow.ACTION_DELETE_CONVERSATION
-                        )
-                    );
-                }
-            }
-
-            if (conversation.is_unread())
+        if ((row.conversation.base_folder.used_as != ARCHIVE) &&
+            (row.conversation.base_folder.used_as != ALL_MAIL)) {
                 context_menu_model.append(
-                    _("Mark as _Read"),
-                    Action.Window.prefix(
-                        Application.MainWindow.ACTION_MARK_AS_READ
-                    )
-                );
-
-            if (conversation.has_any_read_message())
-                context_menu_model.append(
-                    _("Mark as _Unread"),
-                    Action.Window.prefix(
-                        Application.MainWindow.ACTION_MARK_AS_UNREAD
-                    )
-                );
-
-            if (conversation.is_flagged()) {
-                context_menu_model.append(
-                    _("U_nstar"),
-                    Action.Window.prefix(
-                        Application.MainWindow.ACTION_MARK_AS_UNSTARRED
-                    )
-                );
-            } else {
-                context_menu_model.append(
-                    _("_Star"),
-                    Action.Window.prefix(
-                        Application.MainWindow.ACTION_MARK_AS_STARRED
-                    )
-                );
-            }
-            if ((conversation.base_folder.used_as != ARCHIVE) && (conversation.base_folder.used_as != ALL_MAIL)) {
-                context_menu_model.append(
-                    _("Archive conversation"),
+                    ngettext(
+                        "_Archive conversation",
+                        "_Archive conversations",
+                        selection_size
+                    ),
                     Action.Window.prefix(
                         Application.MainWindow.ACTION_ARCHIVE_CONVERSATION
                     )
                 );
+        }
+
+        Menu actions_section = new Menu();
+        actions_section.append(
+            _("_Reply"),
+            Action.Window.prefix(
+                Application.MainWindow.ACTION_REPLY_CONVERSATION
+            )
+        );
+        actions_section.append(
+            _("R_eply All"),
+            Action.Window.prefix(
+                Application.MainWindow.ACTION_REPLY_ALL_CONVERSATION
+            )
+        );
+        actions_section.append(
+            _("_Forward"),
+            Action.Window.prefix(
+                Application.MainWindow.ACTION_FORWARD_CONVERSATION
+            )
+        );
+        context_menu_model.append_section(null, actions_section);
+
+        // Use a popover rather than a regular context menu since
+        // the latter grabs the event queue, so the MainWindow
+        // will not receive events if the user releases Shift,
+        // making the trash/delete header bar state wrong.
+        Gtk.Popover context_menu = new Gtk.Popover.from_model(
+            row, context_menu_model
+        );
+
+        return context_menu;
+    }
+
+    // -------------------
+    //  Selection
+    // -------------------
+
+    /**
+     * Emitted when one or more conversations are selected
+     */
+    public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
+
+    /**
+     * Emitted when one conversation is activated
+     */
+    public signal void conversation_activated(Geary.App.Conversation activated,
+                                              uint button);
+
+    /**
+     * Gets the conversations represented by the current selection in the ListBox
+     */
+    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+        var selected = new Gee.HashSet<Geary.App.Conversation>();
+
+        foreach (var row in this.list.get_selected_rows()) {
+            selected.add(((Row) row).conversation);
+        }
+        return selected;
+    }
+
+    /**
+     * Selects the rows for a given collection of conversations
+     *
+     * If a conversation is not present in the ListBox, it is ignored.
+     */
+    public void select_conversations(Gee.Collection<Geary.App.Conversation> selection) {
+        this.list.foreach((child) => {
+            var row = (Row) child;
+            Geary.App.Conversation conversation = row.conversation;
+            if (selection.contains(conversation)) {
+                this.list.select_row(row);
             }
+        });
+    }
 
-            Menu actions_section = new Menu();
-            actions_section.append(
-                _("_Reply"),
-                Action.Window.prefix(
-                    Application.MainWindow.ACTION_REPLY_CONVERSATION
-                )
-            );
-            actions_section.append(
-                _("R_eply All"),
-                Action.Window.prefix(
-                    Application.MainWindow.ACTION_REPLY_ALL_CONVERSATION
-                )
-            );
-            actions_section.append(
-                _("_Forward"),
-                Action.Window.prefix(
-                    Application.MainWindow.ACTION_FORWARD_CONVERSATION
-                )
-            );
-            context_menu_model.append_section(null, actions_section);
+    /**
+     * Selects all conversations
+     */
+    public void select_all() {
+        this.selection_mode_enabled = true;
+        this.list.select_all();
+    }
 
-            // Use a popover rather than a regular context menu since
-            // the latter grabs the event queue, so the MainWindow
-            // will not receive events if the user releases Shift,
-            // making the trash/delete header bar state wrong.
-            Gtk.Popover context_menu = new Gtk.Popover.from_model(
-                this, context_menu_model
-            );
-            Gdk.Rectangle dest = Gdk.Rectangle();
-            dest.x = (int) event.x;
-            dest.y = (int) event.y;
-            context_menu.set_pointing_to(dest);
-            context_menu.popup();
+    /**
+     * Unselects all conversations
+     */
+    public void unselect_all() {
+        this.list.unselect_all();
+    }
 
-            // When the conversation under the mouse is selected, stop event propagation
-            return get_selection().path_is_selected(path);
+    private bool selection_changed(Gee.Set<Geary.App.Conversation> selection) {
+        bool changed = this.selected.size != selection.size;
+        if (changed) {
+            return true;
         }
-
-        return false;
-    }
-
-    private void on_style_changed() {
-        // Recalculate dimensions of child cells.
-        ConversationListCellRenderer.style_changed(this);
-
-        schedule_visible_conversations_changed();
-    }
-
-    private void on_value_changed() {
-        if (this.enable_load_more) {
-            check_load_more();
-        }
-    }
-
-    private static Gtk.TreeViewColumn create_column(ConversationListStore.Column column,
-        Gtk.CellRenderer renderer, string attr, int width = 0) {
-        Gtk.TreeViewColumn view_column = new Gtk.TreeViewColumn.with_attributes(column.to_string(),
-            renderer, attr, column);
-        view_column.set_resizable(true);
-
-        if (width != 0) {
-            view_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED);
-            view_column.set_fixed_width(width);
-        }
-
-        return view_column;
-    }
-
-    private List<Gtk.TreePath> get_all_selected_paths() {
-        Gtk.TreeModel model;
-        return get_selection().get_selected_rows(out model);
-    }
-
-    private void on_selection_changed() {
-        // Schedule processing selection changes at low idle for
-        // two reasons: (a) if a lot of changes come in
-        // back-to-back, this allows for all that activity to
-        // settle before updating state and firing signals (which
-        // results in a lot of I/O), and (b) it means the
-        // ConversationMonitor's signals may be processed in any
-        // order by this class and the ConversationListView and
-        // not result in a lot of screen flashing and (again)
-        // unnecessary I/O as both classes update selection state.
-        this.selection_update.schedule();
-    }
-
-    // Gtk.TreeSelection can fire its "changed" signal even when
-    // nothing's changed, so look for that to avoid subscribers from
-    // doing the same things (in particular, I/O) multiple times
-    private void do_selection_changed() {
-        Gee.HashSet<Geary.App.Conversation> new_selection =
-            new Gee.HashSet<Geary.App.Conversation>();
-        List<Gtk.TreePath> paths = get_all_selected_paths();
-        if (paths.length() != 0) {
-            // Conversations are selected, so collect them and
-            // signal if different
-            foreach (Gtk.TreePath path in paths) {
-                Geary.App.Conversation? conversation =
-                get_model().get_conversation_at_path(path);
-                if (conversation != null)
-                    new_selection.add(conversation);
+        foreach (Geary.App.Conversation conversation in selection) {
+            if (!this.selected.contains(conversation)) {
+                changed = true;
             }
-        }
-
-        // only notify if different than what was previously reported
-        if (this.selected.size != new_selection.size ||
-            !this.selected.contains_all(new_selection)) {
-            this.selected = new_selection;
-            conversations_selected(this.selected.read_only_view);
-        }
-    }
-
-    public Gee.Set<Geary.App.Conversation> get_visible_conversations() {
-        Gee.HashSet<Geary.App.Conversation> visible_conversations = new Gee.HashSet<Geary.App.Conversation>();
-
-        Gtk.TreePath start_path;
-        Gtk.TreePath end_path;
-        if (!get_visible_range(out start_path, out end_path))
-            return visible_conversations;
-
-        while (start_path.compare(end_path) <= 0) {
-            Geary.App.Conversation? conversation = get_model().get_conversation_at_path(start_path);
-            if (conversation != null)
-                visible_conversations.add(conversation);
-
-            start_path.next();
-        }
-
-        return visible_conversations;
-    }
-
-    // Always returns false, so it can be used as a one-time SourceFunc
-    private bool update_visible_conversations() {
-        bool changed = false;
-        Gee.Set<Geary.App.Conversation> visible_conversations = get_visible_conversations();
-        if (this.current_visible_conversations == null ||
-            this.current_visible_conversations.size != visible_conversations.size ||
-            !this.current_visible_conversations.contains_all(visible_conversations)) {
-            this.current_visible_conversations = visible_conversations;
-            visible_conversations_changed(
-                this.current_visible_conversations.read_only_view
-            );
-            changed = true;
         }
         return changed;
     }
 
-    private void schedule_visible_conversations_changed() {
-        scheduled_update_visible_conversations = Geary.Scheduler.on_idle(update_visible_conversations);
-    }
-
-    public void select_conversations(Gee.Collection<Geary.App.Conversation> new_selection) {
-        if (this.selected.size != new_selection.size ||
-            !this.selected.contains_all(new_selection)) {
-            var selection = get_selection();
-            selection.unselect_all();
-            var model = get_model();
-            if (model != null) {
-                foreach (var conversation in new_selection) {
-                    var path = model.get_path_for_conversation(conversation);
-                    if (path != null) {
-                        selection.select_path(path);
-                    }
-                }
-            }
+    private void restore_row() {
+        if (this.to_restore_row != null) {
+            // Workaround GTK issue, activating/selecting row while model is
+            // updated scrolls to top
+            GLib.Timeout.add(100, () => {
+                this.to_restore_row.activate();
+                this.to_restore_row = null;
+                return false;
+            });
         }
     }
 
-    private void on_rows_changed() {
-        schedule_visible_conversations_changed();
+    // -----------------
+    //  Button Actions
+    // ----------------
+
+    /**
+     * Emitted when the user expresses intent to update the flags on a set of conversations
+     */
+    public signal void mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
+                                          Geary.NamedFlag flag);
+
+
+    private void on_toggle_flags(ConversationList.Row row, Geary.NamedFlag flag) {
+        if (row.is_selected()) {
+            mark_conversations(this.selected, flag);
+        } else {
+            mark_conversations(Geary.Collection.single(row.conversation), flag);
+        }
     }
 
-    private void on_display_preview_changed() {
-        style_updated();
-        model.foreach(refresh_path);
-
-        schedule_visible_conversations_changed();
+    private void on_toggle_selection(ConversationList.Row row, bool active) {
+        if (active) {
+            this.list.select_row(row);
+        } else {
+            this.list.unselect_row(row);
+        }
     }
 
-    private bool refresh_path(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
-        model.row_changed(path, iter);
+    // ----------------
+    //  Visibility
+    // ---------------
+
+    /**
+     * If the number of pixels between the bottom of the viewport and the bottom of
+     * of the listbox is less than LOAD_MORE_THRESHOLD, request more from the
+     * monitor.
+     */
+    private double LOAD_MORE_THRESHOLD = 100;
+    private int LOAD_MORE_COUNT = 50;
+
+    /**
+     * Called on scroll to possibly load more conversations from the model
+     */
+    private void maybe_load_more(Gtk.Adjustment adjustment) {
+        double upper = adjustment.get_upper();
+        double threshold = upper - adjustment.page_size - LOAD_MORE_THRESHOLD;
+
+        if (this.is_visible() && adjustment.get_value() >= threshold) {
+            this.load_more(LOAD_MORE_COUNT);
+        }
+    }
+
+    /**
+     * Time in milliseconds to delay updating the set of visible conversations.
+     * If another update is triggered during this delay, it will be discarded
+     * and the delay begins again.
+     */
+    private int VISIBILITY_UPDATE_DELAY_MS = 1000;
+
+	/**
+	 * The set of all conversations currently displayed in the viewport
+	 */
+    public Gee.Set<Geary.App.Conversation> visible_conversations {get; private set; default = new Gee.HashSet<Geary.App.Conversation>(); }
+    private Geary.Scheduler.Scheduled? scheduled_visible_update;
+
+    /**
+     * Called on scroll to update the set of visible conversations
+     */
+    private void update_visible_conversations() {
+        if(scheduled_visible_update != null) {
+            scheduled_visible_update.cancel();
+        }
+
+        scheduled_visible_update = Geary.Scheduler.after_msec(VISIBILITY_UPDATE_DELAY_MS, () => {
+            var visible = new Gee.HashSet<Geary.App.Conversation>();
+            Gtk.ListBoxRow? first = this.list.get_row_at_y((int) this.vadjustment.value);
+
+            if (first == null) {
+                this.visible_conversations = visible;
+                return Source.REMOVE;
+            }
+
+            uint start_index = ((uint) first.get_index());
+            uint end_index = uint.min(
+                // Assume that all messages are the same height
+                start_index + (uint) (this.vadjustment.page_size / first.get_allocated_height()),
+                this.model.get_n_items()
+            );
+
+            for (uint i = start_index; i < end_index; i++) {
+                visible_conversations.add(
+                    this.model.get_item(i) as Geary.App.Conversation
+                );
+            }
+
+            this.visible_conversations = visible;
+            return Source.REMOVE;
+        }, GLib.Priority.DEFAULT_IDLE);
+    }
+
+    // ------------
+    // Model
+    // ------------
+    private bool should_inhibit_autoactivate = false;
+
+    /**
+     * Informs the listbox to suppress autoactivate behavior on the next update
+     */
+    public void inhibit_next_autoselect() {
+        should_inhibit_autoactivate = true;
+    }
+
+    /**
+     * Find a selectable conversation near current selection
+     */
+    private Gtk.ListBoxRow? get_next_conversation(bool asc=true) {
+        int index = asc ? 0 : int.MAX;
+
+        foreach (Gtk.ListBoxRow row in this.list.get_selected_rows().copy()) {
+            if ((asc && row.get_index() > index) ||
+                (!asc && row.get_index() < index)) {
+                index = row.get_index();
+            }
+        }
+        if (asc) {
+            index += 1;
+        } else {
+            index -= 1;
+        }
+        Gtk.ListBoxRow? row = this.list.get_row_at_index(index);
+        return row != null || !asc ? row : get_next_conversation(false);
+    }
+
+    private void on_conversations_loaded() {
+        if (this.config.autoselect &&
+            !this.should_inhibit_autoactivate &&
+            this.list.get_selected_rows().length() == 0) {
+
+            Gtk.ListBoxRow first_row = this.list.get_row_at_index(0);
+            if (first_row != null) {
+                this.list.select_row(first_row);
+            }
+        }
+
+        this.should_inhibit_autoactivate = false;
+    }
+
+    /*
+     * Select next conversation
+     */
+    private void on_conversations_removed(bool start) {
+        // Before model update, just find a conversation
+        if (start) {
+            this.to_restore_row = get_next_conversation();
+        // If in selection mode, leaving will do the job
+        } else if (this.selection_mode_enabled) {
+            this.selection_mode_enabled = false;
+        // Set next conversation
+        } else {
+            restore_row();
+        }
+    }
+
+    /*
+     * Update conversation row
+     */
+    private void on_conversation_updated(Geary.App.Conversation convo) {
+        this.list.foreach((child) => {
+            var row = (Row) child;
+            if (convo == row.conversation) {
+                row.update();
+            }
+        });
+    }
+
+    // ----------
+    // Gestures
+    // ----------
+
+    private void on_press_gesture_released(int n_press, double x, double y) {
+        var row = (Row) this.list.get_row_at_y((int) y);
+
+        if (row == null)
+            return;
+
+        var button = this.press_gesture.get_current_button();
+        if (button == 1) {
+            Gdk.EventSequence sequence = this.press_gesture.get_current_sequence();
+            Gdk.Event event = this.press_gesture.get_last_event(sequence);
+            event.get_state(out this.last_modifier_type);
+            if (!this.selection_mode_enabled) {
+                if ((this.last_modifier_type & Gdk.ModifierType.SHIFT_MASK) ==
+                        Gdk.ModifierType.SHIFT_MASK ||
+                    (this.last_modifier_type & Gdk.ModifierType.CONTROL_MASK) ==
+                        Gdk.ModifierType.CONTROL_MASK) {
+                    this.selection_mode_enabled = true;
+                } else {
+                    conversation_activated(((Row) row).conversation, 1);
+                }
+            }
+        } else if (button == 2) {
+            conversation_activated(row.conversation, 2);
+        } else if (button == 3) {
+            var rect = Gdk.Rectangle();
+            row.translate_coordinates(this.list, 0, 0, out rect.x, out rect.y);
+            rect.x = (int) x;
+            rect.y = (int) y - rect.y;
+            rect.width = rect.height = 0;
+            context_menu(row, rect);
+        }
+    }
+
+    private bool on_key_event_controller_key_pressed(uint keyval, uint keycode, Gdk.ModifierType modifier_type) {
+        switch (keyval) {
+        case Gdk.Key.Up:
+        case Gdk.Key.Down:
+            if ((modifier_type & Gdk.ModifierType.SHIFT_MASK) ==
+                    Gdk.ModifierType.SHIFT_MASK) {
+                this.selection_mode_enabled = true;
+            }
+            break;
+        case Gdk.Key.Escape:
+            if (this.selection_mode_enabled) {
+                this.selection_mode_enabled = false;
+                return true;
+            }
+            break;
+        }
         return false;
     }
 
-    // Enable/disable hover effect on all selected cells.
-    private void set_hover_selected(bool hover) {
-        ConversationListCellRenderer.set_hover_selected(hover);
-        queue_draw();
-    }
 
-    private bool on_motion_notify_event(Gdk.EventMotion event) {
-        if (get_selection().count_selected_rows() > 0) {
-            Gtk.TreePath? path = null;
-            int cell_x, cell_y;
-            get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
+	/**
+	 * Widgets used as drag icons have to be explicitly destroyed after the drag
+	 * so we track the widget as a private member
+	 */
+    private Row? drag_widget = null;
 
-            set_hover_selected(path != null && get_selection().path_is_selected(path));
+    private void on_drag_begin(Gdk.DragContext ctx) {
+        int screen_x, screen_y;
+        Gdk.ModifierType _modifier;
+
+        this.get_window().get_device_position(ctx.get_device(), out screen_x, out screen_y, out _modifier);
+
+        // If the user has a selection but drags starting from an unselected
+        // row, we need to set the selection to that row
+        Row? row = this.list.get_row_at_y(screen_y + (int) this.vadjustment.value) as Row?;
+        if (row != null && !row.is_selected()) {
+            this.list.unselect_all();
+            this.list.select_row(row);
         }
-        return Gdk.EVENT_PROPAGATE;
+
+        this.drag_widget = new Row(this.config, row.conversation, false);
+        this.drag_widget.width_request = row.get_allocated_width();
+        this.drag_widget.get_style_context().add_class("drag-n-drop");
+        this.drag_widget.visible = true;
+
+        int hot_x, hot_y;
+        this.translate_coordinates(row, screen_x, screen_y, out hot_x, out hot_y);
+        Gtk.drag_set_icon_widget(ctx, this.drag_widget, hot_x, hot_y);
     }
 
-    private bool on_leave_notify_event() {
-        if (get_selection().count_selected_rows() > 0) {
-            set_hover_selected(false);
+    private void on_drag_end(Gdk.DragContext ctx) {
+        if (this.drag_widget != null) {
+            this.drag_widget.destroy();
+            this.drag_widget = null;
         }
-        return Gdk.EVENT_PROPAGATE;
-
     }
 
-    private void on_vadjustment_changed() {
-        this.vadjustment.value_changed.connect(on_value_changed);
+    private void on_selected_rows_changed() {
+        var selected = get_selected_conversations();
+
+        if (!selection_changed(selected)) {
+            return;
+        }
+
+        this.selected = selected;
+        if (this.selected.size > 0 || this.to_restore_row == null) {
+            conversations_selected(this.selected);
+        }
     }
 
+    private void on_row_activated() {
+        var row = this.list.get_selected_row();
+        if (row != null) {
+            conversation_activated(((Row) row).conversation, 1);
+        }
+    }
+
+    private void on_selection_mode_changed() {
+        this.list.foreach((child) => {
+            var row = (Row) child;
+            row.set_selection_enabled(this.selection_mode_enabled);
+        });
+
+        if (this.selection_mode_enabled) {
+            this.to_restore_row = this.list.get_selected_row();
+        } else {
+            restore_row();
+        }
+    }
 }

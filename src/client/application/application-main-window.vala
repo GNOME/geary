@@ -46,7 +46,7 @@ public class Application.MainWindow :
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
         { ACTION_SELECT_INBOX, on_select_inbox, "i" },
-        { ACTION_NAVIGATION_BACK, focus_previous_pane},
+        { ACTION_NAVIGATION_BACK, go_to_previous_pane},
 
         // Message actions
         { ACTION_REPLY_CONVERSATION, on_reply_conversation },
@@ -237,6 +237,16 @@ public class Application.MainWindow :
             "navigate", 1,
             typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_DOWN
         );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.Escape, 0,
+            "escape", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings,
+            Gdk.Key.a, CONTROL_MASK,
+            "select_all", 0
+        );
     }
 
 
@@ -355,7 +365,7 @@ public class Application.MainWindow :
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public SearchBar search_bar { get; private set; }
-    public ConversationListView conversation_list_view  { get; private set; }
+    public ConversationList.View conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
 
     public Components.InfoBarStack conversation_list_info_bars {
@@ -402,7 +412,6 @@ public class Application.MainWindow :
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
 
     [GtkChild] private unowned Gtk.Box conversation_list_box;
-    [GtkChild] private unowned Gtk.ScrolledWindow conversation_list_scrolled;
     [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
     [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
 
@@ -517,22 +526,34 @@ public class Application.MainWindow :
         activate_action(get_window_action(ACTION_FIND_IN_CONVERSATION));
     }
 
+    /** Keybinding signal for escaping current view. */
+    [Signal (action=true)]
+    public virtual signal void escape() {
+        navigate_previous_pane();
+    }
+
+    /** Keybinding signal for selecting all elements in current view. */
+    [Signal (action=true)]
+    public virtual signal void select_all() {
+        this.conversation_list_view.select_all();
+    }
+
     /** Keybinding signal for shifting the keyboard focus. */
     [Signal (action=true)]
     public virtual signal void navigate(Gtk.ScrollType type) {
         switch (type) {
         case Gtk.ScrollType.PAGE_LEFT:
             if (get_direction() != RTL) {
-                focus_previous_pane();
+                go_to_previous_pane();
             } else {
-                focus_next_pane();
+                go_to_next_pane();
             }
             break;
         case Gtk.ScrollType.PAGE_RIGHT:
             if (get_direction() != RTL) {
-                focus_next_pane();
+                go_to_next_pane();
             } else {
-                focus_previous_pane();
+                go_to_previous_pane();
             }
             break;
         case Gtk.ScrollType.STEP_UP:
@@ -659,7 +680,9 @@ public class Application.MainWindow :
         cert_retry.clicked.connect(on_cert_problem_retry);
         this.cert_problem_infobar.get_action_area().add(cert_retry);
 
-        this.conversation_list_view.grab_focus();
+        this.map.connect(() => {
+            this.folder_list.grab_focus();
+        });
 
         foreach (var actions in this.folder_conversation_actions) {
             actions.mark_message_button_toggled.connect(on_show_mark_menu);
@@ -760,6 +783,8 @@ public class Application.MainWindow :
             this.folder_open.cancel();
             var cancellable = this.folder_open = new GLib.Cancellable();
 
+            this.conversation_list_headerbar.selection_open = false;
+
             // Dispose of all existing objects for the currently
             // selected model.
 
@@ -776,11 +801,7 @@ public class Application.MainWindow :
                 this.progress_monitor.remove(this.conversations.progress_monitor);
                 close_conversation_monitor(this.conversations);
                 this.conversations = null;
-            }
-            var conversations_model = this.conversation_list_view.get_model();
-            if (conversations_model != null) {
-                this.progress_monitor.remove(conversations_model.preview_monitor);
-                this.conversation_list_view.set_model(null);
+                this.conversation_list_view.set_monitor(null);
             }
 
             this.conversation_list_info_bars.remove_all();
@@ -829,22 +850,17 @@ public class Application.MainWindow :
                     // Include fields for the conversation viewer as well so
                     // conversations can be displayed without having to go
                     // back to the db
-                    ConversationListStore.REQUIRED_FIELDS |
+                    ConversationList.View.REQUIRED_FIELDS |
                     ConversationListBox.REQUIRED_FIELDS |
                     ConversationEmail.REQUIRED_FOR_CONSTRUCT,
                     MIN_CONVERSATION_COUNT
                 );
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
-                conversations_model = new ConversationListStore(
-                    this.conversations, this.application.config
-
-                );
-                this.progress_monitor.add(conversations_model.preview_monitor);
                 if (inhibit_autoselect) {
                     this.conversation_list_view.inhibit_next_autoselect();
                 }
-                this.conversation_list_view.set_model(conversations_model);
+                this.conversation_list_view.set_monitor(this.conversations);
 
                 // disable copy/move to the new folder
                 foreach (var menu in this.folder_popovers) {
@@ -930,7 +946,6 @@ public class Application.MainWindow :
                     Gee.Collection.empty<Geary.EmailIdentifier>(),
                     is_interactive
                 );
-            } else {
             }
         }
     }
@@ -1335,15 +1350,16 @@ public class Application.MainWindow :
         this.conversation_list_box.pack_start(
             this.conversation_list_info_bars, false, false, 0
         );
-        this.conversation_list_view = new ConversationListView(
-            this.application.config
-        );
-        this.conversation_list_view.load_more.connect(on_load_more);
+
+        this.conversation_list_view = new ConversationList.View(this.application.config);
         this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         this.conversation_list_view.conversation_activated.connect(on_conversation_activated);
-        this.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
-        this.conversation_list_scrolled.add(conversation_list_view);
+        this.conversation_list_view.visible_conversations.notify.connect(on_visible_conversations_changed);
+
+        this.conversation_list_box.pack_start(
+            this.conversation_list_view, true, true, 0
+        );
 
         // Conversation viewer
         this.conversation_viewer = new ConversationViewer(
@@ -1361,10 +1377,24 @@ public class Application.MainWindow :
             this.search_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
         );
+        this.conversation_list_headerbar.bind_property(
+            "selection-open",
+            this.conversation_list_view, "selection-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
         this.conversation_headerbar.bind_property(
             "find-open",
             this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.conversation_list_headerbar.notify["selection-open"].connect(
+            () => {
+                if (this.conversation_list_view.selection_mode_enabled)
+                    this.conversation_list_actions_revealer.reveal_child = (
+                        this.outer_leaflet.folded);
+                else
+                    this.conversation_list_actions_revealer.reveal_child = false;
+            }
         );
         this.conversation_headerbar.notify["shown-actions"].connect(
             () => {
@@ -1382,6 +1412,8 @@ public class Application.MainWindow :
         this.spinner.set_progress_monitor(progress_monitor);
         this.status_bar.add(this.spinner);
         this.status_bar.show_all();
+
+        this.conversation_list_actions.set_mark_inverted();
 
         this.folder_conversation_actions = {
             this.conversation_headerbar.full_actions,
@@ -1552,11 +1584,7 @@ public class Application.MainWindow :
                 this.conversation_viewer.current_list.update_display();
             }
 
-            ConversationListStore? list_store =
-                this.conversation_list_view.get_model() as ConversationListStore;
-            if (list_store != null) {
-                list_store.update_display();
-            }
+            this.conversation_list_view.refresh_times();
         }
     }
 
@@ -1750,15 +1778,49 @@ public class Application.MainWindow :
         }
     }
 
-    private void load_more() {
-        if (this.is_conversation_list_shown &&
-            this.conversations != null) {
-            this.conversations.min_window_count += MIN_CONVERSATION_COUNT;
+    private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
+        bool folded = this.outer_leaflet.folded;
+        // Else selection handled by activated
+        if (selected.size > 1 || !folded) {
+            select_conversations.begin(selected, Gee.Collection.empty(), true);
+        }
+        if (this.conversation_list_view.selection_mode_enabled) {
+            if (selected.size > 0) {
+                this.conversation_list_actions_revealer.reveal_child = folded;
+            } else {
+                this.conversation_list_actions_revealer.reveal_child = false;
+            }
         }
     }
 
-    private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        this.select_conversations.begin(selected, Gee.Collection.empty(), true);
+    private void on_conversation_activated(Geary.App.Conversation activated, uint button) {
+        if (button == 1) {
+            bool folded = this.outer_leaflet.folded;
+            go_to_next_pane(true);
+            if (folded) {
+                Gee.Collection<Geary.App.Conversation> selected =
+                    new Gee.ArrayList<Geary.App.Conversation>();
+                selected.add(activated);
+                select_conversations.begin(selected, Gee.Collection.empty(), true);
+            }
+        } else if (this.selected_folder != null) {
+            if (this.selected_folder.used_as != DRAFTS) {
+                this.application.new_window.begin(
+                    this.selected_folder,
+                    this.conversation_list_view.selected
+                    );
+            } else {
+                // TODO: Determine how to map between conversations
+                // and drafts correctly.
+                Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
+                this.create_composer.begin(
+                    this.selected_folder.account,
+                    EDIT,
+                    draft,
+                    null
+                );
+            }
+        }
     }
 
     private void on_conversation_count_changed() {
@@ -1778,7 +1840,7 @@ public class Application.MainWindow :
                 // conversations_selected firing from the convo list,
                 // so we need to stop the loading spinner here.
                 if (!this.application.config.autoselect &&
-                    this.conversation_list_view.get_selection().count_selected_rows() == 0) {
+                    this.conversation_list_view.selected.size == 0) {
                     this.conversation_viewer.show_none_selected();
                     update_conversation_actions(NONE);
                 }
@@ -1865,20 +1927,6 @@ public class Application.MainWindow :
             sensitive && (this.selected_folder is Geary.FolderSupport.Remove)
         );
 
-        switch (count) {
-        case NONE:
-            this.conversation_list_actions_revealer.reveal_child = false;
-            break;
-        case SINGLE:
-            this.conversation_list_actions_revealer.reveal_child = (
-                this.outer_leaflet.folded
-            );
-            break;
-        case MULTIPLE:
-            this.conversation_list_actions_revealer.reveal_child = true;
-            break;
-        }
-
         this.update_context_dependent_actions.begin(sensitive);
     }
 
@@ -1907,7 +1955,7 @@ public class Application.MainWindow :
                 Gee.Collection<Geary.EmailIdentifier> ids =
                     new Gee.LinkedList<Geary.EmailIdentifier>();
                 foreach (Geary.App.Conversation convo in
-                         this.conversation_list_view.get_selected()) {
+                         this.conversation_list_view.selected) {
                     ids.add_all(convo.get_email_ids());
                 }
                 try {
@@ -1956,65 +2004,83 @@ public class Application.MainWindow :
         }
     }
 
-    private void focus_next_pane() {
-        var focus = get_focus();
-
-        if (this.outer_leaflet.folded) {
-            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
-                if (this.inner_leaflet.folded &&
-                    this.inner_leaflet.visible_child_name == FOLDER_LIST ||
-                    focus == this.folder_list) {
-                    this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
-                    focus = this.conversation_list_view;
-                } else {
-                    if (this.conversation_list_view.get_selected().size == 1 &&
-                        this.selected_folder.properties.email_total > 0) {
-                        this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
-                        focus = this.conversation_viewer.visible_child;
-                    }
-                }
-            }
-        } else if (focus != null) {
-            if (focus == this.folder_list ||
-                focus.is_ancestor(this.folder_list)) {
-                focus = this.conversation_list_view;
-            } else if (focus == this.conversation_list_view ||
-                       focus.is_ancestor(this.conversation_list_view)) {
-                focus = this.conversation_viewer.visible_child;
-            } else if (focus == this.conversation_viewer ||
-                       focus.is_ancestor(this.conversation_viewer)) {
-                focus = this.folder_list;
-            }
-        }
-
-        if (focus != null) {
-            focus.focus(TAB_FORWARD);
+    private void focus_widget(Gtk.Widget? widget) {
+        if (widget != null) {
+            widget.focus(TAB_FORWARD);
         } else {
             error_bell();
         }
     }
 
-    private void focus_previous_pane() {
+    private void navigate_next_pane() {
         var focus = get_focus();
+        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+            if (this.inner_leaflet.folded &&
+                this.inner_leaflet.visible_child_name == FOLDER_LIST ||
+                focus == this.folder_list) {
+                this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                focus = this.conversation_list_view;
+            } else {
+                if (this.conversation_list_view.selected.size == 1 &&
+                    this.selected_folder.properties.email_total > 0) {
+                    this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    focus = this.conversation_viewer.visible_child;
+                }
+            }
+        }
+        focus_widget(focus);
+    }
 
+    private void focus_next_pane() {
+        var focus = get_focus();
+        if (focus != null) {
+            if (focus == this.folder_list ||
+                focus.is_ancestor(this.folder_list)) {
+                focus = this.conversation_list_view;
+            } else if (focus == this.conversation_list_view ||
+                       focus.is_ancestor(this.conversation_list_view)) {
+                focus = this.conversation_viewer.visible_child;
+            } else if (focus == this.conversation_viewer ||
+                       focus.is_ancestor(this.conversation_viewer)) {
+                focus = this.folder_list;
+            }
+        }
+        focus_widget(focus);
+    }
+
+    private void go_to_next_pane(bool only_if_folded=false) {
         if (this.outer_leaflet.folded) {
-            if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
-                if (this.inner_leaflet.folded) {
-                    if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
-                        this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
-                        focus = this.folder_list;
-                    }
-                } else {
-                    if (focus == this.conversation_list_view)
-                        focus = this.folder_list;
-                    else
-                        focus = this.conversation_list_view;
+            navigate_next_pane();
+        } else if (!only_if_folded) {
+            focus_next_pane();
+        }
+    }
+
+    private void navigate_previous_pane() {
+        var focus = get_focus();
+        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
+            if (this.inner_leaflet.folded) {
+                if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
+                    this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                    focus = this.folder_list;
                 }
             } else {
-                this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
-                focus = this.conversation_list_view;
+                 if (focus == this.conversation_list_view ||
+                     focus.is_ancestor(this.conversation_list_view))
+                    focus = this.folder_list;
+                else
+                    focus = this.conversation_list_view;
             }
-        } else if (focus != null) {
+        } else {
+            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
+            focus = this.conversation_list_view;
+        }
+        focus_widget(focus);
+    }
+
+    private void focus_previous_pane() {
+        var focus = get_focus();
+        if (focus != null) {
             if (focus == this.folder_list ||
                 focus.is_ancestor(this.folder_list)) {
                 focus = this.conversation_viewer.visible_child;
@@ -2026,13 +2092,15 @@ public class Application.MainWindow :
                 focus = this.conversation_list_view;
             }
         }
+        focus_widget(focus);
+    }
 
-        if (focus != null) {
-            focus.focus(TAB_FORWARD);
+    private void go_to_previous_pane() {
+        if (this.outer_leaflet.folded) {
+            navigate_previous_pane();
         } else {
-            error_bell();
+            focus_previous_pane();
         }
-
     }
 
     private SimpleAction get_window_action(string name) {
@@ -2055,7 +2123,7 @@ public class Application.MainWindow :
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
         Gtk.Scrollbar? scrollbar = (
-            this.conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar
+            this.conversation_list_view.get_vscrollbar() as Gtk.Scrollbar
         );
         if (is_visible() &&
             (scrollbar == null || !scrollbar.get_visible()) &&
@@ -2063,7 +2131,7 @@ public class Application.MainWindow :
             monitor.can_load_more) {
             debug("Not enough messages, loading more for folder %s",
                   this.selected_folder.to_string());
-            load_more();
+            this.conversation_list_view.load_more(MIN_CONVERSATION_COUNT);
         }
     }
 
@@ -2074,10 +2142,6 @@ public class Application.MainWindow :
         this.controller.report_problem(
             new Geary.ServiceProblemReport(account, account.incoming, err)
         );
-    }
-
-    private void on_load_more() {
-        load_more();
     }
 
     [GtkCallback]
@@ -2116,7 +2180,7 @@ public class Application.MainWindow :
 
     [GtkCallback]
     private void on_outer_leaflet_changed() {
-        int selected = this.conversation_list_view.get_selected().size;
+        int selected = this.conversation_list_view.selected.size;
         update_conversation_actions(
             ConversationCount.for_size(selected)
         );
@@ -2140,6 +2204,13 @@ public class Application.MainWindow :
         } else {
             this.conversation_list_headerbar.show_close_button = false;
             this.conversation_headerbar.back_button.visible = false;
+            if (selected > 0) {
+                select_conversations.begin(
+                    this.conversation_list_view.selected,
+                    Gee.Collection.empty<Geary.EmailIdentifier>(),
+                    false
+                );
+            }
         }
     }
 
@@ -2321,7 +2392,7 @@ public class Application.MainWindow :
         if (this.selected_folder != null) {
             this.controller.clear_new_messages(
                 this.selected_folder,
-                this.conversation_list_view.get_visible_conversations()
+                this.conversation_list_view.visible_conversations
             );
         }
     }
@@ -2355,39 +2426,15 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
+    private void on_visible_conversations_changed() {
         if (this.selected_folder != null) {
-            this.controller.clear_new_messages(this.selected_folder, visible);
+            this.controller.clear_new_messages(this.selected_folder, this.conversation_list_view.visible_conversations);
         }
     }
 
     private void on_folder_activated(Geary.Folder? folder) {
-        if (folder != null)
-            focus_next_pane();
-    }
-
-    private void on_conversation_activated(Geary.App.Conversation activated, bool single) {
-        if (single) {
-            if (this.outer_leaflet.folded) {
-                focus_next_pane();
-            }
-        } else if (this.selected_folder != null) {
-            if (this.selected_folder.used_as != DRAFTS) {
-                this.application.new_window.begin(
-                    this.selected_folder,
-                    this.conversation_list_view.copy_selected()
-                    );
-            } else {
-                // TODO: Determine how to map between conversations
-                // and drafts correctly.
-                Geary.Email draft = activated.get_latest_recv_email(IN_FOLDER);
-                this.create_composer.begin(
-                    this.selected_folder.account,
-                    EDIT,
-                    draft,
-                    null
-                );
-            }
+        if (folder != null) {
+            go_to_next_pane();
         }
     }
 
@@ -2470,7 +2517,7 @@ public class Application.MainWindow :
         bool starred_selected = false;
         bool unstarred_selected = false;
         foreach (Geary.App.Conversation conversation in
-                 this.conversation_list_view.get_selected()) {
+                 this.conversation_list_view.selected) {
             if (conversation.is_unread())
                 unread_selected = true;
 
@@ -2529,7 +2576,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 Geary.EmailFlags.UNREAD,
                 false,
                 (obj, res) => {
@@ -2541,6 +2588,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_mark_as_unread() {
@@ -2548,7 +2596,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 Geary.EmailFlags.UNREAD,
                 true,
                 (obj, res) => {
@@ -2560,6 +2608,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_mark_as_starred() {
@@ -2567,7 +2616,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 Geary.EmailFlags.FLAGGED,
                 true,
                 (obj, res) => {
@@ -2579,6 +2628,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_mark_as_unstarred() {
@@ -2586,7 +2636,7 @@ public class Application.MainWindow :
         if (location != null) {
             this.controller.mark_conversations.begin(
                 location,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 Geary.EmailFlags.FLAGGED,
                 false,
                 (obj, res) => {
@@ -2598,6 +2648,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_mark_as_junk_toggle() {
@@ -2610,7 +2661,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2620,6 +2671,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_move_conversation(Geary.Folder destination) {
@@ -2629,7 +2681,7 @@ public class Application.MainWindow :
             this.controller.move_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 (obj, res) => {
                     try {
                         this.controller.move_conversations.end(res);
@@ -2640,6 +2692,7 @@ public class Application.MainWindow :
             );
 
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_copy_conversation(Geary.Folder destination) {
@@ -2649,7 +2702,7 @@ public class Application.MainWindow :
             this.controller.copy_conversations.begin(
                 source,
                 destination,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 (obj, res) => {
                     try {
                         this.controller.copy_conversations.end(res);
@@ -2660,6 +2713,7 @@ public class Application.MainWindow :
             );
 
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_archive_conversation() {
@@ -2668,7 +2722,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 ARCHIVE,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2678,6 +2732,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_trash_conversation() {
@@ -2686,7 +2741,7 @@ public class Application.MainWindow :
             this.controller.move_conversations_special.begin(
                 source,
                 TRASH,
-                this.conversation_list_view.copy_selected(),
+                this.conversation_list_view.selected,
                 (obj, res) => {
                     try {
                         this.controller.move_conversations_special.end(res);
@@ -2696,13 +2751,14 @@ public class Application.MainWindow :
                 }
             );
         }
+        // No need to disable selection mode, handled by model change
     }
 
     private void on_delete_conversation() {
         Geary.FolderSupport.Remove target =
             this.selected_folder as Geary.FolderSupport.Remove;
         Gee.Collection<Geary.App.Conversation> conversations =
-            this.conversation_list_view.copy_selected();
+            this.conversation_list_view.selected;
         if (target != null && this.prompt_delete_conversations(conversations.size)) {
             this.controller.delete_conversations.begin(
                 target,
@@ -2716,6 +2772,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        // No need to disable selection mode, handled by model change
     }
 
     private void on_email_loaded(ConversationListBox view,
@@ -2757,6 +2814,7 @@ public class Application.MainWindow :
                 }
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_email_reply_to_sender(Geary.Email target, string? quote) {
@@ -2765,6 +2823,7 @@ public class Application.MainWindow :
                 this.selected_account, REPLY_SENDER, target, quote
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_email_reply_to_all(Geary.Email target, string? quote) {
@@ -2773,6 +2832,7 @@ public class Application.MainWindow :
                 this.selected_account, REPLY_ALL, target, quote
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_email_forward(Geary.Email target, string? quote) {
@@ -2781,6 +2841,7 @@ public class Application.MainWindow :
                 this.selected_account, FORWARD, target, quote
             );
         }
+        this.conversation_list_view.selection_mode_enabled = false;
     }
 
     private void on_email_trash(ConversationListBox view, Geary.Email target) {

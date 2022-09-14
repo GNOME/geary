@@ -69,10 +69,10 @@ src/client/composer/composer-widget.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
 src/client/composer/spell-check-popover.vala
-src/client/conversation-list/conversation-list-cell-renderer.vala
-src/client/conversation-list/conversation-list-store.vala
+src/client/conversation-list/conversation-list-model.vala
+src/client/conversation-list/conversation-list-row.vala
 src/client/conversation-list/conversation-list-view.vala
-src/client/conversation-list/formatted-conversation-data.vala
+src/client/conversation-list/conversation-list-participant.vala
 src/client/conversation-viewer/conversation-email.vala
 src/client/conversation-viewer/conversation-list-box.vala
 src/client/conversation-viewer/conversation-message.vala
@@ -466,6 +466,8 @@ ui/components-placeholder-pane.ui
 ui/conversation-contact-popover.ui
 ui/conversation-email.ui
 ui/conversation-email-menus.ui
+ui/conversation-list-row.ui
+ui/conversation-list-view.ui
 ui/conversation-message-link-popover.ui
 ui/conversation-message-menus.ui
 ui/conversation-message.ui

@@ -98,6 +98,13 @@ public class Components.ConversationActions : Gtk.Box {
         this.copy_message_button.clicked();
     }
 
+    public void set_mark_inverted() {
+        var image = new Gtk.Image.from_icon_name(
+            "pan-up-symbolic", Gtk.IconSize.BUTTON
+        );
+        this.mark_message_button.set_image(image);
+    }
+
     public void update_trash_button(bool show_trash) {
         this.show_trash_button = show_trash;
         update_conversation_buttons();

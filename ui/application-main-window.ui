@@ -45,20 +45,13 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkFrame" id="folder_frame">
-                            <property name="visible">True</property>
-                            <property name="vexpand">True</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">none</property>
-                            <child>
-                              <object class="GtkScrolledWindow" id="folder_list_scrolled">
-                                <property name="visible">True</property>
-                                <property name="hscrollbar_policy">never</property>
-                              </object>
-                            </child>
-                            <style>
-                              <class name="geary-folder-frame"/>
-                            </style>
+                           <object class="GtkScrolledWindow" id="folder_list_scrolled">
+                              <property name="visible">True</property>
+                              <property name="vexpand">True</property>
+                              <property name="hscrollbar_policy">never</property>
+                              <style>
+                                <class name="geary-folder"/>
+                              </style>
                           </object>
                           <packing>
                             <property name="fill">True</property>
@@ -92,28 +85,6 @@
                           </object>
                           <packing>
                             <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkFrame" id="conversation_frame">
-                            <property name="visible">True</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">none</property>
-                            <child>
-                              <object class="GtkScrolledWindow" id="conversation_list_scrolled">
-                                <property name="width_request">250</property>
-                                <property name="visible">True</property>
-                              </object>
-                            </child>
-                            <style>
-                              <class name="geary-conversation-frame"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>

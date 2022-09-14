@@ -399,17 +399,6 @@ public class Application.Client : Gtk.Application {
         add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
         add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
 
-        // Set up custom keybindings
-        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
-            (ObjectClass) typeof(Gtk.ListBoxRow).class_ref()
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.Right, MOD1_MASK, "activate", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.Forward, 0, "activate", 0
-        );
-
         // Load Geary GTK CSS
         var provider = new Gtk.CssProvider();
         Gtk.StyleContext.add_provider_for_screen(
@@ -1203,7 +1192,7 @@ public class Application.Client : Gtk.Application {
         MainWindow? current = this.last_active_main_window;
         if (current != null) {
             folder = current.selected_folder;
-            conversations = current.conversation_list_view.copy_selected();
+            conversations = current.conversation_list_view.selected;
         }
         this.new_window.begin(folder, conversations);
     }

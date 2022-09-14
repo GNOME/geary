@@ -89,10 +89,10 @@ client_vala_sources = files(
   'composer/contact-entry-completion.vala',
   'composer/spell-check-popover.vala',
 
-  'conversation-list/conversation-list-cell-renderer.vala',
-  'conversation-list/conversation-list-store.vala',
+  'conversation-list/conversation-list-model.vala',
+  'conversation-list/conversation-list-participant.vala',
+  'conversation-list/conversation-list-row.vala',
   'conversation-list/conversation-list-view.vala',
-  'conversation-list/formatted-conversation-data.vala',
 
   'conversation-viewer/conversation-contact-popover.vala',
   'conversation-viewer/conversation-email.vala',

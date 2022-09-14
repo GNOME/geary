@@ -61,7 +61,24 @@
       </object>
       <packing>
         <property name="pack_type">end</property>
-        <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToggleButton" id="selection_button">
+        <property name="visible">True</property>
+        <property name="focus_on_click">False</property>
+        <property name="receives_default">False</property>
+        <property name="tooltip_text" translatable="yes">Selection conversations</property>
+        <property name="always_show_image">True</property>
+        <child>
+          <object class="GtkImage" id="selection_button_image">
+            <property name="visible">True</property>
+            <property name="icon_name">selection-mode-symbolic</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
       </packing>
     </child>
   </template>
