@@ -35,6 +35,7 @@
       <object class="GtkGrid" id="conversation_page">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkSearchBar" id="conversation_find_bar">
             <property name="visible">True</property>
@@ -109,7 +110,24 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkScrolledWindow" id="conversation_scroller">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <signal name="scroll-event" handler="on_conversation_scroll" swapped="no"/>
+            <child>
+              <placeholder/>
+            </child>
+            <style>
+              <class name=".geary-conversation-scroller"/>
+            </style>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
         </child>
       </object>
       <packing>

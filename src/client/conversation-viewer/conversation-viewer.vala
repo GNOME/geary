@@ -45,8 +45,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     [GtkChild] private unowned Gtk.Grid empty_folder_page;
     [GtkChild] private unowned Gtk.Grid empty_search_page;
     [GtkChild] private unowned Gtk.Grid composer_page;
-
-    private Gtk.ScrolledWindow conversation_scroller;
+    [GtkChild] private unowned Gtk.ScrolledWindow conversation_scroller;
 
     [GtkChild] internal unowned Gtk.SearchBar conversation_find_bar;
 
@@ -143,9 +142,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         this.conversation_find_undo = new Components.EntryUndo(
             this.conversation_find_entry
         );
-
-        // XXX GTK+ Bug 778190 workaround
-        new_conversation_scroller();
 
         // XXX Do this in Glade when possible.
         this.conversation_find_bar.connect_entry(this.conversation_find_entry);
@@ -265,10 +261,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                                         Application.ContactStore contacts,
                                         bool start_mark_timer)
         throws GLib.Error {
-        // Keep the old ScrolledWindow around long enough for its
-        // descendant web views to be kept so their WebProcess can be
-        // re-used.
-        var old_scroller = remove_current_list();
+        var old_viewport = remove_current_list();
 
         ConversationListBox new_list = new ConversationListBox(
             conversation,
@@ -312,9 +305,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
 
         yield new_list.load_conversation(scroll_to, query);
-
-        // Not strictly necessary, but keeps the compiler happy
-        old_scroller.destroy();
+        old_viewport = null;
     }
 
     // Add a new conversation list to the UI
@@ -334,46 +325,23 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     // Remove any existing conversation list, cancelling its loading
-    private Gtk.ScrolledWindow remove_current_list() {
-        if (this.find_cancellable != null) {
-            this.find_cancellable.cancel();
-            this.find_cancellable = null;
+    private Gtk.Widget remove_current_list() {
+        // Remove the viewport that contains the current list
+        Gtk.Widget? scrolled_child = this.conversation_scroller.get_child();
+        if (scrolled_child != null) {
+            conversation_scroller.remove(scrolled_child);
         }
+
+        // Reset the scrollbars to their initial positions
+        this.conversation_scroller.hadjustment.set_value(0);
+        this.conversation_scroller.vadjustment.set_value(0);
 
         if (this.current_list != null) {
             this.current_list.cancel_conversation_load();
             this.conversation_removed(this.current_list);
             this.current_list = null;
         }
-
-        var old_scroller = this.conversation_scroller;
-        // XXX GTK+ Bug 778190 workaround
-        this.conversation_page.remove(old_scroller);
-        new_conversation_scroller();
-        return old_scroller;
-    }
-
-    private void new_conversation_scroller() {
-        // XXX Work around for GTK+ Bug 778190: Instead of replacing
-        // the Viewport that contains the current list, replace the
-        // complete ScrolledWindow. Need to remove this method and
-        // put the settings back into conversation-viewer.ui when we
-        // can rely on it being fixed again.
-        Gtk.ScrolledWindow scroller = new Gtk.ScrolledWindow(null, null);
-        scroller.get_style_context().add_class("geary-conversation-scroller");
-        scroller.hscrollbar_policy = Gtk.PolicyType.NEVER;
-        scroller.set_hexpand(true);
-        scroller.set_vexpand(true);
-        scroller.show();
-        scroller.scroll_event.connect(
-            on_conversation_scroll
-        );
-        scroller.get_vscrollbar().button_release_event.connect(
-            on_conversation_scroll
-        );
-        this.conversation_scroller = scroller;
-        this.conversation_page.add(scroller);
-
+        return scrolled_child;
     }
 
     /**
@@ -502,6 +470,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         }
     }
 
+    [GtkCallback]
     private bool on_conversation_scroll() {
         if (this.current_list != null) {
             this.current_list.mark_visible_read();
