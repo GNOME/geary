@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-09-10 11:23+0000\n"
-"PO-Revision-Date: 2022-09-10 16:31+0300\n"
+"POT-Creation-Date: 2022-09-20 05:38+0000\n"
+"PO-Revision-Date: 2022-09-20 17:04+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -642,12 +642,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2273
+#: src/client/application/application-main-window.vala:2304
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2256
+#: src/client/application/application-main-window.vala:2287
 msgid "Redo"
 msgstr "Повторити"
 
@@ -1260,34 +1260,31 @@ msgstr "Перевірте параметри захисту з'єднання"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#. Translators: The name of the folder group containing
-#. folders created by people (as opposed to special-use
-#. folders)
 #: src/client/application/application-main-window.vala:1105
-#: src/client/folder-list/folder-list-account-branch.vala:46
+#: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1445
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1446
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1447
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1436
+#: src/client/application/application-main-window.vala:1448
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1493
+#: src/client/application/application-main-window.vala:1505
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1295,13 +1292,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1498
-#: src/client/application/application-main-window.vala:1513
+#: src/client/application/application-main-window.vala:1510
+#: src/client/application/application-main-window.vala:1525
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1508
+#: src/client/application/application-main-window.vala:1520
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1309,7 +1306,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1805
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1345,7 +1342,7 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Більше не _запитувати"
 
-#: src/client/components/components-conversation-actions.vala:109
+#: src/client/components/components-conversation-actions.vala:112
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Позначити спілкування"
@@ -1353,15 +1350,7 @@ msgstr[1] "Позначити спілкування"
 msgstr[2] "Позначити спілкування"
 msgstr[3] "Позначити спілкування"
 
-#: src/client/components/components-conversation-actions.vala:114
-msgid "Add label to conversation"
-msgid_plural "Add label to conversations"
-msgstr[0] "Додати мітку до спілкувань"
-msgstr[1] "Додати мітку до спілкувань"
-msgstr[2] "Додати мітку до спілкувань"
-msgstr[3] "Додати мітку до спілкування"
-
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:118
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Пересунути спілкування"
@@ -1369,7 +1358,7 @@ msgstr[1] "Пересунути спілкування"
 msgstr[2] "Пересунути спілкування"
 msgstr[3] "Пересунути спілкування"
 
-#: src/client/components/components-conversation-actions.vala:124
+#: src/client/components/components-conversation-actions.vala:123
 #: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
@@ -1378,7 +1367,25 @@ msgstr[1] "Архівувати спілкування"
 msgstr[2] "Архівувати спілкування"
 msgstr[3] "Архівувати спілкування"
 
-#: src/client/components/components-conversation-actions.vala:135
+#: src/client/components/components-conversation-actions.vala:133
+msgid "Add label to conversation"
+msgid_plural "Add label to conversations"
+msgstr[0] "Додати мітку до спілкувань"
+msgstr[1] "Додати мітку до спілкувань"
+msgstr[2] "Додати мітку до спілкувань"
+msgstr[3] "Додати мітку до спілкування"
+
+#: src/client/components/components-conversation-actions.vala:142
+#| msgid "Move conversation"
+#| msgid_plural "Move conversations"
+msgid "Copy conversation"
+msgid_plural "Copy conversations"
+msgstr[0] "Копіювати спілкування"
+msgstr[1] "Копіювати спілкування"
+msgstr[2] "Копіювати спілкування"
+msgstr[3] "Копіювати спілкування"
+
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Пересунути спілкування до смітника"
@@ -1386,7 +1393,7 @@ msgstr[1] "Пересунути спілкування до смітника"
 msgstr[2] "Пересунути спілкування до смітника"
 msgstr[3] "Пересунути спілкування до смітника"
 
-#: src/client/components/components-conversation-actions.vala:145
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Вилучити спілкування"
@@ -2166,6 +2173,10 @@ msgstr "Подробиці"
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr "Вкажіть ваш пароль для продовження"
+
+#: src/client/folder-list/folder-list-account-branch.vala:53
+msgid "Folders"
+msgstr "Теки"
 
 #. Translators: Label displaying total number of email
 #. messages in a folder. String substitution is the actual
