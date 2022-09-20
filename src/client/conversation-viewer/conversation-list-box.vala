@@ -978,26 +978,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         this.mark_read_timer.start();
     }
 
-    /**
-     * Displays an email as being read, regardless of its actual flags.
-     */
-    public void mark_manual_read(Geary.EmailIdentifier id) {
-        EmailRow? row = this.email_rows.get(id);
-        if (row != null) {
-            row.view.is_manually_read = true;
-        }
-    }
-
-    /**
-     * Displays an email as being unread, regardless of its actual flags.
-     */
-    public void mark_manual_unread(Geary.EmailIdentifier id) {
-        EmailRow? row = this.email_rows.get(id);
-        if (row != null) {
-            row.view.is_manually_read = false;
-        }
-    }
-
     /** Adds an info bar to the given email, if any. */
     public void add_email_info_bar(Geary.EmailIdentifier id,
                                    Components.InfoBar info_bar) {
