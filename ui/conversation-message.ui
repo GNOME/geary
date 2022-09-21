@@ -495,8 +495,7 @@
                   <object class="GtkProgressBar" id="body_progress">
                     <property name="valign">start</property>
                     <style>
-                      <class name="osd"/>
-                      <class name="top"/>
+                      <class name="geary-body-progress"/>
                     </style>
                   </object>
                 </child>

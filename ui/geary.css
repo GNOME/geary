@@ -241,6 +241,30 @@ grid.geary-message-summary {
   margin: 36px 16px;
 }
 
+.geary-message .geary-body-progress {
+  border: none;
+  background-color: transparent;
+  background-image: none;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.geary-message .geary-body-progress progress {
+  background-color: @theme_selected_bg_color;
+  background-image: none;
+  border: none;
+  min-height: 1px;
+}
+
+.geary-message .geary-body-progress trough {
+  border: none;
+  background-color: transparent;
+  background-image: none;
+  min-height: 1px;
+}
+
 /* ContactPopover */
 
 .geary-contact-popover .dim-label {
