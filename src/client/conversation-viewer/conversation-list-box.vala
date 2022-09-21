@@ -572,7 +572,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
 
-    private bool suppress_mark_timer;
+    private bool start_mark_timer;
     private Geary.TimeoutManager mark_read_timer;
 
     private GLib.SimpleActionGroup email_actions = new GLib.SimpleActionGroup();
@@ -684,7 +684,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Constructs a new conversation list box instance.
      */
     public ConversationListBox(Geary.App.Conversation conversation,
-                               bool suppress_mark_timer,
+                               bool start_mark_timer,
                                Geary.App.EmailStore email_store,
                                Application.ContactStore contacts,
                                Application.Configuration config,
@@ -697,7 +697,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         this.search = new SearchManager(this, conversation);
 
-        this.suppress_mark_timer = suppress_mark_timer;
+        this.start_mark_timer = start_mark_timer;
         this.mark_read_timer = new Geary.TimeoutManager.milliseconds(
             MARK_READ_TIMEOUT_MSEC, this.check_mark_read
         );
@@ -1238,15 +1238,31 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     }
 
+    private bool has_been_read(ConversationEmail view) {
+        Gtk.Adjustment adj = get_adjustment();
+        int top_bound = (int) adj.value;
+        int bottom_bound = top_bound + (int) adj.page_size;
+        ConversationMessage conversation_message = view.primary_message;
+        int body_top = 0;
+        int body_left = 0;
+        conversation_message.web_view_translate_coordinates(
+            this,
+            0, 0,
+            out body_left, out body_top
+        );
+        int body_height = conversation_message.web_view_get_allocated_height();
+        int body_bottom = body_top + body_height;
+        return body_height > 0 &&
+            body_bottom > top_bound &&
+            body_top + MARK_READ_PADDING < bottom_bound;
+    }
+
     /**
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read() {
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
-        Gtk.Adjustment adj = get_adjustment();
-        int top_bound = (int) adj.value;
-        int bottom_bound = top_bound + (int) adj.page_size;
 
         this.foreach((child) => {
             // Don't bother with not-yet-loaded emails since the
@@ -1260,22 +1276,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 view.message_body_state == COMPLETED &&
                 !view.is_manually_read &&
                 email.is_unread().is_certain()) {
-                ConversationMessage conversation_message = view.primary_message;
-                 int body_top = 0;
-                 int body_left = 0;
-                 conversation_message.web_view_translate_coordinates(
-                     this,
-                     0, 0,
-                     out body_left, out body_top
-                 );
-
-                 int body_height = conversation_message.web_view_get_allocated_height();
-                 int body_bottom = body_top + body_height;
-
-                 // Only mark the email as read if it's actually visible
-                 if (body_height > 0 &&
-                     body_bottom > top_bound &&
-                     body_top + MARK_READ_PADDING < bottom_bound) {
+                if (!this.config.smart_mark_as_read || has_been_read(view)) {
                      email_ids.add(view.email.id);
 
                      // Since it can take some time for the new flags
@@ -1386,10 +1387,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                                               GLib.ParamSpec param) {
         ConversationEmail? view = obj as ConversationEmail;
         if (view != null && view.message_body_state == COMPLETED) {
-            if (!this.suppress_mark_timer) {
+            if (this.start_mark_timer) {
                 this.mark_read_timer.start();
             }
-            this.suppress_mark_timer = false;
+            this.start_mark_timer = true;
         }
     }
 

@@ -260,7 +260,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            !start_mark_timer,
+            start_mark_timer,
             store,
             contacts,
             this.config,
@@ -491,7 +491,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     private bool on_conversation_scroll() {
-        if (this.current_list != null) {
+        if (this.config.smart_mark_as_read && this.current_list != null) {
             this.current_list.mark_visible_read();
         }
         return Gdk.EVENT_PROPAGATE;

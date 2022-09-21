@@ -103,6 +103,12 @@
         <description>Images from these domains will be trusted</description>
     </key>
 
+    <key name="smart-mark-as-read" type="b">
+        <default>true</default>
+        <summary>Smartly mark messages as read</summary>
+        <description>Only mark messages as read if fully read</description>
+    </key>
+
     <key name="undo-send-delay" type="i">
         <default>5</default>
         <summary>Undo sending email delay</summary>

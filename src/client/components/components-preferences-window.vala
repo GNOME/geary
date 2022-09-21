@@ -173,6 +173,16 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         trust_images_row.activatable_widget = autoselect;
         trust_images_row.add(trust_images);
 
+        var smart_mark_as_read = new Gtk.Switch();
+        smart_mark_as_read.valign = CENTER;
+
+        var smart_mark_as_read_row = new Hdy.ActionRow();
+        /// Translators: Preferences label
+        smart_mark_as_read_row.title = _("_Only mark messages as read if fully read");
+        smart_mark_as_read_row.use_underline = true;
+        smart_mark_as_read_row.activatable_widget = autoselect;
+        smart_mark_as_read_row.add(smart_mark_as_read);
+
         var group = new Hdy.PreferencesGroup();
         /// Translators: Preferences group title
         //group.title = _("General");
@@ -183,6 +193,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(single_key_shortucts_row);
         group.add(startup_notifications_row);
         group.add(trust_images_row);
+        group.add(smart_mark_as_read_row);
 
         var page = new Hdy.PreferencesPage();
         /// Translators: Preferences page title
@@ -226,6 +237,11 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 "state",
                 (GLib.SettingsBindGetMappingShared) settings_trust_images_getter,
                 (GLib.SettingsBindSetMappingShared) settings_trust_images_setter
+            );
+            config.bind(
+                Application.Configuration.SMART_MARK_AS_READ,
+                smart_mark_as_read,
+                "state"
             );
         }
     }
