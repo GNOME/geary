@@ -16,16 +16,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-09-10 11:23+0000\n"
-"PO-Revision-Date: 2022-09-14 22:07+0300\n"
+"POT-Creation-Date: 2022-09-21 14:59+0000\n"
+"PO-Revision-Date: 2022-09-21 21:13+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnometurk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0\n"
-"X-Generator: Gtranslator 40.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -623,12 +623,12 @@ msgid_plural "%d days back"
 msgstr[0] "%d gün öncesinden"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2273
+#: src/client/application/application-main-window.vala:2304
 msgid "Undo"
 msgstr "Geri Al"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2256
+#: src/client/application/application-main-window.vala:2287
 msgid "Redo"
 msgstr "Yinele"
 
@@ -1208,50 +1208,47 @@ msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#. Translators: The name of the folder group containing
-#. folders created by people (as opposed to special-use
-#. folders)
 #: src/client/application/application-main-window.vala:1105
-#: src/client/folder-list/folder-list-account-branch.vala:46
+#: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etiketler"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1445
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1446
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1447
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/application-main-window.vala:1436
+#: src/client/application/application-main-window.vala:1448
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1493
+#: src/client/application/application-main-window.vala:1505
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Bu konuşmaları kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1498
-#: src/client/application/application-main-window.vala:1513
+#: src/client/application/application-main-window.vala:1510
+#: src/client/application/application-main-window.vala:1525
 msgid "Delete"
 msgstr "Sil"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1508
+#: src/client/application/application-main-window.vala:1520
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1805
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1287,33 +1284,38 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Yeniden _sorma"
 
-#: src/client/components/components-conversation-actions.vala:109
+#: src/client/components/components-conversation-actions.vala:112
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Konuşmayı imle"
 
-#: src/client/components/components-conversation-actions.vala:114
-msgid "Add label to conversation"
-msgid_plural "Add label to conversations"
-msgstr[0] "Konuşmayı etiketle"
-
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:118
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Konuşmayı taşı"
 
-#: src/client/components/components-conversation-actions.vala:124
+#: src/client/components/components-conversation-actions.vala:123
 #: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Konuşmayı arşivle"
 
-#: src/client/components/components-conversation-actions.vala:135
+#: src/client/components/components-conversation-actions.vala:133
+msgid "Add label to conversation"
+msgid_plural "Add label to conversations"
+msgstr[0] "Konuşmayı etiketle"
+
+#: src/client/components/components-conversation-actions.vala:142
+msgid "Copy conversation"
+msgid_plural "Copy conversations"
+msgstr[0] "Konuşmayı kopyala"
+
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Konuşmayı Çöpʼe taşı"
 
-#: src/client/components/components-conversation-actions.vala:145
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Konuşmayı sil"
@@ -1787,11 +1789,11 @@ msgstr "%2$s aracılığıyla %1$s"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
-msgstr "Bu dili tercih edilenler listesinden kaldır"
+msgstr "Bu dili yeğlenenler listesinden kaldır"
 
 #: src/client/composer/spell-check-popover.vala:129
 msgid "Add this language to the preferred list"
-msgstr "Bu dili tercih edilenler listesine ekle"
+msgstr "Bu dili yeğlenenler listesine ekle"
 
 #: src/client/composer/spell-check-popover.vala:225
 msgid "Search for more languages"
@@ -2003,7 +2005,7 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"“Bu Sunucuya Güven” ya da “Bu Sunucuya Her Zaman Güven”  seçimi kullanıcı "
+"“Bu Sunucuya Güven” ya da “Bu Sunucuya Her Zaman Güven” seçimi kullanıcı "
 "adınız ve parolanızın güvensiz iletilmesine neden olabilir."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
@@ -2016,7 +2018,7 @@ msgstr ""
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
-msgstr "Geary bu e-posta hesabını eklemeyecek ya da güncellemeyecek."
+msgstr "Geary, bu e-posta hesabını eklemeyecek ya da güncellemeyecek."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
@@ -2031,12 +2033,12 @@ msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
 msgstr ""
-"Bu sorunlar ile ilgili herhangi bir sorunuz varsa, sistem yöneticinize ya da "
-"e-posta hizmet sağlayıcınıza başvurun."
+"Bu sorunlarla ilgili herhangi bir sorunuz varsa sistem yöneticinize ya da e-"
+"posta hizmet sağlayıcınıza başvurun."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
-msgstr "Sunucunun sertifikası bilinen bir yetkili tarafından imzalanmamış"
+msgstr "Sunucunun sertifikası bilinen yetkilice imzalanmamış"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s identity does not match the identity in the certificate"
@@ -2060,7 +2062,7 @@ msgstr "Sunucunun sertifikası güvensiz kabul ediliyor"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:94
 msgid "An error has occurred processing the server’s certificate"
-msgstr "Sunucunun sertifikası işlenirken bir hata oluştu"
+msgstr "Sunucunun sertifikası işlenirken hata oluştu"
 
 #. / Translators: Title for problem report dialog error
 #. / information pane
@@ -2075,7 +2077,11 @@ msgstr "Ayrıntılar"
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
-msgstr "Geary, devam etmek için e-posta parolanızı istiyor"
+msgstr "Geary, sürmek için e-posta parolanızı istiyor"
+
+#: src/client/folder-list/folder-list-account-branch.vala:53
+msgid "Folders"
+msgstr "Klasörler"
 
 #. Translators: Label displaying total number of email
 #. messages in a folder. String substitution is the actual
@@ -3091,8 +3097,8 @@ msgid ""
 msgstr ""
 "Sorun ciddi veya sürekliyse, lütfen bu ayrıntıları kaydedip ve kopyalayıp <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/Contact\">iletişim kanallarına</a> "
-"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
-"\">yeni hata bildirimi</a>nde bulunun."
+"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">yeni hata bildirimi</a>nde bulunun."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
