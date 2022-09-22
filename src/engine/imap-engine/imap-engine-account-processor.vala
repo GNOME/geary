@@ -78,6 +78,26 @@ internal class Geary.ImapEngine.AccountProcessor :
         this.queue.revoke(op);
     }
 
+    // Revokes all operations with the given type; returns true if at least one
+    // operation with the given type was found
+    public bool dequeue_by_type(GLib.Type type) {
+        bool found = false;
+        if (this.current_op != null &&
+            this.current_op.get_type() == type &&
+            this.op_cancellable != null) {
+            this.op_cancellable.cancel();
+            this.op_cancellable = null;
+            found = true;
+        }
+        this.queue.revoke_matching((op) => {
+            if (op.get_type() == type) {
+                found = true;
+            }
+            return op.get_type() == type;
+        });
+        return found;
+    }
+
     public void stop() {
         this.is_running = false;
         if (this.op_cancellable != null) {
