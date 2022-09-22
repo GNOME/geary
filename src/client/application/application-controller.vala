@@ -2002,6 +2002,8 @@ private class Application.MarkEmailCommand : TrivialCommand, EmailCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
+        this.location.account.cancel_remote_update();
+
         yield this.store.mark_email_async(
             this.email, this.to_add, this.to_remove, cancellable
         );

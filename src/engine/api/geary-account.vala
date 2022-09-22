@@ -310,6 +310,11 @@ public abstract class Geary.Account : BaseObject, Logging.Source {
     public abstract bool is_open();
 
     /**
+     * Cancel any running/pending remote update for this {@link Account}.
+     */
+    public abstract void cancel_remote_update();
+
+    /**
      * Rebuild the local data stores for this {@link Account}.
      *
      * This should only be used if {@link open_async} throws {@link EngineError.CORRUPT},

@@ -229,6 +229,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return open;
     }
 
+    /** {@inheritDoc} */
+    public override void cancel_remote_update() {
+        // Cancel and update again
+        if (this.processor.dequeue_by_type(typeof(UpdateRemoteFolders))) {
+            debug("Cancelled a remote update! Updating again...\n");
+            update_remote_folders(false);
+        }
+    }
+
     public override async void rebuild_async(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         if (this.open) {

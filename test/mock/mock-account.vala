@@ -58,6 +58,13 @@ public class Mock.Account : Geary.Account,
         }
     }
 
+    public override void cancel_remote_update() {
+        try {
+            void_call("cancel_remote_update", {});
+        } catch (GLib.Error err) {
+        }
+    }
+
     public override async void rebuild_async(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         void_call("rebuild_async", { cancellable });
