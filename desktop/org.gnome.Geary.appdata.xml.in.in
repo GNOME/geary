@@ -82,6 +82,18 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="43.0" date="2022-09-29">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Improved images management</li>
+          <li>Thunderbird auto configuration support</li>
+          <li>Add XDG background portal support</li>
+          <li>Numerous user interface translation updates</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+        </ul>
+      </description>
+    </release>
     <release version="40.0" date="2021-04-23">
       <description>
         <p>Enhancements included in this release:</p>

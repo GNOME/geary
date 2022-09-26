@@ -1,3 +1,27 @@
+Version 43.0
+~~~~~~~~~~~~
+Released: 2022-09-29
+
+A stable feature release.
+
+Enhancements included in this release:
+ * Improved images management
+ * Thunderbird auto configuration support
+ * Add XDG background portal support
+ * Numerous user interface translation updates
+ * Numerous bug fixes and user interface improvements
+
+Thanks to those who contributed bug fixes and enhancements to this
+release:
+ * Richard Adenling 
+ * Itay Grudev
+ * Adrien Plazas
+ * Maximiliano
+ * Alexander Mikhaylenko
+ * Michael Catanzaro
+
+And special thanks to Niels De Graef for mentoring me.
+
 Version 40.0
 ~~~~~~~~~~~~
 Released: 2021-04-23
