@@ -1574,8 +1574,8 @@ public class Application.MainWindow :
             if (account != null) {
                 var service_provider = account.information.service_provider;
                 this.conversation_list_actions.service_provider = service_provider;
-                this.main_toolbar.full_actions.service_provider = service_provider;
-                this.main_toolbar.compact_actions.service_provider = service_provider;
+                this.conversation_headerbar.full_actions.service_provider = service_provider;
+                this.conversation_headerbar.compact_actions.service_provider = service_provider;
 
                 foreach (var menu in this.folder_popovers) {
                     var folders = account.list_folders();
