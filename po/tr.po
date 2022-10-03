@@ -1,12 +1,10 @@
 # Turkish translation for geary
-# Copyright 2016 Software Freedom Conservancy Inc.
+# Copyright 2016-2022 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
-# Translators:
 # alperenelhan <alperen@elhan.org>, 2012
+# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
 # Baris Ata <brsata@gmail.com>, 2013
-# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
-# Ferhat Tunctan <ferhattnctn66@gmail.com>, 2012
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014-2021.
@@ -16,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-09-20 18:49+0000\n"
+"POT-Creation-Date: 2022-09-22 08:07+0000\n"
 "PO-Revision-Date: 2022-09-21 21:07+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <gnometurk@gnome.org>\n"
@@ -3097,8 +3095,8 @@ msgid ""
 msgstr ""
 "Sorun ciddi veya sürekliyse, lütfen bu ayrıntıları kaydedip ve kopyalayıp <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/Contact\">iletişim kanallarına</a> "
-"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">yeni hata bildirimi</a>nde bulunun."
+"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
+"\">yeni hata bildirimi</a>nde bulunun."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
