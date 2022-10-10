@@ -454,23 +454,6 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                           this.provider.to_string(), err.message);
                     add_local = true;
                 }
-                // Google Mail does not support "Less secure apps" anymore
-                if (add_local) {
-                    switch (this.provider) {
-                    case Geary.ServiceProvider.GMAIL:
-                        this.editor.add_notification(
-                            new Components.InAppNotification(
-                                // Translators: In-app notification label, when
-                                // GNOME Online Accounts are missing
-                                _("Online accounts are missing")
-                            )
-                        );
-                        add_local = false;
-                        break;
-                    default:
-                        break;
-                    }
-                }
 
                 if (add_local) {
                     switch_to_server_settings();
