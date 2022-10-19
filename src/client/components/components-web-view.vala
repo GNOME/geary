@@ -80,16 +80,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
                                         File cache_dir) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
-
-        // WebProcess sandboxing
-        //
-        // The sandbox is currently disabled since it breaks printing
-        // and saving as PDF. See:
-        // https://bugs.webkit.org/show_bug.cgi?id=202363
-        //
-        // context.add_path_to_sandbox(web_extension_dir.get_path(), true);
-        // context.set_sandbox_enabled(true);
-
+        // Enable WebProcess sandboxing
+        context.add_path_to_sandbox(web_extension_dir.get_path(), true);
+        context.set_sandbox_enabled(true);
         // Use the doc browser model so that we get some caching of
         // resources between email body loads.
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
