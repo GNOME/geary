@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-10-01 12:52+0000\n"
-"PO-Revision-Date: 2022-10-05 21:20+0200\n"
+"POT-Creation-Date: 2022-10-29 00:41+0000\n"
+"PO-Revision-Date: 2022-11-02 16:21+0100\n"
 "Last-Translator: Nathan Follens <nfollens@gnome.org>\n"
 "Language-Team: Dutch <gnome-nl-list@gnome.org>\n"
 "Language: nl_NL\n"
@@ -398,22 +398,16 @@ msgstr "_Volgende"
 msgid "_Create"
 msgstr "Aan_maken"
 
-#. Translators: In-app notification label, when
-#. GNOME Online Accounts are missing
-#: src/client/accounts/accounts-editor-add-pane.vala:465
-msgid "Online accounts are missing"
-msgstr "Online-accounts ontbreken"
-
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:681
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 msgid "Your name"
 msgstr "Uw naam"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:698
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "E-mailadres"
@@ -423,7 +417,7 @@ msgstr "E-mailadres"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:702
+#: src/client/accounts/accounts-editor-add-pane.vala:685
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "persoon@voorbeeld.be"
@@ -432,14 +426,14 @@ msgstr "persoon@voorbeeld.be"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-add-pane.vala:699
 #: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Loginnaam"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-add-pane.vala:713
 #: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
@@ -449,14 +443,14 @@ msgstr "Wachtwoord"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-add-pane.vala:735
 #: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "IMAP-server"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:755
+#: src/client/accounts/accounts-editor-add-pane.vala:738
 msgid "imap.example.com"
 msgstr "imap.voorbeeld.be"
 
@@ -464,14 +458,14 @@ msgstr "imap.voorbeeld.be"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-add-pane.vala:744
 #: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "SMTP-server"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:764
+#: src/client/accounts/accounts-editor-add-pane.vala:747
 msgid "smtp.example.com"
 msgstr "smtp.voorbeeld.be"
 
@@ -1441,7 +1435,7 @@ msgstr "Geary zal blijven draaien wanneer alle vensters gesloten zijn"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:171
 msgid "_Always load images"
-msgstr "Externe _afbeeldingen altijd laden"
+msgstr "Afbeeldingen _altijd laden"
 
 #. / Translators: Preferences page title
 #: src/client/components/components-preferences-window.vala:189
@@ -3760,6 +3754,9 @@ msgstr "_Wachtwoord onthouden"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Authenticeren"
+
+#~ msgid "Online accounts are missing"
+#~ msgstr "Online-accounts ontbreken"
 
 #~ msgid "Notify of new mail at startup"
 #~ msgstr "Melding van nieuwe e-mails bij opstarten"
