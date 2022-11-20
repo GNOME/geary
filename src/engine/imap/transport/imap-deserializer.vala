@@ -575,6 +575,12 @@ public class Geary.Imap.Deserializer : BaseObject, Logging.Source {
 
             case ']':
                 if (ch != get_current_context_terminator()) {
+                    if (state == State.ATOM) {
+                        // Allow ']' in atom IFF it does not close the context
+                        // this is to allow [] in folder names
+                        append_to_string(ch);
+                        return State.ATOM;
+                    }
                     warning("Received an unexpected closing brace");
                     return State.FAILED;
                 }
