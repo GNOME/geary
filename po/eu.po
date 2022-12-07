@@ -9,12 +9,11 @@
 # Porrumentzio <porrumentzio@riseup.net>, 2022.
 #
 msgid ""
-msgstr ""
-"Project-Id-Version: geary-0.4.1\n"
+msgstr "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-06-12 20:30+0000\n"
-"PO-Revision-Date: 2022-06-15 17:52+0200\n"
-"Last-Translator: Porrumentzio <porrumentzio@riseup.net>\n"
+"POT-Creation-Date: 2022-09-20 18:49+0000\n"
+"PO-Revision-Date: 2022-12-07 17:52+0200\n"
+"Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <Librezale>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
@@ -22,12 +21,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "eu/)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-DL-Team: eu\n"
-"X-DL-Module: geary\n"
-"X-DL-Branch: mainline\n"
-"X-DL-Domain: po\n"
-"X-DL-State: None\n"
-"X-Generator: Gtranslator 40.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -41,8 +34,8 @@ msgstr "Bidali fitxategiak Geary erabilita"
 #: desktop/geary-autostart.desktop.in.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:704
+#: src/client/accounts/accounts-editor-servers-pane.vala:551
+#: src/client/application/application-main-window.vala:706
 msgid "Geary"
 msgstr "Geary"
 
@@ -74,18 +67,13 @@ msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
-msgstr ""
-"Geary posta elektronikoko aplikazio bat da, berriketen inguruan eraikitakoa "
-"eta GNOME 3 mahaigainean dabilena. Interfaze garbi eta modernoa du eta posta-"
-"mezuak irakurri, aurkitu eta bidaltzeko balio dizu."
+msgstr "Geary posta elektronikoko aplikazio bat da, berriketen inguruan eraikitakoa eta GNOME 3 mahaigainean dabilena. Interfaze garbi eta modernoa du eta posta-mezuak irakurri, aurkitu eta bidaltzeko balio dizu."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
-msgstr ""
-"Berriketak erabilita, eztabaida osoak irakur daitezke mezu batetik "
-"hurrengora jauzi egin behar izan gabe."
+msgstr "Berriketak erabilita, eztabaida osoak irakur daitezke mezu batetik hurrengora jauzi egin behar izan gabe."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
 msgid "Geary’s features include:"
@@ -113,9 +101,7 @@ msgstr "Mezu berrien jakinarazpena mahaigainean"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
-"GMail, Yahoo! Mail, Outlook.com eta beste IMAP zerbitzari batzuekin "
-"bateragarria"
+msgstr "GMail, Yahoo! Mail, Outlook.com eta beste IMAP zerbitzari batzuekin bateragarria"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:50
@@ -132,11 +118,11 @@ msgstr "Geary testu aberatseko konposatzailea erakusten"
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Posta;Posta elektronikoa;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Prestatu mezua"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Leiho berria"
 
@@ -196,9 +182,7 @@ msgstr "Erabili tekla bakarreko lasterbideak"
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
-msgstr ""
-"<Ctrl> sakatzea behar ez duten lasterbideak gaitzen ditu posta-"
-"ekintzetarako, Gmail-ek erabiltzen dituenak emulatzeko."
+msgstr "<Ctrl> sakatzea behar ez duten lasterbideak gaitzen ditu posta-ekintzetarako, Gmail-ek erabiltzen dituenak emulatzeko."
 
 #: desktop/org.gnome.Geary.gschema.xml:52
 msgid "Languages that shall be used in the spell checker"
@@ -208,9 +192,7 @@ msgstr "Ortografia-egiaztatzailean erabiliko diren hizkuntzak"
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
-msgstr ""
-"POSIX hizkuntzen zerrenda bat, zerrenda k ortografia egiaztatzea desgaitzen "
-"du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
+msgstr "POSIX hizkuntzen zerrenda bat, zerrenda k ortografia egiaztatzea desgaitzen du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
 
 #: desktop/org.gnome.Geary.gschema.xml:60
 msgid "Languages that are displayed in the spell checker popover"
@@ -220,16 +202,15 @@ msgstr "Ortografia-egiaztatzailearen bunbuiloan bistaratuko diren hizkuntzak"
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
-msgstr ""
-"Ortografia-egiaztatzailearen bunbuiloan beti bistaratuko diren hizkuntzak"
+msgstr "Ortografia-egiaztatzailearen bunbuiloan beti bistaratuko diren hizkuntzak"
 
 #: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Jakinarazi mezu berriak abioan"
+msgid "Run application in background on logon and when closed"
+msgstr "Exekutatu aplikazioa atzeko planoan saioa hasita dagoenean eta ixten denean"
 
 #: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
-msgstr "Egia abioan mezu berriak daudela jakinarazteko."
+msgid "True to run application in background."
+msgstr "True (egia) aplikazioa atzeko planoan exekutatu dadin."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Ask when opening an attachment"
@@ -245,8 +226,7 @@ msgstr "Mezuak HTML formatuan sortuko diren ala ez"
 
 #: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to compose emails in HTML; false for plain text."
-msgstr ""
-"Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
+msgstr "Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
 
 #: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Advisory strategy for full-text searching"
@@ -255,9 +235,7 @@ msgstr "Testu osoak bilatzeko gomendatzen den estrategia"
 #: desktop/org.gnome.Geary.gschema.xml:85
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr ""
-"Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), "
-"“aggressive” (erasokorra) eta “horizon” (zeruertza)."
+msgstr "Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), “aggressive” (erasokorra) eta “horizon” (zeruertza)."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Zoom of conversation viewer"
@@ -276,45 +254,49 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Askatutako konposatzaile-leihoan erregistratu den azken tamaina."
 
 #: desktop/org.gnome.Geary.gschema.xml:102
+msgid "Allow images for these domains"
+msgstr "Baimendu irudiak honako domeinuetan"
+
+#: desktop/org.gnome.Geary.gschema.xml:103
+msgid "Images from these domains will be trusted"
+msgstr "Honako domeinuetako irudiak fidagarritzat hartuko dira"
+
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Undo sending email delay"
 msgstr "Desegin mezua bidaltzearen atzerapena"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
-msgstr ""
-"Mezu bat bidali baino lehen igaroko den segundo kopurua. Ezarri zero balioa "
-"desgaitzeko."
+msgstr "Mezu bat bidali baino lehen igaroko den segundo kopurua. Ezarri zero balioa desgaitzeko."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Jakinarazpen laburren bistaratze-denbora"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Jakinarazpen laburrak zenbat denbora bistaratuko diren, segundotan."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
 msgstr "Aukerako pluginen zerrenda"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:123
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Hemen zerrendatutako pluginak abioan kargatuko dira."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Whether we migrated the old settings"
 msgstr "Ezarpen zaharrak migratuko diren ala ez"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
-msgstr ""
-"Faltsua “org.yorba.geary”-eskema zaharra egiaztatzeko eta haren balioak "
-"kopiatzeko."
+msgstr "Faltsua “org.yorba.geary”-eskema zaharra egiaztatzeko eta haren balioak kopiatzeko."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -323,21 +305,15 @@ msgstr ""
 msgid "Failed to store certificate"
 msgstr "Huts egin du ziurtagiria biltegiratzeak"
 
-#. Translators: Label for adding an email account
-#. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:98
-msgid "All others"
-msgstr "Beste guztiak"
-
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:185
-#: src/client/accounts/accounts-editor-servers-pane.vala:313
+#: src/client/accounts/accounts-editor-add-pane.vala:167
+#: src/client/accounts/accounts-editor-servers-pane.vala:312
 msgid "Check your receiving login and password"
 msgstr "Egiaztatu mezuak jasotzeko saio-hasiera eta pasahitza"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:200
-#: src/client/accounts/accounts-editor-servers-pane.vala:326
+#: src/client/accounts/accounts-editor-add-pane.vala:182
+#: src/client/accounts/accounts-editor-servers-pane.vala:325
 msgid "Check your receiving server details"
 msgstr "Egiaztatu mezuak jasotzeko zerbitzari-xehetasunak"
 
@@ -346,50 +322,65 @@ msgstr "Egiaztatu mezuak jasotzeko zerbitzari-xehetasunak"
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:222
-#: src/client/accounts/accounts-editor-servers-pane.vala:347
+#: src/client/accounts/accounts-editor-add-pane.vala:204
+#: src/client/accounts/accounts-editor-servers-pane.vala:346
 msgid "Check your sending login and password"
 msgstr "Egiaztatu mezuak bidaltzeko saio-hasiera eta pasahitza"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:236
-#: src/client/accounts/accounts-editor-servers-pane.vala:360
+#: src/client/accounts/accounts-editor-add-pane.vala:218
+#: src/client/accounts/accounts-editor-servers-pane.vala:359
 msgid "Check your sending server details"
 msgstr "Egiaztatu mezuak bidaltzeko zerbitzari-xehetasunak"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:251
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 msgid "Check your email address and password"
 msgstr "Egiaztatu zure saio-hasiera eta pasahitza"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:262
+#: src/client/accounts/accounts-editor-add-pane.vala:244
 msgid "Could not connect, check your network"
 msgstr "Ezin da konektatu, egiaztatu zure sarea"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:275
+#: src/client/accounts/accounts-editor-add-pane.vala:257
 msgid "An unexpected problem occurred"
 msgstr "Espero gabeko arazoa gertatu da"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:293
+#: src/client/accounts/accounts-editor-add-pane.vala:275
 #, c-format
 msgid "Account not created: %s"
 msgstr "Kontua ez da sortu: %s"
 
+#: src/client/accounts/accounts-editor-add-pane.vala:372
+#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+msgid "_Next"
+msgstr "_Hurrengoa"
+
+#: src/client/accounts/accounts-editor-add-pane.vala:379
+msgid "_Create"
+msgstr "_Sortu"
+
+#. Translators: In-app notification label, when
+#. GNOME Online Accounts are missing
+#: src/client/accounts/accounts-editor-add-pane.vala:465
+msgid "Online accounts are missing"
+msgstr "Lineako kontuak falta dira"
+
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:573
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 msgid "Your name"
 msgstr "Zure izena"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:590
+#: src/client/accounts/accounts-editor-add-pane.vala:698
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "Helbide elektronikoa"
@@ -399,7 +390,7 @@ msgstr "Helbide elektronikoa"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:594
+#: src/client/accounts/accounts-editor-add-pane.vala:702
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "pertsona@abidibea.com"
@@ -408,15 +399,15 @@ msgstr "pertsona@abidibea.com"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:608
-#: src/client/accounts/accounts-editor-servers-pane.vala:881
+#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Saioa hasteko izena"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:622
-#: src/client/accounts/accounts-editor-servers-pane.vala:1003
+#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Pasahitza"
@@ -425,14 +416,14 @@ msgstr "Pasahitza"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:644
-#: src/client/accounts/accounts-editor-servers-pane.vala:725
+#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "IMAP zerbitzaria"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:647
+#: src/client/accounts/accounts-editor-add-pane.vala:755
 msgid "imap.example.com"
 msgstr "imap.adibidea.com"
 
@@ -440,14 +431,14 @@ msgstr "imap.adibidea.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:653
-#: src/client/accounts/accounts-editor-servers-pane.vala:731
+#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "SMTP zerbitzaria"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:656
+#: src/client/accounts/accounts-editor-add-pane.vala:764
 msgid "smtp.example.com"
 msgstr "smtp.adibidea.com"
 
@@ -466,14 +457,11 @@ msgstr "Kendu kontua: %s"
 msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
-msgstr ""
-"Kontua kendu egingo da Geary aplikaziotik eta lokalean gordetako posta-"
-"datuak ordenagailutik ezabatuko dira. Ez da ezer ezabatuko zerbitzu-"
-"hornitzailean."
+msgstr "Kontua kendu egingo da Geary aplikaziotik eta lokalean gordetako posta-datuak ordenagailutik ezabatuko dira. Ez da ezer ezabatuko zerbitzu-hornitzailean."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "_Utzi"
@@ -611,55 +599,43 @@ msgid_plural "%d days back"
 msgstr[0] "Egun %d atzera"
 msgstr[1] "%d egun atzera"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2270
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2304
 msgid "Undo"
 msgstr "Desegin"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2253
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+#: src/client/application/application-main-window.vala:2287
 msgid "Redo"
 msgstr "Berregin"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:349
-#: src/client/accounts/accounts-editor-list-pane.vala:445
+#: src/client/accounts/accounts-editor-list-pane.vala:325
 #: src/client/accounts/accounts-editor-row.vala:279
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:353
-#: src/client/accounts/accounts-editor-list-pane.vala:449
+#: src/client/accounts/accounts-editor-list-pane.vala:329
 #: src/client/accounts/accounts-editor-row.vala:283
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:357
-#: src/client/accounts/accounts-editor-list-pane.vala:453
-#: src/client/accounts/accounts-editor-row.vala:287
-msgid "Yahoo"
-msgstr "Yahoo"
-
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:379
+#: src/client/accounts/accounts-editor-list-pane.vala:351
 msgid "This account has been disabled"
 msgstr "Kontu hau desgaitu egin da"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:388
+#: src/client/accounts/accounts-editor-list-pane.vala:360
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Kontu honetan arazo bat aurkitu da eta ez dago erabilgarri"
-
-#: src/client/accounts/accounts-editor-list-pane.vala:457
-msgid "Other email providers"
-msgstr "Beste posta-hornitzaile batzuk"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:563
+#: src/client/accounts/accounts-editor-list-pane.vala:466
 #, c-format
 msgid "Account “%s” removed"
 msgstr "“%s” kontua kendu egin da"
@@ -667,7 +643,7 @@ msgstr "“%s” kontua kendu egin da"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:570
+#: src/client/accounts/accounts-editor-list-pane.vala:473
 #, c-format
 msgid "Account “%s” restored"
 msgstr "“%s” kontua berrezarri egin da"
@@ -680,30 +656,30 @@ msgstr "Arrastatu elementu hau lekuz aldatzeko"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:299
+#: src/client/accounts/accounts-editor-row.vala:295
 msgid "Service provider"
 msgstr "Zerbitzu-hornitzailea"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:473
+#: src/client/accounts/accounts-editor-row.vala:469
 msgid "Connection security"
 msgstr "Konezioaren segurtasuna"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:484
-#: src/client/accounts/accounts-editor-servers-pane.vala:752
-#: src/client/accounts/accounts-editor-servers-pane.vala:967
+#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-servers-pane.vala:751
+#: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Bat ere ez"
 
-#: src/client/accounts/accounts-editor-row.vala:491
+#: src/client/accounts/accounts-editor-row.vala:487
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:498
+#: src/client/accounts/accounts-editor-row.vala:494
 msgid "TLS"
 msgstr "TLS"
 
@@ -711,35 +687,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:650
+#: src/client/accounts/accounts-editor-row.vala:535
+#: src/client/application/application-main-window.vala:648
 msgid "Login"
 msgstr "Saio-hasiera"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:546
+#: src/client/accounts/accounts-editor-row.vala:542
 msgid "No login needed"
 msgstr "Ez da saiorik hasi behar"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:554
+#: src/client/accounts/accounts-editor-row.vala:550
 msgid "Use same login as receiving"
 msgstr "Erabili jasotzean erabilitako saio-hasiera bera"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:562
+#: src/client/accounts/accounts-editor-row.vala:558
 msgid "Use a different login"
 msgstr "Erabili beste saio-hasiera bat"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:374
+#: src/client/accounts/accounts-editor-servers-pane.vala:373
 #, c-format
 msgid "Account not updated: %s"
 msgstr "Kontua ez da eguneratu: %s"
@@ -747,23 +723,23 @@ msgstr "Kontua ez da eguneratu: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:537
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
 msgid "Account source"
 msgstr "Kontu-iturburua"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:549
+#: src/client/accounts/accounts-editor-servers-pane.vala:548
 msgid "GNOME Online Accounts"
 msgstr "GNOME lineako kontuak"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:608
+#: src/client/accounts/accounts-editor-servers-pane.vala:607
 msgid "Save draft email on server"
 msgstr "Gorde mezu-zirriborroa zerbitzarian"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:663
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
 msgid "Save sent email on server"
 msgstr "Gorde bidalitako mezua zerbitzarian"
 
@@ -772,12 +748,12 @@ msgstr "Gorde bidalitako mezua zerbitzarian"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:953
+#: src/client/accounts/accounts-editor-servers-pane.vala:952
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s OAuth2 erabilita"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:963
+#: src/client/accounts/accounts-editor-servers-pane.vala:962
 msgid "Use receiving server login"
 msgstr "Erabili jasotako zerbitzariaren saio-hasiera"
 
@@ -802,9 +778,7 @@ msgstr "'%s' izeneko fitxategia badago lehendik. Ordeztea nahi duzu?"
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
-msgstr ""
-"'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia "
-"gainidatziko da."
+msgstr "'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia gainidatziko da."
 
 #: src/client/application/application-attachment-manager.vala:236
 msgid "_Replace"
@@ -823,132 +797,127 @@ msgid "Visit the Geary web site"
 msgstr "Bisitatu Geary-ren webgunea"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Inprimatu arazketa-egunkaria"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Abiarazi leiho nagusia ezkutuan dela (zaharkitua)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Gaitu WebKitGTK Inspector web bistetan"
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Erregistratu berriketaren monitorizazioa"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 msgid "Log IMAP network deserialization"
 msgstr "Erregistratu IMAP sarearen deserializatzea"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Erregistratu karpetaren normalizazioa"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Erregistratu IMAP sarearen jarduera"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr "Erregistratu IMAP gertaeren ilara"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Erregistratu SMTP sarearen jarduera"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Erregistratu datu-basearen kontsultak (mezu ugari sortzen ditu)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Irten egokiro"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Ireki leiho berria"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Errebokatu sastatutako TLS zerbitzari-ziurtagiri guztiak"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Bistaratu programaren bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Geary bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Geary berrikuspena"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "GTK bertsioa"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "GLib bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "WebKitGTK bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Mahaigaineko ingurunea"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Ezezaguna"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Banaketaren izena"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Banaketaren bertsioa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr "Instalazio-aurrizkia"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
 msgstr "%s aplikazioari buruz"
@@ -956,19 +925,13 @@ msgstr "%s aplikazioari buruz"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:581
 msgid "translator-credits"
 msgstr "Asier Sarasua Garmendia <asier.sarasua@gmail.com>"
 
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1101
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "`--hidden` aukera zaharkituta dago eta kendu egingo da etorkizunean."
-
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1134
+#: src/client/application/application-client.vala:1110
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Programa-argumentu ezezaguna: “%s”"
@@ -1092,17 +1055,13 @@ msgid ""
 "\n"
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
-msgstr ""
-"Errorea gertatu da kontu honen lokaleko postaren datu-basea irekitzean. "
-"Baliteke datu-basearen fitxategia hondatuta egotea direktorio honetan:\n"
+msgstr "Errorea gertatu da kontu honen lokaleko postaren datu-basea irekitzean. Baliteke datu-basearen fitxategia hondatuta egotea direktorio honetan:\n"
 "\n"
 "%s\n"
 "\n"
-"Geary-k datu-basea berreraiki eta zerbitzariarekin berriro sinkroniza "
-"dezake, edo irten.\n"
+"Geary-k datu-basea berreraiki eta zerbitzariarekin berriro sinkroniza dezake, edo irten.\n"
 "\n"
-"Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) "
-"ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
+"Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
 
 #: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
@@ -1123,8 +1082,7 @@ msgid ""
 "Error during rebuild:\n"
 "\n"
 "%s"
-msgstr ""
-"Errorea berreraikitzean:\n"
+msgstr "Errorea berreraikitzean:\n"
 "\n"
 "%s"
 
@@ -1174,107 +1132,108 @@ msgid "Account update"
 msgstr "Kontuaren eguneratzea"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:634
 msgid "Working offline"
 msgstr "Lineaz kanpo lanean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:636
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Ezin izango duzu postarik bidali edo jaso berriro konektatu arte."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:643
 msgid "Login problem"
 msgstr "Arazoa saioa hastean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:645
 msgid "An account has reported an incorrect login or password."
 msgstr "Kontu batek saio-haste edo pasahitz oker baten berri eman du."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:652
 msgid "Retry login, you will be prompted for your password"
 msgstr "Saiatu berriro saioa hasten, pasahitza eskatuko zaizu."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:659
 msgid "Security problem"
 msgstr "Segurtasun-arazoa"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:661
 msgid "An account has reported an untrusted server."
 msgstr "Kontu batek fidagarria ez den zerbitzari baten berri eman du."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:664
 msgid "Check"
 msgstr "Egiaztatu"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:668
 msgid "Check the security details for the connection"
 msgstr "Egiaztatu konexioaren segurtasun-xehetasunak"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:713
+#: src/client/application/application-main-window.vala:715
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#. Translators: The name of the folder group containing
-#. folders created by people (as opposed to special-use
-#. folders)
-#: src/client/application/application-main-window.vala:1103
-#: src/client/folder-list/folder-list-account-branch.vala:46
+#: src/client/application/application-main-window.vala:1105
+#: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etiketak"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1445
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Hustu zure %s karpetako mezu guztiak?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1446
 msgid "This removes the email from Geary and your email server."
 msgstr "Horrek posta Geary-tik eta posta-zerbitzaritik kenduko du."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1447
 msgid "This cannot be undone."
 msgstr "Hau ezin da desegin."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1448
 #, c-format
 msgid "Empty %s"
 msgstr "Hustu %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1505
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Berriketa hau betiko ezabatu nahi dituzu?"
 msgstr[1] "Berriketa hauek betiko ezabatu nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1510
+#: src/client/application/application-main-window.vala:1525
 msgid "Delete"
 msgstr "Ezabatu"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1520
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Mezu hau betirako ezabatzea nahi duzu?"
 msgstr[1] "Mezu hauek betirako ezabatzea nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1804
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
+
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary aplikazioak atzeko planoan exekutatu nahi du"
 
 #. Translators: The first argument will be a
 #. description of the document type, the second will
@@ -1295,46 +1254,50 @@ msgstr "Ziur zaude eranskin horiek ireki nahi dituzula?"
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
-msgstr ""
-"Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu "
-"fidagarrietako fitxategiak bakarrik ireki."
+msgstr "Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu fidagarrietako fitxategiak bakarrik ireki."
 
 #: src/client/components/components-attachment-pane.vala:375
 msgid "Don’t _ask me again"
 msgstr "_Ez galdetu berriro"
 
-#: src/client/components/components-conversation-actions.vala:97
+#: src/client/components/components-conversation-actions.vala:112
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Markatu berriketa"
 msgstr[1] "Markatu berriketak"
 
-#: src/client/components/components-conversation-actions.vala:102
-msgid "Add label to conversation"
-msgid_plural "Add label to conversations"
-msgstr[0] "Gehitu etiketa berriketari"
-msgstr[1] "Gehitu etiketa berriketei"
-
-#: src/client/components/components-conversation-actions.vala:107
+#: src/client/components/components-conversation-actions.vala:118
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Aldatu berriketa lekuz"
 msgstr[1] "Aldatu berriketak lekuz"
 
-#: src/client/components/components-conversation-actions.vala:112
+#: src/client/components/components-conversation-actions.vala:123
 #: src/client/conversation-list/conversation-list-view.vala:446
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Artxibatu berriketa"
 msgstr[1] "Artxibatu berriketak"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:133
+msgid "Add label to conversation"
+msgid_plural "Add label to conversations"
+msgstr[0] "Gehitu etiketa berriketari"
+msgstr[1] "Gehitu etiketa berriketei"
+
+#: src/client/components/components-conversation-actions.vala:142
+msgid "Copy conversation"
+msgid_plural "Copy conversations"
+msgstr[0] "Kopiatu berriketa"
+msgstr[1] "Aldatu berriketak lekuz"
+
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Eraman berriketa zakarrontzira"
 msgstr[1] "Eraman berriketak zakarrontzira"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Ezabatu berriketa"
@@ -1409,7 +1372,7 @@ msgstr "Erabili _tekla bakarreko lasterbideak"
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
-msgstr "Gaitu <Ctrl> sakatzea behar ez duten lasterbideak posta-ekintzetarako"
+msgstr "Gaitu <Ctrl> sakatzea behar ez duten posta-ekintzetarako lasterbideak"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:157
@@ -1421,13 +1384,18 @@ msgstr "_Zaindu posta berririk iritsi den aplikazioa itxitakoan"
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary-k abian jarraituko du leiho guztiak itxi ondoren"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:171
+msgid "_Always load images"
+msgstr "_Beti kargatu irudiak"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:189
 msgid "Preferences"
 msgstr "Hobespenak"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:250
 msgid "Plugins"
 msgstr "Pluginak"
 
@@ -1570,7 +1538,7 @@ msgstr "_Ados"
 msgid "_About"
 msgstr "Honi _buruz"
 
-#: src/client/components/stock.vala:22
+#: src/client/components/stock.vala:22 ui/accounts_editor_list_pane.ui:12
 msgid "_Add"
 msgstr "_Gehitu"
 
@@ -1587,7 +1555,7 @@ msgid "_Help"
 msgstr "_Laguntza"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: src/client/plugin/mail-merge/mail-merge.vala:397
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Ireki"
@@ -1618,7 +1586,7 @@ msgstr "_Gorde"
 msgid "_Keep"
 msgstr "_Mantendu"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Hautatu kolorea"
 
@@ -1664,9 +1632,7 @@ msgstr "Sakatu atzerako tekla aipamena ezabatzeko"
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
-msgstr ""
-"erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipena|"
-"atxikitzea|atxikimendua"
+msgstr "erantsi|eransten|erantsita|eranskina|eranskinak|atxiki|atxikita|atxikipena|atxikitzea|atxikimendua"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -1884,14 +1850,14 @@ msgstr "Data:"
 msgid "Subject:"
 msgstr "Gaia:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Posta-helbide hori faltsua izan daiteke"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Erakutsi gutxiago"
 
@@ -1899,7 +1865,7 @@ msgstr "Erakutsi gutxiago"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1910,47 +1876,48 @@ msgstr[1] "%d gehiago…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Bidaltzailerik ez"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Irudia"
 
-#: src/client/conversation-viewer/conversation-message.vala:1341
-#: src/client/conversation-viewer/conversation-message.vala:1347
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
 msgid "(unknown)"
 msgstr "(ezezaguna)"
 
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Urruneko irudiak ez dira erakutsi"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
+#: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Only show remote images from senders you trust."
 msgstr "Erakutsi fidagarriak diren bidaltzaileen urruneko irudiak soilik."
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
-msgid "Show"
-msgstr "Erakutsi"
+#. Translators: Info bar description
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Mezu hau ez da fidagarria."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Erakutsi beti bidaltzailetik"
+#: src/client/conversation-viewer/conversation-message.vala:1448
+msgid "Show"
+msgstr "Erakutsi"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
@@ -2019,18 +1986,13 @@ msgstr "%s posta-zerbitzariak %s:%u(e)n duen nortasuna ezin izan da egiaztatu."
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
-msgstr ""
-"“Fidatu zerbitzari honetaz” edo “Fidatu beti zerbitzari honetaz” hautatzen "
-"bada, zure erabiltzaile-izena eta pasahitza segurua ez den moduan "
-"transmititzeko arriskua dago."
+msgstr "“Fidatu zerbitzari honetaz” edo “Fidatu beti zerbitzari honetaz” hautatzen bada, zure erabiltzaile-izena eta pasahitza segurua ez den moduan transmititzeko arriskua dago."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
-msgstr ""
-"“Ez fidatu zerbitzari honetaz” hautatzen bada, beharbada Geary-k ezin izango "
-"du zerbitzaria atzitu."
+msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, beharbada Geary-k ezin izango du zerbitzaria atzitu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
@@ -2040,17 +2002,13 @@ msgstr "Geary-k ez du posta-kontu hau gehituko edo eguneratuko."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
-msgstr ""
-"“Ez fidatu zerbitzari honetaz” hautatzen bada, Geary-k kontu hau atzitzeari "
-"utziko dio."
+msgstr "“Ez fidatu zerbitzari honetaz” hautatzen bada, Geary-k kontu hau atzitzeari utziko dio."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
-msgstr ""
-"Jarri harremanetan zure sistema-administratzailearekin edo zerbitzu-"
-"hornitzailearekin auzi horiei buruzko galderarik baduzu."
+msgstr "Jarri harremanetan zure sistema-administratzailearekin edo zerbitzu-hornitzailearekin auzi horiei buruzko galderarik baduzu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
@@ -2094,6 +2052,10 @@ msgstr "Xehetasunak"
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr "Geary-k zure postaren pasahitza behar du jarraitzeko"
+
+#: src/client/folder-list/folder-list-account-branch.vala:53
+msgid "Folders"
+msgstr "Karpetak"
 
 #. Translators: Label displaying total number of email
 #. messages in a folder. String substitution is the actual
@@ -2149,11 +2111,9 @@ msgid ""
 msgid_plural ""
 "%s\n"
 "(%d other new messages)"
-msgstr[0] ""
-"%s\n"
+msgstr[0] "%s\n"
 "(beste mezu berri %d)"
-msgstr[1] ""
-"%s\n"
+msgstr[1] "%s\n"
 "(beste %d mezu berri)"
 
 #. / Notification body when multiple messages have been
@@ -2203,9 +2163,7 @@ msgstr "Sortu txantiloi berrerabilgarriak posta-mezuak bidaltzeko"
 #: src/client/plugin/email-templates/email-templates.vala:29
 #: src/client/plugin/mail-merge/mail-merge.vala:29
 msgid "Templates | Template Mail | Template Email | Template E-Mail"
-msgstr ""
-"Txantiloiak | Posta-txantiloia | Posta elektronikoko txantiloia | Posta-"
-"mezuen txantiloia"
+msgstr "Txantiloiak | Posta-txantiloia | Posta elektronikoko txantiloia | Posta-mezuen txantiloia"
 
 #. Translators: The name of the folder used to
 #. store email templates
@@ -2235,7 +2193,7 @@ msgstr "Bidali"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/mail-merge/mail-merge.vala:342
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Editatu"
@@ -2248,15 +2206,14 @@ msgstr "Editatu"
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 #: src/client/plugin/mail-merge/mail-merge.vala:288
-#: src/client/plugin/mail-merge/mail-merge.vala:389
-#: src/client/plugin/mail-merge/mail-merge.vala:488
+#: src/client/plugin/mail-merge/mail-merge.vala:395
+#: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Posta-konbinazioa"
 
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
 msgid "Fill in and send email templates using a spreadsheet"
-msgstr ""
-"Bete eta bidali posta elektronikoko txantiloiak kalkulu-orri bat erabilita"
+msgstr "Bete eta bidali posta elektronikoko txantiloiak kalkulu-orri bat erabilita"
 
 #. Translators: Info bar label for starting sending a mail
 #. merge
@@ -2282,24 +2239,24 @@ msgstr[1] "%u / %u bidali dira"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:330
 msgid "Mail merge template"
 msgstr "Posta-konbinazioko txantiloia"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:328
+#: src/client/plugin/mail-merge/mail-merge.vala:334
 msgid "Merge"
 msgstr "Konbinatu"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:377
+#: src/client/plugin/mail-merge/mail-merge.vala:383
 msgid "Insert field"
 msgstr "Txertatu eremua"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:396
+#: src/client/plugin/mail-merge/mail-merge.vala:402
 msgid "Comma separated values (CSV)"
 msgstr "Komaz bereizitako balioak (CSV)"
 
@@ -2309,9 +2266,7 @@ msgstr "Mezuen menua"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr ""
-"Unity-ren mezuen menuaren jakinarazpenak bistaratzen ditu mezu berriak "
-"daudenean"
+msgstr "Unity-ren mezuen menuaren jakinarazpenak bistaratzen ditu mezu berriak daudenean"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2324,9 +2279,7 @@ msgstr "Soinua bidalitakoan"
 
 #: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
 msgid "Plays the desktop sent-mail sound when an email is sent"
-msgstr ""
-"Mahaigainak mezu bidalientzako duen soinua erreproduzitzen du mezu bat "
-"bidaltzen denean"
+msgstr "Mahaigainak mezu bidalientzako duen soinua erreproduzitzen du mezu bat bidaltzen denean"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
@@ -2740,9 +2693,7 @@ msgstr "Zirriborroak | Zirriborroa | Drafts | Draft"
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr ""
-"Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | "
-"Sent E-Mail"
+msgstr "Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | Sent E-Mail"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
@@ -2759,10 +2710,7 @@ msgstr "Bidalitako elementuak"
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
-msgstr ""
-"Baztergarria | Baztergarriak | Posta baztergarria | Mezu baztergarria | Junk "
-"| Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
-"Bulk E-Mail"
+msgstr "Baztergarria | Baztergarriak | Posta baztergarria | Mezu baztergarria | Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -2787,33 +2735,29 @@ msgstr "Ezabatutako elementuak"
 msgid "Archive | Archives"
 msgstr "Artxiboa | Artxiboak"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Ezin izan da “%s” elementuaren mime mota zehaztu."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Ezin izan da “%s” mime motaren eduki mota zehaztu “%s” elementurako."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(gairik ez)"
 
-#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:13
 msgid "Add an account"
 msgstr "Gehitu kontua"
 
-#: ui/accounts_editor_add_pane.ui:47
-msgid "_Create"
-msgstr "_Sortu"
-
-#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Jasotzen"
 
-#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Bidaltzen"
 
@@ -2850,11 +2794,11 @@ msgstr "Kendu kontu hau Geary-tik"
 msgid "Accounts"
 msgstr "Kontuak"
 
-#: ui/accounts_editor_list_pane.ui:59
+#: ui/accounts_editor_list_pane.ui:72
 msgid "To get started, select an email provider below."
 msgstr "Hasteko, hautatu azpian erakusten diren posta-hornitzaileetako bat."
 
-#: ui/accounts_editor_list_pane.ui:73
+#: ui/accounts_editor_list_pane.ui:86
 msgid "Welcome to Geary"
 msgstr "Ongi etorri Geary aplikaziora"
 
@@ -3132,11 +3076,7 @@ msgid ""
 "one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
-msgstr ""
-"Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a "
-"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktu-kanaletara</a> "
-"edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">akatsen jakinarazpen berri bati</a>."
+msgstr "Arazoa larria edo iraunkorra bada, gorde xehetasun hauek eta bidali <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktu-kanaletara</a> edo erantsi <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">akatsen jakinarazpen berri bati</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3317,14 +3257,11 @@ msgstr "Esteka iruzurtia aurkitu da"
 
 #: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
-msgstr ""
-"Posta-mezua bidali dizunak okerreko webgunera eraman nahi dizula dirudi."
+msgstr "Posta-mezua bidali dizunak okerreko webgunera eraman nahi dizula dirudi."
 
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr ""
-"Ez bazaude seguru, hitz egin bidaltzailearekin eta galdetu aurrera egin "
-"baino lehen."
+msgstr "Ez bazaude seguru, hitz egin bidaltzailearekin eta galdetu aurrera egin baino lehen."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
@@ -3349,6 +3286,22 @@ msgstr "Gorde _irudia honela…"
 #: ui/conversation-message-menus.ui:33
 msgid "_Select All"
 msgstr "_Hautatu denak"
+
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Erakutsi irudiak"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Mezu honetarako"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Bidaltzaile honetarako"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Domeinu honetarako"
 
 #: ui/conversation-message.ui:54
 msgid "From <email>"
@@ -3393,10 +3346,6 @@ msgstr "Bilatu:"
 #: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Aurrekoa"
-
-#: ui/find_bar.glade:97
-msgid "_Next"
-msgstr "_Hurrengoa"
 
 #: ui/find_bar.glade:114
 msgid "_Case sensitive"
@@ -3723,6 +3672,32 @@ msgstr "_Gogoratu pasahitza"
 msgid "_Authenticate"
 msgstr "_Autentifikatu"
 
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Jakinarazi mezu berriak abioan"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr "Egia abioan mezu berriak daudela jakinarazteko."
+
+#~ msgid "All others"
+#~ msgstr "Beste guztiak"
+
+#~ msgid "Yahoo"
+#~ msgstr "Yahoo"
+
+#~ msgid "Other email providers"
+#~ msgstr "Beste posta-hornitzaile batzuk"
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Abiarazi leiho nagusia ezkutuan dela (zaharkitua)"
+
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr ""
+#~ "`--hidden` aukera zaharkituta dago eta kendu egingo da etorkizunean."
+
+#~ msgid "Always show from sender"
+#~ msgstr "Erakutsi beti bidaltzailetik"
+
 #~ msgid "Position of folder list pane"
 #~ msgstr "Karpeta-zerrendaren panelaren posizioa"
 
@@ -3803,9 +3778,6 @@ msgstr "_Autentifikatu"
 #~ msgstr ""
 #~ "Mezu berrien kopurua erakusten duen atrakatutako jakinarazpen bat "
 #~ "bistaratzen du"
-
-#~ msgid "Special Folders"
-#~ msgstr "Karpeta bereziak"
 
 #~ msgctxt "shortcut window"
 #~ msgid "Find in current conversations"
