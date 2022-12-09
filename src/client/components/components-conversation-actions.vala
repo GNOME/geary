@@ -18,22 +18,23 @@ public class Components.ConversationActions : Gtk.Box {
 
     public bool pack_justified { get; construct; }
 
-    public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
-
-    public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
+    public FolderPopover copy_move_popover {
+        get {
+            unowned var popover = this.copy_message_button.popover as FolderPopover;
+            return popover;
+        }
+    }
 
     public int selected_conversations { get; set; }
 
-    public Geary.ServiceProvider service_provider { get; set; }
+    public Geary.Account account { get; set; }
 
     [GtkChild] private unowned Gtk.Box response_buttons { get; }
 
-    [GtkChild] private unowned Gtk.Box mark_copy_move_buttons { get; }
     [GtkChild] private unowned Gtk.MenuButton mark_message_button { get; }
     [GtkChild] private unowned Gtk.MenuButton copy_message_button { get;  }
-    [GtkChild] private unowned Gtk.MenuButton move_message_button { get;  }
 
-    [GtkChild] private unowned Gtk.Box archive_trash_delete_buttons { get; }
+    [GtkChild] private unowned Gtk.Box action_buttons { get; }
     [GtkChild] private unowned Gtk.Button archive_button;
     [GtkChild] private unowned Gtk.Button trash_delete_button;
 
@@ -60,8 +61,6 @@ public class Components.ConversationActions : Gtk.Box {
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
         this.notify["service-provider"].connect(() => update_conversation_buttons());
         this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
-        this.copy_message_button.popover = copy_folder_menu;
-        this.move_message_button.popover = move_folder_menu;
 
         this.mark_message_button.toggled.connect((button) => {
             if (button.active)
@@ -69,21 +68,20 @@ public class Components.ConversationActions : Gtk.Box {
         });
 
         this.response_buttons.set_visible(this.show_response_actions);
-        this.mark_copy_move_buttons.set_visible(this.show_conversation_actions);
-        this.archive_trash_delete_buttons.set_visible(this.show_conversation_actions);
+        this.action_buttons.set_visible(this.show_conversation_actions);
 
         if (this.pack_justified) {
-            this.archive_trash_delete_buttons.hexpand = true;
-            this.archive_trash_delete_buttons.halign = END;
+            this.action_buttons.hexpand = true;
+            this.action_buttons.halign = END;
         }
     }
 
-    public void set_move_sensitive(bool is_sensitive) {
-        this.move_message_button.sensitive = is_sensitive;
-    }
-
-    public void show_move_menu() {
-        this.move_message_button.clicked();
+    public void init(Application.Configuration config) {
+        this.copy_message_button.popover = new FolderPopover(config);
+        this.bind_property(
+            "account", this.copy_message_button.popover,
+            "account", BindingFlags.DEFAULT
+        );
     }
 
     public void set_copy_sensitive(bool is_sensitive) {
@@ -121,43 +119,34 @@ public class Components.ConversationActions : Gtk.Box {
             this.selected_conversations
             );
 
-        this.move_message_button.tooltip_text = ngettext(
-            "Move conversation",
-            "Move conversations",
-            this.selected_conversations
-            );
         this.archive_button.tooltip_text = ngettext(
             "Archive conversation",
             "Archive conversations",
             this.selected_conversations
             );
 
-        var copy_icon_name = "edit-copy-symbolic";
-        var move_icon_name = "edit-cut-symbolic";
-        switch (this.service_provider) {
-        case Geary.ServiceProvider.GMAIL:
-            this.copy_message_button.tooltip_text = ngettext(
-                "Add label to conversation",
-                "Add label to conversations",
-                this.selected_conversations
+        if (this.account != null) {
+            switch (this.account.information.service_provider) {
+            case Geary.ServiceProvider.GMAIL:
+                this.copy_message_button.tooltip_text = ngettext(
+                    "Add label to conversation",
+                    "Add label to conversations",
+                    this.selected_conversations
+                    );
+                this.copy_message_button.set_image(
+                    new Gtk.Image.from_icon_name(
+                        "tag-symbolic", Gtk.IconSize.BUTTON)
                 );
-            copy_icon_name = "tag-symbolic";
-            move_icon_name = "folder-symbolic";
-            break;
-        default:
-            this.copy_message_button.tooltip_text = ngettext(
-                "Copy conversation",
-                "Copy conversations",
-                this.selected_conversations
-                );
-            break;
+                break;
+            default:
+                this.copy_message_button.tooltip_text = ngettext(
+                    "Copy conversation",
+                    "Copy conversations",
+                    this.selected_conversations
+                    );
+                break;
+            }
         }
-        this.copy_message_button.set_image(
-            new Gtk.Image.from_icon_name(copy_icon_name, Gtk.IconSize.BUTTON)
-        );
-        this.move_message_button.set_image(
-            new Gtk.Image.from_icon_name(move_icon_name, Gtk.IconSize.BUTTON)
-        );
 
         if (this.show_trash_button) {
             this.trash_delete_button.action_name = Action.Window.prefix(

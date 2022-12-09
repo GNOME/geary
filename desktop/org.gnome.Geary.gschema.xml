@@ -39,6 +39,12 @@
         <description>True if we should display a short preview of each message.</description>
     </key>
 
+    <key name="move-messages-on-tag" type="b">
+      <default>false</default>
+      <summary>Move messages by default</summary>
+      <description>When tagging a message, move it to destination folder.</description>
+    </key>
+
     <key name="single-key-shortcuts" type="b">
         <default>false</default>
         <summary>Use single key shortcuts</summary>

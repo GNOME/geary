@@ -9,12 +9,16 @@ public class FolderPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.SearchEntry search_entry;
     [GtkChild] private unowned Gtk.ListBox list_box;
+    [GtkChild] private unowned Gtk.Switch move_switch;
+
+    public Geary.Account account {get; set;}
 
     private int filtered_folder_count = 0;
 
-    public signal void folder_selected(Geary.Folder folder);
+    public signal void copy_conversation(Geary.Folder folder);
+    public signal void move_conversation(Geary.Folder folder);
 
-    public FolderPopover() {
+    public FolderPopover(Application.Configuration config) {
         list_box.set_filter_func(row_filter);
         list_box.set_sort_func(row_sort);
         this.show.connect(() => search_entry.grab_focus());
@@ -22,17 +26,14 @@ public class FolderPopover : Gtk.Popover {
             search_entry.set_text("");
             invalidate_filter();
         });
+        config.bind("move-messages-on-tag", this.move_switch, "active");
     }
 
-    public bool has_folder(Geary.Folder folder) {
-        return get_row_with_folder(folder) != null;
-    }
-
-    public void add_folder(Application.FolderContext context, Gee.HashMap<string,string> map) {
+    private void add_folder(Application.FolderContext context, Gee.HashMap<string,string> map) {
         Geary.Folder folder = context.folder;
         // don't allow multiples and don't allow folders that can't be opened (that means they
         // support almost no operations and have no content)
-        if (has_folder(folder) || folder.properties.is_openable.is_impossible())
+        if (folder.properties.is_openable.is_impossible())
             return;
 
         // also don't allow local-only or virtual folders, which also have a limited set of
@@ -66,28 +67,29 @@ public class FolderPopover : Gtk.Popover {
         list_box.invalidate_sort();
     }
 
-    public void enable_disable_folder(Geary.Folder folder, bool visible) {
-        Gtk.ListBoxRow row = get_row_with_folder(folder);
-        if (row != null)
-            row.visible = visible;
+    [GtkCallback]
+    private void on_map(Gtk.Widget widget) {
+        var folders = this.account.list_folders();
+        // Build map between path and display name for
+        // special directories
+        var map = new Gee.HashMap<string,string>();
+        foreach (var folder in folders) {
+            var context = new Application.FolderContext(folder);
+            if (folder.used_as == Geary.Folder.SpecialUse.NONE)
+                continue;
+            map.set(
+                folder.path.to_string().substring(1),
+                context.display_name
+            );
+        }
+        foreach (var folder in folders) {
+            var context = new Application.FolderContext(folder);
+            this.add_folder(context, map);
+        }
     }
 
-    public void remove_folder(Geary.Folder folder) {
-        Gtk.ListBoxRow row = get_row_with_folder(folder);
-        if (row != null)
-            list_box.remove(row);
-    }
-
-    public Gtk.ListBoxRow? get_row_with_folder(Geary.Folder folder) {
-        Gtk.ListBoxRow result = null;
-        list_box.foreach((row) => {
-            if (row.get_data<Geary.Folder>("folder") == folder)
-                result = row as Gtk.ListBoxRow;
-        });
-        return result;
-    }
-
-    public void clear() {
+    [GtkCallback]
+    private void on_unmap(Gtk.Widget widget) {
         list_box.foreach((row) => list_box.remove(row));
     }
 
@@ -95,7 +97,11 @@ public class FolderPopover : Gtk.Popover {
     private void on_row_activated(Gtk.ListBoxRow? row) {
         if (row != null) {
             Geary.Folder folder = row.get_data<Geary.Folder>("folder");
-            folder_selected(folder);
+            if (this.move_switch.active) {
+                move_conversation(folder);
+            } else {
+                copy_conversation(folder);
+            }
         }
 
         this.hide();

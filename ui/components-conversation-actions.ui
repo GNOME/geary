@@ -79,7 +79,11 @@
       </object>
     </child>
     <child>
-      <object class="GtkBox" id="mark_copy_move_buttons">
+      <object class="GtkImage" id="archive_image">
+        <property name="visible">True</property>
+        <property name="icon_name">mail-archive-symbolic</property>
+      </object>
+      <object class="GtkBox" id="action_buttons">
         <property name="visible">True</property>
         <child>
           <object class="GtkMenuButton" id="copy_message_button">
@@ -90,25 +94,6 @@
             <child>
               <object class="GtkImage" id="copy_message_image">
                 <property name="visible">True</property>
-                <property name="icon_name">tag-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="move_message_button">
-            <property name="visible">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="move_message_image">
-                <property name="visible">True</property>
                 <property name="icon_name">folder-symbolic</property>
               </object>
             </child>
@@ -116,7 +101,40 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="archive_button">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="action_name">win.archive-conversation</property>
+            <property name="image">archive_image</property>
+            <property name="use_underline">True</property>
+            <property name="always_show_image">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="trash_delete_button">
+            <property name="visible">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="action_name">win.trash-conversation</property>
+            <property name="always_show_image">True</property>
+            <child>
+              <object class="GtkImage" id="trash_delete_image">
+                <property name="visible">True</property>
+                <property name="icon_name">user-trash-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
           </packing>
         </child>
         <child>
@@ -138,57 +156,6 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <style>
-          <class name="raised"/>
-          <class name="linked"/>
-        </style>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImage" id="archive_image">
-        <property name="visible">True</property>
-        <property name="icon_name">mail-archive-symbolic</property>
-      </object>
-      <object class="GtkBox" id="archive_trash_delete_buttons">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkButton" id="archive_button">
-            <property name="label" translatable="yes">_Archive</property>
-            <property name="visible">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="action_name">win.archive-conversation</property>
-            <property name="image">archive_image</property>
-            <property name="use_underline">True</property>
-            <property name="always_show_image">True</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="trash_delete_button">
-            <property name="visible">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="action_name">win.trash-conversation</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="trash_delete_image">
-                <property name="visible">True</property>
-                <property name="icon_name">user-trash-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
           </packing>
         </child>
         <style>

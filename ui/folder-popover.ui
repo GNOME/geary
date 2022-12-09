@@ -3,6 +3,8 @@
 <interface>
   <requires lib="gtk+" version="3.14"/>
   <template class="FolderPopover" parent="GtkPopover">
+    <signal name="map" handler="on_map" swapped="no"/>
+    <signal name="unmap" handler="on_unmap" swapped="no"/>
     <child>
       <object class="GtkBox" id="container">
         <property name="visible">True</property>
@@ -51,6 +53,24 @@
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="hexpand">True</property>
+                <property name="halign">start</property>
+                <property name="label">Move message to folder</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="move_switch">
+                <property name="visible">True</property>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
     </child>

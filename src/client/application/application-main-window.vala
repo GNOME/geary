@@ -27,7 +27,6 @@ public class Application.MainWindow :
     public const string ACTION_SEARCH = "search";
     public const string ACTION_SELECT_INBOX = "select-inbox";
     public const string ACTION_SHOW_COPY_MENU = "show-copy-menu";
-    public const string ACTION_SHOW_MOVE_MENU = "show-move-menu";
     public const string ACTION_TOGGLE_JUNK = "toggle-conversation-junk";
     public const string ACTION_TRASH_CONVERSATION = "trash-conversation";
     public const string ACTION_ZOOM = "zoom";
@@ -56,7 +55,6 @@ public class Application.MainWindow :
         { ACTION_TRASH_CONVERSATION, on_trash_conversation },
         { ACTION_DELETE_CONVERSATION, on_delete_conversation },
         { ACTION_SHOW_COPY_MENU, on_show_copy_menu },
-        { ACTION_SHOW_MOVE_MENU, on_show_move_menu },
         { ACTION_CONVERSATION_UP, on_conversation_up },
         { ACTION_CONVERSATION_DOWN, on_conversation_down },
         // Message marking actions
@@ -414,6 +412,7 @@ public class Application.MainWindow :
     [GtkChild] private unowned Gtk.Box conversation_list_box;
     [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
     [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
+    [GtkChild] private unowned Components.ConversationActions conversation_viewer_actions;
 
     [GtkChild] private unowned Gtk.Box conversation_viewer_box;
     [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
@@ -423,7 +422,6 @@ public class Application.MainWindow :
     [GtkChild] private unowned Components.InfoBarStack info_bars;
 
     private Components.ConversationActions[] folder_conversation_actions = {};
-    private FolderPopover[] folder_popovers = {};
 
     private Components.InfoBar offline_infobar;
     private Components.InfoBar cert_problem_infobar;
@@ -476,12 +474,6 @@ public class Application.MainWindow :
     [Signal (action=true)]
     public virtual signal void show_copy_menu() {
         activate_action(get_window_action(ACTION_SHOW_COPY_MENU));
-    }
-
-    /** Keybinding signal for showing the move menu. */
-    [Signal (action=true)]
-    public virtual signal void show_move_menu() {
-        activate_action(get_window_action(ACTION_SHOW_MOVE_MENU));
     }
 
     /** Keybinding signal for archiving the current selection. */
@@ -789,10 +781,6 @@ public class Application.MainWindow :
             // selected model.
 
             if (this.selected_folder != null) {
-                foreach (var menu in this.folder_popovers) {
-                    menu.enable_disable_folder(this.selected_folder, true);
-                }
-
                 this.progress_monitor.remove(this.selected_folder.opening_monitor);
                 this.selected_folder.properties.notify.disconnect(update_headerbar);
                 this.selected_folder = null;
@@ -861,11 +849,6 @@ public class Application.MainWindow :
                     this.conversation_list_view.inhibit_next_autoselect();
                 }
                 this.conversation_list_view.set_monitor(this.conversations);
-
-                // disable copy/move to the new folder
-                foreach (var menu in this.folder_popovers) {
-                    menu.enable_disable_folder(to_select, false);
-                }
 
                 yield open_conversation_monitor(this.conversations, cancellable);
                 yield this.controller.process_pending_composers();
@@ -1197,11 +1180,6 @@ public class Application.MainWindow :
         }
         foreach (var context in to_add) {
             this.folder_list.add_folder(context);
-            if (context.folder.account == this.selected_account) {
-                foreach (var menu in this.folder_popovers) {
-                    menu.add_folder(context, map);
-                }
-            }
             context.folder.use_changed.connect(on_use_changed);
         }
     }
@@ -1219,11 +1197,6 @@ public class Application.MainWindow :
             }
 
             folder.use_changed.disconnect(on_use_changed);
-            if (folder.account == this.selected_account) {
-                foreach (var menu in this.folder_popovers) {
-                    menu.remove_folder(folder);
-                }
-            }
             this.folder_list.remove_folder(context);
         }
     }
@@ -1415,18 +1388,20 @@ public class Application.MainWindow :
 
         this.conversation_list_actions.set_mark_inverted();
 
+        this.conversation_headerbar.full_actions.init(this.application.config);
+        this.conversation_list_actions.init(this.application.config);
+        this.conversation_viewer_actions.init(this.application.config);
+
         this.folder_conversation_actions = {
             this.conversation_headerbar.full_actions,
-            this.conversation_list_actions
+            this.conversation_list_actions,
+            this.conversation_viewer_actions
         };
-        foreach (var actions in this.folder_conversation_actions) {
-            var move = actions.move_folder_menu;
-            this.folder_popovers += move;
-            move.folder_selected.connect(on_move_conversation);
 
-            var copy = actions.copy_folder_menu;
-            this.folder_popovers += copy;
-            copy.folder_selected.connect(on_copy_conversation);
+        foreach (var actions in this.folder_conversation_actions) {
+            var popover = actions.copy_move_popover;
+            popover.copy_conversation.connect(on_copy_conversation);
+            popover.move_conversation.connect(on_move_conversation);
         }
     }
 
@@ -1590,40 +1565,14 @@ public class Application.MainWindow :
 
     private void select_account(Geary.Account? account) {
         if (this.selected_account != account) {
-            if (this.selected_account != null) {
-                foreach (var menu in this.folder_popovers) {
-                    menu.clear();
-                }
-            }
-
             this.selected_account = account;
             this.search_bar.set_account(account);
 
             if (account != null) {
-                var service_provider = account.information.service_provider;
-                this.conversation_list_actions.service_provider = service_provider;
-                this.conversation_headerbar.full_actions.service_provider = service_provider;
-                this.conversation_headerbar.compact_actions.service_provider = service_provider;
-
-                foreach (var menu in this.folder_popovers) {
-                    var folders = account.list_folders();
-                    // Build map between path and display name for
-                    // special directories
-                    var map = new Gee.HashMap<string,string>();
-                    foreach (var folder in folders) {
-                        var context = new Application.FolderContext(folder);
-                        if (folder.used_as == Geary.Folder.SpecialUse.NONE)
-                            continue;
-                        map.set(
-                            folder.path.to_string().substring(1),
-                            context.display_name
-                        );
-                    }
-                    foreach (var folder in folders) {
-                        var context = new Application.FolderContext(folder);
-                        menu.add_folder(context, map);
-                    }
-                }
+                this.conversation_list_actions.account = account;
+                this.conversation_viewer_actions.account = account;
+                this.conversation_headerbar.full_actions.account = account;
+                this.conversation_headerbar.compact_actions.account = account;
             }
 
             update_command_actions();
@@ -1894,18 +1843,10 @@ public class Application.MainWindow :
         get_window_action(ACTION_REPLY_ALL_CONVERSATION).set_enabled(reply_sensitive);
         get_window_action(ACTION_FORWARD_CONVERSATION).set_enabled(reply_sensitive);
 
-        bool move_enabled = (
-            sensitive && (this.selected_folder is Geary.FolderSupport.Move)
-        );
-        get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(move_enabled);
-        foreach (var actions in this.folder_conversation_actions) {
-            actions.set_move_sensitive(move_enabled);
-        }
-
         bool copy_enabled = (
             sensitive && (this.selected_folder is Geary.FolderSupport.Copy)
         );
-        get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(move_enabled);
+        get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(copy_enabled);
         foreach (var actions in this.folder_conversation_actions) {
             actions.set_copy_sensitive(copy_enabled);
         }
@@ -1978,10 +1919,6 @@ public class Application.MainWindow :
             get_window_action(ACTION_SHOW_COPY_MENU).set_enabled(
                 sensitive &&
                 (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))
-            );
-            get_window_action(ACTION_SHOW_MOVE_MENU).set_enabled(
-                sensitive &&
-                (supported_operations.contains(typeof(Geary.FolderSupport.Move)))
             );
         }
     }
@@ -2487,17 +2424,6 @@ public class Application.MainWindow :
             this.conversation_list_actions.show_copy_menu();
         } else if (this.is_conversation_viewer_shown) {
             this.conversation_headerbar.shown_actions.show_copy_menu();
-        } else {
-            error_bell();
-        }
-    }
-
-    private void on_show_move_menu() {
-        if (this.is_conversation_list_shown &&
-            this.conversation_list_actions_revealer.child_revealed) {
-            this.conversation_list_actions.show_move_menu();
-        } else if (this.is_conversation_viewer_shown) {
-            this.conversation_headerbar.shown_actions.show_move_menu();
         } else {
             error_bell();
         }
