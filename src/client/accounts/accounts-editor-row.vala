@@ -217,6 +217,7 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
         this.label.halign = Gtk.Align.START;
         this.label.valign = Gtk.Align.CENTER;
         this.label.set_text(label);
+        this.label.set_ellipsize(Pango.EllipsizeMode.END);
         this.label.show();
         this.layout.add(this.label);
 

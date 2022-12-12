@@ -276,6 +276,7 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         this.value.add(this.unavailable_icon);
         this.value.add(this.service_label);
 
+        this.service_label.set_ellipsize(Pango.EllipsizeMode.END);
         this.service_label.show();
 
         this.account.changed.connect(on_account_changed);
