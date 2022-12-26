@@ -23,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-09-20 18:49+0000\n"
-"PO-Revision-Date: 2022-09-22 21:39+0200\n"
+"POT-Creation-Date: 2022-09-27 14:58+0000\n"
+"PO-Revision-Date: 2022-10-30 11:31+0100\n"
 "Last-Translator: Jürgen Benvenuti <gastornis@posteo.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -134,7 +134,7 @@ msgstr "Geary zeigt den Editor für formatierten Text"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Mail;E-Mail;IMAP;GMail;Yahoo;Hotmail;Outlook;Post;Email;Brief;"
+msgstr "Mail;E-Mail;IMAP;GMail;Yahoo;Hotmail;Outlook;Post;Email;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
@@ -393,10 +393,11 @@ msgstr "Ein unerwartetes Problem ist aufgetreten"
 msgid "Account not created: %s"
 msgstr "Konto wurde nicht erstellt: %s"
 
+# Knopf-Text beim Einrichten eines Kontos. - jb
 #: src/client/accounts/accounts-editor-add-pane.vala:372
 #: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
 msgid "_Next"
-msgstr "_Nächste"
+msgstr "_Weiter"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:379
 msgid "_Create"
@@ -519,7 +520,7 @@ msgstr "Kontoname"
 #: src/client/accounts/accounts-editor-edit-pane.vala:330
 #, c-format
 msgid "Change account name back to “%s”"
-msgstr "Ändern Sie den Kontonamen zurück zu »%s«"
+msgstr "Den Kontonamen zurück zu »%s« ändern"
 
 #. Translators: Tooltip for adding a new email sender/from
 #. address's address to an account
@@ -1153,27 +1154,27 @@ msgstr "E-Mail gesendet an %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2512
+#: src/client/application/application-controller.vala:2514
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "E-Mail an %s zum Versand vorgemerkt"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2576
+#: src/client/application/application-controller.vala:2578
 #, c-format
 msgid "Email to %s saved"
 msgstr "E-Mail an %s gespeichert"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2591
-#: src/client/application/application-controller.vala:2649
+#: src/client/application/application-controller.vala:2593
+#: src/client/application/application-controller.vala:2651
 msgid "Composer could not be restored"
 msgstr "Verfassen-Fenster konnte nicht wiederhergestellt werden"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2634
+#: src/client/application/application-controller.vala:2636
 #, c-format
 msgid "Email to %s discarded"
 msgstr "E-Mail an %s verworfen"
@@ -2785,7 +2786,7 @@ msgstr "Archiv"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1006
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Drafts | Draft"
 msgstr "Entwürfe | Entwurf"
 
@@ -2793,7 +2794,7 @@ msgstr "Entwürfe | Entwurf"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1024
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Gesendet | Gesendete E-Mail | Gesendete E-Mails | Sent | Sent Mail | Sent "
@@ -2801,7 +2802,7 @@ msgstr ""
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1029
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Gesendete Objekte"
@@ -2810,7 +2811,7 @@ msgstr "Gesendete Objekte"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1039
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2822,13 +2823,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1040
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1049
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Papierkorb | Müll | Trash | Rubbish | Rubbish Bin"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1054
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Gelöschte Objekte"
@@ -2837,7 +2838,7 @@ msgstr "Gelöschte Objekte"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1055
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1064
 msgid "Archive | Archives"
 msgstr "Archiv | Archive | Archive | Archives"
 
