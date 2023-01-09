@@ -1816,9 +1816,11 @@ public class Application.MainWindow :
         bool sensitive = (count != NONE);
         bool multiple = (count == MULTIPLE);
 
-        get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(
+        bool find_in_enabled = (
             sensitive && !multiple && this.is_conversation_viewer_shown
         );
+        get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(find_in_enabled);
+        this.conversation_headerbar.set_find_sensitive(find_in_enabled);
 
         bool reply_sensitive = (
             sensitive &&

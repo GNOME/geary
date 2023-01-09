@@ -56,4 +56,8 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
         remove(header);
         add(this.conversation_header);
     }
+
+    public void set_find_sensitive(bool is_sensitive) {
+        this.find_button.sensitive = is_sensitive;
+    }
 }
