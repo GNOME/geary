@@ -25,6 +25,9 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
     private const int BECAME_REACHABLE_TIMEOUT_SEC = 3;
     private const int BECAME_UNREACHABLE_TIMEOUT_SEC = 1;
 
+    private const string LOGIND_DBUS_NAME = "org.freedesktop.login1";
+    private const string LOGIND_DBUS_PATH = "/org/freedesktop/login1";
+    private const string LOGIND_DBUS_INTERFACE = "org.freedesktop.login1.Manager";
 
     /**
      * Denotes the service's current status.
@@ -199,6 +202,8 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
     private TimeoutManager became_reachable_timer;
     private TimeoutManager became_unreachable_timer;
 
+    private DBusProxy logind_proxy;
+
     /** The last reported error, if any. */
     public ErrorContext? last_error { get; private set; default = null; }
 
@@ -226,6 +231,21 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
         this.became_unreachable_timer = new TimeoutManager.seconds(
             BECAME_UNREACHABLE_TIMEOUT_SEC, became_unreachable
         );
+
+        try {
+            this.logind_proxy = new DBusProxy.for_bus_sync(
+                BusType.SYSTEM,
+                DBusProxyFlags.NONE,
+                null,
+                LOGIND_DBUS_NAME,
+                LOGIND_DBUS_PATH,
+                LOGIND_DBUS_INTERFACE,
+                null
+            );
+            this.logind_proxy.g_signal.connect(this.on_logind_signal);
+        } catch (GLib.Error err) {
+            debug("Failed to connect logind bus: %s", err.message);
+        }
 
         connect_handlers();
 
@@ -476,4 +496,17 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
         }
     }
 
+    private void on_logind_signal(DBusProxy logind_proxy, string? sender_name,
+                                  string signal_name, Variant parameters)  {
+        if (signal_name != "PrepareForSleep") {
+            return;
+        }
+
+        bool about_to_suspend = parameters.get_child_value(0).get_boolean();
+        if (about_to_suspend) {
+            this.stop.begin();
+        } else {
+            this.start.begin();
+        }
+    }
 }
