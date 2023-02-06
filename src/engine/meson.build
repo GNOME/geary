@@ -44,6 +44,7 @@ engine_vala_sources = files(
   'app/app-conversation-monitor.vala',
   'app/app-draft-manager.vala',
   'app/app-email-store.vala',
+  'app/app-maintenance.vala',
   'app/app-search-folder.vala',
 
   'app/conversation-monitor/app-append-operation.vala',

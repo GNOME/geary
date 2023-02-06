@@ -23,6 +23,7 @@
         "--talk-name=org.gnome.OnlineAccounts",
         "--talk-name=org.gnome.evolution.dataserver.*",
         "--system-talk-name=org.freedesktop.login1",
+        "--system-talk-name=org.freedesktop.Dozed",
         "--filesystem=xdg-cache/evolution/addressbook:ro",
         "--metadata=X-DConf=migrate-path=/org/gnome/Geary/",
         "--filesystem=~/.config/geary:ro",

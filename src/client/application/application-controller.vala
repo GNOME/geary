@@ -78,6 +78,8 @@ internal class Application.Controller :
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
     private bool is_loading_accounts = true;
 
+    private Geary.App.Maintenance maintenance = new Geary.App.Maintenance();
+
     // Cancelled if the controller is closed
     private GLib.Cancellable controller_open;
 
@@ -1009,6 +1011,7 @@ internal class Application.Controller :
         // hook into it before signals start getting fired by folders
         // becoming available, etc.
         account_available(context, this.is_loading_accounts);
+        this.maintenance.add_account(context.account);
 
         bool retry = false;
         do {
@@ -1060,6 +1063,7 @@ internal class Application.Controller :
             Geary.Account account = context.account;
 
             account_unavailable(context, is_shutdown);
+            this.maintenance.remove_account(context.account);
 
             // Guard against trying to close the account twice
             this.accounts.unset(account.information);
