@@ -3,8 +3,14 @@
       type="guide"
       id="index">
 
+  <info>
+    <title type="link" role="trail">Geary</title>
+    <title type="text">Geary</title>
+    <title type="link">Geary</title>
+  </info>
+
   <title>
-    <media type="image" its:translate="no" src="figures/geary.svg" width="64" height="64"></media>
+    <media type="image" its:translate="no" src="figures/geary.svg" width="48" height="48"></media>
     <span>Geary</span>
   </title>
 
