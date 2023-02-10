@@ -80,6 +80,18 @@ public class Geary.TimeoutManager : BaseObject {
 
 
     /**
+     * Constructs a new timeout with a zero ms interval
+     *
+     * The timeout will be by default not running, and hence needs to be
+     * started by a call to {@link start_ms}.
+     */
+    public TimeoutManager(TimeoutFunc callback) {
+        this.use_seconds = false;
+        this.interval = 0;
+        this.callback = callback;
+    }
+
+    /**
      * Constructs a new timeout with an interval in seconds.
      *
      * The timeout will be by default not running, and hence needs to be
@@ -105,6 +117,16 @@ public class Geary.TimeoutManager : BaseObject {
 
     ~TimeoutManager() {
         reset();
+    }
+
+    /**
+     * Schedules the timeout to fire after the given interval.
+     *
+     * If the timeout is already running, it will first be reset.
+     */
+    public void start_ms(uint interval) {
+        this.interval = interval;
+        this.start();
     }
 
     /**

@@ -20,7 +20,8 @@
  */
 public class Geary.ConnectivityManager : BaseObject {
 
-    private const uint CHECK_QUIESCENCE_MS = 60 * 1000;
+    private const uint CHECK_QUIESCENCE = 60 * 1000;
+    private const uint CHECK_SOON = 1000;
 
 
     /** The endpoint being monitored. */
@@ -45,9 +46,6 @@ public class Geary.ConnectivityManager : BaseObject {
 
     private Cancellable? existing_check = null;
 
-    // Wall time the next already-connected check should not occur before
-    private int64 next_check = 0;
-
     private TimeoutManager delayed_check;
 
 
@@ -71,10 +69,7 @@ public class Geary.ConnectivityManager : BaseObject {
         this.monitor = NetworkMonitor.get_default();
         this.monitor.network_changed.connect(on_network_changed);
 
-        this.delayed_check = new TimeoutManager.seconds(
-            // Don't use the milliseconds ctor since we don't want
-            // high-frequency timing.
-            CHECK_QUIESCENCE_MS / 1000,
+        this.delayed_check = new TimeoutManager(
             () => { this.check_reachable.begin(); }
         );
     }
@@ -90,14 +85,6 @@ public class Geary.ConnectivityManager : BaseObject {
      * running, updating the `is_reachable` property on completion.
      */
     public async void check_reachable() {
-        // We use a cancellable here as a guard instead of a boolean
-        // "is_checking" var since when a series of checks are
-        // requested in quick succession (as is the case when
-        // e.g. connecting or disconnecting from a network), the
-        // result of the *last* check is authoritative, not the first
-        // one.
-        cancel_check();
-
         Cancellable cancellable = new Cancellable();
         this.existing_check = cancellable;
 
@@ -109,9 +96,6 @@ public class Geary.ConnectivityManager : BaseObject {
             debug("Checking if %s reachable...", endpoint);
             is_reachable = yield this.monitor.can_reach_async(
                 this.remote, cancellable
-            );
-            this.next_check = (
-                GLib.get_real_time() + (CHECK_QUIESCENCE_MS * 1000)
             );
         } catch (GLib.IOError.CANCELLED err) {
             // User cancelled, so leave as unreachable
@@ -183,7 +167,7 @@ public class Geary.ConnectivityManager : BaseObject {
 
                 // Kick off another delayed check in case the network
                 // changes without the monitor noticing.
-                this.delayed_check.start();
+                this.delayed_check.start_ms(CHECK_QUIESCENCE);
             }
             this.existing_check = null;
         }
@@ -206,24 +190,8 @@ public class Geary.ConnectivityManager : BaseObject {
         debug("Network changed: %s",
               some_available ? "some available" : "none available");
         if (some_available) {
-            // Some networks may have dropped out despite some being
-            // still available, so need to check again. Only run the
-            // check if we are either currently:
-            //
-            // 1. Unreachable
-            // 2. An existing check is already running (i.e. the
-            //    network configuration is changing)
-            // 3. Reachable, and a check hasn't been run recently
-            //
-            // Otherwise, schedule a delayed check to work around the
-            // issue in Bug 776042.
-            if (this.is_reachable.is_uncertain() ||
-                this.existing_check != null ||
-                this.next_check <= GLib.get_real_time()) {
-                this.check_reachable.begin();
-            } else if (!this.delayed_check.is_running) {
-                this.delayed_check.start();
-            }
+            cancel_check();
+            this.delayed_check.start_ms(CHECK_SOON);
         } else {
             // None available, so definitely not reachable.
             set_reachable(false);
