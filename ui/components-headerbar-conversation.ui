@@ -14,6 +14,7 @@
             <property name="valign">center</property>
             <property name="use-underline">True</property>
             <property name="action_name">win.navigation-back</property>
+            <property name="tooltip_text" translatable="yes">Back</property>
             <style>
               <class name="image-button"/>
             </style>
