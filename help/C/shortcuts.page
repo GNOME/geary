@@ -21,7 +21,7 @@
     help from Geary:</p>
     <table frame="all" rules="rows">
       <tr>
-        <td><p>Display this online help manual</p></td>
+        <td><p>Display this help manual</p></td>
         <td><p><keyseq><key>F1</key></keyseq></p></td>
       </tr>
       <tr>
