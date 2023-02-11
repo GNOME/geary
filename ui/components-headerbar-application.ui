@@ -4,7 +4,7 @@
   <requires lib="gtk+" version="3.20"/>
   <template class="ComponentsApplicationHeaderBar" parent="HdyHeaderBar">
     <property name="visible">True</property>
-    <property name="title">Mail</property>
+    <property name="title" translatable="yes">Mail</property>
     <child>
       <object class="GtkMenuButton" id="app_menu_button">
         <property name="visible">True</property>
