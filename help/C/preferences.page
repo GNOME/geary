@@ -28,13 +28,6 @@
       show the first few lines of each message.</p>
     </item>
     <item>
-      <title><gui>Use three pane view</gui></title>
-      <p>Show the folder list, the conversation list, and the messages
-      side-by-side-by-side in three panes.  If not selected, the
-      folder list and conversation list will be stacked vertically in
-      a single pane.</p>
-    </item>
-    <item>
       <title><gui>Use single key email shortcuts</gui></title>
       <p>Enable keyboard shortcuts for email actions that do not
       require pressing <key>Ctrl</key>. These match the shortcuts used
