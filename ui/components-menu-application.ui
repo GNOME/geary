@@ -13,7 +13,7 @@
       <item>
         <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
         <attribute name="action">win.show-help-overlay</attribute>
-        <attribute name="accel">&lt;Primary&gt;F1</attribute>
+        <attribute name="accel">&lt;Primary&gt;question</attribute>
         <attribute name="hidden-when">action-missing</attribute>
       </item>
       <item>
