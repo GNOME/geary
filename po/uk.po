@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-02-04 17:26+0000\n"
-"PO-Revision-Date: 2023-02-04 19:44+0200\n"
+"POT-Creation-Date: 2023-02-12 12:29+0000\n"
+"PO-Revision-Date: 2023-02-12 20:42+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -127,12 +127,10 @@ msgstr "Редактор форматованого тексту у Geary"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
-#| msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;електронк"
-"а;"
-"імап;аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
+"Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;"
+"електронка;імап;аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
@@ -396,7 +394,7 @@ msgid "Account not created: %s"
 msgstr "Обліковий запис не створено: %s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Далі"
 
@@ -477,7 +475,7 @@ msgstr "smtp.ukrmail.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
+#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Вилучити обліковий запис"
 
@@ -638,12 +636,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2287
+#: src/client/application/application-main-window.vala:2289
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2272
 msgid "Redo"
 msgstr "Повторити"
 
@@ -2906,11 +2904,19 @@ msgstr "(без теми)"
 msgid "Add an account"
 msgstr "Додати обліковий запис"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:14
+#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "Назад"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Отримання"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Надсилання"
 
@@ -2922,24 +2928,24 @@ msgstr "Змінити обліковий запис"
 msgid "Account Name"
 msgstr "Назва облікового запису"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "Адреси ел. пошти"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "Підпис"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "Параметри"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Параметри сервера"
 
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:243
 msgid "Remove this account from Geary"
 msgstr "Вилучити цей обліковий запис з Geary"
 
@@ -3225,21 +3231,21 @@ msgstr "Переслати"
 msgid "_Archive"
 msgstr "_Архівувати"
 
-#: ui/components-headerbar-conversation-list.ui:19
-#: ui/components-headerbar-conversation.ui:22
-msgid "Back"
-msgstr "Назад"
+#: ui/components-headerbar-application.ui:7
+#| msgid "All Mail"
+msgid "Mail"
+msgstr "Пошта"
 
-#: ui/components-headerbar-conversation-list.ui:36
+#: ui/components-headerbar-conversation-list.ui:37
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Нове повідомлення"
 
-#: ui/components-headerbar-conversation-list.ui:52
+#: ui/components-headerbar-conversation-list.ui:53
 msgid "Toggle search bar"
 msgstr "Перемкнути панель пошуку"
 
-#: ui/components-headerbar-conversation.ui:59
+#: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
 msgstr "Увімкнути або вимкнути смужку пошуку"
 
