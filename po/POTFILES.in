@@ -453,6 +453,7 @@ ui/components-attachment-pane.ui
 ui/components-attachment-pane-menus.ui
 ui/components-attachment-view.ui
 ui/components-conversation-actions.ui
+ui/components-headerbar-application.ui
 ui/components-headerbar-conversation-list.ui
 ui/components-headerbar-conversation.ui
 ui/components-in-app-notification.ui
