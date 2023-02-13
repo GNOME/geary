@@ -14,16 +14,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-02-04 17:26+0000\n"
-"PO-Revision-Date: 2023-02-10 18:36+0300\n"
+"POT-Creation-Date: 2023-02-12 12:29+0000\n"
+"PO-Revision-Date: 2023-02-13 21:26+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
-"Language-Team: Turkish <gnometurk@gnome.org>\n"
+"Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.1.1\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"X-Generator: Gtranslator 42.0\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -124,7 +124,8 @@ msgstr "Geary zengin metin oluşturucusunu gösteriyor"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Posta;E-posta;eposta;Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr ""
+"Posta;E-posta;eposta;Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
@@ -377,7 +378,7 @@ msgid "Account not created: %s"
 msgstr "Hesap oluşturulmadı: %s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Sonraki"
 
@@ -458,7 +459,7 @@ msgstr "smtp.ornek.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
+#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Hesabı Kaldır"
 
@@ -480,7 +481,7 @@ msgstr ""
 #: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
-msgstr "_İptal et"
+msgstr "İptal _Et"
 
 #. Translators: Label in the account editor for the user's
 #. custom name for an account.
@@ -615,12 +616,12 @@ msgid_plural "%d days back"
 msgstr[0] "%d gün öncesinden"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2287
+#: src/client/application/application-main-window.vala:2289
 msgid "Undo"
 msgstr "Geri Al"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2272
 msgid "Redo"
 msgstr "Yinele"
 
@@ -2263,7 +2264,7 @@ msgstr "Birleştir"
 #. / mail-merge plugin
 #: src/client/plugin/mail-merge/mail-merge.vala:383
 msgid "Insert field"
-msgstr "Alan yerleştir"
+msgstr "Alan ekle"
 
 #. / Translators: File chooser filer label
 #: src/client/plugin/mail-merge/mail-merge.vala:402
@@ -2338,26 +2339,26 @@ msgstr "%H:%M"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:79
 msgid "%b %-e"
-msgstr "%b %-e"
+msgstr "%-e %b"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:84
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr "%-e %B %Y, %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:87
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%B %-e, %Y %-H:%M"
+msgstr "%-e %B %Y, %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:90
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr "%-e %B %Y, %-l:%M %P"
 
 #: src/client/util/util-date.vala:159
 msgid "Now"
@@ -2367,13 +2368,13 @@ msgstr "Şimdi"
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
-msgstr[0] "%dd önce"
+msgstr[0] "%d dk. önce"
 
 #: src/client/util/util-date.vala:166
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
-msgstr[0] "%dsa önce"
+msgstr[0] "%d sa. önce"
 
 #: src/client/util/util-date.vala:173
 msgid "Yesterday"
@@ -2763,11 +2764,19 @@ msgstr "(konu yok)"
 msgid "Add an account"
 msgstr "Hesap ekle"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:14
+#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "Geri"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Alım"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Gönderiliyor"
 
@@ -2779,24 +2788,24 @@ msgstr "Hesabı Düzenle"
 msgid "Account Name"
 msgstr "Hesap Adı"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "E-posta adresleri"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "İmza"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "Ayarlar"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Sunucu Ayarları"
 
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:243
 msgid "Remove this account from Geary"
 msgstr "Bu hesabı Gearyʼden kaldır"
 
@@ -2850,11 +2859,11 @@ msgstr "Çizgili metin"
 
 #: ui/composer-editor.ui:185
 msgid "Insert bulleted list"
-msgstr "Sırasız liste yerleştir"
+msgstr "Sırasız liste ekle"
 
 #: ui/composer-editor.ui:207
 msgid "Insert numbered list"
-msgstr "Sıralı liste yerleştir"
+msgstr "Sıralı liste ekle"
 
 #: ui/composer-editor.ui:237
 msgid "Indent or quote text"
@@ -2894,11 +2903,11 @@ msgstr "Yazı tipi boyutunu değiştir"
 
 #: ui/composer-editor.ui:402
 msgid "Insert or update text link"
-msgstr "Metin bağlantısı ekle veya güncelle"
+msgstr "Metin bağlantısı ekle ya da güncelle"
 
 #: ui/composer-editor.ui:424
 msgid "Insert an image"
-msgstr "Resim yerleştir"
+msgstr "Resim ekle"
 
 #: ui/composer-editor.ui:463
 msgid "Undo last edit"
@@ -3013,7 +3022,7 @@ msgstr "Kaydet ve Kapat"
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:38
 msgid "Insert the new link with this URL"
-msgstr "Bu URL ile yeni bağlantıyı yerleştir"
+msgstr "Yeni bağlantıyı bu URL ile ekle"
 
 #: ui/composer-link-popover.ui:39
 msgid "Add"
@@ -3080,21 +3089,20 @@ msgstr "Yönlendir"
 msgid "_Archive"
 msgstr "_Arşivle"
 
-#: ui/components-headerbar-conversation-list.ui:19
-#: ui/components-headerbar-conversation.ui:22
-msgid "Back"
-msgstr "Geri"
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "E-Posta"
 
-#: ui/components-headerbar-conversation-list.ui:36
+#: ui/components-headerbar-conversation-list.ui:37
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "İleti Oluştur"
 
-#: ui/components-headerbar-conversation-list.ui:52
+#: ui/components-headerbar-conversation-list.ui:53
 msgid "Toggle search bar"
 msgstr "Arama çubuğunu aç"
 
-#: ui/components-headerbar-conversation.ui:59
+#: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
 msgstr "Bulma çubuğunu aç"
 
@@ -3107,8 +3115,8 @@ msgid ""
 msgstr ""
 "Sorun ciddi veya sürekliyse, lütfen bu ayrıntıları kaydedip ve kopyalayıp <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/Contact\">iletişim kanallarına</a> "
-"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
-"\">yeni hata bildirimi</a>nde bulunun."
+"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">yeni hata bildirimi</a>nde bulunun."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3230,11 +3238,11 @@ msgstr "Tümüne _Yanıt Ver"
 #. read.
 #: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
-msgstr "Okunmuş olarak _imle"
+msgstr "_Okundu Olarak İmle"
 
 #: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
-msgstr "Okunmadı olarak _imle"
+msgstr "_Okunmadı Olarak İmle"
 
 #. Translators: Menu item to mark all messages in a
 #. conversation from this one as unread.
@@ -3256,7 +3264,7 @@ msgstr "_İletiyi sil…"
 #. Translators: Menu item to view the source for a message
 #: ui/conversation-email-menus.ui:69
 msgid "_View Source"
-msgstr "_Kaynağı İncele"
+msgstr "_Kaynağı Görüntüle"
 
 #: ui/conversation-message-link-popover.ui:49
 msgid "But actually goes to:"
@@ -3591,12 +3599,12 @@ msgstr "Biçimlendirmeyi kaldır"
 #: ui/gtk/help-overlay.ui:327
 msgctxt "shortcut window"
 msgid "Insert an image"
-msgstr "Resim yerleştir"
+msgstr "Resim ekle"
 
 #: ui/gtk/help-overlay.ui:334
 msgctxt "shortcut window"
 msgid "Insert a link"
-msgstr "Bağlantı yerleştir"
+msgstr "Bağlantı ekle"
 
 #: ui/gtk/help-overlay.ui:346
 msgid "Application Shortcuts"
@@ -3650,7 +3658,7 @@ msgstr "Sonraki/önceki konuşmayı seç"
 #: ui/gtk/help-overlay.ui:417
 msgctxt "shortcut window"
 msgid "Focus next/previous message"
-msgstr "Önceki/sonraki iletiye odaklan"
+msgstr "Sonraki/önceki iletiye odaklan"
 
 #: ui/gtk/help-overlay.ui:429
 msgid "Single-key Shortcuts"
@@ -3686,6 +3694,3 @@ msgstr "Parolayı _anımsa"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Kimlik Doğrula"
-
-#~ msgid "Online accounts are missing"
-#~ msgstr "Çevrim içi hesaplar eksik"
