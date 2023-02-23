@@ -22,7 +22,8 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
         WebView.init_web_context(
             this.config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
-            File.new_for_path("/tmp") // XXX use something better here
+            File.new_for_path("/tmp"), // XXX use something better here
+            false // https://bugs.webkit.org/show_bug.cgi?id=213174
         );
         try {
             WebView.load_resources(GLib.File.new_for_path("/tmp"));
