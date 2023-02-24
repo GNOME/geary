@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-02-04 17:26+0000\n"
-"PO-Revision-Date: 2023-02-10 14:22+0200\n"
+"POT-Creation-Date: 2023-02-12 12:29+0000\n"
+"PO-Revision-Date: 2023-02-24 12:01+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: Hebrew <>\n"
 "Language: he\n"
@@ -378,7 +378,7 @@ msgid "Account not created: %s"
 msgstr "לא נוצר חשבון: ‏%s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "ה_בא"
 
@@ -459,7 +459,7 @@ msgstr "smtp.example.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
+#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "הסרת חשבון"
 
@@ -619,12 +619,12 @@ msgstr[2] "‏%d ימים אחורה"
 msgstr[3] "‏%d ימים אחורה"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2287
+#: src/client/application/application-main-window.vala:2289
 msgid "Undo"
 msgstr "ביטול"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2272
 msgid "Redo"
 msgstr "ביצוע חוזר"
 
@@ -2859,11 +2859,19 @@ msgstr "(ללא נושא)"
 msgid "Add an account"
 msgstr "הוספת חשבון"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:14
+#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "אחורה"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "קבלה"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "שליחה"
 
@@ -2875,24 +2883,24 @@ msgstr "עריכת חשבון"
 msgid "Account Name"
 msgstr "שם חשבון"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "כתובת דוא״ל"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "חתימה"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "הגדרות"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "הגדרות שרת"
 
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:243
 msgid "Remove this account from Geary"
 msgstr "הסרת חשבון זה מ־Geary"
 
@@ -3176,21 +3184,20 @@ msgstr "העברה"
 msgid "_Archive"
 msgstr "תיוק ב_ארכיון"
 
-#: ui/components-headerbar-conversation-list.ui:19
-#: ui/components-headerbar-conversation.ui:22
-msgid "Back"
-msgstr "אחורה"
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "דואר"
 
-#: ui/components-headerbar-conversation-list.ui:36
+#: ui/components-headerbar-conversation-list.ui:37
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "יצירת הודעה"
 
-#: ui/components-headerbar-conversation-list.ui:52
+#: ui/components-headerbar-conversation-list.ui:53
 msgid "Toggle search bar"
 msgstr "הצגת סרגל החיפוש"
 
-#: ui/components-headerbar-conversation.ui:59
+#: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
 msgstr "הצגת סרגל החיפוש"
 
