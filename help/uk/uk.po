@@ -2,12 +2,12 @@
 # Copyright (C) 2020 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
 #
-# Yuri Chornoivan <yurchor@ukr.net>, 2020.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
-"POT-Creation-Date: 2020-06-25 02:39+0000\n"
-"PO-Revision-Date: 2020-06-25 09:10+0300\n"
+"POT-Creation-Date: 2023-02-28 17:44+0000\n"
+"PO-Revision-Date: 2023-02-28 21:54+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.07.70\n"
+"X-Generator: Lokalize 20.12.0\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -235,21 +235,22 @@ msgid ""
 "email organised by moving old and replied-to email out of the way."
 msgstr ""
 "Geary надає вам змогу архівувати повідомлення, якщо на вашому сервері "
-"передбачено підтримку архівування. Натискання кнопки <gui style=\"button"
-"\">Архівувати</gui> на панелі інструментів пересуває спілкування з поточної "
-"теки до теки <gui>Архів</gui> на більшості служб електронної пошти або до "
-"теки <gui>Уся пошта</gui> на GMail. Архівування допоможе вам упорядкувати "
-"повідомлення, усунувши старі і оброблені повідомлення із робочих тек."
+"передбачено підтримку архівування. Натискання кнопки <gui "
+"style=\"button\">Архівувати</gui> на панелі інструментів пересуває "
+"спілкування з поточної теки до теки <gui>Архів</gui> на більшості служб "
+"електронної пошти або до теки <gui>Уся пошта</gui> на GMail. Архівування "
+"допоможе вам упорядкувати повідомлення, усунувши старі і оброблені "
+"повідомлення із робочих тек."
 
 #. (itstool) path: page/p
 #: C/archive.page:17
 msgid ""
 "To move conversations to the <gui>Trash</gui> folder, select them and click "
 "the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
-"conversations, hold down <key>Shift</key> and click the <gui style=\"button"
-"\">Delete</gui> button that appears in place of the <gui>Trash</gui> button, "
-"or open the conversation in the <gui>Trash</gui> folder and click <gui style="
-"\"button\">Delete</gui> there."
+"conversations, hold down <key>Shift</key> and click the <gui "
+"style=\"button\">Delete</gui> button that appears in place of the "
+"<gui>Trash</gui> button, or open the conversation in the <gui>Trash</gui> "
+"folder and click <gui style=\"button\">Delete</gui> there."
 msgstr ""
 "Щоб пересунути спілкування до теки <gui>Смітник</gui>, позначте його і "
 "натисніть кнопку <gui style=\"button\">Смітник</gui> на панелі інструментів. "
@@ -273,8 +274,8 @@ msgid ""
 "the folder, find the message, then move it back to your <gui>Inbox</gui>"
 msgstr ""
 "Зауважте, що ви завжди можете скасувати архівування або пересування "
-"повідомлення до смітника, якщо передумаєте. Натисніть кнопку <gui style="
-"\"button\">Скасувати</gui> на контекстні панелі сповіщення, яке буде "
+"повідомлення до смітника, якщо передумаєте. Натисніть кнопку <gui "
+"style=\"button\">Скасувати</gui> на контекстні панелі сповіщення, яке буде "
 "показано, або натисніть комбінацію клавіш <keyseq><key>Ctrl</key><key>Z</"
 "key></keyseq>, або відкрийте теку, знайдіть повідомлення, а потім пересуньте "
 "його назад до вашої теки <gui>Вхідні</gui>"
@@ -282,21 +283,22 @@ msgstr ""
 #. (itstool) path: page/p
 #: C/archive.page:34
 msgid ""
-"While both <gui style=\"button\">Archive</gui> and <gui style=\"button"
-"\">Trash</gui> removes conversations from your <gui>Inbox</gui> folder, "
-"there is an important difference. Clicking <gui style=\"button\">Archive</"
-"gui> will ensure your conversations are kept so you can find them again "
-"later. Clicking <gui style=\"button\">Trash</gui> will cause conversations "
-"to be hidden from <link xref=\"search\"/>, and they will likely be deleted "
-"in the future."
+"While both <gui style=\"button\">Archive</gui> and <gui "
+"style=\"button\">Trash</gui> removes conversations from your <gui>Inbox</"
+"gui> folder, there is an important difference. Clicking <gui "
+"style=\"button\">Archive</gui> will ensure your conversations are kept so "
+"you can find them again later. Clicking <gui style=\"button\">Trash</gui> "
+"will cause conversations to be hidden from <link xref=\"search\"/>, and they "
+"will likely be deleted in the future."
 msgstr ""
-"Хоча обидві кнопки <gui style=\"button\">Вилучити</gui> і <gui style=\"button"
-"\">Смітник</gui> вилучають спілкування з вашої теки <gui>Вхідні</gui>, є "
-"істотна відмінність. Натискання кнопки <gui style=\"button\">Архівувати</"
-"gui> зберігає ваш обмін повідомленнями — у ньому згодом можна виконувати "
-"пошук. Натискання кнопки <gui style=\"button\">Смітник</gui> призведе до "
-"приховування повідомлень з можливості <link xref=\"search\"/>, ці "
-"повідомлення, ймовірно, буде надалі вилучено."
+"Хоча обидві кнопки <gui style=\"button\">Вилучити</gui> і <gui "
+"style=\"button\">Смітник</gui> вилучають спілкування з вашої теки "
+"<gui>Вхідні</gui>, є істотна відмінність. Натискання кнопки <gui "
+"style=\"button\">Архівувати</gui> зберігає ваш обмін повідомленнями — у "
+"ньому згодом можна виконувати пошук. Натискання кнопки <gui "
+"style=\"button\">Смітник</gui> призведе до приховування повідомлень з "
+"можливості <link xref=\"search\"/>, ці повідомлення, ймовірно, буде надалі "
+"вилучено."
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
@@ -310,19 +312,14 @@ msgstr "Отримання підтримки"
 
 #. (itstool) path: section/p
 #: C/bugs.page:15
-#| msgid ""
-#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
-#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
-#| "can be fixed."
 msgid ""
 "If you are having trouble using Geary, please <link href=\"https://wiki."
 "gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
 "about the problem."
 msgstr ""
-"Якщо у вас виникають проблеми у користуванні Geary, будь ласка, <link"
-" href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">зв'яжіться</link> зі спільнотою користувачів"
-" Geary щодо вашої проблеми."
+"Якщо у вас виникають проблеми у користуванні Geary, будь ласка, <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">зв'яжіться</link> зі "
+"спільнотою користувачів Geary щодо вашої проблеми."
 
 #. (itstool) path: section/title
 #: C/bugs.page:21
@@ -331,20 +328,15 @@ msgstr "Як повідомити про вади"
 
 #. (itstool) path: section/p
 #: C/bugs.page:23
-#| msgid ""
-#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
-#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
-#| "can be fixed."
 msgid ""
-"If you suspect you have found a bug in Geary, please follow the <link href="
-"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"If you suspect you have found a bug in Geary, please follow the <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
 "guidelines</link> so the problem can be diagnosed and fixed."
 msgstr ""
-"Якщо ви вважаєте, що виявили ваду у Geary, будь ласка, скористайтеся <link"
-" href="
-"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">настановами щодо"
-" звітування про вади</link>, щоб розробники могли виконати діагностику та"
-" виправлення вади."
+"Якщо ви вважаєте, що виявили ваду у Geary, будь ласка, скористайтеся <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">настановами щодо "
+"звітування про вади</link>, щоб розробники могли виконати діагностику та "
+"виправлення вади."
 
 #. (itstool) path: section/p
 #: C/bugs.page:28
@@ -403,10 +395,10 @@ msgid ""
 "key><key>I</key></keyseq> to open it, select and save any relevant log "
 "files, and attach them to the bug report."
 msgstr ""
-"Доступ до файлів журналу можна отримати за допомогою Інспектора Geary:"
-" натисніть комбінацію клавіш <keyseq><key>Alt</key><key>I</key></keyseq>, щоб"
-" відкрити його вікно, виберіть і збережіть потрібні вам файли журналу, а"
-" потім долучіть їх до звіту щодо вади."
+"Доступ до файлів журналу можна отримати за допомогою Інспектора Geary: "
+"натисніть комбінацію клавіш <keyseq><key>Alt</key><key>I</key></keyseq>, щоб "
+"відкрити його вікно, виберіть і збережіть потрібні вам файли журналу, а "
+"потім долучіть їх до звіту щодо вади."
 
 #. (itstool) path: page/title
 #: C/contributing.page:10
@@ -451,36 +443,53 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/contributing.page:23
-#| msgid ""
-#| "<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
-#| "discussion</link>—on the mailing list or IRC channel"
 msgid ""
 "See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
 "link> for more information and options for contributing financially to "
 "Geary's development."
 msgstr ""
-"Щоб дізнатися більше про можливості та варіанти фінансової підтримки розробки"
-" Geary, ознайомтеся зі <link href=\"https://wiki.gnome.org/Apps/Geary/Contribu"
-"te\">сторінкою нашої вікі</link>."
+"Щоб дізнатися більше про можливості та варіанти фінансової підтримки "
+"розробки Geary, ознайомтеся зі <link href=\"https://wiki.gnome.org/Apps/"
+"Geary/Contribute\">сторінкою нашої вікі</link>."
+
+#. (itstool) path: info/title
+#: C/index.page:7
+#| msgid "Using Geary"
+msgctxt "link:trail"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:8
+#| msgid "Using Geary"
+msgctxt "text"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:9
+#| msgid "Using Geary"
+msgctxt "link"
+msgid "Geary"
+msgstr "Geary"
 
 #. (itstool) path: page/title
-#: C/index.page:6
+#: C/index.page:12
 msgid "<_:media-1/> <span>Geary</span>"
 msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:18
 msgid "Introduction"
 msgstr "Вступ"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:22
 msgid "Using Geary"
 msgstr "Користування Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:20
-#| msgid "Contributing and bug reporting"
+#: C/index.page:26
 msgid "Contributing and getting support"
 msgstr "Участь у розробці та отримання підтримки"
 
@@ -592,8 +601,8 @@ msgid ""
 "page</link>."
 msgstr ""
 "Щоб дізнатися більше про можливості, над якими ми працюємо, та майбутнє "
-"Geary, будь ласка, відвідайте <link href=\"https://wiki.gnome.org/Apps/Geary"
-"\">сторінку вікі</link> Geary."
+"Geary, будь ласка, відвідайте <link href=\"https://wiki.gnome.org/Apps/"
+"Geary\">сторінку вікі</link> Geary."
 
 #. (itstool) path: page/title
 #. (itstool) path: section/title
@@ -812,15 +821,15 @@ msgstr "Параметри"
 #. (itstool) path: page/p
 #: C/preferences.page:12
 msgid ""
-"Geary allows you to customise how it works via its <gui style=\"group"
-"\">Preferences</gui> window. To open the window, select <gui style=\"menuitem"
-"\">Preferences</gui> from the application menu on the main window's toolbar. "
-"You can change the following options:"
+"Geary allows you to customise how it works via its <gui "
+"style=\"group\">Preferences</gui> window. To open the window, select <gui "
+"style=\"menuitem\">Preferences</gui> from the application menu on the main "
+"window's toolbar. You can change the following options:"
 msgstr ""
-"Роботу Geary можна налаштувaти за допомогою вікна <gui style=\"group"
-"\">Параметри</gui>. Щоб відкрити повідомлення, виберіть пункт <gui style="
-"\"menuitem\">Параметри</gui> з меню програми на панелі інструментів "
-"головного вікна програми. Ви можете змінити такі параметри:"
+"Роботу Geary можна налаштувaти за допомогою вікна <gui "
+"style=\"group\">Параметри</gui>. Щоб відкрити повідомлення, виберіть пункт "
+"<gui style=\"menuitem\">Параметри</gui> з меню програми на панелі "
+"інструментів головного вікна програми. Ви можете змінити такі параметри:"
 
 #. (itstool) path: item/title
 #: C/preferences.page:19
@@ -855,43 +864,27 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-msgid "<gui>Use three pane view</gui>"
-msgstr "<gui>Використовувати ієрархію</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:32
-msgid ""
-"Show the folder list, the conversation list, and the messages side-by-side-"
-"by-side in three panes. If not selected, the folder list and conversation "
-"list will be stacked vertically in a single pane."
-msgstr ""
-"Показати список повідомлень, список повідомлень і повідомлення паралельно на "
-"трьох панелях. Якщо пункт не позначено, список тек і список спілкувань буде "
-"показано один над одним на одній панелі."
-
-#. (itstool) path: item/title
-#: C/preferences.page:38
 msgid "<gui>Use single key email shortcuts</gui>"
 msgstr "<gui>Використовувати єдині клавіатурні скорочення</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:39
+#: C/preferences.page:32
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
-"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
-"\"shortcuts\"/> for details."
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"shortcuts\"/> for details."
 msgstr ""
 "Увімкнути ті клавіатурні скорочення для дій з повідомленням, які не "
 "потребують натискання клавіші <key>Ctrl</key>. Ці клавіатурні скорочення "
 "використовуються у GMail. Докладніше про це тут: <link xref=\"shortcuts\"/>."
 
 #. (itstool) path: item/title
-#: C/preferences.page:44
+#: C/preferences.page:37
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Шукати нові повідомлення під час закриття</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:45
+#: C/preferences.page:38
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -936,8 +929,8 @@ msgstr ""
 #: C/search.page:19
 msgid ""
 "Keywords that match your search are highlighted in the message view. Geary "
-"will match different forms of the same word, for example searching for \"walk"
-"\" will also match \"walking\" and \"walked.\""
+"will match different forms of the same word, for example searching for "
+"\"walk\" will also match \"walking\" and \"walked.\""
 msgstr ""
 "Ключові слова, які збігатимуться із критерієм пошуку, буде підсвічено на "
 "панелі повідомлень. Крім того, Geary встановлюватиме відповідність із "
@@ -962,7 +955,8 @@ msgstr "<input>attachment:<var>назва_файла</var></input>"
 
 #. (itstool) path: td/p
 #: C/search.page:28
-msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgid ""
+"Finds messages with attachments whose name matches <var>filename</var>."
 msgstr ""
 "Шукає повідомлення із долученнями, у яких назва файла збігається з рядком "
 "<var>назва_файла</var>."
@@ -1095,8 +1089,8 @@ msgid ""
 msgstr ""
 "У Geary передбачено клавіатурні скорочення для типових операцій. "
 "Скористайтеся вбудованою довідкою для ознайомлення із повним списком. Щоб "
-"відкрити довідку з клавіатурних скорочень, виберіть пункт <gui style="
-"\"menuitem\">Клавіатурні скорочення</gui> у меню програми на панелі "
+"відкрити довідку з клавіатурних скорочень, виберіть пункт <gui "
+"style=\"menuitem\">Клавіатурні скорочення</gui> у меню програми на панелі "
 "інструментів головного вікна або скористайтеся клавіатурними скороченнями із "
 "наведеного нижче списку."
 
@@ -1111,7 +1105,8 @@ msgstr ""
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:24
-msgid "Display this online help manual"
+#| msgid "Display this online help manual"
+msgid "Display this help manual"
 msgstr "Показати цей підручник"
 
 #. (itstool) path: td/p
@@ -1250,12 +1245,13 @@ msgid ""
 msgstr ""
 "Щоб розпочати нове спілкування електронною поштою, натисніть кнопку <gui "
 "style=\"button\">Нове повідомлення</gui> на панелі інструментів. Введіть "
-"адресу електронної пошти отримувача повідомлення у поле <gui style=\"input"
-"\">Кому</gui> і тему повідомлення у поле <gui style=\"input\">Тема</gui>. "
-"Далі, ви можете ввести повідомлення до текстового поля, яке розташовано під "
-"цими двома полями. Коли повідомлення буде готове до надсилання, натисніть "
-"кнопку <gui style=\"button\">Надіслати</gui> або натисніть комбінацію клавіш "
-"<keyseq><key>Ctrl</key><key>Enter</key></keyseq>, щоб його надіслати."
+"адресу електронної пошти отримувача повідомлення у поле <gui "
+"style=\"input\">Кому</gui> і тему повідомлення у поле <gui "
+"style=\"input\">Тема</gui>. Далі, ви можете ввести повідомлення до "
+"текстового поля, яке розташовано під цими двома полями. Коли повідомлення "
+"буде готове до надсилання, натисніть кнопку <gui style=\"button\">Надіслати</"
+"gui> або натисніть комбінацію клавіш <keyseq><key>Ctrl</key><key>Enter</"
+"key></keyseq>, щоб його надіслати."
 
 #. (itstool) path: note/title
 #: C/write.page:23
@@ -1266,8 +1262,8 @@ msgstr "Скасовування надсилання"
 #: C/write.page:24
 msgid ""
 "When sending an email, Geary will wait 5 seconds before delivering the "
-"message. During this time, you will be able to click <gui style=\"button"
-"\">Undo</gui> on the pop-up notification that appears or type "
+"message. During this time, you will be able to click <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or type "
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
 "more changes to it."
 msgstr ""
@@ -1282,22 +1278,22 @@ msgstr ""
 #: C/write.page:32
 msgid ""
 "To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
-"and <gui style=\"input\">Reply-to</gui> fields, click the <gui style=\"input"
-"\">More options</gui> button at the end of the <gui style=\"input\">To</gui> "
-"field. Cc allows you to send a copy of the email to other, secondary "
-"recipients. Bcc is similar, but the Bcc list is hidden from recipients. The "
-"Reply-To field specifies an email address to reply to, if recipients should "
-"reply to a different email address than the sender's."
+"and <gui style=\"input\">Reply-to</gui> fields, click the <gui "
+"style=\"input\">More options</gui> button at the end of the <gui "
+"style=\"input\">To</gui> field. Cc allows you to send a copy of the email to "
+"other, secondary recipients. Bcc is similar, but the Bcc list is hidden from "
+"recipients. The Reply-To field specifies an email address to reply to, if "
+"recipients should reply to a different email address than the sender's."
 msgstr ""
-"Щоб програма показала поля <gui style=\"input\">Копія</gui>, <gui style="
-"\"input\">Потайна копія</gui> та <gui style=\"input\">Відповідати</gui>, "
-"натисніть кнопку <gui style=\"input\">Додаткові параметри</gui> у кінці поля "
-"<gui style=\"input\">Кому</gui>. За допомогою поля «Копія» ви можете "
-"надіслати копію повідомлення іншим, вторинним адресатам. Поле «Потайна "
-"копія» надає змогу зробити те саме, але із приховуванням адрес додаткових "
-"кореспондентів. У полі «Відповідати» можна вказати адресу, на яку слід "
-"надсилати відповіді на повідомлення, якщо отримувачі мають відповідати на "
-"адресу, яка відрізняється від адреси електронної пошти відправника."
+"Щоб програма показала поля <gui style=\"input\">Копія</gui>, <gui "
+"style=\"input\">Потайна копія</gui> та <gui style=\"input\">Відповідати</"
+"gui>, натисніть кнопку <gui style=\"input\">Додаткові параметри</gui> у "
+"кінці поля <gui style=\"input\">Кому</gui>. За допомогою поля «Копія» ви "
+"можете надіслати копію повідомлення іншим, вторинним адресатам. Поле "
+"«Потайна копія» надає змогу зробити те саме, але із приховуванням адрес "
+"додаткових кореспондентів. У полі «Відповідати» можна вказати адресу, на яку "
+"слід надсилати відповіді на повідомлення, якщо отримувачі мають відповідати "
+"на адресу, яка відрізняється від адреси електронної пошти відправника."
 
 #. (itstool) path: section/p
 #: C/write.page:41
@@ -1315,17 +1311,17 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:46
 msgid ""
-"To reply to the currently selected conversation, click one of the <gui style="
-"\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui style="
-"\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
-"forwarded email composer for the latest message in the conversation."
+"To reply to the currently selected conversation, click one of the <gui "
+"style=\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui "
+"style=\"button\">Forward</gui> toolbar buttons. This will open a new reply "
+"or forwarded email composer for the latest message in the conversation."
 msgstr ""
 "Щоб відповісти до поточного позначеного спілкування, натисніть на панелі "
 "інструментів одну з таких кнопок: <gui style=\"button\">Відповісти</gui>, "
-"<gui style=\"button\">Відповісти всім</gui> або <gui style=\"button"
-"\">Переспрямувати</gui>. У відповідь буде відкритого вікно редактора "
-"відповіді або переспрямованого повідомлення для останнього повідомлення у "
-"спілкуванні."
+"<gui style=\"button\">Відповісти всім</gui> або <gui "
+"style=\"button\">Переспрямувати</gui>. У відповідь буде відкритого вікно "
+"редактора відповіді або переспрямованого повідомлення для останнього "
+"повідомлення у спілкуванні."
 
 #. (itstool) path: section/p
 #: C/write.page:52
@@ -1333,17 +1329,17 @@ msgid ""
 "When replying, the message being replied to will be quoted and copied into "
 "the footer of the new reply. This can be deleted before typing a reply by "
 "pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
-"by selecting the desired text in a message and clicking <gui style=\"button"
-"\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
-"text will be quoted."
+"by selecting the desired text in a message and clicking <gui "
+"style=\"button\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only "
+"the selected text will be quoted."
 msgstr ""
 "При відповіді на повідомлення початкове повідомлення буде процитовано і "
 "скопійовано у нижню частину відповіді. Цю частину повідомлення можна "
 "вилучити до введення відповіді натисканням клавіші <key>Backspace</key>. "
 "Крім того, текст можна вибірково процитувати позначенням бажаного фрагмента "
-"тексту у повідомленні із наступним натисканням кнопки <gui style=\"button"
-"\">Відповісти</gui> або <gui style=\"button\">Відповісти усім</gui> — "
-"процитовано буде лише позначений фрагмент тексту."
+"тексту у повідомленні із наступним натисканням кнопки <gui "
+"style=\"button\">Відповісти</gui> або <gui style=\"button\">Відповісти усім</"
+"gui> — процитовано буде лише позначений фрагмент тексту."
 
 #. (itstool) path: section/p
 #: C/write.page:60
@@ -1388,18 +1384,18 @@ msgstr ""
 "допомогою натискання кнопок <gui style=\"button\">Вставити неупорядкований "
 "список</gui> та <gui style=\"button\">Вставити упорядкований список</gui> на "
 "панелі інструментів форматування. Рівень відступів у списку можна "
-"скоригувати за допомогою кнопок панелі інструментів форматування <gui style="
-"\"button\">Додати відступи або цитування тексту</gui> та <gui style=\"button"
-"\">Скасувати відступи або цитування тексту</gui>."
+"скоригувати за допомогою кнопок панелі інструментів форматування <gui "
+"style=\"button\">Додати відступи або цитування тексту</gui> та <gui "
+"style=\"button\">Скасувати відступи або цитування тексту</gui>."
 
 #. (itstool) path: section/p
 #: C/write.page:81
 msgid ""
-"Images can be inserted into rich text messages by clicking the <gui style="
-"\"button\">Insert Image</gui> button on the formatting toolbar and selecting "
-"the image to attach, by dragging an image from the <gui>Files</gui> "
-"application into the email body and then dropping it, or by pasting an image "
-"that has been copied to the clipboard from another application."
+"Images can be inserted into rich text messages by clicking the <gui "
+"style=\"button\">Insert Image</gui> button on the formatting toolbar and "
+"selecting the image to attach, by dragging an image from the <gui>Files</"
+"gui> application into the email body and then dropping it, or by pasting an "
+"image that has been copied to the clipboard from another application."
 msgstr ""
 "Зображення можна вставити до повідомлення із форматуванням натисканням "
 "кнопки <gui style=\"button\">Вставити зображення</gui> на панелі "
@@ -1429,12 +1425,12 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:96
 msgid ""
-"A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts\"/> for details."
+"A number of keyboard shortcuts are available in the composer; see <link "
+"xref=\"shortcuts\"/> for details."
 msgstr ""
 "У редакторі повідомлень можна скористатися декількома клавіатурними "
-"скороченнями. Докладніший опис можна знайти у розділі <link xref=\"shortcuts"
-"\"/>."
+"скороченнями. Докладніший опис можна знайти у розділі <link "
+"xref=\"shortcuts\"/>."
 
 #. (itstool) path: section/p
 #: C/write.page:99
@@ -1468,21 +1464,22 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:112
 msgid ""
-"To select languages for spell-checking, click the <gui style=\"button"
-"\">Spell check</gui> button on the formatting toolbar, and the language "
-"selection popover will appear. Click on a language in the list to toggle it "
-"on or off, and click the <gui style=\"button\">-</gui> button to remove it "
-"from the list. If a language does not appear in the list, search for it by "
-"typing its name in the search box, then click the <gui style=\"button\">+</"
-"gui> button to add it."
+"To select languages for spell-checking, click the <gui "
+"style=\"button\">Spell check</gui> button on the formatting toolbar, and the "
+"language selection popover will appear. Click on a language in the list to "
+"toggle it on or off, and click the <gui style=\"button\">-</gui> button to "
+"remove it from the list. If a language does not appear in the list, search "
+"for it by typing its name in the search box, then click the <gui "
+"style=\"button\">+</gui> button to add it."
 msgstr ""
-"Щоб вибрати мови для перевірки правопису, натисніть кнопку <gui style="
-"\"button\">Перевірка правопису</gui> на панелі інструментів форматування. У "
-"відповідь буде відкрито контекстну панель вибору мови. Натисніть пункт мови "
-"у списку, щоб увімкнути або вимкнути перевірку правопису цією мовою. "
-"Натисніть кнопку <gui style=\"button\">-</gui>, щоб вилучити мову зі списку. "
-"Якщо пункту мови немає у списку, пошукайте пункт за допомогою смужки пошуку, "
-"потім натисніть кнопку <gui style=\"button\">+</gui>, щоб додати пункт мови."
+"Щоб вибрати мови для перевірки правопису, натисніть кнопку <gui "
+"style=\"button\">Перевірка правопису</gui> на панелі інструментів "
+"форматування. У відповідь буде відкрито контекстну панель вибору мови. "
+"Натисніть пункт мови у списку, щоб увімкнути або вимкнути перевірку "
+"правопису цією мовою. Натисніть кнопку <gui style=\"button\">-</gui>, щоб "
+"вилучити мову зі списку. Якщо пункту мови немає у списку, пошукайте пункт за "
+"допомогою смужки пошуку, потім натисніть кнопку <gui style=\"button\">+</"
+"gui>, щоб додати пункт мови."
 
 #. (itstool) path: section/title
 #: C/write.page:123
@@ -1525,13 +1522,13 @@ msgid ""
 "need to re-open the message via the <gui>Drafts</gui> folder, if present."
 msgstr ""
 "Якщо ви зберегли або відкинули створене повідомлення електронної пошти, ви "
-"можете повторно його відкрити натисканням кнопки <gui style=\"button"
-"\">Скасувати</gui> на контекстній панелі сповіщення, яку буде показано, або "
-"натисканням комбінації клавіш <keyseq><key>Ctrl</key><key>Z</key></keyseq>. "
-"Вікна редагування можна повторно відкрити протягом періоду до 30 хвилин з "
-"моменту закриття. Після завершення цього періоду вам доведеться повторно "
-"відкрити повідомлення з теки <gui>Чернетки</gui>, якщо його було там "
-"збережено."
+"можете повторно його відкрити натисканням кнопки <gui "
+"style=\"button\">Скасувати</gui> на контекстній панелі сповіщення, яку буде "
+"показано, або натисканням комбінації клавіш <keyseq><key>Ctrl</key><key>Z</"
+"key></keyseq>. Вікна редагування можна повторно відкрити протягом періоду до "
+"30 хвилин з моменту закриття. Після завершення цього періоду вам доведеться "
+"повторно відкрити повідомлення з теки <gui>Чернетки</gui>, якщо його було "
+"там збережено."
 
 #. (itstool) path: section/title
 #: C/write.page:146
@@ -1541,11 +1538,11 @@ msgstr "Звичайні текстові повідомлення"
 #. (itstool) path: section/p
 #: C/write.page:148
 msgid ""
-"Geary can also send plain text messages. Press the <gui style=\"button"
-"\">More options</gui> button at the end of the bottom toolbar, then choose "
-"\"Rich Text\" or \"Plain Text\". Plain text mode is useful when sending "
-"email to mailing lists that prohibit rich text (HTML) messages, or when "
-"sending email to people that do no use modern clients like Geary."
+"Geary can also send plain text messages. Press the <gui "
+"style=\"button\">More options</gui> button at the end of the bottom toolbar, "
+"then choose \"Rich Text\" or \"Plain Text\". Plain text mode is useful when "
+"sending email to mailing lists that prohibit rich text (HTML) messages, or "
+"when sending email to people that do no use modern clients like Geary."
 msgstr ""
 "Крім того, Geary може надсилати звичайні текстові повідомлення. Натисніть "
 "кнопку <gui style=\"button\">Додаткові параметри</gui> у кінці нижньої "
@@ -1567,6 +1564,18 @@ msgstr ""
 "використанням м'яких переносів так, щоб довжина рядків не перевищувала 74 "
 "символів, а текст із відступами буде перенесено із додаванням позначок "
 "цитування, «&gt;», для кожного з рівнів цитування."
+
+#~ msgid "<gui>Use three pane view</gui>"
+#~ msgstr "<gui>Використовувати ієрархію</gui>"
+
+#~ msgid ""
+#~ "Show the folder list, the conversation list, and the messages side-by-"
+#~ "side-by-side in three panes. If not selected, the folder list and "
+#~ "conversation list will be stacked vertically in a single pane."
+#~ msgstr ""
+#~ "Показати список повідомлень, список повідомлень і повідомлення паралельно "
+#~ "на трьох панелях. Якщо пункт не позначено, список тек і список спілкувань "
+#~ "буде показано один над одним на одній панелі."
 
 #~ msgid "Found a bug?"
 #~ msgstr "Знайшли ваду?"
@@ -1592,8 +1601,8 @@ msgstr ""
 #~ "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
 
 #~ msgid ""
-#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
-#~ "\"64\"/> <span>Geary</span>"
+#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" "
+#~ "height=\"64\"/> <span>Geary</span>"
 #~ msgstr ""
-#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
-#~ "\"64\"/> <span>Geary</span>"
+#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" "
+#~ "height=\"64\"/> <span>Geary</span>"
