@@ -26,6 +26,18 @@ plugin_c_args = geary_c_args
 plugin_data_src_suffix = '.desktop.in'
 plugin_data_suffix = '.plugin'
 
+# LibPeas plugins are not using a valid .desktop keyword
+# Force msgfmt to translate Description
+msgfmt_plugin_cmd = [
+  find_program('msgfmt'),
+  '--desktop',
+  '--keyword=Name',
+  '--keyword=Description',
+  '-d', po_dir,
+  '--template=@INPUT@',
+  '--output=@OUTPUT@'
+]
+
 subdir('desktop-notifications')
 subdir('email-templates')
 subdir('folder-highlight')

@@ -42,11 +42,11 @@ plugin = shared_module(
   install_rpath: client_lib_dir
 )
 
-i18n.merge_file(
+custom_target(
+  plugin_data,
   input: files(plugin_data + plugin_data_src_suffix),
   output: plugin_data,
-  type: 'desktop',
-  po_dir: po_dir,
+  command: msgfmt_plugin_cmd,
   install: true,
   install_dir: plugin_dest
 )
