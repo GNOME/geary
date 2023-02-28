@@ -140,7 +140,6 @@ client_vala_sources = files(
   'sidebar/sidebar-entry.vala',
   'sidebar/sidebar-tree.vala',
 
-  'util/util-avatar.vala',
   'util/util-cache.vala',
   'util/util-contact.vala',
   'util/util-date.vala',
