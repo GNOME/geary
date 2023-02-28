@@ -193,7 +193,6 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
                            err is SmtpError.NOT_SUPPORTED) {
                     notify_unrecoverable_error(new ErrorContext(err));
                 }
-                cancellable.cancel();
             } catch (GLib.IOError.CANCELLED err) {
                 // Nothing to do here — we're already cancelled.
             } catch (EngineError.NOT_FOUND err) {
@@ -202,12 +201,6 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
                       id.to_string(), err.message);
             } catch (GLib.Error err) {
                 notify_connection_failed(new ErrorContext(err));
-                cancellable.cancel();
-            }
-
-            if (!email_handled && id != null) {
-                // Send was bad, try sending again later
-                this.outbox_queue.send(id);
             }
         }
 
