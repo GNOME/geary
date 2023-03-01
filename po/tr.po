@@ -14,16 +14,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-02-12 12:29+0000\n"
-"PO-Revision-Date: 2023-02-13 21:26+0300\n"
-"Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
+"POT-Creation-Date: 2023-02-13 18:27+0000\n"
+"PO-Revision-Date: 2023-02-23 05:41+0300\n"
+"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0\n"
-"X-Generator: Gtranslator 42.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.1.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -324,7 +324,7 @@ msgstr ""
 #. untrusted TLS certificate
 #: src/client/accounts/accounts-editor.vala:208
 msgid "Failed to store certificate"
-msgstr "Sertifika kaydetme başarısız oldu"
+msgstr "Sertifika depolanamadı"
 
 #. Translators: In-app notification label
 #: src/client/accounts/accounts-editor-add-pane.vala:167
@@ -3115,8 +3115,8 @@ msgid ""
 msgstr ""
 "Sorun ciddi veya sürekliyse, lütfen bu ayrıntıları kaydedip ve kopyalayıp <a "
 "href=\"https://wiki.gnome.org/Apps/Geary/Contact\">iletişim kanallarına</a> "
-"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">yeni hata bildirimi</a>nde bulunun."
+"gönderin veya <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
+"\">yeni hata bildirimi</a>nde bulunun."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
