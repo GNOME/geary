@@ -170,33 +170,21 @@ public class Composer.WebView : Components.WebView {
                               string quote,
                               bool top_posting,
                               bool body_complete) {
-        StringBuilder html = new StringBuilder();
-        string body_class = (this.is_rich_text) ? "" : "plain";
-        html.append(HTML_PRE.printf(body_class));
-        if (!body_complete) {
-            html.append(BODY_PRE.printf(BODY_HTML_ID));
-            bool have_body = !Geary.String.is_empty(body);
-            if (have_body) {
-                html.append(body);
-                html.append(SPACER);
-            }
+        base.load_html(
+            get_internal_html(body, quote, top_posting, body_complete)
+        );
+    }
 
-            if (!top_posting && !Geary.String.is_empty(quote)) {
-                html.append(quote);
-                html.append(SPACER);
-            }
-
-            html.append(CURSOR);
-            html.append(BODY_POST.printf(SIGNATURE_HTML_ID));
-
-            if (top_posting && !Geary.String.is_empty(quote)) {
-                html.append_printf(QUOTE, QUOTE_HTML_ID, quote);
-            }
-        } else {
-            html.append(body);
-        }
-        html.append(HTML_POST);
-        base.load_html((string) html.data);
+    /**
+     * Loads a message HTML body into the view.
+     */
+    public new void load_html_headless(string body,
+                                       string quote,
+                                       bool top_posting,
+                                       bool body_complete) {
+        base.load_html_headless(
+            get_internal_html(body, quote, top_posting, body_complete)
+        );
     }
 
     /**
@@ -520,6 +508,39 @@ public class Composer.WebView : Components.WebView {
         }
 
         return flowed.str;
+    }
+
+    private string get_internal_html(string body,
+                                     string quote,
+                                     bool top_posting,
+                                     bool body_complete) {
+        StringBuilder html = new StringBuilder();
+        string body_class = (this.is_rich_text) ? "" : "plain";
+        html.append(HTML_PRE.printf(body_class));
+        if (!body_complete) {
+            html.append(BODY_PRE.printf(BODY_HTML_ID));
+            bool have_body = !Geary.String.is_empty(body);
+            if (have_body) {
+                html.append(body);
+                html.append(SPACER);
+            }
+
+            if (!top_posting && !Geary.String.is_empty(quote)) {
+                html.append(quote);
+                html.append(SPACER);
+            }
+
+            html.append(CURSOR);
+            html.append(BODY_POST.printf(SIGNATURE_HTML_ID));
+
+            if (top_posting && !Geary.String.is_empty(quote)) {
+                html.append_printf(QUOTE, QUOTE_HTML_ID, quote);
+            }
+        } else {
+            html.append(body);
+        }
+        html.append(HTML_POST);
+        return (string) html.data;
     }
 
     private void on_cursor_context_changed(GLib.Variant? parameters) {

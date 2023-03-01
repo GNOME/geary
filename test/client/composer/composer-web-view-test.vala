@@ -258,7 +258,7 @@ long, long, long, long, long, long, long, long, long, long,
     }
 
     protected override void load_body_fixture(string html = "") {
-        this.test_view.load_html(html, "", false, false);
+        this.test_view.load_html_headless(html, "", false, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }
