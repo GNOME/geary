@@ -421,7 +421,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
     protected void load_body_fixture_full(string body,
                                           string quote,
                                           bool top_posting) {
-        this.test_view.load_html(body, quote, top_posting, false);
+        this.test_view.load_html_headless(body, quote, top_posting, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }

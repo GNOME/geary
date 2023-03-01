@@ -43,7 +43,7 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
 
     protected virtual void load_body_fixture(string html = "") {
         WebView client_view = (WebView) this.test_view;
-        client_view.load_html(html);
+        client_view.load_html_headless(html);
         while (!client_view.is_content_loaded) {
             Gtk.main_iteration();
         }

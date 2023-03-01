@@ -396,6 +396,25 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      */
     public new void load_html(string? body, string? base_uri=null) {
         this.body = body;
+        // The viewport width will be 0 if the email is loaded before
+        // its WebView is laid out in the widget hierarchy. As a workaround, to
+        // prevent this causing the email being squished down to is minimum
+        // width and hence being stretched right out in height, always load
+        // HTML once view is mapped
+        if (this.get_mapped()) {
+            base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
+        } else {
+            this.map.connect(() => {
+                base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
+            });
+        }
+    }
+
+    /**
+     * Loads a message HTML body into the view.
+     */
+    public new void load_html_headless(string? body, string? base_uri=null) {
+        this.body = body;
         base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
     }
 
