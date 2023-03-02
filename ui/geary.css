@@ -213,8 +213,9 @@ row.geary-folder-popover-list-row > label {
   margin-bottom: 6px
 }
 
-.geary-expanded webkitwebview {
-  border-radius: 8px;
+/* Update this to match any change in above radius value */
+.geary-message-body {
+  margin: 2px;
 }
 
 /* ConversationEmail */
