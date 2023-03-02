@@ -1,14 +1,14 @@
 # Swedish translation for geary help.
-# Copyright © 2017-2020 geary's COPYRIGHT HOLDER
+# Copyright © 2017-2023 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
 # Josef Andersson <l10nl18nsweja@gmail.com>, 2017.
-# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2019, 2020.
+# Anders Jonsson <anders.jonsson@norsjovallen.se>, 2019, 2020, 2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2020-09-19 08:49+0000\n"
-"PO-Revision-Date: 2020-11-13 15:20+0100\n"
+"POT-Creation-Date: 2023-02-28 17:44+0000\n"
+"PO-Revision-Date: 2023-03-03 00:34+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -236,18 +236,18 @@ msgstr ""
 msgid ""
 "To move conversations to the <gui>Trash</gui> folder, select them and click "
 "the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
-"conversations, hold down <key>Shift</key> and click the <gui style=\"button"
-"\">Delete</gui> button that appears in place of the <gui>Trash</gui> button, "
-"or open the conversation in the <gui>Trash</gui> folder and click <gui style="
-"\"button\">Delete</gui> there."
+"conversations, hold down <key>Shift</key> and click the <gui "
+"style=\"button\">Delete</gui> button that appears in place of the "
+"<gui>Trash</gui> button, or open the conversation in the <gui>Trash</gui> "
+"folder and click <gui style=\"button\">Delete</gui> there."
 msgstr ""
 "För att flytta konversationer till mappen <gui>Papperskorg</gui>, markera "
 "dem och klicka på knappen <gui style=\"button\">Papperskorg</gui> i "
 "verktygsfältet. För att permanent ta bort konversationer, håll nere "
 "<key>Skift</key> och klicka på knappen <gui style=\"button\">Ta bort</gui> "
-"som visas istället för knappen <gui>Papperskorg</gui>, eller öppna "
-"konversationen i mappen <gui>Papperskorg</gui> och klicka där på <gui style="
-"\"button\">Ta bort</gui>."
+"som visas i stället för knappen <gui>Papperskorg</gui>, eller öppna "
+"konversationen i mappen <gui>Papperskorg</gui> och klicka där på <gui "
+"style=\"button\">Ta bort</gui>."
 
 #. (itstool) path: note/title
 #: C/archive.page:26
@@ -271,22 +271,22 @@ msgstr ""
 #. (itstool) path: page/p
 #: C/archive.page:34
 msgid ""
-"While both <gui style=\"button\">Archive</gui> and <gui style=\"button"
-"\">Trash</gui> removes conversations from your <gui>Inbox</gui> folder, "
-"there is an important difference. Clicking <gui style=\"button\">Archive</"
-"gui> will ensure your conversations are kept so you can find them again "
-"later. Clicking <gui style=\"button\">Trash</gui> will cause conversations "
-"to be hidden from <link xref=\"search\"/>, and they will likely be deleted "
-"in the future."
+"While both <gui style=\"button\">Archive</gui> and <gui "
+"style=\"button\">Trash</gui> removes conversations from your <gui>Inbox</"
+"gui> folder, there is an important difference. Clicking <gui "
+"style=\"button\">Archive</gui> will ensure your conversations are kept so "
+"you can find them again later. Clicking <gui style=\"button\">Trash</gui> "
+"will cause conversations to be hidden from <link xref=\"search\"/>, and they "
+"will likely be deleted in the future."
 msgstr ""
-"Medan både <gui style=\"button\">Arkivera</gui> och <gui style=\"button"
-"\">Flytta till papperskorg</gui> tar bort konversationer från din "
-"<gui>Inkorg</gui>-mapp, så finns det en viktig skillnad. Att klicka på <gui "
-"style=\"button\">Arkivera</gui> kommer säkerställa att dina konversationer "
-"behålls så att du kan hitta dem igen senare. Att klicka på <gui style="
-"\"button\">Flytta till papperskorg</gui> kommer få konversationer att döljas "
-"från <link xref=\"search\"/>, och de kommer troligen att tas bort i "
-"framtiden."
+"Medan både <gui style=\"button\">Arkivera</gui> och <gui "
+"style=\"button\">Flytta till papperskorg</gui> tar bort konversationer från "
+"din <gui>Inkorg</gui>-mapp, så finns det en viktig skillnad. Att klicka på "
+"<gui style=\"button\">Arkivera</gui> kommer säkerställa att dina "
+"konversationer behålls så att du kan hitta dem igen senare. Att klicka på "
+"<gui style=\"button\">Flytta till papperskorg</gui> kommer få konversationer "
+"att döljas från <link xref=\"search\"/>, och de kommer troligen att tas bort "
+"i framtiden."
 
 #. (itstool) path: page/title
 #: C/bugs.page:10
@@ -317,8 +317,8 @@ msgstr "Rapportera fel"
 #. (itstool) path: section/p
 #: C/bugs.page:23
 msgid ""
-"If you suspect you have found a bug in Geary, please follow the <link href="
-"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"If you suspect you have found a bug in Geary, please follow the <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
 "guidelines</link> so the problem can be diagnosed and fixed."
 msgstr ""
 "Om du misstänker att du hittat ett fel i Geary, följ <link href=\"https://"
@@ -401,8 +401,9 @@ msgid ""
 "<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
 "reporting</link>—report new bugs or request new features"
 msgstr ""
-"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug"
-"\">Felrapportering</link>—rapportera nya fel eller efterfråga nya funktioner"
+"<link href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">Felrapportering</link>—rapportera nya fel eller efterfråga "
+"nya funktioner"
 
 #. (itstool) path: item/p
 #: C/contributing.page:19
@@ -433,23 +434,44 @@ msgstr ""
 "för mer information och alternativ för att bidra finansiellt till Gearys "
 "utveckling."
 
+#. (itstool) path: info/title
+#: C/index.page:7
+#| msgid "Using Geary"
+msgctxt "link:trail"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:8
+#| msgid "Using Geary"
+msgctxt "text"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:9
+#| msgid "Using Geary"
+msgctxt "link"
+msgid "Geary"
+msgstr "Geary"
+
 #. (itstool) path: page/title
-#: C/index.page:6
+#: C/index.page:12
 msgid "<_:media-1/> <span>Geary</span>"
 msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:18
 msgid "Introduction"
 msgstr "Introduktion"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:22
 msgid "Using Geary"
 msgstr "Använda Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:20
+#: C/index.page:26
 msgid "Contributing and getting support"
 msgstr "Bidra och få support"
 
@@ -773,15 +795,15 @@ msgstr "Inställningar"
 #. (itstool) path: page/p
 #: C/preferences.page:12
 msgid ""
-"Geary allows you to customise how it works via its <gui style=\"group"
-"\">Preferences</gui> window. To open the window, select <gui style=\"menuitem"
-"\">Preferences</gui> from the application menu on the main window's toolbar. "
-"You can change the following options:"
+"Geary allows you to customise how it works via its <gui "
+"style=\"group\">Preferences</gui> window. To open the window, select <gui "
+"style=\"menuitem\">Preferences</gui> from the application menu on the main "
+"window's toolbar. You can change the following options:"
 msgstr ""
-"Geary låter dig anpassa hur det fungerar genom sin meny <gui style=\"group"
-"\">Inställningar</gui>. För att öppna fönstret, välj <gui style=\"menuitem"
-"\">Inställningar</gui> från programmenyn i huvudfönstrets verktygsfält. Du "
-"kan ändra följande alternativ:"
+"Geary låter dig anpassa hur det fungerar genom sin meny <gui "
+"style=\"group\">Inställningar</gui>. För att öppna fönstret, välj <gui "
+"style=\"menuitem\">Inställningar</gui> från programmenyn i huvudfönstrets "
+"verktygsfält. Du kan ändra följande alternativ:"
 
 #. (itstool) path: item/title
 #: C/preferences.page:19
@@ -815,43 +837,27 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-msgid "<gui>Use three pane view</gui>"
-msgstr "<gui>Använd trepanelsvy</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:32
-msgid ""
-"Show the folder list, the conversation list, and the messages side-by-side-"
-"by-side in three panes. If not selected, the folder list and conversation "
-"list will be stacked vertically in a single pane."
-msgstr ""
-"Visa mapplistan, konversationslistan och meddelande sida-vid-sida i tre "
-"paneler. Om ej vald kommer mapplistan och konversationslistan att staplas "
-"vertikalt i en enda panel."
-
-#. (itstool) path: item/title
-#: C/preferences.page:38
 msgid "<gui>Use single key email shortcuts</gui>"
 msgstr "<gui>Använd e-postkortkommandon med en tangent</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:39
+#: C/preferences.page:32
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
-"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
-"\"shortcuts\"/> for details."
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"shortcuts\"/> for details."
 msgstr ""
 "Aktivera tangentbordsgenvägar för e-poståtgärder som inte kräver att "
 "<key>Ctrl</key> trycks ned. Dessa matchar kortkommandona som används av "
 "GMail. se <link xref=\"shortcuts\"/> för detaljer."
 
 #. (itstool) path: item/title
-#: C/preferences.page:44
+#: C/preferences.page:37
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Kontrollera om det finns ny e-post vid avslut</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:45
+#: C/preferences.page:38
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -892,8 +898,8 @@ msgstr ""
 #: C/search.page:19
 msgid ""
 "Keywords that match your search are highlighted in the message view. Geary "
-"will match different forms of the same word, for example searching for \"walk"
-"\" will also match \"walking\" and \"walked.\""
+"will match different forms of the same word, for example searching for "
+"\"walk\" will also match \"walking\" and \"walked.\""
 msgstr ""
 "Sökträffar markeras i meddelandevyn. Geary kommer att få träff på olika "
 "former av samma ord, exempelvis ger sökning på ”hej” också träff på ”hejsan” "
@@ -1061,8 +1067,8 @@ msgstr ""
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:24
-msgid "Display this online help manual"
-msgstr "Visa denna näthandbok"
+msgid "Display this help manual"
+msgstr "Visa denna handbok"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:25
@@ -1193,8 +1199,8 @@ msgid ""
 "click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
 "key><key>Enter</key></keyseq> to send the message."
 msgstr ""
-"För att starta en ny e-postkonversation, klicka på knappen <gui style="
-"\"button\">Skriv</gui> i verktygsfältet. Skriv in e-postadressen för "
+"För att starta en ny e-postkonversation, klicka på knappen <gui "
+"style=\"button\">Skriv</gui> i verktygsfältet. Skriv in e-postadressen för "
 "personerna som ska få meddelandet i textfältet <gui style=\"input\">Till</"
 "gui>, och en ämnesrad i fältet <gui style=\"input\">Ämne</gui>. Du kan sedan "
 "skriva in ditt meddelande i textområdet under dessa. När meddelandet är "
@@ -1211,14 +1217,14 @@ msgstr "Ångra sändning"
 #: C/write.page:24
 msgid ""
 "When sending an email, Geary will wait 5 seconds before delivering the "
-"message. During this time, you will be able to click <gui style=\"button"
-"\">Undo</gui> on the pop-up notification that appears or type "
+"message. During this time, you will be able to click <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or type "
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
 "more changes to it."
 msgstr ""
 "Då du skickar ett e-postmeddelande kommer Geary att vänta fem sekunder innan "
-"meddelandet skickas. Under denna tid kommer du kunna klicka <gui style="
-"\"button\">Ångra</gui> i poppuppaviseringen som visas eller trycka "
+"meddelandet skickas. Under denna tid kommer du kunna klicka <gui "
+"style=\"button\">Ångra</gui> i poppuppaviseringen som visas eller trycka "
 "<keyseq><key>Ctrl</key><key>Z</key></keyseq> för att öppna e-postmeddelandet "
 "på nytt och göra fler ändringar i det."
 
@@ -1226,18 +1232,18 @@ msgstr ""
 #: C/write.page:32
 msgid ""
 "To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
-"and <gui style=\"input\">Reply-to</gui> fields, click the <gui style=\"input"
-"\">More options</gui> button at the end of the <gui style=\"input\">To</gui> "
-"field. Cc allows you to send a copy of the email to other, secondary "
-"recipients. Bcc is similar, but the Bcc list is hidden from recipients. The "
-"Reply-To field specifies an email address to reply to, if recipients should "
-"reply to a different email address than the sender's."
+"and <gui style=\"input\">Reply-to</gui> fields, click the <gui "
+"style=\"input\">More options</gui> button at the end of the <gui "
+"style=\"input\">To</gui> field. Cc allows you to send a copy of the email to "
+"other, secondary recipients. Bcc is similar, but the Bcc list is hidden from "
+"recipients. The Reply-To field specifies an email address to reply to, if "
+"recipients should reply to a different email address than the sender's."
 msgstr ""
 "För att visa fälten <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</"
-"gui> och <gui style=\"input\">Svara-till</gui>, klicka på knappen <gui style="
-"\"input\">Fler inställningar</gui> i slutet av fältet <gui style=\"input"
-"\">Till</gui>. Cc låter dig skicka en kopia av meddelandet till andra, "
-"sekundära mottagare. Bcc liknar detta, men Bcc-listan är dold för "
+"gui> och <gui style=\"input\">Svara-till</gui>, klicka på knappen <gui "
+"style=\"input\">Fler inställningar</gui> i slutet av fältet <gui "
+"style=\"input\">Till</gui>. Cc låter dig skicka en kopia av meddelandet till "
+"andra, sekundära mottagare. Bcc liknar detta, men Bcc-listan är dold för "
 "mottagarna. Fältet Svara-till anger en e-postadress att svara till, om "
 "mottagare ska svara till en annan e-postadress än avsändarens."
 
@@ -1257,16 +1263,17 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:46
 msgid ""
-"To reply to the currently selected conversation, click one of the <gui style="
-"\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui style="
-"\"button\">Forward</gui> toolbar buttons. This will open a new reply or "
-"forwarded email composer for the latest message in the conversation."
+"To reply to the currently selected conversation, click one of the <gui "
+"style=\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui "
+"style=\"button\">Forward</gui> toolbar buttons. This will open a new reply "
+"or forwarded email composer for the latest message in the conversation."
 msgstr ""
 "För att besvara den aktuellt markerade konversationen, klicka på en av "
-"verktygsfältsknapparna <gui style=\"button\">Svara</gui>, <gui style=\"button"
-"\">Svara alla</gui> eller <gui style=\"button\">Vidarebefordra</gui>. Detta "
-"kommer öppna en ny e-postredigerare för svar eller vidarebefordran för det "
-"senaste meddelandet i konversationen."
+"verktygsfältsknapparna <gui style=\"button\">Svara</gui>, <gui "
+"style=\"button\">Svara alla</gui> eller <gui "
+"style=\"button\">Vidarebefordra</gui>. Detta kommer öppna en ny e-"
+"postredigerare för svar eller vidarebefordran för det senaste meddelandet i "
+"konversationen."
 
 #. (itstool) path: section/p
 #: C/write.page:52
@@ -1274,16 +1281,16 @@ msgid ""
 "When replying, the message being replied to will be quoted and copied into "
 "the footer of the new reply. This can be deleted before typing a reply by "
 "pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
-"by selecting the desired text in a message and clicking <gui style=\"button"
-"\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only the selected "
-"text will be quoted."
+"by selecting the desired text in a message and clicking <gui "
+"style=\"button\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only "
+"the selected text will be quoted."
 msgstr ""
 "Vid svar kommer meddelandet som besvaras att citeras och kopieras till "
 "sidfoten på det nya svaret. Detta kan tas bort innan ett svar skrivs genom "
 "att trycka <key>Backsteg</key>. Alternativt kan text citeras selektivt genom "
-"att markera den önskade texten i ett meddelande och klicka på <gui style="
-"\"button\">Svara</gui> eller <gui style=\"button\">Svara alla</gui>, så "
-"kommer endast den markerade texten att citeras."
+"att markera den önskade texten i ett meddelande och klicka på <gui "
+"style=\"button\">Svara</gui> eller <gui style=\"button\">Svara alla</gui>, "
+"så kommer endast den markerade texten att citeras."
 
 #. (itstool) path: section/p
 #: C/write.page:60
@@ -1324,20 +1331,20 @@ msgid ""
 "<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
 msgstr ""
 "Punktlistor och numrerade listor kan infogas och tas bort genom att klicka "
-"på knapparna <gui style=\"button\">Infoga punktlista</gui> och <gui style="
-"\"button\">Infoga numrerad lista</gui> i formateringsverktygsfältet. "
-"Indenteringsnivån kan justeras med knapparna <gui style=\"button"
-"\">Indentera</gui> och <gui style=\"button\">Avindentera</gui> i "
-"formateringsverktygsfältet."
+"på knapparna <gui style=\"button\">Infoga punktlista</gui> och <gui "
+"style=\"button\">Infoga numrerad lista</gui> i formateringsverktygsfältet. "
+"Indenteringsnivån kan justeras med knapparna <gui "
+"style=\"button\">Indentera</gui> och <gui style=\"button\">Avindentera</gui> "
+"i formateringsverktygsfältet."
 
 #. (itstool) path: section/p
 #: C/write.page:81
 msgid ""
-"Images can be inserted into rich text messages by clicking the <gui style="
-"\"button\">Insert Image</gui> button on the formatting toolbar and selecting "
-"the image to attach, by dragging an image from the <gui>Files</gui> "
-"application into the email body and then dropping it, or by pasting an image "
-"that has been copied to the clipboard from another application."
+"Images can be inserted into rich text messages by clicking the <gui "
+"style=\"button\">Insert Image</gui> button on the formatting toolbar and "
+"selecting the image to attach, by dragging an image from the <gui>Files</"
+"gui> application into the email body and then dropping it, or by pasting an "
+"image that has been copied to the clipboard from another application."
 msgstr ""
 "Bilder kan infogas i rich text-meddelanden genom att klicka på knappen <gui "
 "style=\"button\">Infoga en bild</gui> i formateringsverktygsfältet och välja "
@@ -1365,11 +1372,11 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:96
 msgid ""
-"A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts\"/> for details."
+"A number of keyboard shortcuts are available in the composer; see <link "
+"xref=\"shortcuts\"/> for details."
 msgstr ""
-"Ett antal tangentbordsgenvägar är tillgängliga i redigeraren; se <link xref="
-"\"shortcuts\"/> för detaljer."
+"Ett antal tangentbordsgenvägar är tillgängliga i redigeraren; se <link "
+"xref=\"shortcuts\"/> för detaljer."
 
 #. (itstool) path: section/p
 #: C/write.page:99
@@ -1402,21 +1409,21 @@ msgstr ""
 #. (itstool) path: section/p
 #: C/write.page:112
 msgid ""
-"To select languages for spell-checking, click the <gui style=\"button"
-"\">Spell check</gui> button on the formatting toolbar, and the language "
-"selection popover will appear. Click on a language in the list to toggle it "
-"on or off, and click the <gui style=\"button\">-</gui> button to remove it "
-"from the list. If a language does not appear in the list, search for it by "
-"typing its name in the search box, then click the <gui style=\"button\">+</"
-"gui> button to add it."
+"To select languages for spell-checking, click the <gui "
+"style=\"button\">Spell check</gui> button on the formatting toolbar, and the "
+"language selection popover will appear. Click on a language in the list to "
+"toggle it on or off, and click the <gui style=\"button\">-</gui> button to "
+"remove it from the list. If a language does not appear in the list, search "
+"for it by typing its name in the search box, then click the <gui "
+"style=\"button\">+</gui> button to add it."
 msgstr ""
-"För att välja språk för stavningskontroll, klicka på knappen <gui style="
-"\"button\">Stavningskontroll</gui> i formateringsverktygsfältet, så kommer "
-"kontextfönstret för språkval att dyka upp. Klicka på ett språk i listan för "
-"att aktivera/inaktivera det, och klicka på knappen <gui style=\"button\">-</"
-"gui> för att ta bort det från listan. Om ett språk inte finns i listan kan "
-"du söka det genom att skriva dess namn i sökrutan, och sedan klicka på "
-"knappen <gui style=\"button\">+</gui> för att lägga till det."
+"För att välja språk för stavningskontroll, klicka på knappen <gui "
+"style=\"button\">Stavningskontroll</gui> i formateringsverktygsfältet, så "
+"kommer kontextfönstret för språkval att dyka upp. Klicka på ett språk i "
+"listan för att aktivera/inaktivera det, och klicka på knappen <gui "
+"style=\"button\">-</gui> för att ta bort det från listan. Om ett språk inte "
+"finns i listan kan du söka det genom att skriva dess namn i sökrutan, och "
+"sedan klicka på knappen <gui style=\"button\">+</gui> för att lägga till det."
 
 #. (itstool) path: section/title
 #: C/write.page:123
@@ -1472,11 +1479,11 @@ msgstr "Vanliga textmeddelanden"
 #. (itstool) path: section/p
 #: C/write.page:148
 msgid ""
-"Geary can also send plain text messages. Press the <gui style=\"button"
-"\">More options</gui> button at the end of the bottom toolbar, then choose "
-"\"Rich Text\" or \"Plain Text\". Plain text mode is useful when sending "
-"email to mailing lists that prohibit rich text (HTML) messages, or when "
-"sending email to people that do no use modern clients like Geary."
+"Geary can also send plain text messages. Press the <gui "
+"style=\"button\">More options</gui> button at the end of the bottom toolbar, "
+"then choose \"Rich Text\" or \"Plain Text\". Plain text mode is useful when "
+"sending email to mailing lists that prohibit rich text (HTML) messages, or "
+"when sending email to people that do no use modern clients like Geary."
 msgstr ""
 "Geary kan också skicka meddelanden i vanlig text. Tryck på knappen <gui "
 "style=\"button\">Fler inställningar</gui> i slutet på verktygsfältet längst "
@@ -1497,6 +1504,18 @@ msgstr ""
 "radbrytning så att den inte är längre än 74 tecken bred, och indenterad text "
 "kommer att radbrytas och citeras med ett ”&gt;”-tecken för varje "
 "citationsnivå."
+
+#~ msgid "<gui>Use three pane view</gui>"
+#~ msgstr "<gui>Använd trepanelsvy</gui>"
+
+#~ msgid ""
+#~ "Show the folder list, the conversation list, and the messages side-by-"
+#~ "side-by-side in three panes. If not selected, the folder list and "
+#~ "conversation list will be stacked vertically in a single pane."
+#~ msgstr ""
+#~ "Visa mapplistan, konversationslistan och meddelande sida-vid-sida i tre "
+#~ "paneler. Om ej vald kommer mapplistan och konversationslistan att staplas "
+#~ "vertikalt i en enda panel."
 
 #~ msgid "Delete or archive a message"
 #~ msgstr "Ta bort eller arkivera ett meddelande"
@@ -1539,23 +1558,6 @@ msgstr ""
 
 #~ msgid "Thanks for your help making Geary better!"
 #~ msgstr "Tack för att du hjälper till att göra Geary bättre!"
-
-#~| msgctxt "_"
-#~| msgid ""
-#~| "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
-#~ msgctxt "_"
-#~ msgid ""
-#~ "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
-#~ msgstr ""
-#~ "external ref='figures/geary.svg' md5='1c66fe237d546362fda9f209840da4a8'"
-
-#~| msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-#~ msgid ""
-#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
-#~ "\"64\"/> <span>Geary</span>"
-#~ msgstr ""
-#~ "<media type=\"image\" src=\"figures/geary.svg\" width=\"64\" height="
-#~ "\"64\"/> <span>Geary</span>"
 
 #~ msgid ""
 #~ "The <gui>Preferences</gui> option is available in either Geary's "
@@ -1750,13 +1752,13 @@ msgstr ""
 #~ "-. Geary kommer att ta bort all information associerad med kontot."
 
 #~ msgid ""
-#~ "Geary is a lightweight email reader for the <link href=\"http://gnome.org"
-#~ "\">GNOME</link> desktop. It works with mail servers that support the IMAP "
-#~ "protocol, including popular services such as Gmail, Yahoo Mail, and "
+#~ "Geary is a lightweight email reader for the <link href=\"http://gnome."
+#~ "org\">GNOME</link> desktop. It works with mail servers that support the "
+#~ "IMAP protocol, including popular services such as Gmail, Yahoo Mail, and "
 #~ "Outlook.com."
 #~ msgstr ""
-#~ "Geary är en lättviktig e-postläsare för <link href=\"http://gnome.org"
-#~ "\">GNOME</link>-skrivbordet. Det fungerar med e-postservrar som stöder "
+#~ "Geary är en lättviktig e-postläsare för <link href=\"http://gnome."
+#~ "org\">GNOME</link>-skrivbordet. Det fungerar med e-postservrar som stöder "
 #~ "IMAP-protokollet, vilket omfattar populära tjänster som Gmail, Yahoo Mail "
 #~ "och Outlook.com."
 
@@ -2143,11 +2145,11 @@ msgstr ""
 #~ "and what version of Geary you're running."
 #~ msgstr ""
 #~ "Listas inte ditt fel? Gratulerar! Du har hittat ett nytt fel. För att "
-#~ "skapa en felrapport, skapa ett konto i GNOMEs Bugzilla och <link href="
-#~ "\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">rapportera ett "
-#~ "fel</link>. Var så specifik du kan och beskriv stegen för att framkalla "
-#~ "den. Glöm inte att skicka med detaljer om ditt operativsystem och vilken "
-#~ "version av Geary du kör."
+#~ "skapa en felrapport, skapa ett konto i GNOMEs Bugzilla och <link "
+#~ "href=\"https://bugzilla.gnome.org/enter_bug.cgi?"
+#~ "product=geary\">rapportera ett fel</link>. Var så specifik du kan och "
+#~ "beskriv stegen för att framkalla den. Glöm inte att skicka med detaljer "
+#~ "om ditt operativsystem och vilken version av Geary du kör."
 
 #~ msgid ""
 #~ "For general inquiries, please join the <link href=\"https://mail.gnome."
