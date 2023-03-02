@@ -132,7 +132,6 @@ src/client/sidebar/sidebar-common.vala
 src/client/sidebar/sidebar-count-cell-renderer.vala
 src/client/sidebar/sidebar-entry.vala
 src/client/sidebar/sidebar-tree.vala
-src/client/util/util-avatar.vala
 src/client/util/util-cache.vala
 src/client/util/util-date.vala
 src/client/util/util-email.vala
