@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary main\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-10-05 19:21+0000\n"
-"PO-Revision-Date: 2022-10-09 18:02+0300\n"
+"POT-Creation-Date: 2023-02-12 12:29+0000\n"
+"PO-Revision-Date: 2023-02-14 19:04+0300\n"
 "Last-Translator: Aleksandr Melman <Alexmelman88@gmail.com>\n"
 "Language-Team: Russian <Alexmelman88@gmail.com>\n"
 "Language: ru\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -128,8 +128,8 @@ msgstr "Интерфейс редактирования текста Geary"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
-msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;Почта;Эл. почта;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
@@ -392,7 +392,7 @@ msgid "Account not created: %s"
 msgstr "Учетная запись не создана: %s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Следующее"
 
@@ -400,22 +400,16 @@ msgstr "_Следующее"
 msgid "_Create"
 msgstr "_Создать"
 
-#. Translators: In-app notification label, when
-#. GNOME Online Accounts are missing
-#: src/client/accounts/accounts-editor-add-pane.vala:465
-msgid "Online accounts are missing"
-msgstr "Отсутствуют сетевые учетные записи"
-
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:681
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 msgid "Your name"
 msgstr "Ваше имя"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:698
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "Адрес эл. почты"
@@ -425,7 +419,7 @@ msgstr "Адрес эл. почты"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:702
+#: src/client/accounts/accounts-editor-add-pane.vala:685
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "person@example.com"
@@ -434,14 +428,14 @@ msgstr "person@example.com"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-add-pane.vala:699
 #: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Имя пользователя"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-add-pane.vala:713
 #: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
@@ -451,14 +445,14 @@ msgstr "Пароль"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-add-pane.vala:735
 #: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "Сервер IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:755
+#: src/client/accounts/accounts-editor-add-pane.vala:738
 msgid "imap.example.com"
 msgstr "imap.example.com"
 
@@ -466,20 +460,20 @@ msgstr "imap.example.com"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-add-pane.vala:744
 #: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "Сервер SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:764
+#: src/client/accounts/accounts-editor-add-pane.vala:747
 msgid "smtp.example.com"
 msgstr "smtp.example.com"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
+#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Удалить учетную запись"
 
@@ -501,7 +495,7 @@ msgstr ""
 #: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
-msgstr "_Отмена"
+msgstr "_Отменить"
 
 #. Translators: Label in the account editor for the user's
 #. custom name for an account.
@@ -638,42 +632,42 @@ msgstr[1] "%d дня назад"
 msgstr[2] "%d дней назад"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2287
+#: src/client/application/application-main-window.vala:2289
 msgid "Undo"
 msgstr "Отменить"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2272
 msgid "Redo"
 msgstr "Повторить"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:325
-#: src/client/accounts/accounts-editor-row.vala:279
+#: src/client/accounts/accounts-editor-list-pane.vala:326
+#: src/client/accounts/accounts-editor-row.vala:280
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:329
-#: src/client/accounts/accounts-editor-row.vala:283
+#: src/client/accounts/accounts-editor-list-pane.vala:330
+#: src/client/accounts/accounts-editor-row.vala:284
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:351
+#: src/client/accounts/accounts-editor-list-pane.vala:352
 msgid "This account has been disabled"
 msgstr "Эта учетная запись была отключена"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:360
+#: src/client/accounts/accounts-editor-list-pane.vala:361
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Эта учетная запись столкнулась с проблемой и недоступна"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:466
+#: src/client/accounts/accounts-editor-list-pane.vala:467
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Учетная запись \"%s\" удалена"
@@ -681,7 +675,7 @@ msgstr "Учетная запись \"%s\" удалена"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:473
+#: src/client/accounts/accounts-editor-list-pane.vala:474
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Учетная запись \"%s\" восстановлена"
@@ -694,30 +688,30 @@ msgstr "Перетащите, чтобы переместить этот эле�
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:295
+#: src/client/accounts/accounts-editor-row.vala:296
 msgid "Service provider"
 msgstr "Поставщик услуг"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:469
+#: src/client/accounts/accounts-editor-row.vala:470
 msgid "Connection security"
 msgstr "Безопасность подключения"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-row.vala:481
 #: src/client/accounts/accounts-editor-servers-pane.vala:751
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Нет"
 
-#: src/client/accounts/accounts-editor-row.vala:487
+#: src/client/accounts/accounts-editor-row.vala:488
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:494
+#: src/client/accounts/accounts-editor-row.vala:495
 msgid "TLS"
 msgstr "TLS"
 
@@ -725,7 +719,7 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:535
+#: src/client/accounts/accounts-editor-row.vala:536
 #: src/client/application/application-main-window.vala:637
 msgid "Login"
 msgstr "Логин"
@@ -733,21 +727,21 @@ msgstr "Логин"
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:542
+#: src/client/accounts/accounts-editor-row.vala:543
 msgid "No login needed"
 msgstr "Вход в систему не требуется"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:550
+#: src/client/accounts/accounts-editor-row.vala:551
 msgid "Use same login as receiving"
 msgstr "Использовать тот же логин, что и для получения"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:558
+#: src/client/accounts/accounts-editor-row.vala:559
 msgid "Use a different login"
 msgstr "Использовать другой логин"
 
@@ -961,7 +955,7 @@ msgstr "Префикс установки"
 #: src/client/application/application-client.vala:577
 #, c-format
 msgid "About %s"
-msgstr "О программе %s"
+msgstr "О %s"
 
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
@@ -975,7 +969,7 @@ msgstr ""
 "mynameisdaniil <sobol.daniil@gmail.com>, 2012\n"
 "Aleksandr Stepanov <alex.eri@ya.ru>, 2015.\n"
 "Stas Solovey <whats_up@tut.by>, 2015, 2016, 2018.\n"
-"Aleksandr Melman <Alexmelman88@gmail.com>, 2021, 2022"
+"Aleksandr Melman <Alexmelman88@gmail.com>, 2021, 2022, 2023"
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1427,7 +1421,7 @@ msgstr "Сохранить как"
 #: src/client/dialogs/dialogs-problem-details-dialog.vala:221
 #: ui/accounts_editor_servers_pane.ui:15 ui/composer-headerbar.ui:55
 msgid "Cancel"
-msgstr "Отмена"
+msgstr "Отменить"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:124
@@ -1449,7 +1443,7 @@ msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr ""
-"Включить сочетания клавиш для действий с почтой, которые не требуют нажатия "
+"Включить комбинации клавиш для действий с почтой, которые не требуют нажатия "
 "<Ctrl>"
 
 #. / Translators: Preferences label
@@ -1649,7 +1643,7 @@ msgstr "_Печать…"
 
 #: src/client/components/stock.vala:29
 msgid "_Quit"
-msgstr "_Завершить"
+msgstr "_Закрыть"
 
 #: src/client/components/stock.vala:30
 msgid "_Remove"
@@ -2865,11 +2859,19 @@ msgstr "(без темы)"
 msgid "Add an account"
 msgstr "Добавить учетную запись"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:14
+#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "Назад"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Получение"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Отправление"
 
@@ -2881,24 +2883,24 @@ msgstr "Редактировать учетную запись"
 msgid "Account Name"
 msgstr "Имя учетной записи"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "Адрес эл. почты"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "Подпись"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "Настройки"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Настройки сервера"
 
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:243
 msgid "Remove this account from Geary"
 msgstr "Удалить эту учетную запись из Geary"
 
@@ -3182,21 +3184,20 @@ msgstr "Переслать"
 msgid "_Archive"
 msgstr "_Архивировать"
 
-#: ui/components-headerbar-conversation-list.ui:19
-#: ui/components-headerbar-conversation.ui:22
-msgid "Back"
-msgstr "Назад"
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "Почта"
 
-#: ui/components-headerbar-conversation-list.ui:36
+#: ui/components-headerbar-conversation-list.ui:37
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Написать сообщение"
 
-#: ui/components-headerbar-conversation-list.ui:52
+#: ui/components-headerbar-conversation-list.ui:53
 msgid "Toggle search bar"
 msgstr "Переключить панель поиска"
 
-#: ui/components-headerbar-conversation.ui:59
+#: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
 msgstr "Включить или отключить полосу поиска"
 
@@ -3242,7 +3243,7 @@ msgstr "Сохранить записи журнала и подробности
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:89 ui/problem-details-dialog.ui:60
 msgid "Copy to clipboard"
-msgstr "Скопировать в буфер обмена"
+msgstr "Копировать в буфер обмена"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:107
@@ -3259,7 +3260,7 @@ msgstr "_Комбинации клавиш"
 
 #: ui/components-menu-application.ui:25
 msgid "_About Geary"
-msgstr "_О Geary"
+msgstr "_О приложении"
 
 #: ui/components-menu-conversation.ui:21
 msgid "Toggle as _Junk"
@@ -3615,7 +3616,7 @@ msgstr "Отсоединить редактор"
 #: ui/gtk/help-overlay.ui:221 ui/gtk/help-overlay.ui:350
 msgctxt "shortcut window"
 msgid "General"
-msgstr "Основное"
+msgstr "Общие"
 
 #: ui/gtk/help-overlay.ui:225
 msgctxt "shortcut window"
@@ -3790,3 +3791,6 @@ msgstr "_Запомнить пароль"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Авторизоваться"
+
+#~ msgid "Online accounts are missing"
+#~ msgstr "Отсутствуют сетевые учетные записи"
