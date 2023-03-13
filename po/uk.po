@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-04 23:51+0000\n"
-"PO-Revision-Date: 2023-03-05 11:11+0200\n"
+"POT-Creation-Date: 2023-03-13 09:10+0000\n"
+"PO-Revision-Date: 2023-03-13 22:24+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -1912,8 +1912,6 @@ msgid "_Star"
 msgstr "_Із зіркою"
 
 #: src/client/conversation-list/conversation-list-view.vala:275
-#| msgid "Archive conversation"
-#| msgid_plural "Archive conversations"
 msgid "_Archive conversation"
 msgid_plural "_Archive conversations"
 msgstr[0] "_Архівувати спілкування"
@@ -2030,46 +2028,53 @@ msgstr "Показати"
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
+#| msgid "No conversations selected"
+msgid "No Conversations Selected"
 msgstr "Не позначено жодного спілкування."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "Після вибору спілкування зі списку його буде показано тут"
+#| msgid "Selecting a conversation from the list will display it here"
+msgid "Selecting a conversation from the list will display it here."
+msgstr "Після вибору спілкування зі списку його буде показано тут."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:100
+#| msgid "Multiple conversations selected"
+msgid "Multiple Conversations Selected"
 msgstr "Позначено декілька спілкувань"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
-msgstr "Вибір дії призведе до її застосування до усіх вибраних спілкувань"
+#: src/client/conversation-viewer/conversation-viewer.vala:104
+#| msgid "Choosing an action will apply to all selected conversations"
+msgid "Choosing an action will apply to all selected conversations."
+msgstr "Вибір дії призведе до її застосування до усіх вибраних спілкувань."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
+#: src/client/conversation-viewer/conversation-viewer.vala:116
+#: src/client/conversation-viewer/conversation-viewer.vala:132
+#| msgid "No conversations found"
+msgid "No Conversations Found"
 msgstr "Спілкувань не знайдено"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "У цій теці не міститься спілкувань"
+#: src/client/conversation-viewer/conversation-viewer.vala:120
+#| msgid "This folder does not contain any conversations"
+msgid "This folder does not contain any conversations."
+msgstr "У цій теці не міститься спілкувань."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
+#: src/client/conversation-viewer/conversation-viewer.vala:136
+#| msgid "Your search returned no results, try refining your search terms"
+msgid "Your search returned no results, try refining your search terms."
 msgstr ""
 "За вашими критеріями пошуку нічого не знайдено. Спробуйте змінити критерії."
 
@@ -3250,8 +3255,6 @@ msgid "Toggle search bar"
 msgstr "Перемкнути панель пошуку"
 
 #: ui/components-headerbar-conversation-list.ui:71
-#| msgctxt "shortcut window"
-#| msgid "Delete conversations"
 msgid "Selection conversations"
 msgstr "Позначені спілкування"
 
