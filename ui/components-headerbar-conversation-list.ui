@@ -68,7 +68,7 @@
         <property name="visible">True</property>
         <property name="focus_on_click">False</property>
         <property name="receives_default">False</property>
-        <property name="tooltip_text" translatable="yes">Selection conversations</property>
+        <property name="tooltip_text" translatable="yes">Select conversations</property>
         <property name="always_show_image">True</property>
         <child>
           <object class="GtkImage" id="selection_button_image">
