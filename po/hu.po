@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-13 09:10+0000\n"
-"PO-Revision-Date: 2023-03-14 03:01+0100\n"
+"POT-Creation-Date: 2023-03-14 07:38+0000\n"
+"PO-Revision-Date: 2023-03-15 01:07+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
 "Language: hu\n"
@@ -1967,28 +1967,24 @@ msgstr "Megjelenítés"
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
-#| msgid "No conversations selected"
 msgid "No Conversations Selected"
 msgstr "Nincs beszélgetés kiválasztva"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:88
-#| msgid "Selecting a conversation from the list will display it here"
 msgid "Selecting a conversation from the list will display it here."
 msgstr "A listában kiválasztott beszélgetés itt fog megjelenni."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:100
-#| msgid "Multiple conversations selected"
 msgid "Multiple Conversations Selected"
 msgstr "Több beszélgetés kijelölve"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:104
-#| msgid "Choosing an action will apply to all selected conversations"
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "A kiválasztott művelet minden beszélgetésen végre lesz hajtva."
 
@@ -1998,25 +1994,22 @@ msgstr "A kiválasztott művelet minden beszélgetésen végre lesz hajtva."
 #. conversations have been found in a search.
 #: src/client/conversation-viewer/conversation-viewer.vala:116
 #: src/client/conversation-viewer/conversation-viewer.vala:132
-#| msgid "No conversations found"
 msgid "No Conversations Found"
 msgstr "Nem találhatóak beszélgetések"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
 #: src/client/conversation-viewer/conversation-viewer.vala:120
-#| msgid "This folder does not contain any conversations"
 msgid "This folder does not contain any conversations."
 msgstr "Ez a mappa nem tartalmaz beszélgetést."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
 #: src/client/conversation-viewer/conversation-viewer.vala:136
-#| msgid "Your search returned no results, try refining your search terms"
 msgid "Your search returned no results, try refining your search terms."
 msgstr ""
-"A keresés nem adott találatokat, próbálja meg finomítani a keresési"
-" kifejezéseket."
+"A keresés nem adott találatokat, próbálja meg finomítani a keresési "
+"kifejezéseket."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -3163,8 +3156,9 @@ msgid "Toggle search bar"
 msgstr "Keresősáv ki- vagy bekapcsolása"
 
 #: ui/components-headerbar-conversation-list.ui:71
-msgid "Selection conversations"
-msgstr "Kijelölés beszélgetések"
+#| msgid "Selection conversations"
+msgid "Select conversations"
+msgstr "Beszélgetések kijelölése"
 
 #: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
