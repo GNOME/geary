@@ -171,7 +171,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         /// Translators: Preferences label
         trust_images_row.title = _("_Always load images");
         trust_images_row.use_underline = true;
-        trust_images_row.activatable_widget = autoselect;
+        trust_images_row.activatable_widget = trust_images;
         trust_images_row.add(trust_images);
 
         var group = new Hdy.PreferencesGroup();
