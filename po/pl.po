@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-04 23:51+0000\n"
-"PO-Revision-Date: 2023-03-05 15:29+0100\n"
+"POT-Creation-Date: 2023-03-14 07:38+0000\n"
+"PO-Revision-Date: 2023-03-18 13:33+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -1996,49 +1996,49 @@ msgstr "Wyświetl"
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
+msgid "No Conversations Selected"
 msgstr "Brak zaznaczonych wątków"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "Zaznaczenie wątku z listy spowoduje jego wyświetlenie w tym miejscu"
+msgid "Selecting a conversation from the list will display it here."
+msgstr "Zaznaczenie wątku z listy spowoduje jego wyświetlenie w tym miejscu."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:100
+msgid "Multiple Conversations Selected"
 msgstr "Zaznaczono wiele wątków"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
+#: src/client/conversation-viewer/conversation-viewer.vala:104
+msgid "Choosing an action will apply to all selected conversations."
 msgstr ""
 "Wybranie działania spowoduje jego zastosowanie do wszystkich zaznaczonych "
-"wątków"
+"wątków."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
+#: src/client/conversation-viewer/conversation-viewer.vala:116
+#: src/client/conversation-viewer/conversation-viewer.vala:132
+msgid "No Conversations Found"
 msgstr "Nie odnaleziono żadnych wątków"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "Ten katalog nie zawiera żadnych wątków"
+#: src/client/conversation-viewer/conversation-viewer.vala:120
+msgid "This folder does not contain any conversations."
+msgstr "Ten katalog nie zawiera żadnych wątków."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
-msgstr "Wyszukiwanie nie zwróciło wyników, proszę spróbować innych słów"
+#: src/client/conversation-viewer/conversation-viewer.vala:136
+msgid "Your search returned no results, try refining your search terms."
+msgstr "Wyszukiwanie nie zwróciło wyników, proszę spróbować innych słów."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -3194,7 +3194,7 @@ msgid "Toggle search bar"
 msgstr "Przełącza pasek wyszukiwania"
 
 #: ui/components-headerbar-conversation-list.ui:71
-msgid "Selection conversations"
+msgid "Select conversations"
 msgstr "Zaznacza wątki"
 
 #: ui/components-headerbar-conversation.ui:60
