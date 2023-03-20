@@ -512,8 +512,14 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      */
     private Gtk.ListBoxRow? get_next_conversation(bool asc=true) {
         int index = asc ? 0 : int.MAX;
+        GLib.List<unowned Gtk.ListBoxRow> selected_rows;
 
-        foreach (Gtk.ListBoxRow row in this.list.get_selected_rows().copy()) {
+        selected_rows = this.list.get_selected_rows();
+        if (selected_rows.length() == 0 ) {
+            return null;
+        }
+
+        foreach (var row in selected_rows) {
             if ((asc && row.get_index() > index) ||
                 (!asc && row.get_index() < index)) {
                 index = row.get_index();
