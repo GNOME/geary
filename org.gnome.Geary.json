@@ -211,12 +211,18 @@
         },
         {
             "name": "libpeas",
-            "buildsystem": "meson",
+            "buildsystem" : "meson",
+            "config-opts" : [
+                "-Dlua51=false",
+                "-Dpython3=false",
+                "-Dgtk_doc=false",
+                "-Dvapi=true"
+            ],
             "sources": [
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/libpeas.git",
-                    "commit": "7f245fa5158204621c3469756a951b68a651c4fe"
+                    "branch": "main"
                 }
             ]
         },
