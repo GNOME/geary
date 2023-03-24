@@ -1,0 +1,46 @@
+/**
+ * Style that is inserted into the message after it is loaded.
+ *
+ * Copyright © 2016 Software Freedom Conservancy Inc.
+ * Copyright © 2020 Michael Gratton <mike@vee.net>
+ */
+
+/*
+ * General HTML style.
+ */
+
+html {
+  color: black;
+  background-color: rgb(250, 250, 250);
+}
+
+table {
+  /* By default, tables reset the font properties to "normal" */
+  font-size: inherit;
+}
+
+a {
+  color: #08c;
+  text-decoration: none;
+}
+
+hr {
+  background-color: #999;
+  height: 1px;
+  border: 0;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+blockquote {
+  margin: 0.3em 16px;
+  border: 0;
+  border-left: 3px #aaa solid;
+  padding: 0 8px;
+}
+
+pre {
+  white-space: break-spaces;
+}
+
+

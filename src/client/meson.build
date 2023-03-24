@@ -59,7 +59,6 @@ client_vala_sources = files(
   'components/components-inspector-error-view.vala',
   'components/components-inspector-log-view.vala',
   'components/components-inspector-system-view.vala',
-  'components/components-placeholder-pane.vala',
   'components/components-preferences-window.vala',
   'components/components-problem-report-info-bar.vala',
   'components/components-reflow-box.c',
@@ -96,8 +95,9 @@ client_vala_sources = files(
 
   'conversation-viewer/conversation-contact-popover.vala',
   'conversation-viewer/conversation-email.vala',
-  'conversation-viewer/conversation-list-box.vala',
-  'conversation-viewer/conversation-message.vala',
+  'conversation-viewer/conversation-email-list.vala',
+  'conversation-viewer/conversation-email-list-actions.vala',
+  'conversation-viewer/conversation-images-policy-menu.vala',
   'conversation-viewer/conversation-viewer.vala',
   'conversation-viewer/conversation-web-view.vala',
 
@@ -140,6 +140,7 @@ client_vala_sources = files(
   'sidebar/sidebar-entry.vala',
   'sidebar/sidebar-tree.vala',
 
+  'util/util-avatar.vala',
   'util/util-cache.vala',
   'util/util-contact.vala',
   'util/util-date.vala',

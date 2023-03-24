@@ -1,0 +1,42 @@
+.geary-conversation-subject {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  font-size: x-large;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.geary-conversation-email-list {
+  border: solid 1px #d3d3d3;
+  border-radius: 8px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-color: white;
+  margin-top: 20px;
+  margin-bottom: 40%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.geary-conversation-content-policy {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #bfd7f4;
+  cursor: pointer;
+}
+
+.geary-conversation-content-policy-title {
+  font-weight: bold;
+  padding: 3px;
+}
+
+.geary-conversation-content-policy-subtitle {
+  padding: 3px;
+}
+
+

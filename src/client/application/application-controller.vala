@@ -142,8 +142,6 @@ internal class Application.Controller :
             )
         );
         Components.WebView.load_resources(config_dir);
-        Composer.WebView.load_resources();
-        ConversationWebView.load_resources();
         Accounts.SignatureWebView.load_resources();
 
         this.all_windows_backgrounded_timeout =
@@ -2658,3 +2656,5 @@ private class Application.DiscardComposerCommand : ComposerCommand {
     }
 
 }
+
+

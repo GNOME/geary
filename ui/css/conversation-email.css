@@ -1,0 +1,114 @@
+
+.geary-email-container {
+  background-color: white;
+}
+
+.geary-collapsible {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.geary-email-container:not(:last-child) {
+  border-bottom: solid 1px #d3d3d3;
+}
+
+.geary-email-header {
+  height: 100%;
+  min-height: 60px;
+  padding: 5px;
+}
+
+.geary-email-avatar {
+  float: left;
+  padding: 5px;
+}
+
+.geary-email-avatar > img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.geary-email-header-preview {
+   opacity: 0.5;
+   font-style: italic;
+   padding-bottom: 10px;
+}
+
+.geary-email-header-from-display-name {
+  font-weight: bold;
+}
+
+.geary-email-header-from-addr {
+  opacity: 0.5;
+}
+
+.geary-email-header-from-others {
+  display: none;
+  opacity: 0.8;
+}
+
+.geary-email-header-to {
+  display: none;
+  opacity: 0.8;
+}
+
+.geary-email-header-cc {
+  display: none;
+  opacity: 0.8;
+}
+
+.geary-email-header-bcc {
+  display: none;
+  opacity: 0.8;
+}
+
+.geary-label {
+  padding: 2px;
+}
+
+.geary-label > a {
+  color: grey;
+}
+
+.geary-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.geary-email-action-container {
+  color: grey;
+  float: right;
+}
+
+.geary-email-action {
+  margin: 5px;
+  display: inline-block;
+}
+
+.geary-collapsible.active > .geary-email-header > .geary-ellipsis {
+  display: block;
+  margin-left: 65px;
+}
+
+.geary-collapsible.active > .geary-email-header > .geary-email-header-preview {
+  display: none;
+}
+
+.geary-email-content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.geary-conversation-email-list-loaded > * > .geary-email-content {
+  transition: max-height 0.15s ease-out;
+}
+
+iframe {
+  display: block;  /* iframes are inline by default */
+  width: 100%;  /* Set width to 100% of the viewport width */
+  border: none; /* Remove default border */
+}
+

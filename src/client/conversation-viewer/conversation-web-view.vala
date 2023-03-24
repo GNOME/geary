@@ -9,21 +9,36 @@
 public class ConversationWebView : Components.WebView {
 
 
-    private const string DECEPTIVE_LINK_CLICKED = "deceptive_link_clicked";
-
-    // Key codes we don't forward on to the super class on key press
-    // since we want to override them elsewhere, especially
-    // ConversationListBox.
-    private const uint[] BLACKLISTED_KEY_CODES = {
-        Gdk.Key.space,
-        Gdk.Key.KP_Space,
-        Gdk.Key.Up,
-        Gdk.Key.Down,
-        Gdk.Key.Page_Up,
-        Gdk.Key.Page_Down,
-        Gdk.Key.Home,
-        Gdk.Key.End
+    private const string[] HTML_PLACEHOLDERS = {
+        "@TO@",
+        "@CC@",
+        "@BCC@",
+        "@CONTENT_POLICY_TITLE@",
+        "@CONTENT_POLICY_SUBTITLE@"
     };
+    private static string[] HTML_TRANSLATIONS = {
+        gettext("To"),
+        gettext("Cc"),
+        gettext("Bcc"),
+        gettext("Remote images not shown"),
+        gettext("Only show remote images from senders you trust.")
+    };
+
+    private static Gee.HashMap<string,string> html_translations =
+        new Gee.HashMap<string,string>();
+
+    static construct {
+        uint i = 0;
+        foreach (string placeholder in HTML_PLACEHOLDERS) {
+            html_translations[placeholder] = HTML_TRANSLATIONS[i++];
+        }
+    }
+
+    private Gee.HashMap<string,string> translated_resources =
+        new Gee.HashMap<string,string>();
+
+    private const string DECEPTIVE_LINK_CLICKED = "deceptive_link_clicked";
+    private const string IMAGES_POLICY_CLICKED = "images_policy_clicked";
 
     /** Specifies the type of deceptive link text when clicked. */
     public enum DeceptiveText {
@@ -36,25 +51,13 @@ public class ConversationWebView : Components.WebView {
         DECEPTIVE_DOMAIN = 2;
     }
 
-    private static WebKit.UserStyleSheet? app_stylesheet = null;
-    private static WebKit.UserScript? app_script = null;
-
-    public static new void load_resources()
-        throws Error {
-        ConversationWebView.app_script = Components.WebView.load_app_script(
-            "conversation-web-view.js"
-        );
-        ConversationWebView.app_stylesheet = Components.WebView.load_app_stylesheet(
-            "conversation-web-view.css"
-        );
-    }
-
-
     /** Emitted when the user clicks on a link with deceptive text. */
     public signal void deceptive_link_clicked(
         DeceptiveText reason, string text, string href, Gdk.Rectangle location
     );
 
+    /** Emitted when the user clicks image policy button. */
+    public signal void images_policy_clicked(uint x, uint y, uint width, uint height);
 
     /**
      * Constructs a new web view for displaying an email message body.
@@ -65,24 +68,32 @@ public class ConversationWebView : Components.WebView {
         base(config);
         init();
 
-        // These only need to be added when creating a new WebProcess,
-        // not when sharing one
-        this.user_content_manager.add_script(ConversationWebView.app_script);
-        this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
-    }
+        Components.WebView.default_context.register_uri_scheme("html", (req) => {
+            WebKit.WebView? view = req.get_web_view() as WebKit.WebView;
+            if (view != null) {
+                handle_html_request(req);
+            }
+        });
+        Components.WebView.default_context.register_uri_scheme("avatar", (req) => {
+            WebKit.WebView? view = req.get_web_view() as WebKit.WebView;
+            if (view != null) {
+                handle_avatar_request(req);
+            }
+        });
+        Components.WebView.default_context.register_uri_scheme("iframe", (req) => {
+            WebKit.WebView? view = req.get_web_view() as WebKit.WebView;
+            if (view != null) {
+                handle_iframe_request(req);
+            }
+        });
 
-    /**
-     * Constructs a new web view for displaying an email message body.
-     *
-     * The WebKitGTK WebProcess will be shared with the related view's
-     * process.
-     */
-    internal ConversationWebView.with_related_view(
-        Application.Configuration config,
-        ConversationWebView related
-    ) {
-        base.with_related_view(config, related);
-        init();
+        this.add_script("conversation-web-view.js");
+        this.add_script("conversation-email-list.js");
+        this.add_script("conversation-email.js");
+
+        this.add_style_sheet("conversation-web-view.css");
+        this.add_style_sheet("conversation-email-list.css");
+        this.add_style_sheet("conversation-email.css");
     }
 
     /**
@@ -90,7 +101,7 @@ public class ConversationWebView : Components.WebView {
      */
     public async string? get_selection_for_find() throws Error{
         return yield call_returning<string?>(
-            Util.JS.callable("getSelectionForFind"), null
+            Util.JS.callable("geary.getSelectionForFind"), null
         );
     }
 
@@ -99,7 +110,7 @@ public class ConversationWebView : Components.WebView {
      */
     public async string? get_selection_for_quoting() throws Error {
         return yield call_returning<string?>(
-            Util.JS.callable("getSelectionForQuoting"), null
+            Util.JS.callable("geary.getSelectionForQuoting"), null
         );
     }
 
@@ -109,7 +120,7 @@ public class ConversationWebView : Components.WebView {
     public async int? get_anchor_target_y(string anchor_body)
         throws GLib.Error {
         return yield call_returning<int?>(
-            Util.JS.callable("getAnchorTargetY").string(anchor_body), null
+            Util.JS.callable("geary.getAnchorTargetY").string(anchor_body), null
         );
     }
 
@@ -185,46 +196,45 @@ public class ConversationWebView : Components.WebView {
         get_find_controller().search_finish();
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
-        // WebView consumes a number of key presses for scrolling
-        // itself internally, but we want them to navigate around in
-        // ConversationListBox, so don't forward any on.
-        bool ret = Gdk.EVENT_PROPAGATE;
-        if (!(((int) event.keyval) in BLACKLISTED_KEY_CODES)) {
-            ret = base.key_press_event(event);
+    /**
+     * Add script to web view
+     */
+    public void add_script(string name) {
+        try {
+            var script = Components.WebView.load_app_script(name);
+            this.user_content_manager.add_script(script);
+        } catch (GLib.Error err) {
+            error("Can't load script: %s", err.message);
         }
-        return ret;
     }
 
-    public override void get_preferred_height(out int minimum_height,
-                                              out int natural_height) {
-        // XXX clamp height to something not too outrageous so we
-        // don't get an XServer error trying to allocate a massive
-        // window.
-        const uint max_pixels = 8 * 1024 * 1024;
-        int width = get_allocated_width();
-        int height = this.preferred_height;
-        if (height * width > max_pixels) {
-            height = (int) Math.floor(max_pixels / (double) width);
+    /**
+     * Add style sheet to web view
+     */
+    public void add_style_sheet(string name) {
+        try {
+            var style_sheet = Components.WebView.load_app_stylesheet(name);
+            this.user_content_manager.add_style_sheet(style_sheet);
+        } catch (GLib.Error err) {
+            error("Can't load style sheet: %s", err.message);
         }
-
-        minimum_height = natural_height = height;
     }
 
-    // Overridden since we always what the view to be sized according
-    // to the available space in the parent, not by the width of the
-    // web view.
-    public override void get_preferred_width(out int minimum_height,
-                                             out int natural_height) {
-        minimum_height = natural_height = 0;
+    protected virtual void handle_avatar_request(WebKit.URISchemeRequest request) {
+        request.finish_error(new FileError.NOENT("Unknown avatar URL"));
+    }
+
+    protected virtual void handle_iframe_request(WebKit.URISchemeRequest request) {
+        request.finish_error(new FileError.NOENT("Unknown iframe URL"));
     }
 
     private void init() {
         register_message_callback(
             DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
         );
-
-        this.notify["preferred-height"].connect(() => queue_resize());
+        register_message_callback(
+            IMAGES_POLICY_CLICKED, on_images_policy_clicked
+        );
     }
 
     private void on_deceptive_link_clicked(GLib.Variant? parameters) {
@@ -263,4 +273,47 @@ public class ConversationWebView : Components.WebView {
         );
     }
 
+    private void on_images_policy_clicked(GLib.Variant? parameters) {
+        var dict = new GLib.VariantDict(parameters);
+        uint x = (uint) dict.lookup_value(
+            "x", GLib.VariantType.DOUBLE
+        ).get_double();
+        uint y = (uint) dict.lookup_value(
+            "y", GLib.VariantType.DOUBLE
+        ).get_double();
+        uint width = (uint) dict.lookup_value(
+            "width", GLib.VariantType.DOUBLE
+        ).get_double();
+        uint height = (uint) dict.lookup_value(
+            "height", GLib.VariantType.DOUBLE
+        ).get_double();
+
+        images_policy_clicked(x, y, width, height);
+    }
+
+    private void handle_html_request(WebKit.URISchemeRequest request) {
+        try {
+            string html_path = request.get_path();
+            string resource;
+
+            if (html_path in this.translated_resources.keys) {
+                resource = this.translated_resources[html_path];
+            } else {
+                resource = GioUtil.read_resource(html_path);
+
+                foreach (string placeholder in HTML_PLACEHOLDERS) {
+                    resource = resource.replace(placeholder, html_translations[placeholder]);
+                }
+                this.translated_resources[html_path] = resource;
+            }
+
+            Geary.Memory.Buffer buf = new Geary.Memory.StringBuffer(resource);
+            request.finish(buf.get_input_stream(), buf.size, null);
+        } catch (GLib.Error err) {
+            request.finish_error(err);
+        }
+    }
 }
+
+
+

@@ -8,7 +8,6 @@ body {
   border: 0 !important;
   padding: 0 !important;
   color: black;
-  background-color: #f9f9f9;
   font-size: medium !important;
 }
 
@@ -63,3 +62,4 @@ pre {
   white-space: break-spaces;
   margin: 0;
 }
+

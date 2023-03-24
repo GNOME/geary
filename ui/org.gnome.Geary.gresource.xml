@@ -1,56 +1,61 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <gresources>
   <gresource prefix="/org/gnome/Geary">
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_add_pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_edit_pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_list_pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_servers_pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">application-main-window.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
-    <file compressed="true">components-web-view.js</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-conversation-actions.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-application.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-conversation-list.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-headerbar-conversation.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-in-app-notification.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-info-bar.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-inspector.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-inspector-error-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-inspector-log-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-inspector-system-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-menu-application.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-menu-conversation.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">components-placeholder-pane.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-editor.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-editor-menus.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-headerbar.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-link-popover.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">composer-widget.ui</file>
-    <file compressed="true">composer-web-view.css</file>
-    <file compressed="true">composer-web-view.js</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-contact-popover.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-list-row.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-list-view.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-email.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-email-menus.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-message.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-message-link-popover.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-message-menus.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">conversation-viewer.ui</file>
-    <file compressed="true">conversation-web-view.css</file>
-    <file compressed="true">conversation-web-view.js</file>
-    <file compressed="true" preprocess="xml-stripblanks">find_bar.glade</file>
-    <file compressed="true" preprocess="xml-stripblanks">folder-popover.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">folder-popover-row.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
-    <file compressed="true" preprocess="xml-stripblanks">problem-details-dialog.ui</file>
-    <file compressed="true">signature-web-view.js</file>
-    <file compressed="true">geary.css</file>
-    <file compressed="true">single-key-shortcuts.css</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="accounts_editor_add_pane.ui">gtk/accounts_editor_add_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="accounts_editor_edit_pane.ui">gtk/accounts_editor_edit_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="accounts_editor_list_pane.ui">gtk/accounts_editor_list_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="accounts_editor_servers_pane.ui">gtk/accounts_editor_servers_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="accounts_editor.ui">gtk/accounts_editor.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="application-main-window.ui">gtk/application-main-window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-attachment-pane-menus.ui">gtk/components-attachment-pane-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-attachment-pane.ui">gtk/components-attachment-pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-attachment-view.ui">gtk/components-attachment-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-conversation-actions.ui">gtk/components-conversation-actions.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-headerbar-application.ui">gtk/components-headerbar-application.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-headerbar-conversation-list.ui">gtk/components-headerbar-conversation-list.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-headerbar-conversation.ui">gtk/components-headerbar-conversation.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-in-app-notification.ui">gtk/components-in-app-notification.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-info-bar.ui">gtk/components-info-bar.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-inspector-error-view.ui">gtk/components-inspector-error-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-inspector-log-view.ui">gtk/components-inspector-log-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-inspector-system-view.ui">gtk/components-inspector-system-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-inspector.ui">gtk/components-inspector.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-menu-application.ui">gtk/components-menu-application.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-menu-conversation.ui">gtk/components-menu-conversation.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="components-placeholder-pane.ui">gtk/components-placeholder-pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="composer-editor-menus.ui">gtk/composer-editor-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="composer-editor.ui">gtk/composer-editor.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="composer-headerbar.ui">gtk/composer-headerbar.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="composer-link-popover.ui">gtk/composer-link-popover.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="composer-widget.ui">gtk/composer-widget.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-contact-popover.ui">gtk/conversation-contact-popover.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-email-menus.ui">gtk/conversation-email-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-email.ui">gtk/conversation-email.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-list-row.ui">gtk/conversation-list-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-list-view.ui">gtk/conversation-list-view.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-message-link-popover.ui">gtk/conversation-message-link-popover.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-message-menus.ui">gtk/conversation-message-menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-message.ui">gtk/conversation-message.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="conversation-viewer.ui">gtk/conversation-viewer.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="folder-popover-row.ui">gtk/folder-popover-row.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="folder-popover.ui">gtk/folder-popover.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="help-overlay.ui">gtk/help-overlay.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="problem-details-dialog.ui">gtk/problem-details-dialog.ui</file>
+    <file compressed="true" alias="composer-web-view.css">css/composer-web-view.css</file>
+    <file compressed="true" alias="conversation-email.css">css/conversation-email.css</file>
+    <file compressed="true" alias="conversation-email-list.css">css/conversation-email-list.css</file>
+    <file compressed="true" alias="conversation-web-view.css">css/conversation-web-view.css</file>
+    <file compressed="true" alias="geary.css">css/geary.css</file>
+    <file compressed="true" alias="single-key-shortcuts.css">css/single-key-shortcuts.css</file>
+    <file compressed="true" alias="conversation-email.html">web/conversation-email.html</file>
+    <file compressed="true" alias="conversation-email-list.html">web/conversation-email-list.html</file>
+    <file compressed="true" alias="conversation-viewer.html">web/conversation-viewer.html</file>
+    <file compressed="true" alias="components-web-view.js">web/components-web-view.js</file>
+    <file compressed="true" alias="composer-web-view.js">web/composer-web-view.js</file>
+    <file compressed="true" alias="conversation-email.js">web/conversation-email.js</file>
+    <file compressed="true" alias="conversation-email-list.js">web/conversation-email-list.js</file>
+    <file compressed="true" alias="conversation-viewer.js">web/conversation-viewer.js</file>
+    <file compressed="true" alias="conversation-web-view.js">web/conversation-web-view.js</file>
+    <file compressed="true" alias="signature-web-view.js">web/signature-web-view.js</file>
   </gresource>
 </gresources>

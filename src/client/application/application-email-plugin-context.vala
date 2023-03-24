@@ -35,7 +35,7 @@ internal class Application.EmailPluginContext :
     public void add_email_info_bar(Plugin.EmailIdentifier displayed,
                                     Plugin.InfoBar info_bar,
                                     uint priority) {
-        Geary.EmailIdentifier? id = this.globals.email.to_engine_id(displayed);
+        /*Geary.EmailIdentifier? id = this.globals.email.to_engine_id(displayed);
         if (id != null) {
             foreach (MainWindow main in this.application.get_main_windows()) {
                 if (main.conversation_viewer.current_list != null) {
@@ -49,7 +49,7 @@ internal class Application.EmailPluginContext :
                     );
                 }
             }
-        }
+        }*/
     }
 
     public void remove_email_info_bar(Plugin.EmailIdentifier displayed,
@@ -95,3 +95,4 @@ internal class Application.EmailPluginContext :
     }
 
 }
+

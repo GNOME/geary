@@ -30,14 +30,14 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
  */
 public class GearyWebExtension : Object {
 
-    private const string PAGE_STATE_OBJECT_NAME = "geary";
-
     // Keep these in sync with Components.WebView
     private const string MESSAGE_EXCEPTION = "__exception__";
     private const string MESSAGE_ENABLE_REMOTE_LOAD = "__enable_remote_load__";
     private const string MESSAGE_RETURN_VALUE = "__return__";
 
-    private const string[] ALLOWED_SCHEMES = { "cid", "geary", "data", "blob" };
+    private const string[] ALLOWED_SCHEMES = {
+        "cid", "geary", "html", "avatar", "iframe", "data", "blob"
+    };
 
     private const string EXTENSION_CLASS_VAR = "_GearyWebExtension";
     private const string EXTENSION_CLASS_SEND = "send";
@@ -74,27 +74,13 @@ public class GearyWebExtension : Object {
         } catch (GLib.UriError err) {
             warning("Invalid request URI: %s", err.message);
         }
+
         if (uri != null && uri.get_scheme() in ALLOWED_SCHEMES) {
             // Always load internal resources
             should_load = true;
-        } else {
-            // Only load anything else if remote resources loading is
-            // permitted
-            if (should_load_remote_resources(page)) {
-                should_load = true;
-            } else {
-                page.send_message_to_view.begin(
-                    new WebKit.UserMessage("remote_resource_load_blocked", null),
-                    null
-                );
-            }
         }
 
         return should_load ? Gdk.EVENT_PROPAGATE : Gdk.EVENT_STOP; // LOL
-    }
-
-    private bool should_load_remote_resources(WebKit.WebPage page) {
-        return page.get_data<string>(EXTENSION_CLASS_ALLOW_REMOTE_LOAD) != null;
     }
 
     private WebKit.UserMessage to_exception_message(string? name,
@@ -159,21 +145,29 @@ public class GearyWebExtension : Object {
                 }
             }
 
-            JSC.Value page_state = context.get_value(PAGE_STATE_OBJECT_NAME);
             JSC.Value? ret = null;
             if (message.name == MESSAGE_ENABLE_REMOTE_LOAD) {
+                JSC.Value object = context.get_value("conversation_email");
                 page.set_data<string>(
-                    EXTENSION_CLASS_ALLOW_REMOTE_LOAD,
-                    EXTENSION_CLASS_ALLOW_REMOTE_LOAD
+                    call_param[0].to_string(),
+                    call_param[0].to_string()
                 );
-                if (!page_state.is_undefined()) {
-                    ret = page_state.object_invoke_methodv(
-                        "loadRemoteResources", null
+                if (!object.is_undefined()) {
+                    ret = object.object_invoke_methodv(
+                        "loadRemoteResources", call_param
                     );
                 }
             } else {
-                ret = page_state.object_invoke_methodv(
-                    message.name, call_param
+                var split  = message.name.split(".");
+                if (split.length != 2) {
+                    return false;
+                }
+                JSC.Value object = context.get_value(split[0]);
+                string method = split[1];
+
+                warning("%s, %s, %p", split[0], split[1], object);
+                ret = object.object_invoke_methodv(
+                    method, call_param
                 );
             }
 
@@ -277,3 +271,6 @@ public class GearyWebExtension : Object {
     }
 
 }
+
+
+

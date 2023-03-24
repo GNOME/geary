@@ -24,12 +24,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
         add_test("is_descendant_of_with_class", is_descendant_of_with_class);
         add_test("is_descendant_of_no_match", is_descendant_of_no_match);
         add_test("is_descendant_of_lax", is_descendant_of_lax);
-
-        try {
-            ConversationWebView.load_resources();
-        } catch (GLib.Error err) {
-            GLib.assert_not_reached();
-        }
     }
 
     public void is_deceptive_text_not_url() throws GLib.Error {

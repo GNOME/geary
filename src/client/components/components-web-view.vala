@@ -27,7 +27,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     public const string CID_URL_PREFIX = "cid:";
 
     // Keep these in sync with GearyWebExtension
-    private const string MESSAGE_ENABLE_REMOTE_LOAD = "__enable_remote_load__";
     private const string MESSAGE_EXCEPTION = "__exception__";
     private const string MESSAGE_RETURN_VALUE = "__return__";
 
@@ -65,7 +64,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
 
-    private static WebKit.WebContext? default_context = null;
+    protected static WebKit.WebContext? default_context = null;
 
     private static WebKit.UserStyleSheet? user_stylesheet = null;
 
@@ -248,18 +247,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         }
     }
 
-    /**
-     * Specifies whether loading remote resources is currently permitted.
-     *
-     * If false, any remote resources contained in HTML loaded into
-     * the view will be blocked.
-     *
-     * @see load_remote_resources
-     */
-    public bool is_load_remote_resources_enabled {
-        get; private set; default = false;
-    }
-
     public string document_font {
         get {
             return _document_font;
@@ -331,11 +318,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
-        setts.enable_developer_extras = config.enable_inspector;
+        setts.enable_developer_extras = true;
         setts.enable_fullscreen = false;
         setts.enable_html5_database = false;
         setts.enable_html5_local_storage = false;
-        setts.enable_java = false;
         setts.enable_javascript = true;
         setts.enable_javascript_markup = false;
         setts.enable_media_stream = false;
@@ -345,7 +331,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         setts.enable_plugins = false;
 #endif
         setts.hardware_acceleration_policy =
-            WebKit.HardwareAccelerationPolicy.NEVER;
+            WebKit.HardwareAccelerationPolicy.ALWAYS;
         setts.javascript_can_access_clipboard = true;
 
         WebKit.UserContentManager content_manager =
@@ -362,6 +348,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         );
         base_ref();
         init(config);
+
     }
 
     /**
@@ -404,7 +391,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * Returns the view's content as an HTML string.
      */
     public async string? get_html() throws Error {
-        return yield call_returning<string?>(Util.JS.callable("getHtml"), null);
+        return yield call_returning<string?>(Util.JS.callable("geary.getHtml"), null);
     }
 
     /**
@@ -428,22 +415,8 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         this.internal_resources.set_all(res);
     }
 
-    /**
-     * Load any remote resources that were previously blocked.
-     *
-     * Calling this before calling {@link load_html} will enable any
-     * remote resources to be loaded as the HTML is loaded. Calling it
-     * afterwards wil ensure any remote resources that were blocked
-     * during initial HTML page load are now loaded.
-     *
-     * @see is_load_remote_resources_enabled
-     */
-    public async void load_remote_resources(GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        this.is_load_remote_resources_enabled = true;
-        yield this.call_void(
-            Util.JS.callable(MESSAGE_ENABLE_REMOTE_LOAD), null
-        );
+    public void clear_internal_resources() {
+        this.internal_resources.clear();
     }
 
     /**
@@ -485,21 +458,15 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         notify_property("preferred-height");
     }
 
-    public new async void set_editable(bool enabled,
-                                       Cancellable? cancellable)
-        throws Error {
-        yield call_void(
-            Util.JS.callable("setEditable").bool(enabled), cancellable
-        );
-    }
-
-    /**
+        /**
      * Invokes a {@link Util.JS.Callable} on this web view.
      *
-     * This calls the given callable on the `geary` object for the
+     * This calls the given callable for the
      * current view, any returned value are ignored.
+     * If you need to call another object, just prefix
+     * callable with object::
      */
-    protected async void call_void(Util.JS.Callable target,
+    public async void call_void(Util.JS.Callable target,
                                    GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield call_impl(target, cancellable);
@@ -508,9 +475,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     /**
      * Invokes a {@link Util.JS.Callable} on this web view.
      *
-     * This calls the given callable on the `geary` object for the
+     * This calls the given callable for the
      * current view. The value returned by the call is returned by
-     * this method.
+     * this method. If you need to call another object, just prefix
+     * callable with object::
      *
      * The type parameter `T` must match the type returned by the
      * call, else an error is thrown. Only simple nullable value types
@@ -518,7 +486,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      * dictionaries, etc) specify {@link GLib.Variant} for `T` and
      * manually parse that.
      */
-    protected async T call_returning<T>(Util.JS.Callable target,
+    public async T call_returning<T>(Util.JS.Callable target,
                                         GLib.Cancellable? cancellable)
         throws GLib.Error {
         WebKit.UserMessage? response = yield call_impl(target, cancellable);
@@ -578,6 +546,14 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             }
         }
         return ret_value;
+    }
+
+    public new async void set_editable(bool enabled,
+                                       Cancellable? cancellable)
+        throws Error {
+        yield call_void(
+            Util.JS.callable("geary.setEditable").bool(enabled), cancellable
+        );
     }
 
     /**
@@ -849,3 +825,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
 }
+
+
+
+
+
+
+

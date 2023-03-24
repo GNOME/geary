@@ -839,7 +839,7 @@ public class Application.MainWindow :
                     // conversations can be displayed without having to go
                     // back to the db
                     ConversationList.View.REQUIRED_FIELDS |
-                    ConversationListBox.REQUIRED_FIELDS |
+                    ConversationEmailList.REQUIRED_FIELDS |
                     ConversationEmail.REQUIRED_FOR_CONSTRUCT,
                     MIN_CONVERSATION_COUNT
                 );
@@ -896,6 +896,7 @@ public class Application.MainWindow :
                                  bool is_interactive) {
         bool inhibit_autoselect = (location != this.selected_folder);
         yield select_folder(location, is_interactive, inhibit_autoselect);
+        print("show_email");
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -905,7 +906,7 @@ public class Application.MainWindow :
                 // A single conversation was loaded, so ensure we
                 // scroll to the email in the conversation.
                 Geary.App.Conversation? target = Geary.Collection.first(loaded);
-                ConversationListBox? current_list =
+                ConversationEmailList? current_list =
                     this.conversation_viewer.current_list;
                 if (current_list != null &&
                     current_list.conversation == target) {
@@ -916,7 +917,7 @@ public class Application.MainWindow :
                     // still be in the middle of loading the messages
                     // obtained from the conversation monitor when
                     // this call is made.
-                    current_list.scroll_to_messages(to_show);
+                    //current_list.scroll_to_messages(to_show);
                 } else {
                     // The target conversation is not loaded, select
                     // it and scroll to the messages.
@@ -977,6 +978,7 @@ public class Application.MainWindow :
             // any of the composer's referred emails (preferring the
             // latest), and if so add it inline, otherwise add it full
             // paned.
+            /*
             Geary.Email? latest_referred = null;
             if (this.conversation_viewer.current_list != null) {
                 Gee.Collection<Geary.EmailIdentifier>? referrants =
@@ -998,7 +1000,7 @@ public class Application.MainWindow :
                 this.conversation_viewer.do_compose(composer);
             }
             // Show the correct leaflet
-            this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);
+            this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);*/
         }
     }
 
@@ -1475,7 +1477,7 @@ public class Application.MainWindow :
             selected != null && selected.commands.can_redo
         );
     }
-
+/*
     private bool prompt_delete_conversations(int count) {
         ConfirmationDialog dialog = new ConfirmationDialog(
             this,
@@ -1504,7 +1506,7 @@ public class Application.MainWindow :
             _("Delete"), "destructive-action"
         );
         return (dialog.run() == Gtk.ResponseType.OK);
-    }
+    }*/
 
     private async Gee.Collection<Geary.App.Conversation>
         load_conversations_for_email(
@@ -1555,9 +1557,9 @@ public class Application.MainWindow :
         if (this.update_ui_last + UPDATE_UI_INTERVAL < now) {
             this.update_ui_last = now;
 
-            if (this.conversation_viewer.current_list != null) {
+            /*if (this.conversation_viewer.current_list != null) {
                 this.conversation_viewer.current_list.update_display();
-            }
+            }*/
 
             this.conversation_list_view.refresh_times();
         }
@@ -1715,16 +1717,16 @@ public class Application.MainWindow :
     }
 
     private async void create_composer_from_viewer(Composer.Widget.ContextType type) {
-        Geary.Account? account = this.selected_account;
+        /*Geary.Account? account = this.selected_account;
         ConversationEmail? email_view = null;
-        ConversationListBox? list_view = this.conversation_viewer.current_list;
+        ConversationEmailList? list_view = this.conversation_viewer.current_list;
         if (list_view != null) {
             email_view = list_view.get_reply_target();
         }
         if (account != null && email_view != null) {
             string? quote = yield email_view.get_selection_for_quoting();
             yield create_composer(account, type, email_view.email, quote);
-        }
+        }*/
     }
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
@@ -2299,14 +2301,14 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_conversation_view_added(ConversationListBox list) {
-        list.email_loaded.connect(on_email_loaded);
+    private void on_conversation_view_added(ConversationEmailList list) {
+        /*list.email_loaded.connect(on_email_loaded);
         list.mark_email.connect(on_email_mark);
         list.reply_to_all_email.connect(on_email_reply_to_all);
         list.reply_to_sender_email.connect(on_email_reply_to_sender);
         list.forward_email.connect(on_email_forward);
         list.trash_email.connect(on_email_trash);
-        list.delete_email.connect(on_email_delete);
+        list.delete_email.connect(on_email_delete);*/
     }
 
     // Window-level action callbacks
@@ -2384,7 +2386,7 @@ public class Application.MainWindow :
     }
 
     private void on_zoom(SimpleAction action, Variant? parameter) {
-        ConversationListBox? view = this.conversation_viewer.current_list;
+        /*ConversationEmailList? view = this.conversation_viewer.current_list;
         if (view != null && parameter != null) {
             string zoom_action = parameter.get_string();
             if (zoom_action == "in")
@@ -2393,7 +2395,7 @@ public class Application.MainWindow :
                 view.zoom_out();
             else
                 view.zoom_reset();
-        }
+        }*/
     }
 
     private void on_reply_conversation() {
@@ -2681,7 +2683,7 @@ public class Application.MainWindow :
     }
 
     private void on_delete_conversation() {
-        Geary.FolderSupport.Remove target =
+       /* Geary.FolderSupport.Remove target =
             this.selected_folder as Geary.FolderSupport.Remove;
         Gee.Collection<Geary.App.Conversation> conversations =
             this.conversation_list_view.selected;
@@ -2697,11 +2699,11 @@ public class Application.MainWindow :
                     }
                 }
             );
-        }
+        }*/
         // No need to disable selection mode, handled by model change
     }
-
-    private void on_email_loaded(ConversationListBox view,
+/*
+    private void on_email_loaded(ConversationEmailList view,
                                  Geary.Email loaded) {
         this.controller.email_loaded(
             view.conversation.base_folder.account.information,
@@ -2709,7 +2711,7 @@ public class Application.MainWindow :
         );
     }
 
-    private void on_email_mark(ConversationListBox view,
+    private void on_email_mark(ConversationEmailList view,
                                Gee.Collection<Geary.EmailIdentifier> messages,
                                Geary.NamedFlag? to_add,
                                Geary.NamedFlag? to_remove) {
@@ -2725,7 +2727,7 @@ public class Application.MainWindow :
                 remove_flags = new Geary.EmailFlags();
                 remove_flags.add(to_remove);
             }
-            this.controller.mark_messages.begin(
+            /*this.controller.mark_messages.begin(
                 location,
                 Geary.Collection.single(view.conversation),
                 messages,
@@ -2738,7 +2740,7 @@ public class Application.MainWindow :
                         handle_error(location.account.information, err);
                     }
                 }
-            );
+            )
         }
         this.conversation_list_view.selection_mode_enabled = false;
     }
@@ -2770,7 +2772,7 @@ public class Application.MainWindow :
         this.conversation_list_view.selection_mode_enabled = false;
     }
 
-    private void on_email_trash(ConversationListBox view, Geary.Email target) {
+    private void on_email_trash(ConversationEmailList view, Geary.Email target) {
         Geary.Folder? source = this.selected_folder;
         if (source != null) {
             this.controller.move_messages_special.begin(
@@ -2789,8 +2791,8 @@ public class Application.MainWindow :
         }
     }
 
-    private void on_email_delete(ConversationListBox view, Geary.Email target) {
-        Geary.FolderSupport.Remove? source =
+    private void on_email_delete(ConversationEmailList view, Geary.Email target) {
+        /*Geary.FolderSupport.Remove? source =
             this.selected_folder as Geary.FolderSupport.Remove;
         if (source != null && prompt_delete_messages(1)) {
             this.controller.delete_messages.begin(
@@ -2806,6 +2808,10 @@ public class Application.MainWindow :
                 }
             );
         }
-    }
+    }*/
 
 }
+
+
+
+

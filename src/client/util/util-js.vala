@@ -422,6 +422,21 @@ namespace Util.JS {
             return this;
         }
 
+        public Callable string_array(string[] values) {
+            var builder = new GLib.VariantBuilder(new GLib.VariantType("as"));
+            foreach (var value in values) {
+                warning("%s", value);
+                builder.add("s", value);
+            }
+            add_param(
+                new GLib.Variant(
+                    "as",
+                    builder
+                )
+            );
+            return this;
+        }
+
         private inline void add_param(GLib.Variant value) {
             this.args += value;
         }
