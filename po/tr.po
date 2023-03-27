@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-04 23:51+0000\n"
-"PO-Revision-Date: 2023-03-05 22:40+0300\n"
+"POT-Creation-Date: 2023-03-14 07:38+0000\n"
+"PO-Revision-Date: 2023-03-26 01:40+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -1933,47 +1933,47 @@ msgstr "Göster"
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
-msgstr "Konuşma seçilmedi"
+msgid "No Conversations Selected"
+msgstr "Konuşma Seçilmedi"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "Listeden bir ileti seçtiğinizde burada gösterilecek"
+msgid "Selecting a conversation from the list will display it here."
+msgstr "Listeden bir ileti seçtiğinizde burada gösterilecek."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
-msgstr "Birden çok konuşma seçildi"
+#: src/client/conversation-viewer/conversation-viewer.vala:100
+msgid "Multiple Conversations Selected"
+msgstr "Birden Çok Konuşma Seçildi"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
-msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır"
+#: src/client/conversation-viewer/conversation-viewer.vala:104
+msgid "Choosing an action will apply to all selected conversations."
+msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
-msgstr "Konuşma bulunamadı"
+#: src/client/conversation-viewer/conversation-viewer.vala:116
+#: src/client/conversation-viewer/conversation-viewer.vala:132
+msgid "No Conversations Found"
+msgstr "Konuşma Bulunamadı"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "Bu klasör herhangi bir konuşma içermiyor"
+#: src/client/conversation-viewer/conversation-viewer.vala:120
+msgid "This folder does not contain any conversations."
+msgstr "Bu klasör herhangi bir konuşma içermiyor."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
-msgstr "Aramanız sonuçsuz kaldı, arama terimlerinizi arıtmayı deneyin"
+#: src/client/conversation-viewer/conversation-viewer.vala:136
+msgid "Your search returned no results, try refining your search terms."
+msgstr "Aramanız sonuçsuz kaldı, arama terimlerinizi basitleştirmeyi deneyin."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -3103,11 +3103,8 @@ msgid "Toggle search bar"
 msgstr "Arama çubuğunu aç"
 
 #: ui/components-headerbar-conversation-list.ui:71
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Delete conversations"
-msgid "Selection conversations"
-msgstr "Konuşmaları sil"
+msgid "Select conversations"
+msgstr "Konuşma seç"
 
 #: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
