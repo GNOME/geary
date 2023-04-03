@@ -1,13 +1,13 @@
 # Italian translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Federico Bruni <fede@inventati.org>, 2014-2020.
+# Federico Bruni <fede@inventati.org>, 2014-2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary help master\n"
-"POT-Creation-Date: 2020-08-27 00:32+0000\n"
-"PO-Revision-Date: 2020-08-29 00:29+0200\n"
+"POT-Creation-Date: 2023-02-28 17:44+0000\n"
+"PO-Revision-Date: 2023-03-13 22:12+0100\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italian <gnome-it-list@gnome.org>\n"
 "Language: it\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Gtranslator 3.36.0\n"
+"X-Generator: Gtranslator 42.0\n"
 
 #. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
 msgctxt "_"
@@ -297,10 +297,6 @@ msgstr "Supporto"
 
 #. (itstool) path: section/p
 #: C/bugs.page:15
-#| msgid ""
-#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
-#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
-#| "can be fixed."
 msgid ""
 "If you are having trouble using Geary, please <link href=\"https://wiki."
 "gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary community "
@@ -317,10 +313,6 @@ msgstr "Segnalazione bug"
 
 #. (itstool) path: section/p
 #: C/bugs.page:23
-#| msgid ""
-#| "If you suspect you've found a bug in Geary, please <link href=\"https://"
-#| "wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it "
-#| "can be fixed."
 msgid ""
 "If you suspect you have found a bug in Geary, please follow the <link href="
 "\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
@@ -433,9 +425,6 @@ msgstr ""
 
 #. (itstool) path: page/p
 #: C/contributing.page:23
-#| msgid ""
-#| "<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
-#| "discussion</link>—on the mailing list or IRC channel"
 msgid ""
 "See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
 "link> for more information and options for contributing financially to "
@@ -445,24 +434,41 @@ msgstr ""
 "wiki</link> per maggiori informazioni e per conoscere le opzioni per "
 "contribuire finanziariamente allo sviluppo di Geary."
 
+#. (itstool) path: info/title
+#: C/index.page:7
+msgctxt "link:trail"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:8
+msgctxt "text"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:9
+msgctxt "link"
+msgid "Geary"
+msgstr "Geary"
+
 #. (itstool) path: page/title
-#: C/index.page:6
+#: C/index.page:12
 msgid "<_:media-1/> <span>Geary</span>"
 msgstr "<_:media-1/> <span>Geary</span>"
 
 #. (itstool) path: section/title
-#: C/index.page:12
+#: C/index.page:18
 msgid "Introduction"
 msgstr "Introduzione"
 
 #. (itstool) path: section/title
-#: C/index.page:16
+#: C/index.page:22
 msgid "Using Geary"
 msgstr "Uso di Geary"
 
 #. (itstool) path: section/title
-#: C/index.page:20
-#| msgid "Contributing and bug reporting"
+#: C/index.page:26
 msgid "Contributing and getting support"
 msgstr "Contribuire e ottenere supporto"
 
@@ -835,28 +841,11 @@ msgstr ""
 
 #. (itstool) path: item/title
 #: C/preferences.page:31
-msgid "<gui>Use three pane view</gui>"
-msgstr "<gui>Usa la visuale a tre riquadri</gui>"
-
-#. (itstool) path: item/p
-#: C/preferences.page:32
-msgid ""
-"Show the folder list, the conversation list, and the messages side-by-side-"
-"by-side in three panes. If not selected, the folder list and conversation "
-"list will be stacked vertically in a single pane."
-msgstr ""
-"Mostra l'elenco delle cartelle, quello delle conversazioni e i messaggi uno "
-"accanto all'altro in tre riquadri. Se non selezionato, l'elenco delle "
-"cartelle e quello delle conversazioni saranno impilati verticalmente in un "
-"unico riquadro."
-
-#. (itstool) path: item/title
-#: C/preferences.page:38
 msgid "<gui>Use single key email shortcuts</gui>"
 msgstr "<gui>Usa le scorciatoie email a tasto singolo</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:39
+#: C/preferences.page:32
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<key>Ctrl</key>. These match the shortcuts used by GMail. See <link xref="
@@ -867,12 +856,12 @@ msgstr ""
 "Maggiori dettagli in <link xref=\"shortcuts\"/>."
 
 #. (itstool) path: item/title
-#: C/preferences.page:44
+#: C/preferences.page:37
 msgid "<gui>Watch for new mail when closed</gui>"
 msgstr "<gui>Controllare la nuova posta dopo la chiusura</gui>"
 
 #. (itstool) path: item/p
-#: C/preferences.page:45
+#: C/preferences.page:38
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
@@ -1088,8 +1077,8 @@ msgstr ""
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:24
-msgid "Display this online help manual"
-msgstr "Mostra questo manuale utente in linea"
+msgid "Display this help manual"
+msgstr "Mostra questo manuale utente"
 
 #. (itstool) path: td/p
 #: C/shortcuts.page:25
@@ -1212,14 +1201,6 @@ msgstr "Composizione e risposta"
 
 #. (itstool) path: section/p
 #: C/write.page:12
-#| msgid ""
-#| "To start a new email conversation, click the <gui style=\"button"
-#| "\">Compose</gui> button on the toolbar. Type the email address of the "
-#| "people to receive the message in the <gui style=\"input\">To</gui> text "
-#| "field, and a subject line in the <gui style=\"input\">Subject</gui> "
-#| "field. You can then type your message in the text area below these. Once "
-#| "the message is read to send, click <gui style=\"button\">Send</gui> or "
-#| "type <keyseq><key>Ctrl</key><key>Enter</key></keyseq> to send the message."
 msgid ""
 "To start a new email conversation, click the <gui style=\"button\">Compose</"
 "gui> button on the toolbar. Type the email address of the people to receive "
@@ -1280,14 +1261,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:41
-#| msgid ""
-#| "When entering an email address in the <gui style=\"input\">To</gui> and "
-#| "<gui style=\"input\">Cc</gui> fields, Geary will provide suggestions from "
-#| "your desktop address book and from previously sent and received email "
-#| "messages. To choose one of these suggestions, simply click on it. In "
-#| "addition, <gui style=\"input\">Bcc</gui> and <gui style=\"input\">Reply-"
-#| "to</gui> fields can be shown by selecting <gui style=\"menu\">Show "
-#| "extended fields</gui> from the formatting toolbar menu."
 msgid ""
 "When entering an email address into any of these fields, Geary will provide "
 "suggestions from your desktop address book and from previously sent and "
@@ -1348,11 +1321,6 @@ msgstr "Formattazione del testo, immagini e allegati"
 
 #. (itstool) path: section/p
 #: C/write.page:68
-#| msgid ""
-#| "Geary's email composer lets you use text styles such as <em>bold</em> and "
-#| "<em>italic</em>, indent text to quote it and links to web pages. Simply "
-#| "select the text and click the appropriate button on the formatting "
-#| "toolbar."
 msgid ""
 "Geary's email composer lets you use text styles such as <em>bold</em> and "
 "<em>italic</em>, indent text to quote it, and links to web pages. Simply "
@@ -1399,13 +1367,6 @@ msgstr ""
 
 #. (itstool) path: section/p
 #: C/write.page:88
-#| msgid ""
-#| "Documents, music, videos, and other files can be attached to the email by "
-#| "clicking the <gui style=\"button\">Attach File</gui> button at the top of "
-#| "the composer window and selecting the document to attach, or by dragging "
-#| "a file from the <gui>Files</gui> application to the composer window, and "
-#| "dropping it either on the text fields at the top of the window or on the "
-#| "toolbar at the bottom."
 msgid ""
 "Documents, music, videos, and other files can be attached to the email by "
 "clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
@@ -1510,13 +1471,6 @@ msgstr "Geary elimina la bozza quando il messaggio viene inviato."
 
 #. (itstool) path: note/p
 #: C/write.page:136
-#| msgid ""
-#| "If you save or discard a composed email, you can re-open it by clicking "
-#| "<gui style=\"button\">Undo</gui> on the pop-up notification that appears "
-#| "or by typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. The ability to "
-#| "restore a saved or discarded composer will be remain for up to 30 "
-#| "minutes. After that you will need to re-open the message via the "
-#| "<gui>Drafts</gui> folder, if present."
 msgid ""
 "If you save or discard a composed email, you can re-open it by clicking <gui "
 "style=\"button\">Undo</gui> on the pop-up notification that appears or by "
@@ -1538,12 +1492,6 @@ msgstr "Messaggi di testo semplice"
 
 #. (itstool) path: section/p
 #: C/write.page:148
-#| msgid ""
-#| "Geary can also send plain text messages. In the drop-down menu, check or "
-#| "uncheck <gui style=\"menu\">Rich Text</gui> to toggle between plain text "
-#| "and rich text mode. Plain text mode is useful when sending email to "
-#| "mailing lists that prohibit rich text (HTML) messages, or when sending "
-#| "email to people that do no use modern clients like Geary."
 msgid ""
 "Geary can also send plain text messages. Press the <gui style=\"button"
 "\">More options</gui> button at the end of the bottom toolbar, then choose "
@@ -1570,3 +1518,16 @@ msgstr ""
 "interruzioni di linea leggere in modo che non sia più largo di 74 caratteri, "
 "mentre il testo citato sarà avvolto usando un carattere “&gt;” per ciascun "
 "livello di citazione."
+
+#~ msgid "<gui>Use three pane view</gui>"
+#~ msgstr "<gui>Usa la visuale a tre riquadri</gui>"
+
+#~ msgid ""
+#~ "Show the folder list, the conversation list, and the messages side-by-"
+#~ "side-by-side in three panes. If not selected, the folder list and "
+#~ "conversation list will be stacked vertically in a single pane."
+#~ msgstr ""
+#~ "Mostra l'elenco delle cartelle, quello delle conversazioni e i messaggi "
+#~ "uno accanto all'altro in tre riquadri. Se non selezionato, l'elenco delle "
+#~ "cartelle e quello delle conversazioni saranno impilati verticalmente in "
+#~ "un unico riquadro."
