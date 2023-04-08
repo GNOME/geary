@@ -694,7 +694,7 @@ private class Accounts.SaveSentRow :
 
 
 private class Accounts.ServiceHostRow :
-    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
 
     public Components.Validator validator {
@@ -848,7 +848,7 @@ private class Accounts.ServiceSecurityRow :
 
 
 private class Accounts.ServiceLoginRow :
-    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
 
     public Components.Validator validator {
@@ -972,7 +972,7 @@ private class Accounts.ServiceLoginRow :
 
 
 private class Accounts.ServicePasswordRow :
-    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow {
+    ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
 
     public Components.Validator validator {

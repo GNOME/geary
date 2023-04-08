@@ -386,7 +386,7 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
 
 
 /** Interface for rows that use a validator for editable values. */
-internal interface Accounts.ValidatingRow : EditorRow {
+internal interface Accounts.ValidatingRow<PaneType> : EditorRow<PaneType> {
 
 
     /** The row's validator */
