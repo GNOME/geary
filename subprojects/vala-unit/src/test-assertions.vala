@@ -21,8 +21,8 @@ namespace ValaUnit {
 
     }
 
-    internal inline void assert_equal<T>(T actual,
-                                         T expected,
+    internal inline void assert_equal<T>(T? actual,
+                                         T? expected,
                                          string? context = null)
         throws TestError {
         if ((actual == null && expected != null) ||
@@ -107,9 +107,9 @@ namespace ValaUnit {
      *
      * This will only work when the values are not already boxed.
      */
-    internal T box_value<T>(T value) {
+    internal T? box_value<T>(T value) {
         var type = typeof(T);
-        T boxed = value;
+        T? boxed = value;
 
         if (type == typeof(int) || type.is_enum()) {
             int actual = (int) value;
@@ -133,7 +133,7 @@ namespace ValaUnit {
         return boxed;
     }
 
-    internal string to_display_string<T>(T value) {
+    internal string to_display_string<T>(T? value) {
         var type = typeof(T);
         var display = "";
 
@@ -191,8 +191,8 @@ namespace ValaUnit {
         );
     }
 
-    private void assert_equal_enum<T>(T actual,
-                                      T expected,
+    private void assert_equal_enum<T>(T? actual,
+                                      T? expected,
                                       string? context)
         throws TestError {
         int actual_val = (int) ((int?) actual);
@@ -342,7 +342,7 @@ public interface ValaUnit.TestAssertions : GLib.Object {
 
 
     /** Asserts a value is null */
-    public void assert_non_null<T>(T actual, string? context = null)
+    public void assert_non_null<T>(T? actual, string? context = null)
         throws TestError {
         if (actual == null) {
             ValaUnit.assert(
@@ -353,7 +353,7 @@ public interface ValaUnit.TestAssertions : GLib.Object {
     }
 
     /** Asserts a value is null */
-    public void assert_is_null<T>(T actual, string? context = null)
+    public void assert_is_null<T>(T? actual, string? context = null)
         throws TestError {
         if (actual != null) {
             ValaUnit.assert(

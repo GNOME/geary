@@ -256,7 +256,7 @@ internal class ValaUnit.ArrayCollectionAssertion<E> : GLib.Object,
 
     public CollectionAssertions<E> contains(E expected)
         throws GLib.Error {
-        E boxed_expected = box_value(expected);
+        E? boxed_expected = box_value(expected);
         bool found = false;
         for (int i = 0; i < this.actual.length; i++) {
             try {
@@ -281,7 +281,7 @@ internal class ValaUnit.ArrayCollectionAssertion<E> : GLib.Object,
 
     public CollectionAssertions<E> not_contains(E expected)
         throws GLib.Error {
-        E boxed_expected = box_value(expected);
+        E? boxed_expected = box_value(expected);
         for (int i = 0; i < this.actual.length; i++) {
             try {
                 assert_equal(box_value(this.actual[i]), boxed_expected);
@@ -312,8 +312,8 @@ internal class ValaUnit.ArrayCollectionAssertion<E> : GLib.Object,
                 this.context
             );
         }
-        E boxed_actual = box_value(this.actual[index]);
-        E boxed_expected = box_value(expected);
+        E? boxed_actual = box_value(this.actual[index]);
+        E? boxed_expected = box_value(expected);
         try {
             assert_equal(boxed_actual, boxed_expected);
         } catch (TestError.FAILED err) {
@@ -453,8 +453,8 @@ internal class ValaUnit.GeeCollectionAssertion<E> :
         for (int i = 0; i <= index; i++) {
             iterator.next();
         }
-        E boxed_actual = box_value(iterator.get());
-        E boxed_expected = box_value(expected);
+        E? boxed_actual = box_value(iterator.get());
+        E? boxed_expected = box_value(expected);
         try {
             assert_equal(boxed_actual, boxed_expected);
         } catch (TestError.FAILED err) {

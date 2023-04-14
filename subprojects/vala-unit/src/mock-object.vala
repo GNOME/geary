@@ -138,7 +138,7 @@ public interface ValaUnit.MockObject : GLib.Object, TestAssertions {
         throws GLib.Error {
         assert_false(this.expected.is_empty, "Unexpected call: %s".printf(name));
 
-        ExpectedCall expected = this.expected.poll();
+        ExpectedCall expected = (!) this.expected.poll();
         assert_equal(name, expected.name, "Unexpected call");
         if (expected.expected_args != null) {
             assert_args(args, expected.expected_args, "Call %s".printf(name));
@@ -229,7 +229,7 @@ public interface ValaUnit.MockObject : GLib.Object, TestAssertions {
                                           R default_return)
         throws GLib.Error {
         check_for_exception(expected);
-        R? return_object = default_return;
+        R return_object = default_return;
         if (expected.return_object != null) {
             return_object = (R) expected.return_object;
         }
@@ -243,7 +243,7 @@ public interface ValaUnit.MockObject : GLib.Object, TestAssertions {
         if (expected.return_object == null) {
             throw default_error;
         }
-        return expected.return_object;
+        return (!) expected.return_object;
     }
 
     private inline void check_for_exception(ExpectedCall expected)
