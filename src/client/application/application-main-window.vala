@@ -1900,6 +1900,7 @@ public class Application.MainWindow :
         );
         this.conversation_list_actions.update_trash_button(show_trash);
         this.conversation_headerbar.full_actions.update_trash_button(show_trash);
+        this.conversation_headerbar.compact_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
