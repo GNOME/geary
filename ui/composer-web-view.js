@@ -724,7 +724,7 @@ let SelectionUtil = {
         var ranges = [];
         let len = selection.rangeCount;
         for (let i = 0; i < len; ++i) {
-            ranges.push(selection.getRangeAt(i));
+            ranges.push(selection.getRangeAt(i).cloneRange());
         }
         return ranges;
     },
