@@ -25,7 +25,7 @@ public class Components.ConversationActions : Gtk.Box {
         }
     }
 
-    public int selected_conversations { get; set; default=1;}
+    public int selected_conversations { get; set; }
 
     public Geary.Account account { get; set; }
 
@@ -58,7 +58,6 @@ public class Components.ConversationActions : Gtk.Box {
             "mark_message_menu"
         );
 
-        this.update_conversation_buttons();
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
         this.notify["service-provider"].connect(() => update_conversation_buttons());
         this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
