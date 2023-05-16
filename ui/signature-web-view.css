@@ -1,0 +1,5 @@
+:root {
+  /* Adjust default controls and system colors for light and dark mode.
+  See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
+  color-scheme: light dark;
+}

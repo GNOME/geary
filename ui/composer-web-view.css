@@ -3,12 +3,22 @@
  * Copyright 2017 Michael Gratton <mike@vee.net>
  */
 
+:root {
+  /* Adjust default controls and system colors for light and dark mode.
+  See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
+  color-scheme: light dark;
+
+  /* Apply canvas background to the root element, so body can darken
+  it using alpha. */
+  background-color: canvas;
+}
+
 body {
+  background-color: rgb(50% 50% 50% / .05);
+
   margin: 0 !important;
   border: 0 !important;
   padding: 0 !important;
-  color: black;
-  background-color: #f9f9f9;
   font-size: medium !important;
 }
 
@@ -40,7 +50,7 @@ body > div#geary-quote {
 }
 
 body > div:focus-within {
-  background-color: white;
+  background-color: canvas;
 }
 
 body > div#geary-signature:focus-within,

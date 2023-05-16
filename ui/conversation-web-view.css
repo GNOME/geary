@@ -13,9 +13,10 @@
   transition: height 0.25s !important;
 }
 
-html {
-  color: black;
-  background-color: white;
+:root {
+  /* Adjust default controls and system colors for light and dark mode.
+  See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
+  color-scheme: light dark;
 
   /* Width must always be defined by the viewport so content doesn't
   overflow inside the WebView, height must always be defined by the
