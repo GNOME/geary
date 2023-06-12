@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-09-20 18:49+0000\n"
-"PO-Revision-Date: 2022-11-22 09:34+0100\n"
+"POT-Creation-Date: 2023-04-12 13:35+0000\n"
+"PO-Revision-Date: 2023-06-12 12:16-0400\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak <gnome-sk-list@gnome.org>\n"
 "Language: sk\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
-"X-Generator: Poedit 3.2.1\n"
+"X-Generator: Poedit 3.3.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -34,7 +34,7 @@ msgstr "Odošle súbory pomocou aplikácie Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:706
+#: src/client/application/application-main-window.vala:718
 msgid "Geary"
 msgstr "Geary"
 
@@ -62,12 +62,22 @@ msgid "Geary Development Team"
 msgstr "Tím vývojárov aplikácie Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid "Geary is an email application built around conversations, for the GNOME 3 desktop. It allows you to read, find and send email with a straightforward, modern interface."
-msgstr "Geary je emailová aplikácia postavená na rozhovoroch pre prostredie GNOME 3. Umožňuje vám prečítať, hľadať a odosielať emaily s jasným a moderným rozhraním."
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary je emailová aplikácia postavená na rozhovoroch pre prostredie GNOME 3. "
+"Umožňuje vám prečítať, hľadať a odosielať emaily s jasným a moderným "
+"rozhraním."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid "Conversations allow you to read a complete discussion without having to find and click from message to message."
-msgstr "Rozhovory vám umožňujú prečítať kompletnú diskusiu bez nutnosti vyhľadania a klikania zo správy na správu."
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Rozhovory vám umožňujú prečítať kompletnú diskusiu bez nutnosti vyhľadania a "
+"klikania zo správy na správu."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
 msgid "Geary’s features include:"
@@ -95,7 +105,9 @@ msgstr "Upozornenie pracovného prostredia na novú poštu"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:33
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "Kompatibilita so servermi GMail, Yahoo! Mail, Outlook.com a inými servermi typu IMAP"
+msgstr ""
+"Kompatibilita so servermi GMail, Yahoo! Mail, Outlook.com a inými servermi "
+"typu IMAP"
 
 #. Translators: A screenshot description.
 #: desktop/org.gnome.Geary.appdata.xml.in.in:50
@@ -109,7 +121,7 @@ msgstr "Aplikácia Geary zobrazujúca tvorcu správ s formátovaným textom"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
-msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;pošta;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
@@ -126,7 +138,9 @@ msgstr "Maximalizovať okno"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
-msgstr "Hodnota True ak je okno aplikácie maximalizované, v opačnom prípade hodnota False."
+msgstr ""
+"Hodnota True ak je okno aplikácie maximalizované, v opačnom prípade hodnota "
+"False."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -158,7 +172,9 @@ msgstr "Automaticky vybrať ďalšiu správu"
 
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid "True if we should autoselect the next available conversation."
-msgstr "Nastavte na True, ak by sme mali automaticky vybrať nasledujúci dostupný rozhovor."
+msgstr ""
+"Nastavte na True, ak by sme mali automaticky vybrať nasledujúci dostupný "
+"rozhovor."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Display message previews"
@@ -173,7 +189,9 @@ msgid "Use single key shortcuts"
 msgstr "Použiť klávesové skratky o jednom klávese"
 
 #: desktop/org.gnome.Geary.gschema.xml:45
-msgid "Enables shortcuts for email actions that do not require pressing <Ctrl> to emulate those used by Gmail."
+msgid ""
+"Enables shortcuts for email actions that do not require pressing <Ctrl> to "
+"emulate those used by Gmail."
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:52
@@ -181,7 +199,9 @@ msgid "Languages that shall be used in the spell checker"
 msgstr "Jazyky, ktoré by mali byť použité pri kontrole pravopisu"
 
 #: desktop/org.gnome.Geary.gschema.xml:53
-msgid "A list of POSIX locales, with the empty list disabling spell checking and the null list using desktop languages by default."
+msgid ""
+"A list of POSIX locales, with the empty list disabling spell checking and "
+"the null list using desktop languages by default."
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:60
@@ -189,8 +209,12 @@ msgid "Languages that are displayed in the spell checker popover"
 msgstr "Jazyky, ktoré sú zobrazené vo vyskakovacom okne kontroly pravopisu"
 
 #: desktop/org.gnome.Geary.gschema.xml:61
-msgid "List of languages that are always displayed in the popover of the spell checker."
-msgstr "Zoznam jazykov, ktoré budú vždy zobrazené vo vyskakovacom okne kontroly pravopisu."
+msgid ""
+"List of languages that are always displayed in the popover of the spell "
+"checker."
+msgstr ""
+"Zoznam jazykov, ktoré budú vždy zobrazené vo vyskakovacom okne kontroly "
+"pravopisu."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Run application in background on logon and when closed"
@@ -221,7 +245,8 @@ msgid "Advisory strategy for full-text searching"
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:85
-msgid "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
+msgid ""
+"Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 
 #: desktop/org.gnome.Geary.gschema.xml:90
@@ -253,16 +278,24 @@ msgid "Undo sending email delay"
 msgstr "Oneskorenie vrátenia späť odosielania emailu"
 
 #: desktop/org.gnome.Geary.gschema.xml:109
-msgid "The number of seconds to wait before sending an email. Set to zero or less to disable."
-msgstr "Počet sekúnd čakania pred odoslaním emailu. Nastavením na nulu alebo menšiu hodnotu, sa zakáže."
+msgid ""
+"The number of seconds to wait before sending an email. Set to zero or less "
+"to disable."
+msgstr ""
+"Počet sekúnd čakania pred odoslaním emailu. Nastavením na nulu alebo menšiu "
+"hodnotu, sa zakáže."
 
 #: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Brief notification display time"
 msgstr "Doba zobrazenia stručného oznámenia"
 
 #: desktop/org.gnome.Geary.gschema.xml:116
-msgid "The length of time in seconds for which brief notifications should be displayed."
-msgstr "Dĺžka trvania v sekundách, počas ktorého by mali byť zobrazované stručné oznámenia."
+msgid ""
+"The length of time in seconds for which brief notifications should be "
+"displayed."
+msgstr ""
+"Dĺžka trvania v sekundách, počas ktorého by mali byť zobrazované stručné "
+"oznámenia."
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "List of optional plugins"
@@ -277,7 +310,8 @@ msgid "Whether we migrated the old settings"
 msgstr "Či sa majú migrovať staré nastavenia"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
-msgid "False to check for the old “org.yorba.geary”-schema and copy its values."
+msgid ""
+"False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 
 #. Translators: In-app notification label, when
@@ -339,7 +373,7 @@ msgid "Account not created: %s"
 msgstr "Účet nebol vytvorený: %s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "_Nasledujúca"
 
@@ -347,22 +381,16 @@ msgstr "_Nasledujúca"
 msgid "_Create"
 msgstr "Vy_tvoriť"
 
-#. Translators: In-app notification label, when
-#. GNOME Online Accounts are missing
-#: src/client/accounts/accounts-editor-add-pane.vala:465
-msgid "Online accounts are missing"
-msgstr "Chýbajú Účty služieb"
-
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:681
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 msgid "Your name"
 msgstr "Vaše meno"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:698
+#: src/client/accounts/accounts-editor-add-pane.vala:681
 #: src/client/accounts/accounts-editor-edit-pane.vala:527
 msgid "Email address"
 msgstr "Emailová adresa"
@@ -372,7 +400,7 @@ msgstr "Emailová adresa"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:702
+#: src/client/accounts/accounts-editor-add-pane.vala:685
 #: src/client/accounts/accounts-editor-edit-pane.vala:493
 msgid "person@example.com"
 msgstr "osoba@priklad.sk"
@@ -381,14 +409,14 @@ msgstr "osoba@priklad.sk"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:716
+#: src/client/accounts/accounts-editor-add-pane.vala:699
 #: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Prihlasovacie meno"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:730
+#: src/client/accounts/accounts-editor-add-pane.vala:713
 #: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
@@ -398,14 +426,14 @@ msgstr "Heslo"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:752
+#: src/client/accounts/accounts-editor-add-pane.vala:735
 #: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "Server IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:755
+#: src/client/accounts/accounts-editor-add-pane.vala:738
 msgid "imap.example.com"
 msgstr "imap.priklad.sk"
 
@@ -413,20 +441,20 @@ msgstr "imap.priklad.sk"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:761
+#: src/client/accounts/accounts-editor-add-pane.vala:744
 #: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "Server SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:764
+#: src/client/accounts/accounts-editor-add-pane.vala:747
 msgid "smtp.example.com"
 msgstr "smtp.priklad.sk"
 
 #. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
+#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Odstrániť účet"
 
@@ -436,8 +464,12 @@ msgid "Remove Account: %s"
 msgstr "Odstránenie účtu: %s"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:221
-msgid "This will remove it from Geary and delete locally cached email data from your computer. Nothing will be deleted from your service provider."
-msgstr "Týmto bude odstránený z aplikácie Geary a budú odstránené miestne údaje emailov z vášho počítača. Z vášho poskytovateľa služby nebude odstránené nič."
+msgid ""
+"This will remove it from Geary and delete locally cached email data from "
+"your computer. Nothing will be deleted from your service provider."
+msgstr ""
+"Týmto bude odstránený z aplikácie Geary a budú odstránené miestne údaje "
+"emailov z vášho počítača. Z vášho poskytovateľa služby nebude odstránené nič."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
@@ -581,42 +613,42 @@ msgstr[1] "starú %d deň"
 msgstr[2] "starú %d dni"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2304
+#: src/client/application/application-main-window.vala:2360
 msgid "Undo"
 msgstr "Vrátiť späť"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2287
+#: src/client/application/application-main-window.vala:2343
 msgid "Redo"
 msgstr "Znovu vykonať"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:325
-#: src/client/accounts/accounts-editor-row.vala:279
+#: src/client/accounts/accounts-editor-list-pane.vala:326
+#: src/client/accounts/accounts-editor-row.vala:280
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:329
-#: src/client/accounts/accounts-editor-row.vala:283
+#: src/client/accounts/accounts-editor-list-pane.vala:330
+#: src/client/accounts/accounts-editor-row.vala:284
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:351
+#: src/client/accounts/accounts-editor-list-pane.vala:352
 msgid "This account has been disabled"
 msgstr "Tento účet bol zakázaný"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:360
+#: src/client/accounts/accounts-editor-list-pane.vala:361
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Tento účet narazil na problém a nie je dostupný"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:466
+#: src/client/accounts/accounts-editor-list-pane.vala:467
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Účet „%s“ bol odstránený"
@@ -624,7 +656,7 @@ msgstr "Účet „%s“ bol odstránený"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:473
+#: src/client/accounts/accounts-editor-list-pane.vala:474
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Účet „%s“ bol obnovený"
@@ -637,30 +669,30 @@ msgstr "Ťahaním presuniete túto položku"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:295
+#: src/client/accounts/accounts-editor-row.vala:296
 msgid "Service provider"
 msgstr "Poskytovateľ služby"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:469
+#: src/client/accounts/accounts-editor-row.vala:470
 msgid "Connection security"
 msgstr "Zabezpečenie pripojenia"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-row.vala:481
 #: src/client/accounts/accounts-editor-servers-pane.vala:751
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Nič"
 
-#: src/client/accounts/accounts-editor-row.vala:487
+#: src/client/accounts/accounts-editor-row.vala:488
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:494
+#: src/client/accounts/accounts-editor-row.vala:495
 msgid "TLS"
 msgstr "TLS"
 
@@ -668,29 +700,29 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:535
-#: src/client/application/application-main-window.vala:648
+#: src/client/accounts/accounts-editor-row.vala:536
+#: src/client/application/application-main-window.vala:658
 msgid "Login"
 msgstr "Prihlásenie"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:542
+#: src/client/accounts/accounts-editor-row.vala:543
 msgid "No login needed"
 msgstr "Nie je potrebné prihlásenie"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:550
+#: src/client/accounts/accounts-editor-row.vala:551
 msgid "Use same login as receiving"
 msgstr "Použiť rovnaké prihlásenie ako pre prijímanie"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:558
+#: src/client/accounts/accounts-editor-row.vala:559
 msgid "Use a different login"
 msgstr "Použiť iné prihlásenie"
 
@@ -757,7 +789,8 @@ msgstr "Súbor s názvom „%s“ už existuje.  Chcete ho nahradiť?"
 #. / folder's name.
 #: src/client/application/application-attachment-manager.vala:229
 #, c-format
-msgid "The file already exists in “%s”.  Replacing it will overwrite its contents."
+msgid ""
+"The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Súbor v „%s“ už existuje.  Nahradením sa prepíše jeho obsah."
 
 #: src/client/application/application-attachment-manager.vala:236
@@ -898,7 +931,7 @@ msgstr "Vydanie distribúcie"
 msgid "Installation prefix"
 msgstr "Predpona inštalácie"
 
-#: src/client/application/application-client.vala:577
+#: src/client/application/application-client.vala:566
 #, c-format
 msgid "About %s"
 msgstr "O %s"
@@ -906,13 +939,13 @@ msgstr "O %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:581
+#: src/client/application/application-client.vala:570
 msgid "translator-credits"
 msgstr "Dušan Kazik <prescott66@gmail.com>"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1110
+#: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný parameter programu: „%s“"
@@ -1037,21 +1070,27 @@ msgstr "Nie je možné otvoriť databázu pre %s"
 #: src/client/application/application-controller.vala:1338
 #, c-format
 msgid ""
-"There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n"
+"There was an error opening the local mail database for this account. This is "
+"possibly due to corruption of the database file in this directory:\n"
 "\n"
 "%s\n"
 "\n"
 "Geary can rebuild the database and re-synchronize with the server or exit.\n"
 "\n"
-"Rebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>"
+"Rebuilding the database will destroy all local email and its attachments. "
+"<b>The mail on the your server will not be affected.</b>"
 msgstr ""
-"Vyskytla sa chyba počas otvárania miestnej poštovej databázy tohoto účtu. Toto je pravdepodobne spôsobené poškodeným súborom databázy v tomto adresári:\n"
+"Vyskytla sa chyba počas otvárania miestnej poštovej databázy tohoto účtu. "
+"Toto je pravdepodobne spôsobené poškodeným súborom databázy v tomto "
+"adresári:\n"
 "\n"
 "%s\n"
 "\n"
-"Aplikácia Geary môže pri skončení znovu zostaviť databázu a znovu spustiť synchronizáciu so serverom.\n"
+"Aplikácia Geary môže pri skončení znovu zostaviť databázu a znovu spustiť "
+"synchronizáciu so serverom.\n"
 "\n"
-"Znovu zostavenie databázy zničí všetku miestnu poštu a jej prílohy. <b>Pošta na serveri nebude ovplyvnená.</b>"
+"Znovu zostavenie databázy zničí všetku miestnu poštu a jej prílohy. <b>Pošta "
+"na serveri nebude ovplyvnená.</b>"
 
 #: src/client/application/application-controller.vala:1340
 msgid "_Rebuild"
@@ -1086,27 +1125,27 @@ msgstr "Email pre príjemcu %s bol odoslaný"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2512
+#: src/client/application/application-controller.vala:2514
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Email pre príjemcu %s bol zaradený do fronty na doručenie"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2576
+#: src/client/application/application-controller.vala:2578
 #, c-format
 msgid "Email to %s saved"
 msgstr "Email pre príjemcu %s bol uložený"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2591
-#: src/client/application/application-controller.vala:2649
+#: src/client/application/application-controller.vala:2593
+#: src/client/application/application-controller.vala:2651
 msgid "Composer could not be restored"
 msgstr "Nepodarilo sa obnoviť tvorcu správ"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2634
+#: src/client/application/application-controller.vala:2636
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Email pre príjemcu %s bol zahodený"
@@ -1123,103 +1162,106 @@ msgid "Account update"
 msgstr "Aktualizácia účtu"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:634
+#: src/client/application/application-main-window.vala:644
 msgid "Working offline"
 msgstr "Práca bez pripojenia"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:646
 msgid "You will not be able to send or receive email until re-connected."
-msgstr "Nebudete môcť odoslať alebo prijať email, pokiaľ sa opätovne nepripojíte."
+msgstr ""
+"Nebudete môcť odoslať alebo prijať email, pokiaľ sa opätovne nepripojíte."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:643
+#: src/client/application/application-main-window.vala:653
 msgid "Login problem"
 msgstr "Problém s prihlásením"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an incorrect login or password."
 msgstr "Účet nahlásil nesprávne prihlasovacie meno alebo heslo."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:652
+#: src/client/application/application-main-window.vala:662
 msgid "Retry login, you will be prompted for your password"
 msgstr "Znovu sa pokúsi o prihlásenie, budete vyzvaný na zadanie hesla"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:659
+#: src/client/application/application-main-window.vala:669
 msgid "Security problem"
 msgstr "Problém so zabezpečením"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:671
 msgid "An account has reported an untrusted server."
 msgstr "Účet nahlásil nedôveryhodný server."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:664
+#: src/client/application/application-main-window.vala:674
 msgid "Check"
 msgstr "Skontrolovať"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:668
+#: src/client/application/application-main-window.vala:678
 msgid "Check the security details for the connection"
 msgstr "Skontroluje podrobnosti zabezpečenia pre pripojenie"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:715
+#: src/client/application/application-main-window.vala:727
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1105
+#: src/client/application/application-main-window.vala:1109
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Menovky"
 
-#: src/client/application/application-main-window.vala:1445
+#: src/client/application/application-main-window.vala:1449
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdniť všetky emaily z vášho priečinka %s?"
 
-#: src/client/application/application-main-window.vala:1446
+#: src/client/application/application-main-window.vala:1450
 msgid "This removes the email from Geary and your email server."
-msgstr "Týmto sa odstránia všetky emaily z aplikácie Geary a vášho emailového servera."
+msgstr ""
+"Týmto sa odstránia všetky emaily z aplikácie Geary a vášho emailového "
+"servera."
 
-#: src/client/application/application-main-window.vala:1447
+#: src/client/application/application-main-window.vala:1451
 msgid "This cannot be undone."
 msgstr "Táto akcia sa nebude dať vrátiť späť."
 
-#: src/client/application/application-main-window.vala:1448
+#: src/client/application/application-main-window.vala:1452
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdniť priečinok %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1505
+#: src/client/application/application-main-window.vala:1509
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Chcete natrvalo odstrániť tieto rozhovory?"
 msgstr[1] "Chcete natrvalo odstrániť tento rozhovor?"
 msgstr[2] "Chcete natrvalo odstrániť tieto rozhovory?"
 
-#: src/client/application/application-main-window.vala:1510
-#: src/client/application/application-main-window.vala:1525
+#: src/client/application/application-main-window.vala:1514
+#: src/client/application/application-main-window.vala:1529
 msgid "Delete"
 msgstr "Odstrániť"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1520
+#: src/client/application/application-main-window.vala:1524
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete natrvalo odstrániť túto správu?"
 msgstr[1] "Chcete natrvalo odstrániť tieto správy?"
 msgstr[2] "Chcete natrvalo odstrániť tieto správy?"
 
-#: src/client/application/application-main-window.vala:1836
+#: src/client/application/application-main-window.vala:1870
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1244,36 +1286,39 @@ msgid "Are you sure you want to open these attachments?"
 msgstr "Naozaj chcete otvoriť tieto prílohy?"
 
 #: src/client/components/components-attachment-pane.vala:374
-msgid "Attachments may cause damage to your system if opened.  Only open files from trusted sources."
-msgstr "Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z dôveryhodných zdrojov."
+msgid ""
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z "
+"dôveryhodných zdrojov."
 
 #: src/client/components/components-attachment-pane.vala:375
 msgid "Don’t _ask me again"
 msgstr "Nepýtať s_a znovu"
 
-#: src/client/components/components-conversation-actions.vala:112
+#: src/client/components/components-conversation-actions.vala:119
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Označí rozhovor"
 msgstr[1] "Označí rozhovory"
 msgstr[2] "Označí rozhovory"
 
-#: src/client/components/components-conversation-actions.vala:118
+#: src/client/components/components-conversation-actions.vala:125
 msgid "Move conversation"
 msgid_plural "Move conversations"
 msgstr[0] "Presunie rozhovory"
 msgstr[1] "Presunie rozhovor"
 msgstr[2] "Presunie rozhovory"
 
-#: src/client/components/components-conversation-actions.vala:123
-#: src/client/conversation-list/conversation-list-view.vala:446
+#: src/client/components/components-conversation-actions.vala:130
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Archivuje rozhovory"
 msgstr[1] "Archivuje rozhovor"
 msgstr[2] "Archivuje rozhovory"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:140
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Pridá menovku rozhovorom"
@@ -1281,22 +1326,21 @@ msgstr[1] "Pridá menovku rozhovoru"
 msgstr[2] "Pridá menovku rozhovorom"
 
 # tooltip
-#: src/client/components/components-conversation-actions.vala:142 msgid_plural
-#: "Move conversations"
+#: src/client/components/components-conversation-actions.vala:149
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Skopíruje rozhovory"
 msgstr[1] "Skopíruje rozhovor"
 msgstr[2] "Skopíruje rozhovory"
 
-#: src/client/components/components-conversation-actions.vala:161
+#: src/client/components/components-conversation-actions.vala:168
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Presunie rozhovory do Koša"
 msgstr[1] "Presunie rozhovor do Koša"
 msgstr[2] "Presunie rozhovory do Koša"
 
-#: src/client/components/components-conversation-actions.vala:171
+#: src/client/components/components-conversation-actions.vala:178
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Odstráni rozhovory"
@@ -1354,46 +1398,50 @@ msgid "Cancel"
 msgstr "Zrušiť"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:124
+#: src/client/components/components-preferences-window.vala:125
 msgid "_Automatically select next message"
 msgstr "_Automaticky vybrať ďalšiu správu"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:134
+#: src/client/components/components-preferences-window.vala:135
 msgid "_Display conversation preview"
 msgstr "_Zobraziť náhľad rozhovoru"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:144
+#: src/client/components/components-preferences-window.vala:145
 msgid "Use _single key email shortcuts"
 msgstr "Použiť emailové klávesové skratky o _jednom klávese"
 
-#: src/client/components/components-preferences-window.vala:146
-msgid "Enable keyboard shortcuts for email actions that do not require pressing <Ctrl>"
-msgstr "Povolí klávesové skratky pre akcie s emailami, ktoré nevyžadujú stlačenie klávesu <Ctrl>"
+#: src/client/components/components-preferences-window.vala:147
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<Ctrl>"
+msgstr ""
+"Povolí klávesové skratky pre akcie s emailami, ktoré nevyžadujú stlačenie "
+"klávesu <Ctrl>"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:157
+#: src/client/components/components-preferences-window.vala:158
 msgid "_Watch for new mail when closed"
 msgstr "_Sledovať novú poštu, keď je aplikácia zavretá"
 
 #. / Translators: Preferences tooltip
-#: src/client/components/components-preferences-window.vala:161
+#: src/client/components/components-preferences-window.vala:162
 msgid "Geary will keep running after all windows are closed"
 msgstr "Aplikácia Geary bude naďalej spustená aj po uzavretí všetkých okien"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:171
+#: src/client/components/components-preferences-window.vala:172
 msgid "_Always load images"
 msgstr "Vž_dy načítať obrázky"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:189
+#: src/client/components/components-preferences-window.vala:190
 msgid "Preferences"
 msgstr "Nastavenia"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:250
+#: src/client/components/components-preferences-window.vala:251
 msgid "Plugins"
 msgstr "Zásuvné moduly"
 
@@ -1549,7 +1597,7 @@ msgstr "_Zavrieť"
 msgid "_Discard"
 msgstr "Za_hodiť"
 
-#: src/client/components/stock.vala:25 ui/components-main-toolbar-menus.ui:42
+#: src/client/components/stock.vala:25 ui/components-menu-application.ui:20
 msgid "_Help"
 msgstr "Po_mocník"
 
@@ -1559,7 +1607,7 @@ msgstr "Po_mocník"
 msgid "_Open"
 msgstr "_Otvoriť"
 
-#: src/client/components/stock.vala:27 ui/components-main-toolbar-menus.ui:32
+#: src/client/components/stock.vala:27 ui/components-menu-application.ui:10
 msgid "_Preferences"
 msgstr "N_astavenia"
 
@@ -1628,8 +1676,13 @@ msgstr "Stlačte kláves Backspace na odstránenie citácie"
 #. allowed. The words will be converted to lower case based on
 #. locale and English versions included automatically.
 #: src/client/composer/composer-widget.vala:252
-msgid "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures"
-msgstr "príloha|prílohy|priložiť|priložený|priložená|priložené|priloženému|priloženým|priložených|priloženého|prikladám|prikladanú|prikladané|prikladaný|prikladaným|prikladanému"
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr ""
+"príloha|prílohy|priložiť|priložený|priložená|priložené|priloženému|"
+"priloženým|priložených|priloženého|prikladám|prikladanú|prikladané|"
+"prikladaný|prikladaným|prikladanému"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -1779,7 +1832,7 @@ msgid "Search for more languages"
 msgstr "Vyhľadajte viac jazykov"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:390
+#: src/client/conversation-list/conversation-list-view.vala:214
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Presunúť rozhovory do _Koša"
@@ -1787,52 +1840,55 @@ msgstr[1] "Presunúť rozhovor do _Koša"
 msgstr[2] "Presunúť rozhovory do _Koša"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:402
+#: src/client/conversation-list/conversation-list-view.vala:226
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "O_dstrániť rozhovory"
 msgstr[1] "O_dstrániť rozhovor"
 msgstr[2] "O_dstrániť rozhovory"
 
-#: src/client/conversation-list/conversation-list-view.vala:415
-#: ui/components-main-toolbar-menus.ui:5
+#: src/client/conversation-list/conversation-list-view.vala:239
+#: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "Označiť ako _prečítanú"
 
-#: src/client/conversation-list/conversation-list-view.vala:423
-#: ui/components-main-toolbar-menus.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:248
+#: ui/components-menu-conversation.ui:9
 msgid "Mark as _Unread"
 msgstr "Označiť ako _neprečítanú"
 
-#: src/client/conversation-list/conversation-list-view.vala:431
-#: ui/components-main-toolbar-menus.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:257
+#: ui/components-menu-conversation.ui:17
 msgid "U_nstar"
 msgstr "Zrušiť oz_načenie hviezdičkou"
 
-#: src/client/conversation-list/conversation-list-view.vala:438
-#: ui/components-main-toolbar-menus.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:264
+#: ui/components-menu-conversation.ui:13
 msgid "_Star"
 msgstr "Označiť _hviezdičkou"
 
+#: src/client/conversation-list/conversation-list-view.vala:275
+msgid "_Archive conversation"
+msgid_plural "_Archive conversations"
+msgstr[0] "_Archivovať rozhovory"
+msgstr[1] "_Archivovať rozhovor"
+msgstr[2] "_Archivovať rozhovory"
+
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:455
+#: src/client/conversation-list/conversation-list-view.vala:287
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Odpovedať"
 
-#: src/client/conversation-list/conversation-list-view.vala:461
+#: src/client/conversation-list/conversation-list-view.vala:293
 msgid "R_eply All"
 msgstr "Odpov_edať všetkým"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:467
+#: src/client/conversation-list/conversation-list-view.vala:299
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Preposlať"
-
-#: src/client/conversation-list/formatted-conversation-data.vala:18
-msgid "Me"
-msgstr "Ja"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:531
@@ -1925,47 +1981,48 @@ msgstr "Zobraziť"
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
+msgid "No Conversations Selected"
 msgstr "Žiadne vybrané rozhovory"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "Tu sa zobrazí vybraný rozhovor zo zoznamu"
+msgid "Selecting a conversation from the list will display it here."
+msgstr "Tu sa zobrazí vybraný rozhovor zo zoznamu."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:100
+msgid "Multiple Conversations Selected"
 msgstr "Vybraných viacero rozhovorov"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
-msgstr "Zvolením akcie sa použije na všetky vybrané rozhovory"
+#: src/client/conversation-viewer/conversation-viewer.vala:104
+msgid "Choosing an action will apply to all selected conversations."
+msgstr "Zvolením akcie sa použije na všetky vybrané rozhovory."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
+#: src/client/conversation-viewer/conversation-viewer.vala:116
+#: src/client/conversation-viewer/conversation-viewer.vala:132
+msgid "No Conversations Found"
 msgstr "Nenašli sa žiadne rozhovory"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "Tento priečinok neobsahuje žiadne rozhovory"
+#: src/client/conversation-viewer/conversation-viewer.vala:120
+msgid "This folder does not contain any conversations."
+msgstr "Tento priečinok neobsahuje žiadne rozhovory."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
-msgstr "Vaše vyhľadávanie je bez výsledkov. Skúste upraviť vaše hľadané výrazy."
+#: src/client/conversation-viewer/conversation-viewer.vala:136
+msgid "Your search returned no results, try refining your search terms."
+msgstr ""
+"Vaše vyhľadávanie je bez výsledkov. Skúste upraviť vaše hľadané výrazy."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -1986,24 +2043,41 @@ msgid "The identity of the %s mail server at %s:%u could not be verified."
 msgstr "Identitu poštového servera %s na adrese %s:%u sa nepodarilo overiť."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:48
-msgid "Selecting “Trust This Server” or “Always Trust This Server” may cause your username and password to be transmitted insecurely."
-msgstr "Vybratie voľby „Dôverovať tomuto serveru“ alebo „Vždy dôverovať tomuto serveru“ môže spôsobiť, že prenos vášho používateľského mena a hesla nebude zabezpečený."
+msgid ""
+"Selecting “Trust This Server” or “Always Trust This Server” may cause your "
+"username and password to be transmitted insecurely."
+msgstr ""
+"Vybratie voľby „Dôverovať tomuto serveru“ alebo „Vždy dôverovať tomuto "
+"serveru“ môže spôsobiť, že prenos vášho používateľského mena a hesla nebude "
+"zabezpečený."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
-msgid "Selecting “Don’t Trust This Server” will cause Geary not to access this server."
-msgstr "Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary nebude pristupovať k tomuto serveru."
+msgid ""
+"Selecting “Don’t Trust This Server” will cause Geary not to access this "
+"server."
+msgstr ""
+"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary "
+"nebude pristupovať k tomuto serveru."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
 msgstr "Aplikácia Geary nepridá alebo neaktualizuje tento emailový účet."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
-msgid "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this account."
-msgstr "Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary prestane pristupovať k tomuto účtu."
+msgid ""
+"Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
+"account."
+msgstr ""
+"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary "
+"prestane pristupovať k tomuto účtu."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
-msgid "Contact your system administrator or email service provider if you have any question about these issues."
-msgstr "Ak máte akékoľvek otázky k tomuto problému, obráťte sa na vášho správcu systému, alebo poskytovateľa emailovej služby."
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr ""
+"Ak máte akékoľvek otázky k tomuto problému, obráťte sa na vášho správcu "
+"systému, alebo poskytovateľa emailovej služby."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
@@ -2694,7 +2768,7 @@ msgstr "Archív"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1006
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Drafts | Draft"
 msgstr "Koncepty | Koncept"
 
@@ -2702,13 +2776,13 @@ msgstr "Koncepty | Koncept"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1024
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Odoslané správy | Odoslaná poštal | Odoslané emaily | Odoslané E-Maily"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1029
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Odoslaná pošta"
@@ -2717,21 +2791,23 @@ msgstr "Odoslaná pošta"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
-msgid "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1039
+msgid ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
 msgstr "Nevyžiadaná pošta | Spam | Nevyžiadané emaily"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1040
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1049
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kôš"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1054
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Odstránená pošta"
@@ -2740,7 +2816,7 @@ msgstr "Odstránená pošta"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1055
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1064
 msgid "Archive | Archives"
 msgstr "Archív | Archívy | Archivované"
 
@@ -2762,11 +2838,19 @@ msgstr "(žiadny predmet)"
 msgid "Add an account"
 msgstr "Pridanie účtu"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:14
+#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "Späť"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Prijímanie"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Odosielanie"
 
@@ -2778,24 +2862,24 @@ msgstr "Úprava účtu"
 msgid "Account Name"
 msgstr "Názov účtu"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "Emailové adresy"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "Podpis"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "Nastavenia"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Nastavenia servera"
 
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:243
 msgid "Remove this account from Geary"
 msgstr "Odstráni tento účet z aplikácie Geary"
 
@@ -3093,13 +3177,43 @@ msgstr "Odpovie všetkým"
 msgid "Forward"
 msgstr "Prepošle"
 
-#: ui/components-conversation-actions.ui:156
+#: ui/components-conversation-actions.ui:159
 msgid "_Archive"
 msgstr "_Archivovať"
 
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "Pošta"
+
+#: ui/components-headerbar-conversation-list.ui:37
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "Napíše správu"
+
+#: ui/components-headerbar-conversation-list.ui:53
+msgid "Toggle search bar"
+msgstr "Prepne panel vyhľadávania"
+
+# tooltip
+#: ui/components-headerbar-conversation-list.ui:71
+msgid "Select conversations"
+msgstr "Vyberie rozhovory"
+
+#: ui/components-headerbar-conversation.ui:60
+msgid "Toggle find bar"
+msgstr "Prepne panel nájdených výrazov"
+
 #: ui/components-inspector-error-view.ui:27
-msgid "If the problem is serious or persists, please save and send these details to one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new bug report</a>."
-msgstr "Ak je problém vážny alebo pretrváva, prosím, uložte a odošlite tieto podrobnosti do jedného z <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">kontaktných kanálov</a> alebo ich priložte k <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">novému chybovému hláseniu</a>."
+msgid ""
+"If the problem is serious or persists, please save and send these details to "
+"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
+"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">new bug report</a>."
+msgstr ""
+"Ak je problém vážny alebo pretrváva, prosím, uložte a odošlite tieto "
+"podrobnosti do jedného z <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"Contact\">kontaktných kanálov</a> alebo ich priložte k <a href=\"https://"
+"wiki.gnome.org/Apps/Geary/ReportingABug\">novému chybovému hláseniu</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3140,38 +3254,21 @@ msgstr "Skopíruje to schránky"
 msgid "Clears all log entries"
 msgstr "Vymaže všetky položky záznamu"
 
-#: ui/components-main-toolbar.ui:72 ui/components-main-toolbar.ui:158
-msgid "Back"
-msgstr "Späť"
-
-#: ui/components-main-toolbar.ui:89
-msgctxt "tooltip"
-msgid "Compose Message"
-msgstr "Napíše správu"
-
-#: ui/components-main-toolbar.ui:105
-msgid "Toggle search bar"
-msgstr "Prepne panel vyhľadávania"
-
-#: ui/components-main-toolbar.ui:195
-msgid "Toggle find bar"
-msgstr "Prepne panel nájdených výrazov"
-
-#: ui/components-main-toolbar-menus.ui:21
-msgid "Toggle as _Junk"
-msgstr "Prepnúť ako _nevyžiadanú poštu"
-
-#: ui/components-main-toolbar-menus.ui:28
+#: ui/components-menu-application.ui:6
 msgid "_Accounts"
 msgstr "Účt_y"
 
-#: ui/components-main-toolbar-menus.ui:36
+#: ui/components-menu-application.ui:14
 msgid "_Keyboard Shortcuts"
 msgstr "Klávesové _skratky"
 
-#: ui/components-main-toolbar-menus.ui:47
+#: ui/components-menu-application.ui:25
 msgid "_About Geary"
 msgstr "_O aplikácii Geary"
+
+#: ui/components-menu-conversation.ui:21
+msgid "Toggle as _Junk"
+msgstr "Prepnúť ako _nevyžiadanú poštu"
 
 #: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
@@ -3705,6 +3802,12 @@ msgstr "_Zapamätať heslo"
 msgid "_Authenticate"
 msgstr "_Overiť totožnosť"
 
+#~ msgid "Online accounts are missing"
+#~ msgstr "Chýbajú Účty služieb"
+
+#~ msgid "Me"
+#~ msgstr "Ja"
+
 #~ msgid "Notify of new mail at startup"
 #~ msgstr "Oznámiť novú poštu po spustení"
 
@@ -3724,7 +3827,8 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Start with the main window hidden (deprecated)"
 #~ msgstr "Spustí aplikáciu Geary so skrytým hlavným oknom (zastarané)"
 
-#~ msgid "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
 #~ msgstr "Voľba „--hidden“ je zastaraná a bude v budúcnosti odstránená."
 
 #~ msgid "Always show from sender"
@@ -3846,13 +3950,15 @@ msgstr "_Overiť totožnosť"
 #~ msgstr "        • Chyba pripojenia k serveru IMAP.\n"
 
 #~ msgid "        • IMAP username or password incorrect.\n"
-#~ msgstr "        • Používateľské meno alebo heslo servera IMAP je nesprávne.\n"
+#~ msgstr ""
+#~ "        • Používateľské meno alebo heslo servera IMAP je nesprávne.\n"
 
 #~ msgid "        • SMTP connection error.\n"
 #~ msgstr "        • Chyba pripojenia k serveru SMTP.\n"
 
 #~ msgid "        • SMTP username or password incorrect.\n"
-#~ msgstr "        • Používateľské meno alebo heslo servera SMTP je nesprávne.\n"
+#~ msgstr ""
+#~ "        • Používateľské meno alebo heslo servera SMTP je nesprávne.\n"
 
 #~ msgid "        • Connection error.\n"
 #~ msgstr "        • Chyba pripojenia.\n"
@@ -3878,50 +3984,77 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Your settings are insecure"
 #~ msgstr "Vaše nastavenie nie sú bezpečné"
 
-#~ msgid "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"
-#~ msgstr "Vaše nastavenia servera IMAP a/alebo SMTP neurčujú šifrovanie SSL alebo TLS.  To znamená, že vaše meno používateľa a heslo môže byť prečítané inou osobou v sieti.  Naozaj chcete toto vykonať?"
+#~ msgid ""
+#~ "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means "
+#~ "your username and password could be read by another person on the "
+#~ "network.  Are you sure you want to do this?"
+#~ msgstr ""
+#~ "Vaše nastavenia servera IMAP a/alebo SMTP neurčujú šifrovanie SSL alebo "
+#~ "TLS.  To znamená, že vaše meno používateľa a heslo môže byť prečítané "
+#~ "inou osobou v sieti.  Naozaj chcete toto vykonať?"
 
 #~ msgid "Co_ntinue"
 #~ msgstr "Po_kračovať"
 
-#~ msgid "Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder."
-#~ msgstr "Aplikácia Geary narazila na chybu počas odosielania pošty. Ak problém pretrváva, prosím, ručne odstráňte email z vášho priečinka „Pošta na odoslanie“."
+#~ msgid ""
+#~ "Geary encountered an error sending an email.  If the problem persists, "
+#~ "please manually delete the email from your Outbox folder."
+#~ msgstr ""
+#~ "Aplikácia Geary narazila na chybu počas odosielania pošty. Ak problém "
+#~ "pretrváva, prosím, ručne odstráňte email z vášho priečinka „Pošta na "
+#~ "odoslanie“."
 
-#~ msgid "Geary encountered an error saving a sent message to Sent Mail.  The message will stay in your Outbox folder until you delete it."
-#~ msgstr "Aplikácia Geary narazila na chybu počas ukladania odoslanej správy do priečinka „Odoslaná pošta“. Správa zostane vo vašom priečinku „Pošta na odoslanie“, pokiaľ ju neodstránite."
+#~ msgid ""
+#~ "Geary encountered an error saving a sent message to Sent Mail.  The "
+#~ "message will stay in your Outbox folder until you delete it."
+#~ msgstr ""
+#~ "Aplikácia Geary narazila na chybu počas ukladania odoslanej správy do "
+#~ "priečinka „Odoslaná pošta“. Správa zostane vo vašom priečinku „Pošta na "
+#~ "odoslanie“, pokiaľ ju neodstránite."
 
 #~ msgid "Unable to open local mailbox for %s"
 #~ msgstr "Nie je možné otvoriť miestnu poštovú schránku účtu %s"
 
 #~ msgid ""
-#~ "There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n"
+#~ "There was an error opening the local mail database for this account. This "
+#~ "is possibly due to a file permissions problem.\n"
 #~ "\n"
-#~ "Please check that you have read/write permissions for all files in this directory:\n"
+#~ "Please check that you have read/write permissions for all files in this "
+#~ "directory:\n"
 #~ "\n"
 #~ "%s"
 #~ msgstr ""
-#~ "Vyskytla sa chyba počas otvárania miestnej poštovej databázy tohoto účtu. Môže to byť spôsobené problémom s oprávneniami súboru.\n"
+#~ "Vyskytla sa chyba počas otvárania miestnej poštovej databázy tohoto účtu. "
+#~ "Môže to byť spôsobené problémom s oprávneniami súboru.\n"
 #~ "\n"
-#~ "Prosím, skontrolujte, či máte oprávnenia na čítanie/zápis pre všetky súbory v tomto adresári:\n"
+#~ "Prosím, skontrolujte, či máte oprávnenia na čítanie/zápis pre všetky "
+#~ "súbory v tomto adresári:\n"
 #~ "\n"
 #~ "%s"
 
 #~ msgid ""
-#~ "The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be “rolled back” to work with this version of Geary.\n"
+#~ "The version number of the local mail database is formatted for a newer "
+#~ "version of Geary. Unfortunately, the database cannot be “rolled back” to "
+#~ "work with this version of Geary.\n"
 #~ "\n"
 #~ "Please install the latest version of Geary and try again."
 #~ msgstr ""
-#~ "Číslo verzie miestnej poštovej databázy je sformátované pre novšiu verziu aplikácie Geary. Bohužiaľ, databáza sa nedá vrátiť späť, aby mohla pracovať s touto verziou aplikácie Geary.\n"
+#~ "Číslo verzie miestnej poštovej databázy je sformátované pre novšiu verziu "
+#~ "aplikácie Geary. Bohužiaľ, databáza sa nedá vrátiť späť, aby mohla "
+#~ "pracovať s touto verziou aplikácie Geary.\n"
 #~ "ynProsím, nainštalujte najnovšiu verziu programu Geary a skúste to znovu."
 
 #~ msgid ""
-#~ "There was an error opening the local account. This is probably due to connectivity issues.\n"
+#~ "There was an error opening the local account. This is probably due to "
+#~ "connectivity issues.\n"
 #~ "\n"
 #~ "Please check your network connection and restart Geary."
 #~ msgstr ""
-#~ "Vyskytla sa chyba počas otvárania miestneho účtu. Môže to byť spôsobené problémom s pripojením.\n"
+#~ "Vyskytla sa chyba počas otvárania miestneho účtu. Môže to byť spôsobené "
+#~ "problémom s pripojením.\n"
 #~ "\n"
-#~ "Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite aplikáciu Geary."
+#~ "Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite aplikáciu "
+#~ "Geary."
 
 #~ msgid "Undo move (Ctrl+Z)"
 #~ msgstr "Vráti späť presunutie (Ctrl+Z)"
@@ -3968,8 +4101,12 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Problem connecting to incoming server for %s"
 #~ msgstr "Problém s pripájaním k prichádzajúcemu serveru pre účet %s"
 
-#~ msgid "Could not connect to %s, check your Internet access and the server name and try again"
-#~ msgstr "Nepodarilo sa pripojiť k serveru %s. Skontrolujte vaše pripojenie k internetu a názov servera a skúste to znovu."
+#~ msgid ""
+#~ "Could not connect to %s, check your Internet access and the server name "
+#~ "and try again"
+#~ msgstr ""
+#~ "Nepodarilo sa pripojiť k serveru %s. Skontrolujte vaše pripojenie k "
+#~ "internetu a názov servera a skúste to znovu."
 
 #~ msgid "Retry connecting now"
 #~ msgstr "Znovu skúsiť pripojenie teraz"
@@ -3983,8 +4120,11 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Problem with connection to incoming server for %s"
 #~ msgstr "Problém s pripojením k serveru prichádzajúcich správ účtu %s"
 
-#~ msgid "Network error talking to %s, check your Internet access and try again"
-#~ msgstr "Chyba sieťovej komunikácie so serverom %s. Skontrolujte vaše internetové pripojenie a skúste to znovu"
+#~ msgid ""
+#~ "Network error talking to %s, check your Internet access and try again"
+#~ msgstr ""
+#~ "Chyba sieťovej komunikácie so serverom %s. Skontrolujte vaše internetové "
+#~ "pripojenie a skúste to znovu"
 
 #~ msgid "Problem with connection to outgoing server for %s"
 #~ msgstr "Problém s pripojením k odchádzajúcemu serveru pre účet %s"
@@ -3992,14 +4132,22 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Problem communicating with incoming server for %s"
 #~ msgstr "Komunikačný problém so serverom prichádzajúcich správ účtu %s"
 
-#~ msgid "Geary did not understand a message from %s or vice versa, please file a bug report"
-#~ msgstr "Aplikácia Geary nerozumie správe zo servera %s alebo naopak. Prosím, nahláste chybu."
+#~ msgid ""
+#~ "Geary did not understand a message from %s or vice versa, please file a "
+#~ "bug report"
+#~ msgstr ""
+#~ "Aplikácia Geary nerozumie správe zo servera %s alebo naopak. Prosím, "
+#~ "nahláste chybu."
 
 #~ msgid "Problem communicating with outgoing mail server"
 #~ msgstr "Komunikačný problém s poštovým serverom odchádzajúcich správ"
 
-#~ msgid "Could not communicate with %s for %s, check the server name and try again in a moment"
-#~ msgstr "Nepodarilo sa komunikovať so serverom %s účtu %s. Skontrolujte názov servera a skúste to znovu neskôr."
+#~ msgid ""
+#~ "Could not communicate with %s for %s, check the server name and try again "
+#~ "in a moment"
+#~ msgstr ""
+#~ "Nepodarilo sa komunikovať so serverom %s účtu %s. Skontrolujte názov "
+#~ "servera a skúste to znovu neskôr."
 
 #~ msgid "Incoming mail server password required for %s"
 #~ msgstr "Vyžaduje sa heslo pre server prichádzajúcich správ účtu %s"
@@ -4019,15 +4167,20 @@ msgstr "_Overiť totožnosť"
 #~ msgid "A problem occurred checking mail for %s"
 #~ msgstr "Vyskytol sa problém s kontrolou pošty v účte %s"
 
-#~ msgid "Something went wrong, please file a bug report if the problem persists"
+#~ msgid ""
+#~ "Something went wrong, please file a bug report if the problem persists"
 #~ msgstr "Niekde nastala chyba. Ak problém pretrváva, prosím, nahláste chybu."
 
 #~ msgid "Messages for %s must be downloaded again."
 #~ msgstr "Správy účtu %s musia byť znovu prevzaté."
 
 # tooltip
-#~ msgid "Copy technical details to clipboard for pasting into an email or bug report"
-#~ msgstr "Skopíruje technické podrobnosti do schránky pre vloženie do emailu alebo chybového hlásenia"
+#~ msgid ""
+#~ "Copy technical details to clipboard for pasting into an email or bug "
+#~ "report"
+#~ msgstr ""
+#~ "Skopíruje technické podrobnosti do schránky pre vloženie do emailu alebo "
+#~ "chybového hlásenia"
 
 #~ msgid "Indexing %s account"
 #~ msgstr "Indexuje sa účet %s"
@@ -4042,7 +4195,8 @@ msgstr "_Overiť totožnosť"
 #~ msgstr "Skrytá kópia: "
 
 #~ msgid "Geary will exit if you have no other open email accounts."
-#~ msgstr "Aplikácia Geary skončí, ak nemáte otvorené žiadne iné emailové účty."
+#~ msgstr ""
+#~ "Aplikácia Geary skončí, ak nemáte otvorené žiadne iné emailové účty."
 
 #~ msgid "Open"
 #~ msgstr "Otvoriť"
@@ -4079,10 +4233,15 @@ msgstr "_Overiť totožnosť"
 #~ msgstr "Kópia: %s\n"
 
 #~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-#~ msgstr "<span weight=\"bold\" size=\"larger\">Nedá sa odstrániť účet</span> "
+#~ msgstr ""
+#~ "<span weight=\"bold\" size=\"larger\">Nedá sa odstrániť účet</span> "
 
-#~ msgid "A composer window associated with this account is currently open. Send or discard the message and try again."
-#~ msgstr "Okno tvorcu správy priradeného k tomuto účtu je momentálne otvorené. Odošlite alebo zahoďte správu a skúste to znovu."
+#~ msgid ""
+#~ "A composer window associated with this account is currently open. Send or "
+#~ "discard the message and try again."
+#~ msgstr ""
+#~ "Okno tvorcu správy priradeného k tomuto účtu je momentálne otvorené. "
+#~ "Odošlite alebo zahoďte správu a skúste to znovu."
 
 #~ msgid "Please wait while Geary validates your account."
 #~ msgstr "Prosím, čakajte, kým aplikácia Geary overí váš účet."
@@ -4152,8 +4311,13 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Search for messages from"
 #~ msgstr "Vyhľadať správy od"
 
-#~ msgid "Some email services require additional addresses be configured on the server.  Contact your email provider for more information."
-#~ msgstr "Niektoré emailové služby vyžadujú nastavenie dodatočných adries na serveri. Pre viac informácií kontaktuje vášho poskytovateľa emailovej služby."
+#~ msgid ""
+#~ "Some email services require additional addresses be configured on the "
+#~ "server.  Contact your email provider for more information."
+#~ msgstr ""
+#~ "Niektoré emailové služby vyžadujú nastavenie dodatočných adries na "
+#~ "serveri. Pre viac informácií kontaktuje vášho poskytovateľa emailovej "
+#~ "služby."
 
 #~ msgctxt "shortcut window"
 #~ msgid "Move focus to conversation list"
@@ -4294,11 +4458,19 @@ msgstr "_Overiť totožnosť"
 #~ msgid "Show _notifications for new mail"
 #~ msgstr "Zobraziť _upozornenia pre novú poštu"
 
-#~ msgid "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this account?</span> "
-#~ msgstr "<span weight=\"bold\" size=\"larger\">Naozaj chcete odstrániť tento účet?</span> "
+#~ msgid ""
+#~ "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove "
+#~ "this account?</span> "
+#~ msgstr ""
+#~ "<span weight=\"bold\" size=\"larger\">Naozaj chcete odstrániť tento účet?"
+#~ "</span> "
 
-#~ msgid "All email associated with this account will be removed from your computer. This will not affect email on the server."
-#~ msgstr "Všetky emaily priradené k tomuto účtu budú odstránené z vášho počítača. Emaily na serveri nebudú ovplyvnené."
+#~ msgid ""
+#~ "All email associated with this account will be removed from your "
+#~ "computer. This will not affect email on the server."
+#~ msgstr ""
+#~ "Všetky emaily priradené k tomuto účtu budú odstránené z vášho počítača. "
+#~ "Emaily na serveri nebudú ovplyvnené."
 
 #~ msgid "Nickname:"
 #~ msgstr "Prezývka:"
@@ -4308,14 +4480,19 @@ msgstr "_Overiť totožnosť"
 #~ msgstr "Predvolený adresár pre prílohy"
 
 #~ msgid "Geary will run in the background and notify of new mail"
-#~ msgstr "Aplikácia Geary bude spustená na pozadí a bude upozorňovať na novú poštu"
+#~ msgstr ""
+#~ "Aplikácia Geary bude spustená na pozadí a bude upozorňovať na novú poštu"
 
 #~| msgid "Geary"
 #~ msgid "geary"
 #~ msgstr "geary"
 
-#~ msgid "Geary encountered an error while connecting to the server.  Please try again in a few moments."
-#~ msgstr "Aplikácia Geary narazila na chybu počas pripájania k serveru. Prosím, skúste to znovu neskôr."
+#~ msgid ""
+#~ "Geary encountered an error while connecting to the server.  Please try "
+#~ "again in a few moments."
+#~ msgstr ""
+#~ "Aplikácia Geary narazila na chybu počas pripájania k serveru. Prosím, "
+#~ "skúste to znovu neskôr."
 
 #~ msgid "Geary Email"
 #~ msgstr "Geary Email"
