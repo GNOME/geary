@@ -1,3 +1,26 @@
+Version 44.0
+~~~~~~~~~~~~
+Released: 2023-07-05
+
+A stable feature release.
+
+Enhancements included in this release:
+ * New conversation list
+ * Reworked headerbar
+ * Fix network detection issues
+ * Suspend engine on system suspend
+ * Numerous user interface translation updates
+ * Numerous bug fixes and user interface improvements
+
+Thanks to those who contributed bug fixes and enhancements to this
+release:
+ * Automeris naranja
+ * Rico Tzschichholz
+ * Thomas Jollans
+ * Sabri Ünal 
+ * Kevin Degeling
+ * All translators
+
 Version 43.0
 ~~~~~~~~~~~~
 Released: 2022-09-29
