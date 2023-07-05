@@ -38,7 +38,7 @@
   <url type="help">https://wiki.gnome.org/Apps/Geary/Documentation</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/geary/-/issues/new</url>
-  <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
+  <url type="translate">https://wiki.gnome.org/TranslationProject</url>
   <url type="donation">https://wiki.gnome.org/Apps/Geary/Donate</url>
 
   <screenshots>
