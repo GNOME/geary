@@ -25,7 +25,7 @@ public class Components.ConversationActions : Gtk.Box {
         }
     }
 
-    public int selected_conversations { get; set; default=1;}
+    public int selected_conversations { get; set; default = 1; }
 
     public Geary.Account account { get; set; }
 
