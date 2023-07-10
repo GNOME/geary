@@ -679,6 +679,11 @@ public class Application.MainWindow :
         foreach (var actions in this.folder_conversation_actions) {
             actions.mark_message_button_toggled.connect(on_show_mark_menu);
         }
+
+        Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
+            on_gtk_decoration_layout_changed
+        );
+        update_close_button_position();
     }
 
     ~MainWindow() {
@@ -696,6 +701,9 @@ public class Application.MainWindow :
             );
         }
         this.update_ui_timeout.reset();
+        Gtk.Settings.get_default().notify["gtk-decoration-layout"].disconnect(
+            on_gtk_decoration_layout_changed
+        );
         base.destroy();
     }
 
@@ -1742,6 +1750,20 @@ public class Application.MainWindow :
         }
     }
 
+    private void update_close_button_position() {
+        bool at_end = Util.Gtk.close_button_at_end();
+
+        this.application_headerbar.show_close_button = (
+            this.inner_leaflet.folded || !at_end
+        );
+        this.conversation_list_headerbar.show_close_button = (
+            this.inner_leaflet.folded || (at_end && this.outer_leaflet.folded)
+        );
+        this.conversation_headerbar.show_close_button = (
+            this.outer_leaflet.folded || at_end
+        );
+    }
+
     private void on_conversation_activated(Geary.App.Conversation activated, uint button) {
         if (button == 1) {
             bool folded = this.outer_leaflet.folded;
@@ -2122,8 +2144,8 @@ public class Application.MainWindow :
         update_conversation_actions(
             ConversationCount.for_size(selected)
         );
+        update_close_button_position();
         if (this.outer_leaflet.folded) {
-            this.conversation_list_headerbar.show_close_button = true;
             // Ensure something useful gets the keyboard focus, given
             // GNOME/libhandy#179
             if (this.is_conversation_list_shown) {
@@ -2140,7 +2162,6 @@ public class Application.MainWindow :
                 close_composer(false, false);
             }
         } else {
-            this.conversation_list_headerbar.show_close_button = false;
             this.conversation_headerbar.back_button.visible = false;
             if (selected > 0) {
                 select_conversations.begin(
@@ -2154,8 +2175,8 @@ public class Application.MainWindow :
 
     [GtkCallback]
     private void on_inner_leaflet_changed() {
+        update_close_button_position();
         if (this.inner_leaflet.folded) {
-            this.application_headerbar.show_close_button = true;
             // Ensure something useful gets the keyboard focus, given
             // GNOME/libhandy#179
             if (this.is_conversation_list_shown) {
@@ -2165,7 +2186,6 @@ public class Application.MainWindow :
                 this.folder_list.grab_focus();
             }
         } else {
-            this.application_headerbar.show_close_button = false;
             this.conversation_list_headerbar.back_button.visible = false;
         }
     }
@@ -2809,4 +2829,7 @@ public class Application.MainWindow :
         }
     }
 
+    private void on_gtk_decoration_layout_changed() {
+        update_close_button_position();
+    }
 }
