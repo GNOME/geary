@@ -33,6 +33,14 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
 
     [GtkChild] private unowned Hdy.HeaderBar conversation_header;
 
+    public bool show_close_button {
+        get {
+            return this.conversation_header.show_close_button;
+        }
+        set {
+            this.conversation_header.show_close_button = value;
+        }
+    }
 
     construct {
         this.actions_squeezer.notify["visible-child"].connect_after(
@@ -49,11 +57,13 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
     public void set_conversation_header(Hdy.HeaderBar header) {
         remove(this.conversation_header);
         header.hexpand = true;
+        header.show_close_button = this.conversation_header.show_close_button;
         add(header);
     }
 
     public void remove_conversation_header(Hdy.HeaderBar header) {
         remove(header);
+        this.conversation_header.show_close_button = header.show_close_button;
         add(this.conversation_header);
     }
 
