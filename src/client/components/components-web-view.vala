@@ -335,7 +335,6 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         setts.enable_fullscreen = false;
         setts.enable_html5_database = false;
         setts.enable_html5_local_storage = false;
-        setts.enable_java = false;
         setts.enable_javascript = true;
         setts.enable_javascript_markup = false;
         setts.enable_media_stream = false;
