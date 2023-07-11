@@ -89,7 +89,7 @@ Install them by running this command:
 
 ```
 sudo dnf install meson vala desktop-file-utils enchant2-devel \
-    folks-devel gcr-devel glib2-devel gmime30-devel \
+    folks-devel gcr3-devel glib2-devel gmime30-devel \
     gnome-online-accounts-devel gspell-devel gsound-devel \
     gtk3-devel iso-codes-devel itstool json-glib-devel \
     libappstream-glib-devel libgee-devel libhandy1-devel \
