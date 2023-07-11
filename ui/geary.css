@@ -8,20 +8,8 @@
 
 /* MainWindow */
 
-.geary-folder {
-  min-width: 300px;
-}
-
 geary-conversation-list revealer {
   margin: 6px;
-}
-
-geary-conversation-list {
-  min-width: 360px;
-}
-
-geary-conversation-viewer {
-  min-width: 360px;
 }
 
 .geary-overlay {
