@@ -105,6 +105,11 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
         }
     }
 
+    public override void get_preferred_width(out int minimum_size, out int natural_size) {
+        minimum_size = 300;
+        natural_size = 500;
+    }
+
     /**
      * Updates the display of the received time on each list row.
      *
