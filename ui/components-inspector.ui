@@ -50,7 +50,7 @@
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="icon_name">marker-symbolic</property>
+                <property name="icon_name">document-edit-symbolic</property>
               </object>
             </child>
           </object>
