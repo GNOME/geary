@@ -167,9 +167,9 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
         int index = row.get_index();
         if (scroll_type == Gtk.ScrollType.STEP_UP) {
-            row = this.list.get_row_at_index(index + 1);
-        } else {
             row = this.list.get_row_at_index(index - 1);
+        } else {
+            row = this.list.get_row_at_index(index + 1);
         }
 
         if (row != null) {
