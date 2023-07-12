@@ -144,6 +144,10 @@ public class Components.ConversationActions : Gtk.Box {
                     "Copy conversations",
                     this.selected_conversations
                     );
+                this.copy_message_button.set_image(
+                    new Gtk.Image.from_icon_name(
+                        "folder-symbolic", Gtk.IconSize.BUTTON)
+                );
                 break;
             }
         }
