@@ -64,6 +64,10 @@ row.conversation-list label {
   margin-bottom: .4em;
 }
 
+row.conversation-list .details {
+  padding-left: 1em;
+}
+
 row.conversation-list .tertiary {
   opacity: 0.7;
   font-size: 0.8em;
@@ -71,6 +75,11 @@ row.conversation-list .tertiary {
 
 row.conversation-list .subject {
   font-size: 0.9em;
+  padding-left: 0.5em;
+}
+
+row.conversation-list .preview {
+  padding-left: 0.6em;
 }
 
 row.conversation-list .date {
@@ -78,10 +87,6 @@ row.conversation-list .date {
 }
 
 /* Unread styling */
-row.conversation-list.unread .preview {
-  opacity: 1;
-}
-
 row.conversation-list.unread .subject {
   font-weight: bold;
 }
@@ -90,33 +95,10 @@ row.conversation-list.unread .participants {
   font-weight: bold;
 }
 
-row.conversation-list.unread .unread-button {
-  opacity: 1;
-}
-
-/* Hover buttons */
-row.conversation-list .conversation-ephemeral-button {
-  opacity: 0;
-  margin: 2px;
-  border-radius: 50%;
-  border: none;
-}
-
-row.conversation-list:hover .conversation-ephemeral-button {
-  opacity: 1;
-}
-
-row.conversation-list.starred .flagged-button {
-  opacity: 1;
-}
-
-row.conversation-list:selected .conversation-ephemeral-button {
-  opacity: 1;
-}
-
 row.conversation-list .count-badge {
   background: #888888;
   color: white;
+  margin-top: 4px;
   min-width: 1.5em;
   border-radius: 1em;
   font-size: .8em;
