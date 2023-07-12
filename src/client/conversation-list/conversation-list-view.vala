@@ -558,13 +558,13 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      */
     private void on_conversations_removed(bool start) {
         // Before model update, just find a conversation
-        if (start) {
+        if (this.config.autoselect && start) {
             this.to_restore_row = get_next_conversation();
         // If in selection mode, leaving will do the job
         } else if (this.selection_mode_enabled) {
             this.selection_mode_enabled = false;
         // Set next conversation
-        } else {
+        } else if (this.config.autoselect) {
             restore_row();
         }
     }
