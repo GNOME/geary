@@ -2391,7 +2391,8 @@ public class Application.MainWindow :
 
     private void on_folder_activated(Geary.Folder? folder) {
         if (folder != null) {
-            go_to_next_pane();
+            // Focus on conversation list will autoselect
+            go_to_next_pane(!this.application.config.autoselect);
         }
     }
 
