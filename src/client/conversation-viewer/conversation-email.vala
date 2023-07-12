@@ -565,7 +565,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         Json.Generator generator = new Json.Generator();
         generator.set_root(builder.get_root());
         string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
-        yield this.primary_message.run_javascript(js, null);
+        yield this.primary_message.evaluate_javascript(js, null);
 
         Gtk.Window? window = get_toplevel() as Gtk.Window;
         WebKit.PrintOperation op = this.primary_message.new_print_operation();

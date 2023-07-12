@@ -109,7 +109,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
                         document.getElementById('test'), "BLOCKQUOTE"
                     );
                 """)
-                .get_js_value()
            )
         );
     }
@@ -123,7 +122,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
                         document.getElementById('test'), "BLOCKQUOTE", "test-class"
                     );
                 """)
-                .get_js_value()
            )
         );
     }
@@ -137,7 +135,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
                         document.getElementById('test'), "DIV"
                     );
                 """)
-                .get_js_value()
            )
         );
     }
@@ -151,7 +148,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
                         document.getElementById('test'), "DIV", null, false
                     );
                 """)
-                .get_js_value()
            )
         );
     }
@@ -167,7 +163,6 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
         try {
             ret = (uint) Util.JS.to_int32(
                 run_javascript(@"ConversationPageState.isDeceptiveText(\"$text\", \"$href\")")
-                .get_js_value()
             );
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);

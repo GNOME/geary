@@ -47,7 +47,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(
                         @"ComposerPageState.htmlToText(window.document.body);"
-                    ).get_js_value()
+                    )
                 ) == "para\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
@@ -67,7 +67,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(
                         "ComposerPageState.htmlToText(window.document.body);"
-                    ).get_js_value()
+                    )
                 ) == @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
@@ -87,7 +87,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(
                         "ComposerPageState.htmlToText(window.document.body)"
-                    ).get_js_value()
+                    )
                 ) == @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
@@ -106,7 +106,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
                 Util.JS.to_string(
                     run_javascript(
                         "ComposerPageState.htmlToText(window.document.body, [\"blockquote\"])"
-                    ).get_js_value()
+                    )
                 ) == @"pre\n\npost\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
@@ -126,7 +126,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
             assert(
                 Util.JS.to_string(
                     run_javascript(@"new EditContext(document.getElementById('test')).encode()")
-                    .get_js_value()
+
                 ).has_prefix("1;url;"));
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
@@ -145,7 +145,7 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
             assert(
                 Util.JS.to_string(
                     run_javascript(@"new EditContext(document.getElementById('test')).encode()")
-                    .get_js_value()
+
                 ) == "0;;Comic Sans;144;rgb(255, 127, 1)");
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
@@ -164,13 +164,13 @@ class Composer.PageStateTest : Components.WebViewTestCase<Composer.WebView> {
             assert(
                 Util.JS.to_int32(
                     run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")
-                    .get_js_value()
+
                 ) == 1
             );
             assert(
                 Util.JS.to_string(
                     run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")
-                    .get_js_value()
+
                 ) == "some text"
             );
         } catch (Util.JS.Error err) {
@@ -197,25 +197,25 @@ some text
             assert(
                 Util.JS.to_bool(
                     run_javascript(@"geary.containsAttachmentKeyword(\"some\", \"subject text\");")
-                    .get_js_value()
+
                 )
             );
             assert(
                 Util.JS.to_bool(
                     run_javascript(@"geary.containsAttachmentKeyword(\"subject\", \"subject text\");")
-                    .get_js_value()
+
                 )
             );
             assert(
                 !Util.JS.to_bool(
                     run_javascript(@"geary.containsAttachmentKeyword(\"innerquote\", \"subject text\");")
-                    .get_js_value()
+
                 )
             );
             assert(
                 !Util.JS.to_bool(
                     run_javascript(@"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");")
-                    .get_js_value()
+
                 )
             );
         } catch (Util.JS.Error err) {
@@ -260,7 +260,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         run_javascript("geary.cleanContent();");
         string result = Util.JS.to_string(
             run_javascript("window.document.body.innerHTML;")
-            .get_js_value()
+
         );
         assert_equal(result, DIRTY_BODY_TEMPLATE.printf(expected));
     }
@@ -270,7 +270,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         load_body_fixture(html);
         try {
             string result = Util.JS.to_string(
-                run_javascript(@"window.geary.getHtml();").get_js_value()
+                run_javascript(@"window.geary.getHtml();")
             );
             assert(result == CLEAN_BODY_TEMPLATE.printf(html));
         } catch (Util.JS.Error err) {
@@ -288,7 +288,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
             assert(
                 Util.JS.to_string(
                     run_javascript(@"window.geary.getText();")
-                    .get_js_value()
+
                 ) == "para\n\n\n\n"
             );
         } catch (Util.JS.Error err) {
@@ -308,73 +308,73 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
             // Doesn't contain
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('notcontained', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('not contained', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('not\tcontained', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('http://www.keyword1.com', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('http://www.something.com/something.sf1', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('sf1', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('.sf1', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
 
             // Does contain
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword1', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword2 contained', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword2\tcontained', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('keyword1.', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.sf1', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('something.something.sf2', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
             assert(!Util.JS.to_bool(run_javascript(
                 @"ComposerPageState.containsKeywords('http://something/else.sf2', $complete_keys, $suffix_keys);"
-                ).get_js_value()
+                )
             ));
 
         } catch (Util.JS.Error err) {
@@ -394,12 +394,12 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
             assert(
                 Util.JS.to_string(
                     run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');")
-                    .get_js_value()
+
                 ) == "a b");
             assert(
                 Util.JS.to_string(
                     run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")
-                    .get_js_value()
+
                 ) == "a b c");
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);

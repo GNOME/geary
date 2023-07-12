@@ -49,10 +49,10 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
         }
     }
 
-    protected WebKit.JavascriptResult run_javascript(string command) throws Error {
+    protected JSC.Value? run_javascript(string command) throws Error {
         WebView view = (WebView) this.test_view;
-        view.run_javascript.begin(command, null, this.async_completion);
-        return view.run_javascript.end(async_result());
+        view.evaluate_javascript.begin(command, -1, null, null, null, this.async_completion);
+        return view.evaluate_javascript.end(async_result());
     }
 
 }

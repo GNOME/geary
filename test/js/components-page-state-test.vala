@@ -160,7 +160,6 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
         throws GLib.Error {
         string? result = Util.JS.to_string(
             run_javascript("geary.testResult")
-            .get_js_value()
         );
         assert_equal(result, expected);
     }

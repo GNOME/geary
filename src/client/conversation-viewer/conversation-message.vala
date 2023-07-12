@@ -672,10 +672,10 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         return new WebKit.PrintOperation(web_view);
     }
 
-    public async void run_javascript (string script, Cancellable? cancellable) throws Error {
+    public async void evaluate_javascript(string script, Cancellable? cancellable) throws Error {
         if (this.web_view == null)
             initialize_web_view();
-        yield web_view.run_javascript(script, cancellable);
+        yield web_view.evaluate_javascript(script, -1, null, null, cancellable);
     }
 
     public void zoom_in() {
