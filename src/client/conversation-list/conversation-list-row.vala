@@ -20,16 +20,13 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
     }
 
     [GtkChild] unowned Gtk.Label preview;
-    [GtkChild] unowned Gtk.Box preview_row;
     [GtkChild] unowned Gtk.Label subject;
     [GtkChild] unowned Gtk.Label participants;
     [GtkChild] unowned Gtk.Label date;
     [GtkChild] unowned Gtk.Label count_badge;
 
-    [GtkChild] unowned Gtk.Image read_icon;
     [GtkChild] unowned Gtk.Image flagged_icon;
 
-    [GtkChild] unowned Gtk.Stack stack;
     [GtkChild] unowned Gtk.CheckButton selected_button;
 
     internal Geary.App.Conversation conversation;
@@ -50,7 +47,7 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
         conversation.email_flags_changed.connect(update_flags);
 
         config.bind(Application.Configuration.DISPLAY_PREVIEW_KEY,
-                    this.preview_row, "visible");
+                    this.preview, "visible");
 
         if (selection_mode_enabled) {
             set_selection_enabled(true);
@@ -87,13 +84,11 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
 
     internal void set_selection_enabled(bool enabled) {
         if (enabled) {
-            this.selected_button.show();
             set_button_active(this.is_selected());
             this.state_flags_changed.connect(update_button);
             this.selected_button.toggled.connect(update_state_flags);
-            this.stack.set_visible_child_name("selection-button");
+            this.selected_button.show();
         } else {
-            this.stack.set_visible_child_name("buttons");
             this.state_flags_changed.disconnect(update_button);
             this.selected_button.toggled.disconnect(update_state_flags);
             set_button_active(false);
@@ -140,27 +135,15 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
     private void update_flags(Geary.Email? email) {
         if (conversation.is_unread()) {
             get_style_context().add_class("unread");
-            read_icon.set_from_icon_name("mail-unread-symbolic", Gtk.IconSize.BUTTON);
         } else {
             get_style_context().remove_class("unread");
-            read_icon.set_from_icon_name("mail-read-symbolic", Gtk.IconSize.BUTTON);
         }
 
         if (conversation.is_flagged()) {
-            get_style_context().add_class("starred");
-            flagged_icon.set_from_icon_name("starred-symbolic", Gtk.IconSize.BUTTON);
+            this.flagged_icon.show();
         } else {
-            get_style_context().remove_class("starred");
-            flagged_icon.set_from_icon_name("non-starred-symbolic", Gtk.IconSize.BUTTON);
+            this.flagged_icon.hide();
         }
-    }
-
-    [GtkCallback] private void on_unread_button_clicked() {
-        toggle_flag(this, Geary.EmailFlags.UNREAD);
-    }
-
-    [GtkCallback] private void on_flagged_button_clicked() {
-        toggle_flag(this, Geary.EmailFlags.FLAGGED);
     }
 
     private string get_participants() {
