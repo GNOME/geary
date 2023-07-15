@@ -14,10 +14,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-04-12 13:35+0000\n"
-"PO-Revision-Date: 2023-05-12 14:24+0300\n"
+"POT-Creation-Date: 2023-07-12 13:27+0000\n"
+"PO-Revision-Date: 2023-07-13 17:37+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
-"Language-Team: Turkish <gnome-turk@gnome.org>\n"
+"Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -67,11 +67,11 @@ msgstr "Geary Geliştirme Takımı"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary, GNOME 3 masaüstü için konuşmalar etrafında inşa edilmiş bir e-posta "
+"Geary, GNOME masaüstü için konuşmalar etrafında inşa edilmiş bir e-posta "
 "uygulamasıdır. Dolambaçsız çağdaş bir arayüzle e-posta okumanızı, bulmanızı "
 "ve göndermenizi sağlar."
 
@@ -184,10 +184,18 @@ msgid "True if we should display a short preview of each message."
 msgstr "Her iletinin kısa bir ön izlemesini göstermemiz gerekiyorsa doğru."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Öntanımlı olarak iletileri taşı"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "İleti etiketlendiğinde, onu hedef klasöre taşı."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Tek tuşlu kısayolları kullan"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -195,11 +203,11 @@ msgstr ""
 "Gmailʼin kullandığına benzemek için e-posta eylemlerinde <Ctrl>ʼye basmayı "
 "gerektirmeyen kısayolları etkinleştirir."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Yazım denetleyicide kullanılacak diller"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -207,11 +215,11 @@ msgstr ""
 "POSIX yerellerinin listesi, boş listeyle imla denetimi devre dışı bırakılır "
 "ve butlan (null) listeyle öntanımlı olarak masaüstü dillerini kullanılır."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Yazım denetleyici açılır penceresinde gösterilecek diller"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -219,70 +227,70 @@ msgstr ""
 "Yazım denetleyicinin açılır penceresinde her zaman gösterilecek dillerin "
 "listesi."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr "Kapatıldığında ve oturum açıldığında uygulamayı arka planda çalıştır"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "Uygulamayı arka planda çalıştırmak için doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Ek açarken sor"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "Eki açarken sormak için doğru."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "E-postaların HTML’de oluşturulup oluşturulmayacağı"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "E-postaları HTML’de oluşturmak için doğru, düz metin için yanlış."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Tam metin arama için tavsiye niteliğinde izlem"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Kabul edilebilir değerler şunlardır: “exact” (birebir), "
 "“conservative” (ılımlı), “aggressive” (sert) ve “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Konuşma göstericisinin yakınlaşması"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "Konuşma görünümünde uygulanacak yakınlaşma."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Ayrılan oluşturucu penceresinin boyutu"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "Ayrılmış oluşturucu penceresinin kaydedilen son boyutu."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Bu alan adları için görüntülere izin ver"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "Bu alan adlarından görüntülere güvenilecek"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "E-posta göndermeyi geri alma gecikmesi"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -290,29 +298,29 @@ msgstr ""
 "E-posta gönderilmeden önce beklenecek saniye. Devre dışı bırakmak için sıfır "
 "veya daha azına belirleyin."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Özet bildirim gösterim zamanı"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Özet bildirimlerin gösterileceği zamanın saniye türünde uzunluğu."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "İsteğe bağlı eklenti listesi"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Burada listelenen eklentiler başlangıçta yüklenecek."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Eski ayarları taşıyıp taşımayacağımız"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -616,12 +624,12 @@ msgid_plural "%d days back"
 msgstr[0] "%d gün öncesinden"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2318
 msgid "Undo"
 msgstr "Geri Al"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2301
 msgid "Redo"
 msgstr "Yinele"
 
@@ -704,7 +712,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Giriş"
 
@@ -1149,47 +1157,47 @@ msgid "Account update"
 msgstr "Hesap güncelleme"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Çevrim dışı çalışıyor"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Yeniden bağlanana dek e-posta gönderemez veya alamazsınız."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Giriş sorunu"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "Hesap yanlış bir giriş veya parola bildirdi."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Giriş yapmayı yeniden dene, parola girmeniz istenecek"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Güvenlik sorunu"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Hesap, güvenilmeyen bir sunucu bildirdi."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Gözden geçir"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 
@@ -1201,47 +1209,47 @@ msgstr "Bağlantı güvenlik ayrıntılarını gözden geçirin"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1100
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etiketler"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Bu konuşmaları kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "Sil"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1841
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1277,37 +1285,32 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Yeniden _sorma"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:118
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Konuşmayı imle"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Konuşmayı taşı"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:124
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Konuşmayı arşivle"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:133
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Konuşmayı etiketle"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:144
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Konuşmayı kopyala"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:162
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Konuşmayı Çöpʼe taşı"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:172
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Konuşmayı sil"
@@ -1398,7 +1401,7 @@ msgstr "Geary, tüm pencereler kapatıldıktan sonra çalışmayı sürdürecek"
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:172
 msgid "_Always load images"
-msgstr "Görüntüleri _hep yükle"
+msgstr "Görüntüleri _her zaman yükle"
 
 #. / Translators: Preferences page title
 #: src/client/components/components-preferences-window.vala:190
@@ -1932,25 +1935,25 @@ msgstr "Göster"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No Conversations Selected"
 msgstr "Konuşma Seçilmedi"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
 msgstr "Listeden bir ileti seçtiğinizde burada gösterilecek."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Multiple Conversations Selected"
 msgstr "Birden Çok Konuşma Seçildi"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır."
 
@@ -1958,20 +1961,20 @@ msgstr "Bir eylem seçtiğinizde tüm seçili konuşmalara uygulanacaktır."
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:116
-#: src/client/conversation-viewer/conversation-viewer.vala:132
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
 msgid "No Conversations Found"
 msgstr "Konuşma Bulunamadı"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
 msgstr "Bu klasör herhangi bir konuşma içermiyor."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:136
+#: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
 msgstr "Aramanız sonuçsuz kaldı, arama terimlerinizi basitleştirmeyi deneyin."
 
@@ -2070,7 +2073,7 @@ msgstr "Ayrıntılar"
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
-msgstr "Geary, sürmek için e-posta parolanızı istiyor"
+msgstr "Geary, devam için e-posta parolanızı istiyor"
 
 #: src/client/folder-list/folder-list-account-branch.vala:53
 msgid "Folders"
@@ -3085,10 +3088,6 @@ msgstr "Tümüne Yanıtla"
 msgid "Forward"
 msgstr "Yönlendir"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Arşivle"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "E-Posta"
@@ -3197,7 +3196,7 @@ msgstr "Kişilerʼde Aç"
 
 #: ui/conversation-contact-popover.ui:203
 msgid "Always Load Remote Images"
-msgstr "Uzak Görüntüleri Hep Yükle"
+msgstr "Uzak Görüntüleri Her Zaman Yükle"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:242
@@ -3354,15 +3353,15 @@ msgstr "Şuna yanıtla:"
 msgid "Subject"
 msgstr "Konu"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "Konuşmada bul"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Arama dizisinin önceki olayını bul."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Arama dizisinin sonraki olayını bul."
 
@@ -3699,5 +3698,9 @@ msgstr "Parolayı _anımsa"
 msgid "_Authenticate"
 msgstr "_Kimlik Doğrula"
 
-#~ msgid "Me"
-#~ msgstr "Ben"
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "Konuşmayı taşı"
+
+#~ msgid "_Archive"
+#~ msgstr "_Arşivle"
