@@ -11,9 +11,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary main\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-14 07:38+0000\n"
-"PO-Revision-Date: 2023-03-20 13:41+0700\n"
-"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
+"POT-Creation-Date: 2023-07-18 15:20+0000\n"
+"PO-Revision-Date: 2023-07-20 17:11+0700\n"
+"Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
@@ -35,7 +35,7 @@ msgstr "Kirim berkas memakai Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -181,10 +181,18 @@ msgid "True if we should display a short preview of each message."
 msgstr "True jika kita harus menampilkan pratinjau singkat setiap pesan."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Pindahkan pesan secara bawaan"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "Saat menandai pesan, pindahkan ke folder tujuan."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Pakai pintasan tombol tunggal"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -192,11 +200,11 @@ msgstr ""
 "Memfungsikan pintasan untuk aksi surel yang tidak memerlukan menekan <Ctrl> "
 "untuk mengemulasi mereka yang dipakai oleh Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Bahasa yang akan digunakan dalam pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -204,80 +212,80 @@ msgstr ""
 "Suatu daftar locale POSIX, dengan daftar kosong yang menonaktifkan "
 "pemeriksaan ejaan dan daftar null memakai bahasa-bahasa desktop secara baku."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Bahasa yang ditampilkan dalam popover pemeriksa ejaan"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Daftar bahasa yang selalu ditampilkan di popover pemeriksa ejaan."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr "Jalankan aplikasi di latar belakang saat masuk dan saat ditutup"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "True untuk menjalankan aplikasi di latar belakang."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Tanyakan saat membuka lampiran"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "True untuk bertanya saat membuka lampiran."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Apakah untuk menulis surel dalam HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "True untuk menulis surel dalam HTML; false untuk teks biasa."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategi penasehat untuk penelusuran teks lengkap"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Nilai yang dapat diterima \"exact\" (tepat), \"conservative\" (konservatif), "
 "\"aggressive\" (agresif), dan \"horizon\" (horizon)."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Zoom penampil percakapan"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "Zum untuk diterapkan pada tampilan konservasi."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Ukuran jendela penyusun yang terpisah"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "Ukuran yang terekam terakhir dari jendela penyusun yang terpisah."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Izinkan gambar untuk domain ini"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "Gambar dari domain ini akan dipercaya"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Batalkan tundaan pengiriman surel"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -285,30 +293,30 @@ msgstr ""
 "Berapa detik menunggu sebelum mengirim sebuah surel. Atur ke nol atau kurang "
 "untuk menonaktifkan."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Waktu tampilan pemberitahuan singkat"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 "Lamanya waktu dalam detik di mana pemberitahuan singkat harus ditampilkan."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Daftar plugin opsional"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Plugin yang tercantum di sini akan dimuat pada startup."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Apakah kita memigrasikan pengaturan lama"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -612,12 +620,12 @@ msgid_plural "%d days back"
 msgstr[0] "%d hari ke belakang"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2297
 msgid "Undo"
 msgstr "Tak Jadi"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2280
 msgid "Redo"
 msgstr "Jadi Lagi"
 
@@ -700,7 +708,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Log masuk"
 
@@ -943,7 +951,7 @@ msgstr ""
 "Andika Triwidada <andika@gmail.com>, 2012-2014, 2016, 2017, 2019-2021, "
 "2023.\n"
 "Dani Pratomo <elementaryindo@gmail.com>, 2012.\n"
-"Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021, 2022."
+"Kukuh Syafaat <kukuhsyafaat@gnome.org>, 2017, 2018, 2020, 2021, 2022, 2023."
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -1143,100 +1151,100 @@ msgid "Account update"
 msgstr "Pemutakhiran akun"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Bekerja luring"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Anda tidak akan bisa mengirim atau menerima surel sampai tersambung lagi."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Masalah log masuk"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "Sebuah akun telah melaporkan log masuk atau kata sandi yang salah."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Cobalah lagi log masuk, Anda akan diminta memasukkan kata sandi"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Masalah keamanan"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Suatu akun telah melaporkan sebuah peladen yang tak terpercaya."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Periksa"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "Periksalah rincian keamanan untuk koneksi"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1092
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Label"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Kosongkan semua surel dari folder %s Anda?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1425
 msgid "This removes the email from Geary and your email server."
 msgstr "Ini menghapus surel dari Geary dan peladen surel Anda."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1426
 msgid "This cannot be undone."
 msgstr "Ini tidak bisa dibatalkan."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1427
 #, c-format
 msgid "Empty %s"
 msgstr "Kosongkan %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1484
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Anda hendak membuang percakapan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1489
+#: src/client/application/application-main-window.vala:1504
 msgid "Delete"
 msgstr "Hapus"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1499
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1819
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1272,37 +1280,32 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Jangan tanya s_aya lagi"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:117
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Tandai percakapan"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Pindahkan percakapan"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:123
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arsipkan percakapan"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Tambahkan label ke percakapan"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:143
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Salin percakapan"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Pindahkan percakapan ke Tong Sampah"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Hapus percakapan"
@@ -3082,10 +3085,6 @@ msgstr "Balas Semua"
 msgid "Forward"
 msgstr "Teruskan"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Arsip"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "Surat"
@@ -3695,3 +3694,10 @@ msgstr "_Ingat sandi"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "Otentik_asikan"
+
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "Pindahkan percakapan"
+
+#~ msgid "_Archive"
+#~ msgstr "_Arsip"
