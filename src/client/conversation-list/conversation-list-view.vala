@@ -564,7 +564,8 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
         } else if (this.selection_mode_enabled) {
             this.selection_mode_enabled = false;
         // Set next conversation
-        } else if (this.config.autoselect) {
+        } else if (this.config.autoselect &&
+                   this.list.get_selected_rows().length() == 0) {
             restore_row();
         }
     }
