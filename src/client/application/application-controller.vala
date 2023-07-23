@@ -1798,16 +1798,26 @@ internal class Application.ControllerCommandStack : CommandStack {
 
 
     private EmailCommand? last_executed = null;
+    private Geary.TimeoutManager last_executed_timeout;
 
+
+    public ControllerCommandStack() {
+        this.last_executed_timeout = new Geary.TimeoutManager.milliseconds(
+            250,
+            () => { this.last_executed = null; }
+        );
+    }
 
     /** {@inheritDoc} */
     public override async void execute(Command target,
                                        GLib.Cancellable? cancellable)
         throws GLib.Error {
+        this.last_executed_timeout.reset();
         // Guard against things like Delete being held down by only
         // executing a command if it is different to the last one.
         if (this.last_executed == null || !this.last_executed.equal_to(target)) {
             this.last_executed = target as EmailCommand;
+            this.last_executed_timeout.start();
             yield base.execute(target, cancellable);
         }
     }
