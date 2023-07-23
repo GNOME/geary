@@ -2612,3 +2612,4 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
 }
+
