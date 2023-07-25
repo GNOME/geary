@@ -11,16 +11,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-14 07:38+0000\n"
-"PO-Revision-Date: 2023-03-15 01:07+0100\n"
+"POT-Creation-Date: 2023-07-16 11:52+0000\n"
+"PO-Revision-Date: 2023-07-26 00:50+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
-"Language-Team: Hungarian <gnome-hu-list at gnome dot org>\n"
+"Language-Team: Hungarian <openscope at fsf dot hu>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 22.08.2\n"
+"X-Generator: Lokalize 23.04.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -35,7 +35,7 @@ msgstr "Fájlok küldése a Geary használatával"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -183,10 +183,19 @@ msgid "True if we should display a short preview of each message."
 msgstr "Igaz, ha minden levélről jelenjen meg egy rövid előnézet."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+#| msgid "Move message to _Trash"
+msgid "Move messages by default"
+msgstr "Üzenetek áthelyezése alapértelmezetten"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "Egy üzenet címkézésekor az üzenet áthelyezése a célmappába."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Egybillentyűs gyorsbillentyűk használata"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -194,11 +203,11 @@ msgstr ""
 "Engedélyezi a gyorsbillentyűket az olyan e-mail-műveleteknél, amelyek nem "
 "igénylik a <Ctrl> lenyomását, a Gmail által használtak utánzása érdekében."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "A nyelvek, amelyek használva lesznek a helyesírás-ellenőrzőben"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -206,11 +215,11 @@ msgstr ""
 "POSIX területi beállítások listája, az üres listával letiltja a helyesírás-"
 "ellenőrzést, és a null lista az asztal nyelveit használja alapértelmezetten."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "A nyelvek, melyek megjelennek a helyesírás-ellenőrző felugróban"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -218,72 +227,72 @@ msgstr ""
 "A nyelvek listája, amely mindig megjelenik a helyesírás-ellenőrző "
 "felugrójában."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr ""
 "Az alkalmazás futtatása a háttérben a bejelentkezéskor és ha be van zárva"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "Igaz az alkalmazás háttérben való futtatásához."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Kérdezzen egy melléklet megnyitásakor"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "Igaz, ha kérdezzen egy melléklet megnyitásakor."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Az e-mailek írása HTML-ben történjen-e"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Igaz, ha a levelek HTML-ben legyenek megírva; hamis esetén egyszerű szöveg."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Tanácsadó stratégia a teljes szöveges keresésnél"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Az elfogadható értékek: „exact” (pontos), „conservative” (konzervatív), "
 "„aggressive” (agresszív) és „horizon” (horizont)."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "A beszélgetésmegjelenítő nagyítása"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "A beszélgetés nézeten alkalmazandó nagyítás."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "A leválasztott levélíró ablak mérete"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "A leválasztott levélíró ablak legutóbb elmentett mérete."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Képek engedélyezése ezeknél a tartományoknál"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "Az ezekből a tartományokból származó képek megbízhatóak lesznek"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Levélküldési késleltetés visszavonása"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -291,29 +300,29 @@ msgstr ""
 "A levelek kiküldése előtti várakozás másodpercben. A letiltáshoz állítsa "
 "nullára vagy kevesebbre."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Rövid értesítések megjelenítési ideje"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "A rövid értesítések megjelenítési ideje másodpercben."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Válaszható bővítmények listája"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Az itt felsorolt bővítmények betöltésre kerülnek indításkor."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "A régi beállítások migrálva lettek-e"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -618,12 +627,12 @@ msgstr[0] "%d napra visszamenőleg"
 msgstr[1] "%d napra visszamenőleg"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2297
 msgid "Undo"
 msgstr "Visszavonás"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2280
 msgid "Redo"
 msgstr "Újra"
 
@@ -706,7 +715,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Bejelentkezés"
 
@@ -1161,103 +1170,103 @@ msgid "Account update"
 msgstr "Fiókfrissítés"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Kapcsolat nélküli munka"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Nem lesz képes leveleket küldeni vagy fogadni, amíg nem kapcsolódik újra."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Bejelentkezési probléma"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "Egy fiók helytelen bejelentkezési nevet vagy jelszót jelentett."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Bejelentkezés újrapróbálása, a jelszava bekérésre fog kerülni"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Biztonsági probléma"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Egy fiók nem megbízható kiszolgálót jelentett."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Ellenőrzés"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "A kapcsolat biztonsági részleteinek ellenőrzése"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1092
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Címkék"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Minden levelet kiürít a(z) %s mappából?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1425
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Ez eltávolítja a levelet a Geary programból és a levelezőkiszolgálóról."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1426
 msgid "This cannot be undone."
 msgstr "Ez nem vonható vissza."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1427
 #, c-format
 msgid "Empty %s"
 msgstr "%s ürítése"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1484
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Véglegesen törölni szeretné ezt a beszélgetést?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a beszélgetéseket?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1489
+#: src/client/application/application-main-window.vala:1504
 msgid "Delete"
 msgstr "Törlés"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1499
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Véglegesen törölni szeretné ezt a levelet?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a leveleket?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1819
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1293,43 +1302,37 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Ne _kérdezze újra"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:117
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Beszélgetés megjelölése"
 msgstr[1] "Beszélgetések megjelölése"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Beszélgetés áthelyezése"
-msgstr[1] "Beszélgetések áthelyezése"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:123
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Beszélgetés archiválása"
 msgstr[1] "Beszélgetések archiválása"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Címke hozzáadása a beszélgetéshez"
 msgstr[1] "Címke hozzáadása a beszélgetésekhez"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:143
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Beszélgetés másolása"
 msgstr[1] "Beszélgetések másolása"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Beszélgetés áthelyezése a Kukába"
 msgstr[1] "Beszélgetések áthelyezése a Kukába"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Beszélgetés törlése"
@@ -3138,10 +3141,6 @@ msgstr "Válasz mindenkinek"
 msgid "Forward"
 msgstr "Továbbítás"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Archiválás"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "Levél"
@@ -3156,7 +3155,6 @@ msgid "Toggle search bar"
 msgstr "Keresősáv ki- vagy bekapcsolása"
 
 #: ui/components-headerbar-conversation-list.ui:71
-#| msgid "Selection conversations"
 msgid "Select conversations"
 msgstr "Beszélgetések kijelölése"
 
