@@ -16,9 +16,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary main\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-14 07:38+0000\n"
-"PO-Revision-Date: 2023-03-14 11:42+0300\n"
-"Last-Translator: Aleksandr Melman <Alexmelman88@gmail.com>\n"
+"POT-Creation-Date: 2023-07-12 13:27+0000\n"
+"PO-Revision-Date: 2023-07-15 00:56+1000\n"
+"Last-Translator: Ser82-png <asvmail.as@gmail.com>\n"
 "Language-Team: Russian <Alexmelman88@gmail.com>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -70,11 +70,11 @@ msgstr "Команда разработчиков Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary — приложение эл. почты для рабочего стола GNOME 3, построенное по "
+"Geary — приложение эл. почты для рабочего стола GNOME, построенное по "
 "принципу обмена сообщениями — беседами. Позволяет читать, находить и "
 "отправлять эл. почту с простым, современным интерфейсом."
 
@@ -146,8 +146,7 @@ msgstr "Развернуть окно"
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
 msgstr ""
-"Значение \"true\", если окно программы развернуто; значение \"false\", если "
-"нет."
+"Значение «true», если окно программы развернуто; значение «false», если нет."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -181,7 +180,7 @@ msgstr "Автовыбор следующего сообщения"
 
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid "True if we should autoselect the next available conversation."
-msgstr "Значение \"true\" означает автовыбор следующей доступной беседы."
+msgstr "Значение «true» означает автовыбор следующей доступной беседы."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Display message previews"
@@ -190,14 +189,22 @@ msgstr "Показывать предпросмотр сообщений"
 #: desktop/org.gnome.Geary.gschema.xml:39
 msgid "True if we should display a short preview of each message."
 msgstr ""
-"Если имеет значение \"true\", программа должна показывать короткий "
+"Если имеет значение «true», программа должна показывать короткий "
 "предпросмотр каждого сообщения."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Перемещать сообщения по умолчанию"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "При установке метки на сообщение перемещать его в папку назначения."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Использовать одноклавишные комбинации клавиш"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -205,11 +212,11 @@ msgstr ""
 "Включить комбинации клавиш для действий эл. почты, не требующих нажатия "
 "клавиши <Ctrl>, для эмуляции тех, которые используются в Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Языки, которые должны использоваться в программе проверки орфографии"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -217,11 +224,11 @@ msgstr ""
 "Список локалей POSIX, при этом пустой список отключает проверку орфографии, "
 "а нулевой список использует языки рабочего стола по умолчанию."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Языки, отображаемые во всплывающем окне проверки орфографии"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -229,73 +236,73 @@ msgstr ""
 "Список языков, которые всегда отображаются во всплывающем окне программы "
 "проверки орфографии."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr ""
 "Запуск приложения в фоновом режиме при входе в систему и при закрытии окна"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
-msgstr "Значение \"true\", чтобы приложение работало в фоне."
+msgstr "Значение «true», чтобы приложение работало в фоне."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Спрашивать при открытии вложения"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
-msgstr "Значение \"true\", чтобы спрашивать перед открытием вложения."
+msgstr "Значение «true», чтобы спрашивать перед открытием вложения."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Можно ли составлять эл. письма в формате HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
-"Значение \"true\" для составления писем в формате HTML; \"false\" для "
-"обычного текста."
+"Значение «true» для составления писем в формате HTML; «false» для обычного "
+"текста."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Рекомендуемая стратегия для полнотекстового поиска"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
-"Допустимые значения: \"точный\", \"консервативный\", \"агрессивный\" и "
-"\"горизонтальный\"."
+"Допустимые значения: «точный», «консервативный», «агрессивный» и "
+"«горизонтальный»."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Масштаб окна беседы"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "Масштаб применяемый к окну беседы."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Размер отсоединенного окна редактора"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "Последний сохраненный размер отсоединенного окна редактора."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Разрешить изображения для этих доменов"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "Изображения от данных доменов будут доверенными"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Отменить задержку отправки эл. почты"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -303,34 +310,34 @@ msgstr ""
 "Количество секунд ожидания перед отправкой эл. почты. Установите значение "
 "ноль или меньше, чтобы отключить."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Время отображения краткого уведомления"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 "Время в секундах, в течение которого должны отображаться краткие уведомления."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Список дополнительных плагинов"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Плагины, перечисленные здесь, будут загружены при запуске."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Перенести ли старые настройки"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
-"Значение \"false\", чтобы проверить старую схему “org.yorba.geary” и "
+"Значение «false», чтобы проверить старую схему «org.yorba.geary» и "
 "скопировать ее значения."
 
 #. Translators: In-app notification label, when
@@ -510,7 +517,7 @@ msgstr "Имя учетной записи"
 #: src/client/accounts/accounts-editor-edit-pane.vala:330
 #, c-format
 msgid "Change account name back to “%s”"
-msgstr "Изменить имя учетной записи обратно на \"%s\""
+msgstr "Изменить имя учетной записи обратно на «%s»"
 
 #. Translators: Tooltip for adding a new email sender/from
 #. address's address to an account
@@ -549,7 +556,7 @@ msgstr "Имя отправителя"
 #: src/client/accounts/accounts-editor-edit-pane.vala:587
 #, c-format
 msgid "Remove “%s”"
-msgstr "Удалить “%s”"
+msgstr "Удалить «%s»"
 
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
@@ -557,7 +564,7 @@ msgstr "Удалить “%s”"
 #: src/client/accounts/accounts-editor-edit-pane.vala:627
 #, c-format
 msgid "Undo changes to “%s”"
-msgstr "Отменить изменения в \"%s\""
+msgstr "Отменить изменения в «%s»"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
@@ -565,7 +572,7 @@ msgstr "Отменить изменения в \"%s\""
 #: src/client/accounts/accounts-editor-edit-pane.vala:714
 #, c-format
 msgid "Add “%s” back"
-msgstr "Добавить \"%s\" обратно"
+msgstr "Добавить «%s» обратно"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
@@ -632,12 +639,12 @@ msgstr[1] "%d дня назад"
 msgstr[2] "%d дней назад"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2318
 msgid "Undo"
 msgstr "Отменить"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2301
 msgid "Redo"
 msgstr "Повторить"
 
@@ -670,7 +677,7 @@ msgstr "Эта учетная запись столкнулась с пробл�
 #: src/client/accounts/accounts-editor-list-pane.vala:467
 #, c-format
 msgid "Account “%s” removed"
-msgstr "Учетная запись \"%s\" удалена"
+msgstr "Учетная запись «%s» удалена"
 
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
@@ -678,7 +685,7 @@ msgstr "Учетная запись \"%s\" удалена"
 #: src/client/accounts/accounts-editor-list-pane.vala:474
 #, c-format
 msgid "Account “%s” restored"
-msgstr "Учетная запись \"%s\" восстановлена"
+msgstr "Учетная запись «%s» восстановлена"
 
 #. Translators: Tooltip for dragging list items
 #: src/client/accounts/accounts-editor-row.vala:50
@@ -720,7 +727,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Логин"
 
@@ -801,7 +808,7 @@ msgstr "Без названия"
 #: src/client/application/application-attachment-manager.vala:222
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "Файл с именем \"%s\" уже существует. Заменить его?"
+msgstr "Файл с именем «%s» уже существует. Заменить его?"
 
 #. / Translators: Dialog secondary label when prompting to
 #. / overwrite a file. The string substitution is the parent
@@ -811,7 +818,7 @@ msgstr "Файл с именем \"%s\" уже существует. Замен�
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
-"Файл уже существует в \"%s\". Его замена приведёт к полной перезаписи его "
+"Файл уже существует в «%s». Его замена приведёт к полной перезаписи его "
 "содержимого."
 
 #: src/client/application/application-attachment-manager.vala:236
@@ -976,7 +983,7 @@ msgstr ""
 #: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
-msgstr "Неопознанный аргумент программы: “%s”"
+msgstr "Неопознанный аргумент программы: «%s»"
 
 #. / Notification title.
 #: src/client/application/application-controller.vala:496
@@ -1131,7 +1138,7 @@ msgstr "В_ыйти"
 #: src/client/application/application-controller.vala:1350
 #, c-format
 msgid "Unable to rebuild database for “%s”"
-msgstr "Не удалось пересобрать базу данных для “%s”"
+msgstr "Не удалось пересобрать базу данных для «%s»"
 
 #: src/client/application/application-controller.vala:1351
 #, c-format
@@ -1190,48 +1197,48 @@ msgid "Account update"
 msgstr "Обновление учетной записи"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Работа в автономном режиме"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Вы не сможете отправлять или получать эл. почту до повторного подключения."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Проблема с входом в систему"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "Учетная запись сообщила о неправильном логине или пароле."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Повторите попытку входа, вам будет предложено ввести пароль"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Проблема безопасности"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Учетная запись сообщила о ненадежном сервере."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Проверить"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "Проверить сведения о безопасности для подключения"
 
@@ -1243,51 +1250,51 @@ msgstr "Проверить сведения о безопасности для �
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1100
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Метки"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Очистить все письма из папки %s?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "Это приведет к удалению эл. почты из Geary и вашего почтового сервера."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "Это не может быть отменено."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "Очистить %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Вы хотите навсегда удалить эту беседу?"
 msgstr[1] "Вы хотите навсегда удалить эти беседы?"
 msgstr[2] "Вы хотите навсегда удалить этиx бесед?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "Удалить"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Вы хотите навсегда удалить это сообщение?"
 msgstr[1] "Вы хотите навсегда удалить эти сообщения?"
 msgstr[2] "Вы хотите навсегда удалить этих сообщений?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1841
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1323,49 +1330,42 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Не _спрашивать снова"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:118
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Отметить беседу"
 msgstr[1] "Отметить беседы"
 msgstr[2] "Отметить бесед"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Переместить беседу"
-msgstr[1] "Переместить беседы"
-msgstr[2] "Переместить бесед"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:124
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Архивировать беседу"
 msgstr[1] "Архивировать беседы"
 msgstr[2] "Архивировать бесед"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:133
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Добавить метку беседе"
 msgstr[1] "Добавить метку беседам"
 msgstr[2] "Добавить метку беседам"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:144
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Копировать беседу"
 msgstr[1] "Копировать беседы"
 msgstr[2] "Копировать бесед"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:162
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Переместить беседу в Kорзину"
 msgstr[1] "Переместить беседы в Корзину"
 msgstr[2] "Переместить бесед в Корзину"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:172
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Удалить беседу"
@@ -1772,28 +1772,28 @@ msgstr "Отправить сообщение без прикреплённых 
 #: src/client/composer/composer-widget.vala:1858
 #, c-format
 msgid "“%s” already attached for delivery."
-msgstr "\"%s\" уже вложено для отправки."
+msgstr "«%s» уже вложено для отправки."
 
 #: src/client/composer/composer-widget.vala:1890
 #: src/client/composer/composer-widget.vala:1940
 #, c-format
 msgid "“%s” is an empty file."
-msgstr "\"%s\" является пустым файлом."
+msgstr "«%s» является пустым файлом."
 
 #: src/client/composer/composer-widget.vala:1928
 #, c-format
 msgid "“%s” could not be found."
-msgstr "\"%s\" невозможно найти."
+msgstr "«%s» невозможно найти."
 
 #: src/client/composer/composer-widget.vala:1934
 #, c-format
 msgid "“%s” is a folder."
-msgstr "\"%s\" является папкой."
+msgstr "«%s» является папкой."
 
 #: src/client/composer/composer-widget.vala:1953
 #, c-format
 msgid "“%s” could not be opened for reading."
-msgstr "\"%s\" невозможно открыть для чтения."
+msgstr "«%s» невозможно открыть для чтения."
 
 #: src/client/composer/composer-widget.vala:1961
 msgid "Cannot add attachment"
@@ -2002,25 +2002,25 @@ msgstr "Показать"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No Conversations Selected"
 msgstr "Беседы не выбраны"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
 msgstr "Выбрав беседу из списка, вы увидите ее здесь."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Multiple Conversations Selected"
 msgstr "Выбрано несколько бесед"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "Выбор действия будет применен ко всем выбранным беседам."
 
@@ -2028,20 +2028,20 @@ msgstr "Выбор действия будет применен ко всем в
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:116
-#: src/client/conversation-viewer/conversation-viewer.vala:132
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
 msgid "No Conversations Found"
 msgstr "Беседы не найдены"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
 msgstr "Эта папка не содержит никаких бесед."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:136
+#: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
 msgstr "Поиск не дал результатов, попробуйте уточнить запрос."
 
@@ -2846,12 +2846,12 @@ msgstr "Архив | Архивы | Архивированные | Archive | Arc
 #: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
-msgstr "Не удалось определить mime-тип для “%s”."
+msgstr "Не удалось определить mime-тип для «%s»."
 
 #: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
-msgstr "Не удалось определить тип содержимого для mime-типа \"%s\" в \"%s\"."
+msgstr "Не удалось определить тип содержимого для mime-типа «%s» в «%s»."
 
 #: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
@@ -3182,10 +3182,6 @@ msgstr "Ответить всем"
 msgid "Forward"
 msgstr "Переслать"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Архивировать"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "Почта"
@@ -3453,15 +3449,15 @@ msgstr "Ответить:"
 msgid "Subject"
 msgstr "Тема"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "Найти в беседе"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Найти предыдущее совпадение строки поиска."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Найти следующее совпадение строки поиска."
 
@@ -3797,6 +3793,15 @@ msgstr "_Запомнить пароль"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Авторизоваться"
+
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "Переместить беседу"
+#~ msgstr[1] "Переместить беседы"
+#~ msgstr[2] "Переместить бесед"
+
+#~ msgid "_Archive"
+#~ msgstr "_Архивировать"
 
 #~ msgid "Me"
 #~ msgstr "Я"
