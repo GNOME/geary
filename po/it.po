@@ -19,16 +19,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-13 09:10+0000\n"
-"PO-Revision-Date: 2023-03-14 23:49+0100\n"
+"POT-Creation-Date: 2023-07-25 22:54+0000\n"
+"PO-Revision-Date: 2023-08-01 23:49+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italian <gnome-it-list@gnome.org>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Gtranslator 42.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.3.1\n"
 "X-DL-Team: it\n"
 "X-DL-Module: geary\n"
 "X-DL-Branch: mainline\n"
@@ -48,7 +48,7 @@ msgstr "Invia file usando Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -197,10 +197,20 @@ msgid "True if we should display a short preview of each message."
 msgstr "Vero se si desidera mostrare una breve anteprima di ciascun messaggio."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Sposta i messaggietichett"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr ""
+"Quando si assegna un'etichetta a un messaggio, spostarlo nella cartella di "
+"destinazione."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Usa scorciatoie da tastiera a tasto singolo"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -208,11 +218,11 @@ msgstr ""
 "Abilita le scorciatoie per le azioni email che non richiedono l'uso di "
 "<Ctrl>, per emulare quelle usate da Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Lingue da usare nel controllo ortografico"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -220,12 +230,12 @@ msgstr ""
 "Un elenco dei «locale» POSIX, dove un elenco vuoto disabilita il controllo "
 "ortografico e un elenco nullo utilizza le lingue predefinite del desktop."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr ""
 "Lingue visualizzate nella finestra a comparsa del controllo ortografico"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -233,72 +243,72 @@ msgstr ""
 "Elenco di lingue sempre visualizzate nella finestra a comparsa del controllo "
 "ortografico."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr ""
 "Esegue l'applicazione in background all'avvio della sessione e quando viene "
 "chiusa"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "Vero per eseguire l'applicazione in background."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Chiedere prima di aprire un allegato"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "Vero per chiedere prima di aprire un allegato."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Se comporre le email in HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "Vero per comporre le email in HTML; falso per il testo semplice."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategia di ricerca a testo intero"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "I valori possibili sono “exact”, “conservative”, “aggressive” e “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Ingrandimento del visualizzatore delle conversazioni"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "L'ingrandimento da applicare al visualizzatore delle conversazioni."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Dimensione della finestra di composizione staccata"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "L'ultima dimensione salvata della finestra di composizione staccata."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Permette il caricamento di immagini per questi domini"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr ""
 "Le immagini provenienti da questi domini saranno considerate affidabili"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Ritardo per annullare l'invio dell'email"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -306,29 +316,29 @@ msgstr ""
 "Il numero di secondi di attesa prima di inviare un'email. Impostarlo su zero "
 "o meno per disabilitarlo."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Tempo di visualizzazione delle notifiche brevi"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "La durata (in secondi) di visualizzazione delle notifiche brevi."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Elenco dei plugin opzionali"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "I plugin elencati qui verranno caricati all'avvio."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Indica se le vecchie impostazioni sono state migrate"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -634,12 +644,12 @@ msgstr[0] "%d giorno fa"
 msgstr[1] "%d giorni fa"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2297
 msgid "Undo"
 msgstr "Annulla"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2280
 msgid "Redo"
 msgstr "Ripeti"
 
@@ -722,7 +732,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Accesso"
 
@@ -1177,102 +1187,102 @@ msgid "Account update"
 msgstr "Aggiornamento account"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Fuori rete"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Non si potrà inviare o ricevere la posta finché non è riconnesso."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Problema di accesso"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr ""
 "Un account ha segnalato un nome di accesso o una password non corretti."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Ritentare l'accesso, verrà richiesta la password"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Problema di sicurezza"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Un account ha segnalato un server inaffidabile."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Controlla"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "Controllare i dettagli di sicurezza della connessione"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1092
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etichette"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Svuotare tutte le email dalla cartella %s?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1425
 msgid "This removes the email from Geary and your email server."
 msgstr "Questo rimuoverà le email dall'applicazione e dal server di posta."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1426
 msgid "This cannot be undone."
 msgstr "Impossibile annullare questa azione."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1427
 #, c-format
 msgid "Empty %s"
 msgstr "Svuota %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1484
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Eliminare permanentemente questa conversazione?"
 msgstr[1] "Eliminare permanentemente queste conversazioni?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1489
+#: src/client/application/application-main-window.vala:1504
 msgid "Delete"
 msgstr "Elimina"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1499
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Eliminare permanentemente questo messaggio?"
 msgstr[1] "Eliminare permanentemente questi messaggi?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1819
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1308,43 +1318,37 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "_Non chiederlo più"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:117
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Contrassegna conversazione"
 msgstr[1] "Contrassegna conversazioni"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Sposta conversazione"
-msgstr[1] "Sposta conversazioni"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:123
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Archivia conversazione"
 msgstr[1] "Archivia conversazioni"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Aggiunge etichetta alla conversazione"
 msgstr[1] "Aggiunge etichetta alle conversazioni"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:143
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Copia conversazione"
 msgstr[1] "Copia conversazioni"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:161
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Sposta conversazione  nel cestino"
 msgstr[1] "Sposta conversazioni nel cestino"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:171
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Elimina conversazione"
@@ -3154,10 +3158,6 @@ msgstr "Rispondi a tutti"
 msgid "Forward"
 msgstr "Inoltra"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Archivia"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "Posta"
@@ -3768,6 +3768,14 @@ msgstr "_Ricordare le password"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Autentica"
+
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "Sposta conversazione"
+#~ msgstr[1] "Sposta conversazioni"
+
+#~ msgid "_Archive"
+#~ msgstr "_Archivia"
 
 #~ msgid "Online accounts are missing"
 #~ msgstr "Mancano gli account online di GNOME"
