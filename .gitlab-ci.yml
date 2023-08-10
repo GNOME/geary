@@ -46,7 +46,7 @@ variables:
 
 fedora:
   stage: build
-  image: fedora:rawhide
+  image: fedora:latest
   before_script:
     - dnf update -y --nogpgcheck
     - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
