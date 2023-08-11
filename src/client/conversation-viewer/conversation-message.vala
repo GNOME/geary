@@ -1360,12 +1360,16 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (GLib.Uri.parse_scheme(text_href) == null) {
             text_href = "http://" + text_href;
         }
+        // TRANSLATORS: This is normally the label of a (possibly deceptive)
+        // link, i.e. the way it is presented to the user
         string? text_label = GLib.Uri.unescape_string(text_href) ?? _("(unknown)");
 
         string anchor_href = href;
         if (GLib.Uri.parse_scheme(anchor_href) == null) {
             anchor_href = "http://" + anchor_href;
         }
+        // TRANSLATORS: This is normally the actual value of a (possibly
+        // deceptive) link, i.e. the website it points to
         string anchor_label = GLib.Uri.unescape_string(anchor_href) ?? _("(unknown)");
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
