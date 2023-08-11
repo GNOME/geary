@@ -4,18 +4,22 @@
     <item>
       <attribute name="label" translatable="yes">Mark as _Read</attribute>
       <attribute name="action">win.mark-conversation-read</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">Mark as _Unread</attribute>
       <attribute name="action">win.mark-conversation-unread</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">_Star</attribute>
       <attribute name="action">win.mark-conversation-starred</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">U_nstar</attribute>
       <attribute name="action">win.mark-conversation-unstarred</attribute>
+      <attribute name="hidden-when">action-disabled</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">Toggle as _Junk</attribute>
