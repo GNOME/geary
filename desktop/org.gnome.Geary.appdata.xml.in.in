@@ -82,6 +82,15 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="44.1" date="2023-08-17">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Numerous user interface translation updates</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+        </ul>
+      </description>
+    </release>
     <release version="44.0" date="2023-07-05">
       <description>
         <p>Enhancements included in this release:</p>
