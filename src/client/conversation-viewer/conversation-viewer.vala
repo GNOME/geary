@@ -153,7 +153,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     public override void get_preferred_width(out int minimum_size, out int natural_size) {
         minimum_size = 300;
-        natural_size = 700;
+        natural_size = 500;
     }
 
     /**
