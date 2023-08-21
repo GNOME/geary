@@ -404,18 +404,8 @@ row.geary-labelled-row {
   padding: 0px;
 }
 
-row.geary-labelled-row > grid > * {
+row.geary-labelled-row > box > box {
   margin: 18px 6px;
-}
-
-row.geary-labelled-row > grid > *:first-child:dir(ltr),
-row.geary-labelled-row > grid > *:last-child:dir(rtl) {
-  margin-left: 18px;
-}
-
-row.geary-labelled-row > grid > *:last-child:dir(ltr),
-row.geary-labelled-row > grid > *:first-child:dir(rtl) {
-  margin-right: 18px;
 }
 
 /* Images should have some padding to offset them from adjacent
@@ -423,14 +413,14 @@ widgets, but care ust be taken since images are also used as children
 of other widgets like entries, comboboxes and switches, and these
 shouldn't be be touched. */
 row.geary-labelled-row widget > image,
-row.geary-labelled-row grid > image {
+row.geary-labelled-row box > box > image {
   padding: 0px 6px;
 }
 
-row.geary-labelled-row > grid > combobox,
-row.geary-labelled-row > grid > entry,
-row.geary-labelled-row:not(.geary-add-row) > grid > image,
-row.geary-labelled-row > grid > switch {
+row.geary-labelled-row > box > box > combobox,
+row.geary-labelled-row > box > box > entry,
+row.geary-labelled-row:not(.geary-add-row) > box > image,
+row.geary-labelled-row > box > box > switch {
   /* These use more space than labels, so set their valign to center
   when adding them and free up some space around them here to keep a
   consistent row height. */
@@ -444,10 +434,6 @@ grid.geary-account-view image:dir(ltr) {
 }
 grid.geary-account-view image:dir(rtl) {
   margin-left: 6px;
-}
-
-grid.geary-welcome-panel {
-  margin-bottom: 32px;
 }
 
 label.geary-settings-heading {

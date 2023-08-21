@@ -14,7 +14,10 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
     };
 
 
-    protected Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
+    protected Gtk.Box layout {
+        get;
+        private set;
+        default = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5); }
 
     private Gtk.Container drag_handle;
     private bool drag_picked_up = false;
@@ -26,12 +29,9 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
 
     public EditorRow() {
+
         get_style_context().add_class("geary-settings");
         get_style_context().add_class("geary-labelled-row");
-
-        this.layout.orientation = Gtk.Orientation.HORIZONTAL;
-        this.layout.show();
-        add(this.layout);
 
         // We'd like to add the drag handle only when needed, but
         // GNOME/gtk#1495 prevents us from doing so.
@@ -48,9 +48,25 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         this.drag_handle.hide();
         // Translators: Tooltip for dragging list items
         this.drag_handle.set_tooltip_text(_("Drag to move this item"));
-        this.layout.add(drag_handle);
 
+        var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
+        box.add(drag_handle);
+        box.add(this.layout);
+        box.show();
+        add(box);
+
+        this.layout.show();
         this.show();
+
+         this.size_allocate.connect((allocation) => {
+            if (allocation.width < 500) {
+                if (this.layout.orientation == Gtk.Orientation.HORIZONTAL) {
+                    this.layout.orientation = Gtk.Orientation.VERTICAL;
+                }
+            } else if (this.layout.orientation == Gtk.Orientation.VERTICAL) {
+                this.layout.orientation = Gtk.Orientation.HORIZONTAL;
+            }
+        });
     }
 
     public virtual void activated(PaneType pane) {
@@ -216,8 +232,10 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
     public LabelledEditorRow(string label, V value) {
         this.label.halign = Gtk.Align.START;
         this.label.valign = Gtk.Align.CENTER;
+        this.label.hexpand = true;
         this.label.set_text(label);
-        this.label.set_ellipsize(Pango.EllipsizeMode.END);
+        this.label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+        this.label.set_line_wrap(true);
         this.label.show();
         this.layout.add(this.label);
 
@@ -228,10 +246,15 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
             Gtk.Entry? entry = value as Gtk.Entry;
             if (entry != null) {
                 expand_label = false;
-                entry.xalign = 1;
                 entry.hexpand = true;
             }
+            Gtk.Label? vlabel = value as Gtk.Label;
+            if (vlabel != null) {
+                vlabel.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+                vlabel.set_line_wrap(true);
+            }
 
+            widget.halign = Gtk.Align.START;
             widget.valign = Gtk.Align.CENTER;
             widget.show();
             this.layout.add(widget);
@@ -499,6 +522,7 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
         set_id_column(0);
 
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
+        text_renderer.ellipsize = Pango.EllipsizeMode.END;
         pack_start(text_renderer, true);
         add_attribute(text_renderer, "text", 2);
 
@@ -510,7 +534,7 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
 }
 
 
-internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBoxText {
+internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBox {
 
 
     public string label { get; private set; }
@@ -535,29 +559,54 @@ internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBoxText {
         // account
         this.label = _("Login");
 
-        append(
+        Gtk.ListStore store = new Gtk.ListStore(
+            2, typeof(string), typeof(string)
+        );
+        Gtk.TreeIter iter;
+
+        store.append(out iter);
+        store.set(
+            iter,
+            0,
             Geary.Credentials.Requirement.NONE.to_value(),
+            1,
             // Translators: ComboBox value for source of SMTP
             // authentication credentials (none) when adding a new
             // account
             _("No login needed")
         );
 
-        append(
+        store.append(out iter);
+        store.set(
+            iter,
+            0,
             Geary.Credentials.Requirement.USE_INCOMING.to_value(),
+            1,
             // Translators: ComboBox value for source of SMTP
             // authentication credentials (use IMAP) when adding a new
             // account
             _("Use same login as receiving")
         );
 
-        append(
+        store.append(out iter);
+        store.set(
+            iter,
+            0,
             Geary.Credentials.Requirement.CUSTOM.to_value(),
+            1,
             // Translators: ComboBox value for source of SMTP
             // authentication credentials (custom) when adding a new
             // account
             _("Use a different login")
         );
+
+        this.model = store;
+        set_id_column(0);
+
+        Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
+        text_renderer.ellipsize = Pango.EllipsizeMode.END;
+        pack_start(text_renderer, true);
+        add_attribute(text_renderer, "text", 1);
     }
 
 }
