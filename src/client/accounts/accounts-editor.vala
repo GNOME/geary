@@ -78,6 +78,14 @@ public class Accounts.Editor : Gtk.Dialog {
         push(this.editor_list_pane);
 
         update_command_actions();
+
+        if (this.accounts.size > 1) {
+            this.default_height = 650;
+            this.default_width = 800;
+        } else {
+            // Welcome dialog
+            this.default_width = 600;
+        }
     }
 
     public override bool key_press_event(Gdk.EventKey event) {

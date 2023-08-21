@@ -220,7 +220,27 @@
                     <child>
                       <object class="GtkButtonBox">
                         <property name="visible">True</property>
-                        <property name="layout_style">end</property>
+                        <child>
+                          <object class="GtkButton" id="remove_button">
+                            <property name="visible">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
+                            <signal name="clicked" handler="on_remove_account_clicked" swapped="no"/>
+                            <style>
+                              <class name="destructive-action"/>
+                            </style>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="visible">True</property>
+                                <property name="icon_name">user-trash-symbolic</property>
+                              </object>
+                            </child>"
+                          </object>
+                          <packing>
+                            <property name="pack_type">end</property>
+                            <property name="secondary">True</property>
+                          </packing>
+                        </child>"
                         <child>
                           <object class="GtkButton">
                             <property name="label" translatable="yes" comments="This is a button in the account settings to show server settings.">Server Settings</property>
@@ -231,27 +251,7 @@
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="remove_button">
-                            <property name="label" translatable="yes" comments="This is the remove account button in the account settings.">Remove Account</property>
-                            <property name="visible">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
-                            <signal name="clicked" handler="on_remove_account_clicked" swapped="no"/>
-                            <style>
-                              <class name="destructive-action"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">1</property>
-                            <property name="secondary">True</property>
+                            <property name="pack_type">start</property>
                           </packing>
                         </child>
                         <style>
