@@ -227,58 +227,6 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkBox" id="indentation_buttons">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkButton" id="indent_button">
-                            <property name="visible">True</property>
-                            <property name="focus_on_click">False</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Indent or quote text</property>
-                            <property name="action_name">edt.indent</property>
-                            <property name="always_show_image">True</property>
-                            <child>
-                              <object class="GtkImage" id="indent_image">
-                                <property name="visible">True</property>
-                                <property name="pixel_size">16</property>
-                                <property name="icon_name">format-indent-more-symbolic</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="outdent_button">
-                            <property name="visible">True</property>
-                            <property name="focus_on_click">False</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Un-indent or unquote text</property>
-                            <property name="action_name">edt.outdent</property>
-                            <property name="always_show_image">True</property>
-                            <child>
-                              <object class="GtkImage" id="outdent_image">
-                                <property name="visible">True</property>
-                                <property name="pixel_size">16</property>
-                                <property name="icon_name">format-indent-less-symbolic</property>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <style>
-                          <class name="linked"/>
-                        </style>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkButton" id="remove_format_button">
                         <property name="visible">True</property>
                         <property name="focus_on_click">False</property>
@@ -641,6 +589,61 @@
                     <property name="icon_name">tools-check-spelling-symbolic</property>
                   </object>
                 </child>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="indentation_buttons">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkButton" id="indent_button">
+                    <property name="visible">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Indent or quote text</property>
+                    <property name="action_name">edt.indent</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="indent_image">
+                        <property name="visible">True</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-indent-more-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="outdent_button">
+                    <property name="visible">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Un-indent or unquote text</property>
+                    <property name="action_name">edt.outdent</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="outdent_image">
+                        <property name="visible">True</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-indent-less-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <style>
+                  <class name="linked"/>
+                </style>
               </object>
               <packing>
                 <property name="pack_type">end</property>
