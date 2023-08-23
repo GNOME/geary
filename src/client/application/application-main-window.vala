@@ -1069,9 +1069,10 @@ public class Application.MainWindow :
                 }
 
             }
+            this.previous_non_search_folder = null;
             if (to_select != null) {
                 this.select_folder.begin(
-                    this.previous_non_search_folder, is_interactive
+                    to_select, is_interactive
                 );
             } else {
                 select_first_inbox(is_interactive);
