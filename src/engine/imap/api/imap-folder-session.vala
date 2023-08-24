@@ -1121,6 +1121,11 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         if (flags != null) {
             Imap.EmailFlags imap_flags = Imap.EmailFlags.from_api_email_flags(flags);
             msg_flags = imap_flags.message_flags;
+            // We can't store a message with this flag present.
+            // From RFC 3501: This flag can not be altered by the client.
+            if (msg_flags.contains(Imap.MessageFlag.RECENT)) {
+                msg_flags.remove(Imap.MessageFlag.RECENT);
+            }
         } else {
             msg_flags = new MessageFlags(Geary.iterate<MessageFlag>(MessageFlag.SEEN).to_array_list());
         }
@@ -1301,3 +1306,4 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     }
 
 }
+

@@ -99,3 +99,4 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
     }
 }
 
+

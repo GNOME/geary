@@ -165,3 +165,4 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
     }
 }
 
+
