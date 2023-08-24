@@ -4,9 +4,10 @@
   <template class="ComponentsInAppNotification" parent="GtkRevealer">
     <property name="visible">False</property>
     <property name="halign">center</property>
-    <property name="valign">start</property>
+    <property name="valign">end</property>
     <property name="margin-start">12</property>
     <property name="margin-end">12</property>
+    <property name="margin-bottom">30</property>
     <signal name="notify::child-revealed" handler="on_child_revealed" swapped="no"/>
     <child>
       <object class="GtkBox" id="layout">
