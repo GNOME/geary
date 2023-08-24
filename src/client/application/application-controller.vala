@@ -618,31 +618,60 @@ internal class Application.Controller :
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            yield context.commands.execute(
-                new MoveEmailCommand(
-                    source,
-                    destination,
-                    conversations,
-                    to_in_folder_email_ids(conversations),
-                    /// Translators: Label for in-app
-                    /// notification. String substitution is the name
-                    /// of the destination folder.
-                    ngettext(
-                        "Conversation moved to %s",
-                        "Conversations moved to %s",
-                        conversations.size
-                    ).printf(Util.I18n.to_folder_display_name(destination)),
-                    /// Translators: Label for in-app
-                    /// notification. String substitution is the name
-                    /// of the source folder.
-                    ngettext(
-                        "Conversation restored to %s",
-                        "Conversations restored to %s",
-                        conversations.size
-                    ).printf(Util.I18n.to_folder_display_name(source))
-                ),
-                context.cancellable
-            );
+            if (source.account.information.id != destination.account.information.id) {
+                yield context.commands.execute(
+                    new CreateEmailCommand(
+                        source,
+                        destination,
+                        conversations,
+                        to_in_folder_email_ids(conversations),
+                        true,
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation moved to %s",
+                            "Conversations moved to %s",
+                            conversations.size
+                        ).printf(destination.account.information.display_name),
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the source folder.
+                        ngettext(
+                            "Conversation restored to %s",
+                            "Conversations restored to %s",
+                            conversations.size
+                        ).printf(source.account.information.display_name)
+                    ),
+                    context.cancellable
+                );
+            } else {
+                yield context.commands.execute(
+                    new MoveEmailCommand(
+                        source,
+                        destination,
+                        conversations,
+                        to_in_folder_email_ids(conversations),
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation moved to %s",
+                            "Conversations moved to %s",
+                            conversations.size
+                        ).printf(Util.I18n.to_folder_display_name(destination)),
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the source folder.
+                        ngettext(
+                            "Conversation restored to %s",
+                            "Conversations restored to %s",
+                            conversations.size
+                        ).printf(Util.I18n.to_folder_display_name(source))
+                    ),
+                    context.cancellable
+                );
+            }
         }
     }
 
@@ -809,31 +838,61 @@ internal class Application.Controller :
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
         if (context != null) {
-            yield context.commands.execute(
-                new CopyEmailCommand(
-                    source,
-                    destination,
-                    conversations,
-                    to_in_folder_email_ids(conversations),
-                    /// Translators: Label for in-app
-                    /// notification. String substitution is the name
-                    /// of the destination folder.
-                    ngettext(
-                        "Conversation labelled as %s",
-                        "Conversations labelled as %s",
-                        conversations.size
-                    ).printf(Util.I18n.to_folder_display_name(destination)),
-                    /// Translators: Label for in-app
-                    /// notification. String substitution is the name
-                    /// of the destination folder.
-                    ngettext(
-                        "Conversation un-labelled as %s",
-                        "Conversations un-labelled as %s",
-                        conversations.size
-                    ).printf(Util.I18n.to_folder_display_name(destination))
-                ),
-                context.cancellable
-            );
+
+            if (source.account.information.id != destination.account.information.id) {
+                yield context.commands.execute(
+                    new CreateEmailCommand(
+                        source,
+                        destination,
+                        conversations,
+                        to_in_folder_email_ids(conversations),
+                        false,
+                        /// Translators: Copied for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation copied to %s",
+                            "Conversations copied to %s",
+                            conversations.size
+                        ).printf(destination.account.information.display_name),
+                        /// Translators: Copied for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation restored to %s",
+                            "Conversations restored to %s",
+                            conversations.size
+                        ).printf(source.account.information.display_name)
+                    ),
+                    context.cancellable
+                );
+            } else {
+                yield context.commands.execute(
+                    new CopyEmailCommand(
+                        source,
+                        destination,
+                        conversations,
+                        to_in_folder_email_ids(conversations),
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation labelled as %s",
+                            "Conversations labelled as %s",
+                            conversations.size
+                        ).printf(Util.I18n.to_folder_display_name(destination)),
+                        /// Translators: Label for in-app
+                        /// notification. String substitution is the name
+                        /// of the destination folder.
+                        ngettext(
+                            "Conversation un-labelled as %s",
+                            "Conversations un-labelled as %s",
+                            conversations.size
+                        ).printf(Util.I18n.to_folder_display_name(destination))
+                    ),
+                    context.cancellable
+                );
+            }
         }
     }
 
@@ -2261,6 +2320,242 @@ private class Application.ArchiveEmailCommand : RevokableCommand {
         }
     }
 
+}
+
+private class Application.CreateEmailCommand : EmailCommand {
+
+
+    private Geary.Folder destination;
+    private Geary.Folder source;
+    private bool remove_from_source;
+
+    // This will contain a list of email ids _on the destination_ :
+    private Gee.List<Geary.EmailIdentifier?> created_emails;
+    private Gee.List<Geary.Email?> removed_emails;
+
+    public override bool can_undo {
+        get {
+            return this.created_emails.size != 0 || this.removed_emails.size != 0;
+        }
+    }
+
+    public CreateEmailCommand(Geary.Folder source,
+                              Geary.Folder destination,
+                              Gee.Collection<Geary.App.Conversation> conversations,
+                              Gee.Collection<Geary.EmailIdentifier> messages,
+                              bool remove_from_source,
+                              string? executed_label = null,
+                              string? undone_label = null) {
+        base(source, conversations, messages);
+
+        this.source = source;
+        this.destination = destination;
+
+        this.remove_from_source = remove_from_source;
+
+        this.created_emails = new Gee.ArrayList<Geary.EmailIdentifier?>();
+        this.removed_emails = new Gee.ArrayList<Geary.Email?>();
+
+        this.executed_label = executed_label;
+        this.undone_label = undone_label;
+    }
+
+    public override async void execute(GLib.Cancellable? cancellable) throws GLib.Error {
+        var destination = this.destination as Geary.FolderSupport.Create;
+        var to_create = new Gee.ArrayList<Geary.Email>();
+
+        if (!yield open_folder(destination, cancellable))
+            return;
+
+        // Load missing mails in conversation
+        foreach (Geary.App.Conversation conversation in conversations) {
+            try {
+                Gee.List<Geary.Email>? comversation_mails = yield this.source.list_email_by_sparse_id_async(
+                        conversation.get_email_ids(),
+                        Geary.Email.Field.ALL,
+                        Geary.Folder.ListFlags.NONE,
+                        cancellable);
+                if (comversation_mails != null) {
+                    foreach (Geary.Email mail in comversation_mails) {
+                        to_create.add(mail);
+                    }
+                }
+            } catch (Error err) {
+                warning(
+                    "Error while loading %s: %s",
+                    conversation.to_string(),
+                    err.message
+
+                );
+            }
+
+            if (to_create.size > 0) {
+                foreach (Geary.Email mail in to_create) {
+                    debug(
+                        "Create email id %s from %s to %s",
+                        mail.id.to_string(),
+                        this.source.account.information.display_name,
+                        this.destination.account.information.display_name
+                    );
+                    Geary.EmailIdentifier? new_id = null;
+                    try {
+                        new_id = yield destination.create_email_async(
+                            mail.get_message(),
+                            mail.email_flags,
+                            mail.properties.date_received,
+                            cancellable
+                        );
+                        this.created_emails.add(new_id);
+                        if (this.remove_from_source) {
+                            this.removed_emails.add(mail);
+                        }
+                    } catch (Error err) {
+                        warning(
+                            "Error while creating %s: %s",
+                            mail.id.to_string(),
+                            err.message
+
+                        );
+                    }
+                }
+            } else {
+                debug("No email to copy");
+            }
+        }
+
+        yield close_folder(destination, cancellable);
+
+        yield do_remove_from_source(cancellable);
+    }
+
+    public override async void undo(GLib.Cancellable? cancellable) throws GLib.Error {
+        yield undo_deletion(source, cancellable);
+        yield undo_creation(destination, cancellable);
+    }
+
+    public override async void redo(GLib.Cancellable? cancellable) throws GLib.Error {
+        debug(
+            "Redoing email creation in %s",
+            this.destination.account.information.display_name
+        );
+        yield this.execute(cancellable);
+    }
+
+    private async bool open_folder(Geary.Folder folder, GLib.Cancellable? cancellable) {
+        try {
+            yield destination.open_async(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
+            return true;
+        } catch (GLib.Error err) {
+            warning(
+                "Error while opening %s: %s",
+                this.destination.account.information.display_name,
+                err.message
+
+            );
+        }
+        return false;
+    }
+
+    private async bool close_folder(Geary.Folder folder, GLib.Cancellable? cancellable) {
+        try {
+            yield folder.close_async(null);
+            return true;
+        } catch (GLib.Error err) {
+            warning(
+                "Error while closing %s: %s",
+                folder.account.information.display_name,
+                err.message
+            );
+        }
+        return false;
+    }
+
+    private async void undo_creation(Geary.Folder folder, GLib.Cancellable? cancellable) {
+        var destination = this.destination as Geary.FolderSupport.Remove;
+
+        if (!yield open_folder(destination, cancellable))
+            return;
+
+        foreach(Geary.EmailIdentifier? id in this.created_emails) {
+            debug(
+                "Undoing %s creation in %s",
+                id.to_string(),
+                this.destination.account.information.display_name
+            );
+            try {
+                yield destination.remove_email_async(
+                        Geary.Collection.single(id),
+                        cancellable);
+                this.created_emails.remove(id);
+            } catch (GLib.Error err) {
+                warning(
+                    "Error while removing email from %s: %s",
+                    this.destination.account.information.display_name,
+                    err.message
+                );
+            }
+        }
+
+        yield close_folder(destination, cancellable);
+    }
+
+    private async void undo_deletion(Geary.Folder folder, GLib.Cancellable? cancellable) {
+        var source = this.source as Geary.FolderSupport.Remove;
+
+        if (!yield open_folder(source, cancellable))
+            return;
+
+        foreach(var mail in this.removed_emails) {
+            debug(
+                "Undoing %s deletion in %s",
+                mail.id.to_string(),
+                this.source.account.information.display_name
+            );
+            try {
+                yield source.remove_email_async(
+                        Geary.Collection.single(mail.id),
+                        cancellable);
+            } catch (GLib.Error err) {
+                warning(
+                    "Error while undoing email deletion from %s: %s",
+                    this.source.account.information.display_name,
+                    err.message
+                );
+            }
+        }
+        this.removed_emails = new Gee.ArrayList<Geary.Email>();
+
+        yield close_folder(source, cancellable);
+    }
+
+    private async void do_remove_from_source(GLib.Cancellable? cancellable) {
+        var source = this.source as Geary.FolderSupport.Remove;
+
+        if (!yield open_folder(source, cancellable))
+            return;
+
+        foreach(var mail in this.removed_emails) {
+            print(
+                "Removing email %s from %s",
+                mail.id.to_string(),
+                this.source.account.information.display_name
+            );
+            try {
+                yield source.remove_email_async(
+                    Geary.Collection.single(mail.id),
+                    cancellable
+                );
+            } catch (Error err) {
+               warning(
+                    "Error while marking email %s: %s",
+                    mail.id.to_string(),
+                    err.message
+                );
+            }
+        }
+
+        yield close_folder(source, cancellable);
+    }
 }
 
 
