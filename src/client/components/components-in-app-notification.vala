@@ -8,6 +8,7 @@
  * Represents an in-app notification.
  *
  * Following the GNOME HIG, it should only contain a label and maybe a button.
+ * Looks like libadwaita toast, remove this when porting toward GTK4
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-in-app-notification.ui")]
 public class Components.InAppNotification : Gtk.Revealer {
@@ -30,7 +31,7 @@ public class Components.InAppNotification : Gtk.Revealer {
      */
     public InAppNotification(string message,
                              uint duration = DEFAULT_DURATION) {
-        this.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
+        this.transition_type = Gtk.RevealerTransitionType.CROSSFADE;
         this.message_label.label = message;
         this.duration = duration;
     }

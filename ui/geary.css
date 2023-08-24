@@ -25,6 +25,11 @@ geary-conversation-list revealer {
   border-right: 0;
 }
 
+.app-notification {
+  border-radius: 30px;
+  padding-left: 18px;
+}
+
 .geary-info-bar-stack > border {
   border-width: 0;
   border-left-width: 0;
