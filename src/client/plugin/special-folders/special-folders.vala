@@ -25,7 +25,7 @@ public class Plugin.SpecialFolders :
     private const string ACTION_EMPTY = "empty-folder";
 
     // InfoBar priority
-    private const int PRIORITY = 0;
+    private const int PRIORITY = 10;
 
 
     public FolderContext folders {
