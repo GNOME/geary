@@ -27,7 +27,7 @@
                 <child>
                   <object class="HdyLeaflet" id="inner_leaflet">
                     <property name="visible">True</property>
-                    <property name="hexpand">True</property>
+                    <property name="hexpand-set">True</property>
                     <property name="can_swipe_back">True</property>
                     <property name="transition_type">over</property>
                     <signal name="notify::folded" handler="on_inner_leaflet_changed" swapped="no"/>
