@@ -1068,7 +1068,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             // fetch flags for each email
             Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? map = do_get_email_flags(cx,
-                to_mark, cancellable);
+                to_mark, ListFlags.NONE, cancellable);
             if (map == null)
                 return Db.TransactionOutcome.COMMIT;
 
@@ -1138,7 +1138,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Collection<EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            map = do_get_email_flags(cx, ids, cancellable);
+            map = do_get_email_flags(cx, ids, ListFlags.NONE, cancellable);
 
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -1155,7 +1155,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
                 // TODO get current flags, compare to ones being set
                 Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? existing_map =
-                    do_get_email_flags(cx, map.keys, cancellable);
+                    do_get_email_flags(cx, map.keys, ListFlags.NONE, cancellable);
 
                 if (existing_map != null) {
                     foreach(ImapDB.EmailIdentifier id in map.keys) {
@@ -1241,10 +1241,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Gee.Set<ImapDB.EmailIdentifier> removed_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             Gee.List<LocationIdentifier?> locs;
-            if (ids != null)
-                locs = do_get_locations_for_ids(cx, ids, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
-            else
+            if (ids == null || ids.size == 0)
                 locs = do_get_all_locations(cx, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            else
+                locs = do_get_locations_for_ids(cx, ids, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
 
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
@@ -1910,9 +1910,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? do_get_email_flags(Db.Connection cx,
-        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        Gee.List<LocationIdentifier>? locs = do_get_locations_for_ids(cx, ids, ListFlags.NONE,
-            cancellable);
+        Gee.Collection<ImapDB.EmailIdentifier>? ids, ListFlags flags,
+        Cancellable? cancellable) throws Error {
+        Gee.List<LocationIdentifier>? locs;
+
+        if (ids == null || ids.size == 0)
+            locs = do_get_all_locations(cx, flags, cancellable);
+        else
+            locs = do_get_locations_for_ids(cx, ids, flags, cancellable);
+
         if (locs == null || locs.size == 0)
             return null;
 
@@ -2553,14 +2559,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     private int do_get_unread_count_for_ids(Db.Connection cx,
         Gee.Collection<ImapDB.EmailIdentifier>? ids, Cancellable? cancellable) throws Error {
-        if (ids == null || ids.size == 0)
-            return 0;
 
         // Fetch flags for each email and update this folder's unread count.
         // (Note that this only flags for emails which have NOT been marked for removal
         // are included.)
         Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? flag_map = do_get_email_flags(cx,
-            ids, cancellable);
+            ids, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
         if (flag_map != null)
             return Geary.traverse<Geary.EmailFlags>(flag_map.values).count_matching(f => f.is_unread());
 
