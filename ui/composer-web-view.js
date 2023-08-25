@@ -38,6 +38,7 @@ ComposerPageState.prototype = {
         this._cursorContextChanged = MessageSender("cursor_context_changed");
         this._quoteDeleted = MessageSender("quote_deleted");
         this._dragDropReceived = MessageSender("drag_drop_received");
+        this._quoteDeleted = MessageSender("quote_deleted");
 
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
