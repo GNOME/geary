@@ -385,15 +385,26 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     }
 
     private void restore_row() {
-        if (this.to_restore_row != null) {
-            // Workaround GTK issue, activating/selecting row while model is
-            // updated scrolls to top
-            GLib.Timeout.add(100, () => {
-                this.to_restore_row.activate();
-                this.to_restore_row = null;
-                return false;
-            });
+        if (!this.config.autoselect) {
+            this.to_restore_row = null;
+            return;
         }
+
+        // Workaround GTK issue, activating/selecting row while model is
+        // updated scrolls to top
+        GLib.Timeout.add(100, () => {
+            if (this.to_restore_row != null) {
+                var main = get_toplevel() as Application.MainWindow;
+                if (main.is_conversation_viewer_shown) {
+                    this.to_restore_row.activate();
+                } else {
+                    this.list.select_row(this.to_restore_row);
+                    this.to_restore_row.grab_focus();
+                }
+                this.to_restore_row = null;
+            }
+            return false;
+        });
     }
 
     // -----------------
@@ -553,15 +564,16 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      */
     private void on_conversations_removed(bool start) {
         // Before model update, just find a conversation
-        if (this.config.autoselect && start) {
+        if (start) {
             this.to_restore_row = get_next_conversation();
         // If in selection mode, leaving will do the job
         } else if (this.selection_mode_enabled) {
             this.selection_mode_enabled = false;
         // Set next conversation
-        } else if (this.config.autoselect &&
-                   this.list.get_selected_rows().length() == 0) {
+        } else if (this.list.get_selected_rows().length() == 0) {
             restore_row();
+        } else {
+            this.to_restore_row = null;
         }
     }
 
