@@ -35,6 +35,7 @@ public class Composer.WebView : Components.WebView {
     // WebKit message handler names
     private const string CURSOR_CONTEXT_CHANGED = "cursor_context_changed";
     private const string DRAG_DROP_RECEIVED = "drag_drop_received";
+    private const string QUOTE_DELETED = "quote_deleted";
 
     /**
      * Encapsulates editing-related state for a specific DOM node.
@@ -140,6 +141,8 @@ public class Composer.WebView : Components.WebView {
     /** Emitted when an image file has been dropped on the composer */
     public signal void image_file_dropped(string filename, string type, uint8[] contents);
 
+    /** Emitted when quote has been deleted by backspace */
+    public signal void quote_deleted();
 
     public WebView(Application.Configuration config) {
         base(config);
@@ -151,6 +154,7 @@ public class Composer.WebView : Components.WebView {
 
         register_message_callback(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
         register_message_callback(DRAG_DROP_RECEIVED, on_drag_drop_received);
+        register_message_callback(QUOTE_DELETED, on_quote_deleted);
 
         // XXX this is a bit of a hack given the docs for is_empty,
         // above
@@ -556,5 +560,9 @@ public class Composer.WebView : Components.WebView {
         if (file_type.index_of("image/") == 0) {
             image_file_dropped(file_name_unescaped, file_type, image);
         }
+    }
+
+    private void on_quote_deleted(GLib.Variant? parameters) {
+        quote_deleted();
     }
 }

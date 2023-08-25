@@ -552,6 +552,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.editor.body.content_loaded.connect(on_content_loaded);
         this.editor.body.document_modified.connect(() => { draft_changed(); });
         this.editor.body.key_press_event.connect(on_editor_key_press_event);
+        this.editor.body.quote_deleted.connect(on_quote_deleted);
         this.editor.show();
         this.editor_container.add(this.editor);
 
@@ -2197,15 +2198,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 return Gdk.EVENT_STOP;
         }
 
-        if (this.can_delete_quote) {
-            this.can_delete_quote = false;
-            if (event.is_modifier == 0 && event.keyval == Gdk.Key.BackSpace) {
-                this.editor.body.delete_quoted_message();
-                return Gdk.EVENT_STOP;
-            }
-        }
-
         return Gdk.EVENT_PROPAGATE;
+    }
+
+    private void on_quote_deleted(WebView webview) {
+        this.can_delete_quote = false;
     }
 
     private GLib.SimpleAction? get_action(string action_name) {

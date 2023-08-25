@@ -36,6 +36,7 @@ ComposerPageState.prototype = {
         this.cursorContext = null;
 
         this._cursorContextChanged = MessageSender("cursor_context_changed");
+        this._quoteDeleted = MessageSender("quote_deleted");
         this._dragDropReceived = MessageSender("drag_drop_received");
 
         document.addEventListener("click", function(e) {
@@ -99,6 +100,11 @@ ComposerPageState.prototype = {
                 // https://github.com/WebKit/webkit/blob/master/Source/WebCore/editing/EditorCommand.cpp
                 state.breakBlockquotes();
             }
+        }, true);
+
+        // Handle input (keydown/up and accessiblity)
+        document.body.addEventListener("input", function(e) {
+            state.handleInput(e);
         }, true);
 
         // Handle file drag & drop
@@ -238,6 +244,7 @@ ComposerPageState.prototype = {
         if (this.quotePart != null) {
             this.quotePart.parentNode.removeChild(this.quotePart);
             this.quotePart = null;
+            this._quoteDeleted()
         }
     },
     /**
@@ -363,6 +370,12 @@ ComposerPageState.prototype = {
             }
         }
         return inPart;
+    },
+    handleInput: function(inputEvent) {
+      if (inputEvent.inputType == "deleteContentBackward") {
+         this.deleteQuotedMessage();
+      }
+      this.quotePart = null;
     },
     handleFileDrop: function(dropEvent) {
         dropEvent.preventDefault();
