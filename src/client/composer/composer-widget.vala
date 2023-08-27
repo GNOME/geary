@@ -223,7 +223,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     public static void add_accelerators(Application.Client application) {
-        application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
+        application.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
         application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
