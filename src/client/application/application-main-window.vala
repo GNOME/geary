@@ -1717,10 +1717,23 @@ public class Application.MainWindow :
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         bool folded = this.outer_leaflet.folded;
-        // Else selection handled by activated
+        // If folded, selection handled by activate
         if (selected.size > 1 || !folded) {
             select_conversations.begin(selected, Gee.Collection.empty(), true);
+        } else if (folded) {
+            switch(selected.size) {
+            case 0:
+                update_conversation_actions(NONE);
+                break;
+            case 1:
+                update_conversation_actions(SINGLE);
+                break;
+            default:
+                update_conversation_actions(MULTIPLE);
+                break;
+            }
         }
+
         if (this.conversation_list_view.selection_mode_enabled) {
             if (selected.size > 0) {
                 this.conversation_list_actions_revealer.reveal_child = folded;
