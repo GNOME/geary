@@ -515,7 +515,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     /**
      * Find a selectable conversation near current selection
      */
-    private Gtk.ListBoxRow? get_next_conversation(bool asc=true) {
+    private Gtk.ListBoxRow? get_next_conversation(bool asc=false) {
         int index = asc ? 0 : int.MAX;
         GLib.List<unowned Gtk.ListBoxRow> selected_rows;
 
@@ -536,7 +536,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
             index -= 1;
         }
         Gtk.ListBoxRow? row = this.list.get_row_at_index(index);
-        return row != null || !asc ? row : get_next_conversation(false);
+        return row != null || !asc ? row : get_next_conversation(true);
     }
 
     private void on_conversations_loaded() {
