@@ -1607,12 +1607,12 @@ internal class Application.Controller :
         string message = _(
             "Email sent to %s"
         ).printf(Util.Email.to_short_recipient_display(sent));
-        Components.InAppNotification notification =
-            new Components.InAppNotification(
-                message, application.config.brief_notification_duration
-                );
+
         foreach (MainWindow window in this.application.get_main_windows()) {
-            window.add_notification(notification);
+            window.ian.add_toast(
+                message,
+                application.config.brief_notification_duration
+            );
         }
 
         AccountContext? context = this.accounts.get(service.account);
@@ -1854,17 +1854,17 @@ internal class Application.ControllerCommandStack : CommandStack {
     }
 
     /** {@inheritDoc} */
-    public override async void undo(GLib.Cancellable? cancellable)
+    public override async void undo(GLib.Cancellable? cancellable, string? target = null)
         throws GLib.Error {
         this.last_executed = null;
-        yield base.undo(cancellable);
+        yield base.undo(cancellable, target);
     }
 
     /** {@inheritDoc} */
-    public override async void redo(GLib.Cancellable? cancellable)
+    public override async void redo(GLib.Cancellable? cancellable, string? target = null)
         throws GLib.Error {
         this.last_executed = null;
-        yield base.redo(cancellable);
+        yield base.redo(cancellable, target);
     }
 
     /**

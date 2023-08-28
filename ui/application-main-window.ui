@@ -13,6 +13,12 @@
     <child>
       <object class="GtkOverlay" id="overlay">
         <property name="visible">True</property>
+        <child type="overlay">
+          <object class="ComponentsInAppNotification" id="ian">
+            <property name="visible">True</property>
+            <property name="transition_type">crossfade</property>
+          </object>
+        </child>
         <child>
           <object class="GtkBox" id="main_layout">
             <property name="visible">True</property>

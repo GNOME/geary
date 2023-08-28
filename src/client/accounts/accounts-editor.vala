@@ -17,6 +17,7 @@
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor.ui")]
 public class Accounts.Editor : Gtk.Dialog {
 
+    [GtkChild] public unowned Components.InAppNotification ian;
 
     private const ActionEntry[] EDIT_ACTIONS = {
         { Action.Edit.REDO, on_redo },
@@ -47,8 +48,6 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
-
-    [GtkChild] private unowned Gtk.Overlay notifications_pane;
 
     [GtkChild] private unowned Gtk.Stack editor_panes;
 
@@ -182,12 +181,6 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.set_visible_child(prev);
     }
 
-    /** Displays an in-app notification in the dialog. */
-    internal void add_notification(Components.InAppNotification notification) {
-        this.notifications_pane.add_overlay(notification);
-        notification.show();
-    }
-
     /**
      * Prompts for pinning a certificate using the certificate manager.
      *
@@ -208,13 +201,11 @@ public class Accounts.Editor : Gtk.Dialog {
             throw err;
         } catch (Application.CertificateManagerError.STORE_FAILED err) {
             // XXX show error info bar rather than a notification?
-            add_notification(
-                new Components.InAppNotification(
-                    // Translators: In-app notification label, when
-                    // the app had a problem pinning an otherwise
-                    // untrusted TLS certificate
-                    _("Failed to store certificate")
-                )
+            this.ian.add_toast(
+                // Translators: In-app notification label, when
+                // the app had a problem pinning an otherwise
+                // untrusted TLS certificate
+                _("Failed to store certificate")
             );
             throw err;
         } catch (Application.CertificateManagerError err) {

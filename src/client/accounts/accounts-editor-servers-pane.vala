@@ -366,12 +366,10 @@ internal class Accounts.EditorServersPane :
         debug("Validation complete, is valid: %s", is_valid.to_string());
 
         if (!is_valid && message != null) {
-            this.editor.add_notification(
-                new Components.InAppNotification(
-                    // Translators: In-app notification label, the
-                    // string substitution is a more detailed reason.
-                    _("Account not updated: %s").printf(message)
-                )
+            this.editor.ian.add_toast(
+                // Translators: In-app notification label, the
+                // string substitution is a more detailed reason.
+                _("Account not updated: %s").printf(message)
             );
         }
 
