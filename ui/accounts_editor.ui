@@ -45,6 +45,12 @@
                 <property name="index">-1</property>
               </packing>
             </child>
+            <child type="overlay">
+              <object class="ComponentsInAppNotification" id="ian">
+                <property name="visible">True</property>
+                <property name="transition_type">crossfade</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>

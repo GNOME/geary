@@ -33,8 +33,8 @@ public class Application.MainWindow :
     public const string ACTION_NAVIGATION_BACK = "navigation-back";
 
     private const ActionEntry[] EDIT_ACTIONS = {
-        { Action.Edit.UNDO, on_undo },
-        { Action.Edit.REDO, on_redo },
+        { Action.Edit.UNDO, on_undo, "s"},
+        { Action.Edit.REDO, on_redo, "s"},
     };
 
     private const ActionEntry[] WINDOW_ACTIONS = {
@@ -399,6 +399,8 @@ public class Application.MainWindow :
     [GtkChild] private unowned Components.ApplicationHeaderBar application_headerbar;
     [GtkChild] private unowned Components.ConversationListHeaderBar conversation_list_headerbar;
     [GtkChild] public unowned Components.ConversationHeaderBar conversation_headerbar;
+
+    [GtkChild] public unowned Components.InAppNotification ian;
 
     // Folds the inner leaftlet and conversation viewer
     [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
@@ -1308,7 +1310,6 @@ public class Application.MainWindow :
 
     public void add_notification(Components.InAppNotification notification) {
         this.overlay.add_overlay(notification);
-        notification.show();
     }
 
     private void setup_layout(Configuration config) {
@@ -1441,11 +1442,11 @@ public class Application.MainWindow :
     }
 
     /** Un-does the last executed application command, if any. */
-    private async void undo() {
+    private async void undo(string? target = null) {
         AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.undo.begin(
-                selected.cancellable,
+                selected.cancellable, target,
                 (obj, res) => {
                     try {
                         selected.commands.undo.end(res);
@@ -1458,11 +1459,11 @@ public class Application.MainWindow :
     }
 
     /** Re-does the last undone application command, if any. */
-    private async void redo() {
+    private async void redo(string? target = null) {
         AccountContext? selected = get_selected_account_context();
         if (selected != null) {
             selected.commands.redo.begin(
-                selected.cancellable,
+                selected.cancellable, target,
                 (obj, res) => {
                     try {
                         selected.commands.redo.end(res);
@@ -2282,24 +2283,6 @@ public class Application.MainWindow :
 
     private void on_command_undo(Command command) {
         update_command_actions();
-        EmailCommand? email = command as EmailCommand;
-        if (email != null) {
-            if (email.conversations.size > 1) {
-                this.show_conversations.begin(
-                    email.location, email.conversations, false
-                );
-            } else {
-                this.show_email.begin(
-                    email.location, email.email, false
-                );
-            }
-        }
-        if (command.undone_label != null) {
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
-            add_notification(ian);
-        }
     }
 
     private void on_command_redo(Command command) {
@@ -2311,11 +2294,13 @@ public class Application.MainWindow :
                 notification_time =
                     application.config.brief_notification_duration;
             }
-            Components.InAppNotification ian = new Components.InAppNotification(
-                command.executed_label, notification_time
+            this.ian.add_toast(
+                command.executed_label,
+                notification_time,
+                _("Undo"),
+                Action.Edit.prefix(Action.Edit.UNDO),
+                command.id
             );
-            ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
-            add_notification(ian);
         }
     }
 
@@ -2331,12 +2316,21 @@ public class Application.MainWindow :
 
     // Window-level action callbacks
 
-    private void on_undo() {
-        this.undo.begin();
+    private void on_undo(GLib.Action action, GLib.Variant? parameter) {
+        string? target = null;
+
+        if (parameter != null)
+            target = parameter.get_string();
+
+        this.undo.begin(target);
     }
 
-    private void on_redo() {
-        this.redo.begin();
+    private void on_redo(GLib.Action action, GLib.Variant? parameter) {
+        string? target = null;
+
+        if (parameter != null)
+            target = parameter.get_string();
+        this.redo.begin(target);
     }
 
     private void on_close() {

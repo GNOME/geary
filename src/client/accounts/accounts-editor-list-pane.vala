@@ -228,20 +228,23 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
                 notification_time =
                     this.editor.application.config.brief_notification_duration;
             }
-            Components.InAppNotification ian = new Components.InAppNotification(
-                command.executed_label, notification_time
+            this.editor.ian.add_toast(
+                command.executed_label,
+                notification_time,
+                _("Undo"),
+                Action.Edit.prefix(Action.Edit.UNDO)
             );
-            ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
-            this.editor.add_notification(ian);
         }
     }
 
     private void on_undo(Application.Command command) {
         if (command.undone_label != null) {
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
-            this.editor.add_notification(ian);
+            this.editor.ian.add_toast(
+                command.undone_label,
+                Components.InAppNotification.DEFAULT_DURATION,
+                _("Redo"),
+                Action.Edit.prefix(Action.Edit.REDO)
+            );
         }
     }
 

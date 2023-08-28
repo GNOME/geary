@@ -20,39 +20,41 @@ public class Components.InAppNotification : Gtk.Revealer {
 
     [GtkChild] private unowned Gtk.Button action_button;
 
-    private uint duration;
+    private uint? timeout_id = null;
 
     /**
-     * Creates an in-app notification.
      *
+     * Show a new notification
      * @param message The message that should be displayed.
      * @param duration The length of time to show the notification,
      * in seconds.
      */
-    public InAppNotification(string message,
-                             uint duration = DEFAULT_DURATION) {
-        this.transition_type = Gtk.RevealerTransitionType.CROSSFADE;
-        this.message_label.label = message;
-        this.duration = duration;
-    }
+    public new void add_toast(string message,
+                              uint duration = DEFAULT_DURATION,
+                              string? label=null,
+                              string? action_name=null,
+                              string? action_target=null) {
+        if (duration > 0) {
+            if (this.timeout_id != null) {
+                Source.remove(this.timeout_id);
+                this.timeout_id = null;
+            }
+            this.message_label.label = message;
+            this.action_button.label = label;
+            this.action_button.action_name = action_name;
 
-    /**
-     * Sets a button for the notification.
-     */
-    public void set_button(string label, string action_name) {
-        this.action_button.visible = true;
-        this.action_button.label = label;
-        this.action_button.action_name = action_name;
-    }
+            if (action_target != null)
+                this.action_button.action_target = new GLib.Variant("s", action_target);
+            else
+                this.action_button.action_target = null;
 
-    public override void show() {
-        if (this.duration > 0) {
-            base.show();
+            this.action_button.visible = action_name != null;
+
+            show();
             this.reveal_child = true;
-
             // Close after the given amount of time
-            GLib.Timeout.add_seconds(
-                this.duration, () => { close(); return false; }
+            this.timeout_id = GLib.Timeout.add_seconds(
+                duration, () => { close(); return false; }
             );
         }
     }
@@ -64,12 +66,13 @@ public class Components.InAppNotification : Gtk.Revealer {
     public void close() {
         // Allows for the disappearing transition
         this.reveal_child = false;
+        this.timeout_id = null;
     }
 
-    // Make sure the notification gets destroyed after closing.
+    // Make sure the notification gets hidden after closing.
     [GtkCallback]
     private void on_child_revealed(Object src, ParamSpec p) {
         if (!this.child_revealed)
-            destroy();
-    }
+            hide();
+     }
 }

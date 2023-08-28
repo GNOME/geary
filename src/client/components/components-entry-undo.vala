@@ -165,7 +165,7 @@ public class Components.EntryUndo : Geary.BaseObject {
         flush_command();
         bool complete = false;
         this.commands.undo.begin(
-            null,
+            null, null,
             (obj, res) => {
                 try {
                     this.commands.undo.end(res);
@@ -187,7 +187,7 @@ public class Components.EntryUndo : Geary.BaseObject {
         flush_command();
         bool complete = false;
         this.commands.redo.begin(
-            null,
+            null, null,
             (obj, res) => {
                 try {
                     this.commands.redo.end(res);

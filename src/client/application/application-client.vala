@@ -396,8 +396,8 @@ public class Application.Client : Gtk.Application {
 
         // Common edit accels
         add_edit_accelerators(Action.Edit.COPY, { "<Ctrl>C" });
-        add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
-        add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
+        add_edit_accelerators(Action.Edit.REDO+("('')"), { "<Ctrl><Shift>Z" });
+        add_edit_accelerators(Action.Edit.UNDO+("('')"), { "<Ctrl>Z" });
 
         // Load Geary GTK CSS
         var provider = new Gtk.CssProvider();

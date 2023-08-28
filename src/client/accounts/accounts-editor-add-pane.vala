@@ -268,12 +268,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                 to_focus.grab_focus();
             }
             if (message != null) {
-                this.editor.add_notification(
-                    new Components.InAppNotification(
-                        // Translators: In-app notification label, the
-                        // string substitution is a more detailed reason.
-                        _("Account not created: %s").printf(message)
-                    )
+                this.editor.ian.add_toast(
+                    // Translators: In-app notification label, the
+                    // string substitution is a more detailed reason.
+                    _("Account not created: %s").printf(message)
                 );
             }
         }

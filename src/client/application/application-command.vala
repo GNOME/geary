@@ -12,6 +12,12 @@
 public abstract class Application.Command : GLib.Object {
 
 
+    public string id { get; private set; }
+
+    protected Command() {
+        this.id = GLib.Uuid.string_random();
+    }
+
     /**
      * Determines if a command can be undone.
      *
@@ -416,29 +422,29 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public virtual async void undo(GLib.Cancellable? cancellable)
+    public virtual async void undo(GLib.Cancellable? cancellable, string? target = null)
         throws GLib.Error {
         if (!this.undo_stack.is_empty) {
-            Command target = this.undo_stack.poll_head();
+            Command? command = get_command_by_id(this.undo_stack, target);
 
             if (this.undo_stack.is_empty) {
                 this.can_undo = false;
             }
 
-            debug("Undoing: %s", target.to_string());
+            debug("Undoing: %s", command.to_string());
             try {
-                yield target.undo(cancellable);
+                yield command.undo(cancellable);
             } catch (Error err) {
                 this.redo_stack.clear();
                 this.can_redo = false;
                 throw err;
             }
 
-            update_redo_stack(target);
+            update_redo_stack(command);
             this.can_redo = !this.redo_stack.is_empty;
 
-            undone(target);
-            target.undone();
+            undone(command);
+            command.undone();
         }
     }
 
@@ -450,29 +456,29 @@ public class Application.CommandStack : GLib.Object {
      * stack. If an error is thrown, the command is discarded and the
      * redo stack is emptied.
      */
-    public virtual async void redo(GLib.Cancellable? cancellable)
+    public virtual async void redo(GLib.Cancellable? cancellable, string? target = null)
         throws GLib.Error {
         if (!this.redo_stack.is_empty) {
-            Command target = this.redo_stack.poll_head();
+            Command? command = get_command_by_id(this.redo_stack, target);
 
             if (this.redo_stack.is_empty) {
                 this.can_redo = false;
             }
 
-            debug("Redoing: %s", target.to_string());
+            debug("Redoing: %s", command.to_string());
             try {
-                yield target.redo(cancellable);
+                yield command.redo(cancellable);
             } catch (Error err) {
                 this.redo_stack.clear();
                 this.can_redo = false;
                 throw err;
             }
 
-            update_undo_stack(target);
+            update_undo_stack(command);
             this.can_undo = !this.undo_stack.is_empty;
 
-            redone(target);
-            target.redone();
+            redone(command);
+            command.redone();
         }
     }
 
@@ -518,4 +524,11 @@ public class Application.CommandStack : GLib.Object {
         }
     }
 
+    private Command get_command_by_id(Gee.Deque<Command> stack, string? id) {
+        foreach(var command in stack) {
+            if(command.id == id)
+                return command;
+        }
+        return stack.poll_head();
+    }
 }

@@ -27,6 +27,7 @@
           <object class="GtkButton" id="action_button">
             <property name="visible">False</property>
             <property name="valign">center</property>
+            <signal name="clicked" handler="close" swapped="no"/>
           </object>
         </child>
         <child>
