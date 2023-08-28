@@ -39,9 +39,10 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
             int new_count = Numeric.int_floor(original_count - removed_ids.size, 0);
             if (new_count != original_count)
                 engine.replay_notify_email_count_changed(new_count, Geary.Folder.CountChangeReason.REMOVED);
+            return ReplayOperation.Status.CONTINUE;
         }
 
-        return ReplayOperation.Status.CONTINUE;
+        return ReplayOperation.Status.COMPLETED;
     }
 
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
