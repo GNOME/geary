@@ -498,13 +498,14 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     // ------------
     // Model
     // ------------
-    private bool should_inhibit_autoactivate = false;
+    public enum InhibitAutoSelect {
+        FALSE,
+        TRUE,
+        ALWAYS
+    }
 
-    /**
-     * Informs the listbox to suppress autoactivate behavior on the next update
-     */
-    public void inhibit_next_autoselect() {
-        should_inhibit_autoactivate = true;
+    public InhibitAutoSelect should_inhibit_autoselect {
+        get; set; default = InhibitAutoSelect.FALSE;
     }
 
     /**
@@ -536,7 +537,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
     private void on_conversations_loaded() {
         if (this.config.autoselect &&
-            !this.should_inhibit_autoactivate &&
+            this.should_inhibit_autoselect == InhibitAutoSelect.FALSE &&
             this.list.get_selected_rows().length() == 0) {
 
             Gtk.ListBoxRow first_row = this.list.get_row_at_index(0);
@@ -545,7 +546,8 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
             }
         }
 
-        this.should_inhibit_autoactivate = false;
+        if (this.should_inhibit_autoselect == InhibitAutoSelect.TRUE)
+            this.should_inhibit_autoselect = InhibitAutoSelect.FALSE;
     }
 
     /*

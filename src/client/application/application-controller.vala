@@ -424,7 +424,7 @@ internal class Application.Controller :
             // new one. Replies must open inline in the main window,
             // so we need to ensure there are no composers open there
             // first.
-            if (composer == null && !main.close_composer(true)) {
+            if (composer == null && !main.conversation_viewer.close_composer(true)) {
                 // Prompt to close the existing composer was declined,
                 // so bail out
                 return null;
@@ -1483,7 +1483,7 @@ internal class Application.Controller :
     internal bool check_open_composers() {
         var do_quit = true;
         foreach (var composer in this.composer_widgets) {
-            if (composer.conditional_close(true, true) == CANCELLED) {
+            if (composer.conditional_close(true) == CANCELLED) {
                 do_quit = false;
                 break;
             }

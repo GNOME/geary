@@ -22,7 +22,7 @@
                 <property name="visible">True</property>
                 <property name="can_swipe_back">True</property>
                 <property name="transition_type">over</property>
-                <signal name="notify::folded" handler="on_outer_leaflet_changed" swapped="no"/>
+                <signal name="notify::folded" handler="on_outer_leaflet_folded" swapped="no"/>
                 <signal name="notify::visible-child" handler="on_outer_leaflet_changed" swapped="no"/>
                 <child>
                   <object class="HdyLeaflet" id="inner_leaflet">
@@ -30,7 +30,7 @@
                     <property name="hexpand-set">True</property>
                     <property name="can_swipe_back">True</property>
                     <property name="transition_type">over</property>
-                    <signal name="notify::folded" handler="on_inner_leaflet_changed" swapped="no"/>
+                    <signal name="notify::folded" handler="on_inner_leaflet_folded" swapped="no"/>
                     <signal name="notify::visible-child" handler="on_inner_leaflet_changed" swapped="no"/>
                     <child>
                       <object class="GtkBox" id="folder_box">
