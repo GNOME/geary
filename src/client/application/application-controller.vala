@@ -503,6 +503,29 @@ internal class Application.Controller :
     }
 
     /**
+     * Mark conversations as read if needed by automark read setting
+     */
+    public async void mark_conversations_read_if_needed(
+            Geary.Folder source,
+            Gee.Collection<Geary.App.Conversation> conversations) {
+        if (this.application.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_REPLYING) {
+            bool is_unread = Geary.traverse(conversations).any((c) => c.is_unread());
+            if (is_unread)
+                try {
+                    yield this.mark_conversations(
+                        source,
+                        conversations,
+                        Geary.EmailFlags.UNREAD,
+                        false
+                    );
+                } catch (GLib.Error err) {
+                    debug("Can't mark conversation as read: %s", err.message);
+                }
+        }
+    }
+
+    /**
      * Updates flags for a collection of conversations.
      *
      * If `prefer_adding` is true, this will add the flag if not set
@@ -651,6 +674,9 @@ internal class Application.Controller :
                                                  Gee.Collection<Geary.App.Conversation> conversations)
         throws GLib.Error {
         AccountContext? context = this.accounts.get(source.account.information);
+
+        yield mark_conversations_read_if_needed(source, conversations);
+
         if (context != null) {
             Command? command = null;
             Gee.Collection<Geary.EmailIdentifier> messages =

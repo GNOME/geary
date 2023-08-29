@@ -1242,7 +1242,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read() {
-        if (Application.Configuration.AutoMarkRead.NEVER == config.automark_read) {
+        if (config.automark_read != Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
             return;
         }
 

@@ -450,6 +450,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private Application.Configuration config;
 
+    /**
+     * Emitted when a message has been sent.
+     */
+    public signal void sent();
 
     internal Widget(ApplicationInterface application,
                     Application.Configuration config,
@@ -1529,6 +1533,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.should_send.begin((obj, res) => {
                 if (this.should_send.end(res)) {
                     this.on_send_async.begin();
+                    this.sent();
                 }
             });
     }
