@@ -82,7 +82,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         bool can_switch = true;
         var parent = get_toplevel() as Application.MainWindow;
         if (parent != null) {
-            can_switch = parent.close_composer(false);
+            can_switch = parent.conversation_viewer.close_composer(false);
         }
         return can_switch;
     }

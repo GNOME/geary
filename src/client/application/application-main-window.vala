@@ -853,8 +853,11 @@ public class Application.MainWindow :
                 );
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
-                if (inhibit_autoselect) {
-                    this.conversation_list_view.inhibit_next_autoselect();
+                if (inhibit_autoselect &&
+                    this.conversation_list_view.should_inhibit_autoselect !=
+                        ConversationList.View.InhibitAutoSelect.ALWAYS) {
+                    this.conversation_list_view.should_inhibit_autoselect =
+                        ConversationList.View.InhibitAutoSelect.TRUE;
                 }
                 this.conversation_list_view.set_monitor(this.conversations);
 
@@ -981,6 +984,8 @@ public class Application.MainWindow :
         if (this.has_composer) {
             composer.detach(this.application);
         } else {
+            this.conversation_list_view.should_inhibit_autoselect =
+                ConversationList.View.InhibitAutoSelect.ALWAYS;
             // See if the currently displayed conversation contains
             // any of the composer's referred emails (preferring the
             // latest), and if so add it inline, otherwise add it full
@@ -1005,25 +1010,14 @@ public class Application.MainWindow :
             } else {
                 this.conversation_viewer.do_compose(composer);
             }
+            this.conversation_viewer.composer_removed.connect(() => {
+                this.conversation_list_view.should_inhibit_autoselect =
+                    ConversationList.View.InhibitAutoSelect.FALSE;
+            });
+
             // Show the correct leaflet
             this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);
         }
-    }
-
-    /**
-     * Closes any open composers, after prompting the user if requested.
-     *
-     * Returns true if none were open or the user approved closing
-     * them.
-     */
-    internal bool close_composer(bool should_prompt, bool is_shutdown = false) {
-        bool closed = true;
-        Composer.Widget? composer = this.conversation_viewer.current_composer;
-        if (composer != null &&
-            composer.conditional_close(should_prompt, is_shutdown) == CANCELLED) {
-            closed = false;
-        }
-        return closed;
     }
 
     internal void start_search(string query_text, bool is_interactive) {
@@ -1596,6 +1590,10 @@ public class Application.MainWindow :
         );
         this.previous_selection_was_interactive = is_interactive;
 
+        if (to_select.size > 0 && this.has_composer) {
+            this.conversation_viewer.current_composer.detach(this.application);
+        }
+
         // Ensure that the conversations are selected in the UI if
         // this was called by something other than the selection
         // changed callback. That will check to ensure that we're not
@@ -1606,7 +1604,7 @@ public class Application.MainWindow :
         this.conversation_headerbar.full_actions.selected_conversations = to_select.size;
         this.conversation_headerbar.compact_actions.selected_conversations = to_select.size;
 
-        if (this.selected_folder != null && !this.has_composer) {
+        if (this.selected_folder != null) {
             switch(to_select.size) {
             case 0:
                 update_conversation_actions(NONE);
@@ -2138,7 +2136,7 @@ public class Application.MainWindow :
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (close_composer(true, false)) {
+        if (this.conversation_viewer.close_composer(true)) {
             this.sensitive = false;
             this.select_folder.begin(
                 null,
@@ -2154,7 +2152,7 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private void on_outer_leaflet_changed() {
+    private void on_outer_leaflet_folded() {
         int selected = this.conversation_list_view.selected.size;
         update_conversation_actions(
             ConversationCount.for_size(selected)
@@ -2170,12 +2168,6 @@ public class Application.MainWindow :
             } else {
                 this.conversation_headerbar.back_button.visible = true;
             }
-
-            // Close any open composer that is no longer visible
-            if (this.has_composer &&
-                (this.is_folder_list_shown || this.is_conversation_list_shown)) {
-                close_composer(false, false);
-            }
         } else {
             this.conversation_headerbar.back_button.visible = false;
             if (selected > 0) {
@@ -2189,7 +2181,12 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private void on_inner_leaflet_changed() {
+    private void on_outer_leaflet_changed() {
+        this.conversation_headerbar.back_button.visible = this.outer_leaflet.folded;
+    }
+
+    [GtkCallback]
+    private void on_inner_leaflet_folded() {
         update_close_button_position();
         if (this.inner_leaflet.folded) {
             // Ensure something useful gets the keyboard focus, given
@@ -2203,6 +2200,10 @@ public class Application.MainWindow :
         } else {
             this.conversation_list_headerbar.back_button.visible = false;
         }
+    }
+
+    [GtkCallback]
+    private void on_inner_leaflet_changed() {
     }
 
     private void on_offline_infobar_response() {

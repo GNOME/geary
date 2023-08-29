@@ -192,7 +192,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     // namespace, leaving only common window actions there.
     private const string ACTION_ADD_ATTACHMENT = "add-attachment";
     private const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add-original-attachments";
-    private const string ACTION_CLOSE = "composer-close";
+    private const string ACTION_SAVE = "save";
     private const string ACTION_CUT = "cut";
     private const string ACTION_DETACH = "detach";
     private const string ACTION_DISCARD = "discard";
@@ -207,7 +207,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         { Action.Window.SHOW_MENU,         on_show_window_menu              },
         { ACTION_ADD_ATTACHMENT,           on_add_attachment                },
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments           },
-        { ACTION_CLOSE,                    on_close                         },
+        { ACTION_SAVE,                     on_save                          },
         { ACTION_CUT,                      on_cut                           },
         { ACTION_DETACH,                   on_detach                        },
         { ACTION_DISCARD,                  on_discard                       },
@@ -880,8 +880,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * The return value specifies whether the composer is being closed
      * or if the prompt was cancelled by a human.
      */
-    public CloseStatus conditional_close(bool should_prompt,
-                                         bool is_shutdown = false) {
+    public CloseStatus conditional_close(bool should_prompt, bool allow_save=true) {
         CloseStatus status = CLOSED;
         switch (this.current_mode) {
         case PresentationMode.CLOSED:
@@ -900,7 +899,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                 status = CLOSED;
             } else if (should_prompt) {
                 present();
-                if (this.can_save) {
+                if (this.can_save && allow_save) {
                     var dialog = new TernaryConfirmationDialog(
                         this.container.top_window,
                         // Translators: This dialog text is displayed to the
@@ -911,7 +910,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                         Stock._KEEP,
                         Stock._DISCARD, Gtk.ResponseType.CLOSE,
                         "",
-                        is_shutdown ? "destructive-action" : "",
+                        "destructive-action",
                         Gtk.ResponseType.OK // Default == Keep
                     );
                     Gtk.ResponseType response = dialog.run();
@@ -1413,7 +1412,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     /* Activate the close action */
     public void activate_close_action() {
-        this.actions.activate_action(ACTION_CLOSE, null);
+        this.actions.activate_action(ACTION_SAVE, null);
     }
 
     internal void set_mode(PresentationMode new_mode) {
@@ -2472,6 +2471,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         conditional_close(this.container is Window);
     }
 
+    private void on_save() {
+        this.save_and_close.begin();
+    }
+
     private void on_show_window_menu() {
         Application.MainWindow main = null;
         if (this.container != null) {
@@ -2490,7 +2493,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_discard() {
         if (this.container is Window) {
-            conditional_close(true);
+            conditional_close(true, false);
         } else {
             this.discard_and_close.begin();
         }

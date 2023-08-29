@@ -64,6 +64,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     /* Emitted when a new conversation list was removed from this view. */
     public signal void conversation_removed(ConversationListBox list);
 
+    /* Emitted when a composer was removed from this view. */
+    public signal void composer_removed();
 
     static construct {
         set_css_name("geary-conversation-viewer");
@@ -217,6 +219,21 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         composer.set_size_request(
             -1, this.conversation_scroller.get_allocated_height() / 3 * 2
         );
+    }
+
+    /**
+     * Close embedded composer if exists
+     */
+    public bool close_composer(bool should_prompt) {
+        bool closed = true;
+        Composer.Widget? composer = this.current_composer;
+        this.selection_while_composing = null;
+        if (composer != null && composer.conditional_close(should_prompt) == CANCELLED) {
+            closed = false;
+        } else {
+            this.current_composer = null;
+        }
+        return closed;
     }
 
     /**
@@ -515,6 +532,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     private void on_composer_closed() {
+        this.composer_removed();
         this.current_composer = null;
         if (get_visible_child() == this.composer_page) {
             set_visible_child(this.conversation_page);
@@ -524,15 +542,18 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             if (main_window != null) {
                 main_window.update_title();
 
+                // Restore selected view
                 if (this.selection_while_composing != null) {
                     var conversation_list = main_window.conversation_list_view;
-                    if (this.selection_while_composing.is_empty) {
-                        conversation_list.conversations_selected(
-                            this.selection_while_composing
-                        );
-                    } else {
-                        conversation_list.select_conversations(
-                            this.selection_while_composing
+                    conversation_list.select_conversations(
+                        this.selection_while_composing
+                    );
+                    // We are folded, we need to activate view
+                    if (!main_window.is_conversation_list_shown &&
+                        this.selection_while_composing.size == 1) {
+                        conversation_list.conversation_activated(
+                            this.selection_while_composing.to_array()[0],
+                            1
                         );
                     }
 
