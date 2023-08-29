@@ -1714,6 +1714,12 @@ public class Application.MainWindow :
             quote ?? ""
         );
         this.controller.present_composer(composer);
+        composer.sent.connect(() => {
+            this.controller.mark_conversations_read_if_needed.begin(
+                this.selected_folder,
+                this.conversation_list_view.selected
+            );
+        });
     }
 
     private async void create_composer_from_viewer(Composer.Widget.ContextType type) {
