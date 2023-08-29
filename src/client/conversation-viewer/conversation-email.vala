@@ -44,6 +44,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // Time to wait loading the body before showing the progress meter
     private const int BODY_LOAD_TIMEOUT_MSEC = 250;
 
+    // Time to wait before showing unread indicator
+    private const int UNREAD_TIMEOUT_MSEC = 1000;
 
     /** Specifies the loading state for a message part. */
     public enum LoadState {
@@ -236,6 +238,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // Tracks if Shift key handler has been installed on the main
     // window, for updating email menu trash/delete actions.
     private bool shift_handler_installed = false;
+
+    private uint? unread_timeout_id = null;
 
     [GtkChild] private unowned Gtk.Grid actions;
 
@@ -721,11 +725,21 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void update_email_state() {
         Gtk.StyleContext style = get_style_context();
 
-        if (this.is_unread) {
-            style.add_class(UNREAD_CLASS);
-        } else {
-            style.remove_class(UNREAD_CLASS);
+        if (this.unread_timeout_id != null) {
+            Source.remove(this.unread_timeout_id);
+            this.unread_timeout_id = null;
         }
+
+        this.unread_timeout_id = GLib.Timeout.add(
+            UNREAD_TIMEOUT_MSEC, () => {
+            if (this.is_unread && !this.is_manually_read) {
+                style.add_class(UNREAD_CLASS);
+            } else {
+                style.remove_class(UNREAD_CLASS);
+            }
+            this.unread_timeout_id = null;
+            return false;
+        });
 
         if (this.is_starred) {
             style.add_class(STARRED_CLASS);

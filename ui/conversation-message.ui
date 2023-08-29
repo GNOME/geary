@@ -7,6 +7,21 @@
     <property name="visible">True</property>
     <property name="orientation">vertical</property>
     <child>
+      <object class="GtkImage" id="unread">
+        <property name="visible">True</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="pixel-size">8</property>
+        <style>
+          <class name="geary-unread-indicator"/>
+        </style>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkGrid" id="summary">
         <property name="visible">True</property>
         <property name="hexpand">True</property>
@@ -427,7 +442,7 @@
       </object>
       <packing>
         <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
+        <property name="top_attach">1</property>
       </packing>
     </child>
     <child>
@@ -510,7 +525,7 @@
       </object>
       <packing>
         <property name="left_attach">0</property>
-        <property name="top_attach">1</property>
+        <property name="top_attach">2</property>
       </packing>
     </child>
     <style>

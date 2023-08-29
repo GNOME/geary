@@ -195,20 +195,18 @@ row.geary-folder-popover-list-row > label {
 
 /* ConversationEmail */
 
-.geary-unread grid.geary-message-summary {
-  border-color: @theme_selected_bg_color;
-  transition: border 0.25s;
-}
-
-.geary-expanded > .geary_email grid.geary-message-summary,
-.geary-expanded + row > .geary_email grid.geary-message-summary {
-  border-top-left-radius: 8px;
-  -gtk-outline-top-left-radius: 7px;
-  border-top-right-radius: 8px;
-  -gtk-outline-top-right-radius: 7px;
-}
-
 /* ConversationMessage */
+
+.geary-unread-indicator {
+  background-color: transparent;
+  border-radius: 50px;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.geary-unread .geary-unread-indicator {
+  background-color: @theme_selected_bg_color;
+}
 
 .geary-message infobar box {
   border-width: 0;
@@ -228,9 +226,8 @@ row.geary-folder-popover-list-row > label {
 }
 
 grid.geary-message-summary {
-  border-top: 4px solid transparent;
   padding: 12px;
-  padding-top: 8px;
+  padding-top: 0px;
   transition: border 4s;
 }
 
