@@ -236,6 +236,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
     public async Message.from_composed_email(Geary.ComposedEmail email,
                                              string? message_id,
+                                             GMime.EncodingConstraint constraint,
                                              GLib.Cancellable? cancellable)
         throws Error {
         this.message = new GMime.Message(true);
@@ -338,6 +339,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                     null,
                     "text/plain",
                     true,
+                    constraint,
                     cancellable
                 );
             } catch (GLib.Error err) {
@@ -438,6 +440,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                     body_charset,
                     "text/html",
                     false,
+                    constraint,
                     cancellable
                 );
             } catch (GLib.Error err) {
@@ -1200,6 +1203,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
                                                string? charset,
                                                string content_type,
                                                bool is_flowed,
+                                               GMime.EncodingConstraint constraint,
                                                GLib.Cancellable? cancellable)
         throws GLib.Error {
         GMime.Stream content_stream = new GMime.StreamMem.with_buffer(content);
@@ -1211,7 +1215,7 @@ public class Geary.RFC822.Message : BaseObject, EmailHeaderSet {
 
         GMime.ContentEncoding encoding = yield Utils.get_best_encoding(
             filter_stream,
-            GMime.EncodingConstraint.7BIT,
+            constraint,
             cancellable
         );
 

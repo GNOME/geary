@@ -12,6 +12,7 @@ public class Geary.Smtp.Capabilities : Geary.GenericCapabilities {
     public const string AUTH_PLAIN = "plain";
     public const string AUTH_LOGIN = "login";
     public const string AUTH_OAUTH2 = "xoauth2";
+    public const string 8BITMIME = "8bitmime";
 
     public const string NAME_SEPARATOR = " ";
     public const string VALUE_SEPARATOR = " ";

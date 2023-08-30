@@ -120,6 +120,21 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
         throws GLib.Error {
         debug("Saving composed email: %s", email_subject(composed));
 
+        // Detect server encoding constraint
+        GMime.EncodingConstraint constraint = GMime.EncodingConstraint.7BIT;
+        try {
+
+            ClientConnection smtp = new ClientConnection(this.remote);
+            yield smtp.connect_async(cancellable);
+            yield smtp.say_hello_async(cancellable);
+            if (smtp.capabilities.has_capability(Capabilities.8BITMIME)) {
+                constraint = GMime.EncodingConstraint.8BIT;
+            }
+            yield smtp.disconnect_async(cancellable);
+        } catch (Error err) {
+            // Oh well
+        }
+
         // XXX work out what our public IP address is somehow and use
         // that in preference to the originator's domain
         var from = composed.from;
@@ -128,7 +143,10 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
             : this.account.primary_mailbox.domain;
         Geary.RFC822.Message rfc822 =
             yield new Geary.RFC822.Message.from_composed_email(
-                composed, GMime.utils_generate_message_id(domain), cancellable
+                composed,
+                GMime.utils_generate_message_id(domain),
+                constraint,
+                cancellable
             );
 
         EmailIdentifier id = yield this.outbox.create_email_async(

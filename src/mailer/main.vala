@@ -44,7 +44,7 @@ async void main_async() throws Error {
             }
 
             msg = yield new Geary.RFC822.Message.from_composed_email(
-                composed_email, null, null
+                composed_email, null, GMime.EncodingConstraint.7BIT, null
             );
         }
 

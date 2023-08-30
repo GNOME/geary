@@ -133,6 +133,7 @@ class Integration.Smtp.ClientSession : TestCase {
         return yield new Geary.RFC822.Message.from_composed_email(
             composed,
             GMime.utils_generate_message_id(from.domain),
+            GMime.EncodingConstraint.7BIT,
             null
         );
     }
