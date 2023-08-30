@@ -126,6 +126,8 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         automark_read.append("when-viewed", _("when viewed"));
         /// Translators: Preferences label
         automark_read.append("when-replying", _("when replying, archiving, etc."));
+        /// Translators: Preferences label
+        automark_read.append("when-readen", _("when readen"));
 
         var automark_read_row = new Hdy.ActionRow();
         /// Translators: Preferences label

@@ -5,6 +5,7 @@
   <value nick='never' value='0'/>
   <value nick='when-viewed' value='1'/>
   <value nick='when-replying' value='2'/>
+  <value nick='when-readen' value='3'/>
 </enum>
 
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/" gettext-domain="geary">

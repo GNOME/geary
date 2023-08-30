@@ -36,7 +36,8 @@ public class Application.Configuration : Geary.BaseObject {
     public enum AutoMarkRead {
         NEVER = 0,
         WHEN_VIEWED,
-        WHEN_REPLYING;
+        WHEN_REPLYING,
+        WHEN_READEN;
     }
 
 
