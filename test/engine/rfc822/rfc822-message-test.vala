@@ -446,6 +446,7 @@ This is the second line.
         return yield new Geary.RFC822.Message.from_composed_email(
             composed,
             GMime.utils_generate_message_id(composed.from.get(0).domain),
+            GMime.EncodingConstraint.7BIT,
             null
         );
     }

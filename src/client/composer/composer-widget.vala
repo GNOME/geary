@@ -1723,7 +1723,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             Geary.ComposedEmail draft = yield to_composed_email(null, true);
             yield this.draft_manager.update(
                 yield new Geary.RFC822.Message.from_composed_email(
-                    draft, null, null
+                    draft, null, GMime.EncodingConstraint.7BIT, null
                 ),
                 null,
                 null
