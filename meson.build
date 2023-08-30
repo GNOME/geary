@@ -18,7 +18,6 @@ endif
 
 if profile == 'development'
   appid_suffix = '.Devel'
-  name_suffix = ' (Development)'
 elif profile == 'beta'
   appid_suffix = '.Beta'
   name_suffix = ' (Beta)'
