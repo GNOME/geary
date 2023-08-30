@@ -298,7 +298,6 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // Emitted when an email is loaded for the first time
         public signal void email_loaded(Geary.Email email);
 
-
         protected ConversationRow(Geary.Email? email) {
             base_ref();
             this.email = email;
@@ -638,7 +637,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 break;
             }
             adj.set_value(value);
-            this.mark_read_timer.start();
+            if (this.config.automark_read ==
+                    Application.Configuration.AutoMarkRead.WHEN_READEN)
+                this.mark_read_timer.start();
         }
     }
 
@@ -646,14 +647,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     [Signal (action=true)]
     public virtual signal void focus_next() {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, 1);
-        this.mark_read_timer.start();
+        mark_read();
     }
 
     /** Keyboard action to shift focus to the prev message, if any. */
     [Signal (action=true)]
     public virtual signal void focus_prev() {
         this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
-        this.mark_read_timer.start();
+        mark_read();
     }
 
     /** Fired when an email is fully loaded in the list box. */
@@ -699,7 +700,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         this.suppress_mark_timer = suppress_mark_timer;
         this.mark_read_timer = new Geary.TimeoutManager.milliseconds(
-            MARK_READ_TIMEOUT_MSEC, this.check_mark_read
+            MARK_READ_TIMEOUT_MSEC, this.check_mark_read_readen
         );
 
         this.selection_mode = NONE;
@@ -975,7 +976,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Marks all email with a visible body read.
      */
     public void mark_visible_read() {
-        this.mark_read_timer.start();
+        mark_read();
     }
 
     /** Adds an info bar to the given email, if any. */
@@ -1106,6 +1107,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 query, enable_query_scroll
             );
         }
+
+        if (this.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
+            check_mark_read_viewed();
+        }
     }
 
     private inline async void throttle_loading() throws GLib.IOError {
@@ -1145,10 +1151,17 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             yield row.view.load_contacts();
-            if (is_interesting(full_email)) {
+            if (this.config.automark_read !=
+                    Application.Configuration.AutoMarkRead.WHEN_VIEWED &&
+                    is_interesting(full_email)) {
                 yield row.expand();
             }
             this.search.highlight_row_if_matching(row);
+        }
+
+        if (this.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
+            check_mark_read_viewed();
         }
     }
 
@@ -1193,6 +1206,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         EmailRow row = new EmailRow(view);
         row.email_loaded.connect((e) => { email_loaded(e); });
+        row.notify["is-expanded"].connect(() => {
+             if (this.config.automark_read ==
+                    Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
+                check_mark_read_viewed();
+            }
+         });
+
         this.email_rows.set(email.id, row);
 
         if (append_row) {
@@ -1238,14 +1258,47 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     }
 
+    private void mark_read() {
+        if (this.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
+            check_mark_read_viewed();
+        } else if (this.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_READEN) {
+            this.mark_read_timer.start();
+        }
+    }
+
+    /**
+     * Mark expanded messages as read
+     */
+    private void check_mark_read_viewed() {
+        Gee.List<Geary.EmailIdentifier> email_ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        this.foreach((child) => {
+            EmailRow? row = child as EmailRow;
+            ConversationEmail? view = (row != null) ? row.view : null;
+            Geary.Email? email = (view != null) ? view.email : null;
+            if (row != null &&
+                row.is_expanded &&
+                !view.is_manually_read &&
+                email.is_unread().is_certain()) {
+                email_ids.add(view.email.id);
+
+                // Since it can take some time for the new flags
+                // to round-trip back to our signal handlers,
+                // mark as manually read here
+                view.is_manually_read = true;
+            }
+        });
+        if (email_ids.size > 0) {
+            mark_email(email_ids, null, Geary.EmailFlags.UNREAD);
+        }
+    }
+
     /**
      * Finds any currently visible messages, marks them as being read.
      */
-    private void check_mark_read() {
-        if (config.automark_read != Application.Configuration.AutoMarkRead.WHEN_VIEWED) {
-            return;
-        }
-
+    private void check_mark_read_readen() {
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
         Gtk.Adjustment adj = get_adjustment();
@@ -1388,12 +1441,15 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     private void on_message_body_state_notify(GLib.Object obj,
                                               GLib.ParamSpec param) {
-        ConversationEmail? view = obj as ConversationEmail;
-        if (view != null && view.message_body_state == COMPLETED) {
-            if (!this.suppress_mark_timer) {
-                this.mark_read_timer.start();
+        if (this.config.automark_read ==
+                Application.Configuration.AutoMarkRead.WHEN_READEN) {
+            ConversationEmail? view = obj as ConversationEmail;
+            if (view != null && view.message_body_state == COMPLETED) {
+                if (!this.suppress_mark_timer) {
+                    this.mark_read_timer.start();
+                }
+                this.suppress_mark_timer = false;
             }
-            this.suppress_mark_timer = false;
         }
     }
 

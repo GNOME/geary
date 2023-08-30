@@ -472,8 +472,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     [GtkCallback]
     private bool on_conversation_scroll() {
-        if (this.current_list != null) {
-            this.current_list.mark_visible_read();
+        if (config.automark_read == Application.Configuration.AutoMarkRead.WHEN_READEN) {
+            if (this.current_list != null) {
+                this.current_list.mark_visible_read();
+            }
         }
         return Gdk.EVENT_PROPAGATE;
     }
