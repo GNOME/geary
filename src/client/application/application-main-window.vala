@@ -1779,14 +1779,7 @@ public class Application.MainWindow :
 
     private void on_conversation_activated(Geary.App.Conversation activated, uint button) {
         if (button == 1) {
-            bool folded = this.outer_leaflet.folded;
-            go_to_next_pane(true);
-            if (folded) {
-                Gee.Collection<Geary.App.Conversation> selected =
-                    new Gee.ArrayList<Geary.App.Conversation>();
-                selected.add(activated);
-                select_conversations.begin(selected, Gee.Collection.empty(), true);
-            }
+            navigate_next_pane();
         } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
@@ -1988,13 +1981,17 @@ public class Application.MainWindow :
         var focus = get_focus();
         if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
             if (this.inner_leaflet.folded &&
-                this.inner_leaflet.visible_child_name == FOLDER_LIST ||
-                focus == this.folder_list) {
+                this.inner_leaflet.visible_child_name == FOLDER_LIST) {
                 this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                 focus = this.conversation_list_view;
+
             } else {
-                if (this.conversation_list_view.selected.size == 1 &&
-                    this.selected_folder.properties.email_total > 0) {
+                if (this.conversation_list_view.selected.size == 1) {
+                    select_conversations.begin(
+                        this.conversation_list_view.selected,
+                        Gee.Collection.empty(),
+                        true
+                    );
                     this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
                     focus = this.conversation_viewer.visible_child;
                 }
@@ -2020,10 +2017,16 @@ public class Application.MainWindow :
         focus_widget(focus);
     }
 
-    private void go_to_next_pane(bool only_if_folded=false) {
-        if (this.outer_leaflet.folded) {
+    private void go_to_next_pane() {
+        var focus = get_focus();
+        if (!this.inner_leaflet.folded && (
+                this.outer_leaflet.folded &&
+                focus.is_ancestor(this.conversation_list_view)) ||
+                focus == null)
             navigate_next_pane();
-        } else if (!only_if_folded) {
+        else if (this.inner_leaflet.folded) {
+            navigate_next_pane();
+        } else {
             focus_next_pane();
         }
     }
@@ -2068,7 +2071,7 @@ public class Application.MainWindow :
     }
 
     private void go_to_previous_pane() {
-        if (this.outer_leaflet.folded) {
+        if (this.outer_leaflet.folded || this.inner_leaflet.folded) {
             navigate_previous_pane();
         } else {
             focus_previous_pane();
@@ -2405,7 +2408,8 @@ public class Application.MainWindow :
     private void on_folder_activated(Geary.Folder? folder) {
         if (folder != null) {
             // Focus on conversation list will autoselect
-            go_to_next_pane(!this.application.config.autoselect);
+            if (this.application.config.autoselect)
+                go_to_next_pane();
         }
     }
 
