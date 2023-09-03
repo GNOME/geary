@@ -1486,11 +1486,8 @@ internal class Application.Controller :
 
     private void on_sent(Geary.Smtp.ClientService service,
                          Geary.Email sent) {
-        /// Translators: The label for an in-app notification. The
-        /// string substitution is a list of recipients of the email.
-        string message = _(
-            "Email sent to %s"
-        ).printf(Util.Email.to_short_recipient_display(sent));
+        /// Translators: The label for an in-app notification.
+        string message = _("Email sent");
         Components.InAppNotification notification =
             new Components.InAppNotification(
                 message, application.config.brief_notification_duration
@@ -2555,12 +2552,8 @@ private class Application.SaveComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.to_composed_email();
-        /// Translators: The label for an in-app notification. The
-        /// string substitution is a list of recipients of the email.
-        this.executed_label = _(
-            "Email to %s saved"
-        ).printf(Util.Email.to_short_recipient_display(email));
+        /// Translators: The label for an in-app notification.
+        this.executed_label = _("Email saved as draft");
         this.destroy_timer.start();
     }
 
@@ -2613,12 +2606,9 @@ private class Application.DiscardComposerCommand : ComposerCommand {
 
     public override async void execute(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        Geary.ComposedEmail email = yield this.composer.to_composed_email();
         /// Translators: The label for an in-app notification. The
         /// string substitution is a list of recipients of the email.
-        this.executed_label = _(
-            "Email to %s discarded"
-        ).printf(Util.Email.to_short_recipient_display(email));
+        this.executed_label = _("Email discarded");
         this.destroy_timer.start();
     }
 
