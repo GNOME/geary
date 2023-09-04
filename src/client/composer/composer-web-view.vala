@@ -24,7 +24,8 @@ public class Composer.WebView : Components.WebView {
     private const string BODY_PRE = """
 <div id="%s" dir="auto">""";
     private const string BODY_POST = """</div>
-<div id="%s" class="geary-no-display" dir="auto"></div>
+""";
+    private const string SIGNATURE = """<div id="%s" class="geary-no-display" dir="auto"></div>
 """;
     private const string QUOTE = """
 <div id="%s" dir="auto"><br />%s</div>
@@ -527,11 +528,12 @@ public class Composer.WebView : Components.WebView {
             }
 
             html.append(CURSOR);
-            html.append(BODY_POST.printf(SIGNATURE_HTML_ID));
-
+            html.append(BODY_POST);
             if (top_posting && !Geary.String.is_empty(quote)) {
                 html.append_printf(QUOTE, QUOTE_HTML_ID, quote);
             }
+            html.append(SIGNATURE.printf(SIGNATURE_HTML_ID));
+
         } else {
             html.append(body);
         }
