@@ -156,6 +156,10 @@ row.geary-folder-popover-list-row > label {
   -gtk-outline-top-right-radius: 0px;
 }
 
+.conversation-listbox.content > row:hover:last-child {
+  background-color: @theme_base_color;
+}
+
 .conversation-listbox.content > row:first-child:not(.geary-loading) {
   margin-top: 12px;
   transition: 0;
