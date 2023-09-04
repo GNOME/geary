@@ -47,10 +47,16 @@ body > div:focus-within {
   background-color: white;
 }
 
+body > div#geary-signature {
+  color: #777;
+}
+
 body > div#geary-signature:focus-within,
 body > div#geary-quote:focus-within {
   outline: 1px dashed #ccc !important;
+  color: black;
 }
+
 
 blockquote {
   margin: 0 10px;
