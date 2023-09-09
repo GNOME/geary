@@ -767,9 +767,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         throws GLib.Error {
         set_sort_func(null);
 
-        Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails(
-            Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
-        );
+        Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails_ignoring_duplicates();
 
         // Work out what the first interesting email is, and load it
         // before all of the email before and after that so we can
@@ -1167,6 +1165,16 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // Constructs a row and view for an email, adds it to the listbox
     private EmailRow add_email(Geary.Email email, bool append_row = true) {
+        // We first remove any previously added identical message:
+        // - we just received a previously sent message
+        // - we received same message from a different mailing list
+        this.foreach((child) => {
+            var row = (EmailRow) child;
+            if (!row.is_expanded && row.email.message_id.equal_to(email.message_id)) {
+                remove_email(row.email);
+            }
+        });
+
         bool is_sent = false;
         Geary.Account account = this.conversation.base_folder.account;
         if (email.from != null) {
@@ -1293,6 +1301,16 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     }
 
     /**
+     * Mark ids and related ids as read
+     */
+    private void fully_mark_read(Gee.List<Geary.EmailIdentifier> email_ids) {
+        foreach (var id in email_ids.read_only_view) {
+            email_ids.add_all(this.conversation.get_related_email_ids(id));
+        }
+        mark_email(email_ids, null, Geary.EmailFlags.UNREAD);
+    }
+
+    /**
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read_readen() {
@@ -1341,7 +1359,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         });
 
         if (email_ids.size > 0) {
-            mark_email(email_ids, null, Geary.EmailFlags.UNREAD);
+            fully_mark_read(email_ids);
         }
     }
 
