@@ -71,9 +71,9 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
 
         this.participants.set_markup(get_participants());
 
-        var count = conversation.get_count();
+        var count = conversation.get_count(true);
         if (count > 1) {
-            this.count_badge.set_text(conversation.get_count().to_string());
+            this.count_badge.set_text(count.to_string());
         } else {
             this.count_badge.hide();
         }
@@ -148,8 +148,7 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
 
     private string get_participants() {
         var participants = new Gee.ArrayList<Participant>();
-        Gee.List<Geary.Email> emails = conversation.get_emails(
-                          Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING);
+        Gee.List<Geary.Email> emails = conversation.get_emails_ignoring_duplicates();
 
         foreach (Geary.Email message in emails) {
             Geary.RFC822.MailboxAddresses? addresses =
