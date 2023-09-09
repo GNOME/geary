@@ -92,10 +92,13 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
-     * Returns the number of emails in the conversation.
+     * Returns the number of unique emails in the conversation.
      */
-    public int get_count() {
-        return emails.size;
+    public int get_count(bool ignore_duplicated=false) {
+        if (ignore_duplicated)
+            return get_emails_ignoring_duplicates().size;
+        else
+            return emails.size;
     }
 
     /**
@@ -272,6 +275,40 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
+     * Returns the conversation's email ascending without duplicated message ids
+     * Only use this for showing messages to user, for controller actions on
+     * this conversation, use get_emails()
+     */
+    public Gee.List<Email>
+        get_emails_ignoring_duplicates() {
+        Gee.List<Email> emails = new Gee.ArrayList<Email>();
+        Gee.HashMap<RFC822.MessageID, bool> ids = new Gee.HashMap<RFC822.MessageID, bool>();
+
+        foreach (var email in get_emails(Ordering.SENT_DATE_DESCENDING)) {
+            bool unread = email.is_unread().to_boolean(true);
+            // Found a duplicate
+            if (ids.has_key(email.message_id)) {
+                // Ignore message if a newer unread exists or if readen.
+                // Can happen if we have been modified by external MUA.
+                if (ids.get(email.message_id) || !unread)
+                    continue;
+                // Ignore newer message then (allowing us to mark it readen)
+                int index = 0;
+                foreach (var _email in emails) {
+                    if (_email.message_id.equal_to(email.message_id)) {
+                        emails.remove_at(index);
+                        break;
+                    }
+                    index++;
+                }
+            }
+            emails.insert(0, email);
+            ids.set(email.message_id, unread);
+        }
+        return emails;
+    }
+
+    /**
      * Determines if the given id is in the conversation's base folder.
      */
     public bool is_in_base_folder(Geary.EmailIdentifier id) {
@@ -313,12 +350,18 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
-     * Return all Message IDs associated with the conversation.
+     * Returns all EmailIdentifiers related to id.
      */
-    public Gee.Collection<RFC822.MessageID> get_message_ids() {
-        // Turn into a HashSet first, so we don't return duplicates.
-        Gee.HashSet<RFC822.MessageID> ids = new Gee.HashSet<RFC822.MessageID>();
-        ids.add_all(message_ids);
+    public Gee.Collection<Geary.EmailIdentifier> get_related_email_ids(
+            Geary.EmailIdentifier id) {
+        Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        var email = get_email_by_id(id);
+        foreach (var _email in this.emails.values) {
+            if (email.id.equal_to(_email.id))
+                continue;
+            if (email.message_id.equal_to(_email.message_id))
+                ids.add(_email.id);
+        }
         return ids;
     }
 
@@ -355,7 +398,7 @@ public class Geary.App.Conversation : BaseObject {
 
             Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
             if (ancestors != null)
-                message_ids.add_all(ancestors);
+                this.message_ids.add_all(ancestors);
 
             appended(email);
             added = true;
@@ -385,8 +428,8 @@ public class Geary.App.Conversation : BaseObject {
                 foreach (RFC822.MessageID ancestor_id in ancestors) {
                     // if remove() changes set (i.e. it was present) but no longer present, that
                     // means the ancestor_id was the last one and is formally removed
-                    if (message_ids.remove(ancestor_id) &&
-                        !message_ids.contains(ancestor_id)) {
+                    if (this.message_ids.remove(ancestor_id) &&
+                        !this.message_ids.contains(ancestor_id)) {
                         removed_ids.add(ancestor_id);
                     }
                 }
