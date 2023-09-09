@@ -23,16 +23,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-07-25 22:54+0000\n"
-"PO-Revision-Date: 2023-09-09 09:19+0200\n"
-"Last-Translator: Tim Sabsch <tim@sabsch.com>\n"
+"POT-Creation-Date: 2023-09-09 12:14+0000\n"
+"PO-Revision-Date: 2023-09-09 16:54+0200\n"
+"Last-Translator: Jürgen Benvenuti <gastornis@posteo.org>\n"
 "Language-Team: German <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.3.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -47,7 +47,7 @@ msgstr "Dateien mit Geary versenden"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:710
+#: src/client/application/application-main-window.vala:718
 msgid "Geary"
 msgstr "Geary"
 
@@ -76,11 +76,11 @@ msgstr "Geary-Entwicklerteam"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary ist ein E-Mail-Programm für GNOME 3 mit Fokus auf Konversationen. Es "
+"Geary ist ein E-Mail-Programm für GNOME mit Fokus auf Konversationen. Es "
 "ermöglicht das einfache Lesen, Finden und Schreiben von E-Mails in einer "
 "übersichtlichen und modernen Benutzeroberfläche."
 
@@ -645,12 +645,12 @@ msgstr[0] "%d Tag zurück"
 msgstr[1] "%d Tage zurück"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2297
+#: src/client/application/application-main-window.vala:2317
 msgid "Undo"
 msgstr "Rückgängig machen"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2280
+#: src/client/application/application-main-window.vala:2300
 msgid "Redo"
 msgstr "Wiederholen"
 
@@ -1244,54 +1244,54 @@ msgstr "Sicherheitsdetails für die Verbindung prüfen"
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:719
+#: src/client/application/application-main-window.vala:727
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1092
+#: src/client/application/application-main-window.vala:1100
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Beschriftungen"
 
-#: src/client/application/application-main-window.vala:1424
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Alle E-Mails aus dem Ordner %s löschen?"
 
-#: src/client/application/application-main-window.vala:1425
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "Dies wird die E-Mail aus Geary und von Ihrem E-Mail-Server löschen."
 
-#: src/client/application/application-main-window.vala:1426
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "Dies kann nicht rückgängig gemacht werden."
 
-#: src/client/application/application-main-window.vala:1427
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "%s leeren"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1484
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Möchten Sie diese Konversation dauerhaft löschen?"
 msgstr[1] "Möchten Sie diese Konversationen dauerhaft löschen?"
 
-#: src/client/application/application-main-window.vala:1489
-#: src/client/application/application-main-window.vala:1504
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "Löschen"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1499
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Möchten Sie diese Nachricht dauerhaft löschen?"
 msgstr[1] "Möchten Sie diese Nachrichten dauerhaft löschen?"
 
-#: src/client/application/application-main-window.vala:1819
+#: src/client/application/application-main-window.vala:1841
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1327,37 +1327,37 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Nicht _noch einmal fragen"
 
-#: src/client/components/components-conversation-actions.vala:117
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Konversation markieren"
 msgstr[1] "Konversationen markieren"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Konversation archivieren"
 msgstr[1] "Konversationen archivieren"
 
-#: src/client/components/components-conversation-actions.vala:132
+#: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Konversation eine Beschriftung zuweisen"
 msgstr[1] "Konversationen eine Beschriftung zuweisen"
 
-#: src/client/components/components-conversation-actions.vala:143
+#: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Konversation kopieren"
 msgstr[1] "Konversationen kopieren"
 
-#: src/client/components/components-conversation-actions.vala:161
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Konversation in den Papierkorb verschieben"
 msgstr[1] "Konversationen in den Papierkorb verschieben"
 
-#: src/client/components/components-conversation-actions.vala:171
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Konversation löschen"
@@ -1849,57 +1849,57 @@ msgid "Search for more languages"
 msgstr "Nach weiteren Sprachen suchen"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:214
+#: src/client/conversation-list/conversation-list-view.vala:219
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Konversation in den _Papierkorb verschieben"
 msgstr[1] "Konversationen in den _Papierkorb verschieben"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:226
+#: src/client/conversation-list/conversation-list-view.vala:231
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "Konversation _löschen"
 msgstr[1] "Konversationen _löschen"
 
-#: src/client/conversation-list/conversation-list-view.vala:239
+#: src/client/conversation-list/conversation-list-view.vala:244
 #: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "Als _gelesen markieren"
 
-#: src/client/conversation-list/conversation-list-view.vala:248
-#: ui/components-menu-conversation.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:253
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "Als _ungelesen markieren"
 
-#: src/client/conversation-list/conversation-list-view.vala:257
-#: ui/components-menu-conversation.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:262
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "_Stern entfernen"
 
-#: src/client/conversation-list/conversation-list-view.vala:264
-#: ui/components-menu-conversation.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:269
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "_Stern"
 
-#: src/client/conversation-list/conversation-list-view.vala:275
+#: src/client/conversation-list/conversation-list-view.vala:280
 msgid "_Archive conversation"
 msgid_plural "_Archive conversations"
 msgstr[0] "Konversation _archivieren"
 msgstr[1] "Konversationen _archivieren"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:287
+#: src/client/conversation-list/conversation-list-view.vala:292
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Antworten"
 
-#: src/client/conversation-list/conversation-list-view.vala:293
+#: src/client/conversation-list/conversation-list-view.vala:298
 msgid "R_eply All"
 msgstr "Allen _antworten"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:299
+#: src/client/conversation-list/conversation-list-view.vala:304
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Weiterleiten"
@@ -1997,13 +1997,13 @@ msgstr "Anzeigen"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No Conversations Selected"
 msgstr "Keine Konversationen ausgewählt"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
 msgstr ""
 "Wenn Sie eine Konversation aus der Liste auswählen, wird diese hier "
@@ -2011,13 +2011,13 @@ msgstr ""
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Multiple Conversations Selected"
 msgstr "Mehrere Konversationen ausgewählt"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "Eine Aktion wird auf alle ausgewählten Konversationen angewendet."
 
@@ -2025,20 +2025,20 @@ msgstr "Eine Aktion wird auf alle ausgewählten Konversationen angewendet."
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:116
-#: src/client/conversation-viewer/conversation-viewer.vala:132
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
 msgid "No Conversations Found"
 msgstr "Keine Konversationen gefunden"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
 msgstr "Dieser Ordner enthält keine Konversationen."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:136
+#: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
 msgstr ""
 "Ihre Suche hat keine Treffer ergeben. Versuchen Sie es mit anderen "
@@ -2862,8 +2862,8 @@ msgid "Add an account"
 msgstr "Ein Konto hinzufügen"
 
 #: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
-#: ui/components-headerbar-conversation-list.ui:14
-#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
 #: ui/components-headerbar-conversation.ui:17
 #: ui/components-headerbar-conversation.ui:23
 msgid "Back"
@@ -3186,16 +3186,16 @@ msgstr "Weiterleiten"
 msgid "Mail"
 msgstr "E-Mail"
 
-#: ui/components-headerbar-conversation-list.ui:37
+#: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Nachricht verfassen"
 
-#: ui/components-headerbar-conversation-list.ui:53
+#: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
 msgstr "Suchleiste anzeigen/verbergen"
 
-#: ui/components-headerbar-conversation-list.ui:71
+#: ui/components-headerbar-conversation-list.ui:70
 msgid "Select conversations"
 msgstr "Konversationen auswählen"
 
@@ -3265,7 +3265,7 @@ msgstr "_Tastenkombinationen"
 msgid "_About Geary"
 msgstr "_Info zu Geary"
 
-#: ui/components-menu-conversation.ui:21
+#: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
 msgstr "S_pam-Markierung umschalten"
 
@@ -3450,15 +3450,15 @@ msgstr "Antwort an:"
 msgid "Subject"
 msgstr "Betreff"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "In Konversation suchen"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Vorhergehende Übereinstimmungen mit dem Suchtext finden."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Nächste Übereinstimmung mit dem Suchtext finden."
 
