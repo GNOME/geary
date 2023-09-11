@@ -40,7 +40,7 @@ public class SearchBar : Hdy.SearchBar {
         this.entry.has_focus = true;
 
         var column = new Hdy.Clamp();
-        column.maximum_size = 450;
+        column.maximum_size = 400;
         column.add(this.entry);
 
         connect_entry(this.entry);
