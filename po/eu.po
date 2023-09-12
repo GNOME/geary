@@ -11,8 +11,8 @@
 msgid ""
 msgstr "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-03-14 07:38+0000\n"
-"PO-Revision-Date: 2023-04-09 17:52+0200\n"
+"POT-Creation-Date: 2023-09-09 12:14+0000\n"
+"PO-Revision-Date: 2023-09-12 17:52+0200\n"
 "Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <Librezale>\n"
 "Language: eu\n"
@@ -174,125 +174,133 @@ msgid "True if we should display a short preview of each message."
 msgstr "Egia mezu bakoitzaren aurrebista laburra bistaratzeko."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Modu lehenetsian, mugitu mezuak"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "Mezu bati etiketak ezartzean, eraman helburuko karpetara."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Erabili tekla bakarreko lasterbideak"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr "<Ctrl> sakatzea behar ez duten lasterbideak gaitzen ditu posta-ekintzetarako, Gmail-ek erabiltzen dituenak emulatzeko."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Ortografia-egiaztatzailean erabiliko diren hizkuntzak"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
 msgstr "POSIX hizkuntzen zerrenda bat, zerrenda k ortografia egiaztatzea desgaitzen du eta zerrenda nuluak mahaigainaren hizkuntza lehenetsia erabiltzen du."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Ortografia-egiaztatzailearen bunbuiloan bistaratuko diren hizkuntzak"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Ortografia-egiaztatzailearen bunbuiloan beti bistaratuko diren hizkuntzak"
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr "Exekutatu aplikazioa atzeko planoan saioa hasita dagoenean eta ixten denean"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "True (egia) aplikazioa atzeko planoan exekutatu dadin."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Galdetu eranskin bat irekitzean"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "Egia eranskin bat irekitzean galdetzeko."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Mezuak HTML formatuan sortuko diren ala ez"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "Egia posta-mezuak HTML formatuan konposatzeko; faltsua testu soilerako."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Testu osoak bilatzeko gomendatzen den estrategia"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr "Balio onartuak: “exact” (zehatza), “conservative” (kontserbadorea), “aggressive” (erasokorra) eta “horizon” (zeruertza)."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Berriketa-ikustailearen zooma"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "Berriketa-ikustaileari aplikatuko zaion zooma."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Askatutako konposatzaile-leihoaren tamaina"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "Askatutako konposatzaile-leihoan erregistratu den azken tamaina."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "Baimendu irudiak honako domeinuetan"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "Honako domeinuetako irudiak fidagarritzat hartuko dira"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Desegin mezua bidaltzearen atzerapena"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr "Mezu bat bidali baino lehen igaroko den segundo kopurua. Ezarri zero balioa desgaitzeko."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Jakinarazpen laburren bistaratze-denbora"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Jakinarazpen laburrak zenbat denbora bistaratuko diren, segundotan."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Aukerako pluginen zerrenda"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Hemen zerrendatutako pluginak abioan kargatuko dira."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Ezarpen zaharrak migratuko diren ala ez"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr "Faltsua “org.yorba.geary”-eskema zaharra egiaztatzeko eta haren balioak kopiatzeko."
@@ -593,12 +601,12 @@ msgstr[0] "Egun %d atzera"
 msgstr[1] "%d egun atzera"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2360
+#: src/client/application/application-main-window.vala:2317
 msgid "Undo"
 msgstr "Desegin"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2343
+#: src/client/application/application-main-window.vala:2300
 msgid "Redo"
 msgstr "Berregin"
 
@@ -681,7 +689,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:658
+#: src/client/application/application-main-window.vala:650
 msgid "Login"
 msgstr "Saio-hasiera"
 
@@ -1125,47 +1133,47 @@ msgid "Account update"
 msgstr "Kontuaren eguneratzea"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:644
+#: src/client/application/application-main-window.vala:636
 msgid "Working offline"
 msgstr "Lineaz kanpo lanean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:646
+#: src/client/application/application-main-window.vala:638
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Ezin izango duzu postarik bidali edo jaso berriro konektatu arte."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:645
 msgid "Login problem"
 msgstr "Arazoa saioa hastean"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:655
+#: src/client/application/application-main-window.vala:647
 msgid "An account has reported an incorrect login or password."
 msgstr "Kontu batek saio-haste edo pasahitz oker baten berri eman du."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:662
+#: src/client/application/application-main-window.vala:654
 msgid "Retry login, you will be prompted for your password"
 msgstr "Saiatu berriro saioa hasten, pasahitza eskatuko zaizu."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:669
+#: src/client/application/application-main-window.vala:661
 msgid "Security problem"
 msgstr "Segurtasun-arazoa"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:671
+#: src/client/application/application-main-window.vala:663
 msgid "An account has reported an untrusted server."
 msgstr "Kontu batek fidagarria ez den zerbitzari baten berri eman du."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:674
+#: src/client/application/application-main-window.vala:666
 msgid "Check"
 msgstr "Egiaztatu"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:678
+#: src/client/application/application-main-window.vala:670
 msgid "Check the security details for the connection"
 msgstr "Egiaztatu konexioaren segurtasun-xehetasunak"
 
@@ -1177,49 +1185,49 @@ msgstr "Egiaztatu konexioaren segurtasun-xehetasunak"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1109
+#: src/client/application/application-main-window.vala:1100
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etiketak"
 
-#: src/client/application/application-main-window.vala:1449
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Hustu zure %s karpetako mezu guztiak?"
 
-#: src/client/application/application-main-window.vala:1450
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "Horrek posta Geary-tik eta posta-zerbitzaritik kenduko du."
 
-#: src/client/application/application-main-window.vala:1451
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "Hau ezin da desegin."
 
-#: src/client/application/application-main-window.vala:1452
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "Hustu %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1509
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Berriketa hau betiko ezabatu nahi dituzu?"
 msgstr[1] "Berriketa hauek betiko ezabatu nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1514
-#: src/client/application/application-main-window.vala:1529
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "Ezabatu"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1524
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Mezu hau betirako ezabatzea nahi duzu?"
 msgstr[1] "Mezu hauek betirako ezabatzea nahi dituzu?"
 
-#: src/client/application/application-main-window.vala:1870
+#: src/client/application/application-main-window.vala:1841
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1253,43 +1261,37 @@ msgstr "Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu fid
 msgid "Don’t _ask me again"
 msgstr "_Ez galdetu berriro"
 
-#: src/client/components/components-conversation-actions.vala:119
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Markatu berriketa"
 msgstr[1] "Markatu berriketak"
 
-#: src/client/components/components-conversation-actions.vala:125
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Aldatu berriketa lekuz"
-msgstr[1] "Aldatu berriketak lekuz"
-
-#: src/client/components/components-conversation-actions.vala:130
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Artxibatu berriketa"
 msgstr[1] "Artxibatu berriketak"
 
-#: src/client/components/components-conversation-actions.vala:140
+#: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Gehitu etiketa berriketari"
 msgstr[1] "Gehitu etiketa berriketei"
 
-#: src/client/components/components-conversation-actions.vala:149
+#: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Kopiatu berriketa"
 msgstr[1] "Aldatu berriketak lekuz"
 
-#: src/client/components/components-conversation-actions.vala:168
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Eraman berriketa zakarrontzira"
 msgstr[1] "Eraman berriketak zakarrontzira"
 
-#: src/client/components/components-conversation-actions.vala:178
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Ezabatu berriketa"
@@ -1771,57 +1773,57 @@ msgid "Search for more languages"
 msgstr "Bilatu hizkuntza gehiago"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:214
+#: src/client/conversation-list/conversation-list-view.vala:219
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Eraman berriketa _zakarrontzira"
 msgstr[1] "Eraman berriketak _zakarrontzira"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:226
+#: src/client/conversation-list/conversation-list-view.vala:231
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_Ezabatu berriketa"
 msgstr[1] "_Ezabatu berriketak"
 
-#: src/client/conversation-list/conversation-list-view.vala:239
+#: src/client/conversation-list/conversation-list-view.vala:244
 #: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "Markatu _irakurrita gisa"
 
-#: src/client/conversation-list/conversation-list-view.vala:248
+#: src/client/conversation-list/conversation-list-view.vala:253
 #: ui/components-menu-conversation.ui:9
 msgid "Mark as _Unread"
 msgstr "Markatu i_rakurri gabeko gisa"
 
-#: src/client/conversation-list/conversation-list-view.vala:257
+#: src/client/conversation-list/conversation-list-view.vala:262
 #: ui/components-menu-conversation.ui:17
 msgid "U_nstar"
 msgstr "Ke_ndu izarra"
 
-#: src/client/conversation-list/conversation-list-view.vala:264
+#: src/client/conversation-list/conversation-list-view.vala:269
 #: ui/components-menu-conversation.ui:13
 msgid "_Star"
 msgstr "_Izarra"
 
-#: src/client/conversation-list/conversation-list-view.vala:275
+#: src/client/conversation-list/conversation-list-view.vala:280
 msgid "_Archive conversation"
 msgid_plural "_Archive conversations"
 msgstr[0] "Art_xibatu berriketa"
 msgstr[1] "Art_xibatu berriketak"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:287
+#: src/client/conversation-list/conversation-list-view.vala:292
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Erantzun"
 
-#: src/client/conversation-list/conversation-list-view.vala:293
+#: src/client/conversation-list/conversation-list-view.vala:298
 msgid "R_eply All"
 msgstr "Erantzun _denei"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:299
+#: src/client/conversation-list/conversation-list-view.vala:304
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "A_urrera"
@@ -2748,8 +2750,8 @@ msgid "Add an account"
 msgstr "Gehitu kontua"
 
 #: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
-#: ui/components-headerbar-conversation-list.ui:14
-#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
 #: ui/components-headerbar-conversation.ui:17
 #: ui/components-headerbar-conversation.ui:23
 msgid "Back"
@@ -3068,24 +3070,20 @@ msgstr "Erantzun denei"
 msgid "Forward"
 msgstr "Birbidali"
 
-#: ui/components-conversation-actions.ui:159
-msgid "_Archive"
-msgstr "_Artxibatu"
-
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
 msgstr "Posta"
 
-#: ui/components-headerbar-conversation-list.ui:37
+#: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Prestatu mezua"
 
-#: ui/components-headerbar-conversation-list.ui:53
+#: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
 msgstr "Aktibatu/desaktibatu bilaketa-barra"
 
-#: ui/components-headerbar-conversation-list.ui:71
+#: ui/components-headerbar-conversation-list.ui:70
 msgid "Select conversations"
 msgstr "Hautatu berriketak"
 
@@ -3677,6 +3675,14 @@ msgstr "_Gogoratu pasahitza"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Autentifikatu"
+
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "Aldatu berriketa lekuz"
+#~ msgstr[1] "Aldatu berriketak lekuz"
+
+#~ msgid "_Archive"
+#~ msgstr "_Artxibatu"
 
 #~ msgid "Online accounts are missing"
 #~ msgstr "Lineako kontuak falta dira"
