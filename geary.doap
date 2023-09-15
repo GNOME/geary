@@ -14,7 +14,7 @@ read, find and send email with a straightforward, modern
 interface.</description>
 
   <homepage rdf:resource="https://wiki.gnome.org/Apps/Geary" />
-  <mailing-list rdf:resource="https://mail.gnome.org/archives/geary-list/" />
+  <support-forum rdf:resource="https://discourse.gnome.org/tag/geary" />
   <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/geary/issues/" />
   <download-page rdf:resource="https://download.gnome.org/sources/geary/"/>
   <category rdf:resource="http://api.gnome.org/doap-extensions#apps" />
