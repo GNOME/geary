@@ -397,6 +397,24 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
         closed();
     }
 
+    /**
+     * Get pending unread change.
+     */
+    public int pending_unread_change() {
+        int unread_change = 0;
+        Gee.Collection<ReplayOperation> replay_ops = traverse(
+            remote_queue.get_all()
+        ).to_array_list();
+        replay_ops.add(this.remote_op_active);
+        foreach (ReplayOperation op in replay_ops) {
+            if (op is ImapEngine.MarkEmail) {
+                ImapEngine.MarkEmail mark_email = op as ImapEngine.MarkEmail;
+                unread_change += mark_email.unread_change;
+            }
+        }
+        return unread_change;
+    }
+
     /** {@inheritDoc} */
     public Logging.State to_logging_state() {
         return new Logging.State(
@@ -447,7 +465,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
                 break;
             }
 
-            local_op_active = op;
+            this.local_op_active = op;
 
             // If this is a Close operation, shut down the queue after processing it
             if (op is CloseReplayQueue)
@@ -526,7 +544,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
                     failed(op);
             }
 
-            local_op_active = null;
+            this.local_op_active = null;
         }
 
         debug("ReplayQueue.do_replay_local_async %s exiting", to_string());
@@ -547,7 +565,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
                 break;
             }
 
-            remote_op_active = op;
+            this.remote_op_active = op;
 
             // ReplayClose means this queue (and the folder) are closing, so handle errors a little
             // differently
@@ -641,7 +659,7 @@ private class Geary.ImapEngine.ReplayQueue : BaseObject, Logging.Source {
             else
                 failed(op);
 
-            remote_op_active = null;
+            this.remote_op_active = null;
         }
 
         debug("ReplayQueue.do_replay_remote_async %s exiting", to_string());

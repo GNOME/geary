@@ -1060,7 +1060,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return deleted_email_ids;
     }
 
-    public async void mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,
+    public async int mark_email_async(Gee.Collection<ImapDB.EmailIdentifier> to_mark,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, Cancellable? cancellable)
         throws Error {
         int unread_change = 0; // Negative means messages are read, positive means unread.
@@ -1120,6 +1120,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         // Signal changes so other folders can be updated.
         if (unread_status.size > 0)
             unread_updated(unread_status);
+
+        return unread_change;
     }
 
     internal async Gee.List<Imap.UID>? get_email_uids_async(

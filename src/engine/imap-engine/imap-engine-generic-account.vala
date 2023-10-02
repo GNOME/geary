@@ -1373,6 +1373,15 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             // always update, openable or not; have the folder update the UID info the next time
             // it's opened
             try {
+                // Some emails may have been marked as read locally while
+                // updating remote folders
+                if (minimal_folder.replay_queue != null &&
+                    minimal_folder.replay_queue.pending_unread_change() != 0) {
+                    remote_folder.properties.set_status_unseen(
+                        remote_folder.properties.unseen +
+                        minimal_folder.replay_queue.pending_unread_change()
+                    );
+                }
                 yield minimal_folder.local_folder.update_folder_status(
                     remote_folder.properties, false, cancellable
                 );

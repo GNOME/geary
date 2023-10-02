@@ -1112,6 +1112,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
+        // Some emails may have been marked as read locally while
+        // claiming folder session, handle the diff here.
+        session.folder.properties.set_status_unseen(
+            session.folder.properties.unseen +
+            this.replay_queue.pending_unread_change()
+        );
+
         // Update the local folder's totals and UID values after
         // normalisation, so it does not mistake the remote's current
         // state with our previous state
@@ -1371,6 +1378,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         replay_queue.schedule(mark);
 
         yield mark.wait_for_ready_async(cancellable);
+
+        // Cancel any remote update, we just updated locally unread_count,
+        // incoming data will have an invalid unseen value
+        this.account.cancel_remote_update();
     }
 
     public virtual async void
