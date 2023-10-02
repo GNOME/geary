@@ -228,7 +228,7 @@ public class Geary.Smtp.ClientService : Geary.ClientService {
     /**
      * Loads any email in the outbox and adds them to the queue.
      */
-    private async void fill_outbox_queue(GLib.Cancellable cancellable) {
+    private async void fill_outbox_queue(GLib.Cancellable? cancellable) {
         debug("Filling queue");
         try {
             Gee.List<Email>? queued = yield this.outbox.list_email_by_id_async(
