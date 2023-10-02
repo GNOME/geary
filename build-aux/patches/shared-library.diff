@@ -1,18 +1,20 @@
- GNUmakefile           | 15 +++++++--------
- libstemmer/symbol.map |  6 ++++++
- 2 files changed, 13 insertions(+), 8 deletions(-)
+commit d5f711a6b76fddc6e91f0f66e240b5a357f526ca
+Author: Cédric Bellegarde <cedric.bellegarde@adishatz.org>
+Date:   Mon Oct 2 17:41:02 2023 +0200
 
-diff --git c/GNUmakefile i/GNUmakefile
-index 98eb1fa..86e4855 100644
---- c/GNUmakefile
-+++ i/GNUmakefile
-@@ -170,20 +170,19 @@ C_OTHER_OBJECTS = $(C_OTHER_SOURCES:.c=.o)
+    plop
+
+diff --git a/GNUmakefile b/GNUmakefile
+index 3958e02..e6e1c06 100644
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -171,12 +171,11 @@ C_OTHER_OBJECTS = $(C_OTHER_SOURCES:.c=.o)
  JAVA_CLASSES = $(JAVA_SOURCES:.java=.class)
  JAVA_RUNTIME_CLASSES=$(JAVARUNTIME_SOURCES:.java=.class)
  
--CFLAGS=-O2 -W -Wall -Wmissing-prototypes -Wmissing-declarations
+-CFLAGS=-g -O2 -W -Wall -Wmissing-prototypes -Wmissing-declarations
 -CPPFLAGS=
-+CFLAGS+=-fPIC -W -Wall -Wmissing-prototypes -Wmissing-declarations
++CFLAGS=-g -fPIC -W -Wall -Wmissing-prototypes -Wmissing-declarations
  
  INCLUDES=-Iinclude
  
@@ -21,7 +23,7 @@ index 98eb1fa..86e4855 100644
  
  algorithms.mk: libstemmer/mkalgorithms.pl libstemmer/modules.txt
  	libstemmer/mkalgorithms.pl algorithms.mk libstemmer/modules.txt
- 
+@@ -184,7 +183,7 @@ algorithms.mk: libstemmer/mkalgorithms.pl libstemmer/modules.txt
  clean:
  	rm -f $(COMPILER_OBJECTS) $(RUNTIME_OBJECTS) \
  	      $(LIBSTEMMER_OBJECTS) $(LIBSTEMMER_UTF8_OBJECTS) $(STEMWORDS_OBJECTS) snowball$(EXEEXT) \
@@ -30,7 +32,7 @@ index 98eb1fa..86e4855 100644
                libstemmer/modules.h \
                libstemmer/modules_utf8.h \
  	      $(C_LIB_SOURCES) $(C_LIB_HEADERS) $(C_LIB_OBJECTS) \
-@@ -222,19 +221,19 @@ libstemmer/modules_utf8.h libstemmer/mkinc_utf8.mak: libstemmer/mkmodules.pl lib
+@@ -224,19 +223,19 @@ libstemmer/modules_utf8.h libstemmer/mkinc_utf8.mak: libstemmer/mkmodules.pl lib
  
  libstemmer/libstemmer.o: libstemmer/modules.h $(C_LIB_HEADERS)
  
@@ -54,11 +56,11 @@ index 98eb1fa..86e4855 100644
  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
  
  csharp_stemwords$(EXEEXT): $(CSHARP_STEMWORDS_SOURCES) $(CSHARP_RUNTIME_SOURCES) $(CSHARP_SOURCES)
-diff --git c/libstemmer/symbol.map i/libstemmer/symbol.map
+diff --git a/libstemmer/symbol.map b/libstemmer/symbol.map
 new file mode 100644
 index 0000000..7a3d423
 --- /dev/null
-+++ i/libstemmer/symbol.map
++++ b/libstemmer/symbol.map
 @@ -0,0 +1,6 @@
 +SB_STEMMER_0 {
 +    global:
@@ -66,4 +68,3 @@ index 0000000..7a3d423
 +    local:
 +        *;
 +};
-
