@@ -357,23 +357,26 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
                 (folder != null) ? folder.to_string() : "root", response.to_string());
         }
 
-        // See note at ListCommand about some servers returning the
-        // parent's name alongside their children ... this filters
-        // this out
-        if (folder != null && list_children) {
-            Gee.Iterator<MailboxInformation> iter = list_results.iterator();
-            while (iter.next()) {
+        // We use a hash to filter duplicated mailboxes
+        Gee.HashMap<string, MailboxInformation> filtered =
+            new Gee.HashMap<string, MailboxInformation>();
+        foreach (MailboxInformation information in list_results) {
+            // See note at ListCommand about some servers returning the
+            // parent's name alongside their children ... this filters
+            // this out
+            if (folder != null && list_children) {
                 FolderPath list_path = session.get_path_for_mailbox(
-                    this.root, iter.get().mailbox
+                    this.root, information.mailbox
                 );
                 if (list_path.equal_to(folder)) {
                     debug("Removing parent from LIST results: %s", list_path.to_string());
-                    iter.remove();
+                    continue;
                 }
             }
+            filtered.set(information.mailbox.name, information);
         }
 
-        return list_results;
+        return Geary.traverse(filtered.values).to_array_list();
     }
 
     private async StatusData send_status_async(ClientSession session,
