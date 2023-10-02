@@ -73,6 +73,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private EmailPrefetcher email_prefetcher;
 
     private int open_count = 0;
+    private int unread_change = 0;
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private Cancellable? open_cancellable = null;
     private Nonblocking.Mutex lifecycle_mutex = new Nonblocking.Mutex();
@@ -1026,6 +1027,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Don't try to re-open again
         this.remote_open_timer.reset();
 
+        // Reset unread change before claiming
+        this.unread_change = 0;
+
         // Phase 1: Acquire a new session
 
         Imap.FolderSession? session = null;
@@ -1126,6 +1130,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // All done, can now hook up the session to the folder
         this.remote_session = session;
+        // Some emails may have been marked as read since this function
+        // started, handle the diff here.
+        session.folder.properties.set_status_unseen(
+            session.folder.properties.unseen + this.unread_change
+        );
+
         this._properties.add(session.folder.properties);
         session.disconnected.connect(on_remote_disconnected);
 
@@ -1362,9 +1372,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             flags_to_remove,
             cancellable
         );
+        mark.notify["unread-change"].connect(() => {
+            this.unread_change += mark.unread_change;
+        });
+
         replay_queue.schedule(mark);
 
         yield mark.wait_for_ready_async(cancellable);
+
+        // Cancel any remote update, we just updated locally unread_count,
+        // incoming data will have an invalid unseen value
+        this.account.cancel_remote_update();
     }
 
     public virtual async void

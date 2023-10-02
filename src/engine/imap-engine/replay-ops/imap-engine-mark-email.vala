@@ -13,6 +13,8 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
 
+    internal int unread_change { get; private set; default=0; }
+
     public MarkEmail(MinimalFolder engine,
                      Gee.Collection<ImapDB.EmailIdentifier> to_mark,
                      EmailFlags? flags_to_add,
@@ -46,8 +48,12 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         if (original_flags == null || original_flags.size == 0)
             return ReplayOperation.Status.COMPLETED;
 
-        yield engine.local_folder.mark_email_async(original_flags.keys, flags_to_add, flags_to_remove,
-            cancellable);
+         this.unread_change = yield engine.local_folder.mark_email_async(
+            original_flags.keys,
+            flags_to_add,
+            flags_to_remove,
+            cancellable
+        );
 
         // We can't rely on email identifier for remote replay
         // An email identifier id can match multiple uids
