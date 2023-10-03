@@ -546,6 +546,12 @@ public class Geary.Imap.ClientService : Geary.ClientService {
                 session,
                 (obj, res) => { this.remove_session_async.end(res); }
             );
+            if (session.disconnected == ClientSession.DisconnectReason.REMOTE_ERROR) {
+                Geary.ErrorContext context = new Geary.ErrorContext(
+                    new GLib.IOError.NOT_CONNECTED("Session disconnected, remote error")
+                );
+                notify_connection_failed(context);
+            }
         }
     }
 

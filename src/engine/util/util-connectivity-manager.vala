@@ -189,8 +189,9 @@ public class Geary.ConnectivityManager : BaseObject {
         // localhost.  (This is a Linux program, after all...)
         debug("Network changed: %s",
               some_available ? "some available" : "none available");
+
+        cancel_check();
         if (some_available) {
-            cancel_check();
             this.delayed_check.start_ms(CHECK_SOON);
         } else {
             // None available, so definitely not reachable.
