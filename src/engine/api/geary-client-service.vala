@@ -400,6 +400,8 @@ public abstract class Geary.ClientService : BaseObject, Logging.Source {
         this.last_error = error;
         this.current_status = CONNECTION_FAILED;
         connection_error(error);
+        // Network error, so try to connect again
+        this.remote.connectivity.check_reachable.begin(true);
     }
 
     /**

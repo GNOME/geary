@@ -84,7 +84,13 @@ public class Geary.ConnectivityManager : BaseObject {
      * This will cancel any existing check, and start a new one
      * running, updating the `is_reachable` property on completion.
      */
-    public async void check_reachable() {
+    public async void check_reachable(bool force_notify=false) {
+        if (force_notify) {
+            this.is_reachable = Geary.Trillian.UNKNOWN;
+        }
+        if (this.existing_check != null) {
+            this.existing_check.cancel();
+        }
         Cancellable cancellable = new Cancellable();
         this.existing_check = cancellable;
 
@@ -163,6 +169,11 @@ public class Geary.ConnectivityManager : BaseObject {
             }
         } finally {
             if (!cancellable.is_cancelled()) {
+                if (is_reachable) {
+                    debug("%s reachable.", endpoint);
+                } else {
+                    debug("%s not reachable.", endpoint);
+                }
                 set_reachable(is_reachable);
 
                 // Kick off another delayed check in case the network
@@ -189,8 +200,9 @@ public class Geary.ConnectivityManager : BaseObject {
         // localhost.  (This is a Linux program, after all...)
         debug("Network changed: %s",
               some_available ? "some available" : "none available");
+
+        cancel_check();
         if (some_available) {
-            cancel_check();
             this.delayed_check.start_ms(CHECK_SOON);
         } else {
             // None available, so definitely not reachable.
