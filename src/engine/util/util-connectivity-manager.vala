@@ -100,73 +100,17 @@ public class Geary.ConnectivityManager : BaseObject {
             // Check first, and ask questions only if an error occurs,
             // because if we can connect, then we can connect.
             debug("Checking if %s reachable...", endpoint);
-            is_reachable = yield this.monitor.can_reach_async(
+            SocketClient client = new SocketClient();
+            // 5 seconds
+            client.set_timeout(5);
+            SocketConnection conn = yield client.connect_async(
                 this.remote, cancellable
             );
+            is_reachable = true;
         } catch (GLib.IOError.CANCELLED err) {
             // User cancelled, so leave as unreachable
-        } catch (GLib.IOError.HOST_UNREACHABLE err) {
-            // Despite returning a boolean, per its API docs
-            // NetworkMonitor.can_reach() should never actually return
-            // false under Vala since it will throw an error instead,
-            // and usually this one. While that's not 100% always the
-            // case, we do need to treat this error as meaning
-            // unreachable.
-            //
-            // However if the monitor says there actually is a network
-            // available, we may be running under Flatpak with Network
-            // Manager connectivity checking enabled and hitting issue
-            // GNOME/glib#1705. Pull this debug logging out once that
-            // is fixed.
-            if (this.monitor.network_available) {
-                debug("Assuming %s is unreachable, despite network availability",
-                      endpoint);
-            }
-        } catch (GLib.DBusError err) {
-            // Running under Flatpak can cause a DBus error if the
-            // portal is malfunctioning (e.g. Geary #97 & #82 and
-            // xdg-desktop-portal #208). We must treat this as
-            // reachable so we make a connection attempt, otherwise it
-            // will never happen.
-            debug("DBus error checking %s reachable, treating as reachable: %s",
-                  endpoint, err.message);
-            is_reachable = true;
-        } catch (GLib.ResolverError.TEMPORARY_FAILURE err) {
-            // Host name could not be resolved since name servers
-            // could not be reached, so treat as being offline.
-            debug("Transient error checking %s reachable, treating offline: %s",
-                  endpoint, err.message);
         } catch (GLib.Error err) {
-            if (err is IOError.NETWORK_UNREACHABLE &&
-                this.monitor.network_available) {
-                // If we get a network unreachable error, but the monitor
-                // says there actually is a network available, we may be
-                // running in a Flatpak and hitting Bug 777706. If so,
-                // just assume the service is reachable is for now. :(
-                // Pull this put once xdg-desktop-portal 1.x is widely
-                // installed.
-                debug("Assuming %s is reachable, despite network unavailability",
-                      endpoint);
-                is_reachable = true;
-            } else {
-                // The monitor threw an error, but only notify if it
-                // looks like we *should* be able to connect
-                // (i.e. have full network connectivity, or are
-                // connecting to a local service), so we don't
-                // needlessly hassle the user with expected error
-                // messages.
-                GLib.NetworkConnectivity connectivity = this.monitor.connectivity;
-                if ((this.monitor.network_available && connectivity == FULL) ||
-                    (connectivity == LOCAL && is_local_address())) {
-                    debug("Error checking %s [%s] reachable, treating unreachable: %s",
-                          endpoint, connectivity.to_string(), err.message);
-                    set_invalid();
-                    remote_error_reported(err);
-                } else {
-                    debug("Error checking %s [%s] reachable, treating offline: %s",
-                          endpoint, connectivity.to_string(), err.message);
-                }
-            }
+            debug("Checking %s reachable: %s", endpoint, err.message);
         } finally {
             if (!cancellable.is_cancelled()) {
                 if (is_reachable) {
