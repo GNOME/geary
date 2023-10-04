@@ -867,6 +867,7 @@ public class Application.MainWindow :
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
+            navigate_next_pane();
             // Since conversation ids don't persist between
             // conversation monitor instances, need to load
             // conversations based on their messages.
@@ -901,6 +902,7 @@ public class Application.MainWindow :
         if (this.selected_folder == location) {
             var loaded = yield load_conversations_for_email(location, to_show);
 
+            navigate_next_pane();
             if (loaded.size == 1) {
                 // A single conversation was loaded, so ensure we
                 // scroll to the email in the conversation.
