@@ -2029,8 +2029,18 @@ public class Application.MainWindow :
                     focus = this.conversation_list_view;
             }
         } else {
-            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
-            focus = this.conversation_list_view;
+            bool cancelled = false;
+            if (this.has_composer) {
+                cancelled =
+                    this.conversation_viewer
+                        .current_composer
+                        .conditional_close(true) == Composer.Widget.CloseStatus
+                                                                   .CANCELLED;
+            }
+            if (!cancelled) {
+                this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                focus = this.conversation_list_view;
+            }
         }
         focus_widget(focus);
     }
