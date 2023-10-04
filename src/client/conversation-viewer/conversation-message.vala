@@ -839,10 +839,20 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 );
 
                 if (this.primary_contact != null) {
+                    // Workaround https://gitlab.gnome.org/GNOME/libadwaita/-/issues/647
                     this.primary_contact.bind_property("display-name",
                                                        this.avatar,
                                                        "text",
-                                                       BindingFlags.SYNC_CREATE);
+                                                       BindingFlags.SYNC_CREATE,
+                                                       (_, src, ref dst) => {
+                        try {
+                            GLib.Regex regex = /([(].*[)]|[\[].*[\]])/;
+                            dst = regex.replace (src.get_string(), -1, 0, " ");
+                            return true;
+                        } catch {
+                            return false;
+                        }
+                    });
                     this.primary_contact.bind_property("avatar",
                                                        this.avatar,
                                                        "loadable-icon",
