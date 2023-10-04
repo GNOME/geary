@@ -357,6 +357,18 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     }
 
     /**
+     * Activate currently selected row
+     *
+     * If more than one selected, activate the first one
+     */
+    public void activate_selected() {
+        Gee.Set<Geary.App.Conversation> conversations = get_selected_conversations();
+        if (!conversations.is_empty) {
+            conversation_activated(conversations.to_array()[0], 1);
+        }
+    }
+
+    /**
      * Selects all conversations
      */
     public void select_all() {

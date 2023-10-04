@@ -2065,6 +2065,20 @@ public class Application.MainWindow :
         }
     }
 
+    private void reply_conversation(Composer.Widget.ContextType context_type) {
+        if (this.outer_leaflet.folded) {
+            this.conversation_list_view.activate_selected();
+            navigate_next_pane();
+            // This is a lot of async actions, delay composer creation
+            GLib.Timeout.add(500, () => {
+              this.create_composer_from_viewer.begin(context_type);
+              return Source.REMOVE;
+            });
+        } else {
+            this.create_composer_from_viewer.begin(context_type);
+        }
+    }
+
     private void on_scan_completed(Geary.App.ConversationMonitor monitor) {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
@@ -2405,15 +2419,15 @@ public class Application.MainWindow :
     }
 
     private void on_reply_conversation() {
-        this.create_composer_from_viewer.begin(REPLY_SENDER);
+        reply_conversation(REPLY_SENDER);
     }
 
     private void on_reply_all_conversation() {
-        this.create_composer_from_viewer.begin(REPLY_ALL);
+        reply_conversation(REPLY_ALL);
     }
 
     private void on_forward_conversation() {
-        this.create_composer_from_viewer.begin(FORWARD);
+        reply_conversation(FORWARD);
     }
 
     private void on_show_window_menu() {
