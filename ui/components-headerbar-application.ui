@@ -6,6 +6,15 @@
     <property name="visible">True</property>
     <property name="title" translatable="yes">Mail</property>
     <child>
+      <object class="MonitoredSpinner" id="spinner">
+        <property name="visible">True</property>
+        <property name="margin-start">5</property>
+      </object>
+      <packing>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
       <object class="GtkMenuButton" id="app_menu_button">
         <property name="visible">True</property>
         <property name="focus_on_click">False</property>

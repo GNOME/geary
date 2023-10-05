@@ -17,6 +17,7 @@
 public class Components.ApplicationHeaderBar : Hdy.HeaderBar {
 
     [GtkChild] private unowned Gtk.MenuButton app_menu_button;
+    [GtkChild] public unowned MonitoredSpinner spinner;
 
 
     construct {

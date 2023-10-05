@@ -73,8 +73,6 @@ public class Application.MainWindow :
     private const string CONVERSATION_LIST = "conversation_list";
     private const string CONVERSATION_VIEWER = "conversation_viewer";
 
-    private const int STATUS_BAR_HEIGHT = 18;
-
     private const int UPDATE_UI_INTERVAL = 60;
 
     private const int MIN_CONVERSATION_COUNT = 50;
@@ -370,11 +368,7 @@ public class Application.MainWindow :
         get; private set; default = new Components.InfoBarStack(PRIORITY_QUEUE);
     }
 
-    public StatusBar status_bar { get; private set; default = new StatusBar(); }
-
     private Controller controller;
-
-    private MonitoredSpinner spinner = new MonitoredSpinner();
 
     private Gee.Set<AccountContext> accounts = new Gee.HashSet<AccountContext>();
 
@@ -406,7 +400,6 @@ public class Application.MainWindow :
     // Folds the folder list and the conversation list
     [GtkChild] private unowned Hdy.Leaflet inner_leaflet;
 
-    [GtkChild] private unowned Gtk.Box folder_box;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
 
     [GtkChild] private unowned Gtk.Box conversation_list_box;
@@ -607,7 +600,6 @@ public class Application.MainWindow :
         });
 
         setup_layout(application.config);
-        this.folder_box.pack_start(status_bar, false, false);
 
         update_command_actions();
         update_conversation_actions(NONE);
@@ -1387,13 +1379,7 @@ public class Application.MainWindow :
             }
         );
 
-        // Status bar
-        this.status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
-        this.status_bar.set_border_width(2);
-        this.spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
-        this.spinner.set_progress_monitor(progress_monitor);
-        this.status_bar.add(this.spinner);
-        this.status_bar.show_all();
+        this.application_headerbar.spinner.set_progress_monitor(progress_monitor);
 
         this.conversation_list_actions.set_mark_inverted();
 

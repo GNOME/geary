@@ -992,7 +992,6 @@ internal class Application.Controller :
         account.notify["current-status"].connect(
             on_account_status_notify
         );
-        account.email_removed.connect(on_account_email_removed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.report_problem.connect(on_report_problem);
 
@@ -1001,8 +1000,6 @@ internal class Application.Controller :
         );
         if (smtp != null) {
             smtp.email_sent.connect(on_sent);
-            smtp.sending_monitor.start.connect(on_sending_started);
-            smtp.sending_monitor.finish.connect(on_sending_finished);
         }
 
         // Notify before opening so that listeners have a chance to
@@ -1077,7 +1074,6 @@ internal class Application.Controller :
                 on_account_status_notify
             );
 
-            account.email_removed.disconnect(on_account_email_removed);
             account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
 
             Geary.Smtp.ClientService? smtp = (
@@ -1085,8 +1081,6 @@ internal class Application.Controller :
             );
             if (smtp != null) {
                 smtp.email_sent.disconnect(on_sent);
-                smtp.sending_monitor.start.disconnect(on_sending_started);
-                smtp.sending_monitor.finish.disconnect(on_sending_finished);
             }
 
             // Now the account is not in the accounts map, reset any
@@ -1301,28 +1295,6 @@ internal class Application.Controller :
 
         context.tls_validation_prompting = false;
         update_account_status();
-    }
-
-    private void on_account_email_removed(Geary.Folder folder,
-                                          Gee.Collection<Geary.EmailIdentifier> ids) {
-        if (folder.used_as == OUTBOX) {
-            foreach (MainWindow window in this.application.get_main_windows()) {
-                window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
-                window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            }
-        }
-    }
-
-    private void on_sending_started() {
-        foreach (MainWindow window in this.application.get_main_windows()) {
-            window.status_bar.activate_message(StatusBar.Message.OUTBOX_SENDING);
-        }
-    }
-
-    private void on_sending_finished() {
-        foreach (MainWindow window in this.application.get_main_windows()) {
-            window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SENDING);
-        }
     }
 
     // Returns true if the caller should try opening the account again
