@@ -27,12 +27,11 @@ namespace Geary.RFC822.Utils {
                                                           Gee.List<MailboxAddress>? sender_addresses = null) {
         var new_to = new Gee.ArrayList<MailboxAddress>();
 
-        // If we're replying to something we sent, send it to the same people we originally did.
-        // Otherwise, we'll send to the reply-to address or the from address.
-        if (email.to != null && email_is_from_sender(email, sender_addresses))
-            new_to.add_all(email.to.get_all());
-        else if (email.reply_to != null)
+        if (email.reply_to != null)
             new_to.add_all(email.reply_to.get_all());
+        // If we're replying to something we sent, send it to the same people we originally did.
+        else if (email.to != null && email_is_from_sender(email, sender_addresses))
+            new_to.add_all(email.to.get_all());
         else if (email.from != null)
             new_to.add_all(email.from.get_all());
 
