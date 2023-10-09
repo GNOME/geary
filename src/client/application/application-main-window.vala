@@ -777,7 +777,7 @@ public class Application.MainWindow :
      */
     public async void select_folder(Geary.Folder? to_select,
                                     bool is_interactive,
-                                    bool inhibit_autoselect = false) {
+                                    bool disable_autoactivate = false) {
         if (this.selected_folder != to_select) {
             // Cancel any existing folder loading
             this.folder_open.cancel();
@@ -853,9 +853,7 @@ public class Application.MainWindow :
                 );
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
-                if (inhibit_autoselect) {
-                    this.conversation_list_view.inhibit_next_autoselect();
-                }
+                this.conversation_list_view.disable_autoactivate = disable_autoactivate;
                 this.conversation_list_view.set_monitor(this.conversations);
 
                 yield open_conversation_monitor(this.conversations, cancellable);
@@ -870,8 +868,8 @@ public class Application.MainWindow :
     public async void show_conversations(Geary.Folder location,
                                          Gee.Collection<Geary.App.Conversation> to_show,
                                          bool is_interactive) {
-        bool inhibit_autoselect = (location != this.selected_folder);
-        yield select_folder(location, is_interactive, inhibit_autoselect);
+        bool disable_autoactivate = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, disable_autoactivate);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
@@ -902,8 +900,8 @@ public class Application.MainWindow :
     public async void show_email(Geary.Folder location,
                                  Gee.Collection<Geary.EmailIdentifier> to_show,
                                  bool is_interactive) {
-        bool inhibit_autoselect = (location != this.selected_folder);
-        yield select_folder(location, is_interactive, inhibit_autoselect);
+        bool disable_autoactivate = (location != this.selected_folder);
+        yield select_folder(location, is_interactive, disable_autoactivate);
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
