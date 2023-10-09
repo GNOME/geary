@@ -20,12 +20,12 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     public signal void copy_conversation(Geary.Folder folder);
     public signal void move_conversation(Geary.Folder folder);
 
-    public Geary.Folder? selected { get ; private set; default = null; }
+    public Geary.Folder? selected { get; private set; default = null; }
+    public SearchBranch? search_branch { get; private set; default = null; }
 
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
-    private SearchBranch? search_branch = null;
 
 
     public Tree() {

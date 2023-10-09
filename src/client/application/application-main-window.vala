@@ -362,7 +362,6 @@ public class Application.MainWindow :
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
-    public SearchBar search_bar { get; private set; }
     public ConversationList.View conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; }
 
@@ -371,6 +370,8 @@ public class Application.MainWindow :
     }
 
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+
+    private SearchBar search_bar;
 
     private Controller controller;
 
@@ -854,6 +855,10 @@ public class Application.MainWindow :
                 this.progress_monitor.add(this.conversations.progress_monitor);
 
                 this.conversation_list_view.disable_autoactivate = disable_autoactivate;
+                if (disable_autoactivate) {
+                    this.conversation_viewer.show_none_selected();
+                }
+
                 this.conversation_list_view.set_monitor(this.conversations);
 
                 yield open_conversation_monitor(this.conversations, cancellable);
@@ -1024,7 +1029,7 @@ public class Application.MainWindow :
         return closed;
     }
 
-    internal void start_search(string query_text, bool is_interactive) {
+    internal void start_search(string query_text) {
         var context = get_selected_account_context();
         if (context != null) {
             // If the current folder is not the search folder, save it
@@ -1054,7 +1059,7 @@ public class Application.MainWindow :
         }
     }
 
-    internal void stop_search(bool is_interactive) {
+    internal void stop_search() {
         // If the search folder is current selected, deselect and
         // re-select any previously selected folder
         if (this.selected_folder == null ||
@@ -1069,10 +1074,10 @@ public class Application.MainWindow :
             }
             if (to_select != null) {
                 this.select_folder.begin(
-                    this.previous_non_search_folder, is_interactive
+                    this.previous_non_search_folder, true
                 );
             } else {
-                select_first_inbox(is_interactive);
+                select_first_inbox(true);
             }
         }
         this.folder_list.remove_search();
@@ -1315,6 +1320,7 @@ public class Application.MainWindow :
         // Search bar
         this.search_bar = new SearchBar(this.application.engine);
         this.search_bar.search_text_changed.connect(on_search);
+        this.search_bar.notify["search-mode-enabled"].connect(on_search_mode_enabled);
         this.conversation_list_box.pack_start(this.search_bar, false, false, 0);
 
 
@@ -2353,7 +2359,13 @@ public class Application.MainWindow :
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
-        this.select_folder.begin(folder, true);
+        if (folder != null && folder.used_as == SEARCH) {
+            this.select_folder.begin(folder, true, true);
+            this.search_bar.search_mode_enabled = true;
+        } else {
+            this.select_folder.begin(folder, true, false);
+            this.search_bar.search_mode_enabled = false;
+        }
     }
 
     private void on_select_inbox(SimpleAction action, Variant? parameter) {
@@ -2374,10 +2386,23 @@ public class Application.MainWindow :
     }
 
     private void on_search(string text) {
-        if (Geary.String.is_empty_or_whitespace(text)) {
-            stop_search(true);
-        } else {
-            this.start_search(text, true);
+        if (this.search_bar.search_mode_enabled) {
+            start_search(text);
+        }
+    }
+
+    private void on_search_mode_enabled() {
+        FolderList.SearchBranch? branch = this.folder_list.search_branch;
+        Geary.SearchQuery? query = null;
+        if (branch != null) {
+            query = branch.get_search_folder().query;
+        }
+        if (this.search_bar.search_mode_enabled) {
+            if (query != null) {
+                this.search_bar.entry.text = query.raw;
+            }
+        } else if (query == null || query.raw == "") {
+            stop_search();
         }
     }
 

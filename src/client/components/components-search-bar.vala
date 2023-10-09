@@ -33,9 +33,6 @@ public class SearchBar : Hdy.SearchBar {
         this.entry.search_changed.connect(() => {
             search_text_changed(this.entry.text);
         });
-        this.entry.activate.connect(() => {
-            search_text_changed(this.entry.text);
-        });
         this.entry.placeholder_text = DEFAULT_SEARCH_TEXT;
         this.entry.has_focus = true;
 
