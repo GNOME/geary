@@ -565,6 +565,9 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private Gee.Map<Geary.EmailIdentifier,EmailRow> email_rows =
         new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
 
+    // Current search query if any
+    private Geary.SearchQuery? query = null;
+
     // The current composer, if any
     private ComposerRow? current_composer = null;
 
@@ -766,6 +769,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                                         Geary.SearchQuery? query)
         throws GLib.Error {
         set_sort_func(null);
+        this.query = query;
 
         Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
@@ -838,7 +842,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         yield interesting_row.view.load_contacts();
         yield interesting_row.expand();
         this.finish_loading.begin(
-            query, scroll_to.is_empty, uninteresting, post_interesting
+            scroll_to.is_empty, uninteresting, post_interesting
         );
     }
 
@@ -1042,8 +1046,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         return this.email_rows.get(id);
     }
 
-    private async void finish_loading(Geary.SearchQuery? query,
-                                      bool enable_query_scroll,
+    private async void finish_loading(bool enable_query_scroll,
                                       Gee.LinkedList<Geary.Email> to_insert,
                                       Gee.LinkedList<Geary.Email> to_append)
         throws GLib.Error {
@@ -1099,12 +1102,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         set_sort_func(on_sort);
 
-        if (query != null) {
+        if (this.query != null) {
             // XXX this sucks for large conversations because it can take
             // a long time for the load to complete and hence for
             // matches to show up.
             yield this.search.highlight_matching_email(
-                query, enable_query_scroll
+                this.query, enable_query_scroll
             );
         }
 
@@ -1272,6 +1275,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Mark expanded messages as read
      */
     private void check_mark_read_viewed() {
+        if (this.query != null) {
+            return;
+        }
+
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
         this.foreach((child) => {
@@ -1299,6 +1306,10 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read_readen() {
+        if (this.query != null) {
+            return;
+        }
+
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
         Gtk.Adjustment adj = get_adjustment();
