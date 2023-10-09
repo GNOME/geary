@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-07-07 21:02+0000\n"
-"PO-Revision-Date: 2023-07-08 09:30+0300\n"
+"POT-Creation-Date: 2023-10-09 13:58+0000\n"
+"PO-Revision-Date: 2023-10-09 21:32+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <kde-i18n-uk@kde.org>\n"
 "Language: uk\n"
@@ -38,7 +38,7 @@ msgstr "Надіслати файли через Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:710
+#: src/client/application/application-main-window.vala:718
 msgid "Geary"
 msgstr "Geary"
 
@@ -66,10 +66,6 @@ msgid "Geary Development Team"
 msgstr "Команда з розробки Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
-#| msgid ""
-#| "Geary is an email application built around conversations, for the GNOME 3 "
-#| "desktop. It allows you to read, find and send email with a "
-#| "straightforward, modern interface."
 msgid ""
 "Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -649,12 +645,12 @@ msgstr[2] "%d днів тому"
 msgstr[3] "день тому"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2297
+#: src/client/application/application-main-window.vala:2317
 msgid "Undo"
 msgstr "Скасувати"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2280
+#: src/client/application/application-main-window.vala:2300
 msgid "Redo"
 msgstr "Повторити"
 
@@ -1262,36 +1258,36 @@ msgstr "Перевірте параметри захисту з'єднання"
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:719
+#: src/client/application/application-main-window.vala:727
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1092
+#: src/client/application/application-main-window.vala:1100
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Мітки"
 
-#: src/client/application/application-main-window.vala:1424
+#: src/client/application/application-main-window.vala:1432
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Спорожнити всі листи з теки %s?"
 
-#: src/client/application/application-main-window.vala:1425
+#: src/client/application/application-main-window.vala:1433
 msgid "This removes the email from Geary and your email server."
 msgstr "Це вилучить всі листи з Geary і з вашого сервера."
 
-#: src/client/application/application-main-window.vala:1426
+#: src/client/application/application-main-window.vala:1434
 msgid "This cannot be undone."
 msgstr "Це неможливо повернути."
 
-#: src/client/application/application-main-window.vala:1427
+#: src/client/application/application-main-window.vala:1435
 #, c-format
 msgid "Empty %s"
 msgstr "Спорожнити %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1484
+#: src/client/application/application-main-window.vala:1492
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ви справді хочете остаточно вилучити ці спілкування?"
@@ -1299,13 +1295,13 @@ msgstr[1] "Ви справді хочете остаточно вилучити 
 msgstr[2] "Ви справді хочете остаточно вилучити ці спілкування?"
 msgstr[3] "Ви справді хочете остаточно вилучити це спілкування?"
 
-#: src/client/application/application-main-window.vala:1489
-#: src/client/application/application-main-window.vala:1504
+#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1512
 msgid "Delete"
 msgstr "Вилучити"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1499
+#: src/client/application/application-main-window.vala:1507
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Остаточно вилучити цей лист?"
@@ -1313,7 +1309,7 @@ msgstr[1] "Остаточно вилучити ці листи?"
 msgstr[2] "Остаточно вилучити ці листи?"
 msgstr[3] "Остаточно вилучити цей лист?"
 
-#: src/client/application/application-main-window.vala:1819
+#: src/client/application/application-main-window.vala:1841
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1349,7 +1345,7 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Більше не _запитувати"
 
-#: src/client/components/components-conversation-actions.vala:117
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Позначити спілкування"
@@ -1357,7 +1353,7 @@ msgstr[1] "Позначити спілкування"
 msgstr[2] "Позначити спілкування"
 msgstr[3] "Позначити спілкування"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Архівувати спілкування"
@@ -1365,7 +1361,7 @@ msgstr[1] "Архівувати спілкування"
 msgstr[2] "Архівувати спілкування"
 msgstr[3] "Архівувати спілкування"
 
-#: src/client/components/components-conversation-actions.vala:132
+#: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Додати мітку до спілкувань"
@@ -1373,7 +1369,7 @@ msgstr[1] "Додати мітку до спілкувань"
 msgstr[2] "Додати мітку до спілкувань"
 msgstr[3] "Додати мітку до спілкування"
 
-#: src/client/components/components-conversation-actions.vala:143
+#: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Копіювати спілкування"
@@ -1381,7 +1377,7 @@ msgstr[1] "Копіювати спілкування"
 msgstr[2] "Копіювати спілкування"
 msgstr[3] "Копіювати спілкування"
 
-#: src/client/components/components-conversation-actions.vala:157
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Пересунути спілкування до смітника"
@@ -1389,7 +1385,7 @@ msgstr[1] "Пересунути спілкування до смітника"
 msgstr[2] "Пересунути спілкування до смітника"
 msgstr[3] "Пересунути спілкування до смітника"
 
-#: src/client/components/components-conversation-actions.vala:167
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Вилучити спілкування"
@@ -1902,17 +1898,17 @@ msgid "Mark as _Read"
 msgstr "Зазначити як _прочитане"
 
 #: src/client/conversation-list/conversation-list-view.vala:248
-#: ui/components-menu-conversation.ui:9
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "Зазначити як _непрочитане"
 
 #: src/client/conversation-list/conversation-list-view.vala:257
-#: ui/components-menu-conversation.ui:17
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "_Без зірки"
 
 #: src/client/conversation-list/conversation-list-view.vala:264
-#: ui/components-menu-conversation.ui:13
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "_Із зіркою"
 
@@ -2016,9 +2012,10 @@ msgstr "Зовнішні зображення не показано"
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1424
-msgid "Only show remote images from senders you trust."
+#| msgid "Only show remote images from senders you trust."
+msgid "Showing remote images allows the sender to track you"
 msgstr ""
-"Зовнішні зображення буде показано лише для відправників, яким ви довіряєте."
+"Показ зовнішніх зображень надасть відправнику можливість стежити за вами"
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
@@ -2032,25 +2029,25 @@ msgstr "Показати"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No Conversations Selected"
 msgstr "Не позначено жодного спілкування."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
 msgstr "Після вибору спілкування зі списку його буде показано тут."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Multiple Conversations Selected"
 msgstr "Позначено декілька спілкувань"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "Вибір дії призведе до її застосування до усіх вибраних спілкувань."
 
@@ -2058,20 +2055,20 @@ msgstr "Вибір дії призведе до її застосування д
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:116
-#: src/client/conversation-viewer/conversation-viewer.vala:132
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
 msgid "No Conversations Found"
 msgstr "Спілкувань не знайдено"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
 msgstr "У цій теці не міститься спілкувань."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:136
+#: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
 msgstr ""
 "За вашими критеріями пошуку нічого не знайдено. Спробуйте змінити критерії."
@@ -2913,8 +2910,8 @@ msgid "Add an account"
 msgstr "Додати обліковий запис"
 
 #: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
-#: ui/components-headerbar-conversation-list.ui:14
-#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
 #: ui/components-headerbar-conversation.ui:17
 #: ui/components-headerbar-conversation.ui:23
 msgid "Back"
@@ -3239,16 +3236,16 @@ msgstr "Переслати"
 msgid "Mail"
 msgstr "Пошта"
 
-#: ui/components-headerbar-conversation-list.ui:37
+#: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Нове повідомлення"
 
-#: ui/components-headerbar-conversation-list.ui:53
+#: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
 msgstr "Перемкнути панель пошуку"
 
-#: ui/components-headerbar-conversation-list.ui:71
+#: ui/components-headerbar-conversation-list.ui:70
 msgid "Select conversations"
 msgstr "Виберіть спілкування"
 
@@ -3318,7 +3315,7 @@ msgstr "_Клавіатурні скорочення"
 msgid "_About Geary"
 msgstr "_Про Geary"
 
-#: ui/components-menu-conversation.ui:21
+#: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
 msgstr "Перемкнути позначення як сп_ам"
 
@@ -3505,15 +3502,15 @@ msgstr "Відповідати до:"
 msgid "Subject"
 msgstr "Тема"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "Знайти у спілкуванні"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Знайти попередній відповідник шуканого рядка."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Знайти наступний відповідник шуканого рядка"
 
