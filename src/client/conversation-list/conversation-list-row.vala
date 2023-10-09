@@ -148,26 +148,38 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
 
     private string get_participants() {
         var participants = new Gee.ArrayList<Participant>();
+        var addresses = new Geary.RFC822.MailboxAddresses();
         Gee.List<Geary.Email> emails = conversation.get_emails(
                           Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING);
-
+        bool is_outgoing = conversation.base_folder.used_as.is_outgoing();
         foreach (Geary.Email message in emails) {
-            Geary.RFC822.MailboxAddresses? addresses =
-                conversation.base_folder.used_as.is_outgoing()
-                ? new Geary.RFC822.MailboxAddresses.single(Util.Email.get_primary_originator(message))
+            Geary.RFC822.MailboxAddresses? addrs =
+                is_outgoing
+                ? message.to
                 : message.from;
+            addresses = addresses.merge_list(addrs);
+        }
 
-            if (addresses == null) {
-                continue;
-            }
-
-            foreach (Geary.RFC822.MailboxAddress address in addresses) {
-                Participant participant_display = new Participant(address);
-                int existing_index = participants.index_of(participant_display);
-                if (existing_index < 0) {
-                    participants.add(participant_display);
-                    continue;
+        Gee.List<Geary.RFC822.MailboxAddress> list = Geary.traverse(
+            addresses.get_all()
+        ).filter((address) => {
+            // In sent, we only want to show "Me"
+            if (is_outgoing && addresses.size > 1) {
+                foreach (var account in this.user_accounts) {
+                    if (account.equal_to(address)) {
+                        return false;
+                    }
                 }
+            }
+            return true;
+        }).to_array_list();
+
+        foreach (Geary.RFC822.MailboxAddress address in list) {
+            Participant participant_display = new Participant(address);
+            int existing_index = participants.index_of(participant_display);
+            if (existing_index < 0) {
+                participants.add(participant_display);
+                continue;
             }
         }
 
