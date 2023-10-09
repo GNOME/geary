@@ -1421,7 +1421,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                     // Translators: Info bar status message
                     _("Remote images not shown"),
                     // Translators: Info bar description
-                    _("Only show remote images from senders you trust.")
+                    _("Showing remote images allows the sender to track you")
                 );
 
                 var menu_image = new Gtk.Image();
