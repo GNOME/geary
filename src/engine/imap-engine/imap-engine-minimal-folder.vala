@@ -1030,6 +1030,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         Imap.FolderSession? session = null;
         try {
+#if WITH_DELAYED_REPLAY_QUEUE
+            // When folder session is claimed, that can lock for some ms.
+            // It can be tricky to debug issues happening during this small
+            // random delay. Use this build option to force the delay.
+            yield Geary.Scheduler.sleep_async(1);
+#endif
             session = yield this._account.claim_folder_session(
                 this.path, cancellable
             );

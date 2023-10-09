@@ -365,6 +365,12 @@ if libytnef.found()
   ]
 endif
 
+if get_option('delayed_replay_queue')
+  engine_vala_args += [
+    '-D', 'WITH_DELAYED_REPLAY_QUEUE'
+  ]
+endif
+
 engine_lib = static_library('geary-engine',
   engine_sources,
   dependencies: engine_dependencies,
