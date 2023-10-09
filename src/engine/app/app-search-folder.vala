@@ -584,6 +584,12 @@ public class Geary.App.SearchFolder :
                         added.add(email.id);
                     }
                 }
+            } else {
+                foreach (var id in this.ids.keys) {
+                    removed.add(id);
+                }
+                ids = new_id_map();
+                entries = new_entry_set();
             }
         } else {
             // Removing email, can just remove them directly
