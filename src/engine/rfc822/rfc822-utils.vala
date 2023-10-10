@@ -55,6 +55,9 @@ namespace Geary.RFC822.Utils {
         if (email.to != null && !email_is_from_sender(email, sender_addresses))
             new_cc.add_all(email.to.get_all());
 
+        if (email.from != null)
+            new_cc.add_all(email.from.get_all());
+
         if (email.cc != null)
             new_cc.add_all(email.cc.get_all());
 
