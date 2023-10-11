@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-07-25 22:53+0000\n"
-"PO-Revision-Date: 2023-09-02 15:46+0200\n"
+"POT-Creation-Date: 2023-10-09 13:58+0000\n"
+"PO-Revision-Date: 2023-10-12 01:34+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -629,12 +629,12 @@ msgstr[1] "%d dny zpětně"
 msgstr[2] "%d dní zpětně"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2318
+#: src/client/application/application-main-window.vala:2317
 msgid "Undo"
 msgstr "Zpět"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2301
+#: src/client/application/application-main-window.vala:2300
 msgid "Redo"
 msgstr "Znovu"
 
@@ -1310,42 +1310,42 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Příště se nept_at"
 
-#: src/client/components/components-conversation-actions.vala:118
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Označit konverzaci"
 msgstr[1] "Označit konverzace"
 msgstr[2] "Označit konverzace"
 
-#: src/client/components/components-conversation-actions.vala:124
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Archivovat konverzaci (A)"
 msgstr[1] "Archivovat konverzace (A)"
 msgstr[2] "Archivovat konverzace (A)"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "Přiřadit konverzaci štítek"
 msgstr[1] "Přiřadit konverzacím štítek"
 msgstr[2] "Přiřadit konverzacím štítek"
 
-#: src/client/components/components-conversation-actions.vala:144
+#: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "Zkopírovat konverzaci"
 msgstr[1] "Zkopírovat konverzace"
 msgstr[2] "Zkopírovat konverzace"
 
-#: src/client/components/components-conversation-actions.vala:162
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Přesunout konverzaci"
 msgstr[1] "Přesunout konverzace"
 msgstr[2] "Přesunout konverzace"
 
-#: src/client/components/components-conversation-actions.vala:172
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Vymazat konverzaci"
@@ -1854,17 +1854,17 @@ msgid "Mark as _Read"
 msgstr "Označit jako _přečtené"
 
 #: src/client/conversation-list/conversation-list-view.vala:248
-#: ui/components-menu-conversation.ui:9
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "Označit jako _nepřečtené"
 
 #: src/client/conversation-list/conversation-list-view.vala:257
-#: ui/components-menu-conversation.ui:17
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "O_debrat hvězdičku"
 
 #: src/client/conversation-list/conversation-list-view.vala:264
-#: ui/components-menu-conversation.ui:13
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "_Hvězdička"
 
@@ -1966,8 +1966,8 @@ msgstr "Vzdálené obrázky nejsou zobrazené"
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1424
-msgid "Only show remote images from senders you trust."
-msgstr "Vzdálené obrázky se zobrazují jen od odesilatelů, kterým důvěřujete."
+msgid "Showing remote images allows the sender to track you"
+msgstr "Zobrazení vzdálených obrázků umožňuje odesílateli vás sledovat"
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
@@ -2845,8 +2845,8 @@ msgid "Add an account"
 msgstr "Přidat účet"
 
 #: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
-#: ui/components-headerbar-conversation-list.ui:14
-#: ui/components-headerbar-conversation-list.ui:20
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
 #: ui/components-headerbar-conversation.ui:17
 #: ui/components-headerbar-conversation.ui:23
 msgid "Back"
@@ -3169,16 +3169,16 @@ msgstr "Přeposlat"
 msgid "Mail"
 msgstr "Pošta"
 
-#: ui/components-headerbar-conversation-list.ui:37
+#: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
 msgstr "Napsat zprávu"
 
-#: ui/components-headerbar-conversation-list.ui:53
+#: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
 msgstr "Přepnout vyhledávací lištu"
 
-#: ui/components-headerbar-conversation-list.ui:71
+#: ui/components-headerbar-conversation-list.ui:70
 msgid "Select conversations"
 msgstr "Vybrat konverzace"
 
@@ -3247,7 +3247,7 @@ msgstr "_Klávesové zkratky"
 msgid "_About Geary"
 msgstr "O _aplikaci Geary"
 
-#: ui/components-menu-conversation.ui:21
+#: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
 msgstr "Přepnout jako nevyžá_danou"
 
