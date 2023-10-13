@@ -91,11 +91,13 @@ namespace Util.Email {
             // Spaces are important
             const string VIA = " via ";
 
-            if (reply_to_name != "" && from_name.has_prefix(reply_to_name)) {
+            // See https://gitlab.gnome.org/GNOME/geary/-/issues/1024
+            /*if (reply_to_name != "" && from_name.has_prefix(reply_to_name)) {
                 // Mailman sometimes sends the true originator as the
                 // Reply-To for the email
                 primary = primary_reply_to;
-            } else if (VIA in from_name) {
+            }*/
+            if (VIA in from_name) {
                 // Mailman, GitLib, Discourse and others send the
                 // originator's name prefixing something starting with
                 // "via".

@@ -109,7 +109,7 @@ public class Util.Email.Test : TestCase {
 
         assert_non_null(originator);
         assert_equal(originator.name, "test");
-        assert_equal(originator.address, "test@example.com");
+        assert_equal(originator.address, "bot@example.com");
     }
 
     public void plain_via_originator() throws GLib.Error {
