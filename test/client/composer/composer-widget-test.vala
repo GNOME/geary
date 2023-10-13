@@ -339,7 +339,7 @@ public class Composer.WidgetTest : TestCase {
         widget.load_context.end(async_result());
 
         assert_equal(widget.to, "Alice: Personal Account <alice@example.org>");
-        assert_equal(widget.cc, "Charlie <charlie@example.net>, Dave <dave@example.net>");
+        assert_equal(widget.cc, "Charlie <charlie@example.net>, Alice <alice@example.net>, Dave <dave@example.net>");
         assert_equal(widget.bcc, "");
         assert_equal(widget.reply_to, "");
         assert_equal(widget.subject, "Re: Basic text/plain message");
