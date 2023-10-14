@@ -200,7 +200,9 @@ internal class Application.Controller :
             // exactly as planned
         }
 
-        SecretMediator? libsecret = yield new SecretMediator(cancellable);
+        SecretMediator? libsecret = yield new SecretMediator(
+            this.application, cancellable
+        );
 
         application.engine.account_available.connect(on_account_available);
 
