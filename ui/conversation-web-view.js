@@ -59,6 +59,7 @@ ConversationPageState.prototype = {
         this.updateDirection();
         this.createControllableQuotes();
         this.wrapSignature();
+        this.deceptiveLinksTitle();
         PageState.prototype.loaded.apply(this, []);
     },
     /**
@@ -150,6 +151,15 @@ ConversationPageState.prototype = {
                 }
             }
         }
+    },
+    deceptiveLinksTitle: function() {
+      let pattern = /^((http|https|ftp):\/\/)/;
+      let anchors = document.getElementsByTagName("a");
+      for (var i = 0; i < anchors.length; i++) {
+        if(pattern.test(anchors[i].title)) {
+          anchors[i].title = anchors[i].href;
+        }
+      }
     },
     /**
      * Look for and wrap a signature.
