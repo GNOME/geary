@@ -36,9 +36,19 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     );
 
 
-    public async SecretMediator(GLib.Cancellable? cancellable)
+    public async SecretMediator(Application.Client application,
+                                GLib.Cancellable? cancellable)
         throws GLib.Error {
         yield check_unlocked(cancellable);
+        // https://github.com/flatpak/xdg-desktop-portal/issues/557
+        if (application.is_flatpak_sandboxed) {
+            yield Secret.password_lookup(
+                SecretMediator.schema,
+                cancellable,
+                ATTR_LOGIN,
+                ""
+            );
+        }
     }
 
     public virtual async bool load_token(Geary.AccountInformation account,
