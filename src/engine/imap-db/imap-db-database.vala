@@ -617,6 +617,24 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
     protected override void prepare_connection(Db.DatabaseConnection cx)
         throws GLib.Error {
+
+        // SQLite might need more disk space than we have in /tmp
+        // So use XDG_CACHE_DIR instead
+        string tmp_path = "%s/geary/database".printf(
+                GLib.Environment.get_user_cache_dir()
+        );
+        GLib.File tmp_directory = GLib.File.new_for_path(tmp_path);
+        try {
+            if (tmp_directory.query_exists() || tmp_directory.make_directory()) {
+                cx.exec(
+                    "PRAGMA temp_store_directory = '%s'".printf(tmp_path)
+                );
+            }
+        } catch (GLib.Error err) {
+            // Ignore error, will use /tmp as temp store
+            debug("couldn't set db temp dir to $XDG_CACHE_DIR: %s", err.message);
+        }
+
         cx.set_busy_timeout_msec(
             Db.DatabaseConnection.RECOMMENDED_BUSY_TIMEOUT_MSEC
         );
