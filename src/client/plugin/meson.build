@@ -5,7 +5,6 @@
 
 plugin_dependencies = [
   folks,
-  gdk,
   client_dep,
   engine_dep,
   gee,

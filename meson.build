@@ -53,9 +53,9 @@ valac = meson.get_compiler('vala')
 #
 
 target_glib = '2.68'
-target_gtk = '3.24.24'
+target_gtk = '4.12.3'
 target_vala = '0.48.18'
-target_webkit = '2.30'
+target_webkit = '>= 2.41.1'
 
 if not valac.version().version_compare('>=' + target_vala)
   error('Vala does not meet minimum required version: ' + target_vala)
@@ -64,9 +64,9 @@ endif
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
 gmime = dependency('gmime-3.0', version: '>= 3.2.4')
-gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
+gtk = dependency('gtk4', version: '>=' + target_gtk)
 sqlite = dependency('sqlite3', version: '>= 3.24')
-webkit2gtk = dependency('webkit2gtk-4.1', version: '>=' + target_webkit)
+webkit2gtk = dependency('webkitgtk-6.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 # We need appdata.its from appstream-glib:
@@ -75,20 +75,18 @@ appstream_glib = dependency('appstream-glib', version: '>=0.7.10')
 cairo = dependency('cairo')
 enchant = dependency('enchant-2', version: '>=2.1')
 folks = dependency('folks', version: '>=0.11')
-gck = dependency('gck-1')
-gcr = dependency('gcr-3', version: '>= 3.10.1')
-gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
+gck = dependency('gck-2')
+gcr = dependency('gcr-4', version: '>= 3.9.0')
 gee = dependency('gee-0.8', version: '>= 0.8.5')
 gio = dependency('gio-2.0', version: '>=' + target_glib)
 goa = dependency('goa-1.0')
 gsound = dependency('gsound')
-gspell = dependency('gspell-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
-javascriptcoregtk = dependency('javascriptcoregtk-4.1', version: '>=' + target_webkit)
+javascriptcoregtk = dependency('javascriptcoregtk-6.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libhandy = dependency('libhandy-1', version: '>= 1.2.1', required: false)
+libhandy = dependency('libadwaita-1', version: '>= 1.4.beta', required: false)
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-1.0', version: '>= 1.24.0')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
@@ -103,7 +101,7 @@ libunwind_generic_dep = dependency(
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef'))
 posix = valac.find_library('posix')
-webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.1', version: '>=' + target_webkit)
+webkitgtk_web_extension = dependency('webkitgtk-web-process-extension-6.0', version: '>=' + target_webkit)
 
 # System dependencies above ensures appropriate versions for the
 # following libraries, but the declared dependency is what we actually
