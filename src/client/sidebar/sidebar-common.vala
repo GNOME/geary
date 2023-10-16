@@ -82,9 +82,3 @@ public class Sidebar.Header : Sidebar.Grouping, Sidebar.EmphasizableEntry {
         return emphasized;
     }
 }
-
-public interface Sidebar.Contextable : Object {
-    // Return null if the context menu should not be invoked for this event
-    public abstract Gtk.Menu? get_sidebar_context_menu(Gdk.EventButton event);
-}
-

@@ -358,7 +358,6 @@ public class Application.MainWindow :
     // Used to save/load the window state between sessions.
     public int window_width { get; set; }
     public int window_height { get; set; }
-    public bool window_maximized { get; set; }
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
@@ -1258,34 +1257,21 @@ public class Application.MainWindow :
             }
         }
         this.window_position = Gtk.WindowPosition.CENTER;
-        if (this.window_maximized) {
+        if (this.window.maximized) {
             maximize();
         }
-    }
-
-    // Called on [un]maximize and possibly others. Save maximized state
-    // for the next start.
-    public override bool window_state_event(Gdk.EventWindowState event) {
-        if ((event.new_window_state & Gdk.WindowState.WITHDRAWN) == 0) {
-            bool maximized = (
-                (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0
-            );
-            if (this.window_maximized != maximized) {
-                this.window_maximized = maximized;
-            }
-        }
-        return base.window_state_event(event);
     }
 
     // Called on window resize. Save window size for the next start.
     public override void size_allocate(Gtk.Allocation allocation) {
         base.size_allocate(allocation);
 
-        if (!this.window_maximized) {
+        if (!this.window.maximized) {
             Gdk.Display? display = get_display();
-            Gdk.Window? window = get_window();
-            if (display != null && window != null) {
-                Gdk.Monitor monitor = display.get_monitor_at_window(window);
+            if (display != null) {
+                Gdk.Monitor monitor = display.get_monitor_at_surface(
+                    this.get_surface()
+                );
 
                 // Get the size via ::get_size instead of the
                 // allocation so that the window isn't ever-expanding.
@@ -1412,18 +1398,10 @@ public class Application.MainWindow :
             popover.copy_conversation.connect(on_copy_conversation);
             popover.move_conversation.connect(on_move_conversation);
         }
-    }
 
-    /** {@inheritDoc} */
-    public override bool key_press_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return base.key_press_event(event);
-    }
-
-    /** {@inheritDoc} */
-    public override bool key_release_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return base.key_release_event(event);
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
+        controller.connect("key-released", this.on_key_released);
     }
 
     internal bool prompt_empty_folder(Geary.Folder.SpecialUse type) {
@@ -1951,17 +1929,16 @@ public class Application.MainWindow :
         update_trash_action();
     }
 
-    private inline void check_shift_event(Gdk.EventKey event) {
-        // FIXME: it's possible the user will press two shift keys.  We want
-        // the shift key to report as released when they release ALL of them.
-        // There doesn't seem to be an easy way to do this in Gdk.
-        if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
+    private inline bool check_shift_key(bool pressed, Gdk.ModifierType type) {
+        if (type == Gdk.ModifierType.SHIFT_MASK) {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
                 (!(focus is Gtk.Entry) && !(focus is Composer.WebView))) {
-                set_shift_key_down(event.type == Gdk.EventType.KEY_PRESS);
+                set_shift_key_down(pressed);
+                return true;
             }
         }
+        return false;
     }
 
     private void focus_widget(Gtk.Widget? widget) {
@@ -2102,6 +2079,14 @@ public class Application.MainWindow :
         this.controller.report_problem(
             new Geary.ServiceProblemReport(account, account.incoming, err)
         );
+    }
+
+    private bool on_key_pressed(uint keyval, uint keycode, Gdk.ModifierType state) {
+        return this.check_shift_key(true, state);
+    }
+
+    private bool on_key_released(uint keyval, uint keycode, Gdk.ModifierType state) {
+        return this.check_shift_key(false, state);
     }
 
     [GtkCallback]

@@ -69,6 +69,9 @@ public class ConversationWebView : Components.WebView {
         // not when sharing one
         this.user_content_manager.add_script(ConversationWebView.app_script);
         this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
+
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
     }
 
     /**
@@ -185,15 +188,15 @@ public class ConversationWebView : Components.WebView {
         get_find_controller().search_finish();
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
+    private bool on_key_pressed(Gtk.EventController controller, uint keyval,
+                                uint keycode, Gdk.ModifierType state) {
         // WebView consumes a number of key presses for scrolling
         // itself internally, but we want them to navigate around in
         // ConversationListBox, so don't forward any on.
-        bool ret = Gdk.EVENT_PROPAGATE;
-        if (!(((int) event.keyval) in BLACKLISTED_KEY_CODES)) {
-            ret = base.key_press_event(event);
+        if ((((int) keyval) in BLACKLISTED_KEY_CODES)) {
+            return true;
         }
-        return ret;
+        return false;
     }
 
     public override void get_preferred_height(out int minimum_height,

@@ -29,7 +29,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
 
     public Tree() {
-        base(TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE, drop_handler);
+        base();
         base_ref();
         set_activate_on_single_click(true);
         entry_selected.connect(on_entry_selected);
@@ -66,10 +66,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
                 entry.set_has_new(has_new);
             }
         }
-    }
-
-    private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
-        Gtk.SelectionData data, uint info, uint time) {
     }
 
     private FolderEntry? get_folder_entry(Geary.Folder folder) {
@@ -219,22 +215,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         get_selection().unselect_all();
         this.selected = null;
         folder_selected(null);
-    }
-
-    public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
-        // Run the base version first.
-        bool ret = base.drag_motion(context, x, y, time);
-
-        // Update the cursor for copy or move.
-        Gdk.ModifierType mask;
-        double[] axes = new double[2];
-        context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            Gdk.drag_status(context, Gdk.DragAction.COPY, time);
-        } else {
-            Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
-        }
-        return ret;
     }
 
     public void set_search(Geary.Engine engine,

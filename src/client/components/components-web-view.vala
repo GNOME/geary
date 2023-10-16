@@ -642,7 +642,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         } else if (this.zoom_level > ZOOM_MAX) {
             this.zoom_level = ZOOM_MAX;
         }
-        this.scroll_event.connect(on_scroll_event);
+
+        Gtk.EventControllerScroll controller = new Gtk.EventControllerScroll(this);
+        controller.connect("scroll", this.on_scroll);
 
         // Watch desktop font settings
         Settings system_settings = config.gnome_interface;
@@ -771,7 +773,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         return Gdk.EVENT_STOP;
     }
 
-    private bool on_scroll_event(Gdk.EventScroll event) {
+    private bool on_scroll_event(Gtk.EventController controller,
+                                 double x, double y) {
+        Gdk.Event event = controller.get_current_event();
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
             double dir = 0;
             if (event.direction == Gdk.ScrollDirection.UP)

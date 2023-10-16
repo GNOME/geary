@@ -167,8 +167,8 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     /** Forwards a key press event to the search entry. */
-    public bool handle_key_press(Gdk.EventKey event) {
-        return this.search_entry.key_press_event(event);
+    public bool forward_search_entry(Gtk.EventController controller) {
+        return controller.forward(this.search_entry);
     }
 
     /** Returns the number of currently selected log records. */

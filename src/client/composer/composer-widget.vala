@@ -18,7 +18,7 @@ private errordomain AttachmentError {
  * Container}.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
+public class Composer.Widget : Gtk.Box, Geary.BaseInterface {
 
 
     /**
@@ -467,13 +467,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // Hide until we know we can save drafts
         this.header.show_save_and_close = false;
 
-        // Setup drag 'n drop
-        const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
-        Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
-            target_entries, Gdk.DragAction.COPY);
-
-        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
-
         this.visible_on_attachment_drag_over.remove(
             this.visible_on_attachment_drag_over_child
         );
@@ -551,9 +544,18 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.editor.body.content_loaded.connect(on_content_loaded);
         this.editor.body.document_modified.connect(() => { draft_changed(); });
-        this.editor.body.key_press_event.connect(on_editor_key_press_event);
         this.editor.show();
         this.editor_container.add(this.editor);
+
+
+        Gtk.EventControllerKey controller1 = new Gtk.EventControllerKey(
+            this
+        );
+        controller.connect("key-pressed", this.on_key_pressed);
+        Gtk.EventControllerKey controller2 = new Gtk.EventControllerKey(
+            this.editor.body
+        );
+        controller.connect("key-pressed", this.on_editor_key_pressed);
 
         // Listen to account signals to update from menu.
         this.application.account_available.connect(
@@ -1206,7 +1208,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.visible_on_attachment_drag_over.set_size_request(-1, -1);
         }
    }
-
+/*
     [GtkCallback]
     private void on_set_focus_child() {
         var window = get_toplevel() as Gtk.Window;
@@ -1274,7 +1276,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         Gtk.drag_get_data(sender, context, target_type, time_);
         return true;
-    }
+    }*/
 
     /** Returns a representation of the current message. */
     public async Geary.ComposedEmail to_composed_email(GLib.DateTime? date_override = null,
@@ -1385,13 +1387,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         // Include the email in the composer's list of referred email
         this.referred_ids.add(referred.id);
-    }
-
-    public override bool key_press_event(Gdk.EventKey event) {
-        // Override the method since key-press-event is run last, and
-        // we want this behaviour to take precedence over the default
-        // key handling
-        return check_send_on_return(event) && base.key_press_event(event);
     }
 
     /** Updates the composer's top level window and headerbar title. */
@@ -2053,21 +2048,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         dialog.destroy();
     }
 
-    private bool check_send_on_return(Gdk.EventKey event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-        switch (Gdk.keyval_name(event.keyval)) {
+    private bool check_send_on_return(uint keyval, Gdk.ModifierType state) {
+        switch (Gdk.keyval_name(keyval)) {
             case "Return":
             case "KP_Enter":
                 // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent
                 // the Enter leaking through to the controls, but only
                 // send if send is available
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                if ((state & Gdk.ModifierType.CONTROL_MASK) != 0) {
                     this.actions.activate_action(ACTION_SEND, null);
-                    ret = Gdk.EVENT_STOP;
+                    return true;
                 }
             break;
         }
-        return ret;
+        return false;
     }
 
     private void validate_send_button() {
@@ -2187,25 +2181,27 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private bool on_editor_key_press_event(Gdk.EventKey event) {
-        // Widget's keypress override doesn't receive non-modifier
-        // keys when the editor processes them, regardless if true or
-        // false is called; this deals with that issue (specifically
-        // so Ctrl+Enter will send the message)
-        if (event.is_modifier == 0) {
-            if (check_send_on_return(event) == Gdk.EVENT_STOP)
-                return Gdk.EVENT_STOP;
+    private bool on_key_pressed(Gtk.EventController controller, uint keyval,
+                                uint keycode, Gdk.ModifierType state) {
+        return check_send_on_return(event);
+    }
+
+
+    private bool on_editor_key_pressed(Gtk.EventController controller, uint keyval,
+                                       uint keycode, Gdk.ModifierType state) {
+        if (check_send_on_return(keyval, state)) {
+            return true;
         }
 
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
-            if (event.is_modifier == 0 && event.keyval == Gdk.Key.BackSpace) {
+            if (keyval == Gdk.Key.BackSpace) {
                 this.editor.body.delete_quoted_message();
-                return Gdk.EVENT_STOP;
+                return true;
             }
         }
 
-        return Gdk.EVENT_PROPAGATE;
+        return false;
     }
 
     private GLib.SimpleAction? get_action(string action_name) {

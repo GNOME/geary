@@ -86,66 +86,9 @@ public class Accounts.Editor : Gtk.Dialog {
             // Welcome dialog
             this.default_width = 600;
         }
-    }
 
-    public override bool key_press_event(Gdk.EventKey event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-
-        // Allow the user to use Esc, Back and Alt+arrow keys to
-        // navigate between panes. If a pane is executing a long
-        // running operation, only allow Esc and use it to cancel the
-        // operation instead.
-        EditorPane? current_pane = get_current_pane();
-        if (current_pane != null &&
-            current_pane != this.editor_list_pane) {
-            Gdk.ModifierType state = (
-                event.state & Gtk.accelerator_get_default_mod_mask()
-            );
-            bool is_ltr = (get_direction() == Gtk.TextDirection.LTR);
-
-            switch (event.keyval) {
-            case Gdk.Key.Escape:
-                if (current_pane.is_operation_running) {
-                    current_pane.cancel_operation();
-                } else {
-                    pop();
-                }
-                ret = Gdk.EVENT_STOP;
-                break;
-
-            case Gdk.Key.Back:
-                if (!current_pane.is_operation_running) {
-                    pop();
-                    ret = Gdk.EVENT_STOP;
-                }
-                break;
-
-            case Gdk.Key.Left:
-                if (!current_pane.is_operation_running &&
-                    state == Gdk.ModifierType.MOD1_MASK &&
-                    is_ltr) {
-                    pop();
-                    ret = Gdk.EVENT_STOP;
-                }
-                break;
-
-            case Gdk.Key.Right:
-                if (!current_pane.is_operation_running &&
-                    state == Gdk.ModifierType.MOD1_MASK &&
-                    !is_ltr) {
-                    pop();
-                    ret = Gdk.EVENT_STOP;
-                }
-                break;
-            }
-
-        }
-
-        if (ret != Gdk.EVENT_STOP) {
-            ret = base.key_press_event(event);
-        }
-
-        return ret;
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
     }
 
     /**
@@ -263,6 +206,57 @@ public class Accounts.Editor : Gtk.Dialog {
         if (pane != null) {
             pane.redo();
         }
+    }
+
+    private bool on_key_pressed(uint keyval, uint keycode, Gdk.ModifierType state) {
+        bool ret = false;
+        // Allow the user to use Esc, Back and Alt+arrow keys to
+        // navigate between panes. If a pane is executing a long
+        // running operation, only allow Esc and use it to cancel the
+        // operation instead.
+        EditorPane? current_pane = get_current_pane();
+        if (current_pane != null &&
+            current_pane != this.editor_list_pane) {
+            bool is_ltr = (get_direction() == Gtk.TextDirection.LTR);
+
+            switch (keyval) {
+            case Gdk.Key.Escape:
+                if (current_pane.is_operation_running) {
+                    current_pane.cancel_operation();
+                } else {
+                    pop();
+                }
+                ret = true;
+                break;
+
+            case Gdk.Key.Back:
+                if (!current_pane.is_operation_running) {
+                    pop();
+                    ret = true;
+                }
+                break;
+
+            case Gdk.Key.Left:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    is_ltr) {
+                    pop();
+                    ret = true;
+                }
+                break;
+
+            case Gdk.Key.Right:
+                if (!current_pane.is_operation_running &&
+                    state == Gdk.ModifierType.MOD1_MASK &&
+                    !is_ltr) {
+                    pop();
+                    ret = true;
+                }
+                break;
+            }
+
+        }
+        return ret;
     }
 
     [GtkCallback]

@@ -9,17 +9,13 @@
 internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
     private const string DND_ATOM = "geary-editor-row";
-    private const Gtk.TargetEntry[] DRAG_ENTRIES = {
-        { DND_ATOM, Gtk.TargetFlags.SAME_APP, 0 }
-    };
-
 
     protected Gtk.Box layout {
         get;
         private set;
         default = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5); }
 
-    private Gtk.Container drag_handle;
+    private Gtk.Grid drag_handle;
     private bool drag_picked_up = false;
     private bool drag_entered = false;
 
@@ -35,15 +31,12 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
         // We'd like to add the drag handle only when needed, but
         // GNOME/gtk#1495 prevents us from doing so.
-        Gtk.EventBox drag_box = new Gtk.EventBox();
-        drag_box.add(
-            new Gtk.Image.from_icon_name(
-                "list-drag-handle-symbolic", Gtk.IconSize.BUTTON
-            )
+        Gtk.Image image = new Gtk.Image.from_icon_name(
+            "list-drag-handle-symbolic", Gtk.IconSize.BUTTON
         );
         this.drag_handle = new Gtk.Grid();
         this.drag_handle.valign = Gtk.Align.CENTER;
-        this.drag_handle.add(drag_box);
+        this.drag_handle.add(image);
         this.drag_handle.show_all();
         this.drag_handle.hide();
         // Translators: Tooltip for dragging list items
@@ -67,67 +60,30 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
                 this.layout.orientation = Gtk.Orientation.HORIZONTAL;
             }
         });
+
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
     }
 
     public virtual void activated(PaneType pane) {
         // No-op by default
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-
-        if (event.state == Gdk.ModifierType.CONTROL_MASK) {
-            int index = get_index();
-            if (event.keyval == Gdk.Key.Up) {
-                index -= 1;
-                if (index >= 0) {
-                    move_to(index);
-                    ret = Gdk.EVENT_STOP;
-                }
-            } else if (event.keyval == Gdk.Key.Down) {
-                index += 1;
-                Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
-                if (parent != null &&
-                    index < parent.get_children().length() &&
-                    !(parent.get_row_at_index(index) is AddRow)) {
-                    move_to(index);
-                    ret = Gdk.EVENT_STOP;
-                }
-            }
-        }
-
-        if (ret != Gdk.EVENT_STOP) {
-            ret = base.key_press_event(event);
-        }
-
-        return ret;
-    }
-
     /** Adds a drag handle to the row and enables drag signals. */
     protected void enable_drag() {
-        Gtk.drag_source_set(
-            this.drag_handle,
-            Gdk.ModifierType.BUTTON1_MASK,
-            DRAG_ENTRIES,
-            Gdk.DragAction.MOVE
-        );
+        Gtk.DragSource dnd_src = new Gtk.DragSource();
+        Gtk.DropTarget dnd_dst = new Gtk.DropTarget();
 
-        Gtk.drag_dest_set(
-            this,
-            // No highlight, we'll take care of that ourselves so we
-            // can avoid highlighting the row that was picked up
-            Gtk.DestDefaults.MOTION | Gtk.DestDefaults.DROP,
-            DRAG_ENTRIES,
-            Gdk.DragAction.MOVE
-        );
+        this.drag_handle.add_controller(dnd_src);
+        this.add_controller(dnd_dst);
 
-        this.drag_handle.drag_begin.connect(on_drag_begin);
-        this.drag_handle.drag_end.connect(on_drag_end);
-        this.drag_handle.drag_data_get.connect(on_drag_data_get);
+        dnd_src.connect("prepare", on_drag_prepare);
+        dnd_src.connect("drag-begin", on_drag_begin);
+        dnd_src.connect("drag-end", on_drag_end);
 
-        this.drag_motion.connect(on_drag_motion);
-        this.drag_leave.connect(on_drag_leave);
-        this.drag_data_received.connect(on_drag_data_received);
+        dnd_dst.connect("motion", on_drag_motion);
+        dnd_dst.connect("leave", on_drag_leave);
+        dnd_dst.connect("drop", on_drag_drop);
 
         this.drag_handle.get_style_context().add_class("geary-drag-handle");
         this.drag_handle.show();
@@ -135,8 +91,40 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         get_style_context().add_class("geary-draggable");
     }
 
+    private bool on_key_pressed(Gtk.EventController controller, uint keyval,
+                                uint keycode, Gdk.ModifierType state) {
+        bool ret = false;
 
-    private void on_drag_begin(Gdk.DragContext context) {
+        if (state == Gdk.ModifierType.CONTROL_MASK) {
+            int index = get_index();
+            if (keyval == Gdk.Key.Up) {
+                index -= 1;
+                if (index >= 0) {
+                    move_to(index);
+                    ret = true;
+                }
+            } else if (keyval == Gdk.Key.Down) {
+                index += 1;
+                Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+                if (parent != null &&
+                    index < parent.get_children().length() &&
+                    !(parent.get_row_at_index(index) is AddRow)) {
+                    move_to(index);
+                    ret = true;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    private Gdk.ContentProvider on_drag_prepare(Gtk.DragSource src, int x, int y) {
+        return Gdk.ContentProvider.new_for_bytes(
+            get_index().to_string().data
+        );
+    }
+
+    private void on_drag_begin(Gtk.DragSource src, Gdk.Drag drag) {
         // Draw a nice drag icon
         Gtk.Allocation alloc = Gtk.Allocation();
         this.get_allocation(out alloc);
@@ -154,22 +142,19 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
         int x, y;
         this.drag_handle.translate_coordinates(this, 0, 0, out x, out y);
-        surface.set_device_offset(-x, -y);
-        Gtk.drag_set_icon_surface(context, surface);
+        src.set_icon(surface, -x, -y);
 
         // Set a visual hint that the row is being dragged
         style.add_class("geary-drag-source");
         this.drag_picked_up = true;
     }
 
-    private void on_drag_end(Gdk.DragContext context) {
+    private void on_drag_end(Gtk.DragSource src, Gdk.Drag drag) {
         get_style_context().remove_class("geary-drag-source");
         this.drag_picked_up = false;
     }
 
-    private bool on_drag_motion(Gdk.DragContext context,
-                                int x, int y,
-                                uint time_) {
+    private Gdk.DragAction on_drag_motion(Gtk.DropTarget dst, double x, double y) {
         if (!this.drag_entered) {
             this.drag_entered = true;
 
@@ -182,11 +167,10 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
             }
         }
 
-        return true;
+        return Gdk.DragAction.MOVE;
     }
 
-    private void on_drag_leave(Gdk.DragContext context,
-                               uint time_) {
+    private void on_drag_leave(Gtk.DropTarget dst) {
         if (!this.drag_picked_up) {
             Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
             if (parent != null) {
@@ -196,20 +180,8 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
         this.drag_entered = false;
     }
 
-    private void on_drag_data_get(Gdk.DragContext context,
-                                  Gtk.SelectionData selection_data,
-                                  uint info, uint time_) {
-        selection_data.set(
-            Gdk.Atom.intern_static_string(DND_ATOM), 8,
-            get_index().to_string().data
-        );
-    }
-
-    private void on_drag_data_received(Gdk.DragContext context,
-                                       int x, int y,
-                                       Gtk.SelectionData selection_data,
-                                       uint info, uint time_) {
-        int drag_index = int.parse((string) selection_data.get_data());
+    private void on_drag_drop(Gtk.DropTarget dst, GLib.Value value, double x, double y) {
+        int drag_index = int.parse((string) value.get_string());
         Gtk.ListBox? parent = this.get_parent() as Gtk.ListBox;
         if (parent != null) {
             EditorRow? drag_row = parent.get_row_at_index(drag_index) as EditorRow;

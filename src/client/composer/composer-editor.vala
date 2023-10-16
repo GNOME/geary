@@ -147,7 +147,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     [GtkChild] private unowned Gtk.Image font_color_icon;
     [GtkChild] private unowned Gtk.MenuButton more_options_button;
 
-    private Gtk.GestureMultiPress click_gesture;
+    private Gtk.GestureClick click_gesture;
 
 
     internal signal void insert_image(bool from_clipboard);

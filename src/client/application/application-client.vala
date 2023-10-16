@@ -928,8 +928,9 @@ public class Application.Client : Gtk.Application {
 
     private MainWindow new_main_window(bool select_first_inbox) {
         MainWindow window = new MainWindow(this);
+        Gtk.EventControllerFocus controller = new Gtk.EventControllerFocus(window);
+        controller.connect("enter", on_main_window_enter);
         this.controller.register_window(window);
-        window.focus_in_event.connect(on_main_window_focus_in);
         if (select_first_inbox) {
             if (!window.select_first_inbox(true)) {
                 // The first inbox wasn't selected, so the account is
@@ -1264,13 +1265,11 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    private bool on_main_window_focus_in(Gtk.Widget widget,
-                                         Gdk.EventFocus event) {
+    private void on_main_window_enter(Gtk.EventController controller) {
         MainWindow? main = widget as MainWindow;
         if (main != null) {
             this.last_active_main_window = main;
         }
-        return Gdk.EVENT_PROPAGATE;
     }
 
     private void on_window_removed(Gtk.Window window) {

@@ -93,25 +93,29 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         // records in
         enable_log_updates(true);
         this.log_pane.load(Geary.Logging.get_earliest_record(), null);
+
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-
+    private bool on_key_pressed(Gtk.EventController controller, uint keyval,
+                                uint keycode, Gdk.ModifierType state) {
         if (this.log_pane.search_mode_enabled &&
-            event.keyval == Gdk.Key.Escape) {
+            keyval == Gdk.Key.Escape) {
             // Manually deactivate search so the button stays in sync
             this.search_button.set_active(false);
-            ret = Gdk.EVENT_STOP;
+            return true;
         }
 
-        if (ret == Gdk.EVENT_PROPAGATE &&
-            this.log_pane.search_mode_enabled) {
+        if (this.log_pane.search_mode_enabled) {
             // Ensure <Space> and others are passed to the search
             // entry before getting used as an accelerator.
-            ret = this.log_pane.handle_key_press(event);
+            if (this.log_pane.forward_search_entry(controller)) {
+                return true;
+            }
         }
-
+        return false;
+        /* TODO
         if (ret == Gdk.EVENT_PROPAGATE) {
             ret = base.key_press_event(event);
         }
@@ -124,9 +128,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
             if (ret == Gdk.EVENT_STOP) {
                 this.search_button.set_active(true);
             }
-        }
-
-        return ret;
+        }*/
     }
 
     private void enable_log_updates(bool enabled) {

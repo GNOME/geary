@@ -231,8 +231,7 @@ public class Components.AttachmentPane : Gtk.Grid {
         this.attachments_view.save_attachments.connect(on_save_selected);
         this.attachments_view.child_activated.connect(on_child_activated);
         this.attachments_view.selected_children_changed.connect(on_selected_changed);
-        this.attachments_view.button_press_event.connect(on_attachment_button_press);
-		this.attachments_view.popup_menu.connect(on_attachment_popup_menu);
+        this.attachments_view.popup_menu.connect(on_attachment_popup_menu);
         this.attachments_view.activate_on_single_click = false;
         this.attachments_view.max_children_per_line = 3;
         this.attachments_view.column_spacing = 6;
@@ -241,6 +240,12 @@ public class Components.AttachmentPane : Gtk.Grid {
         this.attachments_view.hexpand = true;
         this.attachments_view.show();
         this.attachments_container.add(this.attachments_view);
+
+        Gtk.GestureClick gesture = new Gtk.GestureClick(
+            this.attachments_view
+        );
+        gesture.set_button(2);
+        gesture.connect("pressed", this.on_gesture_pressed);
 
         this.actions.add_action_entries(action_entries, this);
         insert_action_group(GROUP_NAME, this.actions);
@@ -429,6 +434,19 @@ public class Components.AttachmentPane : Gtk.Grid {
         }
     }
 
+    private bool on_gesture_pressed(Gtk.Gesture gesture, int n_press,
+                                    double x, double y) {
+        Gtk.FlowBoxChild? child = this.attachments_view.get_child_at_pos(
+            (int) x,
+            (int) y
+        );
+        if (child != null) {
+            show_popup((View) child.get_child(), event);
+            return true;
+        }
+        return false;
+    }
+
     private void on_open(GLib.SimpleAction action, GLib.Variant? param) {
         var target = get_attachment(param);
         if (target != null) {
@@ -497,21 +515,5 @@ public class Components.AttachmentPane : Gtk.Grid {
             }
         }
         return ret;
-	}
-
-	private bool on_attachment_button_press(Gtk.Widget widget,
-                                            Gdk.EventButton event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-		if (event.triggers_context_menu()) {
-            Gtk.FlowBoxChild? child = this.attachments_view.get_child_at_pos(
-                (int) event.x,
-                (int) event.y
-            );
-            if (child != null) {
-                show_popup((View) child.get_child(), event);
-                ret = Gdk.EVENT_STOP;
-            }
-		}
-        return ret;
-	}
+    }
 }

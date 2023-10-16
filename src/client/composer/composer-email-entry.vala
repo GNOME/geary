@@ -47,7 +47,8 @@ public class Composer.EmailEntry : Gtk.Entry {
 
     public EmailEntry(Composer.Widget composer) {
         changed.connect(on_changed);
-        key_press_event.connect(on_key_press);
+        Gtk.EventControllerKey controller = new Gtk.EventControllerKey(this);
+        controller.connect("key-pressed", this.on_key_pressed);
         this.composer = composer;
         show();
     }
@@ -92,8 +93,8 @@ public class Composer.EmailEntry : Gtk.Entry {
         }
     }
 
-    private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
-        bool propagate = Gdk.EVENT_PROPAGATE;
+    private bool on_key_pressed(Gtk.EventController controller, uint keyval,
+                                uint keycode, Gdk.ModifierType state) {
         if (event.keyval == Gdk.Key.Tab) {
             // If there is a completion entry selected, then use that
             ContactEntryCompletion? completion = (
@@ -102,24 +103,9 @@ public class Composer.EmailEntry : Gtk.Entry {
             if (completion != null) {
                 completion.trigger_selection();
                 composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
-                propagate = Gdk.EVENT_STOP;
+                return true;
             }
         }
-
-        if (propagate == Gdk.EVENT_PROPAGATE &&
-            event.keyval != Gdk.Key.Escape) {
-            // Keyboard shortcuts for undo/redo won't work when the
-            // completion UI is visible unless we explicitly check for
-            // them there.
-            //
-            // However, don't forward it on if the button pressed is
-            // Escape, so that the completion is hidden if present
-            // before the composer is closed.
-            Gtk.Window? window = get_toplevel() as Gtk.Window;
-            if (window != null) {
-                propagate = window.activate_key(event);
-            }
-        }
-        return propagate;
+        return false;
     }
 }

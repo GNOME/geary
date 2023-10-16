@@ -48,14 +48,3 @@ public interface Sidebar.EmphasizableEntry : Sidebar.Entry {
 public interface Sidebar.DestroyableEntry : Sidebar.Entry {
     public abstract void destroy_source();
 }
-
-public interface Sidebar.InternalDropTargetEntry : Sidebar.Entry {
-    // Returns true if drop was successful
-    public abstract bool internal_drop_received(Sidebar.Tree parent,
-                                                Gdk.DragContext context,
-                                                Gtk.SelectionData data);
-}
-
-public interface Sidebar.InternalDragSourceEntry : Sidebar.Entry {
-    public abstract void prepare_selection_data(Gtk.SelectionData data);
-}

@@ -80,31 +80,6 @@ public class FolderList.FolderEntry :
         entry_changed();
     }
 
-    public bool internal_drop_received(Sidebar.Tree parent,
-                                       Gdk.DragContext context,
-                                       Gtk.SelectionData data) {
-        var handled = false;
-        var folders = parent as FolderList.Tree;
-        if (folders != null) {
-            switch (context.get_selected_action()) {
-            case MOVE:
-                folders.move_conversation(folder);
-                handled = true;
-                break;
-
-            case COPY:
-                folders.copy_conversation(folder);
-                handled = true;
-                break;
-
-            default:
-                // noop
-                break;
-            }
-        }
-        return handled;
-    }
-
     public override int get_count() {
         switch (this.context.displayed_count) {
         case TOTAL:
