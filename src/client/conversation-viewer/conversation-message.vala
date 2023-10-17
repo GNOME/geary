@@ -338,7 +338,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
     private GLib.DateTime? local_date = null;
 
-    [GtkChild] private unowned Hdy.Avatar avatar;
+    [GtkChild] private unowned Adw.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Revealer compact_revealer;
     [GtkChild] private unowned Gtk.Label compact_from;

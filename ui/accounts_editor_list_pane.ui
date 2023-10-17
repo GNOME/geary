@@ -40,7 +40,7 @@
           <object class="GtkViewport">
             <property name="visible">True</property>
             <child>
-              <object class="HdyClamp">
+              <object class="AdwClamp">
                 <property name="visible">True</property>
                 <property name="margin">24</property>
                 <child>

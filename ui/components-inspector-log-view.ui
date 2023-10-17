@@ -6,7 +6,7 @@
   <template class="ComponentsInspectorLogView" parent="GtkGrid">
     <property name="visible">True</property>
     <child>
-      <object class="HdySearchBar" id="search_bar">
+      <object class="AdwSearchBar" id="search_bar">
         <property name="name">search_bar</property>
         <property name="visible">True</property>
         <property name="hexpand">True</property>

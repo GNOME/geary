@@ -45,7 +45,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Grid contact_pane;
 
-    [GtkChild] private unowned Hdy.Avatar avatar;
+    [GtkChild] private unowned Adw.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Label contact_name;
 

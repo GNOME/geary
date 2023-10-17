@@ -14,7 +14,7 @@
  * @see Application.MainWindow
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-headerbar-conversation-list.ui")]
-public class Components.ConversationListHeaderBar : Hdy.HeaderBar {
+public class Components.ConversationListHeaderBar : Adw.HeaderBar {
 
     public string account { get; set; }
     public string folder { get; set; }

@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="ComponentsApplicationHeaderBar" parent="HdyHeaderBar">
+  <template class="ComponentsApplicationHeaderBar" parent="AdwHeaderBar">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Mail</property>
     <child>

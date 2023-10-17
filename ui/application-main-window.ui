@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <template class="ApplicationMainWindow" parent="HdyApplicationWindow">
+  <template class="ApplicationMainWindow" parent="AdwApplicationWindow">
     <property name="events">GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK</property>
     <property name="show_menubar">False</property>
     <signal name="delete-event" handler="on_delete_event" swapped="no"/>
@@ -18,14 +18,14 @@
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="HdyLeaflet" id="outer_leaflet">
+              <object class="AdwLeaflet" id="outer_leaflet">
                 <property name="visible">True</property>
                 <property name="can_swipe_back">True</property>
                 <property name="transition_type">over</property>
                 <signal name="notify::folded" handler="on_outer_leaflet_changed" swapped="no"/>
                 <signal name="notify::visible-child" handler="on_outer_leaflet_changed" swapped="no"/>
                 <child>
-                  <object class="HdyLeaflet" id="inner_leaflet">
+                  <object class="AdwLeaflet" id="inner_leaflet">
                     <property name="visible">True</property>
                     <property name="hexpand-set">True</property>
                     <property name="can_swipe_back">True</property>

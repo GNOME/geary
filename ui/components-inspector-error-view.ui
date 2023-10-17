@@ -6,7 +6,7 @@
   <template class="ComponentsInspectorErrorView" parent="GtkGrid">
     <property name="visible">True</property>
     <child>
-      <object class="HdyClamp">
+      <object class="AdwClamp">
         <property name="visible">True</property>
         <property name="margin_left">16</property>
         <property name="margin_right">16</property>

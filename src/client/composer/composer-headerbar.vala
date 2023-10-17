@@ -5,7 +5,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
-public class Composer.Headerbar : Hdy.HeaderBar {
+public class Composer.Headerbar : Adw.HeaderBar {
 
 
     public bool show_save_and_close {

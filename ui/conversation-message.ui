@@ -12,7 +12,7 @@
         <property name="hexpand">True</property>
         <property name="column_spacing">6</property>
         <child>
-          <object class="HdyAvatar" id="avatar">
+          <object class="AdwAvatar" id="avatar">
             <property name="visible">True</property>
             <property name="valign">start</property>
             <property name="show-initials">True</property>

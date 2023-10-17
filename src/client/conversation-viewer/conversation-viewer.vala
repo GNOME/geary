@@ -75,8 +75,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base_ref();
         this.config = config;
 
-        Hdy.StatusPage no_conversations =
-            new Hdy.StatusPage();
+        Adw.StatusPage no_conversations =
+            new Adw.StatusPage();
         no_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been selected.
@@ -91,8 +91,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         no_conversations.show ();
         this.no_conversations_page.add(no_conversations);
 
-        Hdy.StatusPage multi_conversations =
-            new Hdy.StatusPage();
+        Adw.StatusPage multi_conversations =
+            new Adw.StatusPage();
         multi_conversations.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when multiple
         // conversations have been selected.
@@ -107,8 +107,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         multi_conversations.show ();
         this.multiple_conversations_page.add(multi_conversations);
 
-        Hdy.StatusPage empty_folder =
-            new Hdy.StatusPage();
+        Adw.StatusPage empty_folder =
+            new Adw.StatusPage();
         empty_folder.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have exist in a folder.
@@ -123,8 +123,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         empty_folder.show ();
         this.empty_folder_page.add(empty_folder);
 
-        Hdy.StatusPage empty_search =
-            new Hdy.StatusPage();
+        Adw.StatusPage empty_search =
+            new Adw.StatusPage();
         empty_search.icon_name = "folder-symbolic";
         // Translators: Title label for placeholder when no
         // conversations have been found in a search.

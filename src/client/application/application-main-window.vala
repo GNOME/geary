@@ -8,7 +8,7 @@
 
 [GtkTemplate (ui = "/org/gnome/Geary/application-main-window.ui")]
 public class Application.MainWindow :
-    Hdy.ApplicationWindow, Geary.BaseInterface {
+    Adw.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
@@ -400,10 +400,10 @@ public class Application.MainWindow :
     [GtkChild] public unowned Components.ConversationHeaderBar conversation_headerbar;
 
     // Folds the inner leaftlet and conversation viewer
-    [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
+    [GtkChild] private unowned Adw.Leaflet outer_leaflet;
 
     // Folds the folder list and the conversation list
-    [GtkChild] private unowned Hdy.Leaflet inner_leaflet;
+    [GtkChild] private unowned Adw.Leaflet inner_leaflet;
 
     [GtkChild] private unowned Gtk.Box folder_box;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
@@ -943,10 +943,10 @@ public class Application.MainWindow :
     /** Shows the appopriate window menu, if any. */
     public void show_window_menu() {
         if (this.outer_leaflet.folded) {
-            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
+            this.outer_leaflet.navigate(Adw.NavigationDirection.BACK);
         }
         if (this.inner_leaflet.folded) {
-            this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
+            this.inner_leaflet.navigate(Adw.NavigationDirection.BACK);
         }
         this.application_headerbar.show_app_menu();
     }
@@ -1955,12 +1955,12 @@ public class Application.MainWindow :
             if (this.inner_leaflet.folded &&
                 this.inner_leaflet.visible_child_name == FOLDER_LIST ||
                 focus == this.folder_list) {
-                this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                this.inner_leaflet.navigate(Adw.NavigationDirection.FORWARD);
                 focus = this.conversation_list_view;
             } else {
                 if (this.conversation_list_view.selected.size == 1 &&
                     this.selected_folder.properties.email_total > 0) {
-                    this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
+                    this.outer_leaflet.navigate(Adw.NavigationDirection.FORWARD);
                     focus = this.conversation_viewer.visible_child;
                 }
             }
@@ -1998,7 +1998,7 @@ public class Application.MainWindow :
         if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
             if (this.inner_leaflet.folded) {
                 if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
-                    this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
+                    this.inner_leaflet.navigate(Adw.NavigationDirection.BACK);
                     focus = this.folder_list;
                 }
             } else {
@@ -2009,7 +2009,7 @@ public class Application.MainWindow :
                     focus = this.conversation_list_view;
             }
         } else {
-            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
+            this.outer_leaflet.navigate(Adw.NavigationDirection.BACK);
             focus = this.conversation_list_view;
         }
         focus_widget(focus);

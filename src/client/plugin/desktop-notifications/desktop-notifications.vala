@@ -141,7 +141,7 @@ public class Plugin.DesktopNotifications :
           }
         }
 
-        var avatar = new Hdy.Avatar(32, title, true);
+        var avatar = new Adw.Avatar(32, title, true);
         avatar.loadable_icon = icon as GLib.LoadableIcon;
         icon = yield avatar.draw_to_pixbuf_async(32, window_scale, null);
 

@@ -6,7 +6,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Components.PreferencesWindow : Hdy.PreferencesWindow {
+public class Components.PreferencesWindow : Adw.PreferencesWindow {
 
 
     private const string ACTION_CLOSE = "preferences-close";
@@ -16,7 +16,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         { ACTION_CLOSE, on_close },
     };
 
-    private class PluginRow : Hdy.ActionRow {
+    private class PluginRow : Adw.ActionRow {
 
         private Peas.PluginInfo plugin;
         private Application.PluginManager plugins;
@@ -120,7 +120,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var autoselect = new Gtk.Switch();
         autoselect.valign = CENTER;
 
-        var autoselect_row = new Hdy.ActionRow();
+        var autoselect_row = new Adw.ActionRow();
         /// Translators: Preferences label
         autoselect_row.title = _("_Automatically select next message");
         autoselect_row.use_underline = true;
@@ -130,7 +130,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var display_preview = new Gtk.Switch();
         display_preview.valign = CENTER;
 
-        var display_preview_row = new Hdy.ActionRow();
+        var display_preview_row = new Adw.ActionRow();
         /// Translators: Preferences label
         display_preview_row.title = _("_Display conversation preview");
         display_preview_row.use_underline = true;
@@ -140,7 +140,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var single_key_shortucts = new Gtk.Switch();
         single_key_shortucts.valign = CENTER;
 
-        var single_key_shortucts_row = new Hdy.ActionRow();
+        var single_key_shortucts_row = new Adw.ActionRow();
         /// Translators: Preferences label
         single_key_shortucts_row.title = _("Use _single key email shortcuts");
         single_key_shortucts_row.tooltip_text = _(
@@ -153,7 +153,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var startup_notifications = new Gtk.Switch();
         startup_notifications.valign = CENTER;
 
-        var startup_notifications_row = new Hdy.ActionRow();
+        var startup_notifications_row = new Adw.ActionRow();
         /// Translators: Preferences label
         startup_notifications_row.title = _("_Watch for new mail when closed");
         startup_notifications_row.use_underline = true;
@@ -167,7 +167,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         var trust_images = new Gtk.Switch();
         trust_images.valign = CENTER;
 
-        var trust_images_row = new Hdy.ActionRow();
+        var trust_images_row = new Adw.ActionRow();
         /// Translators: Preferences label
         trust_images_row.title = _("_Always load images");
         trust_images_row.subtitle = _("Showing remote images allows the sender to track you");
@@ -175,7 +175,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         trust_images_row.activatable_widget = trust_images;
         trust_images_row.add(trust_images);
 
-        var group = new Hdy.PreferencesGroup();
+        var group = new Adw.PreferencesGroup();
         /// Translators: Preferences group title
         //group.title = _("General");
         /// Translators: Preferences group description
@@ -186,7 +186,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(startup_notifications_row);
         group.add(trust_images_row);
 
-        var page = new Hdy.PreferencesPage();
+        var page = new Adw.PreferencesPage();
         /// Translators: Preferences page title
         page.title = _("Preferences");
         page.icon_name = "preferences-other-symbolic";
@@ -233,7 +233,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
     }
 
     private void add_plugin_pane() {
-        var group = new Hdy.PreferencesGroup();
+        var group = new Adw.PreferencesGroup();
         /// Translators: Preferences group title
         //group.title = _("Plugins");
         /// Translators: Preferences group description
@@ -247,7 +247,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
             }
         }
 
-        var page = new Hdy.PreferencesPage();
+        var page = new Adw.PreferencesPage();
         /// Translators: Preferences page title
         page.title = _("Plugins");
         page.icon_name = "application-x-addon-symbolic";

@@ -65,7 +65,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         set { this.search_bar.search_mode_enabled = value; }
     }
 
-    [GtkChild] private unowned Hdy.SearchBar search_bar;
+    [GtkChild] private unowned Adw.SearchBar search_bar;
 
     [GtkChild] private unowned Gtk.SearchEntry search_entry;
 

@@ -60,7 +60,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="HdyAvatar" id="avatar">
+                  <object class="AdwAvatar" id="avatar">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="show-initials">True</property>

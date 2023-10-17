@@ -6,7 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class SearchBar : Hdy.SearchBar {
+public class SearchBar : Adw.SearchBar {
 
     /// Translators: Search entry placeholder text
     private const string DEFAULT_SEARCH_TEXT = _("Search");
@@ -39,7 +39,7 @@ public class SearchBar : Hdy.SearchBar {
         this.entry.placeholder_text = DEFAULT_SEARCH_TEXT;
         this.entry.has_focus = true;
 
-        var column = new Hdy.Clamp();
+        var column = new Adw.Clamp();
         column.maximum_size = 400;
         column.add(this.entry);
 

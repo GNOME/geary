@@ -14,7 +14,7 @@
  * @see Application.MainWindow
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-headerbar-application.ui")]
-public class Components.ApplicationHeaderBar : Hdy.HeaderBar {
+public class Components.ApplicationHeaderBar : Adw.HeaderBar {
 
     [GtkChild] private unowned Gtk.MenuButton app_menu_button;
 

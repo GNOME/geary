@@ -24,14 +24,14 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
         }
     }
 
-    [GtkChild] private unowned Hdy.Squeezer actions_squeezer;
+    [GtkChild] private unowned Adw.Squeezer actions_squeezer;
     [GtkChild] public unowned ConversationActions full_actions;
     [GtkChild] public unowned ConversationActions compact_actions;
 
     [GtkChild] private unowned Gtk.ToggleButton find_button;
     [GtkChild] public unowned Gtk.Button back_button;
 
-    [GtkChild] private unowned Hdy.HeaderBar conversation_header;
+    [GtkChild] private unowned Adw.HeaderBar conversation_header;
 
     public bool show_close_button {
         get {
@@ -54,14 +54,14 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
         );
     }
 
-    public void set_conversation_header(Hdy.HeaderBar header) {
+    public void set_conversation_header(Adw.HeaderBar header) {
         remove(this.conversation_header);
         header.hexpand = true;
         header.show_close_button = this.conversation_header.show_close_button;
         add(header);
     }
 
-    public void remove_conversation_header(Hdy.HeaderBar header) {
+    public void remove_conversation_header(Adw.HeaderBar header) {
         remove(header);
         this.conversation_header.show_close_button = header.show_close_button;
         add(this.conversation_header);

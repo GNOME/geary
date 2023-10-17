@@ -371,7 +371,7 @@ public class Application.Client : Gtk.Application {
 
         // Calls Gtk.init(), amongst other things
         base.startup();
-        Hdy.init();
+        Adw.init();
 
         this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
