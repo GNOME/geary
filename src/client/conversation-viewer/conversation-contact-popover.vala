@@ -55,12 +55,6 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Button unstarred_button;
 
-    [GtkChild] private unowned Gtk.ModelButton open_button;
-
-    [GtkChild] private unowned Gtk.ModelButton save_button;
-
-    [GtkChild] private unowned Gtk.ModelButton load_remote_button;
-
     [GtkChild] private unowned Gtk.Grid deceptive_pane;
 
     [GtkChild] private unowned Gtk.Label forged_email_label;
@@ -214,7 +208,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_copy_email() {
-        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        Gdk.Clipboard clipboard = this.get_clipboard();
         clipboard.set_text(this.mailbox.to_full_display(), -1);
         clipboard.store();
     }
@@ -253,13 +247,4 @@ public class Conversation.ContactPopover : Gtk.Popover {
     private void on_unstar() {
         this.set_favourite.begin(false);
     }
-
-    [GtkCallback]
-    private void after_closed() {
-        GLib.Idle.add(() => {
-                this.destroy();
-                return GLib.Source.REMOVE;
-            } );
-    }
-
 }

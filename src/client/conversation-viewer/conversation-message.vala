@@ -65,7 +65,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
         private string search_value;
 
-        private Gtk.Bin container;
+        private Gtk.Grid address_parts = new Gtk.Grid();
 
 
         public ContactFlowBoxChild(Application.Contact contact,
@@ -76,18 +76,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             this.address_type = address_type;
             this.search_value = source.to_searchable_string().casefold();
 
-            // Update prelight state when mouse-overed.
-            Gtk.EventBox events = new Gtk.EventBox();
-            events.add_events(
-                Gdk.EventMask.ENTER_NOTIFY_MASK |
-                Gdk.EventMask.LEAVE_NOTIFY_MASK
-            );
-            events.set_visible_window(false);
-            events.enter_notify_event.connect(on_prelight_in_event);
-            events.leave_notify_event.connect(on_prelight_out_event);
-
-            add(events);
-            this.container = events;
             set_halign(Gtk.Align.START);
 
             this.contact.changed.connect(on_contact_changed);
@@ -120,7 +108,11 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             // both cases, but we can't yet include CSS classes in
             // Pango markup. See Bug 766763.
 
-            Gtk.Grid address_parts = new Gtk.Grid();
+            Gtk.Widget widget = this.address_parts.get_first_child();
+            while (child != null) {
+                this.address_parts.remove(child);
+                child = this.address_parts.get_first_child();
+            }
 
             bool is_spoofed = this.source.is_spoofed();
             if (is_spoofed) {
@@ -177,13 +169,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                 secondary.set_text(display_address);
                 address_parts.add(secondary);
             }
-
-            Gtk.Widget? existing_ui = this.container.get_child();
-            if (existing_ui != null) {
-                this.container.remove(existing_ui);
-            }
-
-            this.container.add(address_parts);
             show_all();
         }
 
@@ -369,9 +354,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     private Gtk.Widget? body_placeholder = null;
 
     private string empty_from_label;
-
-    // The web_view's context menu
-    private Gtk.Menu? context_menu = null;
 
     // Menu models for creating the context menu
     private MenuModel context_menu_link;
@@ -1286,10 +1268,6 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
                                  WebKit.ContextMenu context_menu,
                                  Gdk.Event event,
                                  WebKit.HitTestResult hit_test) {
-        if (this.context_menu != null) {
-            this.context_menu.detach();
-        }
-
         // Build a new context menu every time the user clicks because
         // at the moment under GTK+3.20 it's far easier to selectively
         // build a new menu model from pieces as we do here, then to
@@ -1332,9 +1310,9 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
             model.append_section(null, context_menu_inspector);
         }
 
-        this.context_menu = new Gtk.Menu.from_model(model);
-        this.context_menu.attach_to_widget(this, null);
-        this.context_menu.popup_at_pointer(event);
+        var context_menu = new Gtk.PopoverMenu.from_model(model);
+        context_menu.set_relative_to(this);
+        context_menu.popup();
 
         return true;
     }
@@ -1456,7 +1434,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_copy_link(Variant? param) {
-        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        Gdk.Clipboard clipboard = this.get_clipboard();
         clipboard.set_text(param.get_string(), -1);
         clipboard.store();
     }
@@ -1466,7 +1444,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         if (value.has_prefix(MAILTO_URI_PREFIX)) {
             value = value.substring(MAILTO_URI_PREFIX.length, -1);
         }
-        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        // FIXME: check if it works
+        Gdk.Clipboard clipboard = this.get_clipboard();
         clipboard.set_text(value, -1);
         clipboard.store();
     }

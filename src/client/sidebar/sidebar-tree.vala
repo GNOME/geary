@@ -66,7 +66,6 @@ public class Sidebar.Tree : Gtk.TreeView {
     private int editing_disabled = 0;
     private bool mask_entry_selected_signal = false;
     private weak EntryWrapper? selected_wrapper = null;
-    private Gtk.Menu? default_context_menu = null;
     private bool is_internal_drag_in_progress = false;
     private Sidebar.Entry? internal_drag_source_entry = null;
     private Gtk.TreeRowReference? old_path_ref = null;
@@ -178,10 +177,6 @@ public class Sidebar.Tree : Gtk.TreeView {
         }
 
         return get_wrapper_at_iter(iter);
-    }
-
-    public void set_default_context_menu(Gtk.Menu context_menu) {
-        default_context_menu = context_menu;
     }
 
     // Note that this method will result in the "entry-selected" signal to fire if mask_signal

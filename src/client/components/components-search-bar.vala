@@ -6,7 +6,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class SearchBar : Adw.SearchBar {
+public class SearchBar : Gtk.SearchBar {
 
     /// Translators: Search entry placeholder text
     private const string DEFAULT_SEARCH_TEXT = _("Search");

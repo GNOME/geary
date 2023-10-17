@@ -1,116 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
+  <menu id="contact_menu_model">
+    <section>
+      <item>
+        <attribute name="custom">header</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">New Conversation…</attribute>
+        <attribute name="action">con.new-conversation</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Copy Email Address</attribute>
+        <attribute name="action">con.copy-email</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Save in Contacts…</attribute>
+        <attribute name="action">con.save</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Show Conversations</attribute>
+        <attribute name="action">con.show-conversations</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Open in Contacts</attribute>
+        <attribute name="action">con.open</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Always Load Remote Images</attribute>
+        <attribute name="action">con.load-remote</attribute>
+      </item>
+    </section>
+  </menu>
   <requires lib="gtk+" version="3.20"/>
-  <template class="ConversationContactPopover" parent="GtkPopover">
-    <signal name="closed" handler="after_closed" after="yes" swapped="no"/>
-    <child>
-      <object class="GtkGrid">
+  <template class="ConversationContactPopover" parent="GtkPopoverMenu">
+    <property name="menu-model">contact_menu_model</property>
+    <child type="header">
+      <object class="GtkGrid" id="contact_pane">
         <property name="visible">True</property>
+        <property name="margin_left">10</property>
+        <property name="margin_right">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkGrid" id="contact_pane">
+          <object class="GtkGrid">
             <property name="visible">True</property>
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
-            <property name="margin_top">10</property>
-            <property name="margin_bottom">10</property>
-            <property name="orientation">vertical</property>
+            <property name="margin_bottom">6</property>
+            <property name="column_spacing">12</property>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkButton" id="unstarred_button">
+                <property name="receives_default">True</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="action_name">con.star</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon_name">non-starred-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="starred_button">
+                <property name="receives_default">True</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="action_name">con.unstar</property>
+                <property name="relief">none</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon_name">starred-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="AdwAvatar" id="avatar">
                 <property name="visible">True</property>
-                <property name="margin_bottom">6</property>
-                <property name="column_spacing">12</property>
-                <child>
-                  <object class="GtkButton" id="unstarred_button">
-                    <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="valign">center</property>
-                    <property name="action_name">con.star</property>
-                    <property name="relief">none</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="icon_name">non-starred-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="starred_button">
-                    <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <property name="valign">center</property>
-                    <property name="action_name">con.unstar</property>
-                    <property name="relief">none</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="icon_name">starred-symbolic</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="AdwAvatar" id="avatar">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="show-initials">True</property>
-                    <property name="size">48</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkGrid">
-                    <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkLabel" id="contact_name">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="valign">end</property>
-                        <property name="vexpand">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="contact_address">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="valign">start</property>
-                        <property name="margin_top">2</property>
-                        <property name="hexpand">False</property>
-                        <property name="vexpand">True</property>
-                        <property name="ellipsize">middle</property>
-                        <style>
-                          <class name="dim-label"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
+                <property name="can_focus">False</property>
+                <property name="show-initials">True</property>
+                <property name="size">48</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -118,213 +102,49 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSeparator">
+              <object class="GtkGrid">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="contact_name">
+                    <property name="visible">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">end</property>
+                    <property name="vexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="contact_address">
+                    <property name="visible">True</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="margin_top">2</property>
+                    <property name="hexpand">False</property>
+                    <property name="vexpand">True</property>
+                    <property name="ellipsize">middle</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.new-conversation</property>
-                <property name="text" translatable="yes">New Conversation…</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.copy-email</property>
-                <property name="text" translatable="yes">Copy Email Address</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="save_button">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.save</property>
-                <property name="text" translatable="yes">Save in Contacts…</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.show-conversations</property>
-                <property name="text" translatable="yes">Show Conversations</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="open_button">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.open</property>
-                <property name="text" translatable="yes">Open in Contacts</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkModelButton" id="load_remote_button">
-                <property name="visible">True</property>
-                <property name="receives_default">True</property>
-                <property name="action_name">con.load-remote</property>
-                <property name="text" translatable="yes">Always Load Remote Images</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">8</property>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkGrid" id="deceptive_pane">
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
-            <property name="margin_top">10</property>
-            <property name="margin_bottom">10</property>
-            <property name="orientation">vertical</property>
-            <property name="row_spacing">6</property>
-            <child>
-              <object class="GtkGrid">
-                <property name="visible">True</property>
-                <property name="column_spacing">12</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="pixel_size">24</property>
-                    <property name="icon_name">dialog-warning-symbolic</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes" comments="Title label on contact popover">Deceptive email address</property>
-                    <style>
-                      <class name="title"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparator">
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes" comments="Contact popover label">This email address is:</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="actual_email_label">
-                <property name="visible">True</property>
-                <style>
-                  <class name="geary-deceptive"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes" comments="Contact popover label">But was forged as:</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="forged_email_label">
-                <property name="visible">True</property>
-                <style>
-                  <class name="geary-deceptive"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes" comments="Contact popover label">The sender may not be trustworthy</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
           </packing>
         </child>
       </object>

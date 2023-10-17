@@ -336,23 +336,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             update_previous_sibling_css_class();
         }
 
-        // This is mostly taken form libhandy AdwExpanderRow
-        private Gtk.Widget? get_previous_sibling() {
-            if (this.parent is Gtk.Container) {
-                var siblings = this.parent.get_children();
-                unowned List<weak Gtk.Widget> l;
-                for (l = siblings; l != null && l.next != null && l.next.data != this; l = l.next);
-
-                if (l != null && l.next != null && l.next.data == this) {
-                    return l.data;
-                }
-            }
-
-            return null;
-        }
-
         private void update_previous_sibling_css_class() {
-            var previous_sibling = get_previous_sibling();
+            var previous_sibling = this.parent.get_prev_sibling(this);
             if (previous_sibling != null) {
                 if (this.is_expanded)
                     previous_sibling.get_style_context().add_class("geary-expanded-previous-sibling");

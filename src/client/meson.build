@@ -69,7 +69,6 @@ client_vala_sources = files(
   'components/count-badge.vala',
   'components/folder-popover.vala',
   'components/folder-popover-row.vala',
-  'components/icon-factory.vala',
   'components/monitored-progress-bar.vala',
   'components/monitored-spinner.vala',
   'components/status-bar.vala',

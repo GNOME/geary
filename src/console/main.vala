@@ -31,7 +31,6 @@ class ImapConsole : Gtk.Window {
 
     public ImapConsole() {
         title = "IMAP Console";
-        destroy.connect(() => { Gtk.main_quit(); });
         set_default_size(800, 600);
 
         Gtk.Box layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 4);
@@ -40,15 +39,15 @@ class ImapConsole : Gtk.Window {
         Gtk.ScrolledWindow scrolled_console = new Gtk.ScrolledWindow(null, null);
         scrolled_console.add(console);
         scrolled_console.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        layout.pack_start(scrolled_console, true, true, 0);
+        layout.append(scrolled_console);
 
         cmdline.activate.connect(on_activate);
-        layout.pack_start(cmdline, false, false, 0);
+        layout.append(cmdline);
 
         statusbar_ctx = statusbar.get_context_id("status");
-        layout.pack_end(statusbar, false, false, 0);
+        layout.append(statusbar);
 
-        add(layout);
+        set_child(layout);
 
         cmdline.grab_focus();
     }
@@ -105,8 +104,6 @@ class ImapConsole : Gtk.Window {
         "search",
         "uid-search",
         "help",
-        "exit",
-        "quit",
         "gmail",
         "yahoo",
         "keepalive",
@@ -222,11 +219,6 @@ class ImapConsole : Gtk.Window {
                     case "help":
                         foreach (string cmdname in cmdnames)
                             print_console_line(cmdname);
-                    break;
-
-                    case "exit":
-                    case "quit":
-                        quit(cmd, args);
                     break;
 
                     case "gmail":
@@ -607,10 +599,6 @@ class ImapConsole : Gtk.Window {
         );
     }
 
-    private void quit(string cmd, string[] args) throws Error {
-        Gtk.main_quit();
-    }
-
     private bool keepalive_on = false;
 
     private void keepalive(string cmd, string[] args) throws Error {
@@ -695,13 +683,14 @@ class ImapConsole : Gtk.Window {
 }
 
 void main(string[] args) {
-    Gtk.init(ref args);
+    MainLoop loop = new MainLoop();
+
+    Gtk.init();
 
     Geary.Logging.init();
     Geary.Logging.log_to(stdout);
 
     ImapConsole console = new ImapConsole();
-    console.show_all();
 
-    Gtk.main();
+    loop.run();
 }
