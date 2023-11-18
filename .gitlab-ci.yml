@@ -27,7 +27,7 @@ variables:
     glib2-devel gmime30-devel gnome-online-accounts-devel gspell-devel
     gsound-devel gtk3-devel iso-codes-devel json-glib-devel itstool
     libappstream-glib-devel libgee-devel libhandy1-devel libicu-devel
-    libpeas-devel libsecret-devel libstemmer-devel libunwind-devel
+    libpeas1-devel libsecret-devel libstemmer-devel libunwind-devel
     libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
     git
   FEDORA_TEST_DEPS: glibc-langpack-en gnutls-utils tar Xvfb xz
