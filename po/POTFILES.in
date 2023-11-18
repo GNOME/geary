@@ -55,7 +55,6 @@ src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala
 src/client/components/monitored-progress-bar.vala
 src/client/components/monitored-spinner.vala
-src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-box.vala
 src/client/composer/composer-container.vala
