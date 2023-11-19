@@ -1872,6 +1872,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         Gtk.Label label = new Gtk.Label(label_text);
         box.pack_start(label);
         label.halign = Gtk.Align.START;
+        label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+        label.has_tooltip = true;
+        label.query_tooltip.connect(Util.Gtk.query_tooltip_label);
 
         Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
         box.pack_start(remove_button, false, false);
