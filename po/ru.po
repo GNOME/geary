@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary main\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-10-14 12:05+0000\n"
-"PO-Revision-Date: 2023-10-15 11:41+0300\n"
+"POT-Creation-Date: 2023-11-18 16:02+0000\n"
+"PO-Revision-Date: 2023-11-23 15:22+0300\n"
 "Last-Translator: Artur So <arturios2005@mail.ru>\n"
 "Language-Team: Russian <Alexmelman88@gmail.com>\n"
 "Language: ru\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -41,7 +41,7 @@ msgstr "Отправить файлы с помощью Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -725,7 +725,7 @@ msgstr "TLS"
 #. account
 #. Translators: An info bar button label
 #: src/client/accounts/accounts-editor-row.vala:560
-#: src/client/application/application-main-window.vala:650
+#: src/client/application/application-main-window.vala:642
 msgid "Login"
 msgstr "Логин"
 
@@ -1095,12 +1095,12 @@ msgstr[0] "Беседа не помечена как %s"
 msgstr[1] "Беседы не помечены как %s"
 msgstr[2] "Бесед не помечено как %s"
 
-#: src/client/application/application-controller.vala:1337
+#: src/client/application/application-controller.vala:1309
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Не удалось открыть базу данных для %s"
 
-#: src/client/application/application-controller.vala:1338
+#: src/client/application/application-controller.vala:1310
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1125,20 +1125,20 @@ msgstr ""
 "Пересобрание базы данных уничтожит все локальные письма и их вложения. "
 "<b>Операция не затронет почту, хранящуюся на сервере.</b>"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "_Rebuild"
 msgstr "_Пересобрать"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "E_xit"
 msgstr "В_ыйти"
 
-#: src/client/application/application-controller.vala:1350
+#: src/client/application/application-controller.vala:1322
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Не удалось пересобрать базу данных для «%s»"
 
-#: src/client/application/application-controller.vala:1351
+#: src/client/application/application-controller.vala:1323
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1151,34 +1151,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1518
+#: src/client/application/application-controller.vala:1490
 #, c-format
 msgid "Email sent to %s"
 msgstr "Письмо отправлено до %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2514
+#: src/client/application/application-controller.vala:2486
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Письмо до %s поставлено в очередь на отправку"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2578
+#: src/client/application/application-controller.vala:2550
 #, c-format
 msgid "Email to %s saved"
 msgstr "Письмо до %s сохранено"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2593
-#: src/client/application/application-controller.vala:2651
+#: src/client/application/application-controller.vala:2565
+#: src/client/application/application-controller.vala:2623
 msgid "Composer could not be restored"
 msgstr "Невозможно восстановить содержимое редактора"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
+#: src/client/application/application-controller.vala:2608
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Письмо до %s отклонено"
@@ -1195,104 +1195,104 @@ msgid "Account update"
 msgstr "Обновление учетной записи"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:628
 msgid "Working offline"
 msgstr "Работа в автономном режиме"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Вы не сможете отправлять или получать эл. почту до повторного подключения."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:637
 msgid "Login problem"
 msgstr "Проблема с входом в систему"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
 msgstr "Учетная запись сообщила о неправильном логине или пароле."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
 msgstr "Повторите попытку входа, вам будет предложено ввести пароль"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:653
 msgid "Security problem"
 msgstr "Проблема безопасности"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
 msgstr "Учетная запись сообщила о ненадежном сервере."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:658
 msgid "Check"
 msgstr "Проверить"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:662
 msgid "Check the security details for the connection"
 msgstr "Проверить сведения о безопасности для подключения"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1101
+#: src/client/application/application-main-window.vala:1093
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Метки"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1419
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Очистить все письма из папки %s?"
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1420
 msgid "This removes the email from Geary and your email server."
 msgstr "Это приведет к удалению эл. почты из Geary и вашего почтового сервера."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1421
 msgid "This cannot be undone."
 msgstr "Это не может быть отменено."
 
-#: src/client/application/application-main-window.vala:1436
+#: src/client/application/application-main-window.vala:1422
 #, c-format
 msgid "Empty %s"
 msgstr "Очистить %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1493
+#: src/client/application/application-main-window.vala:1479
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Вы хотите навсегда удалить эту беседу?"
 msgstr[1] "Вы хотите навсегда удалить эти беседы?"
 msgstr[2] "Вы хотите навсегда удалить этиx бесед?"
 
-#: src/client/application/application-main-window.vala:1498
-#: src/client/application/application-main-window.vala:1513
+#: src/client/application/application-main-window.vala:1484
+#: src/client/application/application-main-window.vala:1499
 msgid "Delete"
 msgstr "Удалить"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1508
+#: src/client/application/application-main-window.vala:1494
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Вы хотите навсегда удалить это сообщение?"
 msgstr[1] "Вы хотите навсегда удалить эти сообщения?"
 msgstr[2] "Вы хотите навсегда удалить этих сообщений?"
 
-#: src/client/application/application-main-window.vala:1842
+#: src/client/application/application-main-window.vala:1828
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1590,22 +1590,6 @@ msgstr "Следует указать имя сервера"
 msgid "Could not look up server name"
 msgstr "Не удалось найти имя сервера"
 
-#. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: src/client/components/status-bar.vala:26
-msgid "Sending…"
-msgstr "Отправка…"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Ошибка отправки почты"
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Ошибка сохранения отправленной почты"
-
 #: src/client/components/stock.vala:18
 msgid "_OK"
 msgstr "_ОК"
@@ -1814,6 +1798,7 @@ msgstr "Изображения"
 #: src/client/composer/composer-widget.vala:2096
 #: src/client/conversation-viewer/conversation-email.vala:536
 #: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
+#, c-format
 msgid "To:"
 msgstr "Кому:"
 
@@ -1821,6 +1806,7 @@ msgstr "Кому:"
 #: src/client/composer/composer-widget.vala:2102
 #: src/client/conversation-viewer/conversation-email.vala:541
 #: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
+#, c-format
 msgid "Cc:"
 msgstr "Копия:"
 
@@ -1828,11 +1814,13 @@ msgstr "Копия:"
 #: src/client/composer/composer-widget.vala:2108
 #: src/client/conversation-viewer/conversation-email.vala:546
 #: ui/conversation-message.ui:365
+#, c-format
 msgid "Bcc:"
 msgstr "Скрытая копия:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
 #: src/client/composer/composer-widget.vala:2114
+#, c-format
 msgid "Reply-To: "
 msgstr "Ответить: "
 
@@ -1920,18 +1908,21 @@ msgstr "_Переслать"
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:531
 #: src/client/util/util-email.vala:258
+#, c-format
 msgid "From:"
 msgstr "От:"
 
 #. Translators: Human-readable version of the RFC 822 Date header
 #: src/client/conversation-viewer/conversation-email.vala:551
 #: src/client/util/util-email.vala:263
+#, c-format
 msgid "Date:"
 msgstr "Дата:"
 
 #. Translators: Human-readable version of the RFC 822 Subject header
 #: src/client/conversation-viewer/conversation-email.vala:561
 #: src/client/util/util-email.vala:261
+#, c-format
 msgid "Subject:"
 msgstr "Тема:"
 
@@ -1943,6 +1934,7 @@ msgstr "Возможно, этот адрес почты был подделан
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
 #: src/client/conversation-viewer/conversation-message.vala:237
+#, c-format
 msgid "Show less"
 msgstr "Показать меньше"
 
@@ -2430,8 +2422,9 @@ msgstr "%H:%M"
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:79
+#, c-format
 msgid "%b %-e"
-msgstr "%-e %b"
+msgstr "%b %-e"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -3793,6 +3786,15 @@ msgstr "_Запомнить пароль"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Авторизоваться"
+
+#~ msgid "Sending…"
+#~ msgstr "Отправка…"
+
+#~ msgid "Error sending email"
+#~ msgstr "Ошибка отправки почты"
+
+#~ msgid "Error saving sent mail"
+#~ msgstr "Ошибка сохранения отправленной почты"
 
 #~ msgid "Move conversation"
 #~ msgid_plural "Move conversations"
