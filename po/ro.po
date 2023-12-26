@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2021-04-14 12:19+0000\n"
-"PO-Revision-Date: 2021-05-05 13:46+0200\n"
+"POT-Creation-Date: 2023-11-25 10:18+0000\n"
+"PO-Revision-Date: 2023-12-26 15:38+0200\n"
 "Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Gnome Romanian Translation Team\n"
 "Language: ro\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Project-Style: gnome\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
@@ -37,8 +37,8 @@ msgstr "Trimite fișiere folosind Geary"
 #: desktop/geary-autostart.desktop.in.in:3
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
-#: src/client/accounts/accounts-editor-servers-pane.vala:552
-#: src/client/application/application-main-window.vala:704
+#: src/client/accounts/accounts-editor-servers-pane.vala:551
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -67,13 +67,13 @@ msgstr "Echipa de dezvoltare Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary este o aplicație de email construită în jurul conversațiilor pentru "
-"desktopul GNOME 3. Vă permite să citiți, găsiți și trimite email-uri dintr-o "
-"interfață modernă și simplă."
+"Geary este o aplicație de e-mail construită în jurul conversațiilor, pentru "
+"desktopul GNOME. Vă permite să citiți, să găsiți și să trimiteți e-mailuri "
+"cu o interfață simplă și modernă."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
@@ -112,25 +112,25 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Compatibil cu GMail, Yahoo! Mail, Outlook.com și alte servere IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:47
+#: desktop/org.gnome.Geary.appdata.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "Geary afișând o conversație"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:58
+#: desktop/org.gnome.Geary.appdata.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "Geary afișând compunătorul de text bogat"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
-msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Mesaje;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;Email;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:22
+#: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
 msgstr "Compune un mesaj"
 
-#: desktop/org.gnome.Geary.desktop.in.in:26
+#: desktop/org.gnome.Geary.desktop.in.in:28
 msgid "New Window"
 msgstr "Fereastră nouă"
 
@@ -186,10 +186,18 @@ msgstr ""
 "mesaj."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "Mută mesajele implicit"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "Când etichetați un mesaj, mutați-l în dosarul de destinație."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "Utilizează scurtături de o singură tastă"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -197,11 +205,11 @@ msgstr ""
 "Activează scurtăturile pentru acțiunile email care nu necesită apăsarea "
 "<Ctrl> pentru a le emula pe cele utilizate de Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "Limbi care ar trebui folosite în corectorul ortografic"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -210,11 +218,11 @@ msgstr ""
 "ortografică în timp ce o listă nulă va folosi limbile desktopului în mod "
 "implicit."
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Limbi care sunt afișate în fereastra popup a corectorului ortografic"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -222,61 +230,69 @@ msgstr ""
 "Listă de limbi care sunt afișate întotdeauna în fereastra popup a "
 "corectorului ortografic."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
-msgid "Notify of new mail at startup"
-msgstr "Notifică despre emailuri noi la pornire"
-
-#: desktop/org.gnome.Geary.gschema.xml:67
-msgid "True to notify of new mail at startup."
-msgstr "Adevărat pentru a notifica despre noile emailuri la pornire."
-
 #: desktop/org.gnome.Geary.gschema.xml:72
+msgid "Run application in background on logon and when closed"
+msgstr "Rulați aplicația pe fundal la conectare și când este închisă"
+
+#: desktop/org.gnome.Geary.gschema.xml:73
+msgid "True to run application in background."
+msgstr "Adevărat pentru a rula aplicația pe fundal."
+
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "Întreabă când se deschide un atașament"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "Adevărat pentru a întreba la deschiderea unui fișier atașat."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "Dacă să se compună email-uri în HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "Adevărat pentru a compune email-uri În HTML; fals pentru text simplu."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategie consultativă pentru căutarea în întreg textul"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Valorile acceptabile sunt „exact”, „conservative”, „aggressive” și „horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "Nivelul de zoom al vizualizatorului conversației"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "Nivelul de zoom de aplicat vizualizării conversației."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "Dimensiunea ferestrei detașată a compozitorului"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "Ultima dimensiune înregistrată a ferestrei detașate a compozitorului."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
+msgid "Allow images for these domains"
+msgstr "Permite imagini pentru aceste domenii"
+
+#: desktop/org.gnome.Geary.gschema.xml:109
+msgid "Images from these domains will be trusted"
+msgstr "Imaginile de pe aceste domenii vor fi de încredere"
+
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "Refă întârzierea trimiterii de email"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -284,11 +300,11 @@ msgstr ""
 "Numărul de secunde de așteptat înainte de a trimite un email. Stabiliți la "
 "zero sau mai puțin pentru a dezactiva."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "Timp de afișaj al înștiințării scurte"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
@@ -296,19 +312,19 @@ msgstr ""
 "Durata de timp în secunde pentru care înștiințările scurte ar trebui să fie "
 "afișate."
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "Listă de module opționale"
 
-#: desktop/org.gnome.Geary.gschema.xml:117
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Modulele listate aici vor fi încărcate la pornirea sistemului."
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "Dacă am migrat configurările vechi"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -318,25 +334,19 @@ msgstr ""
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
 #. untrusted TLS certificate
-#: src/client/accounts/accounts-editor.vala:208
+#: src/client/accounts/accounts-editor.vala:216
 msgid "Failed to store certificate"
 msgstr "Eșec la stocarea certificatului"
 
-#. Translators: Label for adding an email account
-#. account for a generic IMAP service provider.
-#: src/client/accounts/accounts-editor-add-pane.vala:98
-msgid "All others"
-msgstr "Toate celelalte"
-
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:185
-#: src/client/accounts/accounts-editor-servers-pane.vala:313
+#: src/client/accounts/accounts-editor-add-pane.vala:167
+#: src/client/accounts/accounts-editor-servers-pane.vala:312
 msgid "Check your receiving login and password"
 msgstr "Verificați numele și parola contului de primire"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:200
-#: src/client/accounts/accounts-editor-servers-pane.vala:326
+#: src/client/accounts/accounts-editor-add-pane.vala:182
+#: src/client/accounts/accounts-editor-servers-pane.vala:325
 msgid "Check your receiving server details"
 msgstr "Verificați detaliile serverului de primire"
 
@@ -345,51 +355,60 @@ msgstr "Verificați detaliile serverului de primire"
 #. succeeded, so the user probably needs to
 #. specify custom creds here
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:222
-#: src/client/accounts/accounts-editor-servers-pane.vala:347
+#: src/client/accounts/accounts-editor-add-pane.vala:204
+#: src/client/accounts/accounts-editor-servers-pane.vala:346
 msgid "Check your sending login and password"
 msgstr "Verificați numele și parola contului de trimitere"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:236
-#: src/client/accounts/accounts-editor-servers-pane.vala:360
+#: src/client/accounts/accounts-editor-add-pane.vala:218
+#: src/client/accounts/accounts-editor-servers-pane.vala:359
 msgid "Check your sending server details"
 msgstr "Verificați detaliile serverului de trimitere"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:251
+#: src/client/accounts/accounts-editor-add-pane.vala:233
 msgid "Check your email address and password"
 msgstr "Verificați adresa de email și parola"
 
 #. Translators: In-app notification label
-#: src/client/accounts/accounts-editor-add-pane.vala:262
+#: src/client/accounts/accounts-editor-add-pane.vala:244
 msgid "Could not connect, check your network"
 msgstr "Nu s-a putut conecta, verificați rețeaua"
 
 #. Translators: In-app notification label for a
 #. generic error creating an account
-#: src/client/accounts/accounts-editor-add-pane.vala:275
+#: src/client/accounts/accounts-editor-add-pane.vala:257
 msgid "An unexpected problem occurred"
 msgstr "A apărut o problemă neașteptată"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-add-pane.vala:293
+#: src/client/accounts/accounts-editor-add-pane.vala:275
 #, c-format
 msgid "Account not created: %s"
 msgstr "Contul nu a fost creeat: %s"
 
+#: src/client/accounts/accounts-editor-add-pane.vala:372
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
+msgid "_Next"
+msgstr "_Următorul"
+
+#: src/client/accounts/accounts-editor-add-pane.vala:379
+msgid "_Create"
+msgstr "_Creează"
+
 #. Translators: Label for the person's actual name when adding
 #. an account
-#: src/client/accounts/accounts-editor-add-pane.vala:573
+#: src/client/accounts/accounts-editor-add-pane.vala:664
 msgid "Your name"
 msgstr "Numele dumneavoastră"
 
 #. Translators: Label used for the address part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:590
-#: src/client/accounts/accounts-editor-edit-pane.vala:527
+#: src/client/accounts/accounts-editor-add-pane.vala:681
+#: src/client/accounts/accounts-editor-edit-pane.vala:528
 msgid "Email address"
 msgstr "Adresă de email"
 
@@ -398,8 +417,8 @@ msgstr "Adresă de email"
 #. Translators: This is used as a placeholder for the
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:594
-#: src/client/accounts/accounts-editor-edit-pane.vala:493
+#: src/client/accounts/accounts-editor-add-pane.vala:685
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
 msgid "person@example.com"
 msgstr "persoană@exemplu.ro"
 
@@ -407,15 +426,15 @@ msgstr "persoană@exemplu.ro"
 #. when adding an account
 #. Translators: Label for the user's login name for an
 #. IMAP, SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:608
-#: src/client/accounts/accounts-editor-servers-pane.vala:881
+#: src/client/accounts/accounts-editor-add-pane.vala:699
+#: src/client/accounts/accounts-editor-servers-pane.vala:880
 msgid "Login name"
 msgstr "Nume de autentificare"
 
 #. Translators: Label for the user's password for an IMAP,
 #. SMTP, etc service
-#: src/client/accounts/accounts-editor-add-pane.vala:622
-#: src/client/accounts/accounts-editor-servers-pane.vala:1003
+#: src/client/accounts/accounts-editor-add-pane.vala:713
+#: src/client/accounts/accounts-editor-servers-pane.vala:1002
 #: ui/password-dialog.glade:98
 msgid "Password"
 msgstr "Parolă"
@@ -424,14 +443,14 @@ msgstr "Parolă"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's IMAP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:644
-#: src/client/accounts/accounts-editor-servers-pane.vala:725
+#: src/client/accounts/accounts-editor-add-pane.vala:735
+#: src/client/accounts/accounts-editor-servers-pane.vala:724
 msgid "IMAP server"
 msgstr "Server IMAP"
 
 #. Translators: Placeholder for the IMAP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:647
+#: src/client/accounts/accounts-editor-add-pane.vala:738
 msgid "imap.example.com"
 msgstr "imap.exemplu.ro"
 
@@ -439,20 +458,18 @@ msgstr "imap.exemplu.ro"
 #. adding an account.
 #. Translators: This label describes the host name or IP
 #. address and port used by an account's SMTP service.
-#: src/client/accounts/accounts-editor-add-pane.vala:653
-#: src/client/accounts/accounts-editor-servers-pane.vala:731
+#: src/client/accounts/accounts-editor-add-pane.vala:744
+#: src/client/accounts/accounts-editor-servers-pane.vala:730
 msgid "SMTP server"
 msgstr "Server SMTP"
 
 #. Translators: Placeholder for the SMTP server hostname
 #. when adding an account.
-#: src/client/accounts/accounts-editor-add-pane.vala:656
+#: src/client/accounts/accounts-editor-add-pane.vala:747
 msgid "smtp.example.com"
 msgstr "smtp.exemplu.ro"
 
-#. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
 msgid "Remove Account"
 msgstr "Elimină contul"
 
@@ -471,7 +488,7 @@ msgstr ""
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
-#: src/client/plugin/mail-merge/mail-merge.vala:392
+#: src/client/plugin/mail-merge/mail-merge.vala:398
 #: ui/password-dialog.glade:182
 msgid "_Cancel"
 msgstr "_Anulează"
@@ -500,32 +517,32 @@ msgstr "Adaugă o nouă adresă de email pentru expeditor"
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
 #. email addresses in their account settings.
-#: src/client/accounts/accounts-editor-edit-pane.vala:437
+#: src/client/accounts/accounts-editor-edit-pane.vala:438
 msgid "Name not set"
 msgstr "Numele nu este configurat"
 
 #. Translators: This is used as a placeholder for the
 #. display name for an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:478
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
 msgid "Sender Name"
 msgstr "Numele expeditorului"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:505
+#: src/client/accounts/accounts-editor-edit-pane.vala:506
 msgid "Remove"
 msgstr "Elimină"
 
 #. Translators: Label used for the display name part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:520
+#: src/client/accounts/accounts-editor-edit-pane.vala:521
 msgid "Sender name"
 msgstr "Nume expeditor"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
 #. substitution is the email address added.
-#: src/client/accounts/accounts-editor-edit-pane.vala:587
+#: src/client/accounts/accounts-editor-edit-pane.vala:588
 #, c-format
 msgid "Remove “%s”"
 msgstr "Elimină „%s”"
@@ -533,7 +550,7 @@ msgstr "Elimină „%s”"
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
 #. the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:627
+#: src/client/accounts/accounts-editor-edit-pane.vala:628
 #, c-format
 msgid "Undo changes to “%s”"
 msgstr "Anulează modificările la „%s”"
@@ -541,7 +558,7 @@ msgstr "Anulează modificările la „%s”"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:714
+#: src/client/accounts/accounts-editor-edit-pane.vala:715
 #, c-format
 msgid "Add “%s” back"
 msgstr "Adaugă înapoi „%s”"
@@ -549,14 +566,14 @@ msgstr "Adaugă înapoi „%s”"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:756
+#: src/client/accounts/accounts-editor-edit-pane.vala:757
 msgid "Undo signature changes"
 msgstr "Anulează modificările de semnătură"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
-#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#: src/client/accounts/accounts-editor-edit-pane.vala:805
 msgid "Download mail"
 msgstr "Descarcă email"
 
@@ -565,44 +582,44 @@ msgstr "Descarcă email"
 #. should be downloaded for an account. The
 #. string substitution is the duration,
 #. e.g. "1 month back".
-#: src/client/accounts/accounts-editor-edit-pane.vala:836
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
 #, c-format
 msgid "Change download period back to: %s"
 msgstr "Modifică perioada de descărcare înapoi la: %s"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:857
+#: src/client/accounts/accounts-editor-edit-pane.vala:858
 msgid "Everything"
 msgstr "Totul"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:861
+#: src/client/accounts/accounts-editor-edit-pane.vala:862
 msgid "2 weeks back"
 msgstr "acum 2 săptămâni"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:865
+#: src/client/accounts/accounts-editor-edit-pane.vala:866
 msgid "1 month back"
 msgstr "acum o lună"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:869
+#: src/client/accounts/accounts-editor-edit-pane.vala:870
 msgid "3 months back"
 msgstr "acum 3 luni"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:873
+#: src/client/accounts/accounts-editor-edit-pane.vala:874
 msgid "6 months back"
 msgstr "acum 6 luni"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:877
+#: src/client/accounts/accounts-editor-edit-pane.vala:878
 msgid "1 year back"
 msgstr "acum 1 an"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:881
+#: src/client/accounts/accounts-editor-edit-pane.vala:882
 msgid "2 years back"
 msgstr "acum 2 ani"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:885
+#: src/client/accounts/accounts-editor-edit-pane.vala:886
 msgid "4 years back"
 msgstr "acum 4 ani"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:891
+#: src/client/accounts/accounts-editor-edit-pane.vala:892
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
@@ -610,55 +627,43 @@ msgstr[0] "acum %d zi"
 msgstr[1] "acum %d zile"
 msgstr[2] "acum %d de zile"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:246
-#: src/client/application/application-main-window.vala:2270
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2318
 msgid "Undo"
 msgstr "Anulează"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:255
-#: src/client/application/application-main-window.vala:2253
+#: src/client/accounts/accounts-editor-list-pane.vala:243
+#: src/client/application/application-main-window.vala:2301
 msgid "Redo"
 msgstr "Refă"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:349
-#: src/client/accounts/accounts-editor-list-pane.vala:445
-#: src/client/accounts/accounts-editor-row.vala:279
+#: src/client/accounts/accounts-editor-list-pane.vala:327
+#: src/client/accounts/accounts-editor-row.vala:303
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:353
-#: src/client/accounts/accounts-editor-list-pane.vala:449
-#: src/client/accounts/accounts-editor-row.vala:283
+#: src/client/accounts/accounts-editor-list-pane.vala:331
+#: src/client/accounts/accounts-editor-row.vala:307
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:357
-#: src/client/accounts/accounts-editor-list-pane.vala:453
-#: src/client/accounts/accounts-editor-row.vala:287
-msgid "Yahoo"
-msgstr "Yahoo"
-
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:379
+#: src/client/accounts/accounts-editor-list-pane.vala:353
 msgid "This account has been disabled"
 msgstr "Acest cont a fost dezactivat"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:388
+#: src/client/accounts/accounts-editor-list-pane.vala:362
 msgid "This account has encountered a problem and is unavailable"
 msgstr "Acest cont a întâmpinat o problemă și este indisponibil"
-
-#: src/client/accounts/accounts-editor-list-pane.vala:457
-msgid "Other email providers"
-msgstr "Alți furnizori de email"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:563
+#: src/client/accounts/accounts-editor-list-pane.vala:468
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Contul „%s” a fost eliminat"
@@ -666,7 +671,7 @@ msgstr "Contul „%s” a fost eliminat"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:570
+#: src/client/accounts/accounts-editor-list-pane.vala:475
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Contul „%s” a fost restaurat"
@@ -679,30 +684,30 @@ msgstr "Trageți pentru a muta acest element"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:299
+#: src/client/accounts/accounts-editor-row.vala:319
 msgid "Service provider"
 msgstr "Furnizor servicii"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:473
+#: src/client/accounts/accounts-editor-row.vala:493
 msgid "Connection security"
 msgstr "Securitatea conexiunii"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:484
-#: src/client/accounts/accounts-editor-servers-pane.vala:752
-#: src/client/accounts/accounts-editor-servers-pane.vala:967
+#: src/client/accounts/accounts-editor-row.vala:504
+#: src/client/accounts/accounts-editor-servers-pane.vala:751
+#: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Niciuna"
 
-#: src/client/accounts/accounts-editor-row.vala:491
+#: src/client/accounts/accounts-editor-row.vala:511
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:498
+#: src/client/accounts/accounts-editor-row.vala:518
 msgid "TLS"
 msgstr "TLS"
 
@@ -710,35 +715,35 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:539
-#: src/client/application/application-main-window.vala:650
+#: src/client/accounts/accounts-editor-row.vala:560
+#: src/client/application/application-main-window.vala:642
 msgid "Login"
 msgstr "Autentificare"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:546
+#: src/client/accounts/accounts-editor-row.vala:576
 msgid "No login needed"
 msgstr "Nicio autentificare necesară"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:554
+#: src/client/accounts/accounts-editor-row.vala:588
 msgid "Use same login as receiving"
 msgstr "Utilizează aceeași autentificare ca la primire"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:562
+#: src/client/accounts/accounts-editor-row.vala:600
 msgid "Use a different login"
 msgstr "Utilizează o autentificare diferită"
 
 #. Translators: In-app notification label, the
 #. string substitution is a more detailed reason.
-#: src/client/accounts/accounts-editor-servers-pane.vala:374
+#: src/client/accounts/accounts-editor-servers-pane.vala:373
 #, c-format
 msgid "Account not updated: %s"
 msgstr "Contul nu a fost actualizat: %s"
@@ -746,23 +751,23 @@ msgstr "Contul nu a fost actualizat: %s"
 #. Translators: This label describes the program that
 #. created the account, e.g. an SSO service like GOA, or
 #. locally by Geary.
-#: src/client/accounts/accounts-editor-servers-pane.vala:537
+#: src/client/accounts/accounts-editor-servers-pane.vala:536
 msgid "Account source"
 msgstr "Sursa contului"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:549
+#: src/client/accounts/accounts-editor-servers-pane.vala:548
 msgid "GNOME Online Accounts"
 msgstr "Conturi online GNOME"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:608
+#: src/client/accounts/accounts-editor-servers-pane.vala:607
 msgid "Save draft email on server"
 msgstr "Salvează emailul ciornă pe server"
 
 #. Translators: This label describes an account
 #. preference.
-#: src/client/accounts/accounts-editor-servers-pane.vala:663
+#: src/client/accounts/accounts-editor-servers-pane.vala:662
 msgid "Save sent email on server"
 msgstr "Salvează mailul trimis pe server"
 
@@ -771,12 +776,12 @@ msgstr "Salvează mailul trimis pe server"
 #. Translators: Label used when an account's IMAP or
 #. SMTP service uses OAuth2. The string replacement is
 #. the service's login name.
-#: src/client/accounts/accounts-editor-servers-pane.vala:953
+#: src/client/accounts/accounts-editor-servers-pane.vala:952
 #, c-format
 msgid "%s using OAuth2"
 msgstr "%s folosind OAuth2"
 
-#: src/client/accounts/accounts-editor-servers-pane.vala:963
+#: src/client/accounts/accounts-editor-servers-pane.vala:962
 msgid "Use receiving server login"
 msgstr "Utilizează autentificarea serverului de primire"
 
@@ -821,132 +826,127 @@ msgid "Visit the Geary web site"
 msgstr "Vizitează situl Geary"
 
 #. / Command line option
-#: src/client/application/application-client.vala:102
+#: src/client/application/application-client.vala:101
 msgid "Print debug logging"
 msgstr "Tipărește jurnalizarea de depanare"
 
 #. / Command line option
-#: src/client/application/application-client.vala:105
-msgid "Start with the main window hidden (deprecated)"
-msgstr "Pornește Geary cu fereastra principală ascunsă (învechită)"
-
-#. / Command line option
-#: src/client/application/application-client.vala:108
+#: src/client/application/application-client.vala:104
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Activează Inspector WebKitGTK în vizualizările web"
 
 #. / Command line option
-#: src/client/application/application-client.vala:111
+#: src/client/application/application-client.vala:107
 msgid "Log conversation monitoring"
 msgstr "Înregistrează monitorizarea conversațiilor"
 
 #. / Command line option
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:110
 msgid "Log IMAP network deserialization"
 msgstr "Înregistrează deserializarea rețelei IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:118
+#: src/client/application/application-client.vala:114
 msgid "Log folder normalization"
 msgstr "Înregistrează normalizarea directorului"
 
 #. / Command line option
-#: src/client/application/application-client.vala:121
+#: src/client/application/application-client.vala:117
 msgid "Log IMAP network activity"
 msgstr "Înregistrează activitatea rețelei IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:126
+#: src/client/application/application-client.vala:122
 msgid "Log IMAP replay queue"
 msgstr "Înregistrează coada de evenimente IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:129
+#: src/client/application/application-client.vala:125
 msgid "Log SMTP network activity"
 msgstr "Înregistrează activitatea rețelei SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:132
+#: src/client/application/application-client.vala:128
 msgid "Log database queries (generates lots of messages)"
 msgstr "Înregistrează interogările bazei de date (generează multe mesajee)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:135
+#: src/client/application/application-client.vala:131
 msgid "Perform a graceful quit"
 msgstr "Efectuează o ieșire elegantă"
 
-#: src/client/application/application-client.vala:137
+#: src/client/application/application-client.vala:133
 msgid "Open a new window"
 msgstr "Deschide o fereastră nouă"
 
 #. / Command line option
-#: src/client/application/application-client.vala:140
+#: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Revocă toate certificatele fixate serverelor TLS"
 
 #. / Command line option
-#: src/client/application/application-client.vala:143
+#: src/client/application/application-client.vala:139
 msgid "Display program version"
 msgstr "Afișează versiunea programului"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:275
+#: src/client/application/application-client.vala:267
 msgid "Geary version"
 msgstr "Versiune Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:277
+#: src/client/application/application-client.vala:269
 msgid "Geary revision"
 msgstr "Revizie Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:279
+#: src/client/application/application-client.vala:271
 msgid "GTK version"
 msgstr "Versiune GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:286
+#: src/client/application/application-client.vala:278
 msgid "GLib version"
 msgstr "Versiune GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:293
+#: src/client/application/application-client.vala:285
 msgid "WebKitGTK version"
 msgstr "Versiune WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:292
 msgid "Desktop environment"
 msgstr "Mediu desktop"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:302
-#: src/client/application/application-client.vala:308
-#: src/client/application/application-client.vala:314
+#: src/client/application/application-client.vala:294
+#: src/client/application/application-client.vala:300
+#: src/client/application/application-client.vala:306
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Necunoscut"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:298
 msgid "Distribution name"
 msgstr "Numele distribuției"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:312
+#: src/client/application/application-client.vala:304
 msgid "Distribution release"
 msgstr "Lansarea distribuției"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:318
+#: src/client/application/application-client.vala:310
 msgid "Installation prefix"
 msgstr "Prefix de instalare"
 
-#: src/client/application/application-client.vala:587
+#: src/client/application/application-client.vala:566
 #, c-format
 msgid "About %s"
 msgstr "Despre %s"
@@ -954,7 +954,7 @@ msgstr "Despre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:591
+#: src/client/application/application-client.vala:570
 msgid "translator-credits"
 msgstr ""
 "CoolGoose <melipse AT gmail DOT com>\n"
@@ -962,17 +962,11 @@ msgstr ""
 "Viorel-Cătălin Răpițeanu <rapiteanu DOT catalin AT gmail DOT com>\n"
 "Daniel Șerbănescu <daniel [at] serbanescu [dot] dk>, 2019-2021\n"
 "Florentina Mușat <florentina [dot] musat [dot] 28 [at] gmail [dot] com>, "
-"2020-2021"
-
-#. / Warning printed to the console when a deprecated
-#. / command line option is used.
-#: src/client/application/application-client.vala:1101
-msgid "The `--hidden` option is deprecated and will be removed in the future."
-msgstr "Opțiunea „--hidden” este învechită și va fi eliminată în viitor."
+"2020-2021, 2023"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1134
+#: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argument pentru program nerecunoscut: „%s”"
@@ -1089,12 +1083,12 @@ msgstr[0] "Conversația nemarcată ca %s"
 msgstr[1] "Conversațiile nemarcate ca %s"
 msgstr[2] "Conversațiile nemarcate ca %s"
 
-#: src/client/application/application-controller.vala:1337
+#: src/client/application/application-controller.vala:1309
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nu s-a reușit deschiderea bazei de date pentru %s"
 
-#: src/client/application/application-controller.vala:1338
+#: src/client/application/application-controller.vala:1310
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1119,20 +1113,20 @@ msgstr ""
 "Reconstrucția bazei de date va șterge toate emailurile locale și fișierele "
 "lor atașate. <b>Emailurile de pe server nu vor fi afectate.</b>"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "_Rebuild"
 msgstr "_Reconstruiește"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "E_xit"
 msgstr "_Ieșire"
 
-#: src/client/application/application-controller.vala:1350
+#: src/client/application/application-controller.vala:1322
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nu s-a reușit reconstruirea bazei de date pentru „%s”"
 
-#: src/client/application/application-controller.vala:1351
+#: src/client/application/application-controller.vala:1323
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1145,34 +1139,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1518
+#: src/client/application/application-controller.vala:1490
 #, c-format
 msgid "Email sent to %s"
 msgstr "Email trimis la %s"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2512
+#: src/client/application/application-controller.vala:2486
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Emailul către %s pus în coadă pentru livrare"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2576
+#: src/client/application/application-controller.vala:2550
 #, c-format
 msgid "Email to %s saved"
 msgstr "Emailul către %s salvat"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2591
-#: src/client/application/application-controller.vala:2649
+#: src/client/application/application-controller.vala:2565
+#: src/client/application/application-controller.vala:2623
 msgid "Composer could not be restored"
 msgstr "Compunătorul nu a putut fi restaurat"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2634
+#: src/client/application/application-controller.vala:2608
 #, c-format
 msgid "Email to %s discarded"
 msgstr "Emailul către %s eliminat"
@@ -1189,109 +1183,110 @@ msgid "Account update"
 msgstr "Actualizare de cont"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:628
 msgid "Working offline"
 msgstr "Se lucrează deconectat"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Nu veți putea trimite sau primi email-uri până la reconectare."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:637
 msgid "Login problem"
 msgstr "Problemă de autentificare"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
 msgstr "Un cont a raportat o autentificare sau parolă incorectă."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
 msgstr "Reîncercați autentificarea, vi se va cere parola"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:653
 msgid "Security problem"
 msgstr "Problemă de securitate"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
 msgstr "Un cont a raportat un server de neîncredere."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:658
 msgid "Check"
 msgstr "Verifică"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:662
 msgid "Check the security details for the connection"
 msgstr "Verifică detaliile de securitate pentru conexiune"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:713
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#. Translators: The name of the folder group containing
-#. folders created by people (as opposed to special-use
-#. folders)
-#: src/client/application/application-main-window.vala:1103
-#: src/client/folder-list/folder-list-account-branch.vala:46
+#: src/client/application/application-main-window.vala:1093
+#: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Etichete"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1419
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Goliți toate emailurile din dosarul %s?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1420
 msgid "This removes the email from Geary and your email server."
 msgstr "Aceasta elimină emailul din Geary și de pe serverul de email."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1421
 msgid "This cannot be undone."
 msgstr "Aceasta nu poate fi anulată."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1422
 #, c-format
 msgid "Empty %s"
 msgstr "Golește %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1479
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Doriți să ștergeți permanent această conversație?"
 msgstr[1] "Doriți să ștergeți permanent aceste conversații?"
 msgstr[2] "Doriți să ștergeți permanent aceste conversații?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1484
+#: src/client/application/application-main-window.vala:1499
 msgid "Delete"
 msgstr "Șterge"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1494
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Doriți să ștergeți permanent acest mesaj?"
 msgstr[1] "Doriți să ștergeți permanent aceste mesaje?"
 msgstr[2] "Doriți să ștergeți permanent aceste mesaje?"
 
-#: src/client/application/application-main-window.vala:1804
+#: src/client/application/application-main-window.vala:1828
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
+
+#: src/client/application/application-startup-manager.vala:78
+msgid "Geary wants to run in background"
+msgstr "Geary dorește să ruleze pe fundal"
 
 #. Translators: The first argument will be a
 #. description of the document type, the second will
@@ -1320,43 +1315,42 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "Nu întreb_a din nou"
 
-#: src/client/components/components-conversation-actions.vala:97
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "Marchează conversația"
 msgstr[1] "Marchează conversațiile"
 msgstr[2] "Marchează conversațiile"
 
-#: src/client/components/components-conversation-actions.vala:102
-msgid "Add label to conversation"
-msgid_plural "Add label to conversations"
-msgstr[0] "Adaugă etichetă la conversație"
-msgstr[1] "Adaugă etichete la conversații"
-msgstr[2] "Adaugă etichete la conversații"
-
-#: src/client/components/components-conversation-actions.vala:107
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "Mută conversația"
-msgstr[1] "Mută conversațiile"
-msgstr[2] "Mută conversațiile"
-
-#: src/client/components/components-conversation-actions.vala:112
-#: src/client/conversation-list/conversation-list-view.vala:446
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "Arhivează conversația"
 msgstr[1] "Arhivează conversațiile"
 msgstr[2] "Arhivează conversațiile"
 
-#: src/client/components/components-conversation-actions.vala:123
+#: src/client/components/components-conversation-actions.vala:141
+msgid "Add label to conversation"
+msgid_plural "Add label to conversations"
+msgstr[0] "Adaugă etichetă la conversație"
+msgstr[1] "Adaugă etichete la conversații"
+msgstr[2] "Adaugă etichete la conversații"
+
+#: src/client/components/components-conversation-actions.vala:152
+msgid "Copy conversation"
+msgid_plural "Copy conversations"
+msgstr[0] "Copiază conversația"
+msgstr[1] "Copiază conversațiile"
+msgstr[2] "Copiază conversațiile"
+
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "Mută conversația la Gunoi"
 msgstr[1] "Mută conversațiile la Gunoi"
 msgstr[2] "Mută conversațiile la Gunoi"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "Șterge conversația"
@@ -1414,21 +1408,21 @@ msgid "Cancel"
 msgstr "Anulează"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:124
+#: src/client/components/components-preferences-window.vala:125
 msgid "_Automatically select next message"
 msgstr "_Selectează automat următorul mesaj"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:134
+#: src/client/components/components-preferences-window.vala:135
 msgid "_Display conversation preview"
 msgstr "_Afișează previzualizarea conversației"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:144
+#: src/client/components/components-preferences-window.vala:145
 msgid "Use _single key email shortcuts"
 msgstr "Utilizează scurtături de email cu o _singură tastă"
 
-#: src/client/components/components-preferences-window.vala:146
+#: src/client/components/components-preferences-window.vala:147
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
@@ -1437,22 +1431,34 @@ msgstr ""
 "necesită apăsarea <Ctrl>"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:157
+#: src/client/components/components-preferences-window.vala:158
 msgid "_Watch for new mail when closed"
 msgstr "_Verifică după emailuri noi când este închis"
 
 #. / Translators: Preferences tooltip
-#: src/client/components/components-preferences-window.vala:161
+#: src/client/components/components-preferences-window.vala:162
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary va continua rularea după ce toate ferestrele sunt închise"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:172
+msgid "_Always load images"
+msgstr "Încarcă întotde_auna imaginile"
+
+#. Translators: Info bar description
+#: src/client/components/components-preferences-window.vala:173
+#: src/client/conversation-viewer/conversation-message.vala:1424
+msgid "Showing remote images allows the sender to track you"
+msgstr ""
+"Afișarea imaginilor de la distanță permite expeditorului să vă urmărească"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:178
+#: src/client/components/components-preferences-window.vala:191
 msgid "Preferences"
 msgstr "Preferințe"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:234
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Module"
 
@@ -1571,22 +1577,6 @@ msgstr "Numele de server este obligatoriu"
 msgid "Could not look up server name"
 msgstr "Nu s-a putut detecta numele serverului"
 
-#. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: src/client/components/status-bar.vala:26
-msgid "Sending…"
-msgstr "Se trimite…"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Eroare la trimiterea emailului"
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Eroare la salvarea emailului trimis"
-
 #: src/client/components/stock.vala:18
 msgid "_OK"
 msgstr "_OK"
@@ -1595,7 +1585,7 @@ msgstr "_OK"
 msgid "_About"
 msgstr "_Despre"
 
-#: src/client/components/stock.vala:22
+#: src/client/components/stock.vala:22 ui/accounts_editor_list_pane.ui:12
 msgid "_Add"
 msgstr "_Adaugă"
 
@@ -1607,17 +1597,17 @@ msgstr "În_chide"
 msgid "_Discard"
 msgstr "_Renunță"
 
-#: src/client/components/stock.vala:25 ui/components-main-toolbar-menus.ui:42
+#: src/client/components/stock.vala:25 ui/components-menu-application.ui:20
 msgid "_Help"
 msgstr "_Ajutor"
 
 #: src/client/components/stock.vala:26
-#: src/client/plugin/mail-merge/mail-merge.vala:391
+#: src/client/plugin/mail-merge/mail-merge.vala:397
 #: ui/components-attachment-pane-menus.ui:7
 msgid "_Open"
 msgstr "_Deschide"
 
-#: src/client/components/stock.vala:27 ui/components-main-toolbar-menus.ui:32
+#: src/client/components/stock.vala:27 ui/components-menu-application.ui:10
 msgid "_Preferences"
 msgstr "_Preferințe"
 
@@ -1643,19 +1633,19 @@ msgstr "_Salvează"
 msgid "_Keep"
 msgstr "_Păstrează"
 
-#: src/client/composer/composer-editor.vala:680
+#: src/client/composer/composer-editor.vala:688
 msgid "Select Color"
 msgstr "Selectează culoarea"
 
-#: src/client/composer/composer-link-popover.vala:135
+#: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "Legătura URL nu este formatată corect; ex. http://exemplu.ro"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
 msgstr "Legătură URL nevalidă"
 
-#: src/client/composer/composer-link-popover.vala:142
+#: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid email address"
 msgstr "Adresă de email nevalidă"
 
@@ -1839,7 +1829,7 @@ msgid "Search for more languages"
 msgstr "Caută după mai multe limbi"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:390
+#: src/client/conversation-list/conversation-list-view.vala:214
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Mută conversația la _Gunoi"
@@ -1847,52 +1837,55 @@ msgstr[1] "Mută conversațiile la _Gunoi"
 msgstr[2] "Mută conversațiile la _Gunoi"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:402
+#: src/client/conversation-list/conversation-list-view.vala:226
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "Ș_terge conversația"
 msgstr[1] "Ș_terge conversațiile"
 msgstr[2] "Ș_terge conversațiile"
 
-#: src/client/conversation-list/conversation-list-view.vala:415
-#: ui/components-main-toolbar-menus.ui:5
+#: src/client/conversation-list/conversation-list-view.vala:239
+#: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "Ma_rchează ca citit"
 
-#: src/client/conversation-list/conversation-list-view.vala:423
-#: ui/components-main-toolbar-menus.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:248
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "Marchează ca _necitit"
 
-#: src/client/conversation-list/conversation-list-view.vala:431
-#: ui/components-main-toolbar-menus.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:257
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "Eliminați _steaua"
 
-#: src/client/conversation-list/conversation-list-view.vala:438
-#: ui/components-main-toolbar-menus.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:264
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "Marchează cu o _stea"
 
+#: src/client/conversation-list/conversation-list-view.vala:275
+msgid "_Archive conversation"
+msgid_plural "_Archive conversations"
+msgstr[0] "_Arhivează conversația"
+msgstr[1] "_Arhivează conversațiile"
+msgstr[2] "_Arhivează conversațiile"
+
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:455
+#: src/client/conversation-list/conversation-list-view.vala:287
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Răspunde"
 
-#: src/client/conversation-list/conversation-list-view.vala:461
+#: src/client/conversation-list/conversation-list-view.vala:293
 msgid "R_eply All"
 msgstr "Răspund_e tuturor"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:467
+#: src/client/conversation-list/conversation-list-view.vala:299
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "Î_naintează"
-
-#: src/client/conversation-list/formatted-conversation-data.vala:18
-msgid "Me"
-msgstr "Eu"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:531
@@ -1912,14 +1905,14 @@ msgstr "Data:"
 msgid "Subject:"
 msgstr "Subiect:"
 
-#: src/client/conversation-viewer/conversation-message.vala:128
+#: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
 msgstr "Această adresă de email poate fi falsificată"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
 #. email's header, but they are all being shown anyway.
-#: src/client/conversation-viewer/conversation-message.vala:234
+#: src/client/conversation-viewer/conversation-message.vala:237
 msgid "Show less"
 msgstr "Arată mai puțin"
 
@@ -1927,7 +1920,7 @@ msgstr "Arată mai puțin"
 #. too many email addresses to be shown by default in
 #. an email's header. The string substitution is the
 #. number of extra email to be shown.
-#: src/client/conversation-viewer/conversation-message.vala:260
+#: src/client/conversation-viewer/conversation-message.vala:263
 #, c-format
 msgid "%d more…"
 msgid_plural "%d more…"
@@ -1939,90 +1932,90 @@ msgstr[2] "%d mai multe…"
 #. in load_contacts.
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: src/client/conversation-viewer/conversation-message.vala:533
+#: src/client/conversation-viewer/conversation-message.vala:550
 msgid "No sender"
 msgstr "Fără expeditor"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the compact header for a message.
-#: src/client/conversation-viewer/conversation-message.vala:1011
+#: src/client/conversation-viewer/conversation-message.vala:1032
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: src/client/conversation-viewer/conversation-message.vala:1133
+#: src/client/conversation-viewer/conversation-message.vala:1154
 msgid "Image"
 msgstr "Imagine"
 
+#: src/client/conversation-viewer/conversation-message.vala:1363
+#: src/client/conversation-viewer/conversation-message.vala:1369
+msgid "(unknown)"
+msgstr "(necunoscut)"
+
 #. Translators: Info bar status message
-#: src/client/conversation-viewer/conversation-message.vala:1396
+#: src/client/conversation-viewer/conversation-message.vala:1422
+#: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Imaginile de la distanță nu sunt afișate"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1398
-msgid "Only show remote images from senders you trust."
-msgstr ""
-"Afișează imaginile de la distanță numai pentru expeditorii de încredere."
+#: src/client/conversation-viewer/conversation-message.vala:1444
+msgid "This message can't be trusted."
+msgstr "Acest mesaj nu poate fi de încredere."
 
 #. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1402
+#: src/client/conversation-viewer/conversation-message.vala:1448
 msgid "Show"
 msgstr "Arată"
 
-#. Translators: Info bar button label
-#: src/client/conversation-viewer/conversation-message.vala:1406
-msgid "Always show from sender"
-msgstr "Arată întotdeauna de la expeditor"
-
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:83
+msgid "No Conversations Selected"
 msgstr "Nicio conversație selectată"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "Selectând o conversație din listă o va afișa aici"
+#: src/client/conversation-viewer/conversation-viewer.vala:87
+msgid "Selecting a conversation from the list will display it here."
+msgstr "Selectarea unei conversații din listă o va afișa aici."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:99
+msgid "Multiple Conversations Selected"
 msgstr "Conversații multiple selectate"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
-msgstr "Alegând o acțiune se va aplica tuturor conversațiilor selectate"
+#: src/client/conversation-viewer/conversation-viewer.vala:103
+msgid "Choosing an action will apply to all selected conversations."
+msgstr "Alegerea unei acțiuni se va aplica tuturor conversațiilor selectate."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
-msgstr "Nicio conversație în dosar"
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
+msgid "No Conversations Found"
+msgstr "Nicio conversație găsită"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "Acest dosar nu conține nicio conversație"
+#: src/client/conversation-viewer/conversation-viewer.vala:119
+msgid "This folder does not contain any conversations."
+msgstr "Acest dosar nu conține conversații."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
+#: src/client/conversation-viewer/conversation-viewer.vala:135
+msgid "Your search returned no results, try refining your search terms."
 msgstr ""
-"Căutarea dumneavoastră nu a produs rezultate, încercați să îmbunătățiți "
-"termenii de căutare"
+"Căutarea nu a produs rezultate, încercați să îmbunătățiți termenii de "
+"căutare."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -2122,6 +2115,10 @@ msgstr "Detalii"
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr "Geary necesită parola dumneavoastra de email pentru a continua"
+
+#: src/client/folder-list/folder-list-account-branch.vala:53
+msgid "Folders"
+msgstr "Dosare"
 
 #. Translators: Label displaying total number of email
 #. messages in a folder. String substitution is the actual
@@ -2270,7 +2267,7 @@ msgstr "Trimite"
 #. Translators: Info bar button label for editing a draft
 #. email
 #: src/client/plugin/email-templates/email-templates.vala:305
-#: src/client/plugin/mail-merge/mail-merge.vala:336
+#: src/client/plugin/mail-merge/mail-merge.vala:342
 #: src/client/plugin/special-folders/special-folders.vala:187
 msgid "Edit"
 msgstr "Editare"
@@ -2283,8 +2280,8 @@ msgstr "Editare"
 #. display merged email
 #: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 #: src/client/plugin/mail-merge/mail-merge.vala:288
-#: src/client/plugin/mail-merge/mail-merge.vala:389
-#: src/client/plugin/mail-merge/mail-merge.vala:488
+#: src/client/plugin/mail-merge/mail-merge.vala:395
+#: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Îmbină mail"
 
@@ -2317,24 +2314,24 @@ msgstr[2] "Trimise %u din %u"
 
 #. Translators: Infobar status label for an email mail merge
 #. template
-#: src/client/plugin/mail-merge/mail-merge.vala:324
+#: src/client/plugin/mail-merge/mail-merge.vala:330
 msgid "Mail merge template"
 msgstr "Șablon de îmbinare email"
 
 #. Translators: Info bar button label for performing a
 #. mail-merge on an email template
-#: src/client/plugin/mail-merge/mail-merge.vala:328
+#: src/client/plugin/mail-merge/mail-merge.vala:334
 msgid "Merge"
 msgstr "Îmbină"
 
 #. / Translators: Action bar menu button label for
 #. / mail-merge plugin
-#: src/client/plugin/mail-merge/mail-merge.vala:377
+#: src/client/plugin/mail-merge/mail-merge.vala:383
 msgid "Insert field"
 msgstr "Introdu un câmp"
 
 #. / Translators: File chooser filer label
-#: src/client/plugin/mail-merge/mail-merge.vala:396
+#: src/client/plugin/mail-merge/mail-merge.vala:402
 msgid "Comma separated values (CSV)"
 msgstr "Valori separate prin virgulă (CSV)"
 
@@ -2766,7 +2763,7 @@ msgstr "Arhivă"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1006
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
 msgid "Drafts | Draft"
 msgstr "Drafts | Draft | Ciorne | Ciornă"
 
@@ -2774,14 +2771,14 @@ msgstr "Drafts | Draft | Ciorne | Ciornă"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1015
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1024
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Sent | Sent Mail | Sent Email | Sent E-Mail | Trimise | Emailuri Trimise"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1020
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1029
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elemente trimise"
@@ -2790,7 +2787,7 @@ msgstr "Elemente trimise"
 #. Junk/Spam mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1030
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1039
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -2802,13 +2799,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1040
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1049
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Rubbish | Rubbish Bin | Gunoi | Coșul de guni"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1045
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1054
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elemente șterse"
@@ -2817,38 +2814,42 @@ msgstr "Elemente șterse"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:1055
+#: src/engine/imap-engine/imap-engine-generic-account.vala:1064
 msgid "Archive | Archives"
 msgstr "Archive | Archives | Arhivă | Arhive"
 
-#: src/engine/rfc822/rfc822-message.vala:551
+#: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Nu s-a putut determina tipul mime pentru „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:562
+#: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "Nu s-a putut determina tipul de conținut pentru tipul mime „%s” pe „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1015
+#: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
 msgstr "(fără titlu)"
 
-#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:122
+#: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:13
 msgid "Add an account"
 msgstr "Adaugă un cont"
 
-#: ui/accounts_editor_add_pane.ui:47
-msgid "_Create"
-msgstr "_Creează"
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "Înapoi"
 
-#: ui/accounts_editor_add_pane.ui:119 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "Primire"
 
-#: ui/accounts_editor_add_pane.ui:163 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "Se trimite"
 
@@ -2860,36 +2861,36 @@ msgstr "Editează contul"
 msgid "Account Name"
 msgstr "Numele contului"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:115
 msgid "Email addresses"
 msgstr "Adrese de email"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:152
 msgid "Signature"
 msgstr "Semnătură"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:187
 msgid "Settings"
 msgstr "Configurări"
 
-#. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
-msgid "Server Settings"
-msgstr "Configurări server"
-
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:227
 msgid "Remove this account from Geary"
 msgstr "Elimină acest cont din Geary"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:246 ui/accounts_editor_servers_pane.ui:7
+msgid "Server Settings"
+msgstr "Configurări server"
 
 #: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "Conturi"
 
-#: ui/accounts_editor_list_pane.ui:59
-msgid "To get started, select an email provider below."
-msgstr "Pentru a începe, selectați furnizorul de email de mai jos."
+#: ui/accounts_editor_list_pane.ui:74
+msgid "To get started, add an email provider above."
+msgstr "Pentru a începe, adăugați un furnizor de email mai sus."
 
-#: ui/accounts_editor_list_pane.ui:73
+#: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
 msgstr "Bine ați venit la Geary"
 
@@ -3157,9 +3158,26 @@ msgstr "Răspunde tuturor"
 msgid "Forward"
 msgstr "Înaintează"
 
-#: ui/components-conversation-actions.ui:156
-msgid "_Archive"
-msgstr "_Arhivează"
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "Mail"
+
+#: ui/components-headerbar-conversation-list.ui:36
+msgctxt "tooltip"
+msgid "Compose Message"
+msgstr "Compune un mesaj"
+
+#: ui/components-headerbar-conversation-list.ui:52
+msgid "Toggle search bar"
+msgstr "Comută bara de căutare"
+
+#: ui/components-headerbar-conversation-list.ui:70
+msgid "Select conversations"
+msgstr "Selectați conversațiile"
+
+#: ui/components-headerbar-conversation.ui:60
+msgid "Toggle find bar"
+msgstr "Comută bara de căutare"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
@@ -3210,38 +3228,21 @@ msgstr "Copiază în clipboard"
 msgid "Clears all log entries"
 msgstr "Curăță toate intrările din istoric"
 
-#: ui/components-main-toolbar.ui:72 ui/components-main-toolbar.ui:158
-msgid "Back"
-msgstr "Înapoi"
-
-#: ui/components-main-toolbar.ui:89
-msgctxt "tooltip"
-msgid "Compose Message"
-msgstr "Compune un mesaj"
-
-#: ui/components-main-toolbar.ui:105
-msgid "Toggle search bar"
-msgstr "Comută bara de căutare"
-
-#: ui/components-main-toolbar.ui:195
-msgid "Toggle find bar"
-msgstr "Comută bara de căutare"
-
-#: ui/components-main-toolbar-menus.ui:21
-msgid "Toggle as _Junk"
-msgstr "Comută ca _spam"
-
-#: ui/components-main-toolbar-menus.ui:28
+#: ui/components-menu-application.ui:6
 msgid "_Accounts"
 msgstr "_Conturi"
 
-#: ui/components-main-toolbar-menus.ui:36
+#: ui/components-menu-application.ui:14
 msgid "_Keyboard Shortcuts"
 msgstr "Scurtături de _tastatură"
 
-#: ui/components-main-toolbar-menus.ui:47
+#: ui/components-menu-application.ui:25
 msgid "_About Geary"
 msgstr "_Despre Geary"
+
+#: ui/components-menu-conversation.ui:25
+msgid "Toggle as _Junk"
+msgstr "Comută ca _spam"
 
 #: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
@@ -3384,6 +3385,22 @@ msgstr "Salvează _imaginea ca…"
 msgid "_Select All"
 msgstr "_Selectează tot"
 
+#: ui/conversation-message-menus.ui:50
+msgid "Show images"
+msgstr "Arată imaginile"
+
+#: ui/conversation-message-menus.ui:52
+msgid "For this message"
+msgstr "Pentru acest mesaj"
+
+#: ui/conversation-message-menus.ui:56
+msgid "For this sender"
+msgstr "Pentru acest expeditor"
+
+#: ui/conversation-message-menus.ui:60
+msgid "For this domain"
+msgstr "Pentru acest domeniu"
+
 #: ui/conversation-message.ui:54
 msgid "From <email>"
 msgstr "De la <email>"
@@ -3408,15 +3425,15 @@ msgstr "Răspunde către:"
 msgid "Subject"
 msgstr "Subiect"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "Caută în conversație"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Găsește aparența anterioară a șirului căutat."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Găsește aparența următoare a șirului căutat."
 
@@ -3427,10 +3444,6 @@ msgstr "Caută:"
 #: ui/find_bar.glade:80
 msgid "_Previous"
 msgstr "_Precedentul"
-
-#: ui/find_bar.glade:97
-msgid "_Next"
-msgstr "_Următorul"
 
 #: ui/find_bar.glade:114
 msgid "_Case sensitive"
@@ -3757,6 +3770,46 @@ msgstr "_Memorează parola"
 msgid "_Authenticate"
 msgstr "_Autentificare"
 
+#~ msgid "Notify of new mail at startup"
+#~ msgstr "Notifică despre emailuri noi la pornire"
+
+#~ msgid "True to notify of new mail at startup."
+#~ msgstr "Adevărat pentru a notifica despre noile emailuri la pornire."
+
+#~ msgid "All others"
+#~ msgstr "Toate celelalte"
+
+#~ msgid "Yahoo"
+#~ msgstr "Yahoo"
+
+#~ msgid "Other email providers"
+#~ msgstr "Alți furnizori de email"
+
+#~ msgid "Start with the main window hidden (deprecated)"
+#~ msgstr "Pornește Geary cu fereastra principală ascunsă (învechită)"
+
+#~ msgid ""
+#~ "The `--hidden` option is deprecated and will be removed in the future."
+#~ msgstr "Opțiunea „--hidden” este învechită și va fi eliminată în viitor."
+
+#~ msgid "Sending…"
+#~ msgstr "Se trimite…"
+
+#~ msgid "Error sending email"
+#~ msgstr "Eroare la trimiterea emailului"
+
+#~ msgid "Error saving sent mail"
+#~ msgstr "Eroare la salvarea emailului trimis"
+
+#~ msgid "Me"
+#~ msgstr "Eu"
+
+#~ msgid "Always show from sender"
+#~ msgstr "Arată întotdeauna de la expeditor"
+
+#~ msgid "_Archive"
+#~ msgstr "_Arhivează"
+
 #~ msgid "_Reply-To"
 #~ msgstr "_Răspunde la"
 
@@ -3840,9 +3893,6 @@ msgstr "_Autentificare"
 
 #~ msgid "Displays a dock badge showing the number of new messages"
 #~ msgstr "Afișează un ecuson de doc arătând numărul de mesaje noi"
-
-#~ msgid "Special Folders"
-#~ msgstr "Dosare speciale"
 
 #~ msgid "Enable notification sounds"
 #~ msgstr "Activează notificările sonore"
