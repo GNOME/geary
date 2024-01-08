@@ -38,12 +38,13 @@
   <url type="help">https://wiki.gnome.org/Apps/Geary/Documentation</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/geary/-/issues/new</url>
+  <url type="vcs-browser">https://gitlab.gnome.org/GNOME/geary/</url>
   <url type="translate">https://wiki.gnome.org/TranslationProject</url>
   <url type="donation">https://gnome.org/donate</url>
 
   <screenshots>
-    <screenshot>
-      <image type="default">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-40-main-window.png</image>
+    <screenshot type="default">
+      <image>https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-40-main-window.png</image>
     </screenshot>
     <screenshot>
       <!-- Translators: A screenshot description. -->
@@ -261,7 +262,6 @@
   </requires>
 
   <custom>
-    <value key="Purism::form_factor">workstation</value>
     <value key="Purism::form_factor">mobile</value>
   </custom>
 
