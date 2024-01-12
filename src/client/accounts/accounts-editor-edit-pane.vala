@@ -160,7 +160,7 @@ internal class Accounts.EditorEditPane :
         Application.Command next_undo = this.commands.peek_undo();
         this.undo_button.set_tooltip_text(
             (next_undo != null && next_undo.undo_label != null)
-            ? next_undo.undo_label : ""
+            ? next_undo.undo_label : _("Undo")
         );
 
         // Ensure the account is notified that is has changed. This
