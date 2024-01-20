@@ -5,13 +5,13 @@
 #
 # Translators:
 # Hessam.08 <h.shahpouri@yandex.com>, 2013.
-# Danial Behzadi <dani.behzi@ubuntu.com>, 2023.
+# Danial Behzadi <dani.behzi@ubuntu.com>, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-11-25 11:35+0000\n"
-"PO-Revision-Date: 2023-11-25 15:47+0330\n"
+"POT-Creation-Date: 2023-12-05 12:57+0000\n"
+"PO-Revision-Date: 2024-01-20 16:31+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian (http://www.transifex.com/projects/p/geary/language/"
 "fa/)\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-DamnedLies-Scope: partial\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -960,15 +960,15 @@ msgstr "رایانامه تا اتّصال دوباره فرستاده نخوا�
 #: src/client/application/application-controller.vala:599
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
-msgstr[0] "گفت‌وگوها نشان شدند"
-msgstr[1] ""
+msgstr[0] "گفت‌وگو نشان شد"
+msgstr[1] "گفت‌وگوها نشان شدند"
 
 #. / Translators: Label for in-app notification
 #: src/client/application/application-controller.vala:605
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
-msgstr[0] "نشان گفت‌وگوها برداشته شد"
-msgstr[1] ""
+msgstr[0] "نشان گفت‌وگو برداشته شد"
+msgstr[1] "نشان گفت‌وگوها برداشته شد"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -998,8 +998,8 @@ msgstr[1] "گفت‌وگوها به %s بازگردانده شدند"
 #: src/client/application/application-controller.vala:682
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
-msgstr[0] "گفت‌وگوها بایگانی شدند"
-msgstr[1] ""
+msgstr[0] "گفت‌وگو بایگانی شد"
+msgstr[1] "گفت‌وگوها بایگانی شدند"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
@@ -1014,8 +1014,8 @@ msgstr[1] "پیام‌ها به %s بازگردانده شدند"
 #: src/client/application/application-controller.vala:759
 msgid "Message archived"
 msgid_plural "Messages archived"
-msgstr[0] "پیام‌ها بایگانی شدند"
-msgstr[1] ""
+msgstr[0] "پیام‌ بایگانی شد"
+msgstr[1] "پیام‌ها بایگانی شدند"
 
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
@@ -1065,7 +1065,7 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
-"خطایی در هنگام گشودن پایگاه دادهٔ محلی ایمیل برای این حساب وجود دارد. این "
+"خطایی در هنگام گشودن پایگاه دادهٔ محلی رایانامه برای این حساب وجود دارد. این "
 "احتمالاً به خاطر وجود خرابی در فایل پایگاه داده در پوشهٔ زیر است:\n"
 "\n"
 "%s\n"
@@ -1073,9 +1073,9 @@ msgstr ""
 "Geary می‌تواند پایگاه داده را مجدداً تولید کرده و مجدداً با سرور هماهنگ کند و یا "
 "خارج شود.\n"
 "\n"
-"ایجاد مجدد پایگاه داده باعث از بین رفتن همهٔ ایمیل‌های محلی و فایل‌های پیوست "
+"ایجاد مجدد پایگاه داده باعث از بین رفتن همهٔ رایانامه‌های محلی و فایل‌های پیوست "
 "آن‌ها خواهد شد.\n"
-"<b>ایمیل‌ها بر روی سرور شما تأثیری نخواهند دید.</b>"
+"<b>رایانامه‌ها بر روی سرور شما تأثیری نخواهند دید.</b>"
 
 #: src/client/application/application-controller.vala:1312
 msgid "_Rebuild"
@@ -1207,7 +1207,7 @@ msgstr "برچسب‌ها"
 #: src/client/application/application-main-window.vala:1419
 #, c-format
 msgid "Empty all email from your %s folder?"
-msgstr ""
+msgstr "خالی کردن همهٔ رایانامه‌ها از شاخهٔ %sتان؟"
 
 #: src/client/application/application-main-window.vala:1420
 msgid "This removes the email from Geary and your email server."
@@ -1226,8 +1226,8 @@ msgstr "تخلیهٔ %s"
 #: src/client/application/application-main-window.vala:1479
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
-msgstr[0] "می‌خواهید این گفت‌وگوها را برای همیشه پاک کنید؟"
-msgstr[1] ""
+msgstr[0] "می‌خواهید این گفت‌وگو را برای همیشه پاک کنید؟"
+msgstr[1] "می‌خواهید این گفت‌وگوها را برای همیشه حذف کنید؟"
 
 #: src/client/application/application-main-window.vala:1484
 #: src/client/application/application-main-window.vala:1499
@@ -1238,8 +1238,8 @@ msgstr "حذف"
 #: src/client/application/application-main-window.vala:1494
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
-msgstr[0] "می‌خواهید این پیام‌ها را برای همیشه پاک کنید؟"
-msgstr[1] ""
+msgstr[0] "می‌خواهید این پیام را برای همیشه حذف کنید؟"
+msgstr[1] "می‌خواهید این پیام‌ها را برای همیشه حذف کنید؟"
 
 #: src/client/application/application-main-window.vala:1828
 #, c-format
@@ -1248,7 +1248,7 @@ msgstr "%s (%Id)"
 
 #: src/client/application/application-startup-manager.vala:78
 msgid "Geary wants to run in background"
-msgstr ""
+msgstr "گیری می‌خواهد در پس‌زمینه اجرا شود"
 
 #. Translators: The first argument will be a
 #. description of the document type, the second will
@@ -1280,38 +1280,38 @@ msgstr "_دیگر پرسیده نشود"
 #: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
-msgstr[0] "نشانه‌گذاری گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "نشانه‌گذاری گفت‌وگو"
+msgstr[1] "نشانه‌گذاری گفت‌وگوها"
 
 #: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
-msgstr[0] "بایگانی گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "بایگانی گفت‌وگو"
+msgstr[1] "بایگانی گفت‌وگوها"
 
 #: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
-msgstr[0] "افزودن برچسب به گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "افزودن برچسب به گفت‌وگو"
+msgstr[1] "افزودن برچسب به گفت‌وگوها"
 
 #: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
-msgstr[0] "رونوشت از گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "رونوشت از گفت‌وگو"
+msgstr[1] "رونوشت از گفت‌وگوها"
 
 #: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
-msgstr[0] "انتقال گفت‌وگوها به زباله‌دان"
-msgstr[1] ""
+msgstr[0] "انتقال گفت‌وگو به زباله‌دان"
+msgstr[1] "انتقال گفت‌وگوها به زباله‌دان"
 
 #: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
-msgstr[0] "حذف گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "حذف گفت‌وگو"
+msgstr[1] "حذف گفت‌وگوها"
 
 #: src/client/components/components-info-bar.vala:248
 msgid "Information"
@@ -1606,7 +1606,7 @@ msgstr "نشانی رایانامهٔ نامعتبر"
 #. / Translators: Title for an empty composer window
 #: src/client/composer/composer-widget.vala:32
 msgid "New Message"
-msgstr "ارسال ایمیل جدید"
+msgstr "ارسال رایانامهٔ جدید"
 
 #: src/client/composer/composer-widget.vala:233
 msgid "Saved"
@@ -1681,50 +1681,45 @@ msgstr "می‌خواهید این پیام پیش‌نویس را دور بین
 
 #: src/client/composer/composer-widget.vala:1503
 msgid "Send message with an empty subject and body?"
-msgstr "ایمیل، بدون موضوع و متن ارسال شود؟"
+msgstr "فرستادن رایانامه بدون موضوع و متن؟"
 
 #: src/client/composer/composer-widget.vala:1505
 msgid "Send message with an empty subject?"
-msgstr "ایمیل، بدون موضوع ارسال شود؟"
+msgstr "فرستادن رایانامه بدون موضوع؟"
 
 #: src/client/composer/composer-widget.vala:1507
 msgid "Send message with an empty body?"
-msgstr "ایمیل، بدون متن ارسال شود؟"
+msgstr "فرستادن رایانامه بدون متن؟"
 
 #: src/client/composer/composer-widget.vala:1516
 msgid "Send message without an attachment?"
-msgstr "ایمیل، بدون فایل پیوست ارسال شود؟"
+msgstr "فرستادن رایانامه بدون پیوست؟"
 
 #: src/client/composer/composer-widget.vala:1858
-#, fuzzy, c-format
-#| msgid "\"%s\" already attached for delivery."
+#, c-format
 msgid "“%s” already attached for delivery."
-msgstr "فایل « %s » در حال حاظر برای تحویل پیوست شده است."
+msgstr "پروندهٔ «%s» از پیش برای تحویل پیوست شده."
 
 #: src/client/composer/composer-widget.vala:1890
 #: src/client/composer/composer-widget.vala:1940
-#, fuzzy, c-format
-#| msgid "\"%s\" is an empty file."
+#, c-format
 msgid "“%s” is an empty file."
-msgstr "تخلیهٔ %s"
+msgstr "پروندهٔ «%s» خالیست."
 
 #: src/client/composer/composer-widget.vala:1928
-#, fuzzy, c-format
-#| msgid "\"%s\" could not be found."
+#, c-format
 msgid "“%s” could not be found."
-msgstr "نتوانست وصل شود. شبکه‌تان را بررسی کنید"
+msgstr "نتوانست «%s» را بیابد."
 
 #: src/client/composer/composer-widget.vala:1934
-#, fuzzy, c-format
-#| msgid "\"%s\" is a folder."
+#, c-format
 msgid "“%s” is a folder."
-msgstr "ثبت عادی‌سازی شاخه"
+msgstr "«%s» شاخه است."
 
 #: src/client/composer/composer-widget.vala:1953
-#, fuzzy, c-format
-#| msgid "\"%s\" could not be opened for reading."
+#, c-format
 msgid "“%s” could not be opened for reading."
-msgstr "امکان گشودن فایل « %s » برای خواندن آن وجود ندارد."
+msgstr "نتوانست پروندهٔ «%s» را برای خواندن بگشاید."
 
 #: src/client/composer/composer-widget.vala:1961
 msgid "Cannot add attachment"
@@ -1768,9 +1763,9 @@ msgstr "پاسخ-به: "
 #. and the second will be the account's primary email
 #. address.
 #: src/client/composer/composer-widget.vala:2232
-#, fuzzy, c-format
+#, c-format
 msgid "%1$s via %2$s"
-msgstr "در %1$s, %2$s نوشته بود:"
+msgstr "%1$s از %2$s"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
@@ -1788,15 +1783,15 @@ msgstr "جست‌وجو برای زبان‌های بیش‌تز"
 #: src/client/conversation-list/conversation-list-view.vala:214
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
-msgstr[0] "انتقال گفت‌وگوها به _زباله‌دان"
-msgstr[1] ""
+msgstr[0] "انتقال گفت‌وگو به _زباله‌دان"
+msgstr[1] "انتقال گفت‌وگوها به _زباله‌دان"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:226
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_حذف گفت‌وگو"
-msgstr[1] ""
+msgstr[1] "_حذف گفت‌وگوها"
 
 #: src/client/conversation-list/conversation-list-view.vala:239
 #: ui/components-menu-conversation.ui:5
@@ -1821,8 +1816,8 @@ msgstr "ستاره دار کردن"
 #: src/client/conversation-list/conversation-list-view.vala:275
 msgid "_Archive conversation"
 msgid_plural "_Archive conversations"
-msgstr[0] "_بایگانی گفت‌وگوها"
-msgstr[1] ""
+msgstr[0] "_بایگانی گفت‌وگو"
+msgstr[1] "_بایگانی گفت‌وگوها"
 
 #. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:287
@@ -2053,10 +2048,8 @@ msgstr "جزییات"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: src/client/dialogs/password-dialog.vala:16
-#, fuzzy
-#| msgid "Please enter your email password"
 msgid "Geary requires your email password to continue"
-msgstr "لطفاً کلمهٔ عبور ایمیل خود را وارد کنید"
+msgstr "گیری برای ادامه نیازمند گذرواژهٔ رایانامه‌تان است"
 
 #: src/client/folder-list/folder-list-account-branch.vala:53
 msgid "Folders"
@@ -2153,7 +2146,7 @@ msgstr[1] "%s, %Id پیام جدید در کل"
 msgid "New message"
 msgid_plural "New messages"
 msgstr[0] "پیام جدید"
-msgstr[1] ""
+msgstr[1] "پیام‌های جدید"
 
 #: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Email Templates"
@@ -2265,17 +2258,15 @@ msgstr "درج زمینه"
 #. / Translators: File chooser filer label
 #: src/client/plugin/mail-merge/mail-merge.vala:402
 msgid "Comma separated values (CSV)"
-msgstr ""
+msgstr "مقدارهای جدا شده با کاما (CSV)"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Messaging Menu"
 msgstr "فهرست پیام‌رسانی"
 
 #: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
-#, fuzzy
-#| msgid "Show _notifications for new mail"
 msgid "Displays Unity Messaging Menu notifications for new email"
-msgstr "نمایش هشدار برای ایمیل جدید"
+msgstr "نمایش آگاهی‌های فهرست پیام‌رسانی یونیتی برای رایانامهٔ جدید"
 
 #: src/client/plugin/messaging-menu/messaging-menu.vala:79
 #, c-format
@@ -2406,13 +2397,11 @@ msgstr "(بدون گیرنده)"
 #. / address of the first, the second substitution is
 #. / the number of n - 1 remaining recipients.
 #: src/client/util/util-email.vala:162
-#, fuzzy, c-format
+#, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
-msgstr[0] ""
-"%s\n"
-"(%Id پیام جدید دیگر)"
-msgstr[1] ""
+msgstr[0] "%s و %Idتای دیگر"
+msgstr[1] "%s و %Idتای دیگر"
 
 #. / GLib g_date_time_format format string for the date and
 #. / time that a message being replied to was
@@ -2424,10 +2413,8 @@ msgstr[1] ""
 #. / use mm/dd/yyyy since it could be confused with
 #. / dd/mm/yyyy) and must include the time zone.
 #: src/client/util/util-email.vala:194
-#, fuzzy
-#| msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgid "%a, %b %-e %Y at %X %Z"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr "%OH:%OM:%OS %OZ روز %a، %-Oe %Ob %Oy at %OH:%OM:%OS %OZ"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s
@@ -2705,9 +2692,8 @@ msgstr "پیش‌نویس | چرک‌نویس"
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1024
-#, fuzzy
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
-msgstr "پخش صدای ارسال نامهٔ میزکار هنگام فرستاده شدن یک رایانامه"
+msgstr "Sent | Sent Mail | Sent Email | Sent E-Mail | فرستاده"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
@@ -2733,6 +2719,8 @@ msgstr ""
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1049
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr ""
+"Trash | Rubbish | Rubbish Bin ‌| زباله | زباله دان | زباله‌دان | سطل زباله | "
+"آشغال | سطل آشغال"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
@@ -2861,24 +2849,20 @@ msgid "Strikethrough text"
 msgstr "متن خط‌خورده"
 
 #: ui/composer-editor.ui:185
-#, fuzzy
 msgid "Insert bulleted list"
-msgstr "سیاههٔ افزایه‌های اختیاری"
+msgstr "درج سیاههٔ نشانه‌ای"
 
 #: ui/composer-editor.ui:207
-#, fuzzy
 msgid "Insert numbered list"
-msgstr "سیاههٔ افزایه‌های اختیاری"
+msgstr "درج سیاههٔ شماره‌ای"
 
 #: ui/composer-editor.ui:237
-#, fuzzy
 msgid "Indent or quote text"
-msgstr "نقل‌قول متن"
+msgstr "دندانه یا نقل‌قول متن"
 
 #: ui/composer-editor.ui:259
-#, fuzzy
 msgid "Un-indent or unquote text"
-msgstr "برداشتن نقل‌قول متن"
+msgstr "برداشتن دندانه یا نقل‌قول متن"
 
 #: ui/composer-editor.ui:286
 msgid "Remove text formatting"
@@ -2909,9 +2893,8 @@ msgid "Change font size"
 msgstr "تغییر اندازهٔ قلم"
 
 #: ui/composer-editor.ui:402
-#, fuzzy
 msgid "Insert or update text link"
-msgstr "درج یک پیوند"
+msgstr "درج یا به‌روز رسانی پیوند متنی"
 
 #: ui/composer-editor.ui:424
 msgid "Insert an image"
@@ -2930,26 +2913,20 @@ msgid "Attach a file"
 msgstr "پیوست کردن یک پرونده"
 
 #: ui/composer-editor.ui:556
-#, fuzzy
-#| msgid "_Include Original Attachments"
 msgid "Add original attachments"
-msgstr "تا به شکل پیوست افزوده شوند"
+msgstr "افزودن پیوست‌های اصلی"
 
 #: ui/composer-editor.ui:598
 msgid "More options"
 msgstr "گزینه‌های بیش‌تر"
 
 #: ui/composer-editor.ui:617
-#, fuzzy
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Show formatting toolbar"
-msgstr "نمایش/نهفتن نوارابزار قالب‌بندی"
+msgstr "نمایش نوارابزار قالب‌بندی"
 
 #: ui/composer-editor.ui:634
-#, fuzzy
-#| msgid "Enable _spell checking"
 msgid "Select spell checking languages"
-msgstr "زبان‌هایی که باید در بازرس املایی استفاده شوند"
+msgstr "گزینش زبان‌های با بازرس املایی"
 
 #: ui/composer-editor.ui:658
 msgid "S_ans Serif"
@@ -3018,9 +2995,8 @@ msgid "_Inspect…"
 msgstr "_بازرسی…"
 
 #: ui/composer-headerbar.ui:20 ui/composer-headerbar.ui:96
-#, fuzzy
 msgid "Detach the composer from the window"
-msgstr "جدا کردن پنجرهٔ نویسنده"
+msgstr "جدا کردن نویسنده از پنجره"
 
 #: ui/composer-headerbar.ui:123
 msgid "_Send"
@@ -3036,9 +3012,8 @@ msgstr "ذخیره و بستن"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:38
-#, fuzzy
 msgid "Insert the new link with this URL"
-msgstr "درج یک پیوند"
+msgstr "درج پیوند جدید با این نشانی"
 
 #: ui/composer-link-popover.ui:39
 msgid "Add"
@@ -3050,9 +3025,8 @@ msgstr "نشانی پیوند"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:56
-#, fuzzy
 msgid "Update this link’s URL"
-msgstr "نشانی پیوند"
+msgstr "به‌روز رسانی نشانی پیوند"
 
 #: ui/composer-link-popover.ui:57
 msgid "Update"
@@ -3072,7 +3046,7 @@ msgstr "تا به شکل پیوست افزوده شوند"
 
 #: ui/composer-widget.ui:217
 msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr ""
+msgstr "نمایش زمینه‌های رونوشت، ‌رونوشت کور و پاسخ به"
 
 #: ui/components-attachment-pane.ui:25 ui/components-attachment-pane.ui:41
 msgid "Select all attachments"
@@ -3139,23 +3113,23 @@ msgstr "جزییات:"
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:16 ui/problem-details-dialog.ui:21
 msgid "Search for matching log entries"
-msgstr ""
+msgstr "جست‌وجو برای ورودی‌هی گزارش مطابق"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:30
 msgid "Toggle appending new log entries"
-msgstr ""
+msgstr "تغییر حالت افزودن ورودی‌های گزارش جدید"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:48
 msgid "Add a marker entry to the log"
-msgstr ""
+msgstr "افزودن ورودی علامت‌گذاری به گزارش"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:71 ui/problem-details-dialog.ui:45
 msgid "Save logs entries and details"
-msgstr ""
+msgstr "ذخیرهٔ ورودی‌های گزارش‌ها و جزییات"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
@@ -3166,7 +3140,7 @@ msgstr "رونوشت به تخته‌گیره"
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:107
 msgid "Clears all log entries"
-msgstr ""
+msgstr "پاک‌سازی همهٔ ورودی‌های کزارش"
 
 #: ui/components-menu-application.ui:6
 msgid "_Accounts"
@@ -3210,28 +3184,23 @@ msgstr "بار کردن همیشگی تصویرهای درودست"
 
 #. Title label on contact popover
 #: ui/conversation-contact-popover.ui:242
-#, fuzzy
-#| msgid "Email address:"
 msgid "Deceptive email address"
-msgstr "رونوشت از نشانی رایانامه"
+msgstr "نشانی رایانامهٔ فریبنده"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:270
-#, fuzzy
-#| msgid "Email address:"
 msgid "This email address is:"
-msgstr "رونوشت از نشانی رایانامه"
+msgstr "نشانی رایانامه:"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:293
 msgid "But was forged as:"
-msgstr ""
+msgstr "ولی نشان داده به شکل:"
 
 #. Contact popover label
 #: ui/conversation-contact-popover.ui:316
-#, fuzzy
 msgid "The sender may not be trustworthy"
-msgstr "پاسخ به فرستنده "
+msgstr "ممکن است فرستنده قابل اطمینان نباشد"
 
 #: ui/conversation-email.ui:24
 msgid "Save all attachments"
@@ -3239,15 +3208,13 @@ msgstr "ذخیرهٔ تمامی پیوست‌ها"
 
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ui/conversation-email.ui:45
-#, fuzzy
 msgid "Mark this message as starred"
-msgstr "نشانه‌گذاری به ستاره‌دار/بی‌ستاره"
+msgstr "نشانه‌گذاری این پیام به ستاره‌دار"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ui/conversation-email.ui:65
-#, fuzzy
 msgid "Mark this message as not starred"
-msgstr "نشانه‌گذاری به ستاره‌دار/بی‌ستاره"
+msgstr "نشانه‌گذاری این پیام به بی‌ستاره"
 
 #. Translators: Menu item to reply to a specific message.
 #: ui/conversation-email-menus.ui:15
@@ -3300,11 +3267,11 @@ msgstr "پروند گمراه کننده پیدا شد"
 
 #: ui/conversation-message-link-popover.ui:102
 msgid "The email sender may be leading you to the wrong web site."
-msgstr ""
+msgstr "ممکن است فرستندهٔ رایانامه به پایگاه وب اشتباهی هدایتتان کند."
 
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr ""
+msgstr "اگر مطمئن نیستید، پیش از ادامه با فرستنده تماس گرفته و بپرسید."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
