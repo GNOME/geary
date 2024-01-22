@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-10-09 13:58+0000\n"
-"PO-Revision-Date: 2023-10-12 01:34+0200\n"
+"POT-Creation-Date: 2023-12-05 12:57+0000\n"
+"PO-Revision-Date: 2024-01-22 16:36+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -35,7 +35,7 @@ msgstr "Odeslat soubory pomocí Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -333,7 +333,7 @@ msgstr ""
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
 #. untrusted TLS certificate
-#: src/client/accounts/accounts-editor.vala:208
+#: src/client/accounts/accounts-editor.vala:216
 msgid "Failed to store certificate"
 msgstr "Selhalo uložení certifikátu"
 
@@ -407,7 +407,7 @@ msgstr "Vaše jméno"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:681
-#: src/client/accounts/accounts-editor-edit-pane.vala:527
+#: src/client/accounts/accounts-editor-edit-pane.vala:528
 msgid "Email address"
 msgstr "E-mailová adresa"
 
@@ -417,7 +417,7 @@ msgstr "E-mailová adresa"
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:685
-#: src/client/accounts/accounts-editor-edit-pane.vala:493
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
 msgid "person@example.com"
 msgstr "osoba@priklad.cz"
 
@@ -468,9 +468,7 @@ msgstr "Server SMTP"
 msgid "smtp.example.com"
 msgstr "smtp.priklad.cz"
 
-#. This is the remove account button in the account settings.
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Odebrat účet"
 
@@ -518,32 +516,32 @@ msgstr "Přidat novou e-mailovou adresu odesilatele"
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
 #. email addresses in their account settings.
-#: src/client/accounts/accounts-editor-edit-pane.vala:437
+#: src/client/accounts/accounts-editor-edit-pane.vala:438
 msgid "Name not set"
 msgstr "Název není nastavený"
 
 #. Translators: This is used as a placeholder for the
 #. display name for an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:478
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
 msgid "Sender Name"
 msgstr "Jméno odesilatele"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:505
+#: src/client/accounts/accounts-editor-edit-pane.vala:506
 msgid "Remove"
 msgstr "Odebrat"
 
 #. Translators: Label used for the display name part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:520
+#: src/client/accounts/accounts-editor-edit-pane.vala:521
 msgid "Sender name"
 msgstr "Jméno odesilatele"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
 #. substitution is the email address added.
-#: src/client/accounts/accounts-editor-edit-pane.vala:587
+#: src/client/accounts/accounts-editor-edit-pane.vala:588
 #, c-format
 msgid "Remove “%s”"
 msgstr "Odebrat „%s“"
@@ -551,7 +549,7 @@ msgstr "Odebrat „%s“"
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
 #. the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:627
+#: src/client/accounts/accounts-editor-edit-pane.vala:628
 #, c-format
 msgid "Undo changes to “%s”"
 msgstr "Vrátit změny na „%s“"
@@ -559,7 +557,7 @@ msgstr "Vrátit změny na „%s“"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:714
+#: src/client/accounts/accounts-editor-edit-pane.vala:715
 #, c-format
 msgid "Add “%s” back"
 msgstr "Přidat zpět „%s“"
@@ -567,14 +565,14 @@ msgstr "Přidat zpět „%s“"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:756
+#: src/client/accounts/accounts-editor-edit-pane.vala:757
 msgid "Undo signature changes"
 msgstr "Vrátit zpět změny v podpisu"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
-#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#: src/client/accounts/accounts-editor-edit-pane.vala:805
 msgid "Download mail"
 msgstr "Stahovat e-maily"
 
@@ -583,44 +581,44 @@ msgstr "Stahovat e-maily"
 #. should be downloaded for an account. The
 #. string substitution is the duration,
 #. e.g. "1 month back".
-#: src/client/accounts/accounts-editor-edit-pane.vala:836
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
 #, c-format
 msgid "Change download period back to: %s"
 msgstr "Změnit stahované období zpět na %s"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:857
+#: src/client/accounts/accounts-editor-edit-pane.vala:858
 msgid "Everything"
 msgstr "Vše"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:861
+#: src/client/accounts/accounts-editor-edit-pane.vala:862
 msgid "2 weeks back"
 msgstr "2 týdny zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:865
+#: src/client/accounts/accounts-editor-edit-pane.vala:866
 msgid "1 month back"
 msgstr "1 měsíc zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:869
+#: src/client/accounts/accounts-editor-edit-pane.vala:870
 msgid "3 months back"
 msgstr "3 měsíce zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:873
+#: src/client/accounts/accounts-editor-edit-pane.vala:874
 msgid "6 months back"
 msgstr "6 měsíců zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:877
+#: src/client/accounts/accounts-editor-edit-pane.vala:878
 msgid "1 year back"
 msgstr "1 rok zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:881
+#: src/client/accounts/accounts-editor-edit-pane.vala:882
 msgid "2 years back"
 msgstr "2 roky zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:885
+#: src/client/accounts/accounts-editor-edit-pane.vala:886
 msgid "4 years back"
 msgstr "4 roky zpětně"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:891
+#: src/client/accounts/accounts-editor-edit-pane.vala:892
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
@@ -629,42 +627,42 @@ msgstr[1] "%d dny zpětně"
 msgstr[2] "%d dní zpětně"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2317
+#: src/client/application/application-main-window.vala:2318
 msgid "Undo"
 msgstr "Zpět"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2300
+#: src/client/application/application-main-window.vala:2301
 msgid "Redo"
 msgstr "Znovu"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:326
-#: src/client/accounts/accounts-editor-row.vala:280
+#: src/client/accounts/accounts-editor-list-pane.vala:327
+#: src/client/accounts/accounts-editor-row.vala:303
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:330
-#: src/client/accounts/accounts-editor-row.vala:284
+#: src/client/accounts/accounts-editor-list-pane.vala:331
+#: src/client/accounts/accounts-editor-row.vala:307
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:352
+#: src/client/accounts/accounts-editor-list-pane.vala:353
 msgid "This account has been disabled"
 msgstr "Tento účet byl zakázán"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:361
+#: src/client/accounts/accounts-editor-list-pane.vala:362
 msgid "This account has encountered a problem and is unavailable"
 msgstr "U tohoto účtu účtu se objevil problém a proto je nedostupný"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:467
+#: src/client/accounts/accounts-editor-list-pane.vala:468
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Účet „%s“ byl odebrán"
@@ -672,7 +670,7 @@ msgstr "Účet „%s“ byl odebrán"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:474
+#: src/client/accounts/accounts-editor-list-pane.vala:475
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Účet „%s“ byl obnoven"
@@ -685,30 +683,30 @@ msgstr "Položku můžete přesunout přetažením"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:296
+#: src/client/accounts/accounts-editor-row.vala:319
 msgid "Service provider"
 msgstr "Poskytovatel služby"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:470
+#: src/client/accounts/accounts-editor-row.vala:493
 msgid "Connection security"
 msgstr "Zabezpečení připojení"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:481
+#: src/client/accounts/accounts-editor-row.vala:504
 #: src/client/accounts/accounts-editor-servers-pane.vala:751
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Žádné"
 
-#: src/client/accounts/accounts-editor-row.vala:488
+#: src/client/accounts/accounts-editor-row.vala:511
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:495
+#: src/client/accounts/accounts-editor-row.vala:518
 msgid "TLS"
 msgstr "TLS"
 
@@ -716,29 +714,29 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:650
+#: src/client/accounts/accounts-editor-row.vala:560
+#: src/client/application/application-main-window.vala:642
 msgid "Login"
 msgstr "Přihlášení"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:543
+#: src/client/accounts/accounts-editor-row.vala:576
 msgid "No login needed"
 msgstr "přihlášení není zapotřebí"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:551
+#: src/client/accounts/accounts-editor-row.vala:588
 msgid "Use same login as receiving"
 msgstr "používat stejné přihlášení jako pro příjem"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:559
+#: src/client/accounts/accounts-editor-row.vala:600
 msgid "Use a different login"
 msgstr "používat jiné přihlášení"
 
@@ -1079,12 +1077,12 @@ msgstr[0] "Konverzaci byl odebrán štítek %s"
 msgstr[1] "Konverzacím byl odebrán štítek %s"
 msgstr[2] "Konverzacím byl odebrán štítek %s"
 
-#: src/client/application/application-controller.vala:1337
+#: src/client/application/application-controller.vala:1309
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nelze otevřít databázi pro %s"
 
-#: src/client/application/application-controller.vala:1338
+#: src/client/application/application-controller.vala:1310
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1108,20 +1106,20 @@ msgstr ""
 "Opětovné sestavení databáze zničí všechny místně uložené e-maily a jejich "
 "přílohy <b>Na e-maily na vašem serveru to nebude mít vliv.</b>"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "_Rebuild"
 msgstr "Znovu _sestavit"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1312
 msgid "E_xit"
 msgstr "S_končit"
 
-#: src/client/application/application-controller.vala:1350
+#: src/client/application/application-controller.vala:1322
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nelze znovu sestavit databázi pro „%s“"
 
-#: src/client/application/application-controller.vala:1351
+#: src/client/application/application-controller.vala:1323
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1134,34 +1132,34 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1518
+#: src/client/application/application-controller.vala:1490
 #, c-format
 msgid "Email sent to %s"
 msgstr "E-mail pro příjemce %s byl odeslán"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2514
+#: src/client/application/application-controller.vala:2486
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "E-mail pro příjemce %s byl zařazen do doručovací fronty"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2578
+#: src/client/application/application-controller.vala:2550
 #, c-format
 msgid "Email to %s saved"
 msgstr "E-mail pro příjemce %s byl uložen"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2593
-#: src/client/application/application-controller.vala:2651
+#: src/client/application/application-controller.vala:2565
+#: src/client/application/application-controller.vala:2623
 msgid "Composer could not be restored"
 msgstr "Nezdařílo se obnovit předchozí stav editoru"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
+#: src/client/application/application-controller.vala:2608
 #, c-format
 msgid "Email to %s discarded"
 msgstr "E-mail pro příjemce %s byl zahozen"
@@ -1178,103 +1176,103 @@ msgid "Account update"
 msgstr "Aktualizace účtu"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:628
 msgid "Working offline"
 msgstr "Pracuje se v režimu odpojení"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "Dokud se znovu nepřipojíte, nebudete moci odesílat a přijímat e-maily."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:637
 msgid "Login problem"
 msgstr "Problém s přihlášením"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
 msgstr "Účet oznámil nesprávné přihlašovací jméno nebo heslo."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
 msgstr "Zkusit znovu přihlásit, budete dotázáni na heslo"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:653
 msgid "Security problem"
 msgstr "Problém se zabezpečením"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
 msgstr "Účet oznámil nedůvěryhodný server."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:658
 msgid "Check"
 msgstr "Zkontrolovat"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:662
 msgid "Check the security details for the connection"
 msgstr "Zkontrolovat údaje zabezpečení pro připojení"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1100
+#: src/client/application/application-main-window.vala:1093
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Štítky"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1419
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdnit všechny zprávy z vaší složky %s?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1420
 msgid "This removes the email from Geary and your email server."
 msgstr "Tímto se odstraní pošta z aplikace Geary i z poštovního serveru."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1421
 msgid "This cannot be undone."
 msgstr "Nebude možné to vrátit zpět."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1422
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdnit %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1479
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Chcete trvale smazat tuto konverzaci?"
 msgstr[1] "Chcete trvale smazat tyto konverzace?"
 msgstr[2] "Chcete trvale smazat tyto konverzace?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1484
+#: src/client/application/application-main-window.vala:1499
 msgid "Delete"
 msgstr "Smazat"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1494
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: src/client/application/application-main-window.vala:1841
+#: src/client/application/application-main-window.vala:1828
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1440,13 +1438,19 @@ msgstr "Aplikace Geary zůstane po zavření všech oken spuštěná na pozadí"
 msgid "_Always load images"
 msgstr "_Vždy načítat obrázky"
 
+#. Translators: Info bar description
+#: src/client/components/components-preferences-window.vala:173
+#: src/client/conversation-viewer/conversation-message.vala:1424
+msgid "Showing remote images allows the sender to track you"
+msgstr "Zobrazení vzdálených obrázků umožňuje odesílateli vás sledovat"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:190
+#: src/client/components/components-preferences-window.vala:191
 msgid "Preferences"
 msgstr "Předvolby"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:251
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Zásuvné moduly"
 
@@ -1564,22 +1568,6 @@ msgstr "Je vyžadován název serveru"
 #: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
 msgstr "Nelze najít název serveru"
-
-#. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: src/client/components/status-bar.vala:26
-msgid "Sending…"
-msgstr "Odesílá se…"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Chyba při odesílání e-mailu"
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Chyba při ukládání odeslané pošty"
 
 #: src/client/components/stock.vala:18
 msgid "_OK"
@@ -1963,11 +1951,6 @@ msgstr "(neznámý)"
 #: src/client/conversation-viewer/conversation-message.vala:1442
 msgid "Remote images not shown"
 msgstr "Vzdálené obrázky nejsou zobrazené"
-
-#. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1424
-msgid "Showing remote images allows the sender to track you"
-msgstr "Zobrazení vzdálených obrázků umožňuje odesílateli vás sledovat"
 
 #. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
@@ -2880,24 +2863,24 @@ msgstr "Podpis"
 msgid "Settings"
 msgstr "Nastavení"
 
-#. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
-msgid "Server Settings"
-msgstr "Nastavení serveru"
-
-#: ui/accounts_editor_edit_pane.ui:243
+#: ui/accounts_editor_edit_pane.ui:227
 msgid "Remove this account from Geary"
 msgstr "Odstranit tento účet z aplikace Geary"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:246 ui/accounts_editor_servers_pane.ui:7
+msgid "Server Settings"
+msgstr "Nastavení serveru"
 
 #: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "Účty"
 
-#: ui/accounts_editor_list_pane.ui:72
-msgid "To get started, select an email provider below."
-msgstr "Pro začátek vyberte níže poskytovatele e-mailu."
+#: ui/accounts_editor_list_pane.ui:74
+msgid "To get started, add an email provider above."
+msgstr "Pro začátek přidejte poskytovatele e-mailu ze seznamu výše."
 
-#: ui/accounts_editor_list_pane.ui:86
+#: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
 msgstr "Vítejte v Geary"
 
@@ -3776,6 +3759,15 @@ msgstr "_Pamatovat si heslo"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Ověřit"
+
+#~ msgid "Sending…"
+#~ msgstr "Odesílá se…"
+
+#~ msgid "Error sending email"
+#~ msgstr "Chyba při odesílání e-mailu"
+
+#~ msgid "Error saving sent mail"
+#~ msgstr "Chyba při ukládání odeslané pošty"
 
 #~ msgid "Notify of new mail at startup"
 #~ msgstr "Upozorňovat na novou poštu při spuštění"
