@@ -404,8 +404,12 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         if (this.get_mapped()) {
             base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
         } else {
-            this.map.connect(() => {
+            ulong handler_id = 0;
+            handler_id = this.map.connect(() => {
                 base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
+                if (handler_id > 0) {
+                    this.disconnect(handler_id);
+                }
             });
         }
     }
