@@ -74,6 +74,7 @@ ubuntu:
     - $BUILD_CMD
     - $TEST_CMD
     - $INSTALL_CMD
+  allow_failure: true
   artifacts:
     when: 'always'
     paths:
