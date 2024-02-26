@@ -1,5 +1,12 @@
 subdir('data')
 
+# Some tests will require a (headless) graphical display, so create an
+# automatic test setup for it in Meson
+add_test_setup('headless',
+  exe_wrapper: xvfb_run.found()? [ 'xvfb-run', '-d' ] : [],
+  is_default: true,
+)
+
 # Mock classes should be compiled into a stand-alone test lib for
 # re-use by both client and engine test suites, but we can't since
 # that would depend on geary-engine.vapi, and the engine test sute
