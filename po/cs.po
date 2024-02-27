@@ -10,9 +10,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-12-05 12:57+0000\n"
-"PO-Revision-Date: 2024-01-22 16:36+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
+"POT-Creation-Date: 2024-02-21 17:08+0000\n"
+"PO-Revision-Date: 2024-02-28 00:32+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -109,12 +109,12 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:50
+#: desktop/org.gnome.Geary.appdata.xml.in.in:51
 msgid "Geary displaying a conversation"
 msgstr "Geary zobrazující konverzaci"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:55
+#: desktop/org.gnome.Geary.appdata.xml.in.in:56
 msgid "Geary showing the rich text composer"
 msgstr "Geary se zobrazeným editorem formátovaného textu"
 
@@ -468,6 +468,13 @@ msgstr "Server SMTP"
 msgid "smtp.example.com"
 msgstr "smtp.priklad.cz"
 
+#: src/client/accounts/accounts-editor-edit-pane.vala:163
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2326
+#: ui/accounts_editor_edit_pane.ui:42
+msgid "Undo"
+msgstr "Zpět"
+
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
 msgid "Remove Account"
 msgstr "Odebrat účet"
@@ -626,13 +633,8 @@ msgstr[0] "%d den zpětně"
 msgstr[1] "%d dny zpětně"
 msgstr[2] "%d dní zpětně"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2318
-msgid "Undo"
-msgstr "Zpět"
-
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2301
+#: src/client/application/application-main-window.vala:2309
 msgid "Redo"
 msgstr "Znovu"
 
@@ -966,18 +968,18 @@ msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný argument aplikace: „%s“"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:496
+#: src/client/application/application-controller.vala:498
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Vyskytl se problém při odesílání pošty z účtu %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:502
 msgid "Email will not be sent until re-connected"
 msgstr "Dokud se znovu nepřipojíte, nebudou se odesílat zprávy."
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:599
+#: src/client/application/application-controller.vala:601
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Konverzace byla označena"
@@ -985,7 +987,7 @@ msgstr[1] "Konverzace byly označeny"
 msgstr[2] "Konverzace byly označeny"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:605
+#: src/client/application/application-controller.vala:607
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Označení konverzace bylo zrušeno"
@@ -995,8 +997,8 @@ msgstr[2] "Označení konverzací bylo zrušeno"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:631
-#: src/client/application/application-controller.vala:715
+#: src/client/application/application-controller.vala:633
+#: src/client/application/application-controller.vala:717
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1009,8 +1011,8 @@ msgstr[2] "Konverzace byly přesunuty do složky %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:639
-#: src/client/application/application-controller.vala:661
+#: src/client/application/application-controller.vala:641
+#: src/client/application/application-controller.vala:663
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1019,7 +1021,7 @@ msgstr[1] "Konverzace byly obnoveny do složky %s"
 msgstr[2] "Konverzace byly obnoveny do složky %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:682
+#: src/client/application/application-controller.vala:684
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Konverzace byla archivována"
@@ -1028,7 +1030,7 @@ msgstr[2] "Konverzace byly archivovány"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:738
+#: src/client/application/application-controller.vala:740
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1037,7 +1039,7 @@ msgstr[1] "Zprávy byly obnoveny do složky %s"
 msgstr[2] "Zprávy byly obnoveny do složky %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:759
+#: src/client/application/application-controller.vala:761
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Zpráva byla archivována"
@@ -1047,7 +1049,7 @@ msgstr[2] "Zpráva byly archivovány"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:794
+#: src/client/application/application-controller.vala:796
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1058,7 +1060,7 @@ msgstr[2] "Zprávy byly přesunuty do složky %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:822
+#: src/client/application/application-controller.vala:824
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1069,7 +1071,7 @@ msgstr[2] "Konverzacím byl přiřazen štítek %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:830
+#: src/client/application/application-controller.vala:832
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
@@ -1077,12 +1079,12 @@ msgstr[0] "Konverzaci byl odebrán štítek %s"
 msgstr[1] "Konverzacím byl odebrán štítek %s"
 msgstr[2] "Konverzacím byl odebrán štítek %s"
 
-#: src/client/application/application-controller.vala:1309
+#: src/client/application/application-controller.vala:1311
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nelze otevřít databázi pro %s"
 
-#: src/client/application/application-controller.vala:1310
+#: src/client/application/application-controller.vala:1312
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1106,20 +1108,20 @@ msgstr ""
 "Opětovné sestavení databáze zničí všechny místně uložené e-maily a jejich "
 "přílohy <b>Na e-maily na vašem serveru to nebude mít vliv.</b>"
 
-#: src/client/application/application-controller.vala:1312
+#: src/client/application/application-controller.vala:1314
 msgid "_Rebuild"
 msgstr "Znovu _sestavit"
 
-#: src/client/application/application-controller.vala:1312
+#: src/client/application/application-controller.vala:1314
 msgid "E_xit"
 msgstr "S_končit"
 
-#: src/client/application/application-controller.vala:1322
+#: src/client/application/application-controller.vala:1324
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nelze znovu sestavit databázi pro „%s“"
 
-#: src/client/application/application-controller.vala:1323
+#: src/client/application/application-controller.vala:1325
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1130,39 +1132,34 @@ msgstr ""
 "\n"
 "%s"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
+#. / Translators: The label for an in-app notification.
 #: src/client/application/application-controller.vala:1490
-#, c-format
-msgid "Email sent to %s"
-msgstr "E-mail pro příjemce %s byl odeslán"
+msgid "Email sent"
+msgstr "E-mail byl odeslán"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2486
+#: src/client/application/application-controller.vala:2495
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "E-mail pro příjemce %s byl zařazen do doručovací fronty"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2550
-#, c-format
-msgid "Email to %s saved"
-msgstr "E-mail pro příjemce %s byl uložen"
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:2556
+msgid "Email saved as draft"
+msgstr "E-mail byl uložen jako koncept"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2565
-#: src/client/application/application-controller.vala:2623
+#: src/client/application/application-controller.vala:2570
+#: src/client/application/application-controller.vala:2625
 msgid "Composer could not be restored"
 msgstr "Nezdařílo se obnovit předchozí stav editoru"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2608
-#, c-format
-msgid "Email to %s discarded"
-msgstr "E-mail pro příjemce %s byl zahozen"
+#: src/client/application/application-controller.vala:2611
+msgid "Email discarded"
+msgstr "E-mail byl zahozen"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
@@ -1228,51 +1225,51 @@ msgstr "Zkontrolovat údaje zabezpečení pro připojení"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1093
+#: src/client/application/application-main-window.vala:1095
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Štítky"
 
-#: src/client/application/application-main-window.vala:1419
+#: src/client/application/application-main-window.vala:1421
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdnit všechny zprávy z vaší složky %s?"
 
-#: src/client/application/application-main-window.vala:1420
+#: src/client/application/application-main-window.vala:1422
 msgid "This removes the email from Geary and your email server."
 msgstr "Tímto se odstraní pošta z aplikace Geary i z poštovního serveru."
 
-#: src/client/application/application-main-window.vala:1421
+#: src/client/application/application-main-window.vala:1423
 msgid "This cannot be undone."
 msgstr "Nebude možné to vrátit zpět."
 
-#: src/client/application/application-main-window.vala:1422
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdnit %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1479
+#: src/client/application/application-main-window.vala:1481
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Chcete trvale smazat tuto konverzaci?"
 msgstr[1] "Chcete trvale smazat tyto konverzace?"
 msgstr[2] "Chcete trvale smazat tyto konverzace?"
 
-#: src/client/application/application-main-window.vala:1484
-#: src/client/application/application-main-window.vala:1499
+#: src/client/application/application-main-window.vala:1486
+#: src/client/application/application-main-window.vala:1501
 msgid "Delete"
 msgstr "Smazat"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1494
+#: src/client/application/application-main-window.vala:1496
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: src/client/application/application-main-window.vala:1828
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1741,60 +1738,60 @@ msgstr "Poslat zprávu bez přílohy?"
 msgid "“%s” already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
 
-#: src/client/composer/composer-widget.vala:1890
-#: src/client/composer/composer-widget.vala:1940
+#: src/client/composer/composer-widget.vala:1893
+#: src/client/composer/composer-widget.vala:1943
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: src/client/composer/composer-widget.vala:1928
+#: src/client/composer/composer-widget.vala:1931
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: src/client/composer/composer-widget.vala:1934
+#: src/client/composer/composer-widget.vala:1937
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s“ je složka."
 
-#: src/client/composer/composer-widget.vala:1953
+#: src/client/composer/composer-widget.vala:1956
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Soubor „%s“ se nezdařilo otevřít pro čtení."
 
-#: src/client/composer/composer-widget.vala:1961
+#: src/client/composer/composer-widget.vala:1964
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2032
+#: src/client/composer/composer-widget.vala:2035
 msgid "Images"
 msgstr "Obrázky"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2096
+#: src/client/composer/composer-widget.vala:2099
 #: src/client/conversation-viewer/conversation-email.vala:536
 #: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "Komu:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2102
+#: src/client/composer/composer-widget.vala:2105
 #: src/client/conversation-viewer/conversation-email.vala:541
 #: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "Kopie:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2108
+#: src/client/composer/composer-widget.vala:2111
 #: src/client/conversation-viewer/conversation-email.vala:546
 #: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "Skrytá kopie:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2114
+#: src/client/composer/composer-widget.vala:2117
 msgid "Reply-To: "
 msgstr "Odpověď:"
 
@@ -1803,7 +1800,7 @@ msgstr "Odpověď:"
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2232
+#: src/client/composer/composer-widget.vala:2235
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s přes %2$s"
@@ -2851,24 +2848,24 @@ msgstr "Úprava účtu"
 msgid "Account Name"
 msgstr "Název účtu"
 
-#: ui/accounts_editor_edit_pane.ui:115
+#: ui/accounts_editor_edit_pane.ui:116
 msgid "Email addresses"
 msgstr "E-mailová adresa"
 
-#: ui/accounts_editor_edit_pane.ui:152
+#: ui/accounts_editor_edit_pane.ui:153
 msgid "Signature"
 msgstr "Podpis"
 
-#: ui/accounts_editor_edit_pane.ui:187
+#: ui/accounts_editor_edit_pane.ui:188
 msgid "Settings"
 msgstr "Nastavení"
 
-#: ui/accounts_editor_edit_pane.ui:227
+#: ui/accounts_editor_edit_pane.ui:228
 msgid "Remove this account from Geary"
 msgstr "Odstranit tento účet z aplikace Geary"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:246 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:247 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "Nastavení serveru"
 
@@ -3759,6 +3756,10 @@ msgstr "_Pamatovat si heslo"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Ověřit"
+
+#, c-format
+#~ msgid "Email to %s saved"
+#~ msgstr "E-mail pro příjemce %s byl uložen"
 
 #~ msgid "Sending…"
 #~ msgstr "Odesílá se…"
