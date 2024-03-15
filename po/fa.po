@@ -9,9 +9,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-12-05 12:57+0000\n"
-"PO-Revision-Date: 2024-01-20 16:31+0330\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
+"POT-Creation-Date: 2024-02-21 17:08+0000\n"
+"PO-Revision-Date: 2024-03-15 13:03+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian (http://www.transifex.com/projects/p/geary/language/"
 "fa/)\n"
@@ -40,8 +40,7 @@ msgstr "فرستادن پرونده‌ها با گیری"
 msgid "Geary"
 msgstr "گیری"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:4 desktop/org.gnome.Geary.desktop.in.in:4
 msgid "Email"
 msgstr "رایانامه"
 
@@ -69,15 +68,14 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"گیری برنامهٔ رایانامه‌ای ساخته برای میزکار گنوم حول گفت‌وگوست. این برنامه "
-"می‌گذارد رایانامه‌ها را با رابطی ساده و نوین خوانده، جسته و بفرستید."
+"گیری برنامهٔ رایانامه‌ای ساخته برای میزکار گنوم حول گفت‌وگوست. این برنامه می‌گذارد "
+"رایانامه‌ها را با رابطی ساده و نوین خوانده، جسته و بفرستید."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
-msgstr ""
-"گفت‌وگوها می‌گذارد بحثی را بدون نیاز به یافتن و کلیک پیام به پیام بخوانید."
+msgstr "گفت‌وگوها می‌گذارد بحثی را بدون نیاز به یافتن و کلیک پیام به پیام بخوانید."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
 msgid "Geary’s features include:"
@@ -108,12 +106,12 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "سازگار با جی‌میل، یاهو!، اوت‌لوک و دیگر کارسازهای IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:50
+#: desktop/org.gnome.Geary.appdata.xml.in.in:51
 msgid "Geary displaying a conversation"
 msgstr "گیری در حال نمایش یک گفت‌وگو"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:55
+#: desktop/org.gnome.Geary.appdata.xml.in.in:56
 msgid "Geary showing the rich text composer"
 msgstr "گیری در حال نمایش متن‌نویس متن غنی"
 
@@ -146,7 +144,7 @@ msgstr "پهنای پنجره"
 
 #: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
-msgstr ""
+msgstr "آخرین پهنای ضبطش شدهٔ پنجرهٔ برنامه."
 
 #: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
@@ -154,7 +152,7 @@ msgstr "بلندای پنجره"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
-msgstr ""
+msgstr "آخرین بلندای ضبطش شدهٔ پنجرهٔ برنامه."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Show/hide formatting toolbar"
@@ -162,7 +160,7 @@ msgstr "نمایش/نهفتن نوارابزار قالب‌بندی"
 
 #: desktop/org.gnome.Geary.gschema.xml:27
 msgid "True if the formatting toolbar in the composer is shown."
-msgstr ""
+msgstr "درست برای نشان دادن نوار ابزار قالب بندی در ایجاد کننده."
 
 #: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Autoselect next message"
@@ -170,7 +168,7 @@ msgstr "گزینش خودکار پیام بعدی"
 
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid "True if we should autoselect the next available conversation."
-msgstr ""
+msgstr "درست برای گزینش خودکار گفت‌وگوی موجود بعدی."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Display message previews"
@@ -178,7 +176,7 @@ msgstr "نمایش پیش‌نمایش پیام"
 
 #: desktop/org.gnome.Geary.gschema.xml:39
 msgid "True if we should display a short preview of each message."
-msgstr ""
+msgstr "درست برای نمایش پیش‌نمایشی کوتاه برای هر پیام."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Move messages by default"
@@ -186,7 +184,7 @@ msgstr "جابه‌جایی پیش‌گزیدهٔ پیام‌ها"
 
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid "When tagging a message, move it to destination folder."
-msgstr ""
+msgstr "جابه‌جایی پیام به شاخهٔ مقصد هنگام برچسب زدن."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
@@ -197,8 +195,8 @@ msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr ""
-"به کار انداختن میان‌برها برای کنش‌های رایانامه که نیاز به فشردن <Ctrl>ندارند "
-"برای شبیه‌سازی میان برهای جی‌میل."
+"به کار انداختن میان‌برها برای کنش‌های رایانامه که نیاز به فشردن <Ctrl>ندارند برای "
+"شبیه‌سازی میان برهای جی‌میل."
 
 #: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
@@ -209,6 +207,8 @@ msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and the "
 "null list using desktop languages by default."
 msgstr ""
+"سیاهه‌ای از localeهای پازیکس. سیاههٔ خالی بررسی نوشتاری از کار انداخته و سیاههٔ "
+"تهی به صورت پیش‌گزیده از زبان‌های میزکار استفاده خواهد کرد."
 
 #: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
@@ -216,17 +216,16 @@ msgstr "زبان‌هایی که در بازشوی بازرس املایی نش�
 
 #: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
-"List of languages that are always displayed in the popover of the spell "
-"checker."
+"List of languages that are always displayed in the popover of the spell checker."
 msgstr "سیاههٔ زبان‌هایی که همواره در بازشوی بازرس املایی نشان داده می‌شوند."
 
 #: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
-msgstr ""
+msgstr "اجرای برنامه در پس‌زمینه هنگام ورود و بسته بودن"
 
 #: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
-msgstr ""
+msgstr "درست برای اجرای برنامه در پس‌زمینه."
 
 #: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
@@ -246,12 +245,12 @@ msgstr "درست برای ایجاد رایانامه‌ها به صورت HTML�
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
-msgstr ""
+msgstr "تدبیر مشورتی برای جست‌وجوی متن کامل"
 
 #: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
-msgstr ""
+msgstr "مقدارهای مجاز exact، conservative، aggressive و horizon هستند."
 
 #: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
@@ -286,6 +285,8 @@ msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less to "
 "disable."
 msgstr ""
+"شمار ثانیه‌های انتظار پیش از فرستادن رایانامه. تنظیم روی صفر یا کم‌تر برای از کار "
+"انداختن."
 
 #: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
@@ -293,9 +294,8 @@ msgstr "زمان نمایش آگاهی کوتاه"
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
-"The length of time in seconds for which brief notifications should be "
-"displayed."
-msgstr ""
+"The length of time in seconds for which brief notifications should be displayed."
+msgstr "درازای زمان به ثانیه برای نمایش آگاهی‌های کوتاه."
 
 #: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
@@ -303,7 +303,7 @@ msgstr "سیاههٔ افزایه‌های اختیاری"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
-msgstr ""
+msgstr "افزایه‌های سیاهه شده در این‌جا هنگام آغاز بار خواهند شد."
 
 #: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
@@ -311,7 +311,7 @@ msgstr "این که تنظیمات قدیمی را مهاجرت داده‌ای�
 
 #: desktop/org.gnome.Geary.gschema.xml:135
 msgid "False to check for the old “org.yorba.geary”-schema and copy its values."
-msgstr ""
+msgstr "نادرست برای بررسی طرحوارهٔ قدیمی org.yorba.geary و رونوشت مقدارهایش."
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -451,6 +451,13 @@ msgstr "کارساز SMTP"
 msgid "smtp.example.com"
 msgstr "smtp.example.com"
 
+#: src/client/accounts/accounts-editor-edit-pane.vala:163
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2326
+#: ui/accounts_editor_edit_pane.ui:42
+msgid "Undo"
+msgstr "برگردان"
+
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
 msgid "Remove Account"
 msgstr "برداشتن حساب"
@@ -465,6 +472,8 @@ msgid ""
 "This will remove it from Geary and delete locally cached email data from your "
 "computer. Nothing will be deleted from your service provider."
 msgstr ""
+"این کار از گیری برش داشته و داده‌های رایانامهٔ انباره شدهٔ محلی را از رایانه‌تان "
+"حذف خواهد کرد. هیچ چیزی از فراهم کنندهٔ خدمتتان حذف نخواهد شد."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
@@ -491,7 +500,7 @@ msgstr "تغییر دوبارهٔ نام حساب به «%s»"
 #. address's address to an account
 #: src/client/accounts/accounts-editor-edit-pane.vala:354
 msgid "Add a new sender email address"
-msgstr ""
+msgstr "افوزدن نشانی رایانامهٔ فرستندهٔ جدید"
 
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
@@ -605,13 +614,8 @@ msgid_plural "%d days back"
 msgstr[0] "%Id روز پیش"
 msgstr[1] "%Id روز پیش"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2318
-msgid "Undo"
-msgstr "برگردان"
-
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2301
+#: src/client/application/application-main-window.vala:2309
 msgid "Redo"
 msgstr "انجام دوباره"
 
@@ -863,7 +867,7 @@ msgstr "گشودن پنجره‌ای جدید"
 #. / Command line option
 #: src/client/application/application-client.vala:136
 msgid "Revoke all pinned TLS server certificates"
-msgstr ""
+msgstr "باطل کردن همهٔ گواهی‌های کارساز TLS سنجاق شده"
 
 #. / Command line option
 #: src/client/application/application-client.vala:139
@@ -943,28 +947,28 @@ msgstr ""
 #: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
-msgstr ""
+msgstr "آرگومان برنامهٔ ناشناخته: «%s»"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:496
+#: src/client/application/application-controller.vala:498
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "در فرستادن رایانامه برای %s خطایی رخ داد"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:502
 msgid "Email will not be sent until re-connected"
 msgstr "رایانامه تا اتّصال دوباره فرستاده نخواهد شد"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:599
+#: src/client/application/application-controller.vala:601
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "گفت‌وگو نشان شد"
 msgstr[1] "گفت‌وگوها نشان شدند"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:605
+#: src/client/application/application-controller.vala:607
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "نشان گفت‌وگو برداشته شد"
@@ -973,8 +977,8 @@ msgstr[1] "نشان گفت‌وگوها برداشته شد"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:631
-#: src/client/application/application-controller.vala:715
+#: src/client/application/application-controller.vala:633
+#: src/client/application/application-controller.vala:717
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -986,8 +990,8 @@ msgstr[1] "گفت‌وگوها به %s جابه‌جا شدند"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:639
-#: src/client/application/application-controller.vala:661
+#: src/client/application/application-controller.vala:641
+#: src/client/application/application-controller.vala:663
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -995,7 +999,7 @@ msgstr[0] "گفت‌وگو به %s بازگردانده شد"
 msgstr[1] "گفت‌وگوها به %s بازگردانده شدند"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:682
+#: src/client/application/application-controller.vala:684
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "گفت‌وگو بایگانی شد"
@@ -1003,7 +1007,7 @@ msgstr[1] "گفت‌وگوها بایگانی شدند"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:738
+#: src/client/application/application-controller.vala:740
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1011,7 +1015,7 @@ msgstr[0] "پیام به %s بازگردانده شد"
 msgstr[1] "پیام‌ها به %s بازگردانده شدند"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:759
+#: src/client/application/application-controller.vala:761
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "پیام‌ بایگانی شد"
@@ -1020,7 +1024,7 @@ msgstr[1] "پیام‌ها بایگانی شدند"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:794
+#: src/client/application/application-controller.vala:796
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1030,7 +1034,7 @@ msgstr[1] "پیام‌ها به %s جابه‌جا شدند"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:822
+#: src/client/application/application-controller.vala:824
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1040,19 +1044,19 @@ msgstr[1] "گفت‌وگوها به عنوان %s برچسب خوردند"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:830
+#: src/client/application/application-controller.vala:832
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "برچسب %s گفت‌وگو برداشته شد"
 msgstr[1] "برچسب %s گفت‌وگوها برداشته شد"
 
-#: src/client/application/application-controller.vala:1309
+#: src/client/application/application-controller.vala:1311
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "ناتوان در گشودن پایگاه داده برای %s"
 
-#: src/client/application/application-controller.vala:1310
+#: src/client/application/application-controller.vala:1312
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1077,20 +1081,20 @@ msgstr ""
 "آن‌ها خواهد شد.\n"
 "<b>رایانامه‌ها بر روی سرور شما تأثیری نخواهند دید.</b>"
 
-#: src/client/application/application-controller.vala:1312
+#: src/client/application/application-controller.vala:1314
 msgid "_Rebuild"
 msgstr "_بازسازی"
 
-#: src/client/application/application-controller.vala:1312
+#: src/client/application/application-controller.vala:1314
 msgid "E_xit"
 msgstr "_خروج"
 
-#: src/client/application/application-controller.vala:1322
+#: src/client/application/application-controller.vala:1324
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "ناتوان در بازسازی پایگاه داده برای «%s»"
 
-#: src/client/application/application-controller.vala:1323
+#: src/client/application/application-controller.vala:1325
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1101,39 +1105,34 @@ msgstr ""
 "\n"
 "%s"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
+#. / Translators: The label for an in-app notification.
 #: src/client/application/application-controller.vala:1490
-#, c-format
-msgid "Email sent to %s"
-msgstr "رایانامه به %s فرستاده شد"
+msgid "Email sent"
+msgstr "رایانامه فرستاده شد"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2486
+#: src/client/application/application-controller.vala:2495
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "رایانامه به %s در ثبت رساندن قرار گرفت"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2550
-#, c-format
-msgid "Email to %s saved"
-msgstr "رایانامه به %s ذخیره شد"
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:2556
+msgid "Email saved as draft"
+msgstr "رایانامه به شکل پیش‌نویس ذخیره شد"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2565
-#: src/client/application/application-controller.vala:2623
+#: src/client/application/application-controller.vala:2570
+#: src/client/application/application-controller.vala:2625
 msgid "Composer could not be restored"
 msgstr "ایجاد کننده نتوانست برگردد"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2608
-#, c-format
-msgid "Email to %s discarded"
-msgstr "رایانامه به %s دور ریخته شد"
+#: src/client/application/application-controller.vala:2611
+msgid "Email discarded"
+msgstr "رایانامه دور ریخته شد"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
@@ -1154,7 +1153,7 @@ msgstr "کار کردن برون‌خط"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
-msgstr ""
+msgstr "تا وصل شدن دوباره نخواهید توانست رایانامه فرستاده یا بگیرید."
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:637
@@ -1164,12 +1163,12 @@ msgstr "مشکل ورود"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
-msgstr ""
+msgstr "حسابی گزارش ورود یا گذرواژهٔ نادرست داد."
 
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
-msgstr ""
+msgstr "تلاش ورود دوباره. گذرواژه پرسیده خواهد شد"
 
 #. Translators: An info bar status label
 #: src/client/application/application-main-window.vala:653
@@ -1179,7 +1178,7 @@ msgstr "مشکل امنیتی"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
-msgstr ""
+msgstr "حسابی گزارش کارساز نامطئن داد."
 
 #. Translators: An info bar button label
 #: src/client/application/application-main-window.vala:658
@@ -1199,49 +1198,49 @@ msgstr "بررسی جزییات امنیتی برای اتّصال"
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1093
+#: src/client/application/application-main-window.vala:1095
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "برچسب‌ها"
 
-#: src/client/application/application-main-window.vala:1419
+#: src/client/application/application-main-window.vala:1421
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "خالی کردن همهٔ رایانامه‌ها از شاخهٔ %sتان؟"
 
-#: src/client/application/application-main-window.vala:1420
+#: src/client/application/application-main-window.vala:1422
 msgid "This removes the email from Geary and your email server."
-msgstr ""
+msgstr "این کار رایانامه ر از گیری و کارساز رایانامه‌تان برخواهد داشت."
 
-#: src/client/application/application-main-window.vala:1421
+#: src/client/application/application-main-window.vala:1423
 msgid "This cannot be undone."
 msgstr "این کار قابل بازگشت نیست."
 
-#: src/client/application/application-main-window.vala:1422
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty %s"
 msgstr "تخلیهٔ %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1479
+#: src/client/application/application-main-window.vala:1481
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "می‌خواهید این گفت‌وگو را برای همیشه پاک کنید؟"
 msgstr[1] "می‌خواهید این گفت‌وگوها را برای همیشه حذف کنید؟"
 
-#: src/client/application/application-main-window.vala:1484
-#: src/client/application/application-main-window.vala:1499
+#: src/client/application/application-main-window.vala:1486
+#: src/client/application/application-main-window.vala:1501
 msgid "Delete"
 msgstr "حذف"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1494
+#: src/client/application/application-main-window.vala:1496
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "می‌خواهید این پیام را برای همیشه حذف کنید؟"
 msgstr[1] "می‌خواهید این پیام‌ها را برای همیشه حذف کنید؟"
 
-#: src/client/application/application-main-window.vala:1828
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%Id)"
@@ -1380,8 +1379,7 @@ msgstr "_استفاده از میان‌برهای تک‌کلیده"
 
 #: src/client/components/components-preferences-window.vala:147
 msgid ""
-"Enable keyboard shortcuts for email actions that do not require pressing "
-"<Ctrl>"
+"Enable keyboard shortcuts for email actions that do not require pressing <Ctrl>"
 msgstr ""
 "به کار انداختن میان‌برهای صفحه‌کلید برای کنش‌های رایانامه که نیاز به فشردن "
 "<Ctrl>ندارند"
@@ -1405,7 +1403,7 @@ msgstr "_بار کردن همیشگی تصویرها"
 #: src/client/components/components-preferences-window.vala:173
 #: src/client/conversation-viewer/conversation-message.vala:1424
 msgid "Showing remote images allows the sender to track you"
-msgstr ""
+msgstr "نمایش تصویرهای دوردست می‌گذارد فرستنده ردیابیتان کند"
 
 #. / Translators: Preferences page title
 #: src/client/components/components-preferences-window.vala:191
@@ -1436,12 +1434,12 @@ msgstr "گیری با %s به مشکلی خورده است."
 #: src/client/components/components-problem-report-info-bar.vala:53
 #, c-format
 msgid "Geary encountered a problem checking mail for %s."
-msgstr ""
+msgstr "گیری در بررسی نامه برای %s به مشکل خورد."
 
 #. Translators: Tooltip label for Retry button
 #: src/client/components/components-problem-report-info-bar.vala:57
 msgid "Try reconnecting"
-msgstr ""
+msgstr "آزمودن وصل شدن دوباره"
 
 #. Translators: Info bar title for an outgoing
 #. account problem. String substitution is the
@@ -1454,7 +1452,7 @@ msgstr "گیری با فرستادن رایانامه برای %s به مشکل�
 #. Translators: Tooltip label for Retry button
 #: src/client/components/components-problem-report-info-bar.vala:69
 msgid "Retry sending queued messages"
-msgstr ""
+msgstr "تلاش دوبارهٔ فرستادن پیام‌های صف شده"
 
 #. Translators: Info bar title for a generic application
 #. problem.
@@ -1466,7 +1464,7 @@ msgstr "گیری به مشکلی خورد"
 #. application problem.
 #: src/client/components/components-problem-report-info-bar.vala:80
 msgid "Please report the details if it persists."
-msgstr ""
+msgstr "در صورت تداوم لطفاً گزارش کنید."
 
 #. Translators: Button label for viewing technical details
 #. for a problem report.
@@ -1478,7 +1476,7 @@ msgstr "جزئیات"
 #. a problem report.
 #: src/client/components/components-problem-report-info-bar.vala:97
 msgid "View technical details about the error"
-msgstr ""
+msgstr "دیدن جزییات فنی دربارهٔ خطا"
 
 #. Translators: Button label for retrying a server
 #. connection
@@ -1530,7 +1528,7 @@ msgstr "یک نام کارساز لازم است"
 #. looked-up in the DNS.
 #: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
-msgstr ""
+msgstr "نتوانست نام کارساز را بیابد"
 
 #: src/client/components/stock.vala:18
 msgid "_OK"
@@ -1593,7 +1591,7 @@ msgstr "انتخاب رنگ"
 
 #: src/client/composer/composer-link-popover.vala:139
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
-msgstr ""
+msgstr "نشانی پیوند درست قالب‌بندی نشده. نمونه: ‪http://example.com"
 
 #: src/client/composer/composer-link-popover.vala:146
 msgid "Invalid link URL"
@@ -1622,7 +1620,7 @@ msgstr "خطا در ذخیره سازی"
 
 #: src/client/composer/composer-widget.vala:236
 msgid "Press Backspace to delete quote"
-msgstr ""
+msgstr "زدن پس‌بر برای حذف نقل قول"
 
 #. Translators: This is list of keywords, separated by pipe ("|")
 #. characters, that suggest an attachment; since this is full-word
@@ -1634,6 +1632,8 @@ msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures|پیوست|پیوست‌ها|پیوسته|ضمیمه|ضمایم|ضمیمه‌ها"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -1700,60 +1700,60 @@ msgstr "فرستادن رایانامه بدون پیوست؟"
 msgid "“%s” already attached for delivery."
 msgstr "پروندهٔ «%s» از پیش برای تحویل پیوست شده."
 
-#: src/client/composer/composer-widget.vala:1890
-#: src/client/composer/composer-widget.vala:1940
+#: src/client/composer/composer-widget.vala:1893
+#: src/client/composer/composer-widget.vala:1943
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "پروندهٔ «%s» خالیست."
 
-#: src/client/composer/composer-widget.vala:1928
+#: src/client/composer/composer-widget.vala:1931
 #, c-format
 msgid "“%s” could not be found."
 msgstr "نتوانست «%s» را بیابد."
 
-#: src/client/composer/composer-widget.vala:1934
+#: src/client/composer/composer-widget.vala:1937
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» شاخه است."
 
-#: src/client/composer/composer-widget.vala:1953
+#: src/client/composer/composer-widget.vala:1956
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "نتوانست پروندهٔ «%s» را برای خواندن بگشاید."
 
-#: src/client/composer/composer-widget.vala:1961
+#: src/client/composer/composer-widget.vala:1964
 msgid "Cannot add attachment"
 msgstr "نمی‌توان پیوست را افزود"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2032
+#: src/client/composer/composer-widget.vala:2035
 msgid "Images"
 msgstr "تصویرها"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2096
+#: src/client/composer/composer-widget.vala:2099
 #: src/client/conversation-viewer/conversation-email.vala:536
 #: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "به:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2102
+#: src/client/composer/composer-widget.vala:2105
 #: src/client/conversation-viewer/conversation-email.vala:541
 #: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "Cc:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2108
+#: src/client/composer/composer-widget.vala:2111
 #: src/client/conversation-viewer/conversation-email.vala:546
 #: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "Bcc:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2114
+#: src/client/composer/composer-widget.vala:2117
 msgid "Reply-To: "
 msgstr "پاسخ-به: "
 
@@ -1762,18 +1762,18 @@ msgstr "پاسخ-به: "
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2232
+#: src/client/composer/composer-widget.vala:2235
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s از %2$s"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
-msgstr ""
+msgstr "برداشتن این زبان از سیاههٔ دلخواه"
 
 #: src/client/composer/spell-check-popover.vala:129
 msgid "Add this language to the preferred list"
-msgstr ""
+msgstr "افزودن این زبان به سیاههٔ دلخواه"
 
 #: src/client/composer/spell-check-popover.vala:225
 msgid "Search for more languages"
@@ -1855,7 +1855,7 @@ msgstr "موضوع:"
 
 #: src/client/conversation-viewer/conversation-message.vala:131
 msgid "This email address may have been forged"
-msgstr ""
+msgstr "ممکن است این نشانی رایانامه دستکاری شده باشد"
 
 #. Translators: Label text displayed when there are too
 #. many email addresses to be shown by default in an
@@ -1927,7 +1927,7 @@ msgstr "هیچ گفت‌وگویی گزیده نشده"
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
-msgstr ""
+msgstr "گزینش گفت‌وگویی از سیاهه این‌جا نشانش خواهد داد."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
@@ -1939,7 +1939,7 @@ msgstr "چندین گفت‌وگو گزیده شده"
 #. conversations have been selected.
 #: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
-msgstr ""
+msgstr "گزینش کنش به همهٔ گفت‌وگوهای گزیده اعمالش خواهد کرد."
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
@@ -1954,13 +1954,13 @@ msgstr "هیچ گفت‌وگویی پیدا نشد"
 #. conversations have exist in a folder.
 #: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
-msgstr ""
+msgstr "شاخه هیچ گفت‌وگویی ندارد."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
 #: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
-msgstr ""
+msgstr "جست‌وجویتان نتیجه‌ای برنگرداند. تلاش برای بهبود عبارت‌های جست‌وجو."
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -1978,63 +1978,69 @@ msgstr "اتّصال نامطمئن: %s"
 #: src/client/dialogs/certificate-warning-dialog.vala:38
 #, c-format
 msgid "The identity of the %s mail server at %s:%u could not be verified."
-msgstr ""
+msgstr "هویت کارساز نامهٔ %s در %s: ‏%Iu تأیید نشده."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:48
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
+"گزینش «اطمینان به این کارساز» یا «اطمینان همیشگی به این کارساز» می‌تواند موجب "
+"انتقال ناامن نام کاربری و گذرواژه‌تان شود."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:56
 msgid ""
-"Selecting “Don’t Trust This Server” will cause Geary not to access this "
-"server."
+"Selecting “Don’t Trust This Server” will cause Geary not to access this server."
 msgstr ""
+"گزینش «اطمینان نکردن ب هاین کارساز» موجب دسترسی نداشتن گیری به این کارساز خواهد "
+"شد."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
-msgstr ""
+msgstr "گیری این حساب رایانامه را نیفزوده یا به‌روز نخواهد کرد."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
+"گزینش «اطمینان نکردن به این کارساز» موجب قطع دسترسی گیری به این حساب خواهد شد."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
 msgstr ""
+"تماس با مدیر سامانه یا فراهم کنندهٔ خدمت رایانامه در صورت داستن پرسش دربارهٔ این "
+"مشکل‌ها."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s certificate is not signed by a known authority"
-msgstr ""
+msgstr "گواهی این کارساز به دست مرجعی شناخته امضا نشده"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s identity does not match the identity in the certificate"
-msgstr ""
+msgstr "هویت این کارساز با هویت گواهی مطابق نیست"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:82
 msgid "The server’s certificate has expired"
-msgstr ""
+msgstr "گواهی این کارساز منقضی شده"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:85
 msgid "The server’s certificate has not been activated"
-msgstr ""
+msgstr "گواهی این کارساز فعّال نشده"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:88
 msgid "The server’s certificate has been revoked and is now invalid"
-msgstr ""
+msgstr "گواهی این کارساز باطل شده و اکنون نامعتبر است"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:91
 msgid "The server’s certificate is considered insecure"
-msgstr ""
+msgstr "گواهی این کارساز ناامن است"
 
 #: src/client/dialogs/certificate-warning-dialog.vala:94
 msgid "An error has occurred processing the server’s certificate"
-msgstr ""
+msgstr "خطایی در پردازش گواهی کارساز رخ داد"
 
 #. / Translators: Title for problem report dialog error
 #. / information pane
@@ -2308,7 +2314,7 @@ msgstr "پیام ذخیره نشد"
 #. unsaved email
 #: src/client/plugin/special-folders/special-folders.vala:201
 msgid "This message was sent, but has not been saved to your account."
-msgstr ""
+msgstr "این پیام فرستاده شده، ولی در حسابتان ذخیره نشده."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -2711,6 +2717,8 @@ msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
 "Bulk E-Mail"
 msgstr ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
+"Bulk E-Mail | هرزنامه | اسپم | بنجل"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -2740,12 +2748,12 @@ msgstr "Archive | Archives | بایگانی | بایگانی‌ها | آرشیو
 #: src/engine/rfc822/rfc822-message.vala:572
 #, c-format
 msgid "Could not determine mime type for “%s”."
-msgstr ""
+msgstr "نتوانست گونهٔ mime را برای %s تشخیص دهد."
 
 #: src/engine/rfc822/rfc822-message.vala:583
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
-msgstr ""
+msgstr "نتوانست گونهٔ محتوا را برای گونهٔ mime‏ %s روی %s تشخیص دهد."
 
 #: src/engine/rfc822/rfc822-message.vala:1036
 msgid "(no subject)"
@@ -2779,24 +2787,24 @@ msgstr "ویرایش حساب"
 msgid "Account Name"
 msgstr "نام حساب"
 
-#: ui/accounts_editor_edit_pane.ui:115
+#: ui/accounts_editor_edit_pane.ui:116
 msgid "Email addresses"
 msgstr "نشانی‌های رایانامه"
 
-#: ui/accounts_editor_edit_pane.ui:152
+#: ui/accounts_editor_edit_pane.ui:153
 msgid "Signature"
 msgstr "امضا"
 
-#: ui/accounts_editor_edit_pane.ui:187
+#: ui/accounts_editor_edit_pane.ui:188
 msgid "Settings"
 msgstr "تنظیمات"
 
-#: ui/accounts_editor_edit_pane.ui:227
+#: ui/accounts_editor_edit_pane.ui:228
 msgid "Remove this account from Geary"
 msgstr "برداشتن این حساب از گیری"
 
 #. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:246 ui/accounts_editor_servers_pane.ui:7
+#: ui/accounts_editor_edit_pane.ui:247 ui/accounts_editor_servers_pane.ui:7
 msgid "Server Settings"
 msgstr "تنظیمات کارساز"
 
@@ -2806,7 +2814,7 @@ msgstr "حساب‌ها"
 
 #: ui/accounts_editor_list_pane.ui:74
 msgid "To get started, add an email provider above."
-msgstr ""
+msgstr "افزودن فراهم‌کنندهٔ رایانامه در بالا برای شروع."
 
 #: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
@@ -2822,15 +2830,15 @@ msgstr "اتّصال نامطمئن"
 
 #: ui/certificate_warning_dialog.glade:26
 msgid "_Always Trust This Server"
-msgstr "اعتماد _همیشگی به این کارساز"
+msgstr "اطمینان _همیشگی به این کارساز"
 
 #: ui/certificate_warning_dialog.glade:39
 msgid "_Trust This Server"
-msgstr "_اعتماد به این کارساز"
+msgstr "_اطمینان به این کارساز"
 
 #: ui/certificate_warning_dialog.glade:52
 msgid "_Don’t Trust This Server"
-msgstr "اعتماد _نکردن به این کارساز"
+msgstr "اطمینان _نکردن به این کارساز"
 
 #: ui/composer-editor.ui:89
 msgid "Bold text"
@@ -3104,6 +3112,10 @@ msgid ""
 "channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
 msgstr ""
+"اگر مشکل مداوم یا جدی بود لطفاً این جزییات را ذخیره و به یکی از <a "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">کانال‌های تماس</a> فرستاده یا "
+"به <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">گزارش مشکل "
+"جدیدی</a> پیوست کنید."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3682,6 +3694,10 @@ msgstr "_به خاطر سپاری گذرواژه"
 msgid "_Authenticate"
 msgstr "_تأیید هویت"
 
+#, c-format
+#~ msgid "Email to %s saved"
+#~ msgstr "رایانامه به %s ذخیره شد"
+
 #~ msgid "Sending…"
 #~ msgstr "فرستادن…"
 
@@ -4052,19 +4068,19 @@ msgstr "_تأیید هویت"
 
 #, c-format
 #~ msgid ""
-#~ "There was an error opening the local mail database for this account. This "
-#~ "is possibly due to a file permissions problem.\n"
+#~ "There was an error opening the local mail database for this account. This is "
+#~ "possibly due to a file permissions problem.\n"
 #~ "\n"
 #~ "Please check that you have read/write permissions for all files in this "
 #~ "directory:\n"
 #~ "\n"
 #~ "%s"
 #~ msgstr ""
-#~ "خطایی در هنگام باز کردن پایگاه داده‌ی محلی ایمیل برای این حساب وجود دارد. "
-#~ "این احتمالاً به خاطر مشکلات دسترسی‌های فایل است.\n"
+#~ "خطایی در هنگام باز کردن پایگاه داده‌ی محلی ایمیل برای این حساب وجود دارد. این "
+#~ "احتمالاً به خاطر مشکلات دسترسی‌های فایل است.\n"
 #~ "\n"
-#~ "لطفاً بررسی کنید که آیا شما اجازه‌ی خواندن و نوشتن برای تمام فایل‌های این "
-#~ "پوشه را دارید یا خیر:\n"
+#~ "لطفاً بررسی کنید که آیا شما اجازه‌ی خواندن و نوشتن برای تمام فایل‌های این پوشه "
+#~ "را دارید یا خیر:\n"
 #~ "\n"
 #~ "%s"
 
@@ -4094,9 +4110,9 @@ msgstr "_تأیید هویت"
 #~ "username and password could be read by another person on the network.  Are "
 #~ "you sure you want to do this?"
 #~ msgstr ""
-#~ "تنظیمات IMAP و یا SMTP شما از SSL یا TLS پشتیبانی نمی‌کند. این بدین معنا "
-#~ "است که نام کاربری و کلمه‌ی عبور شما توسط شخص دیگری بر روی شبکه قابل خواندن "
-#~ "است. آیا از انجام این کار اطمینان دارید؟"
+#~ "تنظیمات IMAP و یا SMTP شما از SSL یا TLS پشتیبانی نمی‌کند. این بدین معنا است "
+#~ "که نام کاربری و کلمه‌ی عبور شما توسط شخص دیگری بر روی شبکه قابل خواندن است. "
+#~ "آیا از انجام این کار اطمینان دارید؟"
 
 #~ msgid "Your settings are insecure"
 #~ msgstr "تنظیمات شما ایمن نمی‌باشند."
