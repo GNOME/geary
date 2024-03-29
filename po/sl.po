@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-03-19 20:59+0100\n"
+"POT-Creation-Date: 2024-03-19 20:00+0000\n"
+"PO-Revision-Date: 2024-03-29 07:37+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -3189,7 +3189,6 @@ msgid "Forward"
 msgstr "Posreduj"
 
 #: ui/components-headerbar-application.ui:7
-#, fuzzy
 msgid "Mail"
 msgstr "Pošlji sporočilo"
 
