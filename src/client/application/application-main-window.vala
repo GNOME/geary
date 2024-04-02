@@ -1762,13 +1762,13 @@ public class Application.MainWindow :
     private void on_conversation_activated(Geary.App.Conversation activated, uint button) {
         if (button == 1) {
             bool folded = this.outer_leaflet.folded;
-            go_to_next_pane(true);
             if (folded) {
                 Gee.Collection<Geary.App.Conversation> selected =
                     new Gee.ArrayList<Geary.App.Conversation>();
                 selected.add(activated);
                 select_conversations.begin(selected, Gee.Collection.empty(), true);
             }
+            go_to_next_pane(true);
         } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
