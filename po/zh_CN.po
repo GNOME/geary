@@ -17,17 +17,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2022-10-10 15:39+0000\n"
-"PO-Revision-Date: 2022-10-12 10:42+0800\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
+"POT-Creation-Date: 2024-02-21 17:08+0000\n"
+"PO-Revision-Date: 2024-05-19 12:01-0400\n"
 "Last-Translator: lumingzh <lumingzh@qq.com>\n"
 "Language-Team: Chinese - China <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0\n"
-"X-Generator: Gtranslator 42.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -42,7 +42,7 @@ msgstr "用 Geary 发送文件"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:695
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -71,12 +71,12 @@ msgstr "Geary 开发团队"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary 是个 GNOME 3 桌面下围绕会话构建的电子邮件应用。它允许您使用一个直观、现"
-"代的用户界面阅读、查找和发送电子邮件。"
+"Geary 是个 GNOME 桌面下围绕会话构建的电子邮件应用。它允许您使用一个直观、现代"
+"的用户界面阅读、查找和发送电子邮件。"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
@@ -113,21 +113,21 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "与 GMail、雅虎邮箱、Outlook.com 和其它 IMAP 服务器兼容"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:50
+#: desktop/org.gnome.Geary.appdata.xml.in.in:51
 msgid "Geary displaying a conversation"
 msgstr "Geary 正在展示一个会话"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:55
+#: desktop/org.gnome.Geary.appdata.xml.in.in:56
 msgid "Geary showing the rich text composer"
 msgstr "Geary 正在显示富文本编辑器"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: desktop/org.gnome.Geary.desktop.in.in:7
-msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;电子邮件;电子邮箱;电子信箱;邮件;"
-"邮箱;信箱;谷歌邮箱;雅虎邮箱;微软邮箱;"
+"Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;电子邮件;电子邮箱;电子信"
+"箱;邮件;邮箱;信箱;谷歌邮箱;雅虎邮箱;微软邮箱;"
 
 #: desktop/org.gnome.Geary.desktop.in.in:24
 msgid "Compose Message"
@@ -186,20 +186,28 @@ msgid "True if we should display a short preview of each message."
 msgstr "若我们要显示每条消息的简短预览则为 true。"
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Move messages by default"
+msgstr "默认移动消息"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "When tagging a message, move it to destination folder."
+msgstr "标记一个消息时，将其移动至目标文件夹。"
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Use single key shortcuts"
 msgstr "使用单键快捷键"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
 msgstr "为邮件动作启用无需按住 <Ctrl> 的快捷键以模拟 Gmail 的操作方式。"
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid "Languages that shall be used in the spell checker"
 msgstr "拼写检查器中要使用的语言"
 
-#: desktop/org.gnome.Geary.gschema.xml:53
+#: desktop/org.gnome.Geary.gschema.xml:59
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -207,106 +215,106 @@ msgstr ""
 "一个 POSIX 语言区域列表，空白列表将禁用拼写检查且空（null）列表将默认使用桌面"
 "语言。"
 
-#: desktop/org.gnome.Geary.gschema.xml:60
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "在拼写检查器弹出框中展示的语言"
 
-#: desktop/org.gnome.Geary.gschema.xml:61
+#: desktop/org.gnome.Geary.gschema.xml:67
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "总是在拼写检查器弹出框中展示的语言列表。"
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Run application in background on logon and when closed"
 msgstr "关闭窗口后登录时在后台运行应用程序"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "True to run application in background."
 msgstr "设置为 true 以在后台运行应用程序。"
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Ask when opening an attachment"
 msgstr "打开附件时询问"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to ask when opening an attachment."
 msgstr "设置为 true 以在打开附件时询问。"
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Whether to compose emails in HTML"
 msgstr "是否以 HTML 格式编写邮件"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "设置为 true 以 HTML 格式编写邮件；false 为纯文本。"
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Advisory strategy for full-text searching"
 msgstr "全文本搜索的报告策略"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr "可接受的值有“exact”“conservative”“aggressive”和“horizon”。"
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Zoom of conversation viewer"
 msgstr "会话阅读器的缩放比例"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "The zoom to apply on the conservation view."
 msgstr "应用在会话视图的缩放比例。"
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Size of detached composer window"
 msgstr "分离编辑窗口的大小"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The last recorded size of the detached composer window."
 msgstr "上次记录的分离编辑窗口的大小。"
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Allow images for these domains"
 msgstr "允许这些域名的图像"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Images from these domains will be trusted"
 msgstr "来自这些域名的图像将被视为可信的"
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Undo sending email delay"
 msgstr "撤消发送中邮件的延迟"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
 msgstr "邮件发送前等待的秒数。设置为 0 或更小可禁用。"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Brief notification display time"
 msgstr "简洁通知的展示时间"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "简洁通知应当被展示的以秒为单位的时间长度。"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "List of optional plugins"
 msgstr "可选插件列表"
 
-#: desktop/org.gnome.Geary.gschema.xml:123
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid "Plugins listed here will be loaded on startup."
 msgstr "列在这里的插件将在启动时被加载。"
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "Whether we migrated the old settings"
 msgstr "是否移植了旧设置"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr "设置为 false 则检查旧的“org.yorba.geary”架构并复制它的值。"
@@ -314,7 +322,7 @@ msgstr "设置为 false 则检查旧的“org.yorba.geary”架构并复制它�
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
 #. untrusted TLS certificate
-#: src/client/accounts/accounts-editor.vala:208
+#: src/client/accounts/accounts-editor.vala:216
 msgid "Failed to store certificate"
 msgstr "保存证书失败"
 
@@ -370,7 +378,7 @@ msgid "Account not created: %s"
 msgstr "未创建的帐号：%s"
 
 #: src/client/accounts/accounts-editor-add-pane.vala:372
-#: ui/accounts_editor_add_pane.ui:42 ui/find_bar.glade:97
+#: ui/accounts_editor_add_pane.ui:43 ui/find_bar.glade:97
 msgid "_Next"
 msgstr "下一个(_N)"
 
@@ -388,7 +396,7 @@ msgstr "您的姓名"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:681
-#: src/client/accounts/accounts-editor-edit-pane.vala:527
+#: src/client/accounts/accounts-editor-edit-pane.vala:528
 msgid "Email address"
 msgstr "邮件地址"
 
@@ -398,7 +406,7 @@ msgstr "邮件地址"
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:685
-#: src/client/accounts/accounts-editor-edit-pane.vala:493
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
 msgid "person@example.com"
 msgstr "person@example.com"
 
@@ -449,9 +457,14 @@ msgstr "SMTP 服务器"
 msgid "smtp.example.com"
 msgstr "smtp.example.com"
 
-#. This is the remove account button in the account settings.
+#: src/client/accounts/accounts-editor-edit-pane.vala:163
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2326
+#: ui/accounts_editor_edit_pane.ui:42
+msgid "Undo"
+msgstr "撤消"
+
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:239
 msgid "Remove Account"
 msgstr "移除帐号"
 
@@ -499,32 +512,32 @@ msgstr "添加新的发件人邮件地址"
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
 #. email addresses in their account settings.
-#: src/client/accounts/accounts-editor-edit-pane.vala:437
+#: src/client/accounts/accounts-editor-edit-pane.vala:438
 msgid "Name not set"
 msgstr "未设定名称"
 
 #. Translators: This is used as a placeholder for the
 #. display name for an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:478
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
 msgid "Sender Name"
 msgstr "发件人姓名"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:505
+#: src/client/accounts/accounts-editor-edit-pane.vala:506
 msgid "Remove"
 msgstr "移除"
 
 #. Translators: Label used for the display name part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:520
+#: src/client/accounts/accounts-editor-edit-pane.vala:521
 msgid "Sender name"
 msgstr "发件人姓名"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
 #. substitution is the email address added.
-#: src/client/accounts/accounts-editor-edit-pane.vala:587
+#: src/client/accounts/accounts-editor-edit-pane.vala:588
 #, c-format
 msgid "Remove “%s”"
 msgstr "移除“%s”"
@@ -532,7 +545,7 @@ msgstr "移除“%s”"
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
 #. the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:627
+#: src/client/accounts/accounts-editor-edit-pane.vala:628
 #, c-format
 msgid "Undo changes to “%s”"
 msgstr "撤消对“%s”的更改"
@@ -540,7 +553,7 @@ msgstr "撤消对“%s”的更改"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:714
+#: src/client/accounts/accounts-editor-edit-pane.vala:715
 #, c-format
 msgid "Add “%s” back"
 msgstr "添加回“%s”"
@@ -548,14 +561,14 @@ msgstr "添加回“%s”"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:756
+#: src/client/accounts/accounts-editor-edit-pane.vala:757
 msgid "Undo signature changes"
 msgstr "撤消对签名的更改"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
-#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#: src/client/accounts/accounts-editor-edit-pane.vala:805
 msgid "Download mail"
 msgstr "下载邮件"
 
@@ -564,86 +577,81 @@ msgstr "下载邮件"
 #. should be downloaded for an account. The
 #. string substitution is the duration,
 #. e.g. "1 month back".
-#: src/client/accounts/accounts-editor-edit-pane.vala:836
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
 #, c-format
 msgid "Change download period back to: %s"
 msgstr "将下载时间段改回：%s"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:857
+#: src/client/accounts/accounts-editor-edit-pane.vala:858
 msgid "Everything"
 msgstr "所有"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:861
+#: src/client/accounts/accounts-editor-edit-pane.vala:862
 msgid "2 weeks back"
 msgstr "2 周前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:865
+#: src/client/accounts/accounts-editor-edit-pane.vala:866
 msgid "1 month back"
 msgstr "1 个月前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:869
+#: src/client/accounts/accounts-editor-edit-pane.vala:870
 msgid "3 months back"
 msgstr "3 个月前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:873
+#: src/client/accounts/accounts-editor-edit-pane.vala:874
 msgid "6 months back"
 msgstr "6 个月前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:877
+#: src/client/accounts/accounts-editor-edit-pane.vala:878
 msgid "1 year back"
 msgstr "1 年前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:881
+#: src/client/accounts/accounts-editor-edit-pane.vala:882
 msgid "2 years back"
 msgstr "2 年前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:885
+#: src/client/accounts/accounts-editor-edit-pane.vala:886
 msgid "4 years back"
 msgstr "4 年前"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:891
+#: src/client/accounts/accounts-editor-edit-pane.vala:892
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
 msgstr[0] "%d 天前"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2287
-msgid "Undo"
-msgstr "撤消"
-
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2270
+#: src/client/application/application-main-window.vala:2309
 msgid "Redo"
 msgstr "重做"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:325
-#: src/client/accounts/accounts-editor-row.vala:279
+#: src/client/accounts/accounts-editor-list-pane.vala:327
+#: src/client/accounts/accounts-editor-row.vala:303
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:329
-#: src/client/accounts/accounts-editor-row.vala:283
+#: src/client/accounts/accounts-editor-list-pane.vala:331
+#: src/client/accounts/accounts-editor-row.vala:307
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:351
+#: src/client/accounts/accounts-editor-list-pane.vala:353
 msgid "This account has been disabled"
 msgstr "该帐号已被禁用"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:360
+#: src/client/accounts/accounts-editor-list-pane.vala:362
 msgid "This account has encountered a problem and is unavailable"
 msgstr "该帐号遇到问题且无法使用"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:466
+#: src/client/accounts/accounts-editor-list-pane.vala:468
 #, c-format
 msgid "Account “%s” removed"
 msgstr "帐号“%s”已移除"
@@ -651,7 +659,7 @@ msgstr "帐号“%s”已移除"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:473
+#: src/client/accounts/accounts-editor-list-pane.vala:475
 #, c-format
 msgid "Account “%s” restored"
 msgstr "帐号“%s”已恢复"
@@ -664,30 +672,30 @@ msgstr "拖拽可移动此项"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:295
+#: src/client/accounts/accounts-editor-row.vala:319
 msgid "Service provider"
 msgstr "服务提供商"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:469
+#: src/client/accounts/accounts-editor-row.vala:493
 msgid "Connection security"
 msgstr "连接安全"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:480
+#: src/client/accounts/accounts-editor-row.vala:504
 #: src/client/accounts/accounts-editor-servers-pane.vala:751
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "无"
 
-#: src/client/accounts/accounts-editor-row.vala:487
+#: src/client/accounts/accounts-editor-row.vala:511
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:494
+#: src/client/accounts/accounts-editor-row.vala:518
 msgid "TLS"
 msgstr "TLS"
 
@@ -695,29 +703,29 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:535
-#: src/client/application/application-main-window.vala:637
+#: src/client/accounts/accounts-editor-row.vala:560
+#: src/client/application/application-main-window.vala:642
 msgid "Login"
 msgstr "登录"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:542
+#: src/client/accounts/accounts-editor-row.vala:576
 msgid "No login needed"
 msgstr "无需登录"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:550
+#: src/client/accounts/accounts-editor-row.vala:588
 msgid "Use same login as receiving"
 msgstr "使用与接收相同的登录"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:558
+#: src/client/accounts/accounts-editor-row.vala:600
 msgid "Use a different login"
 msgstr "使用不同的登录"
 
@@ -925,7 +933,7 @@ msgstr "发行版发布"
 msgid "Installation prefix"
 msgstr "安装前缀"
 
-#: src/client/application/application-client.vala:577
+#: src/client/application/application-client.vala:566
 #, c-format
 msgid "About %s"
 msgstr "关于 %s"
@@ -933,7 +941,7 @@ msgstr "关于 %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:581
+#: src/client/application/application-client.vala:570
 msgid "translator-credits"
 msgstr ""
 "tuhaihe <1132321739qq@gmail.com>, 2012\n"
@@ -944,30 +952,30 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1110
+#: src/client/application/application-client.vala:1099
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "未识别的程序参数：“%s”"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:496
+#: src/client/application/application-controller.vala:498
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "为 %s 发送邮件时发生问题"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:502
 msgid "Email will not be sent until re-connected"
 msgstr "邮件将不会发送直到重新连接"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:599
+#: src/client/application/application-controller.vala:601
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "会话已标记"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:605
+#: src/client/application/application-controller.vala:607
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "会话已取消标记"
@@ -975,8 +983,8 @@ msgstr[0] "会话已取消标记"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:631
-#: src/client/application/application-controller.vala:715
+#: src/client/application/application-controller.vala:633
+#: src/client/application/application-controller.vala:717
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -987,29 +995,29 @@ msgstr[0] "会话已移动到 %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:639
-#: src/client/application/application-controller.vala:661
+#: src/client/application/application-controller.vala:641
+#: src/client/application/application-controller.vala:663
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
 msgstr[0] "会话已恢复到 %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:682
+#: src/client/application/application-controller.vala:684
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "会话已归档"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:738
+#: src/client/application/application-controller.vala:740
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
 msgstr[0] "消息已恢复到 %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:759
+#: src/client/application/application-controller.vala:761
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "消息已归档"
@@ -1017,7 +1025,7 @@ msgstr[0] "消息已归档"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:794
+#: src/client/application/application-controller.vala:796
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1026,7 +1034,7 @@ msgstr[0] "消息已移动到 %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:822
+#: src/client/application/application-controller.vala:824
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1035,18 +1043,18 @@ msgstr[0] "会话已添加标签 %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:830
+#: src/client/application/application-controller.vala:832
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
 msgstr[0] "会话已删除标签 %s"
 
-#: src/client/application/application-controller.vala:1337
+#: src/client/application/application-controller.vala:1311
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "无法打开 %s 的数据库"
 
-#: src/client/application/application-controller.vala:1338
+#: src/client/application/application-controller.vala:1312
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1068,20 +1076,20 @@ msgstr ""
 "\n"
 "重建数据库将会摧毁所有本地邮件及其附件。<b>您服务器中的邮件不会受到影响。</b>"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1314
 msgid "_Rebuild"
 msgstr "重建(_R)"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1314
 msgid "E_xit"
 msgstr "退出(_X)"
 
-#: src/client/application/application-controller.vala:1350
+#: src/client/application/application-controller.vala:1324
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "无法重建“%s”的数据库"
 
-#: src/client/application/application-controller.vala:1351
+#: src/client/application/application-controller.vala:1325
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1092,39 +1100,34 @@ msgstr ""
 "\n"
 "%s"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1518
-#, c-format
-msgid "Email sent to %s"
-msgstr "邮件已发送到 %s"
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:1490
+msgid "Email sent"
+msgstr "邮件已发送"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2514
+#: src/client/application/application-controller.vala:2495
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "给 %s 的邮件已排队等待送达"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2578
-#, c-format
-msgid "Email to %s saved"
-msgstr "给 %s 的邮件已保存"
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:2556
+msgid "Email saved as draft"
+msgstr "邮件已保存为草稿"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2593
-#: src/client/application/application-controller.vala:2651
+#: src/client/application/application-controller.vala:2570
+#: src/client/application/application-controller.vala:2625
 msgid "Composer could not be restored"
 msgstr "编辑器无法恢复"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
-#, c-format
-msgid "Email to %s discarded"
-msgstr "给 %s 的邮件已舍弃"
+#: src/client/application/application-controller.vala:2611
+msgid "Email discarded"
+msgstr "邮件已舍弃"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
@@ -1138,99 +1141,99 @@ msgid "Account update"
 msgstr "帐号更新"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:623
+#: src/client/application/application-main-window.vala:628
 msgid "Working offline"
 msgstr "离线工作"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:625
+#: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
 msgstr "在重新连接之前您无法发送或接收邮件。"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:632
+#: src/client/application/application-main-window.vala:637
 msgid "Login problem"
 msgstr "登录问题"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:634
+#: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
 msgstr "有个帐号报告了登录名或密码错误。"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:641
+#: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
 msgstr "重试登录，请在弹出窗口输入您的密码"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:648
+#: src/client/application/application-main-window.vala:653
 msgid "Security problem"
 msgstr "安全问题"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:650
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
 msgstr "有个帐号报告了一个不信任的服务器。"
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:653
+#: src/client/application/application-main-window.vala:658
 msgid "Check"
 msgstr "检查"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:657
+#: src/client/application/application-main-window.vala:662
 msgid "Check the security details for the connection"
 msgstr "检查连接的安全细节"
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:704
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s — %s"
 
-#: src/client/application/application-main-window.vala:1094
+#: src/client/application/application-main-window.vala:1095
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "标签"
 
-#: src/client/application/application-main-window.vala:1417
+#: src/client/application/application-main-window.vala:1421
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "清空您 %s 文件夹里的所有邮件吗？"
 
-#: src/client/application/application-main-window.vala:1418
+#: src/client/application/application-main-window.vala:1422
 msgid "This removes the email from Geary and your email server."
 msgstr "这会从 Geary 和您的邮件服务器移除邮件。"
 
-#: src/client/application/application-main-window.vala:1419
+#: src/client/application/application-main-window.vala:1423
 msgid "This cannot be undone."
 msgstr "该操作无法撤消。"
 
-#: src/client/application/application-main-window.vala:1420
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty %s"
 msgstr "清空 %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1477
+#: src/client/application/application-main-window.vala:1481
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "您要永久删除这些会话吗？"
 
-#: src/client/application/application-main-window.vala:1482
-#: src/client/application/application-main-window.vala:1497
+#: src/client/application/application-main-window.vala:1486
+#: src/client/application/application-main-window.vala:1501
 msgid "Delete"
 msgstr "删除"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1496
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "您要永久删除这些消息吗？"
 
-#: src/client/application/application-main-window.vala:1808
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1264,38 +1267,32 @@ msgstr "如果打开附件，可能会对您的系统造成破坏。仅打开信
 msgid "Don’t _ask me again"
 msgstr "不再询问(_A)"
 
-#: src/client/components/components-conversation-actions.vala:112
+#: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
 msgstr[0] "标记会话"
 
-#: src/client/components/components-conversation-actions.vala:118
-msgid "Move conversation"
-msgid_plural "Move conversations"
-msgstr[0] "移动会话"
-
-#: src/client/components/components-conversation-actions.vala:123
-#: src/client/conversation-list/conversation-list-view.vala:446
+#: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
 msgstr[0] "归档会话"
 
-#: src/client/components/components-conversation-actions.vala:133
+#: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
 msgstr[0] "为会话添加标签"
 
-#: src/client/components/components-conversation-actions.vala:142
+#: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
 msgstr[0] "复制会话"
 
-#: src/client/components/components-conversation-actions.vala:161
+#: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
 msgstr[0] "移动会话到废件箱"
 
-#: src/client/components/components-conversation-actions.vala:171
+#: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
 msgstr[0] "删除会话"
@@ -1351,48 +1348,54 @@ msgid "Cancel"
 msgstr "取消"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:124
+#: src/client/components/components-preferences-window.vala:125
 msgid "_Automatically select next message"
 msgstr "自动选择下一条消息(_A)"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:134
+#: src/client/components/components-preferences-window.vala:135
 msgid "_Display conversation preview"
 msgstr "显示会话预览(_D)"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:144
+#: src/client/components/components-preferences-window.vala:145
 msgid "Use _single key email shortcuts"
 msgstr "使用单键邮件快捷键(_S)"
 
-#: src/client/components/components-preferences-window.vala:146
+#: src/client/components/components-preferences-window.vala:147
 msgid ""
 "Enable keyboard shortcuts for email actions that do not require pressing "
 "<Ctrl>"
 msgstr "为邮件动作启用无需按住 <Ctrl> 的键盘快捷键"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:157
+#: src/client/components/components-preferences-window.vala:158
 msgid "_Watch for new mail when closed"
 msgstr "关闭后监视新邮件(_W)"
 
 #. / Translators: Preferences tooltip
-#: src/client/components/components-preferences-window.vala:161
+#: src/client/components/components-preferences-window.vala:162
 msgid "Geary will keep running after all windows are closed"
 msgstr "Geary 将在所有窗口关闭后保持运行"
 
 #. / Translators: Preferences label
-#: src/client/components/components-preferences-window.vala:171
+#: src/client/components/components-preferences-window.vala:172
 msgid "_Always load images"
 msgstr "总是加载图像(_A)"
 
+#. Translators: Info bar description
+#: src/client/components/components-preferences-window.vala:173
+#: src/client/conversation-viewer/conversation-message.vala:1424
+msgid "Showing remote images allows the sender to track you"
+msgstr "显示远程图像将允许发信者跟踪您"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:189
+#: src/client/components/components-preferences-window.vala:191
 msgid "Preferences"
 msgstr "首选项"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:250
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "插件"
 
@@ -1510,22 +1513,6 @@ msgstr "需要一个服务器名称"
 #: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
 msgstr "无法查询服务器名称"
-
-#. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: src/client/components/status-bar.vala:26
-msgid "Sending…"
-msgstr "正在发送…"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "发送邮件时出错"
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "保存已发送邮件时出错"
 
 #: src/client/components/stock.vala:18
 msgid "_OK"
@@ -1698,60 +1685,60 @@ msgstr "确认发送无附件的消息吗？"
 msgid "“%s” already attached for delivery."
 msgstr "附件“%s”已添加等待送达。"
 
-#: src/client/composer/composer-widget.vala:1890
-#: src/client/composer/composer-widget.vala:1940
+#: src/client/composer/composer-widget.vala:1893
+#: src/client/composer/composer-widget.vala:1943
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s”是个空文件。"
 
-#: src/client/composer/composer-widget.vala:1928
+#: src/client/composer/composer-widget.vala:1931
 #, c-format
 msgid "“%s” could not be found."
 msgstr "无法找到“%s”。"
 
-#: src/client/composer/composer-widget.vala:1934
+#: src/client/composer/composer-widget.vala:1937
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s”是个文件夹。"
 
-#: src/client/composer/composer-widget.vala:1953
+#: src/client/composer/composer-widget.vala:1956
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "无法打开“%s”以读取。"
 
-#: src/client/composer/composer-widget.vala:1961
+#: src/client/composer/composer-widget.vala:1964
 msgid "Cannot add attachment"
 msgstr "无法添加附件"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2032
+#: src/client/composer/composer-widget.vala:2035
 msgid "Images"
 msgstr "图像"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2096
+#: src/client/composer/composer-widget.vala:2099
 #: src/client/conversation-viewer/conversation-email.vala:536
 #: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "收件人："
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2102
+#: src/client/composer/composer-widget.vala:2105
 #: src/client/conversation-viewer/conversation-email.vala:541
 #: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "抄送："
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2108
+#: src/client/composer/composer-widget.vala:2111
 #: src/client/conversation-viewer/conversation-email.vala:546
 #: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "密送："
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2114
+#: src/client/composer/composer-widget.vala:2117
 msgid "Reply-To: "
 msgstr "回复： "
 
@@ -1760,7 +1747,7 @@ msgstr "回复： "
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2232
+#: src/client/composer/composer-widget.vala:2235
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s 通过 %2$s"
@@ -1778,56 +1765,57 @@ msgid "Search for more languages"
 msgstr "搜索更多语言"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:390
+#: src/client/conversation-list/conversation-list-view.vala:214
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "移动会话到废件箱(_T)"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:402
+#: src/client/conversation-list/conversation-list-view.vala:226
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "删除会话(_D)"
 
-#: src/client/conversation-list/conversation-list-view.vala:415
+#: src/client/conversation-list/conversation-list-view.vala:239
 #: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "标记为已读(_R)"
 
-#: src/client/conversation-list/conversation-list-view.vala:423
-#: ui/components-menu-conversation.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:248
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "标记为未读(_U)"
 
-#: src/client/conversation-list/conversation-list-view.vala:431
-#: ui/components-menu-conversation.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:257
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "取消星标(_N)"
 
-#: src/client/conversation-list/conversation-list-view.vala:438
-#: ui/components-menu-conversation.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:264
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "加注星标(_S)"
 
+#: src/client/conversation-list/conversation-list-view.vala:275
+msgid "_Archive conversation"
+msgid_plural "_Archive conversations"
+msgstr[0] "归档会话(_A)"
+
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:455
+#: src/client/conversation-list/conversation-list-view.vala:287
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "回复(_R)"
 
-#: src/client/conversation-list/conversation-list-view.vala:461
+#: src/client/conversation-list/conversation-list-view.vala:293
 msgid "R_eply All"
 msgstr "回复全部(_E)"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:467
+#: src/client/conversation-list/conversation-list-view.vala:299
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "转发(_F)"
-
-#: src/client/conversation-list/formatted-conversation-data.vala:18
-msgid "Me"
-msgstr "我"
 
 #. Translators: Human-readable version of the RFC 822 From header
 #: src/client/conversation-viewer/conversation-email.vala:531
@@ -1901,11 +1889,6 @@ msgid "Remote images not shown"
 msgstr "未显示远程图像"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1424
-msgid "Only show remote images from senders you trust."
-msgstr "只显示你信任的发件人的远程图像。"
-
-#. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
 msgid "This message can't be trusted."
 msgstr "该消息无法被信任。"
@@ -1917,48 +1900,48 @@ msgstr "显示"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
-msgid "No conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:83
+msgid "No Conversations Selected"
 msgstr "未选中会话"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
-msgid "Selecting a conversation from the list will display it here"
-msgstr "从列表中选择一个会话，在这里显示它"
+#: src/client/conversation-viewer/conversation-viewer.vala:87
+msgid "Selecting a conversation from the list will display it here."
+msgstr "从列表中选择一个会话，在这里显示它。"
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:97
-msgid "Multiple conversations selected"
+#: src/client/conversation-viewer/conversation-viewer.vala:99
+msgid "Multiple Conversations Selected"
 msgstr "已选择多个会话"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:101
-msgid "Choosing an action will apply to all selected conversations"
-msgstr "选择的动作将应用到所有选中会话"
+#: src/client/conversation-viewer/conversation-viewer.vala:103
+msgid "Choosing an action will apply to all selected conversations."
+msgstr "选择的动作将应用到所有选中会话。"
 
 #. Translators: Title label for placeholder when no
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:110
-#: src/client/conversation-viewer/conversation-viewer.vala:123
-msgid "No conversations found"
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
+msgid "No Conversations Found"
 msgstr "未找到会话"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:114
-msgid "This folder does not contain any conversations"
-msgstr "该文件夹未包含任何会话"
+#: src/client/conversation-viewer/conversation-viewer.vala:119
+msgid "This folder does not contain any conversations."
+msgstr "该文件夹未包含任何会话。"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:127
-msgid "Your search returned no results, try refining your search terms"
-msgstr "您的搜索没有返回任何结果，尝试优化下搜索字词"
+#: src/client/conversation-viewer/conversation-viewer.vala:135
+msgid "Your search returned no results, try refining your search terms."
+msgstr "您的搜索没有返回任何结果，请尝试优化一下搜索字词。"
 
 #: src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
@@ -2745,11 +2728,19 @@ msgstr "（无主题）"
 msgid "Add an account"
 msgstr "添加帐号"
 
-#: ui/accounts_editor_add_pane.ui:115 ui/accounts_editor_servers_pane.ui:115
+#: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
+#: ui/components-headerbar-conversation-list.ui:13
+#: ui/components-headerbar-conversation-list.ui:19
+#: ui/components-headerbar-conversation.ui:17
+#: ui/components-headerbar-conversation.ui:23
+msgid "Back"
+msgstr "返回"
+
+#: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
 msgstr "接收"
 
-#: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
+#: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
 msgstr "发送"
 
@@ -2761,36 +2752,36 @@ msgstr "编辑帐号"
 msgid "Account Name"
 msgstr "帐号名称"
 
-#: ui/accounts_editor_edit_pane.ui:114
+#: ui/accounts_editor_edit_pane.ui:116
 msgid "Email addresses"
 msgstr "邮箱地址"
 
-#: ui/accounts_editor_edit_pane.ui:151
+#: ui/accounts_editor_edit_pane.ui:153
 msgid "Signature"
 msgstr "签名"
 
-#: ui/accounts_editor_edit_pane.ui:186
+#: ui/accounts_editor_edit_pane.ui:188
 msgid "Settings"
 msgstr "设置"
 
-#. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:225 ui/accounts_editor_servers_pane.ui:7
-msgid "Server Settings"
-msgstr "服务器设置"
-
-#: ui/accounts_editor_edit_pane.ui:242
+#: ui/accounts_editor_edit_pane.ui:228
 msgid "Remove this account from Geary"
 msgstr "从 Geary 移除此帐号"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:247 ui/accounts_editor_servers_pane.ui:7
+msgid "Server Settings"
+msgstr "服务器设置"
 
 #: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "帐号"
 
-#: ui/accounts_editor_list_pane.ui:72
-msgid "To get started, select an email provider below."
-msgstr "开始之前，请从下面选择您的邮件服务提供商。"
+#: ui/accounts_editor_list_pane.ui:74
+msgid "To get started, add an email provider above."
+msgstr "开始之前，请在上面添加一个邮件服务提供商。"
 
-#: ui/accounts_editor_list_pane.ui:86
+#: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
 msgstr "欢迎使用 Geary"
 
@@ -3058,14 +3049,9 @@ msgstr "回复全部"
 msgid "Forward"
 msgstr "转发"
 
-#: ui/components-conversation-actions.ui:156
-msgid "_Archive"
-msgstr "归档(_A)"
-
-#: ui/components-headerbar-conversation-list.ui:19
-#: ui/components-headerbar-conversation.ui:22
-msgid "Back"
-msgstr "返回"
+#: ui/components-headerbar-application.ui:7
+msgid "Mail"
+msgstr "邮件"
 
 #: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
@@ -3076,7 +3062,11 @@ msgstr "编写消息"
 msgid "Toggle search bar"
 msgstr "开关搜索栏"
 
-#: ui/components-headerbar-conversation.ui:59
+#: ui/components-headerbar-conversation-list.ui:70
+msgid "Select conversations"
+msgstr "选择会话"
+
+#: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
 msgstr "开关查找栏"
 
@@ -3088,8 +3078,8 @@ msgid ""
 "ReportingABug\">new bug report</a>."
 msgstr ""
 "如果问题严重或仍然存在，请保存详情并发送到其中一个<a href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">联系频道</a>，或者作为附件添加到<a href="
-"\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">新的缺陷报告</a>中。"
+"gnome.org/Apps/Geary/Contact\">联系频道</a>，或者作为附件添加到<a "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">新的缺陷报告</a>中。"
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3140,7 +3130,7 @@ msgstr "键盘快捷键(_K)"
 msgid "_About Geary"
 msgstr "关于 Geary(_A)"
 
-#: ui/components-menu-conversation.ui:21
+#: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
 msgstr "标记为垃圾邮件(_J)"
 
@@ -3323,15 +3313,15 @@ msgstr "回复给："
 msgid "Subject"
 msgstr "主题"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "在会话中查找"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "查找搜索字符串的上一次出现。"
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "查找搜索字符串的下一次出现。"
 
@@ -3667,6 +3657,29 @@ msgstr "记住密码(_R)"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "验证(_A)"
+
+#, c-format
+#~ msgid "Email to %s saved"
+#~ msgstr "给 %s 的邮件已保存"
+
+#~ msgid "Move conversation"
+#~ msgid_plural "Move conversations"
+#~ msgstr[0] "移动会话"
+
+#~ msgid "Sending…"
+#~ msgstr "正在发送…"
+
+#~ msgid "Error sending email"
+#~ msgstr "发送邮件时出错"
+
+#~ msgid "Error saving sent mail"
+#~ msgstr "保存已发送邮件时出错"
+
+#~ msgid "Me"
+#~ msgstr "我"
+
+#~ msgid "_Archive"
+#~ msgstr "归档(_A)"
 
 #~ msgid "Online accounts are missing"
 #~ msgstr "在线帐号缺失"
