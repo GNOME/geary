@@ -9,7 +9,7 @@ profile = get_option('profile')
 appid_suffix = ''
 name_suffix = ''
 if profile == 'auto'
-  if run_command('[', '-d', '.git', ']').returncode() == 0
+  if run_command('[', '-d', '.git', ']', check: false).returncode() == 0
     profile = 'development'
   else
     error('No build profile specified, see BUILDING.md')
@@ -170,7 +170,7 @@ geary_id = 'org.gnome.Geary@0@'.format(appid_suffix)
 geary_version = meson.project_version()
 revno = get_option('revno')
 if revno == ''
-  revno = run_command('build-aux/git_version.py').stdout().strip()
+  revno = run_command('build-aux/git_version.py', check: false).stdout().strip()
 endif
 
 gnome = import('gnome')
