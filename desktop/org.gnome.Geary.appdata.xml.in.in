@@ -83,6 +83,19 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="46.0" date="2024-05-20">
+      <description>
+        <p>Enhancements included in this release:</p>
+        <ul>
+          <li>Simpler notification messages</li>
+          <li>Fix navigation issues</li>
+          <li>Continue delivering messages on erro</li>
+          <li>Fix one more unread count issue</li>
+          <li>Numerous user interface translation updates</li>
+          <li>Numerous bug fixes and user interface improvements</li>
+        </ul>
+      </description>
+    </release>
     <release version="44.0" date="2023-07-05">
       <description>
         <p>Enhancements included in this release:</p>

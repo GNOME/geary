@@ -1,3 +1,23 @@
+Version 46.0
+~~~~~~~~~~~~
+Released: 2024-05-20
+
+A stable feature release.
+
+Enhancements included in this release:
+ * Simpler notification messages
+ * Fix navigation issues
+ * Continue delivering messages on error
+ * Fix one more unread count issue
+ * Numerous user interface translation updates
+ * Numerous bug fixes and user interface improvements
+
+Thanks to those who contributed bug fixes and enhancements to this
+release:
+ * Niels De Graef
+ * Sabri Ünal
+ * All translators
+
 Version 44.0
 ~~~~~~~~~~~~
 Released: 2023-07-05
