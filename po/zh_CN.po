@@ -4,30 +4,29 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Qijian Zhang <arch.strange@foxmail.com>, 2019
+# Kuang Chen <kchenphy@gmail.com>, 2012
+# Dianjin Wang <1132321739qq@gmail.com>, 2012-2013
 # Christopher Meng <cickumqt@gmail.com>, 2013
-# Dianjin Wang <1132321739qq@gmail.com>, 2013
 # hepin1989 <hepin1989@gmail.com>, 2013
 # hepin <hepin@sosia.us>, 2013
-# Kuang Chen <kchenphy@gmail.com>, 2012
-# Dianjin Wang <1132321739qq@gmail.com>, 2012
-# Dingzhong Chen <wsxy162@gmail.com>, 2020.
-# lumingzh <lumingzh@qq.com>, 2020-2022.
+# Qijian Zhang <arch.strange@foxmail.com>, 2019
+# Dingzhong Chen <wsxy162@gmail.com>, 2020
+# lumingzh <lumingzh@qq.com>, 2020-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-05-19 12:01-0400\n"
+"POT-Creation-Date: 2024-06-04 08:58+0000\n"
+"PO-Revision-Date: 2024-06-04 19:10+0800\n"
 "Last-Translator: lumingzh <lumingzh@qq.com>\n"
-"Language-Team: Chinese - China <i18n-zh@googlegroups.com>\n"
+"Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Gtranslator 46.1\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -944,11 +943,14 @@ msgstr "关于 %s"
 #: src/client/application/application-client.vala:570
 msgid "translator-credits"
 msgstr ""
-"tuhaihe <1132321739qq@gmail.com>, 2012\n"
+"Kuang Chen <kchenphy@gmail.com>, 2012\n"
+"Dianjin Wang <1132321739qq@gmail.com>, 2012-2013\n"
+"Christopher Meng <cickumqt@gmail.com>, 2013\n"
+"hepin1989 <hepin1989@gmail.com>, 2013\n"
 "hepin <hepin@sosia.us>, 2013\n"
-"张奇建 <arch.strange@foxmail.com>, 2019\n"
-"lumingzh <lumingzh@qq.com>, 2020-2022\n"
-"Dingzhong Chen <wsxy162@gmail.com>, 2020"
+"Qijian Zhang <arch.strange@foxmail.com>, 2019\n"
+"Dingzhong Chen <wsxy162@gmail.com>, 2020\n"
+"lumingzh <lumingzh@qq.com>, 2020-2024"
 
 #. / Command line warning, string substitution
 #. / is the given argument
@@ -2301,8 +2303,9 @@ msgstr "%H:%M"
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:79
+#, c-format
 msgid "%b %-e"
-msgstr "%-m月%-d日"
+msgstr "%b %-e日"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
