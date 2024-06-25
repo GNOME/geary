@@ -65,28 +65,34 @@ public void init() {
 
     xlat_pretty_clocks = new string[ClockFormat.TOTAL];
     /// Datetime format for 12-hour time, i.e. 8:31 am
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_pretty_clocks[ClockFormat.TWELVE_HOURS] = _("%l:%M %P");
     /// Datetime format for 24-hour time, i.e. 16:35
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_pretty_clocks[ClockFormat.TWENTY_FOUR_HOURS] = _("%H:%M");
     /// Datetime format for the locale default, i.e. 8:31 am or 16:35,
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
     xlat_pretty_clocks[ClockFormat.LOCALE_DEFAULT] = "%X";
 
     /// Date format for dates within the current year, i.e. Nov 8
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_same_year = _("%b %-e");
 
     xlat_pretty_verbose_dates = new string[ClockFormat.TOTAL];
     /// Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_pretty_verbose_dates[ClockFormat.TWELVE_HOURS] = _("%B %-e, %Y %-l:%M %P");
     /// Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_pretty_verbose_dates[ClockFormat.TWENTY_FOUR_HOURS] = _("%B %-e, %Y %-H:%M");
     /// Verbose datetime format for the locale default (full month, day and time)
-    /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+    /// See https://docs.gtk.org/glib/method.DateTime.format.html
+    // xgettext: no-c-format
     xlat_pretty_verbose_dates[ClockFormat.LOCALE_DEFAULT] = C_("Default full date", "%B %-e, %Y %-l:%M %P");
 
     // return LC_MESSAGES back to proper locale and return LANGUAGE environment variable
@@ -174,7 +180,8 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
 
         case CoarseDate.THIS_WEEK:
             /// Date format that shows the weekday (Monday, Tuesday, ...)
-            /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+            /// See https://docs.gtk.org/glib/method.DateTime.format.html
+            // xgettext: no-c-format
             fmt = _("%A");
         break;
 
