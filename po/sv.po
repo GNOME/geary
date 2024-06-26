@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-02-21 21:22+0100\n"
+"POT-Creation-Date: 2024-06-26 09:42+0000\n"
+"PO-Revision-Date: 2024-06-26 19:02+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -2350,70 +2350,76 @@ msgid "This message was sent, but has not been saved to your account."
 msgstr "Detta meddelande har skickats, men sparades inte till ditt konto."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%-e %b"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%-e %B %Y %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-H:%M"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Nu"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%dm sedan"
 msgstr[1] "%dm sedan"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%dh sedan"
 msgstr[1] "%dh sedan"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "I går"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
