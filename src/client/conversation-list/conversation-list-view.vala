@@ -658,22 +658,24 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
         this.get_window().get_device_position(ctx.get_device(), out screen_x, out screen_y, out _modifier);
 
-        // If the user has a selection but drags starting from an unselected
-        // row, we need to set the selection to that row
         Row? row = this.list.get_row_at_y(screen_y + (int) this.vadjustment.value) as Row?;
-        if (row != null && !row.is_selected()) {
-            this.list.unselect_all();
-            this.list.select_row(row);
+        if (row != null) {
+            // If the user has a selection but drags starting from an unselected
+            // row, we need to set the selection to that row
+            if (!row.is_selected()) {
+                this.list.unselect_all();
+                this.list.select_row(row);
+            }
+
+            this.drag_widget = new Row(this.config, row.conversation, false);
+            this.drag_widget.width_request = row.get_allocated_width();
+            this.drag_widget.get_style_context().add_class("drag-n-drop");
+            this.drag_widget.visible = true;
+
+            int hot_x, hot_y;
+            this.translate_coordinates(row, screen_x, screen_y, out hot_x, out hot_y);
+            Gtk.drag_set_icon_widget(ctx, this.drag_widget, hot_x, hot_y);
         }
-
-        this.drag_widget = new Row(this.config, row.conversation, false);
-        this.drag_widget.width_request = row.get_allocated_width();
-        this.drag_widget.get_style_context().add_class("drag-n-drop");
-        this.drag_widget.visible = true;
-
-        int hot_x, hot_y;
-        this.translate_coordinates(row, screen_x, screen_y, out hot_x, out hot_y);
-        Gtk.drag_set_icon_widget(ctx, this.drag_widget, hot_x, hot_y);
     }
 
     private void on_drag_end(Gdk.DragContext ctx) {
