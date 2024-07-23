@@ -18,7 +18,7 @@ variables:
   BUILD_DIR: build
   CONFIG_CMD: meson --buildtype=debug $BUILD_DIR
   BUILD_CMD: ninja -v -C $BUILD_DIR
-  TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
+  TEST_CMD: xvfb-run -a dbus-run-session -- meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
 
   # Fedora packages
@@ -30,7 +30,7 @@ variables:
     libpeas1-devel libsecret-devel libstemmer-devel libunwind-devel
     libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
     git
-  FEDORA_TEST_DEPS: glibc-langpack-en gnutls-utils tar Xvfb xz
+  FEDORA_TEST_DEPS: dbus-daemon glibc-langpack-en gnutls-utils tar Xvfb xz
 
   # Ubuntu packages
   UBUNTU_DEPS:
