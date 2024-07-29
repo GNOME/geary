@@ -1,5 +1,5 @@
 # Turkish translation for geary
-# Copyright 2016-2022 Software Freedom Conservancy Inc.
+# Copyright 2016-2024 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # alperenelhan <alperen@elhan.org>, 2012
@@ -8,23 +8,23 @@
 # Necdet Yücel <necdetyucel@gmail.com>, 2015.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014-2021.
-# Sabri Ünal <libreajans@gmail.com>, 2023.
+# Sabri Ünal <yakushabb@gmail.com>, 2023-2024.
 # Emin Tufan Çetin <etcetin@gmail.com>, 2016-2023.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary.mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-02-25 03:36+0300\n"
-"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
+"POT-Creation-Date: 2024-06-04 08:58+0000\n"
+"PO-Revision-Date: 2024-06-25 13:34+0300\n"
+"Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.4.3\n"
 
 #: desktop/geary-attach.contract.desktop.in:3
 msgid "Send by email"
@@ -2317,6 +2317,10 @@ msgstr "%l:%M %P"
 msgid "%H:%M"
 msgstr "%H:%M"
 
+# https://docs.gtk.org/glib/method.DateTime.format.html
+# Örnek:
+# 1 Haz
+# 30 Haz
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #. / Date format for dates within the current year, i.e. Nov 8
@@ -2325,18 +2329,30 @@ msgstr "%H:%M"
 msgid "%b %-e"
 msgstr "%-e %b"
 
+# https://docs.gtk.org/glib/method.DateTime.format.html
+# Örnek: 
+# 1 Haziran 2024, 8:30 öö
+# 30 Haziran 2024, 8:30 ös
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:84
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y, %-l:%M %P"
 
+# https://docs.gtk.org/glib/method.DateTime.format.html
+# Örnek:
+# 1 Haziran 2024, 20:30
+# 30 Haziran 2024, 20:30
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:87
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%-e %B %Y, %-H:%M"
 
+# https://docs.gtk.org/glib/method.DateTime.format.html
+# Örnek:
+# 1 Haziran 2024, 8:30 öö
+# 30 Haziran 2024, 8:30 ös
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:90
@@ -3678,22 +3694,3 @@ msgstr "Parolayı _anımsa"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Kimlik Doğrula"
-
-#~ msgid "Email to %s saved"
-#~ msgstr "Şun(lar)a gidecek e-posta kaydedildi: %s"
-
-#~ msgid "Sending…"
-#~ msgstr "Gönderiliyor…"
-
-#~ msgid "Error sending email"
-#~ msgstr "E-posta gönderme hatası"
-
-#~ msgid "Error saving sent mail"
-#~ msgstr "Gönderilmiş posta kaydedilirken hata"
-
-#~ msgid "Move conversation"
-#~ msgid_plural "Move conversations"
-#~ msgstr[0] "Konuşmayı taşı"
-
-#~ msgid "_Archive"
-#~ msgstr "_Arşivle"
