@@ -61,9 +61,10 @@
         },
         {
             "name": "gspell",
+            "buildsystem": "meson",
             "config-opts": [
-                "--disable-gtk-doc",
-                "--disable-gtk-doc-html"
+                "-Dgspell_app=false",
+                "-Dgtk_doc=false"
             ],
             "sources": [
                 {
