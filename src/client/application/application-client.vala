@@ -359,6 +359,7 @@ public class Application.Client : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
+        Environment.set_prgname(APP_ID);
         Util.I18n.init(GETTEXT_PACKAGE, this.binary);
         Util.Date.init();
 
