@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-09-06 21:15+0000\n"
-"PO-Revision-Date: 2024-09-06 23:16+0200\n"
+"POT-Creation-Date: 2024-09-06 21:16+0000\n"
+"PO-Revision-Date: 2024-09-06 23:17+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -2455,8 +2455,6 @@ msgstr "%H:%M"
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:79
-#, fuzzy, c-format
-#| msgid "%b %-e"
 msgid "%b %-e"
 msgstr "%-e. %b"
 
