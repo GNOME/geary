@@ -8,17 +8,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2023-09-09 12:14+0000\n"
-"PO-Revision-Date: 2024-03-29 07:39+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
+"POT-Creation-Date: 2024-09-01 20:19+0000\n"
+"PO-Revision-Date: 2024-03-29 07:37+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
-"%100==4 ? 3 : 0);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || "
+"n%100==4 ? 3 : 0);\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 2.2.1\n"
 
@@ -35,7 +35,7 @@ msgstr "Pošlji datoteke s programom Geary"
 #: desktop/org.gnome.Geary.appdata.xml.in.in:11
 #: desktop/org.gnome.Geary.desktop.in.in:3
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
-#: src/client/application/application-main-window.vala:718
+#: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
@@ -65,13 +65,13 @@ msgstr "Razvojna skupina Geary"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:17
 msgid ""
-"Geary is an email application built around conversations, for the GNOME 3 "
+"Geary is an email application built around conversations, for the GNOME "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Program Geary je odjemalec elektronske pošte za GNOME, zasnovan za napredno "
-"zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil v "
-"preglednem modernem vmesniku."
+"Program Geary je odjemalec elektronske pošte za namizje GNOME, zasnovan za "
+"napredno zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil "
+"v preglednem modernem vmesniku."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
@@ -112,12 +112,12 @@ msgstr ""
 "strežniki IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:50
+#: desktop/org.gnome.Geary.appdata.xml.in.in:51
 msgid "Geary displaying a conversation"
 msgstr "Prikaz sporočil, zbranih v pogovorno nit"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:55
+#: desktop/org.gnome.Geary.appdata.xml.in.in:56
 msgid "Geary showing the rich text composer"
 msgstr "Program Geary z odprtim oknom skladalnika vsebine"
 
@@ -337,7 +337,7 @@ msgstr ""
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
 #. untrusted TLS certificate
-#: src/client/accounts/accounts-editor.vala:208
+#: src/client/accounts/accounts-editor.vala:216
 msgid "Failed to store certificate"
 msgstr "Shranjevanje potrdila je spodletelo"
 
@@ -411,7 +411,7 @@ msgstr "Ime"
 #. email address when editing a user's sender address
 #. preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:681
-#: src/client/accounts/accounts-editor-edit-pane.vala:527
+#: src/client/accounts/accounts-editor-edit-pane.vala:528
 msgid "Email address"
 msgstr "Elektronski naslov"
 
@@ -421,7 +421,7 @@ msgstr "Elektronski naslov"
 #. address part of an email address when editing a user's
 #. sender address preferences for an account.
 #: src/client/accounts/accounts-editor-add-pane.vala:685
-#: src/client/accounts/accounts-editor-edit-pane.vala:493
+#: src/client/accounts/accounts-editor-edit-pane.vala:494
 msgid "person@example.com"
 msgstr "ime.priimek@domena.si"
 
@@ -472,9 +472,14 @@ msgstr "Strežnik SMTP"
 msgid "smtp.example.com"
 msgstr "smtp.domena.si"
 
-#. This is the remove account button in the account settings.
+#: src/client/accounts/accounts-editor-edit-pane.vala:163
+#: src/client/accounts/accounts-editor-list-pane.vala:234
+#: src/client/application/application-main-window.vala:2326
+#: ui/accounts_editor_edit_pane.ui:42
+msgid "Undo"
+msgstr "Razveljavi"
+
 #: src/client/accounts/accounts-editor-edit-pane.vala:211
-#: ui/accounts_editor_edit_pane.ui:240
 msgid "Remove Account"
 msgstr "Odstrani račun"
 
@@ -523,32 +528,32 @@ msgstr "Dodaj elektronski naslov novega pošiljatelja"
 #. Translators: Label used to indicate the user has
 #. provided no display name for one of their sender
 #. email addresses in their account settings.
-#: src/client/accounts/accounts-editor-edit-pane.vala:437
+#: src/client/accounts/accounts-editor-edit-pane.vala:438
 msgid "Name not set"
 msgstr "Ime ni nastavljeno"
 
 #. Translators: This is used as a placeholder for the
 #. display name for an email address when editing a user's
 #. sender address preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:478
+#: src/client/accounts/accounts-editor-edit-pane.vala:479
 msgid "Sender Name"
 msgstr "Ime pošiljatelja"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:505
+#: src/client/accounts/accounts-editor-edit-pane.vala:506
 msgid "Remove"
 msgstr "Odstrani"
 
 #. Translators: Label used for the display name part of an
 #. email address when editing a user's sender address
 #. preferences for an account.
-#: src/client/accounts/accounts-editor-edit-pane.vala:520
+#: src/client/accounts/accounts-editor-edit-pane.vala:521
 msgid "Sender name"
 msgstr "Ime pošiljatelja"
 
 #. Translators: Label used as the undo tooltip after adding an
 #. new sender email address to an account. The string
 #. substitution is the email address added.
-#: src/client/accounts/accounts-editor-edit-pane.vala:587
+#: src/client/accounts/accounts-editor-edit-pane.vala:588
 #, c-format
 msgid "Remove “%s”"
 msgstr "Odstrani »%s«"
@@ -556,7 +561,7 @@ msgstr "Odstrani »%s«"
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
 #. the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:627
+#: src/client/accounts/accounts-editor-edit-pane.vala:628
 #, c-format
 msgid "Undo changes to “%s”"
 msgstr "Razveljavi spremembe v »%s«"
@@ -564,7 +569,7 @@ msgstr "Razveljavi spremembe v »%s«"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:714
+#: src/client/accounts/accounts-editor-edit-pane.vala:715
 #, c-format
 msgid "Add “%s” back"
 msgstr "Dodaj naslov »%s« nazaj"
@@ -572,14 +577,14 @@ msgstr "Dodaj naslov »%s« nazaj"
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
-#: src/client/accounts/accounts-editor-edit-pane.vala:756
+#: src/client/accounts/accounts-editor-edit-pane.vala:757
 msgid "Undo signature changes"
 msgstr "Razveljavi spremembe podpisa"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
-#: src/client/accounts/accounts-editor-edit-pane.vala:804
+#: src/client/accounts/accounts-editor-edit-pane.vala:805
 msgid "Download mail"
 msgstr "Prejmi sporočila"
 
@@ -588,44 +593,44 @@ msgstr "Prejmi sporočila"
 #. should be downloaded for an account. The
 #. string substitution is the duration,
 #. e.g. "1 month back".
-#: src/client/accounts/accounts-editor-edit-pane.vala:836
+#: src/client/accounts/accounts-editor-edit-pane.vala:837
 #, c-format
 msgid "Change download period back to: %s"
 msgstr "Spremeni čas prejema nazaj na: %s"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:857
+#: src/client/accounts/accounts-editor-edit-pane.vala:858
 msgid "Everything"
 msgstr "Celoten čas"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:861
+#: src/client/accounts/accounts-editor-edit-pane.vala:862
 msgid "2 weeks back"
 msgstr "2 tedna nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:865
+#: src/client/accounts/accounts-editor-edit-pane.vala:866
 msgid "1 month back"
 msgstr "1 mesec nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:869
+#: src/client/accounts/accounts-editor-edit-pane.vala:870
 msgid "3 months back"
 msgstr "3 mesece nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:873
+#: src/client/accounts/accounts-editor-edit-pane.vala:874
 msgid "6 months back"
 msgstr "6 mesecev nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:877
+#: src/client/accounts/accounts-editor-edit-pane.vala:878
 msgid "1 year back"
 msgstr "1 leto nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:881
+#: src/client/accounts/accounts-editor-edit-pane.vala:882
 msgid "2 years back"
 msgstr "2 leti nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:885
+#: src/client/accounts/accounts-editor-edit-pane.vala:886
 msgid "4 years back"
 msgstr "4 leta nazaj"
 
-#: src/client/accounts/accounts-editor-edit-pane.vala:891
+#: src/client/accounts/accounts-editor-edit-pane.vala:892
 #, c-format
 msgid "%d day back"
 msgid_plural "%d days back"
@@ -634,43 +639,38 @@ msgstr[1] "%d dan nazaj"
 msgstr[2] "%d dneva nazaj"
 msgstr[3] "%d dneve nazaj"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:234
-#: src/client/application/application-main-window.vala:2317
-msgid "Undo"
-msgstr "Razveljavi"
-
 #: src/client/accounts/accounts-editor-list-pane.vala:243
-#: src/client/application/application-main-window.vala:2300
+#: src/client/application/application-main-window.vala:2309
 msgid "Redo"
 msgstr "Ponovno uveljavi"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:326
-#: src/client/accounts/accounts-editor-row.vala:280
+#: src/client/accounts/accounts-editor-list-pane.vala:327
+#: src/client/accounts/accounts-editor-row.vala:303
 msgid "Gmail"
 msgstr "Gmail"
 
-#: src/client/accounts/accounts-editor-list-pane.vala:330
-#: src/client/accounts/accounts-editor-row.vala:284
+#: src/client/accounts/accounts-editor-list-pane.vala:331
+#: src/client/accounts/accounts-editor-row.vala:307
 msgid "Outlook.com"
 msgstr "Outlook.com"
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but disabled by the user.
-#: src/client/accounts/accounts-editor-list-pane.vala:352
+#: src/client/accounts/accounts-editor-list-pane.vala:353
 msgid "This account has been disabled"
 msgstr "Ta račun je onemogočen."
 
 #. Translators: Tooltip for accounts that have been
 #. loaded but because of some error are not able to be
 #. used.
-#: src/client/accounts/accounts-editor-list-pane.vala:361
+#: src/client/accounts/accounts-editor-list-pane.vala:362
 msgid "This account has encountered a problem and is unavailable"
 msgstr "S tem računom so povezane težave in trenutno ni na razpolago"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:467
+#: src/client/accounts/accounts-editor-list-pane.vala:468
 #, c-format
 msgid "Account “%s” removed"
 msgstr "Račun »%s« je odstranjen"
@@ -678,7 +678,7 @@ msgstr "Račun »%s« je odstranjen"
 #. Translators: Notification shown after removing an account
 #. is undone. The string substitution is the name of the
 #. account.
-#: src/client/accounts/accounts-editor-list-pane.vala:474
+#: src/client/accounts/accounts-editor-list-pane.vala:475
 #, c-format
 msgid "Account “%s” restored"
 msgstr "Račun »%s« je obnovljen"
@@ -691,30 +691,30 @@ msgstr "Potegnite za premikanje predmeta"
 #. Translators: Label describes the service provider
 #. hosting the email account, e.g. Gmail, Yahoo, or some
 #. other generic IMAP service.
-#: src/client/accounts/accounts-editor-row.vala:296
+#: src/client/accounts/accounts-editor-row.vala:319
 msgid "Service provider"
 msgstr "Ponudnik storitve"
 
 #. Translators: This label describes what form of transport
 #. security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
 #. service.
-#: src/client/accounts/accounts-editor-row.vala:470
+#: src/client/accounts/accounts-editor-row.vala:493
 msgid "Connection security"
 msgstr "Varnost povezave"
 
 #. Translators: Label used when no auth scheme is used
 #. by an account's IMAP or SMTP service.
-#: src/client/accounts/accounts-editor-row.vala:481
+#: src/client/accounts/accounts-editor-row.vala:504
 #: src/client/accounts/accounts-editor-servers-pane.vala:751
 #: src/client/accounts/accounts-editor-servers-pane.vala:966
 msgid "None"
 msgstr "Brez"
 
-#: src/client/accounts/accounts-editor-row.vala:488
+#: src/client/accounts/accounts-editor-row.vala:511
 msgid "StartTLS"
 msgstr "StartTLS"
 
-#: src/client/accounts/accounts-editor-row.vala:495
+#: src/client/accounts/accounts-editor-row.vala:518
 msgid "TLS"
 msgstr "TLS"
 
@@ -722,29 +722,29 @@ msgstr "TLS"
 #. credentials (none, use IMAP, custom) when adding a new
 #. account
 #. Translators: An info bar button label
-#: src/client/accounts/accounts-editor-row.vala:536
-#: src/client/application/application-main-window.vala:650
+#: src/client/accounts/accounts-editor-row.vala:560
+#: src/client/application/application-main-window.vala:642
 msgid "Login"
 msgstr "Prijava"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (none) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:543
+#: src/client/accounts/accounts-editor-row.vala:576
 msgid "No login needed"
 msgstr "Prijava ni zahtevana"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (use IMAP) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:551
+#: src/client/accounts/accounts-editor-row.vala:588
 msgid "Use same login as receiving"
 msgstr "Enaka prijava prejemanju"
 
 #. Translators: ComboBox value for source of SMTP
 #. authentication credentials (custom) when adding a new
 #. account
-#: src/client/accounts/accounts-editor-row.vala:559
+#: src/client/accounts/accounts-editor-row.vala:600
 msgid "Use a different login"
 msgstr "Uporabi različno prijavo"
 
@@ -974,18 +974,18 @@ msgid "Unrecognised program argument: “%s”"
 msgstr "Neprepoznan argument programa »%s«"
 
 #. / Notification title.
-#: src/client/application/application-controller.vala:496
+#: src/client/application/application-controller.vala:498
 #, c-format
 msgid "A problem occurred sending email for %s"
 msgstr "Prišlo je do napake med pošiljanjem sporočila za %s"
 
 #. / Notification body
-#: src/client/application/application-controller.vala:500
+#: src/client/application/application-controller.vala:502
 msgid "Email will not be sent until re-connected"
 msgstr "Elektronsko sporočilo bo poslano, ko bo povezava spet vzpostavljena."
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:599
+#: src/client/application/application-controller.vala:601
 msgid "Conversation marked"
 msgid_plural "Conversations marked"
 msgstr[0] "Pogovori so označeni"
@@ -994,7 +994,7 @@ msgstr[2] "Pogovora sta označena"
 msgstr[3] "Pogovori so označeni"
 
 #. / Translators: Label for in-app notification
-#: src/client/application/application-controller.vala:605
+#: src/client/application/application-controller.vala:607
 msgid "Conversation un-marked"
 msgid_plural "Conversations un-marked"
 msgstr[0] "Oznaka pogovorov je odstranjena"
@@ -1005,8 +1005,8 @@ msgstr[3] "Oznaka pogovorov je odstranjena"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:631
-#: src/client/application/application-controller.vala:715
+#: src/client/application/application-controller.vala:633
+#: src/client/application/application-controller.vala:717
 #, c-format
 msgid "Conversation moved to %s"
 msgid_plural "Conversations moved to %s"
@@ -1020,8 +1020,8 @@ msgstr[3] "Pogovori so premaknjeni v %s"
 #. / of the source folder.
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:639
-#: src/client/application/application-controller.vala:661
+#: src/client/application/application-controller.vala:641
+#: src/client/application/application-controller.vala:663
 #, c-format
 msgid "Conversation restored to %s"
 msgid_plural "Conversations restored to %s"
@@ -1031,7 +1031,7 @@ msgstr[2] "Pogovora sta obnovljena v %s"
 msgstr[3] "Pogovori so obnovljeni v %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:682
+#: src/client/application/application-controller.vala:684
 msgid "Conversation archived"
 msgid_plural "Conversations archived"
 msgstr[0] "Pogovori so arhivirani"
@@ -1041,7 +1041,7 @@ msgstr[3] "Pogovori so arhivirani"
 
 #. / Translators: Label for in-app notification. String
 #. / substitution is the name of the destination folder.
-#: src/client/application/application-controller.vala:738
+#: src/client/application/application-controller.vala:740
 #, c-format
 msgid "Message restored to %s"
 msgid_plural "Messages restored to %s"
@@ -1051,7 +1051,7 @@ msgstr[2] "Sporočili sta obnovljeni v %s"
 msgstr[3] "Sporočila so obnovljena v %s"
 
 #. / Translators: Label for in-app notification.
-#: src/client/application/application-controller.vala:759
+#: src/client/application/application-controller.vala:761
 msgid "Message archived"
 msgid_plural "Messages archived"
 msgstr[0] "Sporočila so arhivirana"
@@ -1062,7 +1062,7 @@ msgstr[3] "Sporočila so arhivirana"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:794
+#: src/client/application/application-controller.vala:796
 #, c-format
 msgid "Message moved to %s"
 msgid_plural "Messages moved to %s"
@@ -1074,7 +1074,7 @@ msgstr[3] "Sporočila so premaknjena v %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:822
+#: src/client/application/application-controller.vala:824
 #, c-format
 msgid "Conversation labelled as %s"
 msgid_plural "Conversations labelled as %s"
@@ -1086,7 +1086,7 @@ msgstr[3] "Pogovori so označeni kot %s"
 #. / Translators: Label for in-app
 #. / notification. String substitution is the name
 #. / of the destination folder.
-#: src/client/application/application-controller.vala:830
+#: src/client/application/application-controller.vala:832
 #, c-format
 msgid "Conversation un-labelled as %s"
 msgid_plural "Conversations un-labelled as %s"
@@ -1095,12 +1095,12 @@ msgstr[1] "Odstranjena je oznaka pogovora %s"
 msgstr[2] "Odstranjena je oznaka pogovorov %s"
 msgstr[3] "Odstranjena je oznaka pogovorov %s"
 
-#: src/client/application/application-controller.vala:1337
+#: src/client/application/application-controller.vala:1311
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Podatkovne zbirke za %s ni mogoče odpreti"
 
-#: src/client/application/application-controller.vala:1338
+#: src/client/application/application-controller.vala:1312
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -1124,20 +1124,20 @@ msgstr ""
 "S ponovno izgradnjo podatkovne zbirke so uničeni vsi krajevni podatki "
 "sporočil in prilog. <b>Sporočila na strežniku ostanejo nespremenjena.</b>"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1314
 msgid "_Rebuild"
 msgstr "Ponovno _izgradi"
 
-#: src/client/application/application-controller.vala:1340
+#: src/client/application/application-controller.vala:1314
 msgid "E_xit"
 msgstr "_Končaj"
 
-#: src/client/application/application-controller.vala:1350
+#: src/client/application/application-controller.vala:1324
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Ponovna izgradnja mape za »%s« ni mogoča."
 
-#: src/client/application/application-controller.vala:1351
+#: src/client/application/application-controller.vala:1325
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -1148,39 +1148,34 @@ msgstr ""
 "\n"
 "%s"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:1518
-#, c-format
-msgid "Email sent to %s"
-msgstr "Elektronsko sporočilo je poslano za %s"
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:1490
+msgid "Email sent"
+msgstr "E-sporočilo je poslano"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2514
+#: src/client/application/application-controller.vala:2495
 #, c-format
 msgid "Email to %s queued for delivery"
 msgstr "Elektronsko sporočilo za %s je uvrščeno v vrsto za pošiljanje"
 
-#. / Translators: The label for an in-app notification. The
-#. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2578
-#, c-format
-msgid "Email to %s saved"
-msgstr "Elektronsko sporočilo za %s je shranjeno."
+#. / Translators: The label for an in-app notification.
+#: src/client/application/application-controller.vala:2556
+msgid "Email saved as draft"
+msgstr "E-sporočilo je shranjeno kot osnutek"
 
 #. / Translators: A label for an in-app notification.
-#: src/client/application/application-controller.vala:2593
-#: src/client/application/application-controller.vala:2651
+#: src/client/application/application-controller.vala:2570
+#: src/client/application/application-controller.vala:2625
 msgid "Composer could not be restored"
 msgstr "Okna skladalnika ni mogoče obnoviti"
 
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
-#: src/client/application/application-controller.vala:2636
-#, c-format
-msgid "Email to %s discarded"
-msgstr "Elektronsko sporočilo za %s je opuščeno."
+#: src/client/application/application-controller.vala:2611
+msgid "Email discarded"
+msgstr "E-sporočilo je opuščeno"
 
 #. / Translators: Label for account database upgrade dialog
 #: src/client/application/application-database-manager.vala:74
@@ -1194,86 +1189,86 @@ msgid "Account update"
 msgstr "Posodobitev računa"
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:636
+#: src/client/application/application-main-window.vala:628
 msgid "Working offline"
 msgstr "Delo brez povezave"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:638
+#: src/client/application/application-main-window.vala:630
 msgid "You will not be able to send or receive email until re-connected."
 msgstr ""
 "Sporočil ne bo mogoče ne prejeti ne poslati do ponovne vzpostavitve povezave."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:645
+#: src/client/application/application-main-window.vala:637
 msgid "Login problem"
 msgstr "Težava s prijavo"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:647
+#: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
 msgstr "Za račun je javljena napaka neveljavne prijave ali gesla."
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:654
+#: src/client/application/application-main-window.vala:646
 msgid "Retry login, you will be prompted for your password"
 msgstr ""
 "Ponovno poskusite s prijavo, ob tem se bo odprlo pogovorno okno za vnos "
 "gesla."
 
 #. Translators: An info bar status label
-#: src/client/application/application-main-window.vala:661
+#: src/client/application/application-main-window.vala:653
 msgid "Security problem"
 msgstr "Varnostna težava"
 
 #. Translators: An info bar description label
-#: src/client/application/application-main-window.vala:663
+#: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
 msgstr "Za račun je javljena povezava s strežnikom, ki ni zaupanja vredno."
 
 #. Translators: An info bar button label
-#: src/client/application/application-main-window.vala:666
+#: src/client/application/application-main-window.vala:658
 msgid "Check"
 msgstr "Preglej"
 
 #. Translators: An info bar button tool-tip
-#: src/client/application/application-main-window.vala:670
+#: src/client/application/application-main-window.vala:662
 msgid "Check the security details for the connection"
 msgstr "Preveri varnostne podrobnosti povezave."
 
 #. / Translators: Main window title, first string
 #. / substitution being the currently selected folder name,
 #. / the second being the selected account name.
-#: src/client/application/application-main-window.vala:727
+#: src/client/application/application-main-window.vala:719
 #, c-format
 msgid "%s — %s"
 msgstr "%s – %s"
 
-#: src/client/application/application-main-window.vala:1100
+#: src/client/application/application-main-window.vala:1095
 #: src/client/folder-list/folder-list-account-branch.vala:49
 msgid "Labels"
 msgstr "Oznake"
 
-#: src/client/application/application-main-window.vala:1432
+#: src/client/application/application-main-window.vala:1421
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Ali želite odstraniti vsa elektronska sporočila iz mape %s?"
 
-#: src/client/application/application-main-window.vala:1433
+#: src/client/application/application-main-window.vala:1422
 msgid "This removes the email from Geary and your email server."
 msgstr "S tem bo sporočilo odstranjeno krajevno in iz poštnega strežnika."
 
-#: src/client/application/application-main-window.vala:1434
+#: src/client/application/application-main-window.vala:1423
 msgid "This cannot be undone."
 msgstr "Dejanja ni mogoče povrniti."
 
-#: src/client/application/application-main-window.vala:1435
+#: src/client/application/application-main-window.vala:1424
 #, c-format
 msgid "Empty %s"
 msgstr "Izprazni %s"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1492
+#: src/client/application/application-main-window.vala:1481
 msgid "Do you want to permanently delete this conversation?"
 msgid_plural "Do you want to permanently delete these conversations?"
 msgstr[0] "Ali želite trajno izbrisati te pogovore?"
@@ -1281,13 +1276,13 @@ msgstr[1] "Ali želite trajno izbrisati ta pogovor?"
 msgstr[2] "Ali želite trajno izbrisati ta pogovora?"
 msgstr[3] "Ali želite trajno izbrisati te pogovore?"
 
-#: src/client/application/application-main-window.vala:1497
-#: src/client/application/application-main-window.vala:1512
+#: src/client/application/application-main-window.vala:1486
+#: src/client/application/application-main-window.vala:1501
 msgid "Delete"
 msgstr "Izbriši"
 
 #. / Translators: Primary text for a confirmation dialog
-#: src/client/application/application-main-window.vala:1507
+#: src/client/application/application-main-window.vala:1496
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ali res želite trajno izbrisati ta sporočila?"
@@ -1295,7 +1290,7 @@ msgstr[1] "Ali res želite trajno izbrisati to sporočilo?"
 msgstr[2] "Ali res želite trajno izbrisati ti sporočili?"
 msgstr[3] "Ali res želite trajno izbrisati ta sporočila?"
 
-#: src/client/application/application-main-window.vala:1841
+#: src/client/application/application-main-window.vala:1836
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1467,13 +1462,19 @@ msgstr "Program bo ostal dejaven tudi po zaprtju okna"
 msgid "_Always load images"
 msgstr "_Vedno naloži slike"
 
+#. Translators: Info bar description
+#: src/client/components/components-preferences-window.vala:173
+#: src/client/conversation-viewer/conversation-message.vala:1424
+msgid "Showing remote images allows the sender to track you"
+msgstr "Prikaz oddaljenih slik omogoča pošiljatelju, da vam sledi"
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:190
+#: src/client/components/components-preferences-window.vala:191
 msgid "Preferences"
 msgstr "Možnosti"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:251
+#: src/client/components/components-preferences-window.vala:252
 msgid "Plugins"
 msgstr "Vstavki"
 
@@ -1591,22 +1592,6 @@ msgstr "Zahtevan je vpis imena strežnika"
 #: src/client/components/components-validator.vala:449
 msgid "Could not look up server name"
 msgstr "Ni mogoče preveriti imena strežnika"
-
-#. / Displayed in the space-limited status bar while a message is in the process of being sent.
-#: src/client/components/status-bar.vala:26
-msgid "Sending…"
-msgstr "Poteka pošiljanje …"
-
-#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/components/status-bar.vala:29
-msgid "Error sending email"
-msgstr "Napaka med pošiljanjem sporočila"
-
-#. Displayed in the space-limited status bar when a message fails to be uploaded
-#. to Sent Mail after being sent.
-#: src/client/components/status-bar.vala:33
-msgid "Error saving sent mail"
-msgstr "Napaka shranjevanja poslanega sporočila"
 
 #: src/client/components/stock.vala:18
 msgid "_OK"
@@ -1781,60 +1766,60 @@ msgstr "Ali želite poslati sporočilo brez priloge?"
 msgid "“%s” already attached for delivery."
 msgstr "Datoteka »%s« je že priložena za pošiljanje."
 
-#: src/client/composer/composer-widget.vala:1890
-#: src/client/composer/composer-widget.vala:1940
+#: src/client/composer/composer-widget.vala:1893
+#: src/client/composer/composer-widget.vala:1943
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "Datoteka »%s« je prazna datoteka."
 
-#: src/client/composer/composer-widget.vala:1928
+#: src/client/composer/composer-widget.vala:1931
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Predmeta »%s« ni mogoče najti."
 
-#: src/client/composer/composer-widget.vala:1934
+#: src/client/composer/composer-widget.vala:1937
 #, c-format
 msgid "“%s” is a folder."
 msgstr "Predmet »%s« je mapa."
 
-#: src/client/composer/composer-widget.vala:1953
+#: src/client/composer/composer-widget.vala:1956
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Datoteke »%s« ni mogoče odpreti za branje."
 
-#: src/client/composer/composer-widget.vala:1961
+#: src/client/composer/composer-widget.vala:1964
 msgid "Cannot add attachment"
 msgstr "Priloge ni mogoče dodati"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2032
+#: src/client/composer/composer-widget.vala:2035
 msgid "Images"
 msgstr "Slike"
 
 #. Translators: Human-readable version of the RFC 822 To header
-#: src/client/composer/composer-widget.vala:2096
+#: src/client/composer/composer-widget.vala:2099
 #: src/client/conversation-viewer/conversation-email.vala:536
 #: src/client/util/util-email.vala:267 ui/conversation-message.ui:283
 msgid "To:"
 msgstr "Za:"
 
 #. Translators: Human-readable version of the RFC 822 CC header
-#: src/client/composer/composer-widget.vala:2102
+#: src/client/composer/composer-widget.vala:2105
 #: src/client/conversation-viewer/conversation-email.vala:541
 #: src/client/util/util-email.vala:272 ui/conversation-message.ui:324
 msgid "Cc:"
 msgstr "Kp:"
 
 #. Translators: Human-readable version of the RFC 822 BCC header
-#: src/client/composer/composer-widget.vala:2108
+#: src/client/composer/composer-widget.vala:2111
 #: src/client/conversation-viewer/conversation-email.vala:546
 #: ui/conversation-message.ui:365
 msgid "Bcc:"
 msgstr "Skp:"
 
 #. Translators: Human-readable version of the RFC 822 Reply-To header
-#: src/client/composer/composer-widget.vala:2114
+#: src/client/composer/composer-widget.vala:2117
 msgid "Reply-To: "
 msgstr "Odgovori _na: "
 
@@ -1843,7 +1828,7 @@ msgstr "Odgovori _na: "
 #. printf argument will be the alternate email address,
 #. and the second will be the account's primary email
 #. address.
-#: src/client/composer/composer-widget.vala:2232
+#: src/client/composer/composer-widget.vala:2235
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s prek %2$s"
@@ -1861,7 +1846,7 @@ msgid "Search for more languages"
 msgstr "Poišči dodatne jezike"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:219
+#: src/client/conversation-list/conversation-list-view.vala:214
 msgid "Move conversation to _Trash"
 msgid_plural "Move conversations to _Trash"
 msgstr[0] "Premakni pogovore v _smeti"
@@ -1870,7 +1855,7 @@ msgstr[2] "Premakni pogovora v _smeti"
 msgstr[3] "Premakni pogovore v _smeti"
 
 #. / Translators: Context menu item
-#: src/client/conversation-list/conversation-list-view.vala:231
+#: src/client/conversation-list/conversation-list-view.vala:226
 msgid "_Delete conversation"
 msgid_plural "_Delete conversations"
 msgstr[0] "_Izbriši pogovore"
@@ -1878,27 +1863,27 @@ msgstr[1] "_Izbriši pogovor"
 msgstr[2] "_Izbriši pogovora"
 msgstr[3] "_Izbriši pogovore"
 
-#: src/client/conversation-list/conversation-list-view.vala:244
+#: src/client/conversation-list/conversation-list-view.vala:239
 #: ui/components-menu-conversation.ui:5
 msgid "Mark as _Read"
 msgstr "Označi kot _prebrano"
 
-#: src/client/conversation-list/conversation-list-view.vala:253
-#: ui/components-menu-conversation.ui:9
+#: src/client/conversation-list/conversation-list-view.vala:248
+#: ui/components-menu-conversation.ui:10
 msgid "Mark as _Unread"
 msgstr "Označi kot _neprebrano"
 
-#: src/client/conversation-list/conversation-list-view.vala:262
-#: ui/components-menu-conversation.ui:17
+#: src/client/conversation-list/conversation-list-view.vala:257
+#: ui/components-menu-conversation.ui:20
 msgid "U_nstar"
 msgstr "_Odstrani zvezdico"
 
-#: src/client/conversation-list/conversation-list-view.vala:269
-#: ui/components-menu-conversation.ui:13
+#: src/client/conversation-list/conversation-list-view.vala:264
+#: ui/components-menu-conversation.ui:15
 msgid "_Star"
 msgstr "Dodaj _zvezdico"
 
-#: src/client/conversation-list/conversation-list-view.vala:280
+#: src/client/conversation-list/conversation-list-view.vala:275
 msgid "_Archive conversation"
 msgid_plural "_Archive conversations"
 msgstr[0] "_Arhiviraj pogovore"
@@ -1907,17 +1892,17 @@ msgstr[2] "_Arhiviraj pogovora"
 msgstr[3] "_Arhiviraj pogovore"
 
 #. Translators: Menu item to reply to a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:292
+#: src/client/conversation-list/conversation-list-view.vala:287
 #: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Odgovori"
 
-#: src/client/conversation-list/conversation-list-view.vala:298
+#: src/client/conversation-list/conversation-list-view.vala:293
 msgid "R_eply All"
 msgstr "O_dgovori vsem"
 
 #. Translators: Menu item to forward a specific message.
-#: src/client/conversation-list/conversation-list-view.vala:304
+#: src/client/conversation-list/conversation-list-view.vala:299
 #: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Posreduj"
@@ -1997,13 +1982,6 @@ msgid "Remote images not shown"
 msgstr "Slike na oddaljenih strežnikih niso prikazane"
 
 #. Translators: Info bar description
-#: src/client/conversation-viewer/conversation-message.vala:1424
-msgid "Only show remote images from senders you trust."
-msgstr ""
-"Slike z oddaljenih mest pokaži le, če je pošiljatelj na seznamu zaupljivih "
-"oseb."
-
-#. Translators: Info bar description
 #: src/client/conversation-viewer/conversation-message.vala:1444
 msgid "This message can't be trusted."
 msgstr "Sporočilu ni mogoče zaupati!"
@@ -2015,25 +1993,25 @@ msgstr "Pokaži"
 
 #. Translators: Title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:84
+#: src/client/conversation-viewer/conversation-viewer.vala:83
 msgid "No Conversations Selected"
 msgstr "Noben pogovor ni izbran"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:88
+#: src/client/conversation-viewer/conversation-viewer.vala:87
 msgid "Selecting a conversation from the list will display it here."
 msgstr "Če izberete pogovor s seznama, bo prikazan tukaj."
 
 #. Translators: Title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:100
+#: src/client/conversation-viewer/conversation-viewer.vala:99
 msgid "Multiple Conversations Selected"
 msgstr "Izbranih je več pogovorov"
 
 #. Translators: Sub-title label for placeholder when multiple
 #. conversations have been selected.
-#: src/client/conversation-viewer/conversation-viewer.vala:104
+#: src/client/conversation-viewer/conversation-viewer.vala:103
 msgid "Choosing an action will apply to all selected conversations."
 msgstr "Izbrano dejanje bo uveljavljeno za vse izbrane pogovore."
 
@@ -2041,20 +2019,20 @@ msgstr "Izbrano dejanje bo uveljavljeno za vse izbrane pogovore."
 #. conversations have exist in a folder.
 #. Translators: Title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:116
-#: src/client/conversation-viewer/conversation-viewer.vala:132
+#: src/client/conversation-viewer/conversation-viewer.vala:115
+#: src/client/conversation-viewer/conversation-viewer.vala:131
 msgid "No Conversations Found"
 msgstr "Ni najdenih pogovorov"
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have exist in a folder.
-#: src/client/conversation-viewer/conversation-viewer.vala:120
+#: src/client/conversation-viewer/conversation-viewer.vala:119
 msgid "This folder does not contain any conversations."
 msgstr "V mapi ni nobenega pogovora."
 
 #. Translators: Sub-title label for placeholder when no
 #. conversations have been found in a search.
-#: src/client/conversation-viewer/conversation-viewer.vala:136
+#: src/client/conversation-viewer/conversation-viewer.vala:135
 msgid "Your search returned no results, try refining your search terms."
 msgstr ""
 "Iskanje ni vrnilo rezultatov, poskusite natančneje opredeliti iskalne izraze."
@@ -2439,49 +2417,55 @@ msgstr ""
 "Sporočilo je poslano, vendar pa kopija ni shranjena v mapo poslanih sporočil."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%-e. %b"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%e. %B %Y %k.%M"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Zdaj"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
@@ -2490,7 +2474,7 @@ msgstr[1] "%d min nazaj"
 msgstr[2] "%d min nazaj"
 msgstr[3] "%d min nazaj"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
@@ -2499,14 +2483,14 @@ msgstr[1] "%dh nazaj"
 msgstr[2] "%dh nazaj"
 msgstr[3] "%dh nazaj"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "Včeraj"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
@@ -2913,36 +2897,36 @@ msgstr "Uredi račun"
 msgid "Account Name"
 msgstr "Ime računa"
 
-#: ui/accounts_editor_edit_pane.ui:115
+#: ui/accounts_editor_edit_pane.ui:116
 msgid "Email addresses"
 msgstr "Elektronski naslov"
 
-#: ui/accounts_editor_edit_pane.ui:152
+#: ui/accounts_editor_edit_pane.ui:153
 msgid "Signature"
 msgstr "Podpis"
 
-#: ui/accounts_editor_edit_pane.ui:187
+#: ui/accounts_editor_edit_pane.ui:188
 msgid "Settings"
 msgstr "Nastavitve"
 
-#. This is a button in the account settings to show server settings.
-#: ui/accounts_editor_edit_pane.ui:226 ui/accounts_editor_servers_pane.ui:7
-msgid "Server Settings"
-msgstr "Nastavitve strežnika"
-
-#: ui/accounts_editor_edit_pane.ui:243
+#: ui/accounts_editor_edit_pane.ui:228
 msgid "Remove this account from Geary"
 msgstr "Odstrani račun iz programa Geary"
+
+#. This is a button in the account settings to show server settings.
+#: ui/accounts_editor_edit_pane.ui:247 ui/accounts_editor_servers_pane.ui:7
+msgid "Server Settings"
+msgstr "Nastavitve strežnika"
 
 #: ui/accounts_editor_list_pane.ui:7
 msgid "Accounts"
 msgstr "Računi"
 
-#: ui/accounts_editor_list_pane.ui:72
-msgid "To get started, select an email provider below."
-msgstr "Za začetek izberite ponudnika elektronske pošte."
+#: ui/accounts_editor_list_pane.ui:74
+msgid "To get started, add an email provider above."
+msgstr "Za začetek zgoraj izberite ponudnika elektronske pošte."
 
-#: ui/accounts_editor_list_pane.ui:86
+#: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
 msgstr "Dobrodošli v programu Geary"
 
@@ -3217,7 +3201,7 @@ msgstr "Pošlji sporočilo"
 #: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
-msgstr "Odpre okno sestavljalnika sporočil"
+msgstr "Sestavi sporočilo"
 
 #: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
@@ -3239,9 +3223,9 @@ msgid ""
 "ReportingABug\">new bug report</a>."
 msgstr ""
 "Če je težava resna in se stalno ponavlja, shranite podrobnosti napake in jih "
-"pošljite po enem izmed <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
-"\">možnih stikov</a> oziroma pripnite podatke k <a href=\"https://wiki.gnome."
-"org/Apps/Geary/ReportingABug\">poročilu o hrošču</a>."
+"pošljite po enem izmed <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"Contact\">možnih stikov</a> oziroma pripnite podatke k <a href=\"https://"
+"wiki.gnome.org/Apps/Geary/ReportingABug\">poročilu o hrošču</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3292,7 +3276,7 @@ msgstr "_Tipkovne bližnjice‫"
 msgid "_About Geary"
 msgstr "_O programu"
 
-#: ui/components-menu-conversation.ui:21
+#: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
 msgstr "Preklopi sporočilo kot _neželeno"
 
@@ -3477,15 +3461,15 @@ msgstr "Odgovori na:"
 msgid "Subject"
 msgstr "Zadeva"
 
-#: ui/conversation-viewer.ui:53
+#: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
 msgstr "Najdi v pogovoru"
 
-#: ui/conversation-viewer.ui:67
+#: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
 msgstr "Najde predhodno pojavitev iskanega niza."
 
-#: ui/conversation-viewer.ui:86
+#: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
 msgstr "Najde naslednjo pojavitev iskanega niza."
 
