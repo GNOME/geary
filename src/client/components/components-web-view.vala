@@ -201,6 +201,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
         return (uint) (size * dpi / 72.0);
     }
 
+    private static inline double get_text_scale () {
+        return Gtk.Settings.get_default().gtk_xft_dpi / 96.0 / 1024.0;
+    }
 
     /**
      * Delegate for message handler callbacks.
@@ -799,7 +802,10 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     private void on_preferred_height_changed(GLib.Variant? parameters) {
         double height = this.webkit_reported_height;
         if (parameters != null && parameters.classify() == DOUBLE) {
-            height = parameters.get_double();
+            // WebkitGtk (after 2.45.3) returns height without taking into account font scaling,
+            // Multiply by `get_text_scale()` to fix the issue.
+            // Related commit: https://github.com/WebKit/WebKit/commit/5713584438d253c13cb10966d7bac9cef1f9082f
+            height = parameters.get_double() * get_text_scale();
         } else {
             warning("Could not get JS preferred height");
         }
