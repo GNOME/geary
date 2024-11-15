@@ -192,13 +192,11 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
-        Gdk.Screen? screen = Gdk.Screen.get_default();
-        double dpi = screen != null ? screen.get_resolution() : 96.0;
         double size = font.get_size();
         if (!font.get_size_is_absolute()) {
             size = size / Pango.SCALE;
         }
-        return (uint) (size * dpi / 72.0);
+        return (uint) WebKit.Settings.font_size_to_pixels((uint) size);
     }
 
     private static inline double get_text_scale () {
