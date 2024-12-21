@@ -270,24 +270,6 @@
             ]
         },
         {
-            "name": "appstream-glib",
-            "buildsystem": "meson",
-            "config-opts": [
-                "-Dfonts=false",
-                "-Dgtk-doc=false",
-                "-Dintrospection=false",
-                "-Dman=false",
-                "-Drpm=false"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://github.com/hughsie/appstream-glib.git",
-                    "branch": "main"
-                }
-            ]
-        },
-        {
             "name": "geary",
             "buildsystem": "meson",
             "config-opts": [

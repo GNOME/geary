@@ -92,7 +92,7 @@ sudo dnf install meson vala desktop-file-utils enchant2-devel \
     folks-devel gcr3-devel glib2-devel gmime30-devel \
     gnome-online-accounts-devel gspell-devel gsound-devel \
     gtk3-devel iso-codes-devel itstool json-glib-devel \
-    libappstream-glib-devel libgee-devel libhandy1-devel \
+    libgee-devel libhandy1-devel \
     libpeas-devel libsecret-devel libicu-devel libstemmer-devel \
     libunwind-devel libxml2-devel libytnef-devel sqlite-devel \
     webkitgtk4-devel
@@ -106,7 +106,7 @@ Install them by running this command:
 ```
 sudo apt-get install meson build-essential valac \
     desktop-file-utils iso-codes gettext itstool \
-    libappstream-glib-dev libenchant-2-dev libfolks-dev \
+    libenchant-2-dev libfolks-dev \
     libgcr-3-dev libgee-0.8-dev libglib2.0-dev libgmime-3.0-dev \
     libgoa-1.0-dev libgspell-1-dev libgsound-dev libgtk-3-dev \
     libjson-glib-dev libhandy-1-dev libicu-dev libpeas-dev \
