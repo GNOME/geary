@@ -66,12 +66,12 @@ appdata_merged = i18n.merge_file(
   install_dir: join_paths(data_dir, 'metainfo')
 )
 
-if appstream_util.found()
+if appstreamcli.found()
   test(
     appdata_file + '-validate',
-    appstream_util,
+    appstreamcli,
     args: [
-      'validate-relax', '--nonet', appdata_merged.full_path()
+      'validate', '--no-net', '--explain', appdata_merged.full_path()
     ],
     depends: [
       appdata_merged,
