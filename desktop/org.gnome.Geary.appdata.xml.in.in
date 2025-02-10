@@ -44,17 +44,17 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-40-main-window.png</image>
+      <image>https://static.gnome.org/appdata/geary/geary-40-main-window.png</image>
     </screenshot>
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary displaying a conversation</caption>
-      <image>https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-40-conversation.png</image>
+      <image>https://static.gnome.org/appdata/geary/geary-40-conversation.png</image>
     </screenshot>
     <screenshot>
       <!-- Translators: A screenshot description. -->
       <caption>Geary showing the rich text composer</caption>
-      <image>https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-36-composer.png</image>
+      <image>https://static.gnome.org/appdata/geary/geary-3-36-composer.png</image>
     </screenshot>
   </screenshots>
 

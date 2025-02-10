@@ -2,7 +2,7 @@
 Geary: Send and receive email
 =============================
 
-![Geary icon](https://wiki.gnome.org/Apps/Geary?action=AttachFile&do=get&target=geary-3-32-256-logo.png)
+![Geary icon](https://gitlab.gnome.org/GNOME/geary/raw/HEAD/icons/hicolor/scalable/apps/org.gnome.Geary.svg)
 
 Geary is an email application built around conversations, for the
 GNOME desktop. It allows you to read, find and send email with a
@@ -15,7 +15,7 @@ translations are managed using GNOME's infrastructure, so we cannot
 accept tickets or pull requests on GitHub. Please see the links below
 for more information.
 
-![Geary displaying a conversation](https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-3-32-main-window.png)
+![Geary displaying a conversation](https://static.gnome.org/appdata/geary/geary-40-main-window.png)
 
 Building & Licensing
 --------------------
