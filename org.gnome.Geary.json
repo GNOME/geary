@@ -157,7 +157,7 @@
                 {
                     "type": "git",
                     "url": "https://gitlab.gnome.org/GNOME/folks.git",
-                    "branch": "master"
+                    "branch": "main"
                 }
             ],
             "cleanup": [
