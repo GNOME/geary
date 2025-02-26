@@ -293,6 +293,11 @@
             "config-opts": [
                 "-Dprofile=development"
             ],
+            "run-tests": true,
+            "test-rule": "",
+            "test-commands": [
+               "meson test -t 10"
+            ],
             "sources": [
                 {
                     "type": "git",
