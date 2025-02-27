@@ -7,14 +7,14 @@
 # Alfredo Hernández <aldomann.designs@gmail.com>, 2012
 # martin.steghoefer <martin@steghoefer.de>, 2013
 # Gerard Bertran <bertran.gerardo@gmail.com>, 2017
-# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017, 2020, 2022
+# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017, 2020, 2022, 2025
 # Jordi Serratosa <jordis@softcatala.cat>, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2022-09-10 11:23+0000\n"
-"PO-Revision-Date: 2022-09-11 08:20+0200\n"
+"PO-Revision-Date: 2025-02-27 08:20+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan (http://www.transifex.com/projects/p/geary/language/ca/)\n"
 "Language: ca\n"
@@ -823,7 +823,7 @@ msgstr "Copyright © 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/application-client.vala:35
 msgid "Copyright © 2016-2021 Geary Development Team."
-msgstr "Copyright © 2016-2020 L'equip de desenvolupament del Geary."
+msgstr "Copyright © 2016-2021 L'equip de desenvolupament del Geary."
 
 #: src/client/application/application-client.vala:37
 msgid "Visit the Geary web site"
@@ -1530,7 +1530,7 @@ msgstr "Cerca les paraules clau en tots els missatges en el compte"
 #: src/client/folder-list/folder-list-search-branch.vala:54
 #, c-format
 msgid "Search %s account"
-msgstr "Compte de cerca %s"
+msgstr "Cerca el compte %s"
 
 #. Translators: Tooltip used when an entry requires a valid
 #. email address to be entered, but one is not provided.
@@ -2040,7 +2040,7 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Seleccionant «Confiar en aquest servidor» o «Sempre pot confiar en aquest "
+"Seleccionant «Confia en aquest servidor» o «Sempre pot confiar en aquest "
 "servidor» pot causar que el nom d'usuari i la contrasenya que es transmetran"
 " ho facin de forma insegura."
 
@@ -2049,7 +2049,7 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Seleccionant «No confiï en aquest servidor» farà que el Geary no pugui "
+"Seleccionant «No confieu en aquest servidor» farà que el Geary no pugui "
 "accedir a aquest servidor."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
@@ -2061,7 +2061,7 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"Seleccionant «No confiï en aquest servidor» farà que el Geary aturi l'accés "
+"Seleccionant «No confieu en aquest servidor» farà que el Geary aturi l'accés "
 "a aquest compte."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
@@ -2360,7 +2360,7 @@ msgstr "Buida"
 #. Translators: Info bar status message for a draft email
 #: src/client/plugin/special-folders/special-folders.vala:179
 msgid "Draft message"
-msgstr "Missatge de l'esborrany"
+msgstr "Esborrany de missatge"
 
 #. Translators: Info bar status description for a draft
 #. email
@@ -2905,7 +2905,7 @@ msgstr "Confia en aques_t servidor"
 
 #: ui/certificate_warning_dialog.glade:52
 msgid "_Don’t Trust This Server"
-msgstr "No confiï aquest servi_dor"
+msgstr "No confieu aquest servi_dor"
 
 #: ui/composer-editor.ui:89
 msgid "Bold text"
