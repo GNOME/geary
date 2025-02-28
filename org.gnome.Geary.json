@@ -293,6 +293,14 @@
             "config-opts": [
                 "-Dprofile=development"
             ],
+            "build-options" : {
+                "test-args" : [
+                    "--device=dri",
+                    "--share=ipc",
+                    "--socket=wayland",
+                    "--socket=fallback-x11"
+                ]
+            },
             "run-tests": true,
             "test-rule": "",
             "test-commands": [
