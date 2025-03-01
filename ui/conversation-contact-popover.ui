@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
   <template class="ConversationContactPopover" parent="GtkPopover">
     <signal name="closed" handler="after_closed" after="yes" swapped="no"/>
     <child>
       <object class="GtkGrid">
-        <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkGrid" id="contact_pane">
-            <property name="visible">True</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
             <property name="margin_top">10</property>
@@ -18,7 +14,6 @@
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkGrid">
-                <property name="visible">True</property>
                 <property name="margin_bottom">6</property>
                 <property name="column_spacing">12</property>
                 <child>
@@ -30,7 +25,6 @@
                     <property name="relief">none</property>
                     <child>
                       <object class="GtkImage">
-                        <property name="visible">True</property>
                         <property name="icon_name">non-starred-symbolic</property>
                       </object>
                     </child>
@@ -49,7 +43,6 @@
                     <property name="relief">none</property>
                     <child>
                       <object class="GtkImage">
-                        <property name="visible">True</property>
                         <property name="icon_name">starred-symbolic</property>
                       </object>
                     </child>
@@ -60,8 +53,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="HdyAvatar" id="avatar">
-                    <property name="visible">True</property>
+                  <object class="AdwAvatar" id="avatar">
                     <property name="can_focus">False</property>
                     <property name="show-initials">True</property>
                     <property name="size">48</property>
@@ -73,11 +65,9 @@
                 </child>
                 <child>
                   <object class="GtkGrid">
-                    <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="contact_name">
-                        <property name="visible">True</property>
                         <property name="halign">start</property>
                         <property name="valign">end</property>
                         <property name="vexpand">True</property>
@@ -89,7 +79,6 @@
                     </child>
                     <child>
                       <object class="GtkLabel" id="contact_address">
-                        <property name="visible">True</property>
                         <property name="halign">start</property>
                         <property name="valign">start</property>
                         <property name="margin_top">2</property>
@@ -119,7 +108,6 @@
             </child>
             <child>
               <object class="GtkSeparator">
-                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -127,8 +115,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
+              <object class="GtkButton">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.new-conversation</property>
                 <property name="text" translatable="yes">New Conversation…</property>
@@ -139,8 +126,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
+              <object class="GtkButton">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.copy-email</property>
                 <property name="text" translatable="yes">Copy Email Address</property>
@@ -152,7 +138,6 @@
             </child>
             <child>
               <object class="GtkSeparator">
-                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -160,8 +145,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="save_button">
-                <property name="visible">True</property>
+              <object class="GtkButton" id="save_button">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.save</property>
                 <property name="text" translatable="yes">Save in Contacts…</property>
@@ -172,8 +156,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton">
-                <property name="visible">True</property>
+              <object class="GtkButton">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.show-conversations</property>
                 <property name="text" translatable="yes">Show Conversations</property>
@@ -184,8 +167,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="open_button">
-                <property name="visible">True</property>
+              <object class="GtkButton" id="open_button">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.open</property>
                 <property name="text" translatable="yes">Open in Contacts</property>
@@ -196,8 +178,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkModelButton" id="load_remote_button">
-                <property name="visible">True</property>
+              <object class="GtkCheckButton" id="load_remote_button">
                 <property name="receives_default">True</property>
                 <property name="action_name">con.load-remote</property>
                 <property name="text" translatable="yes">Always Load Remote Images</property>
@@ -223,11 +204,9 @@
             <property name="row_spacing">6</property>
             <child>
               <object class="GtkGrid">
-                <property name="visible">True</property>
                 <property name="column_spacing">12</property>
                 <child>
                   <object class="GtkImage">
-                    <property name="visible">True</property>
                     <property name="pixel_size">24</property>
                     <property name="icon_name">dialog-warning-symbolic</property>
                   </object>
@@ -238,7 +217,6 @@
                 </child>
                 <child>
                   <object class="GtkLabel">
-                    <property name="visible">True</property>
                     <property name="label" translatable="yes" comments="Title label on contact popover">Deceptive email address</property>
                     <style>
                       <class name="title"/>
@@ -257,7 +235,6 @@
             </child>
             <child>
               <object class="GtkSeparator">
-                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -266,7 +243,6 @@
             </child>
             <child>
               <object class="GtkLabel">
-                <property name="visible">True</property>
                 <property name="label" translatable="yes" comments="Contact popover label">This email address is:</property>
                 <property name="xalign">0</property>
               </object>
@@ -277,7 +253,6 @@
             </child>
             <child>
               <object class="GtkLabel" id="actual_email_label">
-                <property name="visible">True</property>
                 <style>
                   <class name="geary-deceptive"/>
                 </style>
@@ -289,7 +264,6 @@
             </child>
             <child>
               <object class="GtkLabel">
-                <property name="visible">True</property>
                 <property name="label" translatable="yes" comments="Contact popover label">But was forged as:</property>
                 <property name="xalign">0</property>
               </object>
@@ -300,7 +274,6 @@
             </child>
             <child>
               <object class="GtkLabel" id="forged_email_label">
-                <property name="visible">True</property>
                 <style>
                   <class name="geary-deceptive"/>
                 </style>
@@ -312,7 +285,6 @@
             </child>
             <child>
               <object class="GtkLabel">
-                <property name="visible">True</property>
                 <property name="label" translatable="yes" comments="Contact popover label">The sender may not be trustworthy</property>
                 <property name="xalign">0</property>
               </object>

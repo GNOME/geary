@@ -12,7 +12,7 @@
  * shown will differ slightly based on which is selected.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-attachment-pane.ui")]
-public class Components.AttachmentPane : Gtk.Grid {
+public class Components.AttachmentPane : Gtk.Box {
 
 
     private const string GROUP_NAME = "cap";
@@ -35,24 +35,6 @@ public class Components.AttachmentPane : Gtk.Grid {
         { ACTION_SAVE_SELECTED, on_save_selected },
         { ACTION_SELECT_ALL, on_select_all },
     };
-
-
-    // This exists purely to be able to set key bindings on it.
-    private class FlowBox : Gtk.FlowBox {
-
-        /** Keyboard action to open the currently selected attachments. */
-        [Signal (action=true)]
-        public signal void open_attachments();
-
-        /** Keyboard action to save the currently selected attachments. */
-        [Signal (action=true)]
-        public signal void save_attachments();
-
-        /** Keyboard action to remove the currently selected attachments. */
-        [Signal (action=true)]
-        public signal void remove_attachments();
-
-    }
 
     // Displays an attachment's icon and details
     [GtkTemplate (ui = "/org/gnome/Geary/components-attachment-view.ui")]
@@ -112,7 +94,7 @@ public class Components.AttachmentPane : Gtk.Grid {
                 return;
             }
 
-            Gdk.Pixbuf? pixbuf = null;
+            Gdk.Paintable? paintable = null;
 
             // XXX We need to hook up to GtkWidget::style-set and
             // reload the icon when the theme changes.
@@ -131,26 +113,20 @@ public class Components.AttachmentPane : Gtk.Grid {
                         Priority.DEFAULT,
                         load_cancelled
                     );
-                    pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                    var pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
                         stream, preview_size, preview_size, true, load_cancelled
                     );
                     pixbuf = pixbuf.apply_embedded_orientation();
+                    paintable = Gdk.Texture.for_pixbuf(pixbuf);
                 } else {
                     // Load the icon for this mime type
                     GLib.Icon icon = GLib.ContentType.get_icon(
                         this.gio_content_type
                     );
-                    Gtk.IconTheme theme = Gtk.IconTheme.get_default();
-                    Gtk.IconLookupFlags flags = Gtk.IconLookupFlags.DIR_LTR;
-                    if (get_direction() == Gtk.TextDirection.RTL) {
-                        flags = Gtk.IconLookupFlags.DIR_RTL;
-                    }
-                    Gtk.IconInfo? icon_info = theme.lookup_by_gicon_for_scale(
-                        icon, ATTACHMENT_ICON_SIZE, window_scale, flags
+                    var theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+                    paintable = theme.lookup_by_gicon(
+                        icon, ATTACHMENT_ICON_SIZE, window_scale, get_direction(), 0
                     );
-                    if (icon_info != null) {
-                        pixbuf = yield icon_info.load_icon_async(load_cancelled);
-                    }
                 }
             } catch (GLib.Error error) {
                 debug("Failed to load icon for attachment '%s': %s",
@@ -158,40 +134,11 @@ public class Components.AttachmentPane : Gtk.Grid {
                       error.message);
             }
 
-            if (pixbuf != null) {
-                Cairo.Surface surface = Gdk.cairo_surface_create_from_pixbuf(
-                    pixbuf, window_scale, get_window()
-                );
-                this.icon.set_from_surface(surface);
+            if (paintable != null) {
+                this.icon.paintable = paintable;
             }
         }
 
-    }
-
-
-    static construct {
-        // Set up custom keybindings
-        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
-            (ObjectClass) typeof(FlowBox).class_ref()
-        );
-
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.O, Gdk.ModifierType.CONTROL_MASK, "open-attachments", 0
-        );
-
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.S, Gdk.ModifierType.CONTROL_MASK, "save-attachments", 0
-        );
-
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.BackSpace, 0, "remove-attachments", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.Delete, 0, "remove-attachments", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.KP_Delete, 0, "remove-attachments", 0
-        );
     }
 
 
@@ -205,13 +152,13 @@ public class Components.AttachmentPane : Gtk.Grid {
 
     private GLib.SimpleActionGroup actions = new GLib.SimpleActionGroup();
 
-    [GtkChild] private unowned Gtk.Grid attachments_container;
+    [GtkChild] private unowned Gtk.Box attachments_container;
 
     [GtkChild] private unowned Gtk.Button save_button;
 
     [GtkChild] private unowned Gtk.Button remove_button;
 
-    private FlowBox attachments_view;
+    private Gtk.FlowBox attachments_view;
 
 
     public AttachmentPane(bool edit_mode,
@@ -225,22 +172,20 @@ public class Components.AttachmentPane : Gtk.Grid {
 
         this.manager = manager;
 
-        this.attachments_view = new FlowBox();
-        this.attachments_view.open_attachments.connect(on_open_selected);
-        this.attachments_view.remove_attachments.connect(on_remove_selected);
-        this.attachments_view.save_attachments.connect(on_save_selected);
+        this.attachments_view = new Gtk.FlowBox();
+        //XXX GTK4 need to check if shortcuts still work
         this.attachments_view.child_activated.connect(on_child_activated);
         this.attachments_view.selected_children_changed.connect(on_selected_changed);
-        this.attachments_view.button_press_event.connect(on_attachment_button_press);
-		this.attachments_view.popup_menu.connect(on_attachment_popup_menu);
+        Gtk.GestureClick gesture = new Gtk.GestureClick();
+        gesture.pressed.connect(on_attachment_pressed);
+        this.attachments_view.add_controller(gesture);
         this.attachments_view.activate_on_single_click = false;
         this.attachments_view.max_children_per_line = 3;
         this.attachments_view.column_spacing = 6;
         this.attachments_view.row_spacing = 6;
         this.attachments_view.selection_mode = Gtk.SelectionMode.MULTIPLE;
         this.attachments_view.hexpand = true;
-        this.attachments_view.show();
-        this.attachments_container.add(this.attachments_view);
+        this.attachments_container.append(this.attachments_view);
 
         this.actions.add_action_entries(action_entries, this);
         insert_action_group(GROUP_NAME, this.actions);
@@ -249,7 +194,7 @@ public class Components.AttachmentPane : Gtk.Grid {
     public void add_attachment(Geary.Attachment attachment,
                                GLib.Cancellable? cancellable) {
         View view = new View(attachment);
-        this.attachments_view.add(view);
+        this.attachments_view.append(view);
         this.attachments.add(attachment);
         view.load_icon.begin(cancellable);
 
@@ -257,7 +202,7 @@ public class Components.AttachmentPane : Gtk.Grid {
     }
 
     public void open_attachment(Geary.Attachment attachment) {
-        open_attachments(Geary.Collection.single(attachment));
+        open_attachments.begin(Geary.Collection.single(attachment));
     }
 
     public void save_attachment(Geary.Attachment attachment) {
@@ -270,12 +215,15 @@ public class Components.AttachmentPane : Gtk.Grid {
 
     public void remove_attachment(Geary.Attachment attachment) {
         this.attachments.remove(attachment);
-        this.attachments_view.foreach(child => {
-                Gtk.FlowBoxChild flow_child = (Gtk.FlowBoxChild) child;
-                if (((View) flow_child.get_child()).attachment == attachment) {
-                    this.attachments_view.remove(child);
-                }
-            });
+        for (int i = 0; true; i++) {
+            unowned var flow_child = this.attachments_view.get_child_at_index(i);
+            if (flow_child == null)
+                break;
+            if (((View) flow_child.get_child()).attachment == attachment) {
+                this.attachments_view.remove(flow_child);
+                i--;
+            }
+        }
     }
 
     public bool save_all() {
@@ -317,7 +265,7 @@ public class Components.AttachmentPane : Gtk.Grid {
         bool ret = false;
         var selected = get_selected_attachments();
         if (!selected.is_empty) {
-            open_attachments(selected);
+            open_attachments.begin(selected);
             ret = true;
         }
         return ret;
@@ -362,29 +310,36 @@ public class Components.AttachmentPane : Gtk.Grid {
         set_action_enabled(ACTION_SELECT_ALL, len < this.attachments.size);
     }
 
-    private void open_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        var main = this.get_toplevel() as Application.MainWindow;
-        if (main != null) {
-            Application.Client app = main.application;
-            bool confirmed = true;
-            if (app.config.ask_open_attachment) {
-                QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(
-                    main,
-                    _("Are you sure you want to open these attachments?"),
-                    _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                    Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false
-                );
-                if (ask_to_open.run() == Gtk.ResponseType.OK) {
-                    app.config.ask_open_attachment = !ask_to_open.is_checked;
-                } else {
-                    confirmed = false;
-                }
-            }
+    private async void open_attachments(Gee.Collection<Geary.Attachment> attachments) {
+        var main = get_root() as Application.MainWindow;
+        if (main == null)
+            return;
 
-            if (confirmed) {
-                foreach (var attachment in attachments) {
-                    app.show_uri.begin(attachment.file.get_uri());
-                }
+        Application.Client app = main.application;
+        if (app.config.ask_open_attachment) {
+            var dialog = new Adw.AlertDialog(
+                _("Are you sure you want to open these attachments?"),
+                _("Attachments may cause damage to your system if opened. Only open files from trusted sources."));
+            dialog.add_response("cancel", _("_Cancel"));
+            dialog.add_response("open", _("_Open"));
+            dialog.default_response = "open";
+            dialog.close_response = "cancel";
+
+            var check = new Adw.SwitchRow();
+            check.title = _("Don’t _ask me again");
+
+            string response = yield dialog.choose(main, null);
+            if (response != "open")
+                return;
+            app.config.ask_open_attachment = !check.active;
+        }
+
+        foreach (var attachment in attachments) {
+            var launcher = new Gtk.FileLauncher(attachment.file);
+            try {
+                yield launcher.launch(get_native() as Gtk.Window, null);
+            } catch (GLib.Error err) {
+                warning("Couldn't show attachment: %s", err.message);
             }
         }
     }
@@ -396,7 +351,7 @@ public class Components.AttachmentPane : Gtk.Grid {
         }
     }
 
-    private void show_popup(View view, Gdk.EventButton? event) {
+    private void show_popup(View view, Gdk.Rectangle? rect) {
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/components-attachment-pane-menus.ui"
         );
@@ -410,21 +365,20 @@ public class Components.AttachmentPane : Gtk.Grid {
             GROUP_NAME,
             targets
         );
-        Gtk.Menu menu = new Gtk.Menu.from_model(model);
-        menu.attach_to_widget(view, null);
-        if (event != null) {
-            menu.popup_at_pointer(event);
-        } else {
-            menu.popup_at_widget(view, CENTER, SOUTH, null);
+        Gtk.PopoverMenu menu = new Gtk.PopoverMenu.from_model(model);
+        menu.set_parent(view);
+        if (rect != null) {
+            menu.set_pointing_to(rect);
         }
+        menu.popup();
     }
 
     private void beep() {
-        Gtk.Widget? toplevel = get_toplevel();
-        if (toplevel == null) {
-            Gdk.Window? window = toplevel.get_window();
-            if (window != null) {
-                window.beep();
+        Gtk.Native? native = get_native();
+        if (native == null) {
+            Gdk.Surface? surface = native.get_surface();
+            if (surface != null) {
+                surface.beep();
             }
         }
     }
@@ -486,32 +440,19 @@ public class Components.AttachmentPane : Gtk.Grid {
         update_actions();
     }
 
-	private bool on_attachment_popup_menu(Gtk.Widget widget) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-        Gtk.Window parent = get_toplevel() as Gtk.Window;
-        if (parent != null) {
-            Gtk.FlowBoxChild? focus = parent.get_focus() as Gtk.FlowBoxChild;
-            if (focus != null && focus.parent == this.attachments_view) {
-                show_popup((View) focus.get_child(), null);
-                ret = Gdk.EVENT_STOP;
-            }
-        }
-        return ret;
-	}
-
-	private bool on_attachment_button_press(Gtk.Widget widget,
-                                            Gdk.EventButton event) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-		if (event.triggers_context_menu()) {
+    private void on_attachment_pressed(Gtk.GestureClick gesture, int n_press, double x, double y) {
+        var event = gesture.get_current_event();
+        if (event.triggers_context_menu()) {
             Gtk.FlowBoxChild? child = this.attachments_view.get_child_at_pos(
-                (int) event.x,
-                (int) event.y
+                (int) x,
+                (int) y
             );
             if (child != null) {
-                show_popup((View) child.get_child(), event);
-                ret = Gdk.EVENT_STOP;
+                Gdk.Rectangle rect = { (int) x, (int) y, 1, 1 };
+                show_popup((View) child.get_child(), rect);
+                //XXX GTK4?
+                // ret = Gdk.EVENT_STOP;
             }
-		}
-        return ret;
-	}
+        }
+    }
 }

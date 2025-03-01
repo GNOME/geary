@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
   <template class="ComposerLinkPopover" parent="GtkPopover">
     <property name="position">top</property>
     <property name="width-request">360</property>
     <child>
       <object class="GtkGrid">
-        <property name="visible">True</property>
         <property name="margin_left">6</property>
         <property name="margin_right">6</property>
         <property name="margin_top">6</property>
@@ -16,7 +13,6 @@
         <property name="column_spacing">6</property>
         <child>
           <object class="GtkEntry" id="url">
-            <property name="visible">True</property>
             <property name="can_default">True</property>
             <property name="hexpand">True</property>
             <property name="primary_icon_activatable">False</property>
@@ -33,16 +29,10 @@
         </child>
         <child>
           <object class="GtkButton" id="insert">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note that this button and the Update button will never be shown at the same time to the user.">Insert the new link with this URL</property>
             <property name="label" translatable="yes">Add</property>
             <signal name="clicked" handler="on_activate_popover" swapped="no"/>
-            <child internal-child="accessible">
-              <object class="AtkObject" id="insert-atkobject">
-                <property name="AtkObject::accessible-name" translatable="yes">Link URL</property>
-              </object>
-            </child>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -51,7 +41,6 @@
         </child>
         <child>
           <object class="GtkButton" id="update">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note that this button and the Insert button will never be shown at the same time to the user.">Update this link’s URL</property>
             <property name="label" translatable="yes">Update</property>
@@ -64,13 +53,11 @@
         </child>
         <child>
           <object class="GtkButton" id="remove">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes">Delete this link</property>
             <signal name="clicked" handler="on_remove_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">user-trash-symbolic</property>
               </object>
             </child>

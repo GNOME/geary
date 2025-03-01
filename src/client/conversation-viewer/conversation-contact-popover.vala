@@ -45,7 +45,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Grid contact_pane;
 
-    [GtkChild] private unowned Hdy.Avatar avatar;
+    [GtkChild] private unowned Adw.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Label contact_name;
 
@@ -55,11 +55,11 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Button unstarred_button;
 
-    [GtkChild] private unowned Gtk.ModelButton open_button;
+    [GtkChild] private unowned Gtk.Button open_button;
 
-    [GtkChild] private unowned Gtk.ModelButton save_button;
+    [GtkChild] private unowned Gtk.Button save_button;
 
-    [GtkChild] private unowned Gtk.ModelButton load_remote_button;
+    [GtkChild] private unowned Gtk.CheckButton load_remote_button;
 
     [GtkChild] private unowned Gtk.Grid deceptive_pane;
 
@@ -79,12 +79,10 @@ public class Conversation.ContactPopover : Gtk.Popover {
                           Geary.RFC822.MailboxAddress mailbox,
                           Application.Configuration config) {
 
-        this.relative_to = relative_to;
+        set_parent(relative_to);
         this.contact = contact;
         this.mailbox = mailbox;
         this.config = config;
-
-        this.load_remote_button.role = CHECK;
 
         this.contact.bind_property("display-name",
                                    this.avatar,
@@ -106,10 +104,10 @@ public class Conversation.ContactPopover : Gtk.Popover {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public override void destroy() {
+    public override void dispose() {
         this.contact.changed.disconnect(this.on_contact_changed);
         this.load_cancellable.cancel();
-        base.destroy();
+        base.dispose();
     }
 
     private void update() {
@@ -214,9 +212,15 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_copy_email() {
-        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        clipboard.set_text(this.mailbox.to_full_display(), -1);
-        clipboard.store();
+        Gdk.Clipboard clipboard = get_clipboard();
+        clipboard.set_text(this.mailbox.to_full_display());
+        clipboard.store_async.begin(Priority.DEFAULT, null, (obj, res) => {
+            try {
+                clipboard.store_async.end(res);
+            } catch (Error err) {
+                debug("Couldn't copy email to clipboard: %s", err.message);
+            }
+        });
     }
 
     private void on_load_remote(GLib.SimpleAction action) {
@@ -225,7 +229,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_new_conversation() {
-        var main = this.get_toplevel() as Application.MainWindow;
+        var main = this.get_root() as Application.MainWindow;
         if (main != null) {
             main.application.new_composer.begin(this.mailbox);
         }
@@ -240,7 +244,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_show_conversations() {
-        var main = this.get_toplevel() as Application.MainWindow;
+        var main = this.get_root() as Application.MainWindow;
         if (main != null) {
             main.show_search_bar("from:%s".printf(this.mailbox.address));
         }

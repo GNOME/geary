@@ -78,7 +78,7 @@ public class Composer.WebView : Components.WebView {
         public Gdk.RGBA font_color {
             get;
             private set;
-            default = Util.Gtk.rgba(0, 0, 0, 1);
+            default = { 0, 0, 0, 1 };
         }
 
         private uint context = 0;
@@ -141,10 +141,8 @@ public class Composer.WebView : Components.WebView {
     public signal void image_file_dropped(string filename, string type, uint8[] contents);
 
 
-    public WebView(Application.Configuration config) {
-        base(config);
-
-        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
+    public WebView(Application.Configuration config, GLib.File cache_dir) {
+        base(config, cache_dir);
 
         this.user_content_manager.add_style_sheet(WebView.app_style);
         this.user_content_manager.add_script(WebView.app_script);
@@ -248,11 +246,16 @@ public class Composer.WebView : Components.WebView {
      * Pastes plain text from the clipboard into the view.
      */
     public void paste_plain_text() {
-        get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text((clipboard, text) => {
-                if (text != null) {
+        var clipboard = get_clipboard();
+        clipboard.read_text_async.begin(null, (obj, res) => {
+            try {
+                string text = clipboard.read_text_async.end(res);
+                if (text != null)
                     insert_text(text);
-                }
-            });
+            } catch (Error err) {
+                debug("Couldn't read text from clipboard to paste: %s", err.message);
+            }
+        });
     }
 
     /**

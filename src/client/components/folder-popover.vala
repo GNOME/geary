@@ -62,8 +62,7 @@ public class FolderPopover : Gtk.Popover {
         }
 
         var row = new FolderPopoverRow(context, map);
-        row.show();
-        list_box.add(row);
+        list_box.append(row);
         list_box.invalidate_sort();
     }
 
@@ -90,7 +89,9 @@ public class FolderPopover : Gtk.Popover {
 
     [GtkCallback]
     private void on_unmap(Gtk.Widget widget) {
-        list_box.foreach((row) => list_box.remove(row));
+        unowned var row = this.list_box.get_row_at_index(0);
+        while (row != null)
+            this.list_box.remove(row);
     }
 
     [GtkCallback]

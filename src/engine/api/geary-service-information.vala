@@ -76,6 +76,21 @@ public enum Geary.TlsNegotiationMethod {
         );
     }
 
+    /**
+     * Returns a user-displayable string of the enum value
+     */
+    public unowned string to_string() {
+        switch (this) {
+            case Geary.TlsNegotiationMethod.NONE:
+                return _("None");
+            case Geary.TlsNegotiationMethod.START_TLS:
+                return _("StartTLS");
+            case Geary.TlsNegotiationMethod.TRANSPORT:
+                return _("TLS");
+        }
+
+        return_val_if_reached("");
+    }
 }
 
 

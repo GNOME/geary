@@ -5,7 +5,6 @@
 
 plugin_dependencies = [
   folks,
-  gdk,
   client_dep,
   engine_dep,
   gee,
@@ -13,10 +12,10 @@ plugin_dependencies = [
   goa,
   gtk,
   javascriptcoregtk,
-  libhandy,
+  libadwaita,
   libmath,
   libpeas,
-  webkit2gtk,
+  webkitgtk,
 ]
 
 plugin_c_args = geary_c_args

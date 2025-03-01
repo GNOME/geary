@@ -18,7 +18,7 @@ private errordomain AttachmentError {
  * Container}.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
-public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
+public class Composer.Widget : Adw.Bin, Geary.BaseInterface {
 
 
     /**
@@ -134,22 +134,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.label = new Gtk.Label(label);
             this.label.use_underline = true;
             this.label.xalign = 1.0f;
-            add(this.label);
+            append(this.label);
 
             this.value_container = new Gtk.Box(HORIZONTAL, 0);
-            this.value_container.get_style_context().add_class("linked");
-            add(this.value_container);
+            this.value_container.add_css_class("linked");
+            append(this.value_container);
 
             this.value = value;
 
             var value_widget = value as Gtk.Widget;
             if (value_widget != null) {
                 value_widget.hexpand = true;
-                this.value_container.add(value_widget);
+                this.value_container.append(value_widget);
                 this.label.set_mnemonic_widget(value_widget);
             }
-
-            show_all();
         }
 
         ~HeaderRow() {
@@ -193,25 +191,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private const string ACTION_ADD_ATTACHMENT = "add-attachment";
     private const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add-original-attachments";
     private const string ACTION_CLOSE = "composer-close";
-    private const string ACTION_CUT = "cut";
     private const string ACTION_DETACH = "detach";
     private const string ACTION_DISCARD = "discard";
-    private const string ACTION_PASTE = "paste";
     private const string ACTION_SEND = "send";
     private const string ACTION_SHOW_EXTENDED_HEADERS = "show-extended-headers";
 
     private const ActionEntry[] ACTIONS = {
-        { Action.Edit.COPY,                on_copy                          },
         { Action.Window.CLOSE,             on_close                         },
         { Action.Window.SHOW_HELP_OVERLAY, on_show_help_overlay             },
         { Action.Window.SHOW_MENU,         on_show_window_menu              },
         { ACTION_ADD_ATTACHMENT,           on_add_attachment                },
         { ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments           },
         { ACTION_CLOSE,                    on_close                         },
-        { ACTION_CUT,                      on_cut                           },
         { ACTION_DETACH,                   on_detach                        },
         { ACTION_DISCARD,                  on_discard                       },
-        { ACTION_PASTE,                    on_paste                         },
         { ACTION_SEND,                     on_send                          },
         { ACTION_SHOW_EXTENDED_HEADERS,    on_toggle_action, null, "false",
                                            on_show_extended_headers_toggled },
@@ -226,8 +219,6 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         application.add_window_accelerators(ACTION_DISCARD, { "Escape" } );
         application.add_window_accelerators(ACTION_ADD_ATTACHMENT, { "<Ctrl>t" } );
         application.add_window_accelerators(ACTION_DETACH, { "<Ctrl>d" } );
-        application.add_window_accelerators(ACTION_CUT, { "<Ctrl>x" } );
-        application.add_window_accelerators(ACTION_PASTE, { "<Ctrl>v" } );
     }
 
     private const string DRAFT_SAVED_TEXT = _("Saved");
@@ -350,7 +341,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Overrides for the draft folder as save destination, if any. */
     internal Geary.Folder? save_to { get; private set; default = null; }
 
-    internal Headerbar header { get; private set; }
+    internal Composer.Header header { get; private set; }
 
     internal bool has_multiple_from_addresses {
         get {
@@ -362,9 +353,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     [GtkChild] private unowned Gtk.Box header_container;
-    [GtkChild] private unowned Gtk.Grid editor_container;
+    [GtkChild] private unowned Adw.Bin editor_bin;
 
-    [GtkChild] private unowned Gtk.Grid email_headers;
+    [GtkChild] private unowned Gtk.Box email_headers;
     [GtkChild] private unowned Gtk.Box filled_headers;
     [GtkChild] private unowned Gtk.Revealer extended_headers_revealer;
     [GtkChild] private unowned Gtk.Box extended_headers;
@@ -381,8 +372,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private HeaderRow<EmailEntry> reply_to_row;
     private HeaderRow<Gtk.Entry> subject_row;
 
-    private Gspell.Checker subject_spell_checker = new Gspell.Checker(null);
-    private Gspell.Entry subject_spell_entry;
+    private Spelling.Checker subject_spell_checker = new Spelling.Checker(null, null);
+    // XXX GTK4 probably needs to become a SourceBuffer
+    // private Gtk.Entry subject_spell_entry;
 
     [GtkChild] private unowned Gtk.Box attachments_box;
     [GtkChild] private unowned Gtk.Box hidden_on_attachment_drag_over;
@@ -455,25 +447,20 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     Application.Configuration config,
                     Application.AccountContext initial_account,
                     Geary.Folder? save_to = null) {
-        components_reflow_box_get_type();
+        //XXX GTK4
+        // components_reflow_box_get_type();
         base_ref();
         this.application = application;
         this.config = config;
         this.sender_context = initial_account;
         this.save_to = save_to;
 
-        this.header = new Headerbar(config);
+        this.header = new Header(config);
         this.header.expand_composer.connect(on_expand_compact_headers);
         // Hide until we know we can save drafts
         this.header.show_save_and_close = false;
 
         // Setup drag 'n drop
-        const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
-        Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
-            target_entries, Gdk.DragAction.COPY);
-
-        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
-
         this.visible_on_attachment_drag_over.remove(
             this.visible_on_attachment_drag_over_child
         );
@@ -486,16 +473,16 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         var cells = this.from_row.value.get_cells();
         ((Gtk.CellRendererText) cells.data).ellipsize = END;
         this.header_labels_group.add_widget(this.from_row.label);
-        this.filled_headers.add(this.from_row);
+        this.filled_headers.append(this.from_row);
 
         this.to_row = new EntryHeaderRow<EmailEntry>(
             /// Translators: Label for composer To address entry
             _("_To"), new EmailEntry(this)
         );
-        this.to_row.value_container.add(this.show_extended_headers);
+        this.to_row.value_container.append(this.show_extended_headers);
         this.to_row.value.changed.connect(on_envelope_changed);
         this.header_labels_group.add_widget(this.to_row.label);
-        this.filled_headers.add(this.to_row);
+        this.filled_headers.append(this.to_row);
 
         this.cc_row = new EntryHeaderRow<EmailEntry>(
             /// Translators: Label for composer CC address entry
@@ -503,7 +490,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.cc_row.value.changed.connect(on_envelope_changed);
         this.header_labels_group.add_widget(this.cc_row.label);
-        this.extended_headers.add(this.cc_row);
+        this.extended_headers.append(this.cc_row);
 
         this.bcc_row = new EntryHeaderRow<EmailEntry>(
             /// Translators: Label for composer BCC address entry
@@ -511,7 +498,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.bcc_row.value.changed.connect(on_envelope_changed);
         this.header_labels_group.add_widget(this.bcc_row.label);
-        this.extended_headers.add(this.bcc_row);
+        this.extended_headers.append(this.bcc_row);
 
         this.reply_to_row = new EntryHeaderRow<EmailEntry>(
             /// Translators: Label for composer Reply-To address entry
@@ -519,7 +506,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.reply_to_row.value.changed.connect(on_envelope_changed);
         this.header_labels_group.add_widget(this.reply_to_row.label);
-        this.extended_headers.add(this.reply_to_row);
+        this.extended_headers.append(this.reply_to_row);
 
         this.subject_row = new EntryHeaderRow<Gtk.Entry>(
             /// Translators: Label for composer Subject line entry
@@ -527,11 +514,12 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.subject_row.value.changed.connect(on_subject_changed);
         this.header_labels_group.add_widget(this.subject_row.label);
-        this.email_headers.add(this.subject_row);
+        this.email_headers.append(this.subject_row);
 
-        this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
-            this.subject_row.value
-        );
+        //XXX GTK4
+        // this.subject_spell_entry = Gspell.Entry.get_from_gtk_entry(
+        //     this.subject_row.value
+        // );
         config.settings.changed[
             Application.Configuration.SPELL_CHECK_LANGUAGES
         ].connect(() => {
@@ -539,7 +527,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             });
         update_subject_spell_checker();
 
-        this.editor = new Editor(config);
+        this.editor = new Editor(config, application.get_web_cache_dir());
         this.editor.insert_image.connect(
             (from_clipboard) => {
                 if (from_clipboard) {
@@ -551,9 +539,10 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         );
         this.editor.body.content_loaded.connect(on_content_loaded);
         this.editor.body.document_modified.connect(() => { draft_changed(); });
-        this.editor.body.key_press_event.connect(on_editor_key_press_event);
-        this.editor.show();
-        this.editor_container.add(this.editor);
+        Gtk.EventControllerKey editor_key_controller = new Gtk.EventControllerKey();
+        editor_key_controller.key_pressed.connect(on_editor_key_pressed);
+        this.editor.body.add_controller(editor_key_controller);
+        this.editor_bin.child = this.editor;
 
         // Listen to account signals to update from menu.
         this.application.account_available.connect(
@@ -588,7 +577,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // window actions. But for some reason, we can't use the same
         // prefix for the headerbar.
         insert_action_group(Action.Window.GROUP_NAME, this.actions);
-        this.header.insert_action_group("cmh", this.actions);
+        this.header.headerbar.insert_action_group("cmh", this.actions);
         validate_send_button();
 
         load_entry_completions();
@@ -853,7 +842,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // window then focus that, else focus something useful.
         bool refocus = true;
         if (focused_widget != null) {
-            Window? focused_window = focused_widget.get_toplevel() as Window;
+            Window? focused_window = focused_widget.get_root() as Window;
             if (new_window == focused_window) {
                 focused_widget.grab_focus();
                 refocus = false;
@@ -875,8 +864,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * The return value specifies whether the composer is being closed
      * or if the prompt was cancelled by a human.
      */
-    public CloseStatus conditional_close(bool should_prompt,
-                                         bool is_shutdown = false) {
+    public async CloseStatus conditional_close(bool should_prompt,
+                                               bool is_shutdown = false) {
         CloseStatus status = CLOSED;
         switch (this.current_mode) {
         case PresentationMode.CLOSED:
@@ -896,44 +885,39 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             } else if (should_prompt) {
                 present();
                 if (this.can_save) {
-                    var dialog = new TernaryConfirmationDialog(
-                        this.container.top_window,
+                    var dialog = new Adw.AlertDialog(
                         // Translators: This dialog text is displayed to the
                         // user when closing a composer where the options are
                         // Keep, Discard or Cancel.
                         _("Do you want to keep or discard this draft message?"),
-                        null,
-                        Stock._KEEP,
-                        Stock._DISCARD, Gtk.ResponseType.CLOSE,
-                        "",
-                        is_shutdown ? "destructive-action" : "",
-                        Gtk.ResponseType.OK // Default == Keep
-                    );
-                    Gtk.ResponseType response = dialog.run();
-                    if (response == CANCEL ||
-                        response == DELETE_EVENT) {
-                        // Cancel
+                        null);
+                    dialog.add_response("cancel", _("_Cancel"));
+                    dialog.add_response("keep", _("_Keep"));
+                    dialog.add_response("discard", _("_Discard"));
+                    dialog.default_response = "keep";
+                    dialog.close_response = "cancel";
+                    if (is_shutdown)
+                        dialog.set_response_appearance("discard", DESTRUCTIVE);
+                    string response = yield dialog.choose(this.container.top_window, null);
+                    if (response == "cancel") {
                         status = CANCELLED;
-                    } else if (response == OK) {
-                        // Keep
+                    } else if (response == "keep") {
                         this.save_and_close.begin();
-                    } else {
-                        // Discard
+                    } else { // Discard
                         this.discard_and_close.begin();
                     }
                 } else {
-                    AlertDialog dialog = new ConfirmationDialog(
-                        container.top_window,
+                    var dialog = new Adw.AlertDialog(
                         // Translators: This dialog text is displayed to the
                         // user when closing a composer where the options are
                         // only Discard or Cancel.
                         _("Do you want to discard this draft message?"),
-                        null,
-                        Stock._DISCARD,
-                        ""
-                    );
-                    Gtk.ResponseType response = dialog.run();
-                    if (response == OK) {
+                        null);
+                    dialog.add_response("cancel", _("_Cancel"));
+                    dialog.add_response("discard", _("_Discard"));
+                    dialog.close_response = "cancel";
+                    string response = yield dialog.choose(this.container.top_window, null);
+                    if (response == "discard") {
                         this.discard_and_close.begin();
                     } else {
                         status = CANCELLED;
@@ -981,7 +965,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    public override void destroy() {
+    public override void dispose() {
         if (this.draft_manager != null) {
             warning("Draft manager still open on composer destroy");
         }
@@ -992,7 +976,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.application.account_unavailable.disconnect(
             on_account_unavailable
         );
-        base.destroy();
+        base.dispose();
     }
 
     /**
@@ -1007,7 +991,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         // Need to update this separately since it may be detached
         // from the widget itself.
-        this.header.set_sensitive(enabled);
+        this.header.headerbar.set_sensitive(enabled);
 
         if (enabled) {
             var current_account = this.sender_context.account;
@@ -1043,11 +1027,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * Loads and sets contact auto-complete data for the current account.
      */
     private void load_entry_completions() {
+        //XXX GTK4 probably want to create a ContactEntryRow or something like that, GtkEntryCompletion is deprecated
+#if 0
         Application.ContactStore contacts = this.sender_context.contacts;
         this.to_row.value.completion = new ContactEntryCompletion(contacts);
         this.cc_row.value.completion = new ContactEntryCompletion(contacts);
         this.bcc_row.value.completion = new ContactEntryCompletion(contacts);
         this.reply_to_row.value.completion = new ContactEntryCompletion(contacts);
+#endif
     }
 
     /**
@@ -1198,82 +1185,49 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         if (visible) {
             int height = hidden_on_attachment_drag_over.get_allocated_height();
             this.hidden_on_attachment_drag_over.remove(this.hidden_on_attachment_drag_over_child);
-            this.visible_on_attachment_drag_over.pack_start(this.visible_on_attachment_drag_over_child, true, true);
+            this.visible_on_attachment_drag_over.append(this.visible_on_attachment_drag_over_child);
             this.visible_on_attachment_drag_over.set_size_request(-1, height);
         } else {
-            this.hidden_on_attachment_drag_over.add(this.hidden_on_attachment_drag_over_child);
+            this.hidden_on_attachment_drag_over.append(this.hidden_on_attachment_drag_over_child);
             this.visible_on_attachment_drag_over.remove(this.visible_on_attachment_drag_over_child);
             this.visible_on_attachment_drag_over.set_size_request(-1, -1);
         }
    }
 
     [GtkCallback]
-    private void on_set_focus_child() {
-        var window = get_toplevel() as Gtk.Window;
-        if (window != null) {
-            Gtk.Widget? last_focused = window.get_focus();
-            if (last_focused == this.editor.body ||
-                (last_focused is Gtk.Entry && last_focused.is_ancestor(this))) {
-                this.focused_input_widget = last_focused;
-            }
-        }
-    }
-
-    [GtkCallback]
-    private bool on_drag_motion() {
+    private Gdk.DragAction on_drop_target_enter(Gtk.DropTarget drop_target,
+                                                double x,
+                                                double y) {
         show_attachment_overlay(true);
-        return false;
+        return Gdk.DragAction.COPY;
     }
 
     [GtkCallback]
-    private void on_drag_leave() {
+    private void on_drop_target_leave(Gtk.DropTarget drop_target) {
         show_attachment_overlay(false);
     }
 
     [GtkCallback]
-    private void on_drag_data_received(Gtk.Widget sender, Gdk.DragContext context, int x, int y,
-        Gtk.SelectionData selection_data, uint info, uint time_) {
-
-        bool dnd_success = false;
-        if (selection_data.get_length() >= 0) {
-            dnd_success = true;
-
-            string uri_list = (string) selection_data.get_data();
-            string[] uris = uri_list.strip().split("\n");
-            foreach (string uri in uris) {
-                if (!uri.has_prefix(FILE_URI_PREFIX))
-                    continue;
-
-                try {
-                    add_attachment_part(File.new_for_uri(uri.strip()));
-                    draft_changed();
-                } catch (Error err) {
-                    attachment_failed(err.message);
-                }
+    private bool on_drop_target_drop(Gtk.DropTarget drop_target, Value val, double x, double y) {
+        //XXX GTK4 - I'm not sure if this is 100% correct, so best to check
+        if (val.holds(typeof(GLib.File))) {
+            var file = val as GLib.File;
+            try {
+                add_attachment_part(file);
+                draft_changed();
+                return true;
+            } catch (Error err) {
+                attachment_failed(err.message);
             }
         }
 
-        Gtk.drag_finish(context, dnd_success, false, time_);
+        return false;
     }
 
     [GtkCallback]
-    private bool on_drag_drop(Gtk.Widget sender, Gdk.DragContext context, int x, int y, uint time_) {
-        if (context.list_targets() == null)
-            return false;
-
-        uint length = context.list_targets().length();
-        Gdk.Atom? target_type = null;
-        for (uint i = 0; i < length; i++) {
-            Gdk.Atom target = context.list_targets().nth_data(i);
-            if (target.name() == URI_LIST_MIME_TYPE)
-                target_type = target;
-        }
-
-        if (target_type == null)
-            return false;
-
-        Gtk.drag_get_data(sender, context, target_type, time_);
-        return true;
+    private bool on_drop_target_accept(Gtk.DropTarget drop_target, Gdk.Drop drop) {
+        //XXX GTK4 I'm not sure if this is 100% correct
+        return drop.formats.contain_mime_type(URI_LIST_MIME_TYPE);
     }
 
     /** Returns a representation of the current message. */
@@ -1387,11 +1341,13 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.referred_ids.add(referred.id);
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
+    [GtkCallback]
+    private bool on_key_pressed(uint keyval, uint keycode, Gdk.ModifierType state) {
+        // XXX GTK4 check if this actually prevents the default handler from running
         // Override the method since key-press-event is run last, and
         // we want this behaviour to take precedence over the default
         // key handling
-        return check_send_on_return(event) && base.key_press_event(event);
+        return check_send_on_return(keyval, state);
     }
 
     /** Updates the composer's top level window and headerbar title. */
@@ -1443,15 +1399,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     internal void embed_header() {
-        if (this.header.parent == null) {
-            this.header_container.add(this.header);
-            this.header.hexpand = true;
-        }
-    }
-
-    internal void free_header() {
-        if (this.header.parent != null) {
-            this.header.parent.remove(this.header);
+        if (this.header.headerbar.parent == null) {
+            this.header_container.append(this.header.headerbar);
+            this.header.headerbar.hexpand = true;
         }
     }
 
@@ -1517,9 +1467,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             }
         }
         if (confirmation != null) {
-            ConfirmationDialog dialog = new ConfirmationDialog(container.top_window,
-                confirmation, null, Stock._OK, "suggested-action");
-            return (dialog.run() == Gtk.ResponseType.OK);
+            var dialog = new Adw.AlertDialog(confirmation, null);
+            dialog.add_response("cancel", _("_Cancel"));
+            dialog.add_response("ok", _("_OK"));
+            dialog.close_response = "cancel";
+            dialog.default_response = "ok";
+            dialog.set_response_appearance("ok", Adw.ResponseAppearance.SUGGESTED);
+            string response = yield dialog.choose(this.container.top_window, null);
+            return (response == "ok");
         }
         return true;
     }
@@ -1778,7 +1733,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void update_attachments_view() {
         if (this.attached_files.size > 0 )
-            attachments_box.show_all();
+            attachments_box.show();
         else
             attachments_box.hide();
     }
@@ -1860,24 +1815,24 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         Gtk.Box wrapper_box = new Gtk.Box(VERTICAL, 0);
-        this.attachments_box.pack_start(wrapper_box);
-        wrapper_box.pack_start(new Gtk.Separator(HORIZONTAL));
+        this.attachments_box.append(wrapper_box);
+        wrapper_box.append(new Gtk.Separator(HORIZONTAL));
 
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        wrapper_box.pack_start(box);
+        wrapper_box.append(box);
 
         /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
         string label_text = _("%s (%s)").printf(target.get_basename(),
                                                 Files.get_filesize_as_string(target_info.get_size()));
         Gtk.Label label = new Gtk.Label(label_text);
-        box.pack_start(label);
+        box.append(label);
         label.halign = Gtk.Align.START;
         label.ellipsize = Pango.EllipsizeMode.MIDDLE;
         label.has_tooltip = true;
         label.query_tooltip.connect(Util.Gtk.query_tooltip_label);
 
-        Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic", BUTTON);
-        box.pack_start(remove_button, false, false);
+        Gtk.Button remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic");
+        box.append(remove_button);
         remove_button.clicked.connect(() => remove_attachment(target, wrapper_box));
 
         update_attachments_view();
@@ -1961,19 +1916,22 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void attachment_failed(string msg) {
-        ErrorDialog dialog = new ErrorDialog(this.container.top_window, _("Cannot add attachment"), msg);
-        dialog.run();
+        var dialog = new Adw.AlertDialog(_("Cannot add attachment"), msg);
+        dialog.add_css_class("error");
+        dialog.present(this.container.top_window);
     }
 
     private void remove_attachment(File file, Gtk.Box box) {
         if (!this.attached_files.remove(file))
             return;
 
-        foreach (weak Gtk.Widget child in this.attachments_box.get_children()) {
+        unowned Gtk.Widget? child = this.attachments_box.get_first_child();
+        while (child != null) {
             if (child == box) {
                 this.attachments_box.remove(box);
                 break;
             }
+            child = child.get_next_sibling();
         }
 
         update_attachments_view();
@@ -1989,33 +1947,30 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         // requesting the image from the clipboard
         this.editor.start_background_work_pulse();
 
-        get_clipboard(Gdk.SELECTION_CLIPBOARD).request_image((clipboard, pixbuf) => {
-            if (pixbuf != null) {
-                MemoryOutputStream os = new MemoryOutputStream(null);
-                pixbuf.save_to_stream_async.begin(os, "png", null, (obj, res) => {
-                    try {
-                        pixbuf.save_to_stream_async.end(res);
-                        os.close();
-
-                        Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer.from_memory_output_stream(os);
-
-                        GLib.DateTime time_now = new GLib.DateTime.now();
-                        string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
-
-                        string unique_filename;
-                        add_inline_part(byte_buffer, filename, out unique_filename);
-                        this.editor.body.insert_image(
-                            Components.WebView.INTERNAL_URL_PREFIX + unique_filename
-                        );
-                    } catch (Error error) {
-                        this.application.report_problem(
-                            new Geary.ProblemReport(error)
-                        );
-                    }
-
+        var clipboard = get_clipboard();
+        clipboard.read_texture_async.begin(null, (obj, res) => {
+            try {
+                var texture = clipboard.read_texture_async.end(res);
+                if (texture == null) {
+                    warning("Failed to get image from clipboard");
                     this.editor.stop_background_work_pulse();
-                });
-            } else {
+                }
+
+                var png_bytes = texture.save_to_png_bytes();
+                uint8[] png_data = png_bytes.get_data();
+                Geary.Memory.ByteBuffer byte_buffer = new Geary.Memory.ByteBuffer.take(png_data, png_data.length);
+
+                GLib.DateTime time_now = new GLib.DateTime.now();
+                string filename = PASTED_IMAGE_FILENAME_TEMPLATE.printf(time_now.hash());
+
+                string unique_filename;
+                add_inline_part(byte_buffer, filename, out unique_filename);
+                this.editor.body.insert_image(
+                    Components.WebView.INTERNAL_URL_PREFIX + unique_filename
+                );
+
+                this.editor.stop_background_work_pulse();
+            } catch (Error err) {
                 warning("Failed to get image from clipboard");
                 this.editor.stop_background_work_pulse();
             }
@@ -2026,19 +1981,24 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
      * Handle prompting for an inserting images as inline attachments
      */
     private void insert_image() {
-        AttachmentDialog dialog = new AttachmentDialog(
-            this.container.top_window, this.config
-        );
+        var dialog = new Gtk.FileDialog();
         Gtk.FileFilter filter = new Gtk.FileFilter();
         // Translators: This is the name of the file chooser filter
         // when inserting an image in the composer.
-        filter.set_name(_("Images"));
+        filter.set_filter_name(_("Images"));
         filter.add_mime_type("image/*");
-        dialog.add_filter(filter);
-        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-            dialog.hide();
-            foreach (File file in dialog.get_files()) {
-                try {
+        var filters = new ListStore(typeof(Gtk.FileFilter));
+        filters.append(filter);
+        dialog.set_filters(filters);
+
+        dialog.open_multiple.begin(this.container.top_window, null, (obj, res) => {
+            try {
+                ListModel? files = dialog.open_multiple.end(res);
+                if (files == null)
+                    return;
+
+                for (uint i = 0; i < files.get_n_items(); i++) {
+                    File file = (File) files.get_item(i);
                     check_attachment_file(file);
                     Geary.Memory.FileBuffer file_buffer = new Geary.Memory.FileBuffer(file, true);
                     string path = file.get_path();
@@ -2047,24 +2007,23 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
                     this.editor.body.insert_image(
                         Components.WebView.INTERNAL_URL_PREFIX + unique_filename
                     );
-                } catch (Error err) {
-                    attachment_failed(err.message);
-                    break;
                 }
+            } catch (Error err) {
+                //XXX GTK4 check if canceled
+                attachment_failed(err.message);
             }
-        }
-        dialog.destroy();
+        });
     }
 
-    private bool check_send_on_return(Gdk.EventKey event) {
+    private bool check_send_on_return(uint keyval, Gdk.ModifierType state) {
         bool ret = Gdk.EVENT_PROPAGATE;
-        switch (Gdk.keyval_name(event.keyval)) {
+        switch (Gdk.keyval_name(keyval)) {
             case "Return":
             case "KP_Enter":
                 // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent
                 // the Enter leaking through to the controls, but only
                 // send if send is available
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                if (Gdk.ModifierType.CONTROL_MASK in state) {
                     this.actions.activate_action(ACTION_SEND, null);
                     ret = Gdk.EVENT_STOP;
                 }
@@ -2120,34 +2079,8 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
     }
 
-    private void on_cut(SimpleAction action, Variant? param) {
-        var editable = this.container.get_focus() as Gtk.Editable;
-        if (editable != null) {
-            editable.cut_clipboard();
-        }
-    }
-
-    private void on_copy(SimpleAction action, Variant? param) {
-        var editable = this.container.get_focus() as Gtk.Editable;
-        if (editable != null) {
-            editable.copy_clipboard();
-        }
-    }
-
-    private void on_paste(SimpleAction action, Variant? param) {
-        var editable = this.container.get_focus() as Gtk.Editable;
-        if (editable != null) {
-            editable.paste_clipboard();
-        }
-    }
-
     private void on_toggle_action(SimpleAction? action, Variant? param) {
         action.change_state(!action.state.get_boolean());
-    }
-
-    private void reparent_widget(Gtk.Widget child, Gtk.Container new_parent) {
-        ((Gtk.Container) child.get_parent()).remove(child);
-        new_parent.add(child);
     }
 
     private void update_extended_headers(bool reorder=true) {
@@ -2157,19 +2090,19 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
         if (reorder) {
             if (cc) {
-                reparent_widget(this.cc_row, this.filled_headers);
+                this.cc_row.set_parent(this.filled_headers);
             } else {
-                reparent_widget(this.cc_row, this.extended_headers);
+                this.cc_row.set_parent(this.extended_headers);
             }
             if (bcc) {
-                reparent_widget(this.bcc_row, this.filled_headers);
+                this.bcc_row.set_parent(this.filled_headers);
             } else {
-                reparent_widget(this.bcc_row, this.extended_headers);
+                this.bcc_row.set_parent(this.extended_headers);
             }
             if (reply_to) {
-                reparent_widget(this.reply_to_row, this.filled_headers);
+                this.reply_to_row.set_parent(this.filled_headers);
             } else {
-                reparent_widget(this.reply_to_row, this.extended_headers);
+                this.reply_to_row.set_parent(this.extended_headers);
             }
         }
 
@@ -2190,19 +2123,23 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
     }
 
-    private bool on_editor_key_press_event(Gdk.EventKey event) {
+    private bool on_editor_key_pressed(Gtk.EventControllerKey controller,
+                                       uint keyval,
+                                       uint keycode,
+                                       Gdk.ModifierType state) {
+        bool is_modifier = ((Gdk.KeyEvent) controller.get_current_event()).is_modifier();
         // Widget's keypress override doesn't receive non-modifier
         // keys when the editor processes them, regardless if true or
         // false is called; this deals with that issue (specifically
         // so Ctrl+Enter will send the message)
-        if (event.is_modifier == 0) {
-            if (check_send_on_return(event) == Gdk.EVENT_STOP)
+        if (!is_modifier) {
+            if (check_send_on_return(keyval, state) == Gdk.EVENT_STOP)
                 return Gdk.EVENT_STOP;
         }
 
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
-            if (event.is_modifier == 0 && event.keyval == Gdk.Key.BackSpace) {
+            if (!is_modifier && keyval == Gdk.Key.BackSpace) {
                 this.editor.body.delete_quoted_message();
                 return Gdk.EVENT_STOP;
             }
@@ -2362,7 +2299,9 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void update_subject_spell_checker() {
-        Gspell.Language? lang = null;
+        //XXX GTK4
+#if 0
+        Spelling.Language? lang = null;
         string[] langs = this.config.get_spell_check_languages();
         if (langs.length == 1) {
             lang = Gspell.Language.lookup(langs[0]);
@@ -2395,13 +2334,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         var buffer = Gspell.EntryBuffer.get_from_gtk_entry_buffer(
             this.subject_row.value.buffer
         );
-        Gspell.Checker checker = null;
+        Spelling.Checker checker = null;
         if (lang != null) {
             checker = this.subject_spell_checker;
             checker.language = lang;
         }
         this.subject_spell_entry.inline_spell_checking = (checker != null);
         buffer.spell_checker = checker;
+#endif
     }
 
     private void on_draft_id_changed() {
@@ -2444,23 +2384,23 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_add_attachment() {
-        AttachmentDialog dialog = new AttachmentDialog(
-            this.container.top_window, this.config
-        );
-        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-            dialog.hide();
-            foreach (File file in dialog.get_files()) {
-                try {
+        var dialog = new Gtk.FileDialog();
+        dialog.open_multiple.begin(this.container.top_window, null, (obj, res) => {
+            try {
+                ListModel? files = dialog.open_multiple.end(res);
+                if (files == null)
+                    return;
+
+                for (uint i = 0; i < files.get_n_items(); i++) {
+                    File file = (File) files.get_item(i);
                     add_attachment_part(file);
                     draft_changed();
-                } catch (Error err) {
-                    attachment_failed(err.message);
-                    break;
                 }
+            } catch (Error err) {
+                //XXX GTK4 check if canceled
+                attachment_failed(err.message);
             }
-
-        }
-        dialog.destroy();
+        });
     }
 
     private void on_pending_attachments() {
@@ -2470,7 +2410,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     }
 
     private void on_close() {
-        conditional_close(this.container is Window);
+        conditional_close.begin(this.container is Window);
     }
 
     private void on_show_window_menu() {
@@ -2491,7 +2431,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
 
     private void on_discard() {
         if (this.container is Window) {
-            conditional_close(true);
+            conditional_close.begin(true);
         } else {
             this.discard_and_close.begin();
         }

@@ -7,10 +7,6 @@
 public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
 
-    public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
-        { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
-    };
-
     private const int INBOX_ORDINAL = -2; // First account branch is zero
     private const int SEARCH_ORDINAL = -1;
 
@@ -29,7 +25,9 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
 
     public Tree() {
-        base(TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE, drop_handler);
+        //XXX GTK4 need to set up proper GdkContentFormats here
+        base(new Gdk.ContentFormats({ "application/x-geary-mail" }),
+             Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
         base_ref();
         set_activate_on_single_click(true);
         entry_selected.connect(on_entry_selected);
@@ -37,9 +35,12 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
         // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
         // remove it.
+        //XXX GTK4
+#if 0
         unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
         assert(binding_set != null);
         Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
+#endif
 
         this.visible = true;
     }
@@ -48,9 +49,20 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         base_unref();
     }
 
-    public override void get_preferred_width(out int minimum_size, out int natural_size) {
-        minimum_size = 360;
-        natural_size = 500;
+    public override void measure(Gtk.Orientation orientation,
+                                 int for_size,
+                                 out int minimum,
+                                 out int natural,
+                                 out int minimum_baseline,
+                                 out int natural_baseline) {
+        if (orientation == Gtk.Orientation.HORIZONTAL) {
+            minimum = 180;
+            natural = 300;
+        } else {
+            //XXX GTK4 - I have no idea what to put here
+        }
+
+        minimum_baseline = natural_baseline = -1;
     }
 
     public void set_has_new(Geary.Folder folder, bool has_new) {
@@ -68,10 +80,6 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
     }
 
-    private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
-        Gtk.SelectionData data, uint info, uint time) {
-    }
-
     private FolderEntry? get_folder_entry(Geary.Folder folder) {
         AccountBranch? account_branch = account_branches.get(folder.account);
         return (account_branch == null ? null :
@@ -80,7 +88,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
 
     public override bool accept_cursor_changed() {
         bool can_switch = true;
-        var parent = get_toplevel() as Application.MainWindow;
+        var parent = get_root() as Application.MainWindow;
         if (parent != null) {
             can_switch = parent.close_composer(false);
         }
@@ -221,6 +229,8 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         folder_selected(null);
     }
 
+    // XXX GTK4 I'm not sur eif this is needed still?
+#if 0
     public override bool drag_motion(Gdk.DragContext context, int x, int y, uint time) {
         // Run the base version first.
         bool ret = base.drag_motion(context, x, y, time);
@@ -236,6 +246,7 @@ public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
         }
         return ret;
     }
+#endif
 
     public void set_search(Geary.Engine engine,
                            Geary.App.SearchFolder search_folder) {

@@ -8,20 +8,14 @@
 
 internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
-    private const string DND_ATOM = "geary-editor-row";
-    private const Gtk.TargetEntry[] DRAG_ENTRIES = {
-        { DND_ATOM, Gtk.TargetFlags.SAME_APP, 0 }
-    };
-
 
     protected Gtk.Box layout {
         get;
         private set;
         default = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5); }
 
-    private Gtk.Container drag_handle;
+    private Gtk.Image drag_handle;
     private bool drag_picked_up = false;
-    private bool drag_entered = false;
 
 
     public signal void move_to(int new_position);
@@ -29,66 +23,54 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
 
     public EditorRow() {
-
-        get_style_context().add_class("geary-settings");
-        get_style_context().add_class("geary-labelled-row");
-
-        // We'd like to add the drag handle only when needed, but
-        // GNOME/gtk#1495 prevents us from doing so.
-        Gtk.EventBox drag_box = new Gtk.EventBox();
-        drag_box.add(
-            new Gtk.Image.from_icon_name(
-                "list-drag-handle-symbolic", Gtk.IconSize.BUTTON
-            )
-        );
-        this.drag_handle = new Gtk.Grid();
-        this.drag_handle.valign = Gtk.Align.CENTER;
-        this.drag_handle.add(drag_box);
-        this.drag_handle.show_all();
-        this.drag_handle.hide();
-        // Translators: Tooltip for dragging list items
-        this.drag_handle.set_tooltip_text(_("Drag to move this item"));
+        add_css_class("geary-settings");
+        add_css_class("geary-labelled-row");
 
         var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-        box.add(drag_handle);
-        box.add(this.layout);
-        box.show();
-        add(box);
+        this.child = box;
 
-        this.layout.show();
-        this.show();
 
-         this.size_allocate.connect((allocation) => {
-            if (allocation.width < 500) {
-                if (this.layout.orientation == Gtk.Orientation.HORIZONTAL) {
-                    this.layout.orientation = Gtk.Orientation.VERTICAL;
-                }
-            } else if (this.layout.orientation == Gtk.Orientation.VERTICAL) {
-                this.layout.orientation = Gtk.Orientation.HORIZONTAL;
-            }
-        });
+        var breakpoint_bin = new Adw.BreakpointBin();
+        box.append(breakpoint_bin);
+        breakpoint_bin.child = this.layout;
+
+        var breakpoint = new Adw.Breakpoint(Adw.BreakpointCondition.parse("max-width: 500px"));
+        breakpoint.add_setters(this.layout, "orientation", Gtk.Orientation.VERTICAL);
+        breakpoint_bin.add_breakpoint(breakpoint);
+
+        this.drag_handle = new Gtk.Image.from_icon_name("list-drag-handle-symbolic");
+        this.drag_handle.valign = Gtk.Align.CENTER;
+        this.drag_handle.visible = false;
+        // Translators: Tooltip for dragging list items
+        this.drag_handle.set_tooltip_text(_("Drag to move this item"));
+        box.append(this.drag_handle);
+
+        var key_controller = new Gtk.EventControllerKey();
+        key_controller.key_pressed.connect(on_key_pressed);
+        add_controller(key_controller);
     }
 
     public virtual void activated(PaneType pane) {
         // No-op by default
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
+    private bool on_key_pressed(Gtk.EventControllerKey key_controller, uint keyval, uint keycode, Gdk.ModifierType state) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
-        if (event.state == Gdk.ModifierType.CONTROL_MASK) {
+        if (state == Gdk.ModifierType.CONTROL_MASK) {
             int index = get_index();
-            if (event.keyval == Gdk.Key.Up) {
+            if (keyval == Gdk.Key.Up) {
                 index -= 1;
                 if (index >= 0) {
                     move_to(index);
                     ret = Gdk.EVENT_STOP;
                 }
-            } else if (event.keyval == Gdk.Key.Down) {
+            } else if (keyval == Gdk.Key.Down) {
                 index += 1;
                 Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
                 if (parent != null &&
-                    index < parent.get_children().length() &&
+                    //XXX GTK4 - I *think* we don't need this anymore
+                    // index < parent.get_children().length() &&
                     !(parent.get_row_at_index(index) is AddRow)) {
                     move_to(index);
                     ret = Gdk.EVENT_STOP;
@@ -96,127 +78,113 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
             }
         }
 
-        if (ret != Gdk.EVENT_STOP) {
-            ret = base.key_press_event(event);
-        }
-
         return ret;
     }
 
     /** Adds a drag handle to the row and enables drag signals. */
     protected void enable_drag() {
-        Gtk.drag_source_set(
-            this.drag_handle,
-            Gdk.ModifierType.BUTTON1_MASK,
-            DRAG_ENTRIES,
-            Gdk.DragAction.MOVE
-        );
+        //XXX GTK4 - is this activated on click?
+        Gtk.DragSource drag_source = new Gtk.DragSource();
+        drag_source.drag_begin.connect(on_drag_source_begin);
+        drag_source.drag_end.connect(on_drag_source_end);
+        drag_source.prepare.connect(on_drag_source_prepare);
+        this.drag_handle.add_controller(drag_source);
 
-        Gtk.drag_dest_set(
-            this,
-            // No highlight, we'll take care of that ourselves so we
-            // can avoid highlighting the row that was picked up
-            Gtk.DestDefaults.MOTION | Gtk.DestDefaults.DROP,
-            DRAG_ENTRIES,
-            Gdk.DragAction.MOVE
-        );
+        Gtk.DropTarget drop_target = new Gtk.DropTarget(typeof(int), Gdk.DragAction.MOVE);
+        drop_target.enter.connect(on_drop_target_enter);
+        drop_target.leave.connect(on_drop_target_leave);
+        drop_target.drop.connect(on_drop_target_drop);
+        this.drag_handle.add_controller(drop_target);
 
-        this.drag_handle.drag_begin.connect(on_drag_begin);
-        this.drag_handle.drag_end.connect(on_drag_end);
-        this.drag_handle.drag_data_get.connect(on_drag_data_get);
+        //XXX GTK4 - Disable highlight by default, so we can avoid highlighting the row that was picked up
+        this.drag_handle.add_css_class("geary-drag-handle");
+        this.drag_handle.visible = true;
 
-        this.drag_motion.connect(on_drag_motion);
-        this.drag_leave.connect(on_drag_leave);
-        this.drag_data_received.connect(on_drag_data_received);
-
-        this.drag_handle.get_style_context().add_class("geary-drag-handle");
-        this.drag_handle.show();
-
-        get_style_context().add_class("geary-draggable");
+        add_css_class("geary-draggable");
     }
 
 
-    private void on_drag_begin(Gdk.DragContext context) {
+    private void on_drag_source_begin(Gtk.DragSource drag_source, Gdk.Drag drag) {
         // Draw a nice drag icon
         Gtk.Allocation alloc = Gtk.Allocation();
         this.get_allocation(out alloc);
 
-        Cairo.ImageSurface surface = new Cairo.ImageSurface(
-            Cairo.Format.ARGB32, alloc.width, alloc.height
-        );
-        Cairo.Context paint = new Cairo.Context(surface);
+        //XXX GTK4 lol, let's just make this a proper drag icon at some point
+        // Cairo.ImageSurface surface = new Cairo.ImageSurface(
+        //     Cairo.Format.ARGB32, alloc.width, alloc.height
+        // );
+        // Cairo.Context paint = new Cairo.Context(surface);
 
 
-        Gtk.StyleContext style = get_style_context();
-        style.add_class("geary-drag-icon");
-        draw(paint);
-        style.remove_class("geary-drag-icon");
+        // add_css_class("geary-drag-icon");
+        // draw(paint);
+        // remove_css_class("geary-drag-icon");
 
-        int x, y;
-        this.drag_handle.translate_coordinates(this, 0, 0, out x, out y);
-        surface.set_device_offset(-x, -y);
-        Gtk.drag_set_icon_surface(context, surface);
+        // drag_source.set_icon(surface, 0, 0);
 
         // Set a visual hint that the row is being dragged
-        style.add_class("geary-drag-source");
+        add_css_class("geary-drag-source");
         this.drag_picked_up = true;
     }
 
-    private void on_drag_end(Gdk.DragContext context) {
-        get_style_context().remove_class("geary-drag-source");
+    private void on_drag_source_end(Gtk.DragSource drag_source,
+                                    Gdk.Drag drag,
+                                    bool delete_data) {
+        remove_css_class("geary-drag-source");
         this.drag_picked_up = false;
     }
 
-    private bool on_drag_motion(Gdk.DragContext context,
-                                int x, int y,
-                                uint time_) {
-        if (!this.drag_entered) {
-            this.drag_entered = true;
-
-            // Don't highlight the same row that was picked up
-            if (!this.drag_picked_up) {
-                Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
-                if (parent != null) {
-                    parent.drag_highlight_row(this);
-                }
+    private Gdk.DragAction on_drop_target_enter(Gtk.DropTarget drop_target,
+                                                double x,
+                                                double y) {
+        // Don't highlight the same row that was picked up
+        if (!this.drag_picked_up) {
+            Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+            if (parent != null) {
+                parent.drag_highlight_row(this);
             }
         }
 
-        return true;
+        return Gdk.DragAction.MOVE;
     }
 
-    private void on_drag_leave(Gdk.DragContext context,
-                               uint time_) {
+    private void on_drop_target_leave(Gtk.DropTarget drop_target) {
         if (!this.drag_picked_up) {
             Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
             if (parent != null) {
                 parent.drag_unhighlight_row();
             }
         }
-        this.drag_entered = false;
     }
 
-    private void on_drag_data_get(Gdk.DragContext context,
-                                  Gtk.SelectionData selection_data,
-                                  uint info, uint time_) {
-        selection_data.set(
-            Gdk.Atom.intern_static_string(DND_ATOM), 8,
-            get_index().to_string().data
-        );
+    private Gdk.ContentProvider on_drag_source_prepare(Gtk.DragSource drag_source,
+                                                       double x,
+                                                       double y) {
+        GLib.Value val = GLib.Value(typeof(int));
+        val.set_int(get_index());
+        return new Gdk.ContentProvider.for_value(val);
     }
 
-    private void on_drag_data_received(Gdk.DragContext context,
-                                       int x, int y,
-                                       Gtk.SelectionData selection_data,
-                                       uint info, uint time_) {
-        int drag_index = int.parse((string) selection_data.get_data());
+    private bool on_drop_target_drop(Gtk.DropTarget drop_target,
+                                     GLib.Value val,
+                                     double x,
+                                     double y) {
+        if (!val.holds(typeof(int))) {
+            warning("Can't deal with non-uint row value");
+            return false;
+        }
+
+        int drag_index = val.get_int();
         Gtk.ListBox? parent = this.get_parent() as Gtk.ListBox;
         if (parent != null) {
             EditorRow? drag_row = parent.get_row_at_index(drag_index) as EditorRow;
             if (drag_row != null && drag_row != this) {
                 drag_row.dropped(this);
+                return true;
             }
         }
+
+        return false;
     }
 
 }
@@ -233,11 +201,10 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
         this.label.halign = Gtk.Align.START;
         this.label.valign = Gtk.Align.CENTER;
         this.label.hexpand = true;
-        this.label.set_text(label);
-        this.label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
-        this.label.set_line_wrap(true);
-        this.label.show();
-        this.layout.add(this.label);
+        this.label.label = label;
+        this.label.wrap_mode = Pango.WrapMode.WORD_CHAR;
+        this.label.wrap = true;
+        this.layout.append(this.label);
 
         bool expand_label = true;
         this.value = value;
@@ -250,14 +217,13 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
             }
             Gtk.Label? vlabel = value as Gtk.Label;
             if (vlabel != null) {
-                vlabel.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
-                vlabel.set_line_wrap(true);
+                vlabel.wrap_mode = Pango.WrapMode.WORD_CHAR;
+                vlabel.wrap = true;
             }
 
             widget.halign = Gtk.Align.START;
             widget.valign = Gtk.Align.CENTER;
-            widget.show();
-            this.layout.add(widget);
+            this.layout.append(widget);
         }
 
         this.label.hexpand = expand_label;
@@ -265,9 +231,9 @@ internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
 
     public void set_dim_label(bool is_dim) {
         if (is_dim) {
-            this.label.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+            this.label.add_css_class("dim-label");
         } else {
-            this.label.get_style_context().remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
+            this.label.remove_css_class("dim-label");
         }
     }
 
@@ -278,51 +244,11 @@ internal class Accounts.AddRow<PaneType> : EditorRow<PaneType> {
 
 
     public AddRow() {
-        get_style_context().add_class("geary-add-row");
-        Gtk.Image add_icon = new Gtk.Image.from_icon_name(
-            "list-add-symbolic", Gtk.IconSize.BUTTON
-        );
+        add_css_class("geary-add-row");
+        var add_icon = new Gtk.Image.from_icon_name("list-add-symbolic");
         add_icon.set_hexpand(true);
-        add_icon.show();
 
-        this.layout.add(add_icon);
-    }
-
-}
-
-
-internal class Accounts.ServiceProviderRow<PaneType> :
-    LabelledEditorRow<PaneType,Gtk.Label> {
-
-
-    public ServiceProviderRow(Geary.ServiceProvider provider,
-                              string other_type_label) {
-        string? label = null;
-        switch (provider) {
-        case Geary.ServiceProvider.GMAIL:
-            label = _("Gmail");
-            break;
-
-        case Geary.ServiceProvider.OUTLOOK:
-            label = _("Outlook.com");
-            break;
-
-        case Geary.ServiceProvider.OTHER:
-            label = other_type_label;
-            break;
-        }
-
-        base(
-            // Translators: Label describes the service provider
-            // hosting the email account, e.g. Gmail, Yahoo, or some
-            // other generic IMAP service.
-            _("Service provider"),
-            new Gtk.Label(label)
-        );
-
-        // Can't change this, so deactivate and dim out
-        set_activatable(false);
-        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        this.layout.append(add_icon);
     }
 
 }
@@ -390,7 +316,7 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
         Gtk.Widget? widget = value as Gtk.Widget;
         if (widget != null && !is_editable) {
             if (widget is Gtk.Label) {
-                widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+                widget.add_css_class("dim-label");
             } else {
                 widget.set_sensitive(false);
             }
@@ -533,7 +459,6 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
 
 }
 
-
 internal class Accounts.OutgoingAuthComboBox : Gtk.ComboBox {
 
 
@@ -626,13 +551,12 @@ internal class Accounts.EditorPopover : Gtk.Popover {
 
 
     public EditorPopover() {
-        get_style_context().add_class("geary-editor");
+        add_css_class("geary-editor");
 
         this.layout.orientation = Gtk.Orientation.VERTICAL;
         this.layout.set_row_spacing(6);
         this.layout.set_column_spacing(12);
-        this.layout.show();
-        add(this.layout);
+        this.child = this.layout;
 
         this.closed.connect_after(on_closed);
     }
@@ -641,39 +565,12 @@ internal class Accounts.EditorPopover : Gtk.Popover {
         this.closed.disconnect(on_closed);
     }
 
-    /** {@inheritDoc} */
-    public new void popup() {
-        // Work-around GTK+ issue #1138
-        Gtk.Widget target = get_relative_to();
-
-        Gtk.Allocation content_area;
-        target.get_allocation(out content_area);
-
-        Gtk.StyleContext style = target.get_style_context();
-        Gtk.StateFlags flags = style.get_state();
-        Gtk.Border margin = style.get_margin(flags);
-
-        content_area.x = margin.left;
-        content_area.y =  margin.bottom;
-        content_area.width -= (content_area.x + margin.right);
-        content_area.height -= (content_area.y + margin.top);
-
-        set_pointing_to(content_area);
-
-        base.popup();
-
-        if (this.popup_focus != null) {
-            this.popup_focus.grab_focus();
-        }
-    }
-
     public void add_labelled_row(string label, Gtk.Widget value) {
         Gtk.Label label_widget = new Gtk.Label(label);
-        label_widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        label_widget.add_css_class("dim-label");
         label_widget.halign = Gtk.Align.END;
-        label_widget.show();
 
-        this.layout.add(label_widget);
+        this.layout.attach_next_to(label_widget, null, Gtk.PositionType.BOTTOM);
         this.layout.attach_next_to(value, label_widget, Gtk.PositionType.RIGHT);
     }
 

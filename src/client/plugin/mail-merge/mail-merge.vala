@@ -178,7 +178,7 @@ public class Plugin.MailMerge :
 
     private async void merge_email(EmailIdentifier id,
                                    GLib.File? default_csv_file) {
-        var csv_file = default_csv_file ?? show_merge_data_chooser();
+        var csv_file = default_csv_file ?? yield show_merge_data_chooser();
         if (csv_file != null) {
             try {
                 var csv_input = yield csv_file.read_async(
@@ -297,7 +297,7 @@ public class Plugin.MailMerge :
     }
 
     private async void load_composer_data(Composer composer) {
-        var data = show_merge_data_chooser();
+        var data = yield show_merge_data_chooser();
         if (data != null) {
             var insert_field_action = new GLib.SimpleAction(
                 ACTION_INSERT_FIELD,
@@ -388,26 +388,20 @@ public class Plugin.MailMerge :
         return action_bar;
     }
 
-    private GLib.File? show_merge_data_chooser() {
-        var chooser = new Gtk.FileChooserNative(
-            /// Translators: File chooser title after invoking mail
-            /// merge in composer
-            _("Mail Merge"),
-            null, OPEN,
-            _("_Open"),
-            _("_Cancel")
-        );
+    private async GLib.File? show_merge_data_chooser() {
+        var dialog = new Gtk.FileDialog();
+        /// Translators: Filechooser title after invoking mail merge in composer
+        dialog.title = _("Mail Merge");
+
         var csv_filter = new Gtk.FileFilter();
         /// Translators: File chooser filer label
         csv_filter.set_filter_name(_("Comma separated values (CSV)"));
         csv_filter.add_mime_type("text/csv");
-        chooser.add_filter(csv_filter);
+        var filters = new GLib.ListStore(typeof(Gtk.FileFilter));
+        filters.append(csv_filter);
+        dialog.filters = filters;
 
-        return (
-            chooser.run() == Gtk.ResponseType.ACCEPT
-            ? chooser.get_file()
-            : null
-        );
+        return yield dialog.open(null, null);
     }
 
     private void insert_field(Composer composer, string field) {

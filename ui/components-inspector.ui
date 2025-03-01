@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ComponentsInspector" parent="GtkApplicationWindow">
+  <template class="ComponentsInspector" parent="AdwApplicationWindow">
     <property name="default_width">800</property>
     <property name="default_height">500</property>
+
+    <child>
+      <object class="GtkEventControllerKey">
+        <signal name="key-pressed" handler="on_key_pressed"/>
+      </object>
+    </child>
+
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
-        <property name="visible">True</property>
         <property name="show_close_button">True</property>
         <child>
           <object class="GtkToggleButton" id="search_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Search for matching log entries</property>
             <property name="action_name">win.toggle-search</property>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">edit-find-symbolic</property>
               </object>
             </child>
@@ -25,14 +27,12 @@
         </child>
         <child>
           <object class="GtkToggleButton" id="play_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Toggle appending new log entries</property>
             <property name="action_name">win.toggle-play</property>
             <property name="active">True</property>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">media-playback-start-symbolic</property>
               </object>
             </child>
@@ -43,13 +43,11 @@
         </child>
         <child>
           <object class="GtkButton" id="mark_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Add a marker entry to the log</property>
             <signal name="clicked" handler="on_mark_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">document-edit-symbolic</property>
               </object>
             </child>
@@ -60,19 +58,16 @@
         </child>
         <child type="title">
           <object class="GtkStackSwitcher">
-            <property name="visible">True</property>
             <property name="stack">stack</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="save_as_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Save logs entries and details</property>
             <signal name="clicked" handler="on_save_as_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">document-save-as-symbolic</property>
               </object>
             </child>
@@ -84,13 +79,11 @@
         </child>
         <child>
           <object class="GtkButton" id="copy_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Copy to clipboard</property>
             <property name="action_name">edt.copy</property>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">edit-copy-symbolic</property>
               </object>
             </child>
@@ -102,13 +95,11 @@
         </child>
         <child>
           <object class="GtkButton" id="clear_button">
-            <property name="visible">True</property>
             <property name="receives_default">True</property>
             <property name="tooltip_text" translatable="yes" comments="Tooltip for inspector button">Clears all log entries</property>
             <signal name="clicked" handler="on_clear_clicked" swapped="no"/>
             <child>
               <object class="GtkImage">
-                <property name="visible">True</property>
                 <property name="icon_name">edit-clear-all-symbolic</property>
               </object>
             </child>
@@ -122,7 +113,6 @@
     </child>
     <child>
       <object class="GtkStack" id="stack">
-        <property name="visible">True</property>
         <signal name="notify::visible-child" handler="on_visible_child_changed" swapped="no"/>
         <child>
           <placeholder/>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ComponentsPreferencesDialog" parent="AdwPreferencesDialog">
+    <child>
+      <object class="AdwPreferencesPage">
+        <!-- Translators: Preferences page title -->
+        <property name="title" translatable="yes">Preferences</property>
+        <property name="icon-name">preferences-other-symbolic</property>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <child>
+              <object class="AdwSwitchRow" id="autoselect_row">
+                <!-- Translators: Preferences label -->
+                <property name="title" translatable="yes">_Automatically Select Next Message</property>
+                <property name="use-underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="display_preview_row">
+                <!-- Translators: Preferences label -->
+                <property name="title" translatable="yes">_Display Conversation Preview</property>
+                <property name="use-underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="single_key_shortcuts_row">
+                <!-- Translators: Preferences label -->
+                <property name="title" translatable="yes">Use _single key email shortcuts</property>
+                <property name="tooltip-text" translatable="yes">Enable keyboard shortcuts for email actions that do not require pressing &lt;Ctrl&gt;</property>
+                <property name="use-underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="startup_notifications_row">
+                <!-- Translators: Preferences label -->
+                <property name="title" translatable="yes">_Watch for new mail when closed</property>
+                <property name="tooltip-text" translatable="yes">Geary will keep running after all windows are closed</property>
+                <property name="use-underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwSwitchRow" id="trust_images_row">
+                <!-- Translators: Preferences label -->
+                <property name="title" translatable="yes">Always _Load Images</property>
+                <property name="subtitle" translatable="yes">Showing remote images allows the sender to track you</property>
+                <property name="use-underline">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="AdwPreferencesPage">
+        <!-- Translators: Preferences page title -->
+        <property name="title" translatable="yes">Plugins</property>
+        <property name="icon-name">application-x-addon-symbolic</property>
+
+        <child>
+          <object class="AdwPreferencesGroup" id="plugins_group">
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

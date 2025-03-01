@@ -21,9 +21,7 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
 
         WebView.init_web_context(
             this.config,
-            File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
-            File.new_for_path("/tmp"), // XXX use something better here
-            false // https://bugs.webkit.org/show_bug.cgi?id=213174
+            File.new_for_path(_BUILD_ROOT_DIR).get_child("src")
         );
         try {
             WebView.load_resources(GLib.File.new_for_path("/tmp"));
@@ -31,7 +29,9 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
             GLib.assert_not_reached();
         }
 
-        this.test_view = set_up_test_view();
+        this.test_view = set_up_test_view(
+            File.new_for_path("/tmp") // XXX use something better here
+        );
     }
 
     protected override void tear_down() {
@@ -39,7 +39,7 @@ public abstract class Components.WebViewTestCase<V> : TestCase {
         this.test_view = null;
     }
 
-    protected abstract V set_up_test_view();
+    protected abstract V set_up_test_view(GLib.File cache_dir);
 
     protected virtual void load_body_fixture(string html = "") {
         WebView client_view = (WebView) this.test_view;

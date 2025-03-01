@@ -1,48 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
   <template class="ComponentsAttachmentPaneView" parent="GtkGrid">
-    <property name="visible">True</property>
     <property name="column_spacing">6</property>
     <child>
       <object class="GtkImage" id="icon">
-        <property name="visible">True</property>
         <property name="valign">center</property>
         <property name="vexpand">True</property>
         <property name="pixel_size">32</property>
         <property name="icon_name">x-office-document</property>
+        <layout>
+          <property name="row">0</property>
+          <property name="column">0</property>
+          <property name="row-span">2</property>
+        </layout>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-        <property name="height">2</property>
-      </packing>
     </child>
     <child>
       <object class="GtkLabel" id="filename">
-        <property name="visible">True</property>
         <property name="valign">end</property>
         <property name="label">filename.ext</property>
         <property name="ellipsize">middle</property>
         <property name="xalign">0</property>
+        <layout>
+          <property name="row">0</property>
+          <property name="column">1</property>
+        </layout>
       </object>
-      <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">0</property>
-      </packing>
     </child>
     <child>
       <object class="GtkLabel" id="description">
-        <property name="visible">True</property>
         <property name="valign">start</property>
         <property name="label">type (size)</property>
         <property name="xalign">0</property>
+        <layout>
+          <property name="row">1</property>
+          <property name="column">1</property>
+        </layout>
       </object>
-      <packing>
-        <property name="left_attach">1</property>
-        <property name="top_attach">1</property>
-      </packing>
     </child>
   </template>
 </interface>

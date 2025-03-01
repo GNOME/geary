@@ -85,6 +85,7 @@ public class Sidebar.Header : Sidebar.Grouping, Sidebar.EmphasizableEntry {
 
 public interface Sidebar.Contextable : Object {
     // Return null if the context menu should not be invoked for this event
-    public abstract Gtk.Menu? get_sidebar_context_menu(Gdk.EventButton event);
+    //XXX GTK4 is this used?
+    // public abstract Gtk.PopoverMenu? get_sidebar_context_menu(Gdk.EventButton event);
 }
 

@@ -9,7 +9,7 @@
  * A view that displays the contents of the Engine's log.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector-log-view.ui")]
-public class Components.InspectorLogView : Gtk.Grid {
+public class Components.InspectorLogView : Gtk.Box {
 
 
     private const int COL_MESSAGE = 0;
@@ -47,13 +47,10 @@ public class Components.InspectorLogView : Gtk.Grid {
                 () => { notify_property("enabled"); }
             );
 
-            var grid = new Gtk.Grid();
-            grid.orientation = HORIZONTAL;
-            grid.add(label_widget);
-            grid.add(this.enabled_toggle);
-            add(grid);
-
-            show_all();
+            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            box.append(label_widget);
+            box.append(this.enabled_toggle);
+            this.child = box;
         }
 
     }
@@ -65,7 +62,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         set { this.search_bar.search_mode_enabled = value; }
     }
 
-    [GtkChild] private unowned Hdy.SearchBar search_bar;
+    [GtkChild] private unowned Gtk.SearchBar search_bar;
 
     [GtkChild] private unowned Gtk.SearchEntry search_entry;
 
@@ -158,17 +155,10 @@ public class Components.InspectorLogView : Gtk.Grid {
         this.first_pending = null;
     }
 
-    /** {@inheritDoc} */
-    public override void destroy() {
+    ~InspectorLogView() {
         if (this.listener_installed) {
             Geary.Logging.set_log_listener(null);
         }
-        base.destroy();
-    }
-
-    /** Forwards a key press event to the search entry. */
-    public bool handle_key_press(Gdk.EventKey event) {
-        return this.search_entry.key_press_event(event);
     }
 
     /** Returns the number of currently selected log records. */
@@ -385,7 +375,7 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     [GtkCallback]
-    private void on_logs_size_allocate() {
+    private void on_show() {
         if (this.autoscroll) {
             update_scrollbar();
         }

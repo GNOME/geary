@@ -14,7 +14,7 @@ errordomain CommandException {
 
 const int IMAP_TIMEOUT_SEC = 60 * 15;
 
-class ImapConsole : Gtk.Window {
+class ImapConsole : Adw.ApplicationWindow {
     private const int KEEPALIVE_SEC = 60 * 10;
 
     private Gtk.TextView console = new Gtk.TextView();
@@ -29,26 +29,28 @@ class ImapConsole : Gtk.Window {
         Geary.Imap.Tag, Geary.Imap.StatusResponse>();
     private Geary.Nonblocking.Event recvd_response_event = new Geary.Nonblocking.Event();
 
-    public ImapConsole() {
-        title = "IMAP Console";
-        destroy.connect(() => { Gtk.main_quit(); });
+    public ImapConsole(Adw.Application app) {
+        Object(
+            application: app,
+            title: "IMAP Console"
+        );
         set_default_size(800, 600);
 
         Gtk.Box layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 4);
 
         console.editable = false;
-        Gtk.ScrolledWindow scrolled_console = new Gtk.ScrolledWindow(null, null);
-        scrolled_console.add(console);
+        Gtk.ScrolledWindow scrolled_console = new Gtk.ScrolledWindow();
+        scrolled_console.child = console;
         scrolled_console.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        layout.pack_start(scrolled_console, true, true, 0);
+        layout.append(scrolled_console);
 
         cmdline.activate.connect(on_activate);
-        layout.pack_start(cmdline, false, false, 0);
+        layout.append(cmdline);
 
         statusbar_ctx = statusbar.get_context_id("status");
-        layout.pack_end(statusbar, false, false, 0);
+        layout.append(statusbar);
 
-        add(layout);
+        this.content = layout;
 
         cmdline.grab_focus();
     }
@@ -608,7 +610,8 @@ class ImapConsole : Gtk.Window {
     }
 
     private void quit(string cmd, string[] args) throws Error {
-        Gtk.main_quit();
+        GLib.Application app = GLib.Application.get_default();
+        app.quit();
     }
 
     private bool keepalive_on = false;
@@ -694,14 +697,16 @@ class ImapConsole : Gtk.Window {
     }
 }
 
-void main(string[] args) {
-    Gtk.init(ref args);
-
+int main(string[] args) {
     Geary.Logging.init();
     Geary.Logging.log_to(stdout);
 
-    ImapConsole console = new ImapConsole();
-    console.show_all();
+    Adw.Application app = new Adw.Application(null, GLib.ApplicationFlags.DEFAULT_FLAGS);
 
-    Gtk.main();
+    app.activate.connect((gapp) => {
+        ImapConsole console = new ImapConsole(app);
+        console.present();
+    });
+
+    return app.run(args);
 }

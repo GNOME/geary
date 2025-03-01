@@ -1,51 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
-  <template class="ComponentsPlaceholderPane" parent="GtkGrid">
-    <property name="visible">True</property>
+  <template class="ComponentsPlaceholderPane" parent="GtkBox">
+    <property name="orientation">vertical</property>
     <property name="halign">center</property>
     <property name="valign">center</property>
     <property name="hexpand">True</property>
     <property name="vexpand">True</property>
     <child>
       <object class="GtkImage" id="placeholder_image">
-        <property name="visible">True</property>
         <property name="pixel_size">72</property>
         <property name="icon_name">image-x-generic-symbolic</property>
-        <property name="icon_size">6</property>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-      </packing>
     </child>
     <child>
       <object class="GtkLabel" id="title_label">
-        <property name="visible">True</property>
         <property name="label">Mea navis volitans</property>
         <style>
           <class name="title"/>
         </style>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">1</property>
-      </packing>
     </child>
     <child>
       <object class="GtkLabel" id="subtitle_label">
-        <property name="visible">True</property>
         <property name="label">Mea navis volitans anguillis plena est.</property>
         <property name="wrap">True</property>
         <style>
           <class name="subtitle"/>
         </style>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">2</property>
-      </packing>
     </child>
     <style>
       <class name="dim-label"/>

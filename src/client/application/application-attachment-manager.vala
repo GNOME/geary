@@ -84,67 +84,70 @@ public class Application.AttachmentManager : GLib.Object {
      * else false.
      */
     public async bool save_buffer(string display_name,
-                                   Geary.Memory.Buffer buffer,
-                                   GLib.Cancellable? cancellable) {
-        Gtk.FileChooserNative dialog = new_save_chooser(SAVE);
-        dialog.set_current_name(display_name);
+                                  Geary.Memory.Buffer buffer,
+                                  GLib.Cancellable? cancellable) {
+        var dialog = new Gtk.FileDialog();
+        dialog.initial_name = display_name;
+        dialog.initial_folder = download_dir();
 
-        string? destination_uri = null;
-        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-            destination_uri = dialog.get_uri();
+        File? destination = null;
+        try {
+            destination = yield dialog.save(this.parent, cancellable);
+        } catch (Error err) {
+            //XXX GTK4 check if cancelled is accidentally caught here as well
+            warning("Couldn't select file to save attachment: %s", err.message);
+            return false;
         }
-        dialog.destroy();
 
-        bool succeeded = false;
-        if (!Geary.String.is_empty_or_whitespace(destination_uri)) {
-            succeeded = yield check_and_write(
-                buffer, GLib.File.new_for_uri(destination_uri), cancellable
-            );
-        }
-        return succeeded;
+        return yield check_and_write(buffer, destination, cancellable);
     }
 
     private async bool save_all(Gee.Collection<Geary.Attachment> attachments,
                                 GLib.Cancellable? cancellable) {
-        var dialog = new_save_chooser(SELECT_FOLDER);
-        string? destination_uri = null;
-        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
-            destination_uri = dialog.get_uri();
+        var dialog = new Gtk.FileDialog();
+        dialog.initial_file = download_dir();
+
+        File? destination_dir = null;
+        try {
+            destination_dir = yield dialog.select_folder(this.parent, cancellable);
+        } catch (Error err) {
+            //XXX GTK4 check if cancelled is accidentally caught here as well
+            warning("Couldn't select folder for saving attachments: %s", err.message);
+            return false;
         }
-        dialog.destroy();
+
+        if (destination_dir == null)
+            return false;
 
         bool succeeded = false;
-        if (!Geary.String.is_empty_or_whitespace(destination_uri)) {
-            var destination_dir = GLib.File.new_for_uri(destination_uri);
-            foreach (Geary.Attachment attachment in attachments) {
-                GLib.File? destination = null;
-                try {
-                    destination = destination_dir.get_child_for_display_name(
-                        yield attachment.get_safe_file_name(
-                            AttachmentManager.untitled_file_name
-                        )
-                    );
-                } catch (GLib.IOError.CANCELLED err) {
-                    // Everything is going to fail from now on, so get
-                    // out of here
-                    succeeded = false;
-                    break;
-                } catch (GLib.Error err) {
-                    warning(
-                        "Error determining file system name for \"%s\": %s",
-                        attachment.file.get_uri(), err.message
-                    );
-                    handle_error(err);
-                }
-                var content = yield open_buffer(attachment, cancellable);
-                if (content != null &&
-                    destination != null) {
-                    succeeded &= yield check_and_write(
-                        content, destination, cancellable
-                    );
-                } else {
-                    succeeded = false;
-                }
+        foreach (Geary.Attachment attachment in attachments) {
+            GLib.File? destination = null;
+            try {
+                destination = destination_dir.get_child_for_display_name(
+                    yield attachment.get_safe_file_name(
+                        AttachmentManager.untitled_file_name
+                    )
+                );
+            } catch (GLib.IOError.CANCELLED err) {
+                // Everything is going to fail from now on, so get
+                // out of here
+                succeeded = false;
+                break;
+            } catch (GLib.Error err) {
+                warning(
+                    "Error determining file system name for \"%s\": %s",
+                    attachment.file.get_uri(), err.message
+                );
+                handle_error(err);
+            }
+            var content = yield open_buffer(attachment, cancellable);
+            if (content != null &&
+                destination != null) {
+                succeeded &= yield check_and_write(
+                    content, destination, cancellable
+                );
+            } else {
+                succeeded = false;
             }
         }
         return succeeded;
@@ -229,14 +232,18 @@ public class Application.AttachmentManager : GLib.Object {
             "The file already exists in “%s”.  Replacing it will overwrite its contents."
         ).printf(parent_name);
 
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this.parent,
-            primary,
-            secondary,
-            _("_Replace"),
-            "destructive-action"
+        var dialog = new Adw.AlertDialog(primary, secondary);
+        dialog.add_responses(
+            "replace", _("_Replace"),
+            "cancel", _("_Cancel"),
+            null
         );
-        return (dialog.run() == Gtk.ResponseType.OK);
+        dialog.default_response = "cancel";
+        dialog.close_response = "cancel";
+        dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE);
+        string response = yield dialog.choose(this.parent, cancellable);
+
+        return (response == "replace");
     }
 
     private async void write_buffer_to_file(Geary.Memory.Buffer buffer,
@@ -263,20 +270,11 @@ public class Application.AttachmentManager : GLib.Object {
         }
     }
 
-    private inline Gtk.FileChooserNative new_save_chooser(Gtk.FileChooserAction action) {
-        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(
-            null,
-            this.parent,
-            action,
-            Stock._SAVE,
-            Stock._CANCEL
-        );
+    private File? download_dir() {
         var download_dir = GLib.Environment.get_user_special_dir(DOWNLOAD);
-        if (!Geary.String.is_empty_or_whitespace(download_dir)) {
-            dialog.set_current_folder(download_dir);
-        }
-        dialog.set_local_only(false);
-        return dialog;
+        if (Geary.String.is_empty_or_whitespace(download_dir))
+            return null;
+        return File.new_for_path(download_dir);
     }
 
     private inline void handle_error(GLib.Error error) {

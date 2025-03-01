@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="AccountsServiceInformationWidget" parent="AdwPreferencesGroup">
+    <child>
+      <object class="AdwEntryRow" id="host_row">
+        <signal name="changed" handler="on_host_row_changed"/>
+      </object>
+    </child>
+    <child>
+      <object class="AccountsTlsComboRow" id="security_row">
+      </object>
+    </child>
+    <child>
+      <object class="AdwComboRow" id="credentials_requirement_row">
+        <!-- Translators: Label for source of SMTP authentication credentials (none, use IMAP, custom) when adding a new account -->
+        <property name="title" translatable="yes">Login</property>
+        <property name="expression">
+          <closure type="gchararray" function="outgoing_auth_to_string">
+            <lookup name="value" type="AdwEnumListItem"/>
+          </closure>
+        </property>
+        <property name="model">
+          <object class="AdwEnumListModel">
+            <property name="enum-type">GearyCredentialsRequirement</property>
+          </object>
+        </property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwEntryRow" id="login_name_row">
+        <!-- Translators: Label for the user's login name for an IMAP, SMTP, etc service -->
+        <property name="title" translatable="yes">Login Name</property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPasswordEntryRow" id="password_row">
+        <!-- Translators: Label for the user's password for an IMAP, SMTP, etc service -->
+        <property name="title" translatable="yes">Password</property>
+      </object>
+    </child>
+
+    <property name="validators">
+      <object class="ComponentsValidatorGroup">
+        <signal name="changed" handler="on_validators_changed"/>
+        <signal name="activated" handler="on_validators_activated"/>
+        <child>
+          <object class="ComponentsNetworkAddressValidator">
+            <property name="target">host_row</property>
+          </object>
+        </child>
+        <child>
+          <object class="ComponentsValidator">
+            <property name="target">login_name_row</property>
+          </object>
+        </child>
+        <child>
+          <object class="ComponentsValidator">
+            <property name="target">password_row</property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

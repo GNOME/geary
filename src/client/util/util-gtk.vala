@@ -85,8 +85,7 @@ namespace Util.Gtk {
      */
     public inline int get_border_box_height(global::Gtk.Widget widget) {
         global::Gtk.StyleContext style = widget.get_style_context();
-        global::Gtk.StateFlags flags = style.get_state();
-        global::Gtk.Border margin = style.get_margin(flags);
+        global::Gtk.Border margin = style.get_margin();
 
         return widget.get_allocated_height() - margin.top - margin.bottom;
     }
@@ -216,15 +215,6 @@ namespace Util.Gtk {
             new_url = url.substring(0,40) + "…" + url.substring(-40);
         }
         return new_url;
-    }
-
-    public Gdk.RGBA rgba(double red, double green, double blue, double alpha) {
-        return Gdk.RGBA() {
-            red = red,
-            green = green,
-            blue = blue,
-            alpha = alpha
-        };
     }
 
     /* Connect this to Gtk.Widget.query_tooltip signal, will only show tooltip if label ellipsized */

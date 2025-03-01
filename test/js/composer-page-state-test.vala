@@ -410,8 +410,8 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         }
     }
 
-    protected override Composer.WebView set_up_test_view() {
-        return new Composer.WebView(this.config);
+    protected override Composer.WebView set_up_test_view(GLib.File cache_dir) {
+        return new Composer.WebView(this.config, cache_dir);
     }
 
     protected override void load_body_fixture(string body = "") {

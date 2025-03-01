@@ -7,8 +7,15 @@
 /**
  * Adapts a progress bar to automatically display progress of a Geary.ProgressMonitor.
  */
-public class MonitoredProgressBar : Gtk.ProgressBar {
+public class MonitoredProgressBar : Adw.Bin {
     private Geary.ProgressMonitor? monitor = null;
+
+    private Gtk.ProgressBar progress_bar;
+
+    construct {
+        this.progress_bar = new Gtk.ProgressBar();
+        this.child = this.progress_bar;
+    }
 
     public void set_progress_monitor(Geary.ProgressMonitor monitor) {
         this.monitor = monitor;
@@ -16,19 +23,19 @@ public class MonitoredProgressBar : Gtk.ProgressBar {
         monitor.finish.connect(on_finish);
         monitor.update.connect(on_update);
 
-        fraction = monitor.progress;
+        this.progress_bar.fraction = monitor.progress;
     }
 
     private void on_start() {
-        fraction = 0.0;
+        this.progress_bar.fraction = 0.0;
     }
 
     private void on_update(double total_progress, double change, Geary.ProgressMonitor monitor) {
-        fraction = total_progress;
+        this.progress_bar.fraction = total_progress;
     }
 
     private void on_finish() {
-        fraction = 1.0;
+        this.progress_bar.fraction = 1.0;
     }
 }
 

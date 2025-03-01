@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="CertificateWarningDialog" parent="AdwAlertDialog">
+    <property name="title" translatable="yes">Untrusted Connection</property>
+
+    <property name="default-response">authenticate</property>
+    <property name="close-response">cancel</property>
+    <responses>
+      <response id="always-trust" translatable="yes">_Always Trust This Server</response>
+      <response id="trust" translatable="yes">_Trust This Server</response>
+      <response id="dont-trust" translatable="yes" appearance="suggested">_Don't Trust This Server</response>
+    </responses>
+
+    <property name="extra-child">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">24</property>
+        <property name="margin-start">24</property>
+        <property name="margin-end">32</property>
+        <property name="margin-top">32</property>
+        <property name="margin-bottom">32</property>
+        <child>
+          <object class="GtkLabel" id="top_label">
+            <property name="margin_top">8</property>
+            <property name="xalign">0</property>
+            <property name="label">(empty)</property>
+            <property name="wrap">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="warnings_label">
+            <property name="margin_start">16</property>
+            <property name="xalign">0</property>
+            <property name="label">(empty)</property>
+            <property name="wrap">True</property>
+            <property name="max_width_chars">80</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="contact_label">
+            <property name="xalign">0</property>
+            <property name="label">(empty)</property>
+            <property name="wrap">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="dont_trust_label">
+            <property name="valign">end</property>
+            <property name="xalign">0</property>
+            <property name="label">(empty)</property>
+            <property name="use_markup">True</property>
+            <property name="wrap">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="trust_label">
+            <property name="xalign">0</property>
+            <property name="label">(empty)</property>
+            <property name="wrap">True</property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

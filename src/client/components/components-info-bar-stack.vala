@@ -158,7 +158,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
 
 
     construct {
-        get_style_context().add_class("geary-info-bar-stack");
+        add_css_class("geary-info-bar-stack");
         update_queue_type();
     }
 
@@ -174,7 +174,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * stack constructed, the info bar may or may not be revealed
      * immediately.
      */
-    public new void add(Components.InfoBar to_add) {
+    public void add(Components.InfoBar to_add) {
         if (this.available.offer(to_add)) {
             update();
         }
@@ -187,7 +187,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
      * replaced with the next info bar added. If the only info bar
      * present is removed, the stack also hides itself.
      */
-    public new void remove(Components.InfoBar to_remove) {
+    public void remove(Components.InfoBar to_remove) {
         if (this.available.remove(to_remove)) {
             update();
         }
@@ -210,7 +210,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
             // Not currently showing an info bar but have one to show,
             // so show it
             this.visible = true;
-            base.add(next);
+            this.child = next;
             next.revealed = true;
         } else if (current != null && next != current) {
             // Currently showing an info bar but should be showing
@@ -241,7 +241,7 @@ public class Components.InfoBarStack : Gtk.Frame, Geary.BaseInterface {
     private void on_revealed(GLib.Object target, GLib.ParamSpec param) {
         var info_bar = target as Components.InfoBar;
         target.notify["revealed"].disconnect(on_revealed);
-        base.remove(info_bar);
+        this.child = null;
         remove(info_bar);
     }
 

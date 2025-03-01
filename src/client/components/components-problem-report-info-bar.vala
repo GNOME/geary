@@ -106,14 +106,13 @@ public class Components.ProblemReportInfoBar : InfoBar {
     }
 
     private void show_details() {
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
         if (main != null) {
             var dialog = new Dialogs.ProblemDetailsDialog(
-                main,
                 main.application,
                 this.report
             );
-            dialog.show();
+            dialog.present(main);
         }
     }
 
