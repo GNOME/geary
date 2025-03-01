@@ -51,15 +51,16 @@ custom_target(
   install_dir: plugin_dest
 )
 
-plugin_test = executable(
-  'plugin-test',
-  test_src,
-  dependencies: plugin_dependencies + [ vala_unit_dep ],
-  link_with: lib,
-  include_directories: config_h_dir,
-  vala_args: geary_vala_args,
-  c_args: plugin_c_args,
-  install: false
-)
+# XXX GTK4
+# plugin_test = executable(
+#   'plugin-test',
+#   test_src,
+#   dependencies: plugin_dependencies + [ vala_unit_dep ],
+#   link_with: lib,
+#   include_directories: config_h_dir,
+#   vala_args: geary_vala_args,
+#   c_args: plugin_c_args,
+#   install: false
+# )
 
-test(plugin_name + '-test', plugin_test)
+# test(plugin_name + '-test', plugin_test)

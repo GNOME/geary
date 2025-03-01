@@ -1,287 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <object class="GtkHeaderBar" id="header">
-    <property name="visible">True</property>
+  <template class="AccountsEditorEditPane" parent="AccountsEditorPane">
     <property name="title" translatable="yes">Edit Account</property>
-    <property name="subtitle" translatable="yes">Account Name</property>
-    <property name="has_subtitle">False</property>
-    <property name="show_close_button">True</property>
-    <child>
-      <object class="GtkGrid">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkButton" id="back_button">
-            <property name="visible">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Back</property>
-            <signal name="clicked" handler="on_back_button_clicked" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="no_show_all">True</property>
-                <property name="icon_name">go-previous-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkGrid">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkButton" id="undo_button">
-            <property name="visible">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Undo</property>
-            <property name="action_name">edt.undo</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="no_show_all">True</property>
+    <style>
+      <class name="geary-accounts-editor-pane"/>
+    </style>
+
+    <property name="child">
+      <object class="AdwToolbarView">
+
+        <child type="top">
+          <object class="AdwHeaderBar" id="header">
+            <child type="end">
+              <object class="GtkButton" id="undo_button">
+                <property name="visible">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Undo</property>
+                <property name="action_name">edt.undo</property>
                 <property name="icon_name">edit-undo-symbolic</property>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
         </child>
-      </object>
-      <packing>
-        <property name="pack_type">end</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="pane_adjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <template class="AccountsEditorEditPane" parent="GtkGrid">
-    <property name="visible">True</property>
-    <child>
-      <object class="GtkScrolledWindow">
-        <property name="visible">True</property>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="vadjustment">pane_adjustment</property>
-        <property name="hscrollbar_policy">never</property>
-        <property name="min_content_height">400</property>
-        <child>
-          <object class="GtkViewport">
-            <property name="visible">True</property>
-            <child>
-              <object class="HdyClamp">
-                <property name="visible">True</property>
-                <property name="margin">24</property>
-                <child>
-                  <object class="GtkGrid" id="pane_content">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkFrame">
-                        <property name="visible">True</property>
-                        <property name="hexpand">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkListBox" id="details_list">
-                            <property name="visible">True</property>
-                            <property name="selection_mode">none</property>
-                            <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
-                            <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Email addresses</property>
-                        <style>
-                          <class name="geary-settings-heading"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame">
-                        <property name="visible">True</property>
-                        <property name="hexpand">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkListBox" id="senders_list">
-                            <property name="visible">True</property>
-                            <property name="selection_mode">none</property>
-                            <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
-                            <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Signature</property>
-                        <style>
-                          <class name="geary-settings-heading"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame" id="signature_frame">
-                        <property name="visible">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                        <style>
-                          <class name="geary-settings"/>
-                          <class name="geary-signature"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Settings</property>
-                        <style>
-                          <class name="geary-settings-heading"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame">
-                        <property name="visible">True</property>
-                        <property name="hexpand">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkListBox" id="settings_list">
-                            <property name="visible">True</property>
-                            <property name="selection_mode">none</property>
-                            <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
-                            <signal name="row-activated" handler="on_setting_activated" swapped="no"/>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButtonBox">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkButton" id="remove_button">
-                            <property name="visible">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
-                            <signal name="clicked" handler="on_remove_account_clicked" swapped="no"/>
-                            <style>
-                              <class name="destructive-action"/>
-                            </style>
-                            <child>
-                              <object class="GtkImage">
-                                <property name="visible">True</property>
-                                <property name="icon_name">user-trash-symbolic</property>
-                              </object>
-                            </child>"
-                          </object>
-                          <packing>
-                            <property name="pack_type">end</property>
-                            <property name="secondary">True</property>
-                          </packing>
-                        </child>"
-                        <child>
-                          <object class="GtkButton">
-                            <property name="label" translatable="yes" comments="This is a button in the account settings to show server settings.">Server Settings</property>
-                            <property name="visible">True</property>
-                            <property name="receives_default">False</property>
-                            <signal name="clicked" handler="on_server_settings_clicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="pack_type">start</property>
-                          </packing>
-                        </child>
-                        <style>
-                          <class name="geary-settings"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">7</property>
-                      </packing>
-                    </child>
-                    <style>
-                      <class name="geary-accounts-editor-pane-content"/>
-                    </style>
-                  </object>
 
+        <property name="content">
+          <object class="AdwPreferencesPage">
+            <child>
+              <object class="AdwPreferencesGroup" id="details_group">
+                <child>
+                  <object class="AdwEntryRow" id="display_name_row">
+                    <!-- Translators: Label in the account editor for the user's custom name for an account -->
+                    <property name="title" translatable="yes">Account Name</property>
+                  </object>
                 </child>
               </object>
             </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <property name="title" translatable="yes">Email Addresses</property>
+                <child>
+                  <object class="GtkListBox" id="senders_list">
+                    <property name="selection_mode">none</property>
+                    <style>
+                      <class name="boxed-list"/>
+                    </style>
+                  </object>
+                </child>
+                <child type="header-suffix">
+                  <object class="GtkButton">
+                    <property name="child">
+                      <object class="AdwButtonContent">
+                        <property name="icon-name">list-add-symbolic</property>
+                        <property name="label" translatable="yes">_Add</property>
+                        <property name="use-underline">True</property>
+                      </object>
+                    </property>
+                    <!-- Translators: Tooltip for adding a new email sender/from address's address to an account -->
+                    <property name="tooltip-text" translatable="yes">Add a new sender email address</property>
+                    <signal name="clicked" handler="on_add_mailbox_clicked"/>
+                    <style>
+                      <class name="flat"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="signature_bin">
+                <property name="title" translatable="yes">Signature</property>
+                <style>
+                  <class name="geary-settings"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <property name="title" translatable="yes">Settings</property>
+                <child>
+                  <object class="AdwComboRow" id="email_prefetch_row">
+                    <!-- Translators: This label describes the account preference for the length of time (weeks, months or years) that past email should be downloaded -->
+                    <property name="title" translatable="yes">Download Mail</property>
+                    <property name="expression">
+                      <closure type="gchararray" function="period_to_string">
+                        <lookup name="value" type="AdwEnumListItem"/>
+                      </closure>
+                    </property>
+                    <property name="model">
+                      <object class="AdwEnumListModel">
+                        <property name="enum-type">AccountsPrefetchPeriod</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <style>
+                  <class name="geary-settings"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="GtkButton" id="remove_button">
+                    <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
+                    <property name="icon_name">user-trash-symbolic</property>
+                    <signal name="clicked" handler="on_remove_account_clicked"/>
+                    <style>
+                      <class name="destructive-action"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes" comments="This is a button in the account settings to show server settings.">Server Settings</property>
+                    <property name="halign">center</property>
+                    <signal name="clicked" handler="on_server_settings_clicked"/>
+                    <style>
+                      <class name="pill"/>
+                    </style>
+                  </object>
+                </child>
+                <style>
+                  <class name="geary-settings"/>
+                </style>
+              </object>
+            </child>
           </object>
-        </child>
+        </property>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
-    <style>
-      <class name="geary-accounts-editor-pane"/>
-    </style>
+    </property>
   </template>
 </interface>

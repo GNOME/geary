@@ -177,12 +177,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Determines if the email has been manually marked as being read. */
     public bool is_manually_read {
-        get { return get_style_context().has_class(MANUAL_READ_CLASS); }
+        get { return has_css_class(MANUAL_READ_CLASS); }
         set {
             if (value) {
-                get_style_context().add_class(MANUAL_READ_CLASS);
+                add_css_class(MANUAL_READ_CLASS);
             } else {
-                get_style_context().remove_class(MANUAL_READ_CLASS);
+                remove_css_class(MANUAL_READ_CLASS);
             }
         }
     }
@@ -237,7 +237,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // window, for updating email menu trash/delete actions.
     private bool shift_handler_installed = false;
 
-    [GtkChild] private unowned Gtk.Grid actions;
+    [GtkChild] private unowned Gtk.Box actions;
 
     [GtkChild] private unowned Gtk.Button attachments_button;
 
@@ -247,7 +247,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     [GtkChild] private unowned Gtk.MenuButton email_menubutton;
 
-    [GtkChild] private unowned Gtk.Grid sub_messages;
+    [GtkChild] private unowned Gtk.Box sub_messages;
 
 
     /** Fired when a internal link is activated */
@@ -284,7 +284,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             new Geary.Nonblocking.Spinlock(load_cancellable);
 
         if (is_sent) {
-            get_style_context().add_class(SENT_CLASS);
+            add_css_class(SENT_CLASS);
         }
 
         // Construct the view for the primary message, hook into it
@@ -295,7 +295,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             this.contacts,
             this.config
         );
-        this.primary_message.summary.add(this.actions);
+        this.primary_message.summary.append(this.actions);
         connect_message_view_signals(this.primary_message);
 
         // Wire up the rest of the UI
@@ -310,7 +310,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             BODY_LOAD_TIMEOUT_MSEC, this.on_body_loading_timeout
         );
 
-        pack_start(this.primary_message, true, true, 0);
+        append(this.primary_message);
         update_email_state();
     }
 
@@ -482,7 +482,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     /** Displays the raw RFC 822 source for this email. */
     public async void view_source() {
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
         if (main != null) {
             Geary.Email email = this.email;
             try {
@@ -567,7 +567,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
         yield this.primary_message.evaluate_javascript(js, null);
 
-        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        Gtk.Window? window = get_root() as Gtk.Window;
         WebKit.PrintOperation op = this.primary_message.new_print_operation();
         Gtk.PrintSettings settings = new Gtk.PrintSettings();
 
@@ -694,7 +694,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
-            this.primary_message.body_container.add(this.sub_messages);
+            this.primary_message.body_container.append(this.sub_messages);
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
@@ -706,7 +706,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 );
             connect_message_view_signals(attached_message);
             attached_message.add_internal_resources(cid_resources);
-            this.sub_messages.add(attached_message);
+            this.sub_messages.append(attached_message);
             this._attached_messages.add(attached_message);
             attached_message.load_contacts.begin(this.load_cancellable);
             yield attached_message.load_message_body(
@@ -719,20 +719,18 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void update_email_state() {
-        Gtk.StyleContext style = get_style_context();
-
         if (this.is_unread) {
-            style.add_class(UNREAD_CLASS);
+            add_css_class(UNREAD_CLASS);
         } else {
-            style.remove_class(UNREAD_CLASS);
+            remove_css_class(UNREAD_CLASS);
         }
 
         if (this.is_starred) {
-            style.add_class(STARRED_CLASS);
+            add_css_class(STARRED_CLASS);
             this.star_button.hide();
             this.unstar_button.show();
         } else {
-            style.remove_class(STARRED_CLASS);
+            remove_css_class(STARRED_CLASS);
             this.star_button.show();
             this.unstar_button.hide();
         }
@@ -756,7 +754,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 this.conversation.base_folder is Geary.FolderSupport.Remove
             );
             bool is_shift_down = false;
-            var main = get_toplevel() as Application.MainWindow;
+            var main = get_root() as Application.MainWindow;
             if (main != null) {
                 is_shift_down = main.is_shift_down;
 
@@ -805,7 +803,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 }
             );
 
-            this.email_menubutton.popover.bind_model(new_model, null);
+            this.email_menubutton.menu_model = new_model;
             this.email_menubutton.popover.grab_focus();
         }
     }
@@ -814,13 +812,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void update_displayed_attachments() {
         bool has_attachments = !this.displayed_attachments.is_empty;
         this.attachments_button.set_visible(has_attachments);
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
 
         if (has_attachments && main != null) {
             this.attachments_pane = new Components.AttachmentPane(
                 false, main.attachments
             );
-            this.primary_message.body_container.add(this.attachments_pane);
+            this.primary_message.body_container.append(this.attachments_pane);
 
             foreach (var attachment in this.displayed_attachments) {
                 this.attachments_pane.add_attachment(
@@ -834,7 +832,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         this.message_body_state = FAILED;
         this.primary_message.show_load_error_pane();
 
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
         if (main != null) {
             Geary.AccountInformation account = this.email_store.account.information;
             main.application.controller.report_problem(
@@ -853,16 +851,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void activate_email_action(string name) {
-        GLib.ActionGroup? email_actions = get_action_group(
-            ConversationListBox.EMAIL_ACTION_GROUP_NAME
-        );
-        if (email_actions != null) {
-            email_actions.activate_action(name, this.email.id.to_variant());
-        }
+        //XXX GTK4 check if this works still
+        string action_name = ConversationListBox.EMAIL_ACTION_GROUP_NAME + "." + name;
+        activate_action_variant(action_name, this.email.id.to_variant());
     }
 
     [GtkCallback]
-    private void on_email_menu() {
+    private void on_email_menu(Gtk.MenuButton email_menubutton) {
         update_email_menu();
     }
 
@@ -885,7 +880,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private void on_save_image(string uri,
                                string? alt_text,
                                Geary.Memory.Buffer? content) {
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
         if (main != null) {
             if (uri.has_prefix(Components.WebView.CID_URL_PREFIX)) {
                 string cid = uri.substring(Components.WebView.CID_URL_PREFIX.length);

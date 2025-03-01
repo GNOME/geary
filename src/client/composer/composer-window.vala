@@ -35,7 +35,7 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
 
 
     public Window(Widget composer, Application.Client application) {
-        Object(application: application, type: Gtk.WindowType.TOPLEVEL);
+        Object(application: application);
         this.composer = composer;
         this.composer.set_mode(DETACHED);
 
@@ -47,42 +47,34 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
         // XXX Bug 764622
         set_property("name", "GearyComposerWindow");
 
-        add(this.composer);
+        this.child = this.composer;
 
         this.composer.update_window_title();
         if (application.config.desktop_environment == UNITY) {
             composer.embed_header();
         } else {
-            set_titlebar(this.composer.header);
+            set_titlebar(this.composer.header.headerbar);
         }
 
-        this.focus_in_event.connect((w, e) => {
+        Gtk.EventControllerFocus focus_controller = new Gtk.EventControllerFocus();
+        focus_controller.enter.connect((controller) => {
             application.controller.window_focus_in();
-            return false;
         });
-        this.focus_out_event.connect((w, e) => {
+        focus_controller.leave.connect((controller) => {
             application.controller.window_focus_out();
-            return false;
         });
-
-        show();
-        set_position(Gtk.WindowPosition.CENTER);
+        ((Gtk.Widget) this).add_controller(focus_controller);
     }
 
     /** {@inheritDoc} */
     public new void close() {
-        this.composer.free_header();
-        remove(this.composer);
-        destroy();
+        this.child = null;
     }
 
     public override void show() {
         Gdk.Display? display = Gdk.Display.get_default();
         if (display != null) {
-            Gdk.Monitor? monitor = display.get_primary_monitor();
-            if (monitor == null) {
-                monitor = display.get_monitor_at_point(1, 1);
-            }
+            Gdk.Monitor? monitor = display.get_monitor_at_surface(get_surface());
             int[] size = this.application.config.get_composer_window_size();
             //check if stored values are reasonable
             if (monitor != null &&
@@ -98,44 +90,36 @@ public class Composer.Window : Gtk.ApplicationWindow, Container {
     }
 
     private void save_window_geometry () {
-        if (!this.is_maximized) {
+        if (!this.maximized) {
             Gdk.Display? display = get_display();
-            Gdk.Window? window = get_window();
-            if (display != null && window != null) {
-                Gdk.Monitor monitor = display.get_monitor_at_window(window);
-
-                int width = 0;
-                int height = 0;
-                get_size(out width, out height);
+            Gdk.Surface? surface = get_surface();
+            if (display != null && surface != null) {
+                Gdk.Monitor monitor = display.get_monitor_at_surface(surface);
 
                 // Only store if the values are reasonable-looking.
-                if (width > 0 && width <= monitor.geometry.width &&
-                    height > 0 && height <= monitor.geometry.height) {
+                if (this.default_width > 0 && this.default_width <= monitor.geometry.width &&
+                    this.default_height > 0 && this.default_height <= monitor.geometry.height) {
                     this.application.config.set_composer_window_size({
-                            width, height
+                            this.default_width, this.default_height
                         });
                 }
             }
         }
     }
 
-    // Fired on window resize. Save window size for the next start.
-    public override void size_allocate(Gtk.Allocation allocation) {
-        base.size_allocate(allocation);
+    public override bool close_request() {
+        save_window_geometry();
 
-        this.save_window_geometry();
-    }
-
-    public override bool delete_event(Gdk.EventAny event) {
         // Use the child instead of the `composer` property so we
         // don't check with the composer if it has already been
         // removed from the container.
         Widget? child = get_child() as Widget;
         bool ret = Gdk.EVENT_PROPAGATE;
-        if (child != null &&
-            child.conditional_close(true) == CANCELLED) {
-            ret = Gdk.EVENT_STOP;
-        }
+        // XXX GTK4 - This is now an async method, I'm not sure we can still stop htis?
+        // if (child != null &&
+        //     child.conditional_close(true) == CANCELLED) {
+        //     ret = Gdk.EVENT_STOP;
+        // }
         return ret;
     }
 

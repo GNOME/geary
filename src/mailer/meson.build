@@ -5,7 +5,7 @@ mailer_sources = files(
 mailer_dependencies = [
   gee,
   gmime,
-  webkit2gtk,
+  webkitgtk,
   engine_dep,
 ]
 

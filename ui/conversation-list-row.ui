@@ -1,150 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
   <template class="ConversationListRow" parent="GtkListBoxRow">
-    <property name="can-focus">True</property>
+    <style>
+      <class name="conversation-list"/>
+    </style>
     <child>
-      <object class="GtkEventBox" id="eventbox">
-        <property name="visible">True</property>
+      <object class="GtkBox" id="container">
+        <property name="has-tooltip">True</property>
         <child>
-          <object class="GtkBox" id="container">
-            <property name="visible">True</property>
-            <property name="has-tooltip">True</property>
+          <object class="GtkCheckButton" id="selected_button">
+            <property name="visible">False</property>
+            <property name="receives-default">True</property>
+            <property name="vexpand">True</property>
+            <property name="can-focus">False</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="details">
+            <property name="orientation">vertical</property>
+            <property name="baseline-position">top</property>
+            <style>
+              <class name="details"/>
+            </style>
             <child>
-              <object class="GtkCheckButton" id="selected_button">
-                <property name="visible">False</property>
-                <property name="receives-default">True</property>
-                <property name="vexpand">True</property>
-                <property name="can-focus">False</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox" id="details">
-                <property name="visible">True</property>
-                <property name="orientation">vertical</property>
-                <property name="baseline-position">top</property>
+              <object class="GtkLabel" id="participants">
+                <property name="use-markup">True</property>
+                <property name="ellipsize">end</property>
+                <property name="xalign">0</property>
                 <style>
-                  <class name="details"/>
+                  <class name="participants"/>
                 </style>
-                <child>
-                  <object class="GtkLabel" id="participants">
-                    <property name="visible">True</property>
-                    <property name="use-markup">True</property>
-                    <property name="ellipsize">end</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="participants"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="subject">
-                    <property name="visible">True</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">True</property>
-                    <property name="ellipsize">end</property>
-                    <property name="single-line-mode">True</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="subject"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="preview">
-                    <property name="visible">True</property>
-                    <property name="halign">start</property>
-                    <property name="hexpand">True</property>
-                    <property name="wrap">True</property>
-                    <property name="wrap-mode">word-char</property>
-                    <property name="ellipsize">end</property>
-                    <property name="lines">1</property>
-                    <property name="xalign">0</property>
-                    <style>
-                      <class name="preview"/>
-                      <class name="tertiary"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                  </packing>
-                </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-              </packing>
             </child>
             <child>
-              <object class="GtkBox" id="indicators">
-                <property name="visible">True</property>
-                <property name="vexpand">True</property>
-                <property name="orientation">vertical</property>
-                 <child>
-                  <object class="GtkLabel" id="date">
-                    <property name="visible">True</property>
-                    <style>
-                      <class name="date"/>
-                      <class name="tertiary"/>
-                    </style>
+              <object class="GtkLabel" id="subject">
+                <property name="halign">start</property>
+                <property name="hexpand">True</property>
+                <property name="ellipsize">end</property>
+                <property name="single-line-mode">True</property>
+                <property name="xalign">0</property>
+                <style>
+                  <class name="subject"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="preview">
+                <property name="halign">start</property>
+                <property name="hexpand">True</property>
+                <property name="wrap">True</property>
+                <property name="wrap-mode">word-char</property>
+                <property name="ellipsize">end</property>
+                <property name="lines">1</property>
+                <property name="xalign">0</property>
+                <style>
+                  <class name="preview"/>
+                  <class name="tertiary"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="indicators">
+            <property name="vexpand">True</property>
+            <property name="orientation">vertical</property>
+             <child>
+              <object class="GtkLabel" id="date">
+                <style>
+                  <class name="date"/>
+                  <class name="tertiary"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">end</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkImage" id="flagged_icon">
+                    <property name="icon-name">starred-symbolic</property>
                   </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">False</property>
-                    <property name="pack-type">start</property>
-                  </packing>
                 </child>
                 <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="halign">end</property>
-                    <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkImage" id="flagged_icon">
-                        <property name="visible">True</property>
-                        <property name="icon-name">starred-symbolic</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="count_badge">
-                        <property name="visible">True</property>
-                        <style>
-                          <class name="count-badge"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                      </packing>
-                    </child>
+                  <object class="GtkLabel" id="count_badge">
+                    <style>
+                      <class name="count-badge"/>
+                    </style>
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-              </packing>
             </child>
           </object>
         </child>
       </object>
     </child>
-    <style>
-      <class name="conversation-list"/>
-    </style>
   </template>
 </interface>

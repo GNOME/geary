@@ -474,5 +474,5 @@ ui/conversation-viewer.ui
 ui/find_bar.glade
 ui/folder-popover.ui
 ui/gtk/help-overlay.ui
-ui/password-dialog.glade
+ui/password-dialog.ui
 ui/problem-details-dialog.ui

@@ -60,8 +60,10 @@ public class SpellCheckPopover {
             this.is_lang_visible = is_active || is_visible;
 
             Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            box.margin = 6;
             box.margin_start = 12;
+            box.margin_end = 6;
+            box.margin_top = 6;
+            box.margin_bottom = 6;
 
             lang_name = Util.I18n.language_name_from_locale(lang_code);
             country_name = Util.I18n.country_name_from_locale(lang_code);
@@ -80,28 +82,27 @@ public class SpellCheckPopover {
                 country_label.halign = Gtk.Align.START;
                 country_label.ellipsize = END;
                 country_label.xalign = 0;
-                country_label.get_style_context().add_class("dim-label");
+                country_label.add_css_class("dim-label");
 
-                label_box.add(label);
-                label_box.add(country_label);
-                box.pack_start(label_box, false, false);
+                label_box.append(label);
+                label_box.append(country_label);
+                box.append(label_box);
             } else {
-                box.pack_start(label, false, false);
+                box.append(label);
             }
 
-            Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
-            active_image = new Gtk.Image.from_icon_name("object-select-symbolic", sz);
+            active_image = new Gtk.Image.from_icon_name("object-select-symbolic");
             this.visibility_button = new Gtk.Button();
-            this.visibility_button.set_relief(Gtk.ReliefStyle.NONE);
-            box.pack_start(active_image, false, false, 6);
-            box.pack_start(this.visibility_button, true, true);
+            this.visibility_button.add_css_class("flat");
+            box.append(active_image);
+            box.append(this.visibility_button);
             this.visibility_button.halign = Gtk.Align.END; // Make the button stay at the right end of the screen
             this.visibility_button.valign = CENTER;
 
             this.visibility_button.clicked.connect(on_visibility_clicked);
 
             update_images();
-            add(box);
+            this.child = box;
         }
 
         public bool is_lang_active() {
@@ -109,23 +110,21 @@ public class SpellCheckPopover {
         }
 
         private void update_images() {
-            Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
-
             switch (lang_active) {
             case SpellCheckStatus.ACTIVE:
-                active_image.set_from_icon_name("object-select-symbolic", sz);
+                this.active_image.set_from_icon_name("object-select-symbolic");
                 break;
             case SpellCheckStatus.INACTIVE:
-                active_image.clear();
+                this.active_image.clear();
                 break;
             }
 
             if (is_lang_visible) {
-                this.visibility_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
+                this.visibility_button.icon_name = "list-remove-symbolic";
                 this.visibility_button.set_tooltip_text(_("Remove this language from the preferred list"));
             }
             else {
-                this.visibility_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
+                this.visibility_button.icon_name = "list-add-symbolic";
                 this.visibility_button.set_tooltip_text(_("Add this language to the preferred list"));
             }
         }
@@ -193,7 +192,7 @@ public class SpellCheckPopover {
     }
 
     public SpellCheckPopover(Gtk.MenuButton button, Application.Configuration config) {
-        this.popover = new Gtk.Popover(button);
+        this.popover = new Gtk.Popover();
         button.popover = this.popover;
         this.config = config;
         this.selected_rows = new GLib.GenericSet<string>(GLib.str_hash, GLib.str_equal);
@@ -224,12 +223,11 @@ public class SpellCheckPopover {
         search_box = new Gtk.SearchEntry();
         search_box.set_placeholder_text(_("Search for more languages"));
         search_box.changed.connect(on_search_box_changed);
-        search_box.grab_focus.connect(on_search_box_grab_focus);
-        content.pack_start(search_box, false, true);
+        content.append(search_box);
 
-        view = new Gtk.ScrolledWindow(null, null);
-        view.set_shadow_type(Gtk.ShadowType.IN);
+        view = new Gtk.ScrolledWindow();
         view.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        view.vexpand = true;
 
         langs_list = new Gtk.ListBox();
         langs_list.set_selection_mode(Gtk.SelectionMode.NONE);
@@ -239,7 +237,7 @@ public class SpellCheckPopover {
                 lang in enabled_langs,
                 lang in visible_langs
             );
-            langs_list.add(row);
+            langs_list.append(row);
 
             if (row.is_lang_active())
                 selected_rows.add(lang);
@@ -248,14 +246,14 @@ public class SpellCheckPopover {
             row.visibility_changed.connect(this.on_row_visibility_changed);
         }
         langs_list.row_activated.connect(on_row_activated);
-        view.add(langs_list);
+        view.child = langs_list;
 
-        content.pack_start(view, true, true);
+        content.append(view);
 
         langs_list.set_filter_func(this.filter_function);
         langs_list.set_header_func(this.header_function);
 
-        popover.add(content);
+        this.popover.child = content;
 
         // Make sure that the search box does not get the focus first. We want it to have it only
         // if the user wants to perform an extended search.
@@ -265,8 +263,8 @@ public class SpellCheckPopover {
         content.set_margin_top(6);
         content.set_margin_bottom(6);
 
-        popover.show.connect(this.on_shown);
-        popover.set_size_request(360, 350);
+        this.popover.show.connect(this.on_shown);
+        this.popover.set_size_request(360, 350);
     }
 
     private void on_row_activated(Gtk.ListBoxRow row) {
@@ -281,10 +279,6 @@ public class SpellCheckPopover {
         langs_list.invalidate_filter();
     }
 
-    private void on_search_box_grab_focus() {
-        set_expanded(true);
-    }
-
     private void set_expanded(bool expanded) {
         is_expanded = expanded;
         langs_list.invalidate_filter();
@@ -295,8 +289,6 @@ public class SpellCheckPopover {
         content.set_focus_child(view);
         is_expanded = false;
         langs_list.invalidate_filter();
-
-        popover.show_all();
     }
 
     private void on_row_enabled_changed(SpellCheckLangRow row,

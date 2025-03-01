@@ -9,7 +9,7 @@
  * An account editor pane for listing all known accounts.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_list_pane.ui")]
-internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
+internal class Accounts.EditorListPane : Accounts.EditorPane, CommandPane {
 
 
     private static int ordinal_sort(Gtk.ListBoxRow a, Gtk.ListBoxRow b) {
@@ -29,29 +29,22 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
 
     /** {@inheritDoc} */
-    internal Gtk.Widget initial_widget {
-        get {
-            return this.accounts_list;
-        }
-    }
-
-    /** {@inheritDoc} */
-    internal Application.CommandStack commands {
+    internal override Application.CommandStack commands {
         get; protected set; default = new Application.CommandStack();
     }
 
     /** {@inheritDoc} */
-    internal bool is_operation_running { get; protected set; default = false; }
+    internal override bool is_operation_running { get; protected set; default = false; }
 
     /** {@inheritDoc} */
-    internal GLib.Cancellable? op_cancellable {
+    internal override Cancellable? op_cancellable {
         get; protected set; default = null;
     }
 
     internal Manager accounts { get; private set; }
 
     /** {@inheritDoc} */
-    protected weak Accounts.Editor editor { get; set; }
+    protected override weak Accounts.Editor editor { get; set; }
 
     private bool show_welcome {
         get {
@@ -59,11 +52,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         }
     }
 
-    [GtkChild] private unowned Gtk.HeaderBar header;
-
-    [GtkChild] private unowned Gtk.Grid pane_content;
-
-    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
+    [GtkChild] private unowned Adw.HeaderBar header;
 
     [GtkChild] private unowned Gtk.Grid welcome_panel;
 
@@ -71,7 +60,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     [GtkChild] private unowned Gtk.ListBox accounts_list;
 
-    [GtkChild] private unowned Gtk.Frame accounts_list_frame;
+    [GtkChild] private unowned Gtk.ScrolledWindow accounts_list_scrolled;
 
     private Gee.Map<Geary.AccountInformation,EditorEditPane> edit_pane_cache =
         new Gee.HashMap<Geary.AccountInformation,EditorEditPane>();
@@ -85,9 +74,6 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         // without worrying about the editor's lifecycle
         this.accounts = editor.accounts;
 
-        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
-
-        this.accounts_list.set_header_func(Editor.seperator_headers);
         this.accounts_list.set_sort_func(ordinal_sort);
         foreach (Geary.AccountInformation account in this.accounts.iterable()) {
             add_account(account, this.accounts.get_status(account));
@@ -104,22 +90,22 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         update_welcome_panel();
     }
 
-    public override void destroy() {
+    public override void dispose() {
         this.commands.executed.disconnect(on_execute);
         this.commands.undone.disconnect(on_undo);
         this.commands.redone.disconnect(on_execute);
         disconnect_command_signals();
 
         this.accounts.account_added.disconnect(on_account_added);
-        this.accounts.account_status_changed.disconnect(on_account_status_changed);
-        this.accounts.account_removed.disconnect(on_account_removed);
+    this.accounts.account_status_changed.disconnect(on_account_status_changed);
+    this.accounts.account_removed.disconnect(on_account_removed);
 
-        this.edit_pane_cache.clear();
-        base.destroy();
+    this.edit_pane_cache.clear();
+    base.dispose();
     }
 
     internal void show_new_account() {
-        this.editor.push(new EditorAddPane(this.editor));
+        this.editor.push_pane(new EditorAddPane(this.editor));
     }
 
     internal void show_existing_account(Geary.AccountInformation account) {
@@ -128,7 +114,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             edit_pane = new EditorEditPane(this.editor, account);
             this.edit_pane_cache.set(account, edit_pane);
         }
-        this.editor.push(edit_pane);
+        this.editor.push_pane(edit_pane);
     }
 
     /** Removes an account from the list. */
@@ -142,17 +128,12 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         }
     }
 
-    /** {@inheritDoc} */
-    internal Gtk.HeaderBar get_header() {
-        return this.header;
-    }
-
     private void add_account(Geary.AccountInformation account,
                              Manager.Status status) {
         AccountListRow row = new AccountListRow(account, status);
-        row.move_to.connect(on_editor_row_moved);
+        row.moved.connect(on_account_row_moved);
         row.dropped.connect(on_editor_row_dropped);
-        this.accounts_list.add(row);
+        this.accounts_list.append(row);
     }
 
     private void update_welcome_panel() {
@@ -160,24 +141,24 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
             // No accounts are available, so show only the welcome
             // pane and service list.
             this.welcome_panel.show();
-            this.accounts_list_frame.hide();
+            this.accounts_list_scrolled.hide();
         } else {
             // There are some accounts available, so show them and
             // the full add service UI.
             this.welcome_panel.hide();
-            this.accounts_list_frame.show();
+            this.accounts_list_scrolled.show();
         }
     }
 
     private AccountListRow? get_account_row(Geary.AccountInformation account) {
-        AccountListRow? row = null;
-        this.accounts_list.foreach((child) => {
-                AccountListRow? account_row = child as AccountListRow;
-                if (account_row != null && account_row.account == account) {
-                    row = account_row;
-                }
-            });
-        return row;
+        for (int i = 0; true; i++) {
+            unowned var row = this.accounts_list.get_row_at_index(i) as AccountListRow;
+            if (row == null)
+                break;
+            if (row.account == account)
+                return row;
+        }
+        return null;
     }
 
     private void on_account_added(Geary.AccountInformation account,
@@ -194,19 +175,17 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
         }
     }
 
-    private void on_editor_row_moved(EditorRow source, int new_position) {
+    private void on_account_row_moved(AccountListRow source, int new_position) {
         this.commands.execute.begin(
-            new ReorderAccountCommand(
-                (AccountListRow) source, new_position, this.accounts
-            ),
+            new ReorderAccountCommand(source, new_position, this.accounts),
             this.op_cancellable
         );
     }
 
-    private void on_editor_row_dropped(EditorRow source, EditorRow target) {
+    private void on_editor_row_dropped(AccountListRow source, AccountListRow target) {
         this.commands.execute.begin(
             new ReorderAccountCommand(
-                (AccountListRow) source, target.get_index(), this.accounts
+                source, target.get_index(), this.accounts
             ),
             this.op_cancellable
         );
@@ -222,34 +201,51 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     private void on_execute(Application.Command command) {
         if (command.executed_label != null) {
-            uint notification_time =
-                Components.InAppNotification.DEFAULT_DURATION;
-            if (command.executed_notification_brief) {
-                notification_time =
-                    this.editor.application.config.brief_notification_duration;
-            }
-            Components.InAppNotification ian = new Components.InAppNotification(
-                command.executed_label, notification_time
-            );
-            ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
-            this.editor.add_notification(ian);
+            var toast = new Adw.Toast(command.executed_label);
+            toast.button_label = _("Undo");
+            toast.action_name = Action.Edit.prefix(Action.Edit.UNDO);
+            if (command.executed_notification_brief)
+                toast.timeout = this.editor.application.config.brief_notification_duration;
+            this.editor.add_toast(toast);
         }
     }
 
     private void on_undo(Application.Command command) {
         if (command.undone_label != null) {
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
-            this.editor.add_notification(ian);
+            var toast = new Adw.Toast(command.undone_label);
+            toast.button_label = _("Redo");
+            toast.action_name = Action.Edit.prefix(Action.Edit.REDO);
+            this.editor.add_toast(toast);
         }
     }
 
     [GtkCallback]
     private void on_row_activated(Gtk.ListBoxRow row) {
-        EditorRow<EditorListPane>? setting = row as EditorRow<EditorListPane>;
-        if (setting != null) {
-            setting.activated(this);
+        unowned var account_row = row as AccountListRow;
+        if (account_row == null)
+            return;
+
+        Manager manager = this.accounts;
+        if (manager.is_goa_account(account_row.account) &&
+            manager.get_status(account_row.account) != Manager.Status.ENABLED) {
+            // GOA account but it's disabled, so just take people
+            // directly to the GOA panel
+            manager.show_goa_account.begin(
+                account_row.account, this.op_cancellable,
+                (obj, res) => {
+                    try {
+                        manager.show_goa_account.end(res);
+                    } catch (GLib.Error err) {
+                        // XXX display an error to the user
+                        debug(
+                            "Failed to show GOA account \"%s\": %s",
+                            account_row.account.id,
+                            err.message
+                        );
+                    }
+                });
+        } else {
+            show_existing_account(account_row.account);
         }
     }
 
@@ -260,28 +256,29 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 }
 
 
-private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
+[GtkTemplate (ui = "/org/gnome/Geary/accounts-editor-account-list-row.ui")]
+private class Accounts.AccountListRow : Adw.ActionRow {
 
+    public Geary.AccountInformation account { get; construct set; }
 
-    private Gtk.Label service_label = new Gtk.Label("");
-    private Gtk.Image unavailable_icon = new Gtk.Image.from_icon_name(
-        "dialog-warning-symbolic", Gtk.IconSize.BUTTON
-    );
+    [GtkChild] private unowned Gtk.Image drag_icon;
+    [GtkChild] private unowned Gtk.Image unavailable_icon;
+
+    private bool drag_picked_up = false;
+    private double drag_x;
+    private double drag_y;
+
+    public signal void moved(int new_position);
+    public signal void dropped(AccountListRow target);
+
+    construct {
+        this.account.changed.connect(on_account_changed);
+        update();
+    }
 
     public AccountListRow(Geary.AccountInformation account,
                           Manager.Status status) {
-        base(account, "", new Gtk.Grid());
-        enable_drag();
-
-        this.value.add(this.unavailable_icon);
-        this.value.add(this.service_label);
-
-        this.service_label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
-        this.service_label.set_line_wrap(true);
-        this.service_label.show();
-
-        this.account.changed.connect(on_account_changed);
-        update();
+        Object(account: account);
         update_status(status);
     }
 
@@ -289,37 +286,12 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         this.account.changed.disconnect(on_account_changed);
     }
 
-    public override void activated(EditorListPane pane) {
-        Manager manager = pane.accounts;
-        if (manager.is_goa_account(this.account) &&
-            manager.get_status(this.account) != Manager.Status.ENABLED) {
-            // GOA account but it's disabled, so just take people
-            // directly to the GOA panel
-            manager.show_goa_account.begin(
-                account, pane.op_cancellable,
-                (obj, res) => {
-                    try {
-                        manager.show_goa_account.end(res);
-                    } catch (GLib.Error err) {
-                        // XXX display an error to the user
-                        debug(
-                            "Failed to show GOA account \"%s\": %s",
-                            account.id,
-                            err.message
-                        );
-                    }
-                });
-        } else {
-            pane.show_existing_account(this.account);
-        }
-    }
-
-    public override void update() {
+    public void update() {
         string name = this.account.display_name;
         if (Geary.String.is_empty(name)) {
             name = account.primary_mailbox.to_address_display("", "");
         }
-        this.label.set_text(name);
+        this.title = name;
 
         string? details = this.account.service_label;
         switch (account.service_provider) {
@@ -335,32 +307,31 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
             // no-op: Use the generated label
             break;
         }
-        this.service_label.set_text(details);
+        this.subtitle = details;
     }
 
     public void update_status(Manager.Status status) {
-        bool enabled = false;
         switch (status) {
         case ENABLED:
-            enabled = true;
-            this.set_tooltip_text("");
+            remove_css_class("dim-label");
+            this.tooltip_text = "";
+            this.unavailable_icon.visible = false;
             break;
 
         case DISABLED:
-            this.set_tooltip_text(
-                // Translators: Tooltip for accounts that have been
-                // loaded but disabled by the user.
-                _("This account has been disabled")
-            );
+            // Translators: Tooltip for accounts that have been
+            // loaded but disabled by the user.
+            this.tooltip_text = _("This account has been disabled");
+            add_css_class("dim-label");
+            this.unavailable_icon.visible = true;
             break;
 
         case UNAVAILABLE:
-            this.set_tooltip_text(
-                // Translators: Tooltip for accounts that have been
-                // loaded but because of some error are not able to be
-                // used.
-                _("This account has encountered a problem and is unavailable")
-            );
+            // Translators: Tooltip for accounts that have been loaded but
+            // because of some error are not able to be used.
+            this.tooltip_text = _("This account has encountered a problem and is unavailable");
+            add_css_class("dim-label");
+            this.unavailable_icon.visible = true;
             break;
 
         case REMOVED:
@@ -368,23 +339,6 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
             break;
         }
 
-        this.unavailable_icon.set_visible(!enabled);
-
-        if (enabled) {
-            this.label.get_style_context().remove_class(
-                Gtk.STYLE_CLASS_DIM_LABEL
-            );
-            this.service_label.get_style_context().remove_class(
-                Gtk.STYLE_CLASS_DIM_LABEL
-            );
-        } else {
-            this.label.get_style_context().add_class(
-                Gtk.STYLE_CLASS_DIM_LABEL
-            );
-            this.service_label.get_style_context().add_class(
-                Gtk.STYLE_CLASS_DIM_LABEL
-            );
-        }
     }
 
     private void on_account_changed() {
@@ -395,6 +349,129 @@ private class Accounts.AccountListRow : AccountRow<EditorListPane,Gtk.Grid> {
         }
     }
 
+    [GtkCallback]
+    private bool on_key_pressed(Gtk.EventControllerKey key_controller,
+                                uint keyval,
+                                uint keycode,
+                                Gdk.ModifierType state) {
+        if (state != Gdk.ModifierType.CONTROL_MASK)
+            return Gdk.EVENT_PROPAGATE;
+
+        int index = get_index();
+        if (keyval == Gdk.Key.Up) {
+            index--;
+            if (index >= 0) {
+                moved(index);
+                return Gdk.EVENT_STOP;
+            }
+        } else if (keyval == Gdk.Key.Down) {
+            index++;
+            if (get_next_sibling() != null) {
+                moved(index);
+                return Gdk.EVENT_STOP;
+            }
+        }
+
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    // DND
+
+    [GtkCallback]
+    private void on_drag_source_begin(Gtk.DragSource drag_source,
+                                      Gdk.Drag drag) {
+
+        // Show our row while dragging
+        var drag_widget = new Gtk.ListBox();
+        drag_widget.opacity = 0.8;
+
+        Gtk.Allocation allocation;
+        get_allocation(out allocation);
+        drag_widget.set_size_request(allocation.width, allocation.height);
+
+        var drag_row = new AccountListRow(this.account, Manager.Status.ENABLED);
+        drag_widget.append(drag_row);
+        drag_widget.drag_highlight_row(drag_row);
+
+        var drag_icon = (Gtk.DragIcon) Gtk.DragIcon.get_for_drag(drag);
+        drag_icon.child = drag_widget;
+        drag.set_hotspot((int) this.drag_x, (int) this.drag_y);
+
+        // Set a visual hint that the row is being dragged
+        add_css_class("geary-drag-source");
+        this.drag_picked_up = true;
+    }
+
+    [GtkCallback]
+    private void on_drag_source_end(Gtk.DragSource drag_source,
+                                    Gdk.Drag drag,
+                                    bool delete_data) {
+        remove_css_class("geary-drag-source");
+        this.drag_picked_up = false;
+    }
+
+    [GtkCallback]
+    private Gdk.ContentProvider on_drag_source_prepare(Gtk.DragSource drag_source,
+                                                       double x,
+                                                       double y) {
+        Graphene.Point p = { (float) x, (float) y };
+        Graphene.Point p_row;
+        this.drag_icon.compute_point(this, p, out p_row);
+        this.drag_x = p_row.x;
+        this.drag_y = p_row.y;
+
+        GLib.Value val = GLib.Value(typeof(int));
+        val.set_int(get_index());
+        return new Gdk.ContentProvider.for_value(val);
+    }
+
+    [GtkCallback]
+    private Gdk.DragAction on_drop_target_enter(Gtk.DropTarget drop_target,
+                                                double x,
+                                                double y) {
+        // Don't highlight the same row that was picked up
+        if (!this.drag_picked_up) {
+            Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+            if (parent != null) {
+                parent.drag_highlight_row(this);
+            }
+        }
+
+        return Gdk.DragAction.MOVE;
+    }
+
+    [GtkCallback]
+    private void on_drop_target_leave(Gtk.DropTarget drop_target) {
+        if (!this.drag_picked_up) {
+            Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+            if (parent != null) {
+                parent.drag_unhighlight_row();
+            }
+        }
+    }
+
+    [GtkCallback]
+    private bool on_drop_target_drop(Gtk.DropTarget drop_target,
+                                     GLib.Value val,
+                                     double x,
+                                     double y) {
+        if (!val.holds(typeof(int))) {
+            warning("Can't deal with non-int row value");
+            return false;
+        }
+
+        int drag_index = val.get_int();
+        Gtk.ListBox? parent = get_parent() as Gtk.ListBox;
+        if (parent != null) {
+            var drag_row = parent.get_row_at_index(drag_index) as AccountListRow;
+            if (drag_row != null && drag_row != this) {
+                drag_row.dropped(this);
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 

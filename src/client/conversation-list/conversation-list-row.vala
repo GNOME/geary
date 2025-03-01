@@ -110,10 +110,10 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
     private void set_button_active(bool active) {
         this.selected_button.set_active(active);
         if (active) {
-            this.get_style_context().add_class("selected");
+            this.add_css_class("selected");
             this.set_state_flags(Gtk.StateFlags.SELECTED, false);
         } else {
-            this.get_style_context().remove_class("selected");
+            this.remove_css_class("selected");
             this.unset_state_flags(Gtk.StateFlags.SELECTED);
         }
     }
@@ -134,9 +134,9 @@ internal class ConversationList.Row : Gtk.ListBoxRow {
 
     private void update_flags(Geary.Email? email) {
         if (conversation.is_unread()) {
-            get_style_context().add_class("unread");
+            add_css_class("unread");
         } else {
-            get_style_context().remove_class("unread");
+            remove_css_class("unread");
         }
 
         if (conversation.is_flagged()) {

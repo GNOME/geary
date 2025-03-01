@@ -23,7 +23,8 @@ namespace Util.Contact {
             return true;
         // Contact domain trusted
         } else {
-            foreach (Geary.RFC822.MailboxAddress email in email_addresses) {
+            for (uint i = 0; i < email_addresses.get_n_items(); i++) {
+                var email = (Geary.RFC822.MailboxAddress) email_addresses.get_item(i);
                 if (email.domain in domains) {
                     return true;
                 }

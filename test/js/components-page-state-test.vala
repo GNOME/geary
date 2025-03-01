@@ -10,8 +10,8 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
 
     private class TestWebView : Components.WebView {
 
-        public TestWebView(Application.Configuration config) {
-            base(config);
+        public TestWebView(Application.Configuration config, GLib.File cache_dir) {
+            base(config, cache_dir);
         }
 
         public new async void call_void(Util.JS.Callable callable)
@@ -141,7 +141,7 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
         }
     }
 
-    protected override WebView set_up_test_view() {
+    protected override WebView set_up_test_view(GLib.File cache_dir) {
         WebKit.UserScript test_script;
         test_script = new WebKit.UserScript(
             "var geary = new PageState()",
@@ -151,7 +151,7 @@ class Components.PageStateTest : WebViewTestCase<WebView> {
             null
         );
 
-        WebView view = new TestWebView(this.config);
+        WebView view = new TestWebView(this.config, cache_dir);
         view.get_user_content_manager().add_script(test_script);
         return view;
     }

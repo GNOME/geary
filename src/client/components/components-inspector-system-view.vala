@@ -9,52 +9,7 @@
  * A view that displays system and library information.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector-system-view.ui")]
-public class Components.InspectorSystemView : Gtk.Grid {
-
-
-
-    private class DetailRow : Gtk.ListBoxRow {
-
-
-        private Gtk.Grid layout {
-            get; private set; default = new Gtk.Grid();
-        }
-
-        private Gtk.Label label {
-            get; private set; default = new Gtk.Label("");
-        }
-
-        private Gtk.Label value {
-            get; private set; default = new Gtk.Label("");
-        }
-
-
-        public DetailRow(string label, string value) {
-            get_style_context().add_class("geary-labelled-row");
-
-            this.label.halign = Gtk.Align.START;
-            this.label.valign = Gtk.Align.CENTER;
-            this.label.set_text(label);
-            this.label.show();
-
-            this.value.halign = Gtk.Align.END;
-            this.value.hexpand = true;
-            this.value.valign = Gtk.Align.CENTER;
-            this.value.xalign = 1.0f;
-            this.value.set_text(value);
-            this.value.show();
-
-            this.layout.orientation = Gtk.Orientation.HORIZONTAL;
-            this.layout.add(this.label);
-            this.layout.add(this.value);
-            this.layout.show();
-            add(this.layout);
-
-            this.activatable = false;
-            show();
-        }
-
-    }
+public class Components.InspectorSystemView : Gtk.Box {
 
 
     [GtkChild] private unowned Gtk.ListBox system_list;
@@ -65,9 +20,11 @@ public class Components.InspectorSystemView : Gtk.Grid {
     public InspectorSystemView(Application.Client application) {
         this.details = application.get_runtime_information();
         foreach (Application.Client.RuntimeDetail? detail in this.details) {
-            this.system_list.add(
-                new DetailRow("%s:".printf(detail.name), detail.value)
-            );
+            var row = new Adw.ActionRow();
+            row.add_css_class("property");
+            row.title = detail.name;
+            row.subtitle = detail.value;
+            this.system_list.append(row);
         }
     }
 

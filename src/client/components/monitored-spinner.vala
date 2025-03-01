@@ -7,8 +7,15 @@
 /**
  * Adapts a progress spinner to automatically display progress of a Geary.ProgressMonitor.
  */
-public class MonitoredSpinner : Gtk.Spinner {
+public class MonitoredSpinner : Adw.Bin {
     private Geary.ProgressMonitor? monitor = null;
+
+    private Adw.Spinner spinner;
+
+    construct {
+        this.spinner = new Adw.Spinner();
+        this.child = spinner;
+    }
 
     public void set_progress_monitor(Geary.ProgressMonitor? monitor) {
         if (monitor != null) {
@@ -17,8 +24,7 @@ public class MonitoredSpinner : Gtk.Spinner {
             monitor.finish.connect(on_stop);
         } else {
             this.monitor = null;
-            stop();
-            hide();
+            this.spinner.visible = false;
         }
     }
 
@@ -28,13 +34,11 @@ public class MonitoredSpinner : Gtk.Spinner {
     }
 
     private void on_start() {
-        start();
-        show();
+        this.spinner.visible = true;
     }
 
     private void on_stop() {
-        stop();
-        hide();
+        this.spinner.visible = false;
     }
 }
 

@@ -1,54 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="AccountsEditor" parent="GtkDialog">
-    <property name="modal">True</property>
-    <property name="type_hint">dialog</property>
-    <child type="titlebar">
-      <placeholder/>
+  <template class="AccountsEditor" parent="AdwDialog">
+    <property name="content-width">640</property>
+
+    <child>
+      <object class="GtkEventControllerKey">
+        <signal name="key-pressed" handler="on_key_pressed"/>
+      </object>
     </child>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
+
+    <child>
+      <object class="AdwToastOverlay" id="toast_overlay">
         <child>
-          <object class="GtkOverlay" id="notifications_pane">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkStack" id="editor_panes">
-                <property name="visible">True</property>
-                <property name="transition_type">slide-left-right</property>
-                <signal name="notify::visible-child" handler="on_pane_changed" swapped="no"/>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="index">-1</property>
-              </packing>
-            </child>
+          <object class="AdwNavigationView" id="view">
           </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
     </child>

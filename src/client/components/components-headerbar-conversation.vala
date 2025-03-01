@@ -14,25 +14,23 @@
  * @see Application.MainWindow
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-headerbar-conversation.ui")]
-public class Components.ConversationHeaderBar : Gtk.Bin {
+public class Components.ConversationHeaderBar : Adw.Bin {
 
     public bool find_open { get; set; default = false; }
 
-    public ConversationActions shown_actions {
-        get {
-            return (ConversationActions) this.actions_squeezer.visible_child;
-        }
-    }
+    public bool compact { get; set; default = false; }
 
-    [GtkChild] private unowned Hdy.Squeezer actions_squeezer;
-    [GtkChild] public unowned ConversationActions full_actions;
-    [GtkChild] public unowned ConversationActions compact_actions;
+    [GtkChild] public unowned ConversationActions left_actions;
+    [GtkChild] public unowned ConversationActions right_actions;
 
     [GtkChild] private unowned Gtk.ToggleButton find_button;
-    [GtkChild] public unowned Gtk.Button back_button;
 
-    [GtkChild] private unowned Hdy.HeaderBar conversation_header;
+    [GtkChild] private unowned Adw.HeaderBar conversation_header;
+    // Keep a strong ref when it's temporarily removed
+    private Adw.HeaderBar? _conversation_header = null;
 
+    //XXX GTK4 need to figure out close buttons
+#if 0
     public bool show_close_button {
         get {
             return this.conversation_header.show_close_button;
@@ -41,12 +39,9 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
             this.conversation_header.show_close_button = value;
         }
     }
+#endif
 
     construct {
-        this.actions_squeezer.notify["visible-child"].connect_after(
-            () => { notify_property("shown-actions"); }
-        );
-
         this.bind_property(
             "find-open",
             this.find_button, "active",
@@ -54,17 +49,24 @@ public class Components.ConversationHeaderBar : Gtk.Bin {
         );
     }
 
-    public void set_conversation_header(Hdy.HeaderBar header) {
-        remove(this.conversation_header);
-        header.hexpand = true;
-        header.show_close_button = this.conversation_header.show_close_button;
-        add(header);
+    public override void dispose() {
+        this._conversation_header = null;
+        base.dispose();
     }
 
-    public void remove_conversation_header(Hdy.HeaderBar header) {
-        remove(header);
-        this.conversation_header.show_close_button = header.show_close_button;
-        add(this.conversation_header);
+    public void set_conversation_header(Adw.HeaderBar header)
+            requires (header.parent == null) {
+        this._conversation_header = null;
+        header.hexpand = true;
+        //XXX GTK4 need to figure out close buttons
+        // header.show_close_button = this.conversation_header.show_close_button;
+        this.child = header;
+    }
+
+    public void remove_conversation_header(Adw.HeaderBar header) {
+        //XXX GTK4 need to figure out close buttons
+        // this.conversation_header.show_close_button = header.show_close_button;
+        this.child = this.conversation_header;
     }
 
     public void set_find_sensitive(bool is_sensitive) {

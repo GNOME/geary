@@ -1,139 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ComponentsAttachmentPane" parent="GtkGrid">
-    <property name="name">box</property>
-    <property name="visible">True</property>
+  <template class="ComponentsAttachmentPane" parent="GtkBox">
     <property name="orientation">vertical</property>
-    <child>
-      <object class="GtkSeparator">
-        <property name="visible">True</property>
-      </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkActionBar" id="attachments_actions">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkButton" id="select_all_button">
-            <property name="visible">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Select all attachments</property>
-            <property name="action_name">cap.select-all</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="icon_name">edit-select-all-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="remove_button">
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Select all attachments</property>
-            <property name="action_name">cap.remove-selected</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="icon_name">list-remove-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="save_button">
-            <property name="visible">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Save selected attachments</property>
-            <property name="action_name">cap.save-selected</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="icon_name">document-save-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="open_button">
-            <property name="visible">True</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Open selected attachments</property>
-            <property name="action_name">cap.open-selected</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="icon_name">document-open-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <style>
-          <class name="background"/>
-        </style>
-      </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="attachments_container">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">1</property>
-      </packing>
-    </child>
+    <property name="name">box</property>
     <style>
       <class name="view"/>
       <class name="geary-attachment-pane"/>
     </style>
+
+    <child>
+      <object class="GtkShortcutController">
+        <property name="scope">global</property>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;o</property>
+            <property name="action">action(open-attachments)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;s</property>
+            <property name="action">action(save-attachments)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">BackSpace</property>
+            <property name="action">action(remove-attachments)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">Delete</property>
+            <property name="action">action(remove-attachments)</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkSeparator">
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="attachments_container">
+        <property name="orientation">vertical</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkActionBar" id="attachments_actions">
+        <style>
+          <class name="background"/>
+        </style>
+
+        <child>
+          <object class="GtkButton" id="select_all_button">
+            <property name="tooltip_text" translatable="yes">Select all attachments</property>
+            <property name="icon_name">edit-select-all-symbolic</property>
+            <property name="action_name">cap.select-all</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="remove_button">
+            <property name="tooltip_text" translatable="yes">Select all attachments</property>
+            <property name="icon_name">list-remove-symbolic</property>
+            <property name="action_name">cap.remove-selected</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_button">
+            <property name="tooltip_text" translatable="yes">Save selected attachments</property>
+            <property name="icon_name">document-save-symbolic</property>
+            <property name="action_name">cap.save-selected</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="open_button">
+            <property name="tooltip_text" translatable="yes">Open selected attachments</property>
+            <property name="icon_name">document-open-symbolic</property>
+            <property name="action_name">cap.open-selected</property>
+          </object>
+        </child>
+      </object>
+    </child>
   </template>
 </interface>

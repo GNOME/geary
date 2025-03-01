@@ -51,10 +51,14 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
 
         assert(new WebView.EditContext("0;;;12;").font_size == 12);
 
-        assert(new WebView.EditContext("0;;;;rgb(0, 0, 0)").font_color == Util.Gtk.rgba(0, 0, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(255, 0, 0)").font_color == Util.Gtk.rgba(1, 0, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(0, 255, 0)").font_color == Util.Gtk.rgba(0, 1, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(0, 0, 255)").font_color == Util.Gtk.rgba(0, 0, 1, 1));
+        Gdk.RGBA black = { 0, 0, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 0)").font_color == black);
+        Gdk.RGBA red = { 1, 0, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(255, 0, 0)").font_color == red);
+        Gdk.RGBA green = { 0, 1, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 255, 0)").font_color == green);
+        Gdk.RGBA blue = { 0, 0, 1, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 255)").font_color == blue);
     }
 
     public void get_html() throws GLib.Error {
@@ -253,8 +257,8 @@ long, long, long, long, long, long, long, long, long, long,
         assert_false(SIG2 in html, "Signature 2 still present");
     }
 
-    protected override Composer.WebView set_up_test_view() {
-        return new Composer.WebView(this.config);
+    protected override Composer.WebView set_up_test_view(GLib.File cache_dir) {
+        return new Composer.WebView(this.config, cache_dir);
     }
 
     protected override void load_body_fixture(string html = "") {

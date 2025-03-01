@@ -8,8 +8,8 @@
 /**
  * Initialises GearyWebExtension for WebKit web processes.
  */
-public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension,
-                                                           Variant data) {
+public void webkit_web_process_extension_initialize_with_user_data(WebKit.WebProcessExtension extension,
+                                                                   Variant data) {
     bool logging_enabled = data.get_boolean();
 
     Geary.Logging.init();
@@ -26,7 +26,7 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
 }
 
 /**
- * A WebExtension that manages Geary-specific behaviours in web processes.
+ * A WebProcessExtension that manages Geary-specific behaviours in web processes.
  */
 public class GearyWebExtension : Object {
 
@@ -43,15 +43,17 @@ public class GearyWebExtension : Object {
     private const string EXTENSION_CLASS_SEND = "send";
     private const string EXTENSION_CLASS_ALLOW_REMOTE_LOAD = "allowRemoteResourceLoad";
 
-    private WebKit.WebExtension extension;
+    private WebKit.WebProcessExtension extension;
 
 
-    public GearyWebExtension(WebKit.WebExtension extension) {
+    public GearyWebExtension(WebKit.WebProcessExtension extension) {
         this.extension = extension;
         extension.page_created.connect(on_page_created);
         WebKit.ScriptWorld.get_default().window_object_cleared.connect(on_window_object_cleared);
     }
 
+    //XXX GTK4 - it seems this is no longer possible?
+#if 0
     private void on_console_message(WebKit.WebPage page,
                                     WebKit.ConsoleMessage message) {
         string source = message.get_source_id();
@@ -63,6 +65,7 @@ public class GearyWebExtension : Object {
               message.get_text()
         );
     }
+#endif
 
     private bool on_send_request(WebKit.WebPage page,
                                  WebKit.URIRequest request,
@@ -128,9 +131,10 @@ public class GearyWebExtension : Object {
         );
     }
 
-    private void on_page_created(WebKit.WebExtension extension,
+    private void on_page_created(WebKit.WebProcessExtension extension,
                                  WebKit.WebPage page) {
-        page.console_message_sent.connect(on_console_message);
+        //XXX GTK4
+        // page.console_message_sent.connect(on_console_message);
         page.send_request.connect(on_send_request);
         page.user_message_received.connect(on_page_message_received);
     }

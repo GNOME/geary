@@ -6,7 +6,8 @@ console_dependencies = [
   gtk,
   gee,
   gmime,
-  webkit2gtk,
+  libadwaita,
+  webkitgtk,
   engine_dep,
 ]
 

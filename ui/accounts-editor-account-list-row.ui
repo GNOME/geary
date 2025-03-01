@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="AccountsAccountListRow" parent="AdwActionRow">
+    <property name="activatable">True</property>
+    <child type="prefix">
+      <object class="GtkImage" id="drag_icon">
+        <property name="icon-name">list-drag-handle-symbolic</property>
+        <child>
+          <object class="GtkDragSource">
+            <property name="actions">move</property>
+            <signal name="drag-begin" handler="on_drag_source_begin"/>
+            <signal name="drag-end" handler="on_drag_source_end"/>
+            <signal name="prepare" handler="on_drag_source_prepare"/>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="suffix">
+      <object class="GtkImage" id="unavailable_icon">
+        <property name="visible">False</property>
+        <property name="icon-name">dialog-warning-symbolic</property>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkEventControllerKey">
+        <signal name="key-pressed" handler="on_key_pressed"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkDropTarget">
+        <property name="preload">True</property>
+        <property name="actions">move</property>
+        <property name="formats">gint</property>
+        <signal name="enter" handler="on_drop_target_enter"/>
+        <signal name="leave" handler="on_drop_target_leave"/>
+        <signal name="drop" handler="on_drop_target_drop"/>
+      </object>
+    </child>
+  </template>
+</interface>
