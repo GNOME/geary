@@ -66,8 +66,8 @@ Dependencies
 
 Building Geary requires the following major libraries and tools:
 
- * GTK+ 3
- * WebKitGTK+ 2
+ * GTK 3
+ * WebKitGTK (Specifically the API 4.1 variant)
  * SQLite 3
  * Vala
 
@@ -95,7 +95,7 @@ sudo dnf install meson vala desktop-file-utils enchant2-devel \
     libgee-devel libhandy1-devel \
     libpeas-devel libsecret-devel libicu-devel libstemmer-devel \
     libunwind-devel libxml2-devel libytnef-devel sqlite-devel \
-    webkitgtk4-devel
+    webkitgtk4.1-devel
 ```
 
 Installing dependencies on Ubuntu/Debian
@@ -111,7 +111,7 @@ sudo apt-get install meson build-essential valac \
     libgoa-1.0-dev libgspell-1-dev libgsound-dev libgtk-3-dev \
     libjson-glib-dev libhandy-1-dev libicu-dev libpeas-dev \
     libsecret-1-dev libsqlite3-dev libstemmer-dev libunwind-dev \
-    libwebkit2gtk-4.0-dev libxml2-dev libytnef0-dev
+    libwebkit2gtk-4.1-dev libxml2-dev libytnef0-dev
 ```
 
 And for Ubuntu Messaging Menu integration:
