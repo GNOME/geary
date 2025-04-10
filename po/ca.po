@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
 "POT-Creation-Date: 2022-09-10 11:23+0000\n"
-"PO-Revision-Date: 2025-02-27 08:20+0200\n"
+"PO-Revision-Date: 2025-04-10 08:20+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan (http://www.transifex.com/projects/p/geary/language/ca/)\n"
 "Language: ca\n"
@@ -80,7 +80,7 @@ msgid ""
 "Conversations allow you to read a complete discussion without having to find"
 " and click from message to message."
 msgstr ""
-"Les converses li permeten llegir una conversa completa sense haver de buscar"
+"Les converses us permeten llegir una conversa completa sense haver de buscar"
 " i fer clic de missatge en missatge."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:26
@@ -89,7 +89,7 @@ msgstr "Les característiques de Geary inclouen:"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:28
 msgid "Quick email account setup"
-msgstr "Configuració de comptes de correu electrònic"
+msgstr "Configuració ràpida de comptes de correu electrònic"
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:29
 msgid "Shows related messages together in conversations"
@@ -257,7 +257,7 @@ msgstr "Estratègia d'assessorament per a la cerca de text complet"
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
-"Són valors acceptables «exacte», «conservador», «agressiu», i «neutre»."
+"Són valors acceptables «exact», «conservative», «conservative», i «horizon»."
 
 #: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Zoom of conversation viewer"
@@ -2844,7 +2844,7 @@ msgstr "Recepció"
 
 #: ui/accounts_editor_add_pane.ui:155 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
-msgstr "S'està enviant"
+msgstr "Enviament"
 
 #: ui/accounts_editor_edit_pane.ui:7
 msgid "Edit Account"
@@ -3767,83 +3767,4 @@ msgstr "_Recorda la contrasenya"
 
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
-msgstr "_Autenticació"
-
-#~ msgid "Notify of new mail at startup"
-#~ msgstr "Notifica'm el correu nou a l'inici"
-
-#~ msgid "True to notify of new mail at startup."
-#~ msgstr "Cert per a notificar l'arribada d'un correu nou a l'inici."
-
-#~ msgid "All others"
-#~ msgstr "Tots els altres"
-
-#~ msgid "Yahoo"
-#~ msgstr "Yahoo"
-
-#~ msgid "Other email providers"
-#~ msgstr "Altres proveïdors de correu"
-
-#~ msgid "Start with the main window hidden (deprecated)"
-#~ msgstr "Comença amb la finestra principal oculta (obsolet)"
-
-#~ msgid "The `--hidden` option is deprecated and will be removed in the future."
-#~ msgstr "L'opció «--hidden» està en desús i s'eliminarà en el futur."
-
-#~ msgid "Always show from sender"
-#~ msgstr "Mostra sempre des del remitent"
-
-#~ msgid "A_nomena i desa la imatge…"
-#~ msgstr "Desa la _imatge com…"
-
-#~ msgid "Position of folder list pane"
-#~ msgstr "Posició del plafó de la llista de carpetes"
-
-#~ msgid "Position of the folder list Paned grabber."
-#~ msgstr "Posició del capturador de la llista de carpetes."
-
-#~ msgid "Position of folder list pane when horizontal"
-#~ msgstr "Posició del plafó de la llista de carpetes quan és horitzontal"
-
-#~ msgid ""
-#~ "Position of the folder list Paned grabber in the horizontal orientation."
-#~ msgstr ""
-#~ "Posició del capturador de la llista de carpetes en orientació horitzontal."
-
-#~ msgid "Position of folder list pane when vertical"
-#~ msgstr "Posició del plafó de la llista de carpetes quan és vertical"
-
-#~ msgid "Position of the folder list Paned grabber in the vertical orientation."
-#~ msgstr ""
-#~ "Posició del capturador de la llista de carpetes en orientació vertical."
-
-#~ msgid "Orientation of the folder list pane"
-#~ msgstr "Orientació del plafó de la llista de carpetes"
-
-#~ msgid "True if the folder list Paned is in the horizontal orientation."
-#~ msgstr ""
-#~ "Cert si l'orientació del plafó de la llista de carpetes és horitzontal."
-
-#~ msgid "Position of message list pane"
-#~ msgstr "Posició del plafó de la llista de missatges"
-
-#~ msgid "Position of the message list Paned grabber."
-#~ msgstr "Posició del capturador de la llista de missatges."
-
-#~ msgid "Use _three pane view"
-#~ msgstr "Utilitza vista de _tres panells"
-
-#~ msgid "%a, %b %-e, %Y at %l:%M %P"
-#~ msgstr "%a, %-e %b %Y a les %-l:%M %p"
-
-#~ msgid "%a, %b %-e, %Y at %H:%M"
-#~ msgstr "%a, %-e %b %Y a les %-l:%M %p"
-
-#~ msgid "Confirm removing: %s"
-#~ msgstr "Confirmeu la supressió: %s"
-
-#~ msgid "Remove account"
-#~ msgstr "Elimina compte"
-
-#~ msgid "_Reply-To"
-#~ msgstr "_Respon a"
+msgstr "_Autenticació
