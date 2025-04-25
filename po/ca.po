@@ -3767,4 +3767,4 @@ msgstr "_Recorda la contrasenya"
 
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
-msgstr "_Autenticació
+msgstr "_Autenticació"
