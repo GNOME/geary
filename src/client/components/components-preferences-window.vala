@@ -175,6 +175,17 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         trust_images_row.activatable_widget = trust_images;
         trust_images_row.add(trust_images);
 
+        var unset_html_colors = new Gtk.Switch();
+        unset_html_colors.valign = CENTER;
+
+        var unset_html_colors_row = new Hdy.ActionRow();
+        /// Translators: Preferences label
+        unset_html_colors_row.title = _("_Override the original colors in HTML emails");
+        unset_html_colors_row.subtitle = _("Overrides the original colors in HTML messages to integrate better with the app theme. Requires restart.");
+        unset_html_colors_row.use_underline = true;
+        unset_html_colors_row.activatable_widget = unset_html_colors;
+        unset_html_colors_row.add(unset_html_colors);
+
         var group = new Hdy.PreferencesGroup();
         /// Translators: Preferences group title
         //group.title = _("General");
@@ -185,6 +196,7 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
         group.add(single_key_shortucts_row);
         group.add(startup_notifications_row);
         group.add(trust_images_row);
+        group.add(unset_html_colors_row);
 
         var page = new Hdy.PreferencesPage();
         /// Translators: Preferences page title
@@ -228,6 +240,11 @@ public class Components.PreferencesWindow : Hdy.PreferencesWindow {
                 "state",
                 (GLib.SettingsBindGetMappingShared) settings_trust_images_getter,
                 (GLib.SettingsBindSetMappingShared) settings_trust_images_setter
+            );
+            config.bind(
+                Application.Configuration.UNSET_HTML_COLORS,
+                unset_html_colors,
+                "state"
             );
         }
     }

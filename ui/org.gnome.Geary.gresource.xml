@@ -9,6 +9,7 @@
     <file compressed="true" preprocess="xml-stripblanks">application-main-window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>
     <file compressed="true">components-web-view.js</file>
+    <file compressed="true">components-web-view.css</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-pane-menus.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">components-attachment-view.ui</file>
@@ -49,7 +50,6 @@
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">password-dialog.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">problem-details-dialog.ui</file>
-    <file compressed="true">signature-web-view.css</file>
     <file compressed="true">signature-web-view.js</file>
     <file compressed="true">geary.css</file>
     <file compressed="true">single-key-shortcuts.css</file>

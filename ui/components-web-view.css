@@ -1,0 +1,59 @@
+/*
+ * Shared styles for Components.WebView and subclasses.
+ */
+
+body {
+  /* Variables */
+  --bg-color: white;
+  --fg-color: black;
+  --quote-container-bg: #e8e8e8;
+  --quote-container-fg: #303030;
+/* The following was taken from GTK+4 trunk Adwaita theme:
+ * gtk/theme/Adwaita/gtk-contained.css */
+  --button-color: #2e3436;
+  --button-outline-color: rgba(46, 52, 54, 0.3);
+  --button-border-color: #b6b6b3;
+  --button-border-bottom-color: #91918c;
+  --button-background-image: linear-gradient(to bottom, #e8e8e7, #dededd 60%, #cfcfcd);
+  --button-text-shadow-color: rgba(255, 255, 255, 0.76923);
+  --button-box-shadow-color: rgba(255, 255, 255, 0.8);
+
+  --hover-button-color: #2e3436;
+  --hover-button-outline-color: rgba(46, 52, 54, 0.3);
+  --hover-button-border-color: #b6b6b3;
+  --hover-button-border-bottom-color: #91918c;
+  --hover-button-background-image: linear-gradient(to bottom, #f7f7f7, #e8e8e7 60%, #dededd);
+  --hover-button-box-shadow-color: rgba(255, 255, 255, 1);
+
+  /* Adjust default controls and system colors for light and dark mode.
+  See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
+  color-scheme: light dark;
+
+  color: var(--fg-color);
+  background-color: var(--bg-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-geary-theme=dark] {
+    --bg-color: #2a2d30;
+    --fg-color: #eaeaea;
+    --quote-container-bg: #36383b;
+    --quote-container-fg: #e3e3e3;
+
+    /* Adwaita Dark inspired button colors */
+    --button-color: #eeeeec;
+    --button-outline-color: rgba(0, 0, 0, 0.3);
+    --button-border-color: #202020;
+    --button-border-bottom-color: #151515;
+    --button-background-image: linear-gradient(to bottom, #4a4a4a, #3c3c3c 60%, #303030);
+    --button-text-shadow-color: rgba(0, 0, 0, 0.4);
+    --button-box-shadow-color: rgba(0, 0, 0, 0.3);
+
+    --hover-button-color: #ffffff;
+    --hover-button-outline-color: rgba(0, 0, 0, 0.4);
+    --hover-button-border-color: #2c2c2c;
+    --hover-button-border-bottom-color: #1e1e1e;
+    --hover-button-background-image: linear-gradient(to bottom, #5a5a5a, #4c4c4c 60%, #404040);
+    --hover-button-box-shadow-color: rgba(0, 0, 0, 0.4);
+  }
+}

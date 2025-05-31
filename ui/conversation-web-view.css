@@ -13,11 +13,7 @@
   transition: height 0.25s !important;
 }
 
-:root {
-  /* Adjust default controls and system colors for light and dark mode.
-  See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
-  color-scheme: light dark;
-
+html {
   /* Width must always be defined by the viewport so content doesn't
   overflow inside the WebView, height must always be defined by the
   content so the WebView can be sized to fit exactly. */
@@ -105,11 +101,11 @@ pre {
     margin: 0.5em 0;
     border-radius: 4px;
     padding: 0.5em 0;
-    color: #303030;
-    background-color: #e8e8e8;/* recv-quoted */
+    color: var(--quote-container-fg);
+    background-color: var(--quote-container-bg);/* recv-quoted */
   }
   .geary-sent .geary-quote-container {
-    background-color: #e8e8e8;/* sent-quoted */
+    background-color: var(--quote-container-bg);/* sent-quoted */
   }
 
   .geary-quote-container > .geary-quote {
@@ -172,24 +168,24 @@ pre {
     border: 1px solid;
     border-radius: 3px;
     transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    color: #2e3436;
-    outline-color: rgba(46, 52, 54, 0.3);
-    border-color: #b6b6b3;
-    border-bottom-color: #91918c;
-    background-image: linear-gradient(to bottom, #e8e8e7, #dededd 60%, #cfcfcd);
-    text-shadow: 0 1px rgba(255, 255, 255, 0.76923);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.8);
+    color: var(--button-color);
+    outline-color: var(--button-outline-color);
+    border-color: var(--button-border-color);
+    border-bottom-color: var(--button-border-bottom-color);
+    background-image: var(--button-background-image);
+    text-shadow: 0 1px var(--button-text-shadow-color);
+    box-shadow: inset 0 1px var(--button-box-shadow-color);
   }
   .geary-quote-container .geary-button:hover {
     /* Likewise the properties below also workaround WK Bug 166648,
      * and taken from gtk/theme/Adwaita/gtk-contained.css. */
-    color: #2e3436;
-    outline-color: rgba(46, 52, 54, 0.3);
-    border-color: #b6b6b3;
-    border-bottom-color: #91918c;
-    text-shadow: 0 1px rgba(255, 255, 255, 0.76923);
-    box-shadow: inset 0 1px white;
-    background-image: linear-gradient(to bottom, #f7f7f7, #e8e8e7 60%, #dededd);
+    color: var(--hover-button-color);
+    outline-color: var(--hover-button-outline-color);
+    border-color: var(--hover-button-border-color);
+    border-bottom-color: var(--hover-button-border-bottom-color);
+    text-shadow: 0 1px var(--button-text-shadow-color);
+    box-shadow: inset 0 1px var(--hover-button-box-shadow-color);
+    background-image: var(--hover-button-background-image);
   }
 
   /* Highlight search terms */

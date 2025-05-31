@@ -37,6 +37,13 @@
         <default>true</default>
         <summary>Display message previews</summary>
         <description>True if we should display a short preview of each message.</description>
+      </key>
+
+    <key name="unset-html-colors" type="b">
+      <default>false</default>
+      <summary>Unset colors provided in HTML emails</summary>
+      <summary>Override colors in HTML emails</summary>
+      <description>Overrides the original colors in HTML messages to integrate better with the app theme.</description>
     </key>
 
     <key name="move-messages-on-tag" type="b">

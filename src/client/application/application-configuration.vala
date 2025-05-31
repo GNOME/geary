@@ -19,6 +19,7 @@ public class Application.Configuration : Geary.BaseObject {
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
     public const string DISPLAY_PREVIEW_KEY = "display-preview";
+    public const string UNSET_HTML_COLORS = "unset-html-colors";
     public const string FORMATTING_TOOLBAR_VISIBLE = "formatting-toolbar-visible";
     public const string OPTIONAL_PLUGINS = "optional-plugins";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
@@ -97,6 +98,10 @@ public class Application.Configuration : Geary.BaseObject {
 
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
+    }
+
+    public bool unset_html_colors {
+        get { return settings.get_boolean(UNSET_HTML_COLORS); }
     }
 
     public bool single_key_shortcuts { get; set; default = false; }

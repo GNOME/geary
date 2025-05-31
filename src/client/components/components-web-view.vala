@@ -67,9 +67,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
     private static WebKit.WebContext? default_context = null;
 
-    private static WebKit.UserStyleSheet? user_stylesheet = null;
+    private static List<WebKit.UserStyleSheet> styles = new List<WebKit.UserStyleSheet>();
 
-    private static WebKit.UserScript? script = null;
+    private static List<WebKit.UserScript> scripts = new List<WebKit.UserScript>();
 
 
     /**
@@ -126,14 +126,13 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
-        WebView.script = load_app_script(
-            "components-web-view.js"
-        );
+        WebView.scripts.append(load_app_script("components-web-view.js"));
+        WebView.styles.append(load_app_stylesheet("components-web-view.css"));
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
             GLib.File stylesheet = user_dir.get_child(name);
             try {
-                WebView.user_stylesheet = load_user_stylesheet(stylesheet);
+                WebView.styles.append(load_user_stylesheet(stylesheet));
                 break;
             } catch (GLib.IOError.NOT_FOUND err) {
                 // All good, try the next one or just exit
@@ -350,10 +349,21 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
-        content_manager.add_script(WebView.script);
-        if (WebView.user_stylesheet != null) {
-            content_manager.add_style_sheet(WebView.user_stylesheet);
+
+        if (config.unset_html_colors) {
+            WebView.scripts.append(
+                new WebKit.UserScript(
+                    "window.UNSET_HTML_COLORS = true;",
+                    WebKit.UserContentInjectedFrames.TOP_FRAME,
+                    WebKit.UserScriptInjectionTime.START,
+                    null,
+                    null
+                )
+            );
         }
+
+        WebView.scripts.foreach(script => content_manager.add_script(script));
+        WebView.styles.foreach(style => content_manager.add_style_sheet(style));
 
         Object(
             settings: setts,

@@ -71,6 +71,10 @@ PageState.prototype = {
         // completing.
         this.updatePreferredHeight();
         this._contentLoaded();
+        if (window.UNSET_HTML_COLORS) {
+          document.body.setAttribute("data-geary-theme", "dark")
+          unsetHTMLColors(document);
+        }
     },
     loadRemoteResources: function() {
         const TYPES = "*[src], *[srcset]";
@@ -182,3 +186,61 @@ let MessageSender = function(name) {
         _GearyWebExtension.send(name, Array.from(arguments));
     };
 };
+
+
+/**
+ * Unsets inline and stylesheet colors from the given document.
+ * @param {Document} doc The HTML document to process.
+ * @returns {void}
+ */
+function unsetHTMLColors(doc) {
+  // Slightly modified copy from Evolution
+  // https://gitlab.gnome.org/GNOME/evolution/-/blob/94510bed94e8de641a8d54f2adaec6f02a8972de/data/webkit/e-web-view.js#L1169
+
+  Array.from(doc.styleSheets).forEach(sheet => {
+
+    Array.from(sheet.cssRules).forEach(rule => {
+
+      if (!rule.style || !rule.selectorText )
+        return;
+
+      if (rule.style.color)
+        rule.style.removeProperty("color");
+
+      if (rule.style.backgroundColor)
+        rule.style.removeProperty("background-color");
+    })
+  })
+
+  doc.querySelectorAll("[style],[color],[bgcolor]").forEach(elem => {
+
+    if (["HTML", "IFRAME", "INPUT", "BUTTON", "IMG"].includes(elem.tagName)) {
+      return;
+    }
+
+    if (elem.style) {
+      if (elem.style.color)
+        elem.style.removeProperty("color");
+
+      if (elem.style.backgroundColor)
+        elem.style.removeProperty("background-color");
+
+      if (elem.style.backgroundImage)
+        elem.style.removeProperty("background-image");
+
+      if (!elem.style.length)
+        elem.removeAttribute("style");
+    }
+
+    elem.removeAttribute("color");
+    elem.removeAttribute("bgcolor");
+  });
+
+  doc.querySelectorAll("body").forEach(elem => {
+    elem.removeAttribute("bgcolor");
+    elem.removeAttribute("text");
+    elem.removeAttribute("link");
+    elem.removeAttribute("alink");
+    elem.removeAttribute("vlink");
+  });
+}
