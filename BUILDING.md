@@ -120,6 +120,21 @@ And for Ubuntu Messaging Menu integration:
 sudo apt-get install libmessaging-menu-dev
 ```
 
+Updating DarkReader plugin
+--------------------------
+
+We're using [DarkReader API](https://github.com/darkreader/darkreader) for dark mode.
+
+To update it, download latest version from CDN and save as ui/darkreader.js
+
+ - [unpkg](https://unpkg.com/darkreader/)
+ - [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
+
+
+```sh
+curl https://cdn.jsdelivr.net/npm/darkreader/darkreader.js --output ui/darkreader.js
+```
+
 ---
 Copyright © 2016 Software Freedom Conservancy Inc.
 Copyright © 2018-2020 Michael Gratton <mike@vee.net>

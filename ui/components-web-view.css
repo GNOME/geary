@@ -25,6 +25,12 @@ body {
   --hover-button-background-image: linear-gradient(to bottom, #f7f7f7, #e8e8e7 60%, #dededd);
   --hover-button-box-shadow-color: rgba(255, 255, 255, 1);
 
+  /*
+   * DarkReader specific color overrides
+   */
+  /* Gitlab message main color is too dark, override with brighter color */
+  --darkreader-text-3a383f: #eae8ef;
+
   /* Adjust default controls and system colors for light and dark mode.
   See https://www.w3.org/TR/css-color-adjust-1/#color-scheme-effect */
   color-scheme: light dark;

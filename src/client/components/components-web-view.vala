@@ -126,6 +126,7 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
+        WebView.scripts.append(load_app_script("darkreader.js"));
         WebView.scripts.append(load_app_script("components-web-view.js"));
         WebView.styles.append(load_app_stylesheet("components-web-view.css"));
 

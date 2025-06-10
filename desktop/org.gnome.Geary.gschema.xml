@@ -41,7 +41,6 @@
 
     <key name="unset-html-colors" type="b">
       <default>false</default>
-      <summary>Unset colors provided in HTML emails</summary>
       <summary>Override colors in HTML emails</summary>
       <description>Overrides the original colors in HTML messages to integrate better with the app theme.</description>
     </key>
