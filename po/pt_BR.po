@@ -21,21 +21,22 @@
 # Leôndias Araújo <leorusvellt@hotmail.com>, 2022.
 # Alex Jr <alexjrsh@proton.me>, 2023.
 # Hugo Fortini <hugofortinipbi@gmail.com>, 2024.
+# Álvaro Burns <>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-03-31 13:07+0000\n"
-"PO-Revision-Date: 2024-03-31 20:21-0300\n"
-"Last-Translator: Hugo Fortini <hugofortinipbi@gmail.com>\n"
-"Language-Team: Brazilian Portuguese\n"
+"POT-Creation-Date: 2025-06-09 19:33+0000\n"
+"PO-Revision-Date: 2025-06-11 13:57-0300\n"
+"Last-Translator: Álvaro Burns <>\n"
+"Language-Team: Brazilian Portuguese <https://br.gnome.org/traducao/>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Gtranslator 46.0\n"
+"X-Generator: Gtranslator 48.0\n"
 "X-Project-Style: gnome\n"
 "X-DL-Team: pt_BR\n"
 "X-DL-Module: geary\n"
@@ -92,8 +93,8 @@ msgid ""
 "modern interface."
 msgstr ""
 "Geary é um aplicativo de e-mail construído em conversas, para o ambiente do "
-"GNOME. Ele permite que você leia, localize e envie e-mail com uma "
-"interface simples e moderna."
+"GNOME. Ele permite que você leia, localize e envie e-mail com uma interface "
+"simples e moderna."
 
 #: desktop/org.gnome.Geary.appdata.xml.in.in:22
 msgid ""
@@ -206,18 +207,34 @@ msgid "True if we should display a short preview of each message."
 msgstr "Verdadeiro se devemos exibir uma visualização curta de cada mensagem."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Unset colors provided in HTML emails"
+msgstr "Não definir cores fornecidas em e-mails HTML"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid "Override colors in HTML emails"
+msgstr "Sobrepor cores em e-mails HTML"
+
+#: desktop/org.gnome.Geary.gschema.xml:46
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme."
+msgstr ""
+"Sobrepor a cor original em mensagens HTML para melhor integração com tema do "
+"aplicativo."
+
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Move messages by default"
 msgstr "Mover mensagens por padrão"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:52
 msgid "When tagging a message, move it to destination folder."
 msgstr "Ao marcar uma mensagem, mova-a para a pasta de destino."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid "Use single key shortcuts"
 msgstr "Usar atalhos de tecla única"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:58
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -225,11 +242,11 @@ msgstr ""
 "Habilita atalhos de teclado para ações de e-mail que não exigem pressionar "
 "<Ctrl> para emular aqueles usados pelo Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid "Languages that shall be used in the spell checker"
 msgstr "Idiomas que devem ser usados na verificação ortográfica"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:66
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -237,12 +254,12 @@ msgstr ""
 "Uma lista de localidades POSIX, com a lista vazia desabilitando verificação "
 "ortográfica e a lista nula usando idiomas de desktop por padrão."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid "Languages that are displayed in the spell checker popover"
 msgstr ""
 "Idiomas que são exibidos na janela sobreposta de verificação ortográfica"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:74
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -250,69 +267,69 @@ msgstr ""
 "Lista de idiomas que sempre são exibidos na janela sobreposta da verificação "
 "ortográfica."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "Run application in background on logon and when closed"
 msgstr "Executa o aplicativo em segundo plano ao iniciar sessão e ao fechar"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:80
 msgid "True to run application in background."
 msgstr "Verdadeiro para executar o aplicativo em segundo plano."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "Ask when opening an attachment"
 msgstr "Perguntar ao abrir um anexo"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:86
 msgid "True to ask when opening an attachment."
 msgstr "Verdadeiro para perguntar ao abrir um anexo."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "Whether to compose emails in HTML"
 msgstr "Se deve compor e-mails em HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:92
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "Verdadeiro para compor e-mails em HTML; falso para texto simples."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid "Advisory strategy for full-text searching"
 msgstr "Estratégia consultiva para pesquisa de texto completo"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:98
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Valores aceitáveis são “exact”, “conservative”, “aggressive” e “horizon”."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "Zoom of conversation viewer"
 msgstr "Ampliação do visualizador de conversa"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:104
 msgid "The zoom to apply on the conservation view."
 msgstr "A ampliação a ser aplicada no visualizador de conversa."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "Size of detached composer window"
 msgstr "Tamanho da janela do compositor destacada"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:110
 msgid "The last recorded size of the detached composer window."
 msgstr "O último tamanho registrado da janela do compositor destacada."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Allow images for these domains"
 msgstr "Permitir imagens destes domínios"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Images from these domains will be trusted"
 msgstr "Imagens destes domínios serão confiáveis"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid "Undo sending email delay"
 msgstr "Desfazer atraso de envio de e-mail"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:122
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -320,11 +337,11 @@ msgstr ""
 "O número de segundos para aguardar antes de eenviar um e-mail. Defina para "
 "zero ou menos para desabilitar."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid "Brief notification display time"
 msgstr "Tempo de exibição de notificação breve"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:129
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
@@ -332,19 +349,19 @@ msgstr ""
 "O comprimento de tempo, em segundos, pelo qual as notificações breves devem "
 "ser exibidas."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "List of optional plugins"
 msgstr "Lista de plugins opcionais"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:136
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Plugins listados aqui serão carregados na inicialização."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid "Whether we migrated the old settings"
 msgstr "Se migramos as configurações antigas"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:142
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -967,7 +984,7 @@ msgstr "Lançamento da distribuição"
 msgid "Installation prefix"
 msgstr "Prefixo de lançamento"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:569
 #, c-format
 msgid "About %s"
 msgstr "Sobre %s"
@@ -975,7 +992,7 @@ msgstr "Sobre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:573
 msgid "translator-credits"
 msgstr ""
 "Leonardo Lemos <leonardolemos@live.com>\n"
@@ -986,7 +1003,7 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1102
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argumento do programa não reconhecida “%s”"
@@ -1449,13 +1466,26 @@ msgstr "_Sempre carregar imagens"
 msgid "Showing remote images allows the sender to track you"
 msgstr "Mostrar imagens remotas permite que o remetente monitore você"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "_Sobrepor a cor original em e-mails HTML"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme. Requires restart."
+msgstr ""
+"Sobrepõe a cor original em mensagens HTML para melhor integração com tema do "
+"aplicativo. Requer reinício."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "Preferências"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "Plugins"
 
@@ -2369,70 +2399,76 @@ msgid "This message was sent, but has not been saved to your account."
 msgstr "Essa mensagem foi enviada, mas não pôde ser salva em sua conta."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%b %-e"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Agora"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%dm atrás"
 msgstr[1] "%dm atrás"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%dh atrás"
 msgstr[1] "%dh atrás"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "Ontem"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
