@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary mainline\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2025-06-09 19:33+0000\n"
-"PO-Revision-Date: 2025-06-18 08:20+0800\n"
+"POT-Creation-Date: 2025-06-18 00:22+0000\n"
+"PO-Revision-Date: 2025-06-18 09:04+0800\n"
 "Last-Translator: lumingzh <lumingzh@qq.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -2332,7 +2332,7 @@ msgstr "%H:%M"
 #: src/client/util/util-date.vala:82
 #, no-c-format
 msgid "%b %-e"
-msgstr "%b %-e日"
+msgstr "%m月%-d日"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See https://docs.gtk.org/glib/method.DateTime.format.html
@@ -2418,7 +2418,7 @@ msgstr[0] "%s 和其他 %d 个"
 #. / dd/mm/yyyy) and must include the time zone.
 #: src/client/util/util-email.vala:194
 msgid "%a, %b %-e %Y at %X %Z"
-msgstr "%Y年%b月%-e日 %a %X %Z"
+msgstr "%Y年%-m月%-d日 %a %X %Z"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s
