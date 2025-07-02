@@ -10,9 +10,8 @@ variables:
   # See Infrastructure/Infrastructure#97.
   TEST_ARGS: -t 10
 
-  # Locale used for unit tests. See notes in test/test-engine.vala and
-  # test/test-client.vala.
-  TEST_LOCALE: en_US.UTF-8
+  # Locale used for unit tests
+  TEST_LOCALE: C.UTF-8
 
   # Build
   BUILD_DIR: build

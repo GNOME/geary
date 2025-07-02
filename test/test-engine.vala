@@ -10,12 +10,7 @@ int main(string[] args) {
      * Initialise all the things.
      */
 
-    // Ensure things like e.g. GLib's formatting routines uses a
-    // well-known UTF-8-based locale rather ASCII. Would like to use
-    // C.UTF-8 here, but currently only Debian et al and Fedora ship
-    // it, and as of Fedora 32 they disagree on collation order for
-    // non-ASCII chars.
-    GLib.Intl.setlocale(LocaleCategory.ALL, "en_US.UTF-8");
+    GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
 
     Test.init(ref args);
 
