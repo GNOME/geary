@@ -121,5 +121,5 @@ sudo apt-get install libmessaging-menu-dev
 ```
 
 ---
-Copyright © 2016 Software Freedom Conservancy Inc.  
+Copyright © 2016 Software Freedom Conservancy Inc.
 Copyright © 2018-2020 Michael Gratton <mike@vee.net>
