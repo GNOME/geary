@@ -218,6 +218,15 @@ endif
 
 files(iso_639_xml, iso_3166_xml) # Check to make sure these exist
 
+# Make sure the locale C.UTF-8 is installed on the system
+
+c_utf8_check = run_command('locale', '-a', check: true).stdout()
+have_c_utf8 = 'C.utf8' in c_utf8_check.split('\n')
+
+if not have_c_utf8
+  warning('C.utf8 locale not available on this system.')
+endif
+
 # Post-install script
 gnome.post_install(
   gtk_update_icon_cache: true,
