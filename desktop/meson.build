@@ -48,18 +48,18 @@ foreach desktop_file: desktop_output
 endforeach
 
 #
-# Appdata file
+# Metainfo file
 #
 
-appdata_file = 'org.gnome.Geary.appdata.xml'
+metainfo_file = 'org.gnome.Geary.metainfo.xml'
 
-appdata_merged = i18n.merge_file(
+metainfo_merged = i18n.merge_file(
   input: configure_file(
-    input: appdata_file + '.in.in',
-    output: appdata_file + '.in',
+    input: metainfo_file + '.in.in',
+    output: metainfo_file + '.in',
     configuration: desktop_conf
   ),
-  output: '@0@.appdata.xml'.format(geary_id),
+  output: '@0@.metainfo.xml'.format(geary_id),
   type: 'xml',
   po_dir: po_dir,
   install: true,
@@ -68,13 +68,13 @@ appdata_merged = i18n.merge_file(
 
 if appstreamcli.found()
   test(
-    appdata_file + '-validate',
+    metainfo_file + '-validate',
     appstreamcli,
     args: [
-      'validate', '--no-net', '--explain', appdata_merged.full_path()
+      'validate', '--no-net', '--explain', metainfo_merged.full_path()
     ],
     depends: [
-      appdata_merged,
+      metainfo_merged,
     ]
   )
 endif

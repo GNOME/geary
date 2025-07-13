@@ -2,9 +2,9 @@
 # Please keep this file sorted alphabetically.
 desktop/geary-attach.contract.desktop.in
 desktop/geary-autostart.desktop.in.in
-desktop/org.gnome.Geary.appdata.xml.in.in
 desktop/org.gnome.Geary.desktop.in.in
 desktop/org.gnome.Geary.gschema.xml
+desktop/org.gnome.Geary.metainfo.xml.in.in
 src/client/accounts/accounts-editor.vala
 src/client/accounts/accounts-editor-add-pane.vala
 src/client/accounts/accounts-editor-edit-pane.vala
