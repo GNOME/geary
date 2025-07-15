@@ -143,13 +143,12 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         db.exec("""
             CREATE TABLE Test (id INTEGER PRIMARY KEY, test_str TEXT);
             INSERT INTO Test (test_str) VALUES ('a');
-            INSERT INTO Test (test_str) VALUES ('b');
             INSERT INTO Test (test_str) VALUES ('B');
             INSERT INTO Test (test_str) VALUES ('BB');
-            INSERT INTO Test (test_str) VALUES ('á');
+            INSERT INTO Test (test_str) VALUES ('🤯');
         """);
 
-        string[] expected = { "BB", "B", "b", "á", "a" };
+        string[] expected = { "🤯", "a", "BB", "B" };
         Db.Result result = db.query(
             "SELECT test_str FROM Test ORDER BY test_str COLLATE UTF8COLL DESC"
         );
