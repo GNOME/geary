@@ -67,9 +67,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
 
     private static WebKit.WebContext? default_context = null;
 
-    private static List<WebKit.UserStyleSheet> styles = new List<WebKit.UserStyleSheet>();
+    private static GenericArray<WebKit.UserStyleSheet> styles = null;
 
-    private static List<WebKit.UserScript> scripts = new List<WebKit.UserScript>();
+    private static GenericArray<WebKit.UserScript> scripts = null;
 
 
     /**
@@ -126,14 +126,18 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
      */
     public static void load_resources(GLib.File user_dir)
         throws GLib.Error {
-        WebView.scripts.append(load_app_script("darkreader.js"));
-        WebView.scripts.append(load_app_script("components-web-view.js"));
-        WebView.styles.append(load_app_stylesheet("components-web-view.css"));
+        // Initialize, or overwrite any user scripts/styles we've loaded before
+        WebView.scripts = new GenericArray<WebKit.UserScript>();
+        WebView.styles = new GenericArray<WebKit.UserStyleSheet>();
+
+        WebView.scripts.add(load_app_script("darkreader.js"));
+        WebView.scripts.add(load_app_script("components-web-view.js"));
+        WebView.styles.add(load_app_stylesheet("components-web-view.css"));
 
         foreach (string name in new string[] { USER_CSS, USER_CSS_LEGACY }) {
             GLib.File stylesheet = user_dir.get_child(name);
             try {
-                WebView.styles.append(load_user_stylesheet(stylesheet));
+                WebView.styles.add(load_user_stylesheet(stylesheet));
                 break;
             } catch (GLib.IOError.NOT_FOUND err) {
                 // All good, try the next one or just exit
@@ -352,7 +356,9 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
              custom_manager ?? new WebKit.UserContentManager();
 
         if (config.unset_html_colors) {
-            WebView.scripts.append(
+            if (WebView.scripts == null)
+                WebView.scripts = new GenericArray<WebKit.UserScript>();
+            WebView.scripts.add(
                 new WebKit.UserScript(
                     "window.UNSET_HTML_COLORS = true;",
                     WebKit.UserContentInjectedFrames.TOP_FRAME,
@@ -363,8 +369,12 @@ public abstract class Components.WebView : WebKit.WebView, Geary.BaseInterface {
             );
         }
 
-        WebView.scripts.foreach(script => content_manager.add_script(script));
-        WebView.styles.foreach(style => content_manager.add_style_sheet(style));
+        if (WebView.scripts != null) {
+            WebView.scripts.foreach(script => content_manager.add_script(script));
+        }
+        if (WebView.styles != null) {
+            WebView.styles.foreach(style => content_manager.add_style_sheet(style));
+        }
 
         Object(
             settings: setts,
