@@ -5,128 +5,67 @@
 #
 # Translators:
 # Hessam.08 <h.shahpouri@yandex.com>, 2013.
-# Danial Behzadi <dani.behzi@ubuntu.com>, 2024.
+# Danial Behzadi <dani.behzi@ubuntu.com>, 2024-2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-03-15 13:03+0330\n"
+"POT-Creation-Date: 2025-07-21 08:41+0000\n"
+"PO-Revision-Date: 2025-07-29 13:56+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
-"Language-Team: Persian (http://www.transifex.com/projects/p/geary/language/"
-"fa/)\n"
+"Language-Team: Persian (http://www.transifex.com/projects/p/geary/language/fa/)\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-DamnedLies-Scope: partial\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.6\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "فرستادن با رایانامه"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "فرستادن پرونده‌ها با گیری"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2 desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "گیری"
 
-#: desktop/geary-autostart.desktop.in.in:4 desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3 desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "رایانامه"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
+#: desktop/geary-autostart.desktop.in.in:4 desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
 #: src/client/application/application-client.vala:33
 msgid "Send and receive email"
 msgstr "فرستادن و گرفتن رایانامه"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;رایانامه;ای‌میل;میل;پست;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "گروه توسعهٔ گیری"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"گیری برنامهٔ رایانامه‌ای ساخته برای میزکار گنوم حول گفت‌وگوست. این برنامه می‌گذارد "
-"رایانامه‌ها را با رابطی ساده و نوین خوانده، جسته و بفرستید."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr "گفت‌وگوها می‌گذارد بحثی را بدون نیاز به یافتن و کلیک پیام به پیام بخوانید."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "ویژگی‌های گیری شامل:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "برپایی حساب رایانامهٔ سریع"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "نمایش پیام‌های مربوط به هم در گفت‌گوها"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "جست‌وجوی سریع کلیدواژه‌ای و متن کامل"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "پیام‌نویس متن خام و HTML با امکانات کامل"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "آگاهی میزکار برای نامهٔ جدید"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "سازگار با جی‌میل، یاهو!، اوت‌لوک و دیگر کارسازهای IMAP"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "گیری در حال نمایش یک گفت‌وگو"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "گیری در حال نمایش متن‌نویس متن غنی"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;نامه;رایانامه;ای‌میل;پست;"
-"جی‌میل;یاهو;هات‌میل;اوت‌لوک;"
+"Mail;E-"
+"mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;نامه;رایانامه;ای‌میل;پست;جی‌میل;یاهو;هات‌میل;اوت‌لوک;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "نوشتن پیام"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "پنجرهٔ جدید"
 
@@ -152,7 +91,7 @@ msgstr "بلندای پنجره"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
-msgstr "آخرین بلندای ضبطش شدهٔ پنجرهٔ برنامه."
+msgstr "آخرین بلندای ضبط شدهٔ پنجرهٔ برنامه."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Show/hide formatting toolbar"
@@ -179,18 +118,28 @@ msgid "True if we should display a short preview of each message."
 msgstr "درست برای نمایش پیش‌نمایشی کوتاه برای هر پیام."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Override colors in HTML emails"
+msgstr "پایمالی رنگ‌ها در رایانامه‌های HTML"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the app "
+"theme."
+msgstr "پایمالی رنگ‌های اصلی در پیام‌ّای HTML برای یکپارچگی بهتر با زمینهٔ کاره."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "جابه‌جایی پیش‌گزیدهٔ پیام‌ها"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "جابه‌جایی پیام به شاخهٔ مقصد هنگام برچسب زدن."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "استفاده از میان‌برهای تک‌کلیده"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -198,89 +147,88 @@ msgstr ""
 "به کار انداختن میان‌برها برای کنش‌های رایانامه که نیاز به فشردن <Ctrl>ندارند برای "
 "شبیه‌سازی میان برهای جی‌میل."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "زبان‌هایی که باید در بازرس املایی استفاده شوند"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and the "
 "null list using desktop languages by default."
 msgstr ""
-"سیاهه‌ای از localeهای پازیکس. سیاههٔ خالی بررسی نوشتاری از کار انداخته و سیاههٔ "
-"تهی به صورت پیش‌گزیده از زبان‌های میزکار استفاده خواهد کرد."
+"سیاهه‌ای از localeهای پازیکس. سیاههٔ خالی بررسی نوشتاری از کار انداخته و سیاههٔ تهی "
+"به صورت پیش‌گزیده از زبان‌های میزکار استفاده خواهد کرد."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "زبان‌هایی که در بازشوی بازرس املایی نشان داده می‌شوند"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell checker."
 msgstr "سیاههٔ زبان‌هایی که همواره در بازشوی بازرس املایی نشان داده می‌شوند."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr "اجرای برنامه در پس‌زمینه هنگام ورود و بسته بودن"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "درست برای اجرای برنامه در پس‌زمینه."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "پرسش هنگام گشودن یک پیوست"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "درست برای پرسیدن هنگام گشودن پیوست."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "این که رایانامه‌ها به صورت HTML نوشته شوند یا نه"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr "درست برای ایجاد رایانامه‌ها به صورت HTML؛ نادرست برای متن خام."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "تدبیر مشورتی برای جست‌وجوی متن کامل"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
-msgid ""
-"Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
+#: desktop/org.gnome.Geary.gschema.xml:97
+msgid "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr "مقدارهای مجاز exact، conservative، aggressive و horizon هستند."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "بزرگ‌نمایی نمایشگر گفت‌وگو"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "بزرگ‌نمایی اعمالی بر نمای گفت‌وگو."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "اندازهٔ پنجرهٔ نویسندهٔ جدا شده"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "آخرین اندازهٔ ثبت شدهٔ پنجرهٔ جدا شدهٔ ایجاد."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "اجازه به تصویرها برای این دامنه"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "تصویرها از این دامنه مورد اعتمادند"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "بازگردانی وقفهٔ فرستادن رایانامه"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less to "
 "disable."
@@ -288,30 +236,88 @@ msgstr ""
 "شمار ثانیه‌های انتظار پیش از فرستادن رایانامه. تنظیم روی صفر یا کم‌تر برای از کار "
 "انداختن."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "زمان نمایش آگاهی کوتاه"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be displayed."
 msgstr "درازای زمان به ثانیه برای نمایش آگاهی‌های کوتاه."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "سیاههٔ افزایه‌های اختیاری"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr "افزایه‌های سیاهه شده در این‌جا هنگام آغاز بار خواهند شد."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "این که تنظیمات قدیمی را مهاجرت داده‌ایم یا نه"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr "نادرست برای بررسی طرحوارهٔ قدیمی org.yorba.geary و رونوشت مقدارهایش."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "گروه توسعهٔ گیری"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME desktop. "
+"It allows you to read, find and send email with a straightforward, modern "
+"interface."
+msgstr ""
+"گیری برنامهٔ رایانامه‌ای ساخته برای میزکار گنوم حول گفت‌وگوست. این برنامه می‌گذارد "
+"رایانامه‌ها را با رابطی ساده و نوین خوانده، جسته و بفرستید."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find and "
+"click from message to message."
+msgstr "گفت‌وگوها می‌گذارد بحثی را بدون نیاز به یافتن و کلیک پیام به پیام بخوانید."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "ویژگی‌های گیری شامل:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "برپایی حساب رایانامهٔ سریع"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "نمایش پیام‌های مربوط به هم در گفت‌گوها"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "جست‌وجوی سریع کلیدواژه‌ای و متن کامل"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "پیام‌نویس متن خام و HTML با امکانات کامل"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "آگاهی میزکار برای نامهٔ جدید"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "سازگار با جی‌میل، یاهو!، اوت‌لوک و دیگر کارسازهای IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:51
+msgid "Geary displaying a conversation"
+msgstr "گیری در حال نمایش یک گفت‌وگو"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:56
+msgid "Geary showing the rich text composer"
+msgstr "گیری در حال نمایش متن‌نویس متن غنی"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -472,8 +478,8 @@ msgid ""
 "This will remove it from Geary and delete locally cached email data from your "
 "computer. Nothing will be deleted from your service provider."
 msgstr ""
-"این کار از گیری برش داشته و داده‌های رایانامهٔ انباره شدهٔ محلی را از رایانه‌تان "
-"حذف خواهد کرد. هیچ چیزی از فراهم کنندهٔ خدمتتان حذف نخواهد شد."
+"این کار از گیری برش داشته و داده‌های رایانامهٔ انباره شدهٔ محلی را از رایانه‌تان حذف "
+"خواهد کرد. هیچ چیزی از فراهم کنندهٔ خدمتتان حذف نخواهد شد."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
 #: src/client/components/stock.vala:19
@@ -786,8 +792,7 @@ msgstr "پرونده‌ای با نام «%s» از قبل وجود دارد.  �
 #. / folder's name.
 #: src/client/application/application-attachment-manager.vala:229
 #, c-format
-msgid ""
-"The file already exists in “%s”.  Replacing it will overwrite its contents."
+msgid "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "پرونده از قبل در «%s» وجود دارد.  با جایگزینی آن تمام محتوایش بازنویسی می‌شود."
 
@@ -928,7 +933,7 @@ msgstr "ارائه توزیع"
 msgid "Installation prefix"
 msgstr "پیشوند نصب"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:569
 #, c-format
 msgid "About %s"
 msgstr "دربارهٔ %s"
@@ -936,7 +941,7 @@ msgstr "دربارهٔ %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:573
 msgid "translator-credits"
 msgstr ""
 "دانیال بهزادی <dani.behzi@ubuntu.com>\n"
@@ -944,7 +949,7 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1102
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "آرگومان برنامهٔ ناشناخته: «%s»"
@@ -1066,8 +1071,8 @@ msgid ""
 "\n"
 "Geary can rebuild the database and re-synchronize with the server or exit.\n"
 "\n"
-"Rebuilding the database will destroy all local email and its attachments. "
-"<b>The mail on the your server will not be affected.</b>"
+"Rebuilding the database will destroy all local email and its attachments. <b>The "
+"mail on the your server will not be affected.</b>"
 msgstr ""
 "خطایی در هنگام گشودن پایگاه دادهٔ محلی رایانامه برای این حساب وجود دارد. این "
 "احتمالاً به خاطر وجود خرابی در فایل پایگاه داده در پوشهٔ زیر است:\n"
@@ -1269,8 +1274,8 @@ msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr ""
-"ممکن است گشودن پیوست‌ها به سامانه‌تان آسیب بزند.  فقط پرونده‌هایی از منابع مطمئن "
-"را بگشایید."
+"ممکن است گشودن پیوست‌ها به سامانه‌تان آسیب بزند.  فقط پرونده‌هایی از منابع مطمئن را "
+"بگشایید."
 
 #: src/client/components/components-attachment-pane.vala:375
 msgid "Don’t _ask me again"
@@ -1405,13 +1410,26 @@ msgstr "_بار کردن همیشگی تصویرها"
 msgid "Showing remote images allows the sender to track you"
 msgstr "نمایش تصویرهای دوردست می‌گذارد فرستنده ردیابیتان کند"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "_پایمالی رنگ‌های اصلی در رایانامه‌های HTML"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the app "
+"theme. Requires restart."
+msgstr ""
+"پایمالی رنگ‌های اصلی در پیام‌ّای HTML برای یکپارچگی بهتر با زمینهٔ کاره. نیازمند "
+"آغاز دوباره."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "ترجیحات"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "افزایه‌ها"
 
@@ -2154,11 +2172,11 @@ msgid_plural "New messages"
 msgstr[0] "پیام جدید"
 msgstr[1] "پیام‌های جدید"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "قالب‌های رایانامه"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "ایجاد قالب‌های قابل استفادهٔ دوبارخ برای رایانامه‌های ارسالی"
 
@@ -2210,14 +2228,14 @@ msgstr "ویرایش"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "ادغام نامه"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr "پر کردن و فرستادن قالب‌های رایانامه با استفاده از صفحهٔ گسترده"
 
@@ -2266,11 +2284,11 @@ msgstr "درج زمینه"
 msgid "Comma separated values (CSV)"
 msgstr "مقدارهای جدا شده با کاما (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "فهرست پیام‌رسانی"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "نمایش آگاهی‌های فهرست پیام‌رسانی یونیتی برای رایانامهٔ جدید"
 
@@ -2279,11 +2297,11 @@ msgstr "نمایش آگاهی‌های فهرست پیام‌رسانی یونی
 msgid "%s — New Messages"
 msgstr "%s - پیام‌های جدید"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "صدای ارسال"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "پخش صدای ارسال نامهٔ میزکار هنگام فرستاده شدن یک رایانامه"
 
@@ -2317,70 +2335,76 @@ msgid "This message was sent, but has not been saved to your account."
 msgstr "این پیام فرستاده شده، ولی در حسابتان ذخیره نشده."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%l:%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%-e %B"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "اکنون"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%Idد پیش"
 msgstr[1] "%Idد پیش"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%Id س پیش"
 msgstr[1] "%Id س پیش"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "دیروز"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
@@ -2406,7 +2430,7 @@ msgstr "(بدون گیرنده)"
 #, c-format
 msgid "%s and %d other"
 msgid_plural "%s and %d others"
-msgstr[0] "%s و %Idتای دیگر"
+msgstr[0] "%s‏ و %Id نفر دیگر"
 msgstr[1] "%s و %Idتای دیگر"
 
 #. / GLib g_date_time_format format string for the date and
@@ -2436,7 +2460,7 @@ msgstr "در %1$s, %2$s نوشته بود:"
 #: src/client/util/util-email.vala:211
 #, c-format
 msgid "%s wrote:"
-msgstr "%s نوشته است:"
+msgstr "‏%s‏ نوشته:"
 
 #. / The quoted header for a message being replied to
 #. / (in case the sender is not known).  %s will be
@@ -2448,7 +2472,7 @@ msgstr "در %s:"
 
 #: src/client/util/util-email.vala:253
 msgid "---------- Forwarded message ----------"
-msgstr "---------- پیام ارسال مجدد شده ----------"
+msgstr "---------- پیام هدایت شده ----------"
 
 #. / Translators: Can be typed in the search box like
 #. / "attachment:file.txt" to find messages with attachments
@@ -2727,8 +2751,8 @@ msgstr ""
 #: src/engine/imap-engine/imap-engine-generic-account.vala:1049
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr ""
-"Trash | Rubbish | Rubbish Bin ‌| زباله | زباله دان | زباله‌دان | سطل زباله | "
-"آشغال | سطل آشغال"
+"Trash | Rubbish | Rubbish Bin ‌| زباله | زباله دان | زباله‌دان | سطل زباله | آشغال "
+"| سطل آشغال"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
@@ -2761,7 +2785,7 @@ msgstr "(بدون موضوع)"
 
 #: ui/accounts_editor_add_pane.ui:7 ui/accounts_editor_list_pane.ui:13
 msgid "Add an account"
-msgstr "افزودن یک حساب"
+msgstr "افزودن حساب"
 
 #: ui/accounts_editor_add_pane.ui:13 ui/accounts_editor_edit_pane.ui:18
 #: ui/components-headerbar-conversation-list.ui:13
@@ -2773,11 +2797,11 @@ msgstr "بازگشت"
 
 #: ui/accounts_editor_add_pane.ui:116 ui/accounts_editor_servers_pane.ui:115
 msgid "Receiving"
-msgstr "دریافت"
+msgstr "گرفتن"
 
 #: ui/accounts_editor_add_pane.ui:156 ui/accounts_editor_servers_pane.ui:151
 msgid "Sending"
-msgstr "اراسل"
+msgstr "فرستادن"
 
 #: ui/accounts_editor_edit_pane.ui:7
 msgid "Edit Account"
@@ -3107,15 +3131,15 @@ msgstr "تغییر وضعیت نوار یافتن"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
-"If the problem is serious or persists, please save and send these details to "
-"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
-"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"If the problem is serious or persists, please save and send these details to one "
+"of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact channels</"
+"a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
 "ReportingABug\">new bug report</a>."
 msgstr ""
-"اگر مشکل مداوم یا جدی بود لطفاً این جزییات را ذخیره و به یکی از <a "
-"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">کانال‌های تماس</a> فرستاده یا "
-"به <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">گزارش مشکل "
-"جدیدی</a> پیوست کنید."
+"اگر مشکل مداوم یا جدی بود لطفاً این جزییات را ذخیره و به یکی از <a href=\"https://"
+"wiki.gnome.org/Apps/Geary/Contact\">کانال‌های تماس</a> فرستاده یا به <a "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">گزارش مشکل جدیدی</a> "
+"پیوست کنید."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3125,7 +3149,7 @@ msgstr "جزییات:"
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:16 ui/problem-details-dialog.ui:21
 msgid "Search for matching log entries"
-msgstr "جست‌وجو برای ورودی‌هی گزارش مطابق"
+msgstr "جست‌وجو برای ورودی‌های گزارش مطابق"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:30
@@ -3152,7 +3176,7 @@ msgstr "رونوشت به تخته‌گیره"
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:107
 msgid "Clears all log entries"
-msgstr "پاک‌سازی همهٔ ورودی‌های کزارش"
+msgstr "پاک‌سازی همهٔ ورودی‌های گزارش"
 
 #: ui/components-menu-application.ui:6
 msgid "_Accounts"
@@ -3688,11 +3712,11 @@ msgstr "نام کاربری"
 
 #: ui/password-dialog.glade:140
 msgid "_Remember password"
-msgstr "_به خاطر سپاری گذرواژه"
+msgstr "به _خاطر سپردن گذرواژه"
 
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
-msgstr "_تأیید هویت"
+msgstr "_هویت‌سنجی"
 
 #, c-format
 #~ msgid "Email to %s saved"
@@ -3796,8 +3820,7 @@ msgstr "_تأیید هویت"
 #~ "span> "
 
 #~ msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
-#~ msgstr ""
-#~ "<span weight=\"bold\" size=\"larger\">امکان حذف حساب وجود ندارد</span> "
+#~ msgstr "<span weight=\"bold\" size=\"larger\">امکان حذف حساب وجود ندارد</span> "
 
 #~ msgid ""
 #~ "A composer window associated with this account is currently open. Send or "
@@ -3816,8 +3839,8 @@ msgstr "_تأیید هویت"
 #~ "All email associated with this account will be removed from your computer. "
 #~ "This will not affect email on the server."
 #~ msgstr ""
-#~ "همه‌ی ایمیل‌های مربوط به این حساب از روی کامپیوتر شما حذف خواهند شد. این "
-#~ "عملیات بر ایمیل‌های روی سرور تأثیری نخواهد داشت."
+#~ "همه‌ی ایمیل‌های مربوط به این حساب از روی کامپیوتر شما حذف خواهند شد. این عملیات "
+#~ "بر ایمیل‌های روی سرور تأثیری نخواهد داشت."
 
 #~ msgid "Allow inspection of WebView"
 #~ msgstr "اجازه‌ی بازرسی از WebView"
@@ -3896,8 +3919,8 @@ msgstr "_تأیید هویت"
 #~ msgstr "از: %s\n"
 
 #~ msgid ""
-#~ "Geary encountered an error sending an email.  If the problem persists, "
-#~ "please manually delete the email from your Outbox folder."
+#~ "Geary encountered an error sending an email.  If the problem persists, please "
+#~ "manually delete the email from your Outbox folder."
 #~ msgstr ""
 #~ "Geary در هنگام ارسال یک ایمیل با خطا مواجه شد. اگر مشکل همچنان ادامه دارد، "
 #~ "لطفاً ایمیل را به صورت دستی از صندوق خروجی حذف نمایید."
@@ -4050,8 +4073,8 @@ msgstr "_تأیید هویت"
 #~ "Please install the latest version of Geary and try again."
 #~ msgstr ""
 #~ "شماره‌ی نگارش پایگاه داده‌ی محلی ایمیل برای نگارش جدیدتر Geary فرمت بندی شده "
-#~ "است. متأسفانه، امکان بازگرداندن پایگاه داده به فرمت قدیمی برای خواند شدن "
-#~ "توسط این نگارش از Geary وجود ندارد.\n"
+#~ "است. متأسفانه، امکان بازگرداندن پایگاه داده به فرمت قدیمی برای خواند شدن توسط "
+#~ "این نگارش از Geary وجود ندارد.\n"
 #~ "\n"
 #~ "لطفاً آخرین نگارش از Geary را نصب کرده و مجدداً تلاش نمایید."
 
