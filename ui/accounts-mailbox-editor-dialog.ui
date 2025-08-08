@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="AccountsMailboxEditorDialog" parent="AdwDialog">
+    <property name="child">
+      <object class="AdwToolbarView">
+
+        <child type="top">
+          <object class="AdwHeaderBar" id="header">
+            <property name="show-start-title-buttons">False</property>
+            <property name="show-end-title-buttons">False</property>
+
+            <child>
+              <object class="GtkButton" id="cancel_button">
+                <property name="label" translatable="yes">_Cancel</property>
+                <property name="use-underline">True</property>
+                <property name="action-name">win.close</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="apply_button">
+                <property name="label" translatable="yes">_Apply</property>
+                <property name="use-underline">True</property>
+                <property name="sensitive">False</property>
+                <property name="receives_default">True</property>
+                <property name="action-name">apply</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <property name="content">
+          <object class="AdwPreferencesPage">
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="AdwEntryRow" id="name_row">
+                    <!-- Translators: Label used for the display name part of an email address when editing a user's sender address preferences for an account -->
+                    <property name="title" translatable="yes">Sender Name</property>
+                    <property name="width-chars">20</property>
+                    <signal name="changed" handler="on_name_changed"/>
+                    <signal name="activate" handler="on_entry_activate"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwEntryRow" id="address_row">
+                    <!-- Translators: Label used for the address part of an email address when editing a user's sender address preferences for an account -->
+                    <property name="title" translatable="yes">Email Address</property>
+                    <property name="input-purpose">email</property>
+                    <property name="width-chars">20</property>
+                    <signal name="changed" handler="on_address_changed"/>
+                    <signal name="activate" handler="on_entry_activate"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <child>
+                  <object class="GtkButton" id="remove_button">
+                    <property name="label" translatable="yes">Remove</property>
+                    <property name="action-name">remove</property>
+                    <property name="visible"
+                      bind-source="remove_button" bind-property="sensitive"
+                      bind-flags="sync-create"/>
+                    <style>
+                      <class name="destructive-action"/>
+                      <class name="pill"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

@@ -83,9 +83,9 @@ public class Composer.LinkPopover : Gtk.Popover {
         this.url.grab_focus();
     }
 
-    public override void destroy() {
+    public override void dispose() {
         this.validation_timeout.reset();
-        base.destroy();
+        base.dispose();
     }
 
     public void set_link_url(string url) {
@@ -129,25 +129,24 @@ public class Composer.LinkPopover : Gtk.Popover {
             }
         }
 
-        Gtk.StyleContext style = this.url.get_style_context();
         Gtk.EntryIconPosition pos = Gtk.EntryIconPosition.SECONDARY;
         if (!is_valid) {
-            style.add_class(Gtk.STYLE_CLASS_ERROR);
-            style.remove_class(Gtk.STYLE_CLASS_WARNING);
+            this.url.add_css_class("error");
+            this.url.remove_css_class("warning");
             this.url.set_icon_from_icon_name(pos, "dialog-error-symbolic");
             this.url.set_tooltip_text(
                 _("Link URL is not correctly formatted, e.g. http://example.com")
             );
         } else if (!is_nominal) {
-            style.remove_class(Gtk.STYLE_CLASS_ERROR);
-            style.add_class(Gtk.STYLE_CLASS_WARNING);
+            this.url.remove_css_class("error");
+            this.url.add_css_class("warning");
             this.url.set_icon_from_icon_name(pos, "dialog-warning-symbolic");
             this.url.set_tooltip_text(
                 !is_mailto ? _("Invalid link URL") : _("Invalid email address")
             );
         } else {
-            style.remove_class(Gtk.STYLE_CLASS_ERROR);
-            style.remove_class(Gtk.STYLE_CLASS_WARNING);
+            this.url.remove_css_class("error");
+            this.url.remove_css_class("warning");
             this.url.set_icon_from_icon_name(pos, null);
             this.url.set_tooltip_text("");
         }

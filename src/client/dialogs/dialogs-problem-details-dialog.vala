@@ -9,10 +9,9 @@
  * Displays technical details when a problem has been reported.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/problem-details-dialog.ui")]
-public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
+public class Dialogs.ProblemDetailsDialog : Adw.Dialog {
 
 
-    private const string ACTION_CLOSE = "problem-details-close";
     private const string ACTION_SEARCH_TOGGLE = "toggle-search";
     private const string ACTION_SEARCH_ACTIVATE = "activate-search";
 
@@ -21,14 +20,11 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
     };
 
     private const ActionEntry[] WINDOW_ACTIONS = {
-        { Action.Window.CLOSE, on_close },
-        { ACTION_CLOSE, on_close },
         { ACTION_SEARCH_TOGGLE, on_logs_search_toggled, null, "false" },
         { ACTION_SEARCH_ACTIVATE, on_logs_search_activated },
     };
 
     public static void add_accelerators(Application.Client app) {
-        app.add_window_accelerators(ACTION_CLOSE, { "Escape" } );
         app.add_window_accelerators(ACTION_SEARCH_ACTIVATE, { "<Ctrl>F" } );
     }
 
@@ -48,14 +44,8 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
     private Geary.ServiceInformation? service;
 
 
-    public ProblemDetailsDialog(Gtk.Window? parent,
-                                Application.Client application,
+    public ProblemDetailsDialog(Application.Client application,
                                 Geary.ProblemReport report) {
-        Object(
-            transient_for: parent,
-            use_header_bar: 1
-        );
-
         Geary.AccountProblemReport? account_report =
             report as Geary.AccountProblemReport;
         Geary.ServiceProblemReport? service_report =
@@ -79,9 +69,7 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
             error, account, service
         );
 
-        this.log_pane = new Components.InspectorLogView(
-            application.config, account
-        );
+        this.log_pane = new Components.InspectorLogView(account);
         this.log_pane.load(report.earliest_log, report.latest_log);
         this.log_pane.record_selection_changed.connect(
             on_logs_selection_changed
@@ -101,11 +89,15 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
         this.stack.add_titled(this.system_pane, "system_pane", _("System"));
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
+    [GtkCallback]
+    private bool on_key_pressed(Gtk.EventControllerKey controller,
+                                uint keyval,
+                                uint keycode,
+                                Gdk.ModifierType state) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
         if (this.log_pane.search_mode_enabled &&
-            event.keyval == Gdk.Key.Escape) {
+            keyval == Gdk.Key.Escape) {
             // Manually deactivate search so the button stays in sync
             this.search_button.set_active(false);
             ret = Gdk.EVENT_STOP;
@@ -115,18 +107,19 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
             this.log_pane.search_mode_enabled) {
             // Ensure <Space> and others are passed to the search
             // entry before getting used as an accelerator.
-            ret = this.log_pane.handle_key_press(event);
+            ret = controller.forward(this.log_pane);
         }
 
-        if (ret == Gdk.EVENT_PROPAGATE) {
-            ret = base.key_press_event(event);
-        }
+        //XXX GTK4 not sure how to handle this
+        // if (ret == Gdk.EVENT_PROPAGATE) {
+        //     ret = base.key_press_event(event);
+        // }
 
         if (ret == Gdk.EVENT_PROPAGATE &&
             !this.log_pane.search_mode_enabled) {
             // Nothing has handled the event yet, and search is not
             // active, so see if we want to activate it now.
-            ret = this.log_pane.handle_key_press(event);
+            ret = controller.forward(this.log_pane);
             if (ret == Gdk.EVENT_STOP) {
                 this.search_button.set_active(true);
             }
@@ -135,10 +128,9 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
         return ret;
     }
 
-    private async void save(string path,
+    private async void save(GLib.File dest,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
-        GLib.File dest = GLib.File.new_for_path(path);
         GLib.FileIOStream dest_io = yield dest.replace_readwrite_async(
             null,
             false,
@@ -207,39 +199,29 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
 
         string clipboard_value = (string) bytes.get_data();
         if (!Geary.String.is_empty(clipboard_value)) {
-            get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
+            get_clipboard().set_text(clipboard_value);
         }
     }
 
     [GtkCallback]
     private void on_save_as_clicked() {
-        Gtk.FileChooserNative chooser = new Gtk.FileChooserNative(
-            _("Save As"),
-            this,
-            Gtk.FileChooserAction.SAVE,
-            _("Save As"),
-            _("Cancel")
-        );
-        chooser.set_current_name(
-            new GLib.DateTime.now_local().format(
-                "Geary Problem Report - %F %T.txt"
-            )
+        save_as.begin();
+    }
+
+    private async void save_as() {
+        var dialog = new Gtk.FileDialog();
+        dialog.title = _("Save As");
+        dialog.accept_label = _("Save As");
+        dialog.initial_name = new DateTime.now_local().format(
+            "Geary Problem Report - %F %T.txt"
         );
 
-        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
-            this.save.begin(
-                chooser.get_filename(),
-                null,
-                (obj, res) => {
-                    try {
-                        this.save.end(res);
-                    } catch (GLib.Error err) {
-                        warning(
-                            "Failed to save problem report data: %s", err.message
-                        );
-                    }
-                }
-            );
+        try {
+            File? file = yield dialog.save(get_root() as Gtk.Window, null);
+            if (file != null)
+                yield this.save(file, null);
+        } catch (Error err) {
+            warning("Failed to save problem report data: %s", err.message);
         }
     }
 
@@ -257,9 +239,4 @@ public class Dialogs.ProblemDetailsDialog : Gtk.Dialog {
     private void on_logs_search_activated() {
         this.search_button.set_active(true);
     }
-
-    private void on_close() {
-        destroy();
-    }
-
 }

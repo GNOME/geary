@@ -9,14 +9,8 @@
  * An account editor pane for editing a specific account's preferences.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_edit_pane.ui")]
-internal class Accounts.EditorEditPane :
-    Gtk.Grid, EditorPane, AccountPane, CommandPane {
+internal class Accounts.EditorEditPane : EditorPane, AccountPane, CommandPane {
 
-
-    /** {@inheritDoc} */
-    internal Gtk.Widget initial_widget {
-        get { return this.details_list.get_row_at_index(0); }
-    }
 
     /** {@inheritDoc} */
     internal Geary.AccountInformation account { get ; protected set; }
@@ -27,32 +21,28 @@ internal class Accounts.EditorEditPane :
     }
 
     /** {@inheritDoc} */
-    internal bool is_operation_running { get; protected set; default = false; }
+    internal override bool is_operation_running { get; protected set; default = false; }
 
     /** {@inheritDoc} */
-    internal GLib.Cancellable? op_cancellable {
+    internal override Cancellable? op_cancellable {
         get; protected set; default = null;
     }
 
     /** {@inheritDoc} */
-    protected weak Accounts.Editor editor { get; set; }
+    protected override weak Accounts.Editor editor { get; set; }
 
-    [GtkChild] private unowned Gtk.HeaderBar header;
+    [GtkChild] private unowned Adw.HeaderBar header;
 
-    [GtkChild] private unowned Gtk.Grid pane_content;
-
-    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
-
-    [GtkChild] private unowned Gtk.ListBox details_list;
+    [GtkChild] private unowned Adw.EntryRow display_name_row;
 
     [GtkChild] private unowned Gtk.ListBox senders_list;
 
-    [GtkChild] private unowned Gtk.Frame signature_frame;
+    [GtkChild] private unowned Adw.PreferencesGroup signature_bin;
 
     private SignatureWebView signature_preview;
     private bool signature_changed = false;
 
-    [GtkChild] private unowned Gtk.ListBox settings_list;
+    [GtkChild] private unowned Adw.ComboRow email_prefetch_row;
 
     [GtkChild] private unowned Gtk.Button undo_button;
 
@@ -63,24 +53,15 @@ internal class Accounts.EditorEditPane :
         this.editor = editor;
         this.account = account;
 
-        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
+        update_display_name();
 
-        this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(
-            new DisplayNameRow(account, this.commands, this.op_cancellable)
-        );
-
-        this.senders_list.set_header_func(Editor.seperator_headers);
         foreach (Geary.RFC822.MailboxAddress sender in
                  account.sender_mailboxes) {
-            this.senders_list.add(new_mailbox_row(sender));
+            this.senders_list.append(new_mailbox_row(sender));
         }
-        this.senders_list.add(new AddMailboxRow());
 
         this.signature_preview = new SignatureWebView(editor.application.config);
-        this.signature_preview.events = (
-            this.signature_preview.events | Gdk.EventType.FOCUS_CHANGE
-        );
+        this.signature_preview.add_css_class("card");
         this.signature_preview.content_loaded.connect(() => {
                 // Only enable editability after the content has fully
                 // loaded to avoid the WebProcess crashing.
@@ -91,32 +72,29 @@ internal class Accounts.EditorEditPane :
         this.signature_preview.document_modified.connect(() => {
                 this.signature_changed = true;
             });
-        this.signature_preview.focus_out_event.connect(() => {
-                // This event will also be fired if the top-level
-                // window loses focus, e.g. if the user alt-tabs away,
-                // so don't execute the command if the signature web
-                // view no longer the focus widget
-                if (!this.signature_preview.is_focus &&
-                    this.signature_changed) {
-                    this.commands.execute.begin(
-                        new SignatureChangedCommand(
-                            this.signature_preview, account
-                        ),
-                        this.op_cancellable
-                    );
-                }
-                return Gdk.EVENT_PROPAGATE;
-            });
+        var focus_controller = new Gtk.EventControllerFocus();
+        focus_controller.leave.connect(() => {
+            // This event will also be fired if the top-level
+            // window loses focus, e.g. if the user alt-tabs away,
+            // so don't execute the command if the signature web
+            // view no longer the focus widget
+            if (!this.signature_preview.is_focus() &&
+                this.signature_changed) {
+                this.commands.execute.begin(
+                    new SignatureChangedCommand(
+                        this.signature_preview, account
+                    ),
+                    this.op_cancellable
+                );
+            }
+        });
+        this.signature_preview.add_controller(focus_controller);
 
-        this.signature_preview.show();
+        this.signature_bin.add(this.signature_preview);
+
         this.signature_preview.load_html(
             Geary.HTML.smart_escape(account.signature)
         );
-
-        this.signature_frame.add(this.signature_preview);
-
-        this.settings_list.set_header_func(Editor.seperator_headers);
-        this.settings_list.add(new EmailPrefetchRow(this));
 
         this.remove_button.set_visible(
             !this.editor.accounts.is_goa_account(account)
@@ -131,8 +109,12 @@ internal class Accounts.EditorEditPane :
         disconnect_command_signals();
     }
 
+    private void update_display_name() {
+        this.display_name_row.text = this.account.display_name;
+    }
+
     internal string? get_default_name() {
-        string? name = account.primary_mailbox.name;
+        string? name = this.account.primary_mailbox.name;
 
         if (Geary.String.is_empty_or_whitespace(name)) {
             name = this.editor.accounts.get_account_name();
@@ -141,15 +123,11 @@ internal class Accounts.EditorEditPane :
         return name;
     }
 
-    /** {@inheritDoc} */
-    internal Gtk.HeaderBar get_header() {
-        return this.header;
-    }
-
     internal MailboxRow new_mailbox_row(Geary.RFC822.MailboxAddress sender) {
-        MailboxRow row = new MailboxRow(this.account, sender);
-        row.move_to.connect(on_sender_row_moved);
-        row.dropped.connect(on_sender_row_dropped);
+        MailboxRow row = new MailboxRow(this.account, sender, this);
+        //XXX GTK4
+        // row.move_to.connect(on_sender_row_moved);
+        // row.dropped.connect(on_sender_row_dropped);
         return row;
     }
 
@@ -193,83 +171,94 @@ internal class Accounts.EditorEditPane :
     }
 
     [GtkCallback]
-    private void on_setting_activated(Gtk.ListBoxRow row) {
-        EditorRow<EditorEditPane>? setting = row as EditorRow<EditorEditPane>;
-        if (setting != null) {
-            setting.activated(this);
-        }
-    }
-
-    [GtkCallback]
     private void on_server_settings_clicked() {
-        this.editor.push(new EditorServersPane(this.editor, this.account));
+        this.editor.push_pane(new EditorServersPane(this.editor, this.account));
     }
 
     [GtkCallback]
     private void on_remove_account_clicked() {
         if (!this.editor.accounts.is_goa_account(account)) {
-            var button = new Gtk.Button.with_mnemonic(_("Remove Account"));
-            button.get_style_context().add_class(Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
-            button.show();
+            var dialog = new Adw.AlertDialog(
+                _("Remove Account: %s").printf(account.primary_mailbox.address),
+                _("This will remove it from Geary and delete locally cached email data from your computer. Nothing will be deleted from your service provider.")
+            );
+            dialog.add_css_class("warning");
 
-            var dialog = new Gtk.MessageDialog(this.editor,
-            Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-            Gtk.MessageType.WARNING,
-            Gtk.ButtonsType.NONE,
-            _("Remove Account: %s"),
-            account.primary_mailbox.address);
-            dialog.secondary_text = _("This will remove it from Geary and delete locally cached email data from your computer. Nothing will be deleted from your service provider.");
+            dialog.add_response("cancel", _("_Cancel"));
+            dialog.close_response = "cancel";
+            dialog.add_response("remove", _("_Remove Account"));
+            dialog.set_response_appearance("remove", Adw.ResponseAppearance.DESTRUCTIVE);
 
-            dialog.add_button (_("_Cancel"), Gtk.ResponseType.CANCEL);
-            dialog.add_action_widget(button, Gtk.ResponseType.ACCEPT);
-
-            dialog.response.connect((response_id) => {
-                if (response_id == Gtk.ResponseType.ACCEPT)
+            dialog.choose.begin(this, null, (obj, res) => {
+                string response = dialog.choose.end(res);
+                if (response == "remove")
                     this.editor.remove_account(this.account);
-
-                dialog.destroy();
             });
-            dialog.show();
         }
     }
 
     [GtkCallback]
-    private void on_back_button_clicked() {
-        this.editor.pop();
+    private void on_add_mailbox_clicked(Gtk.Button add_button) {
+        var dialog = new MailboxEditorDialog.for_new(get_default_name());
+        dialog.apply.connect((dialog, mailbox) => {
+            this.commands.execute.begin(
+                new AppendMailboxCommand(
+                    this.senders_list,
+                    new_mailbox_row(mailbox)
+                ),
+                this.op_cancellable
+            );
+            dialog.close();
+        });
+
+        dialog.present(this);
     }
 
     [GtkCallback]
-    private bool on_list_keynav_failed(Gtk.Widget widget,
-                                       Gtk.DirectionType direction) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-        Gtk.Container? next = null;
-        if (direction == Gtk.DirectionType.DOWN) {
-            if (widget == this.details_list) {
-                next = this.senders_list;
-            } else if (widget == this.senders_list) {
-                this.signature_preview.grab_focus();
-            } else if (widget == this.signature_preview) {
-                next = this.settings_list;
-            }
-        } else if (direction == Gtk.DirectionType.UP) {
-            if (widget == this.settings_list) {
-                this.signature_preview.grab_focus();
-            } else if (widget == this.signature_preview) {
-                next = this.senders_list;
-            } else if (widget == this.senders_list) {
-                next = this.details_list;
-            }
-        }
-
-        if (next != null) {
-            next.child_focus(direction);
-            ret = Gdk.EVENT_STOP;
-        }
-        return ret;
+    private static string period_to_string(Adw.EnumListItem item,
+                                           Accounts.PrefetchPeriod period) {
+        return period.to_string();
     }
-
 }
 
+
+/**
+ * An enum to describe the possible values for the "Download Mail" option
+ */
+public enum Accounts.PrefetchPeriod {
+
+    2_WEEKS = 14,
+    1_MONTH = 30,
+    3_MONTHS = 90,
+    6_MONTHS = 180,
+    1_YEAR = 365,
+    2_YEARS = 720,
+    4_YEARS = 1461,
+    EVERYTHING = -1;
+
+    public unowned string to_string() {
+        switch (this) {
+        case 2_WEEKS:
+            return _("2 weeks back");
+        case 1_MONTH:
+            return _("1 month back");
+        case 3_MONTHS:
+            return _("3 months back");
+        case 6_MONTHS:
+            return _("6 months back");
+        case 1_YEAR:
+            return _("1 year back");
+        case 2_YEARS:
+            return _("2 years back");
+        case 4_YEARS:
+            return _("4 years back");
+        case EVERYTHING:
+            return _("Everything");
+        }
+
+        return_val_if_reached("");
+    }
+}
 
 private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
 
@@ -299,7 +288,9 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
         // undoable
         this.value_undo = new Components.EntryUndo(this.value);
 
-        this.value.focus_out_event.connect(on_focus_out);
+        var focus_controller = new Gtk.EventControllerFocus();
+        focus_controller.leave.connect(on_focus_out);
+        this.value.add_controller(focus_controller);
     }
 
     public override void update() {
@@ -337,231 +328,75 @@ private class Accounts.DisplayNameRow : AccountRow<EditorEditPane,Gtk.Entry> {
         }
     }
 
-    private bool on_focus_out() {
+    private void on_focus_out() {
         commit();
-        return Gdk.EVENT_PROPAGATE;
     }
 
 }
 
 
-private class Accounts.AddMailboxRow : AddRow<EditorEditPane> {
+private class Accounts.MailboxRow : Adw.ActionRow {
 
+    public Geary.AccountInformation account { get; construct set; }
 
-    public AddMailboxRow() {
-        // Translators: Tooltip for adding a new email sender/from
-        // address's address to an account
-        this.set_tooltip_text(_("Add a new sender email address"));
-    }
+    public Geary.RFC822.MailboxAddress mailbox { get; construct set; }
 
-    public override void activated(EditorEditPane pane) {
-        MailboxEditorPopover popover = new MailboxEditorPopover(
-            pane.get_default_name() ?? "", "", false
-        );
-        popover.activated.connect(() => {
-                pane.commands.execute.begin(
-                    new AppendMailboxCommand(
-                        (Gtk.ListBox) get_parent(),
-                        pane.new_mailbox_row(
-                            new Geary.RFC822.MailboxAddress(
-                                popover.display_name,
-                                popover.address
-                            )
-                        )
-                    ),
-                    pane.op_cancellable
-                );
-                popover.popdown();
-            });
-
-        popover.set_relative_to(this);
-        popover.popup();
-    }
-}
-
-
-private class Accounts.MailboxRow : AccountRow<EditorEditPane,Gtk.Label> {
-
-
-    internal Geary.RFC822.MailboxAddress mailbox;
+    public unowned Accounts.EditorEditPane pane { get; construct set; }
 
 
     public MailboxRow(Geary.AccountInformation account,
-                      Geary.RFC822.MailboxAddress mailbox) {
-        var label = new Gtk.Label("");
-        label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
-        label.set_line_wrap(true);
-        base(account, "", label);
-        this.mailbox = mailbox;
-        enable_drag();
+                      Geary.RFC822.MailboxAddress mailbox,
+                      Accounts.EditorEditPane pane) {
+        Object(
+            account: account,
+            mailbox: mailbox,
+            pane: pane,
+            activatable: true
+        );
 
+        //XXX GTK4 do this again
+        // enable_drag();
+
+        //XXX GTK4 also on notify
         update();
     }
 
-    public override void activated(EditorEditPane pane) {
-        MailboxEditorPopover popover = new MailboxEditorPopover(
-            this.mailbox.name ?? "",
-            this.mailbox.address,
+    public override void activate() {
+        var dialog = new MailboxEditorDialog.for_existing(
+            this.mailbox,
             this.account.has_sender_aliases
         );
-        popover.activated.connect(() => {
-                pane.commands.execute.begin(
-                    new UpdateMailboxCommand(
-                        this,
-                        new Geary.RFC822.MailboxAddress(
-                            popover.display_name,
-                            popover.address
-                        )
-                    ),
-                    pane.op_cancellable
-                );
-                popover.popdown();
-            });
-        popover.remove_clicked.connect(() => {
-                pane.commands.execute.begin(
-                    new RemoveMailboxCommand(this),
-                    pane.op_cancellable
-                );
-                popover.popdown();
-            });
 
-        popover.set_relative_to(this);
-        popover.popup();
+        dialog.apply.connect((dialog, mailbox) => {
+            this.pane.commands.execute.begin(
+                new UpdateMailboxCommand(this, mailbox),
+                this.pane.op_cancellable
+            );
+            dialog.close();
+        });
+
+        dialog.remove.connect((dialog) => {
+            this.pane.commands.execute.begin(
+                new RemoveMailboxCommand(this),
+                this.pane.op_cancellable
+            );
+            dialog.close();
+        });
+
+        dialog.present(this);
     }
 
-    public override void update() {
+    private void update() {
+        this.title = mailbox.address.strip();
+
         string? name = this.mailbox.name;
         if (Geary.String.is_empty_or_whitespace(name)) {
             // Translators: Label used to indicate the user has
             // provided no display name for one of their sender
             // email addresses in their account settings.
             name = _("Name not set");
-            set_dim_label(true);
-        } else {
-            set_dim_label(false);
         }
-
-        this.label.set_text(name);
-        this.value.set_text(mailbox.address.strip());
-    }
-
-}
-
-internal class Accounts.MailboxEditorPopover : EditorPopover {
-
-
-    public string display_name { get; private set; }
-    public string address { get; private set; }
-
-
-    private Gtk.Entry name_entry = new Gtk.Entry();
-    private Components.EntryUndo name_undo;
-    private Gtk.Entry address_entry = new Gtk.Entry();
-    private Components.EntryUndo address_undo;
-    private Components.EmailValidator address_validator;
-    private Gtk.Button remove_button;
-
-    public signal void activated();
-    public signal void remove_clicked();
-
-
-    public MailboxEditorPopover(string? display_name,
-                                string? address,
-                                bool can_remove) {
-        this.display_name = display_name;
-        this.address = address;
-
-        this.name_entry.set_text(display_name ?? "");
-        this.name_entry.set_placeholder_text(
-            // Translators: This is used as a placeholder for the
-            // display name for an email address when editing a user's
-            // sender address preferences for an account.
-            _("Sender Name")
-        );
-        this.name_entry.set_width_chars(20);
-        this.name_entry.changed.connect(on_name_changed);
-        this.name_entry.activate.connect(on_activate);
-        this.name_entry.show();
-
-        this.name_undo = new Components.EntryUndo(this.name_entry);
-
-        this.address_entry.input_purpose = Gtk.InputPurpose.EMAIL;
-        this.address_entry.set_text(address ?? "");
-        this.address_entry.set_placeholder_text(
-            // Translators: This is used as a placeholder for the
-            // address part of an email address when editing a user's
-            // sender address preferences for an account.
-            _("person@example.com")
-        );
-        this.address_entry.set_width_chars(20);
-        this.address_entry.changed.connect(on_address_changed);
-        this.address_entry.activate.connect(on_activate);
-        this.address_entry.show();
-
-        this.address_undo = new Components.EntryUndo(this.address_entry);
-
-        this.address_validator =
-            new Components.EmailValidator(this.address_entry);
-
-        this.remove_button = new Gtk.Button.with_label(_("Remove"));
-        this.remove_button.halign = Gtk.Align.END;
-        this.remove_button.get_style_context().add_class(
-            "geary-setting-remove"
-        );
-        this.remove_button.get_style_context().add_class(
-            Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION
-        );
-        this.remove_button.clicked.connect(on_remove_clicked);
-        this.remove_button.show();
-
-        add_labelled_row(
-            // Translators: Label used for the display name part of an
-            // email address when editing a user's sender address
-            // preferences for an account.
-            _("Sender name"),
-            this.name_entry
-        );
-        add_labelled_row(
-            // Translators: Label used for the address part of an
-            // email address when editing a user's sender address
-            // preferences for an account.
-            _("Email address"),
-            this.address_entry
-        );
-
-        if (can_remove) {
-            this.layout.attach(this.remove_button, 0, 2, 2, 1);
-        }
-
-        this.popup_focus = this.name_entry;
-    }
-
-    ~MailboxEditorPopover() {
-        this.name_entry.changed.disconnect(on_name_changed);
-        this.name_entry.activate.disconnect(on_activate);
-
-        this.address_entry.changed.disconnect(on_address_changed);
-        this.address_entry.activate.disconnect(on_activate);
-
-        this.remove_button.clicked.disconnect(on_remove_clicked);
-    }
-
-    private void on_name_changed() {
-        this.display_name = this.name_entry.get_text().strip();
-    }
-
-    private void on_address_changed() {
-        this.address = this.address_entry.get_text().strip();
-    }
-
-    private void on_remove_clicked() {
-        remove_clicked();
-    }
-
-    private void on_activate() {
-        if (this.address_validator.state == Components.Validator.Validity.INDETERMINATE || this.address_validator.is_valid) {
-            activated();
-        }
+        this.subtitle = name;
     }
 
 }

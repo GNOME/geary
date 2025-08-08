@@ -12,9 +12,25 @@
 [GtkTemplate (ui = "/org/gnome/Geary/components-conversation-actions.ui")]
 public class Components.ConversationActions : Gtk.Box {
 
-    public bool show_conversation_actions { get; construct; }
+    public bool show_conversation_actions {
+        get { return this.action_buttons.visible; }
+        set {
+            if (this.action_buttons.visible == value)
+                return;
+            this.action_buttons.visible = value;
+            notify_property("show-conversation-actions");
+        }
+    }
 
-    public bool show_response_actions { get; construct; }
+    public bool show_response_actions {
+        get { return this.response_buttons.visible; }
+        set {
+            if (this.response_buttons.visible == value)
+                return;
+            this.response_buttons.visible = value;
+            notify_property("show-conversation-actions");
+        }
+    }
 
     public bool pack_justified { get; construct; }
 
@@ -43,15 +59,11 @@ public class Components.ConversationActions : Gtk.Box {
     [GtkChild] private unowned Gtk.MenuButton mark_message_button { get; }
     [GtkChild] private unowned Gtk.MenuButton copy_message_button { get;  }
 
-    [GtkChild] private unowned Gtk.Box action_buttons { get; }
+    [GtkChild] private unowned Gtk.Box action_buttons;
     [GtkChild] private unowned Gtk.Button archive_button;
     [GtkChild] private unowned Gtk.Button trash_delete_button;
 
     private bool show_trash_button = true;
-
-    // Load these at construction time
-    private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
-    private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
 
     static construct {
         set_css_name("components-conversation-actions");
@@ -69,15 +81,12 @@ public class Components.ConversationActions : Gtk.Box {
 
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
         this.notify["service-provider"].connect(() => update_conversation_buttons());
-        this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
+        this.mark_message_button.menu_model = mark_menu;
 
-        this.mark_message_button.toggled.connect((button) => {
+        this.mark_message_button.activate.connect((button) => {
             if (button.active)
                 mark_message_button_toggled();
         });
-
-        this.response_buttons.set_visible(this.show_response_actions);
-        this.action_buttons.set_visible(this.show_conversation_actions);
 
         if (this.pack_justified) {
             this.action_buttons.hexpand = true;
@@ -102,14 +111,11 @@ public class Components.ConversationActions : Gtk.Box {
     }
 
     public void show_copy_menu() {
-        this.copy_message_button.clicked();
+        this.copy_message_button.active = true;
     }
 
     public void set_mark_inverted() {
-        var image = new Gtk.Image.from_icon_name(
-            "pan-up-symbolic", Gtk.IconSize.BUTTON
-        );
-        this.mark_message_button.set_image(image);
+        this.mark_message_button.icon_name = "pan-up-symbolic";
     }
 
     public void update_trash_button(bool show_trash) {
@@ -142,10 +148,7 @@ public class Components.ConversationActions : Gtk.Box {
                     "Add label to conversations",
                     this.selected_conversations
                     );
-                this.copy_message_button.set_image(
-                    new Gtk.Image.from_icon_name(
-                        "tag-symbolic", Gtk.IconSize.BUTTON)
-                );
+                this.copy_message_button.icon_name = "tag-symbolic";
                 break;
             default:
                 this.copy_message_button.tooltip_text = ngettext(
@@ -153,10 +156,7 @@ public class Components.ConversationActions : Gtk.Box {
                     "Copy conversations",
                     this.selected_conversations
                     );
-                this.copy_message_button.set_image(
-                    new Gtk.Image.from_icon_name(
-                        "folder-symbolic", Gtk.IconSize.BUTTON)
-                );
+                this.copy_message_button.icon_name = "folder-symbolic";
                 break;
             }
         }
@@ -165,7 +165,7 @@ public class Components.ConversationActions : Gtk.Box {
             this.trash_delete_button.action_name = Action.Window.prefix(
                 Application.MainWindow.ACTION_TRASH_CONVERSATION
                 );
-            this.trash_delete_button.image = trash_image;
+            this.trash_delete_button.icon_name = "user-trash-symbolic";
             this.trash_delete_button.tooltip_text = ngettext(
                 "Move conversation to Trash",
                 "Move conversations to Trash",
@@ -175,7 +175,7 @@ public class Components.ConversationActions : Gtk.Box {
             this.trash_delete_button.action_name = Action.Window.prefix(
                 Application.MainWindow.ACTION_DELETE_CONVERSATION
                 );
-            this.trash_delete_button.image = delete_image;
+            this.trash_delete_button.icon_name = "edit-delete-symbolic";
             this.trash_delete_button.tooltip_text = ngettext(
                 "Delete conversation",
                 "Delete conversations",

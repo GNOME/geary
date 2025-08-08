@@ -1,199 +1,175 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ComposerWidget" parent="GtkEventBox">
-    <property name="visible">True</property>
-    <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
-    <signal name="drag-drop" handler="on_drag_drop" swapped="no"/>
-    <signal name="drag-leave" handler="on_drag_leave" swapped="no"/>
-    <signal name="drag-motion" handler="on_drag_motion" swapped="no"/>
-    <signal name="set-focus-child" handler="on_set_focus_child" after="yes" swapped="no"/>
+  <template class="ComposerWidget" parent="AdwBin">
+    <child>
+      <object class="GtkEventControllerKey">
+        <signal name="key-pressed" handler="on_key_pressed"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkDropTarget">
+        <signal name="enter" handler="on_drop_target_enter"/>
+        <signal name="leave" handler="on_drop_target_leave"/>
+        <signal name="drop" handler="on_drop_target_drop"/>
+        <signal name="accept" handler="on_drop_target_accept"/>
+      </object>
+    </child>
+
     <child>
       <object class="GtkBox" id="composer_container">
-        <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkBox" id="header_container">
-            <property name="visible">True</property>
             <child>
               <placeholder/>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox" id="hidden_on_attachment_drag_over">
-            <property name="visible">True</property>
             <child>
               <object class="GtkBox" id="hidden_on_attachment_drag_over_child">
-                <property name="visible">True</property>
                 <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkGrid" id="email_headers">
-                    <property name="visible">True</property>
+                  <object class="GtkBox" id="email_headers">
                     <property name="orientation">vertical</property>
+                    <property name="margin-top">6</property>
+                    <property name="margin-bottom">6</property>
+                    <property name="margin-start">6</property>
+                    <property name="margin-end">6</property>
+                    <property name="hexpand">True</property>
                     <child>
-                      <object class="GtkBox" id="filled_headers">
-                        <property name="visible">True</property>
+                      <object class="GtkBox">
                         <property name="margin_top">6</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRevealer" id="extended_headers_revealer">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkBox" id="extended_headers">
-                            <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
+                          <object class="GtkListBox" id="filled_headers">
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
                             <child>
-                              <placeholder/>
+                              <object class="AdwComboRow" id="from_row">
+                                <!-- Translators: Label for composer From address entry -->
+                                <property name="title" translatable="yes">_From</property>
+                                <property name="use-underline">True</property>
+                                <property name="factory">
+                                  <object class="GtkSignalListItemFactory">
+                                    <signal name="setup" handler="on_from_factory_setup"/>
+                                    <signal name="bind" handler="on_from_factory_bind"/>
+                                  </object>
+                                </property>
+                                <property name="model">
+                                  <object class="GListStore" id="from_model">
+                                    <property name="item-type">ComposerWidgetFromAddressMap</property>
+                                  </object>
+                                </property>
+                              </object>
                             </child>
                             <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
+                              <object class="ComposerAddressesRow" id="to_row">
+                                <!-- Translators: Label for composer To address entry -->
+                                <property name="title" translatable="yes">_To</property>
+                                <property name="use-underline">True</property>
+                                <child type="suffix">
+                                  <object class="GtkToggleButton" id="show_extended_headers">
+                                    <property name="valign">center</property>
+                                    <property name="tooltip-text" translatable="yes">Show Cc, Bcc, and Reply-To fields</property>
+                                    <property name="action-name">win.show-extended-headers</property>
+                                    <property name="icon-name">view-more-horizontal-symbolic</property>
+                                  </object>
+                                </child>
+                              </object>
                             </child>
                           </object>
                         </child>
                       </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRevealer" id="extended_headers_revealer">
+                        <child>
+                          <object class="GtkListBox" id="extended_headers">
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                            <child>
+                              <object class="ComposerAddressesRow" id="cc_row">
+                                <!-- Translators: Label for composer CC address entry -->
+                                <property name="title" translatable="yes">_Cc</property>
+                                <property name="use-underline">True</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="ComposerAddressesRow" id="bcc_row">
+                                <!-- Translators: Label for composer BCC address entry -->
+                                <property name="title" translatable="yes">_Bcc</property>
+                                <property name="use-underline">True</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="ComposerAddressesRow" id="reply_to_row">
+                                <!-- Translators: Label for composer Reply-To address entry -->
+                                <property name="title" translatable="yes">_Reply To</property>
+                                <property name="use-underline">True</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBox">
+                        <style>
+                          <class name="boxed-list"/>
+                        </style>
+                        <child>
+                          <object class="AdwEntryRow" id="subject_row">
+                            <!-- Translators: Label for composer Subject line entry -->
+                            <property name="title" translatable="yes">_Subject</property>
+                            <property name="use-underline">True</property>
+                            <signal name="changed" handler="on_subject_changed"/>
+                          </object>
+                        </child>
+                      </object>
                     </child>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox" id="visible_on_attachment_drag_over">
-            <property name="visible">True</property>
             <child>
               <object class="GtkBox" id="visible_on_attachment_drag_over_child">
-                <property name="visible">True</property>
                 <property name="valign">center</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkLabel" id="label1">
-                    <property name="visible">True</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">Drop files here</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label2">
-                    <property name="visible">True</property>
                     <property name="valign">center</property>
                     <property name="label" translatable="yes">To add them as attachments</property>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">2</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkGrid" id="editor_container">
-            <property name="visible">True</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
+          <object class="AdwBin" id="editor_bin">
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox" id="attachments_box">
-            <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
               <placeholder/>
@@ -202,25 +178,8 @@
               <class name="geary-attachments-box"/>
             </style>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
         </child>
       </object>
     </child>
   </template>
-  <object class="GtkToggleButton" id="show_extended_headers">
-    <property name="visible">True</property>
-    <property name="receives_default">True</property>
-    <property name="tooltip_text" translatable="yes">Show Cc, Bcc, and Reply-To fields</property>
-    <property name="action_name">win.show-extended-headers</property>
-    <child>
-      <object class="GtkImage">
-        <property name="visible">True</property>
-        <property name="icon_name">view-more-horizontal-symbolic</property>
-      </object>
-    </child>
-  </object>
 </interface>

@@ -55,24 +55,23 @@ public class Application.Contact : Geary.BaseObject {
     public bool load_remote_resources { get; private set; }
 
     /** The set of email addresses associated with this contact. */
-    public Gee.Collection<Geary.RFC822.MailboxAddress> email_addresses {
+    public GLib.ListModel email_addresses {
         get {
-            Gee.Collection<Geary.RFC822.MailboxAddress>? addrs =
-                this._email_addresses;
-            if (addrs == null) {
-                addrs = new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+            if (this._email_addresses == null) {
+                var addrs = new GLib.ListStore(typeof(Geary.RFC822.MailboxAddress));
                 foreach (Folks.EmailFieldDetails email in
                          this.individual.email_addresses) {
-                    addrs.add(new Geary.RFC822.MailboxAddress(
-                                  this.display_name, email.value
-                              ));
+                    var mailbox_addr = new Geary.RFC822.MailboxAddress(
+                        this.display_name, email.value
+                    );
+                    addrs.append(mailbox_addr);
                 }
                 this._email_addresses = addrs;
             }
             return this._email_addresses;
         }
     }
-    private Gee.Collection<Geary.RFC822.MailboxAddress>? _email_addresses = null;
+    private GLib.ListModel? _email_addresses = null;
 
 
     /** Fired when the contact has changed in some way. */
@@ -142,14 +141,15 @@ public class Application.Contact : Geary.BaseObject {
         }
 
         if (this.display_name != other.display_name ||
-            this.email_addresses.size != other.email_addresses.size) {
+            this.email_addresses.get_n_items() != other.email_addresses.get_n_items()) {
             return false;
         }
 
-        foreach (Geary.RFC822.MailboxAddress this_addr in this.email_addresses) {
+        for (uint i = 0; i < this.email_addresses.get_n_items(); i++) {
+            var this_addr = (Geary.RFC822.MailboxAddress) this.email_addresses.get_item(i);
             bool found = false;
-            foreach (Geary.RFC822.MailboxAddress other_addr
-                     in other.email_addresses) {
+            for (uint j = 0; j < other.email_addresses.get_n_items(); j++) {
+                var other_addr = (Geary.RFC822.MailboxAddress) other.email_addresses.get_item(j);
                 if (this_addr.equal_to(other_addr)) {
                     found = true;
                     break;
@@ -187,8 +187,8 @@ public class Application.Contact : Geary.BaseObject {
                 Gee.Set<Folks.EmailFieldDetails> email_addresses =
                     new Gee.HashSet<Folks.EmailFieldDetails>();
                 GLib.Value email_value = GLib.Value(typeof(Gee.Set));
-                foreach (Geary.RFC822.MailboxAddress addr
-                         in this.email_addresses) {
+                for (uint i = 0; i < this.email_addresses.get_n_items(); i++) {
+                    var addr = (Geary.RFC822.MailboxAddress) this.email_addresses.get_item(i);
                     email_addresses.add(
                         new Folks.EmailFieldDetails(addr.address)
                     );
@@ -279,9 +279,9 @@ public class Application.Contact : Geary.BaseObject {
         throws GLib.Error {
         ContactStore? store = this.store;
         if (store != null) {
-            Gee.Collection<Geary.Contact> contacts =
-                new Gee.LinkedList<Geary.Contact>();
-            foreach (Geary.RFC822.MailboxAddress mailbox in this.email_addresses) {
+            var contacts = new Gee.LinkedList<Geary.Contact>();
+            for (uint i = 0; i < this.email_addresses.get_n_items(); i++) {
+                var mailbox = (Geary.RFC822.MailboxAddress) this.email_addresses.get_item(i);
                 Geary.Contact? contact = yield store.lookup_engine_contact(
                     mailbox, cancellable
                 );
@@ -347,7 +347,9 @@ public class Application.Contact : Geary.BaseObject {
 
     private void update_from_engine() {
         Geary.RFC822.MailboxAddress mailbox = this.engine.get_rfc822_address();
-        this._email_addresses = Geary.Collection.single(mailbox);
+        var addrs = new GLib.ListStore(typeof(Geary.RFC822.MailboxAddress));
+        addrs.append(mailbox);
+        this._email_addresses = addrs;
         this.load_remote_resources = this.engine.flags.always_load_remote_images();
     }
 

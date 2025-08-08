@@ -6,8 +6,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-[CCode (cname = "components_reflow_box_get_type")]
-private extern Type components_reflow_box_get_type();
+//XXX GTK4
+// [CCode (cname = "components_reflow_box_get_type")]
+// private extern Type components_reflow_box_get_type();
 
 /**
  * A widget for editing the body of an email message.
@@ -33,7 +34,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     private const string ACTION_PASTE_WITHOUT_FORMATTING = "paste-without-formatting";
     private const string ACTION_REMOVE_FORMAT = "remove-format";
     private const string ACTION_SELECT_ALL = "select-all";
-    private const string ACTION_SELECT_DICTIONARY = "select-dictionary";
     private const string ACTION_SHOW_FORMATTING = "show-formatting";
     private const string ACTION_STRIKETHROUGH = "strikethrough";
     internal const string ACTION_TEXT_FORMAT = "text-format";
@@ -71,7 +71,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         { ACTION_PASTE_WITHOUT_FORMATTING, on_paste_without_formatting        },
         { ACTION_REMOVE_FORMAT,            on_remove_format, null, "false"    },
         { ACTION_SELECT_ALL,               on_select_all                      },
-        { ACTION_SELECT_DICTIONARY,        on_select_dictionary              },
         { ACTION_SHOW_FORMATTING,          on_toggle_action, null, "false",
                                            on_show_formatting                 },
         { ACTION_STRIKETHROUGH,            on_action,        null, "false"    },
@@ -127,7 +126,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     private Menu context_menu_webkit_text_entry;
     private Menu context_menu_inspector;
 
-    [GtkChild] private unowned Gtk.Grid body_container;
+    [GtkChild] private unowned Adw.Bin body_bin;
 
     [GtkChild] private unowned Gtk.Label message_overlay_label;
 
@@ -147,15 +146,16 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     [GtkChild] private unowned Gtk.Image font_color_icon;
     [GtkChild] private unowned Gtk.MenuButton more_options_button;
 
-    private Gtk.GestureMultiPress click_gesture;
+    private Gtk.GestureClick click_gesture;
 
 
     internal signal void insert_image(bool from_clipboard);
 
 
-    internal Editor(Application.Configuration config) {
+    internal Editor(Application.Configuration config, GLib.File cache_dir) {
         base_ref();
-        components_reflow_box_get_type();
+        //XXX GTK4
+        // components_reflow_box_get_type();
         this.config = config;
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
@@ -168,7 +168,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
         this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
-        this.body = new WebView(config);
+        this.body = new WebView(config, cache_dir);
         this.body.command_stack_changed.connect(on_command_state_changed);
         this.body.context_menu.connect(on_context_menu);
         this.body.cursor_context_changed.connect(on_cursor_context_changed);
@@ -178,12 +178,13 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         this.body.set_hexpand(true);
         this.body.set_vexpand(true);
         this.body.show();
-        this.body_container.add(this.body);
+        this.body_bin.child = this.body;
 
-        this.click_gesture = new Gtk.GestureMultiPress(this.body);
+        this.click_gesture = new Gtk.GestureClick();
         this.click_gesture.propagation_phase = CAPTURE;
         this.click_gesture.pressed.connect(this.on_button_press);
         this.click_gesture.released.connect(this.on_button_release);
+        this.body.add_controller(this.click_gesture);
 
         this.actions.add_action_entries(ACTIONS, this);
         this.actions.change_action_state(
@@ -219,16 +220,15 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         base_unref();
     }
 
-    public override void destroy() {
+    public override void dispose() {
         this.show_background_work_timeout.reset();
         this.background_work_pulse.reset();
-        base.destroy();
+        base.dispose();
     }
 
     /** Adds an action bar to the composer. */
     public void add_action_bar(Gtk.ActionBar to_add) {
-        this.action_bar_box.pack_start(to_add);
-        this.action_bar_box.reorder_child(to_add, 0);
+        this.action_bar_box.prepend(to_add);
     }
 
     /**
@@ -304,10 +304,12 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     }
 
     private async void update_color_icon(Gdk.RGBA color) {
-        var theme = Gtk.IconTheme.get_default();
-        var icon = theme.lookup_icon("font-color-symbolic", 16, 0);
-        var fg_color = Util.Gtk.rgba(0, 0, 0, 1);
-        this.get_style_context().lookup_color("theme_fg_color", out fg_color);
+        // XXX GTK4 - need to look into this
+#if 0
+        var theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+        var icon = theme.lookup_icon("font-color-symbolic", null, 16, 1, Gtk.TextDirection.NONE, 0);
+        Gdk.RGBA fg_color = { 0, 0, 0, 1 };
+        get_style_context().lookup_color("theme_fg_color", out fg_color);
 
         try {
             var pixbuf = yield icon.load_symbolic_async(
@@ -318,6 +320,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
             warning("Could not load icon `font-color-symbolic`!");
             this.font_color_icon.icon_name = "font-color-symbolic";
         }
+#endif
     }
 
     private GLib.SimpleAction? get_action(string action_name) {
@@ -343,7 +346,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
                 LinkPopover.Type.EXISTING_LINK, this.pointer_url,
                 (obj, res) => {
                     LinkPopover popover = this.new_link_popover.end(res);
-                    popover.set_relative_to(this.body);
+                    popover.set_parent(this.body);
                     popover.set_pointing_to(location);
                     popover.popup();
                 });
@@ -352,7 +355,6 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
 
     private bool on_context_menu(WebKit.WebView view,
                                  WebKit.ContextMenu context_menu,
-                                 Gdk.Event event,
                                  WebKit.HitTestResult hit_test_result) {
         // This is a three step process:
         // 1. Work out what existing menu items exist that we want to keep
@@ -535,11 +537,8 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
         action.set_state(new_state);
 
         update_formatting_toolbar();
-        this.update_color_icon.begin(Util.Gtk.rgba(0, 0, 0, 0));
-    }
-
-    private void on_select_dictionary(SimpleAction action, Variant? param) {
-        this.select_dictionary_button.toggled();
+        Gdk.RGBA color = { 0, 0, 0, 0 };
+        this.update_color_icon.begin(color);
     }
 
     private void on_command_state_changed(bool can_undo, bool can_redo) {
@@ -568,18 +567,24 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_copy_link(SimpleAction action, Variant? param) {
-        Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        Gdk.Clipboard c = get_clipboard();
         // XXX could this also be the cursor URL? We should be getting
         // the target URLn as from the action param
-        c.set_text(this.pointer_url, -1);
-        c.store();
+        c.set_text(this.pointer_url);
+        c.store_async.begin(Priority.DEFAULT, null, (obj, res) => {
+            try {
+                c.store_async.end(res);
+            } catch (Error err) {
+                debug("Couldn't store clipboard: %s", err.message);
+            }
+        });
     }
 
     private void on_paste() {
         if (this.body.is_rich_text) {
             // Check for pasted image in clipboard
-            Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-            bool has_image = clipboard.wait_is_image_available();
+            Gdk.Clipboard clipboard = get_clipboard();
+            bool has_image = clipboard.formats.contain_gtype(typeof(Gdk.Texture));
             if (has_image) {
                 insert_image(true);
             } else {
@@ -643,7 +648,7 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
                         style.set_state(NORMAL);
                     });
 
-                popover.set_relative_to(this.insert_link_button);
+                popover.set_parent(this.insert_link_button);
                 popover.popup();
                 style.set_state(ACTIVE);
             });
@@ -684,19 +689,24 @@ public class Composer.Editor : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void on_select_color() {
-        var dialog = new Gtk.ColorChooserDialog(
-            _("Select Color"),
-            get_toplevel() as Gtk.Window
-        );
-        if (dialog.run() == Gtk.ResponseType.OK) {
-            var rgba = dialog.get_rgba();
+        var dialog = new Gtk.ColorDialog();
+        dialog.title = _("Select Color");
+
+        dialog.choose_rgba.begin(get_root() as Gtk.Window, null, null, (obj, res) => {
+            Gdk.RGBA? rgba = null;
+            try {
+                rgba = dialog.choose_rgba.end(res);
+            } catch (Error err) {
+                debug("Couldn't select color: %s", err.message);
+            }
+            if (rgba == null)
+                return;
+
             this.body.execute_editing_command_with_argument(
                 "forecolor", rgba.to_string()
             );
-
             this.update_color_icon.begin(rgba);
-        }
-        dialog.destroy();
+        });
     }
 
     private void on_action(GLib.SimpleAction action, GLib.Variant? param) {

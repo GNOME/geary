@@ -115,9 +115,9 @@ internal class Application.NotificationPluginContext :
             folder != null &&
             this.folder_information.has_key(folder) && (
                 window == null ||
-                !window.has_toplevel_focus ||
+                !window.is_active ||
                 window.selected_folder != folder ||
-                window.conversation_list_view.vadjustment.value > 0.0
+                window.conversation_list_view.scrolled_window.vadjustment.value > 0.0
             )
         );
     }

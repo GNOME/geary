@@ -79,7 +79,7 @@ web_process = library('geary-web-process',
     engine_dep,
     gee,
     gmime,
-    webkit2gtk_web_extension,
+    webkitgtk_web_extension,
   ],
   vala_args: geary_vala_args,
   c_args: geary_c_args,
@@ -98,7 +98,6 @@ bin_sources += [
 ]
 bin_dependencies = [
   folks,
-  gdk,
   client_dep,
   engine_dep,
   gee,
@@ -106,10 +105,10 @@ bin_dependencies = [
   goa,
   gtk,
   javascriptcoregtk,
-  libhandy,
+  libadwaita,
   libmath,
   libpeas,
-  webkit2gtk,
+  webkitgtk,
 ]
 
 bin = executable('geary',
@@ -126,31 +125,27 @@ valadoc_dependencies = [
   enchant,
   folks,
   gcr,
-  gdk,
   gee,
   gio,
   glib,
   gmime,
   goa,
-  gspell,
   gtk,
   javascriptcoregtk,
   json_glib,
-  libhandy,
+  libadwaita,
   libpeas,
   libsecret,
+  libspelling,
   libxml,
   sqlite,
-  webkit2gtk
+  webkitgtk,
 ]
 
 valadoc_vapi_dirs = [
   vapi_dir,
   meson.current_build_dir()
 ]
-if libhandy_vapi != ''
-  valadoc_vapi_dirs += libhandy_vapi
-endif
 
 # Hopefully Meson will get baked-in valadoc support, so we don't have
 # to resort to these kinds of hacks any more. See
@@ -159,10 +154,10 @@ endif
 valadoc_dep_args = []
 foreach dep : valadoc_dependencies
   valadoc_dep_args += '--pkg'
-  if dep != libhandy
+  if dep != libadwaita
     valadoc_dep_args += dep.name()
   else
-    valadoc_dep_args += 'libhandy-1'
+    valadoc_dep_args += 'libadwaita-1'
   endif
 endforeach
 valadoc_dep_args += [ '--pkg', 'config' ]

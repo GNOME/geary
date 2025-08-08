@@ -10,7 +10,7 @@
  * Displays the messages in a conversation and in-window composers.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-viewer.ui")]
-public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
+public class ConversationViewer : Adw.Bin, Geary.BaseInterface {
 
     /**
      * The current conversation listbox, if any.
@@ -37,14 +37,19 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     private Gee.Set<Geary.App.Conversation>? selection_while_composing = null;
     private GLib.Cancellable? find_cancellable = null;
 
+    [GtkChild] public unowned Components.ConversationHeaderBar headerbar;
+
+    [GtkChild] private unowned Gtk.Stack stack;
+
     // Stack pages
-    [GtkChild] private unowned Gtk.Spinner loading_page;
-    [GtkChild] private unowned Gtk.Grid no_conversations_page;
-    [GtkChild] private unowned Gtk.Grid conversation_page;
-    [GtkChild] private unowned Gtk.Grid multiple_conversations_page;
-    [GtkChild] private unowned Gtk.Grid empty_folder_page;
-    [GtkChild] private unowned Gtk.Grid empty_search_page;
-    [GtkChild] private unowned Gtk.Grid composer_page;
+    [GtkChild] private unowned Adw.Spinner loading_page;
+    [GtkChild] private unowned Adw.StatusPage no_conversations_page;
+    [GtkChild] private unowned Gtk.Box conversation_page;
+    [GtkChild] private unowned Adw.StatusPage multiple_conversations_page;
+    [GtkChild] private unowned Adw.StatusPage empty_folder_page;
+    [GtkChild] private unowned Adw.StatusPage empty_search_page;
+    [GtkChild] private unowned Adw.Bin composer_page;
+
     [GtkChild] private unowned Gtk.ScrolledWindow conversation_scroller;
 
     [GtkChild] internal unowned Gtk.SearchBar conversation_find_bar;
@@ -75,70 +80,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         base_ref();
         this.config = config;
 
-        Hdy.StatusPage no_conversations =
-            new Hdy.StatusPage();
-        no_conversations.icon_name = "folder-symbolic";
-        // Translators: Title label for placeholder when no
-        // conversations have been selected.
-        no_conversations.title = _("No Conversations Selected");
-        // Translators: Sub-title label for placeholder when no
-        // conversations have been selected.
-        no_conversations.description = _(
-            "Selecting a conversation from the list will display it here."
-        );
-        no_conversations.hexpand = true;
-        no_conversations.vexpand = true;
-        no_conversations.show ();
-        this.no_conversations_page.add(no_conversations);
-
-        Hdy.StatusPage multi_conversations =
-            new Hdy.StatusPage();
-        multi_conversations.icon_name = "folder-symbolic";
-        // Translators: Title label for placeholder when multiple
-        // conversations have been selected.
-        multi_conversations.title = _("Multiple Conversations Selected");
-        // Translators: Sub-title label for placeholder when multiple
-        // conversations have been selected.
-        multi_conversations.description = _(
-            "Choosing an action will apply to all selected conversations."
-        );
-        multi_conversations.hexpand = true;
-        multi_conversations.vexpand = true;
-        multi_conversations.show ();
-        this.multiple_conversations_page.add(multi_conversations);
-
-        Hdy.StatusPage empty_folder =
-            new Hdy.StatusPage();
-        empty_folder.icon_name = "folder-symbolic";
-        // Translators: Title label for placeholder when no
-        // conversations have exist in a folder.
-        empty_folder.title = _("No Conversations Found");
-        // Translators: Sub-title label for placeholder when no
-        // conversations have exist in a folder.
-        empty_folder.description = _(
-            "This folder does not contain any conversations."
-        );
-        empty_folder.hexpand = true;
-        empty_folder.vexpand = true;
-        empty_folder.show ();
-        this.empty_folder_page.add(empty_folder);
-
-        Hdy.StatusPage empty_search =
-            new Hdy.StatusPage();
-        empty_search.icon_name = "folder-symbolic";
-        // Translators: Title label for placeholder when no
-        // conversations have been found in a search.
-        empty_search.title = _("No Conversations Found");
-        // Translators: Sub-title label for placeholder when no
-        // conversations have been found in a search.
-        empty_search.description = _(
-            "Your search returned no results, try refining your search terms."
-        );
-        empty_search.hexpand = true;
-        empty_search.vexpand = true;
-        empty_search.show ();
-        this.empty_search_page.add(empty_search);
-
         this.conversation_find_undo = new Components.EntryUndo(
             this.conversation_find_entry
         );
@@ -155,10 +96,10 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Puts the view into composer mode, showing a full-height composer.
      */
     public void do_compose(Composer.Widget composer) {
-        var main_window = get_toplevel() as Application.MainWindow;
+        var main_window = get_root() as Application.MainWindow;
         if (main_window != null) {
             Composer.Box box = new Composer.Box(
-                composer, main_window.conversation_headerbar
+                composer, this.headerbar
             );
             this.current_composer = composer;
 
@@ -169,7 +110,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             conversation_list.unselect_all();
 
             box.vanished.connect(on_composer_closed);
-            this.composer_page.add(box);
+            this.composer_page.child = box;
             set_visible_child(this.composer_page);
             composer.update_window_title();
         }
@@ -214,7 +155,6 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows the loading UI.
      */
     public void show_loading() {
-        this.loading_page.start();
         set_visible_child(this.loading_page);
     }
 
@@ -283,13 +223,16 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         this.conversation_find_prev.set_sensitive(false);
         new_list.search.matches_updated.connect((count) => {
                 bool found = count > 0;
+                //XXX GTK4 - Gtk.SearchEntry doesn't have a icon API anymore
+#if 0
                 this.conversation_find_entry.set_icon_from_icon_name(
                     Gtk.EntryIconPosition.PRIMARY,
                     found || Geary.String.is_empty(this.conversation_find_entry.text)
                     ? "edit-find-symbolic" : "computer-fail-symbolic"
                 );
-                this.conversation_find_next.set_sensitive(found);
-                this.conversation_find_prev.set_sensitive(found);
+#endif
+                this.conversation_find_next.sensitive = found;
+                this.conversation_find_prev.sensitive = found;
             });
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
@@ -318,10 +261,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         // are not set on the list - it makes changing focus jumpy
         // when a row or its web_view are larger than the viewport.
         Gtk.Viewport viewport = new Gtk.Viewport(null, null);
-        viewport.show();
-        viewport.add(list);
+        viewport.child = list;
 
-        this.conversation_scroller.add(viewport);
+        this.conversation_scroller.child = viewport;
     }
 
     // Remove any existing conversation list, cancelling its loading
@@ -329,7 +271,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         // Remove the viewport that contains the current list
         Gtk.Widget? scrolled_child = this.conversation_scroller.get_child();
         if (scrolled_child != null) {
-            conversation_scroller.remove(scrolled_child);
+            this.conversation_scroller.child = null;
         }
 
         // Reset the scrollbars to their initial positions
@@ -344,10 +286,14 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
         return scrolled_child;
     }
 
+    public Gtk.Widget get_visible_child() {
+        return this.stack.visible_child;
+    }
+
     /**
      * Sets the currently visible page of the stack.
      */
-    private new void set_visible_child(Gtk.Widget widget) {
+    private void set_visible_child(Gtk.Widget widget) {
         debug("Showing: %s", widget.get_name());
         Gtk.Widget current = get_visible_child();
         if (current == this.conversation_page) {
@@ -358,12 +304,8 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
                 // etc.
                 remove_current_list();
             }
-        } else if (current == this.loading_page) {
-            // Stop the spinner running so it doesn't trigger repaints
-            // and wake up Geary even when idle. See Bug 783025.
-            this.loading_page.stop();
         }
-        base.set_visible_child(widget);
+        this.stack.set_visible_child(widget);
     }
 
     private async void update_find_results() {
@@ -471,7 +413,9 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     }
 
     [GtkCallback]
-    private bool on_conversation_scroll() {
+    private bool on_conversation_scroll(Gtk.EventControllerScroll controller,
+                                        double dx,
+                                        double dy) {
         if (this.current_list != null) {
             this.current_list.mark_visible_read();
         }
@@ -484,7 +428,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             set_visible_child(this.conversation_page);
 
             // Restore the old selection
-            var main_window = get_toplevel() as Application.MainWindow;
+            var main_window = get_root() as Application.MainWindow;
             if (main_window != null) {
                 main_window.update_title();
 

@@ -97,16 +97,13 @@ public class Components.InfoBar : Gtk.Box {
             this.description.tooltip_text = description;
         }
 
-        var container = new Gtk.Grid();
-        container.orientation = VERTICAL;
-        container.valign = CENTER;
-        container.add(this.status);
+        var container = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        container.valign = Gtk.Align.CENTER;
+        container.append(this.status);
         if (this.description != null) {
-            container.add(this.description);
+            container.append(this.description);
         }
-        get_content_area().add(container);
-
-        show_all();
+        get_content_area().append(container);
     }
 
     public InfoBar.for_plugin(Plugin.InfoBar plugin,
@@ -143,14 +140,12 @@ public class Components.InfoBar : Gtk.Box {
         var secondaries = plugin.secondary_buttons.bidir_list_iterator();
         bool has_prev = secondaries.last();
         while (has_prev) {
-            get_action_area().add(new_plugin_button(secondaries.get()));
+            get_action_area().append(new_plugin_button(secondaries.get()));
             has_prev = secondaries.previous();
         }
         update_plugin_primary_button();
 
         set_data<int>(InfoBarStack.PRIORITY_QUEUE_KEY, priority);
-
-        show_all();
     }
 
     [GtkCallback]
@@ -161,10 +156,9 @@ public class Components.InfoBar : Gtk.Box {
         response(Gtk.ResponseType.CLOSE);
     }
 
-    /* {@inheritDoc} */
-    public override void destroy() {
+    public override void dispose() {
         this.plugin = null;
-        base.destroy();
+        base.dispose();
     }
 
     public Gtk.Box get_action_area() {
@@ -180,7 +174,7 @@ public class Components.InfoBar : Gtk.Box {
         button.clicked.connect(() => {
             response(response_id);
         });
-        get_action_area().add(button);
+        get_action_area().append(button);
         button.visible = true;
         return button;
     }
@@ -194,7 +188,7 @@ public class Components.InfoBar : Gtk.Box {
             get_action_area().remove(plugin_primary_button);
         }
         if (new_button != null) {
-            get_action_area().add(new_button);
+            get_action_area().append(new_button);
         }
         this.plugin_primary_button = new_button;
     }
@@ -204,11 +198,7 @@ public class Components.InfoBar : Gtk.Box {
         if (ui.icon_name == null) {
             button = new Gtk.Button.with_label(ui.label);
         } else {
-            var icon = new Gtk.Image.from_icon_name(
-                ui.icon_name, Gtk.IconSize.BUTTON
-            );
-            button = new Gtk.Button();
-            button.add(icon);
+            button = new Gtk.Button.from_icon_name(ui.icon_name);
             button.tooltip_text = ui.label;
         }
         button.set_action_name(
@@ -217,26 +207,26 @@ public class Components.InfoBar : Gtk.Box {
         if (ui.action_target != null) {
             button.set_action_target_value(ui.action_target);
         }
-        button.show_all();
         return button;
     }
 
     private void _set_message_type(Gtk.MessageType message_type) {
         if (this._message_type != message_type) {
-            Gtk.StyleContext context = this.get_style_context();
             const string[] type_class = {
-                Gtk.STYLE_CLASS_INFO,
-                Gtk.STYLE_CLASS_WARNING,
-                Gtk.STYLE_CLASS_QUESTION,
-                Gtk.STYLE_CLASS_ERROR,
+                "info",
+                "warning",
+                "question",
+                "error",
                 null
             };
 
             if (type_class[this._message_type] != null)
-                context.remove_class(type_class[this._message_type]);
+                remove_css_class(type_class[this._message_type]);
 
             this._message_type = message_type;
 
+            // XXX GTK4
+#if 0
             var atk_obj = this.get_accessible();
             if (atk_obj is Atk.Object) {
                 string name = null;
@@ -271,9 +261,10 @@ public class Components.InfoBar : Gtk.Box {
                 if (name != null)
                     atk_obj.set_name(name);
             }
+    #endif
 
             if (type_class[this._message_type] != null)
-                context.add_class(type_class[this._message_type]);
+                add_css_class(type_class[this._message_type]);
         }
     }
 }

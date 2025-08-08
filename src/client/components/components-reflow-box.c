@@ -10,6 +10,8 @@
 #include <gtk/gtk.h>
 
 
+// XXX GTK4 - I really need to know how this works before reimplementing it
+#if 0
 #define COMPONENTS_TYPE_REFLOW_BOX (components_reflow_box_get_type())
 
 G_DECLARE_FINAL_TYPE (ComponentsReflowBox, components_reflow_box, COMPONENTS, REFLOW_BOX, GtkContainer)
@@ -491,6 +493,4 @@ components_reflow_box_new (void)
 {
   return g_object_new (COMPONENTS_TYPE_REFLOW_BOX, NULL);
 }
-
-
-
+#endif

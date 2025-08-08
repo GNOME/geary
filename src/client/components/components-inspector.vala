@@ -9,7 +9,7 @@
  * A window that displays debugging and development information.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector.ui")]
-public class Components.Inspector : Gtk.ApplicationWindow {
+public class Components.Inspector : Adw.ApplicationWindow {
 
 
     /** Determines the format used when serialising inspector data. */
@@ -68,7 +68,8 @@ public class Components.Inspector : Gtk.ApplicationWindow {
 
     public Inspector(Application.Client application) {
         Object(application: application);
-        this.title = this.header_bar.title = _("Inspector");
+        //XXX GTK4 need to figure out titles
+        // this.title = this.header_bar.title = _("Inspector");
 
         // Edit actions
         GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
@@ -78,7 +79,7 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         // Window actions
         add_action_entries(WINDOW_ACTIONS, this);
 
-        this.log_pane = new InspectorLogView(application.config, null);
+        this.log_pane = new InspectorLogView(null);
         this.log_pane.record_selection_changed.connect(
             on_logs_selection_changed
         );
@@ -95,11 +96,15 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         this.log_pane.load(Geary.Logging.get_earliest_record(), null);
     }
 
-    public override bool key_press_event(Gdk.EventKey event) {
+    [GtkCallback]
+    private bool on_key_pressed(Gtk.EventControllerKey controller,
+                                uint keyval,
+                                uint keycode,
+                                Gdk.ModifierType state) {
         bool ret = Gdk.EVENT_PROPAGATE;
 
         if (this.log_pane.search_mode_enabled &&
-            event.keyval == Gdk.Key.Escape) {
+            keyval == Gdk.Key.Escape) {
             // Manually deactivate search so the button stays in sync
             this.search_button.set_active(false);
             ret = Gdk.EVENT_STOP;
@@ -109,18 +114,17 @@ public class Components.Inspector : Gtk.ApplicationWindow {
             this.log_pane.search_mode_enabled) {
             // Ensure <Space> and others are passed to the search
             // entry before getting used as an accelerator.
-            ret = this.log_pane.handle_key_press(event);
+            ret = controller.forward(this.log_pane);
         }
 
-        if (ret == Gdk.EVENT_PROPAGATE) {
-            ret = base.key_press_event(event);
-        }
+        return ret;
 
+        //XXX GTK4 - not sure how to handle this
         if (ret == Gdk.EVENT_PROPAGATE &&
             !this.log_pane.search_mode_enabled) {
             // Nothing has handled the event yet, and search is not
             // active, so see if we want to activate it now.
-            ret = this.log_pane.handle_key_press(event);
+            ret = controller.forward(this.log_pane);
             if (ret == Gdk.EVENT_STOP) {
                 this.search_button.set_active(true);
             }
@@ -140,10 +144,9 @@ public class Components.Inspector : Gtk.ApplicationWindow {
         this.log_pane.enable_log_updates(enabled);
     }
 
-    private async void save(string path,
+    private async void save(GLib.File dest,
                             GLib.Cancellable? cancellable)
         throws GLib.Error {
-        GLib.File dest = GLib.File.new_for_path(path);
         GLib.FileIOStream dest_io = yield dest.replace_readwrite_async(
             null,
             false,
@@ -209,35 +212,29 @@ public class Components.Inspector : Gtk.ApplicationWindow {
 
         string clipboard_value = (string) bytes.get_data();
         if (!Geary.String.is_empty(clipboard_value)) {
-            get_clipboard(Gdk.SELECTION_CLIPBOARD).set_text(clipboard_value, -1);
+            get_clipboard().set_text(clipboard_value);
         }
     }
 
     [GtkCallback]
     private void on_save_as_clicked() {
-        Gtk.FileChooserNative chooser = new Gtk.FileChooserNative(
-            _("Save As"),
-            this,
-            Gtk.FileChooserAction.SAVE,
-            _("Save As"),
-            _("Cancel")
-        );
-        chooser.set_current_name(
-            new GLib.DateTime.now_local().format("Geary Inspector - %F %T.txt")
-        );
+        save_as.begin((obj, res) => {
+            save_as.end(res);
+        });
+    }
 
-        if (chooser.run() == Gtk.ResponseType.ACCEPT) {
-            this.save.begin(
-                chooser.get_filename(),
-                null,
-                (obj, res) => {
-                    try {
-                        this.save.end(res);
-                    } catch (GLib.Error err) {
-                        warning("Failed to save inspector data: %s", err.message);
-                    }
-                }
-            );
+    private async void save_as() {
+        var dialog = new Gtk.FileDialog();
+        dialog.title = _("Save As");
+        dialog.accept_label = _("Save As");
+        dialog.initial_name = new DateTime.now_local().format("Geary Inspector - %F %T.txt");
+
+        try {
+            File? file = yield dialog.save(this, null);
+            if (file != null)
+                yield this.save(file, null);
+        } catch (Error err) {
+            warning("Failed to save inspector data: %s", err.message);
         }
     }
 

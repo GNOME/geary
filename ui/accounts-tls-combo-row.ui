@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="AccountsTlsComboRow" parent="AdwComboRow">
+    <!-- Translators: This label describes what form of transport security (TLS, StartTLS, etc) used by an account's IMAP or SMTP service -->
+    <property name="title" translatable="yes">Connection Security</property>
+    <property name="factory">
+      <object class="GtkSignalListItemFactory">
+        <signal name="setup" handler="on_factory_setup"/>
+        <signal name="bind" handler="on_factory_bind"/>
+      </object>
+    </property>
+    <property name="model">
+      <object class="AdwEnumListModel">
+        <property name="enum-type">GearyTlsNegotiationMethod</property>
+      </object>
+    </property>
+  </template>
+</interface>

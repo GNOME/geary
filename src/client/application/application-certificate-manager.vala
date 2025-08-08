@@ -118,11 +118,11 @@ public class Application.CertificateManager : GLib.Object {
                                              GLib.Cancellable? cancellable)
         throws CertificateManagerError {
         CertificateWarningDialog dialog = new CertificateWarningDialog(
-            parent, account, service, endpoint, is_validation
+            account, service, endpoint, is_validation
         );
 
         bool save = false;
-        switch (dialog.run()) {
+        switch (yield dialog.run(parent)) {
         case CertificateWarningDialog.Result.TRUST:
             // noop
             break;

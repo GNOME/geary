@@ -4,8 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+//XXX GTK4 rename headerbar to header in files too
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
-public class Composer.Headerbar : Hdy.HeaderBar {
+public class Composer.Header : Adw.Bin {
 
 
     public bool show_save_and_close {
@@ -22,6 +23,8 @@ public class Composer.Headerbar : Hdy.HeaderBar {
 
     private bool is_attached = true;
 
+    public Adw.HeaderBar headerbar;
+
     [GtkChild] private unowned Gtk.Box detach_start;
     [GtkChild] private unowned Gtk.Box detach_end;
     [GtkChild] private unowned Gtk.Button recipients_button;
@@ -34,23 +37,24 @@ public class Composer.Headerbar : Hdy.HeaderBar {
     public signal void expand_composer();
 
 
-    public Headerbar(Application.Configuration config) {
+    public Header(Application.Configuration config) {
         this.config = config;
+        this.headerbar = (Adw.HeaderBar) this.child;
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
             on_gtk_decoration_layout_changed
         );
     }
 
-    public override void destroy() {
+    public override void dispose() {
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].disconnect(
             on_gtk_decoration_layout_changed
         );
-        base.destroy();
+        base.dispose();
     }
 
     public void set_recipients(string label, string tooltip) {
-        recipients_label.label = label;
-        recipients_button.tooltip_text = tooltip;
+        this.recipients_label.label = label;
+        this.recipients_button.tooltip_text = tooltip;
     }
 
     internal void set_mode(Widget.PresentationMode mode) {
@@ -77,8 +81,9 @@ public class Composer.Headerbar : Hdy.HeaderBar {
             break;
         }
 
-        this.show_close_button = (mode == Widget.PresentationMode.PANED
-                                  && this.config.desktop_environment != UNITY);
+        //XXX GTK4 still need to figure out close buttons
+        // this.show_close_button = (mode == Widget.PresentationMode.PANED
+        //                           && this.config.desktop_environment != UNITY);
     }
 
     private void set_attached(bool is_attached) {

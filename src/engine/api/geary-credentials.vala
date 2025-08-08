@@ -94,6 +94,27 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
             );
         }
 
+        public string to_string() {
+            switch (this) {
+                case NONE:
+                    // Translators: ComboBox value for source of SMTP
+                    // authentication credentials (none) when adding a new
+                    // account
+                    return _("No login needed");
+                case USE_INCOMING:
+                    // Translators: ComboBox value for source of SMTP
+                    // authentication credentials (use IMAP) when adding a new
+                    // account
+                    return _("Use same login as receiving");
+                case CUSTOM:
+                    // Translators: ComboBox value for source of SMTP
+                    // authentication credentials (custom) when adding a new
+                    // account
+                    return _("Use a different login");
+            }
+            return_val_if_reached("");
+        }
+
     }
 
 

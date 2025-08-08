@@ -10,7 +10,7 @@
 /**
  * The client application's main point of entry and desktop integration.
  */
-public class Application.Client : Gtk.Application {
+public class Application.Client : Adw.Application {
 
     public const string NAME = "Geary" + Config.NAME_SUFFIX;
     public const string RESOURCE_BASE_PATH = "/org/gnome/Geary";
@@ -222,7 +222,6 @@ public class Application.Client : Gtk.Application {
 
     private File exec_dir;
     private string binary;
-    private Gtk.CssProvider single_key_shortcuts = new Gtk.CssProvider();
     private GLib.Cancellable controller_cancellable = new GLib.Cancellable();
     private Components.Inspector? inspector = null;
     private Geary.Nonblocking.Mutex controller_mutex = new Geary.Nonblocking.Mutex();
@@ -348,9 +347,6 @@ public class Application.Client : Gtk.Application {
 
         // Calls Gtk.init(), amongst other things
         base.startup();
-        Hdy.init();
-        Hdy.StyleManager.get_default().set_color_scheme(
-            Hdy.ColorScheme.PREFER_LIGHT);
 
         this.engine = new Geary.Engine(get_resource_directory());
         this.config = new Configuration(SCHEMA_ID);
@@ -378,27 +374,21 @@ public class Application.Client : Gtk.Application {
         add_edit_accelerators(Action.Edit.REDO, { "<Ctrl><Shift>Z" });
         add_edit_accelerators(Action.Edit.UNDO, { "<Ctrl>Z" });
 
-        // Load Geary GTK CSS
-        var provider = new Gtk.CssProvider();
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Display.get_default().get_default_screen(),
-            provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        );
-        load_css(provider,
-                 "resource:///org/gnome/Geary/geary.css");
+        //XXX GTK4 key shortcut themes aren't supported yet: https://gitlab.gnome.org/GNOME/gtk/-/issues/1669#note_1735942
+#if 0
+        // Load Geary CSS for single key shortcuts
         load_css(this.single_key_shortcuts,
                  "resource:///org/gnome/Geary/single-key-shortcuts.css");
         update_single_key_shortcuts();
         this.config.notify[Configuration.SINGLE_KEY_SHORTCUTS].connect(
             on_single_key_shortcuts_toggled
         );
+#endif
 
         MainWindow.add_accelerators(this);
         Composer.Editor.add_accelerators(this);
         Composer.Widget.add_accelerators(this);
         Components.Inspector.add_accelerators(this);
-        Components.PreferencesWindow.add_accelerators(this);
         Dialogs.ProblemDetailsDialog.add_accelerators(this);
 
         // Manually place a hold on the application otherwise the
@@ -432,7 +422,7 @@ public class Application.Client : Gtk.Application {
         // thing down if it takes too long to complete
         int64 start_usec = get_monotonic_time();
         while (!controller_closed) {
-            Gtk.main_iteration();
+            MainContext.default().iteration(false);
 
             int64 delta_usec = get_monotonic_time() - start_usec;
             if (delta_usec >= FORCE_SHUTDOWN_USEC) {
@@ -553,12 +543,11 @@ public class Application.Client : Gtk.Application {
     public async void show_accounts() {
         yield this.present();
 
-        Accounts.Editor editor = new Accounts.Editor(
-            this, get_active_main_window()
-        );
-        editor.run();
-        editor.destroy();
-        this.controller.expunge_accounts.begin();
+        Accounts.Editor editor = new Accounts.Editor(this);
+        editor.present(get_active_main_window());
+        editor.closed.connect((editor) => {
+            this.controller.expunge_accounts.begin();
+        });
     }
 
     /**
@@ -667,9 +656,10 @@ public class Application.Client : Gtk.Application {
 
         if (this.inspector == null) {
             this.inspector = new Components.Inspector(this);
-            this.inspector.destroy.connect(() => {
-                    this.inspector = null;
-                });
+            this.inspector.close_request.connect(() => {
+                this.inspector = null;
+                return true;
+            });
 
             // Create a new window group for the inspector so it is
             // not affected by the app's modal dialogs
@@ -685,11 +675,11 @@ public class Application.Client : Gtk.Application {
     public async void show_preferences() {
         yield this.present();
 
-        Components.PreferencesWindow prefs = new Components.PreferencesWindow(
-            get_active_main_window(),
+        var prefs = new Components.PreferencesDialog(
+            this,
             this.controller.plugins
         );
-        prefs.show();
+        prefs.present(get_active_main_window());
     }
 
     public async void new_composer(Geary.RFC822.MailboxAddress? to = null) {
@@ -820,10 +810,9 @@ public class Application.Client : Gtk.Application {
                 uri_ = "http://" + uri;
             }
 
+            var launcher = new Gtk.UriLauncher(uri_);
             try {
-                Gtk.show_uri_on_window(
-                    get_active_window(), uri_, Gdk.CURRENT_TIME
-                );
+                yield launcher.launch(get_active_window(), null);
             } catch (GLib.Error err) {
                 this.controller.report_problem(new Geary.ProblemReport(err));
             }
@@ -837,8 +826,10 @@ public class Application.Client : Gtk.Application {
      * prompted about and if cancelled, will cancel shut-down here.
      */
     public new void quit() {
-        if (this.controller == null ||
-            this.controller.check_open_composers()) {
+        //XXX GTK4 this is now async, need to figure out how to do this
+        // if (this.controller == null ||
+        //     this.controller.check_open_composers()) {
+        if (this.controller == null) {
             this.last_active_main_window = null;
             base.quit();
         }
@@ -908,7 +899,9 @@ public class Application.Client : Gtk.Application {
     private MainWindow new_main_window(bool select_first_inbox) {
         MainWindow window = new MainWindow(this);
         this.controller.register_window(window);
-        window.focus_in_event.connect(on_main_window_focus_in);
+        Gtk.EventControllerFocus focus_controller = new Gtk.EventControllerFocus();
+        focus_controller.enter.connect(on_main_window_focus_enter);
+        ((Gtk.Widget) window).add_controller(focus_controller);
         if (select_first_inbox) {
             if (!window.select_first_inbox(true)) {
                 // The first inbox wasn't selected, so the account is
@@ -958,11 +951,10 @@ public class Application.Client : Gtk.Application {
             open_failed = true;
             warning("Error creating controller: %s", err.message);
             var dialog = new Dialogs.ProblemDetailsDialog(
-                null,
                 this,
                 new Geary.ProblemReport(err)
             );
-            dialog.show();
+            dialog.present(null);
         }
 
         if (mutex_token != Geary.Nonblocking.Mutex.INVALID_TOKEN) {
@@ -1100,20 +1092,23 @@ public class Application.Client : Gtk.Application {
         set_accels_for_action("app." + action, accelerators);
     }
 
+        //XXX GTK4 key shortcut themes aren't supported yet: https://gitlab.gnome.org/GNOME/gtk/-/issues/1669#note_1735942
+#if 0
     private void update_single_key_shortcuts() {
         if (this.config.single_key_shortcuts) {
-            Gtk.StyleContext.add_provider_for_screen(
-                Gdk.Display.get_default().get_default_screen(),
+            Gtk.StyleContext.add_provider_for_display(
+                Gdk.Display.get_default(),
                 this.single_key_shortcuts,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
             );
         } else {
-            Gtk.StyleContext.remove_provider_for_screen(
-                Gdk.Display.get_default().get_default_screen(),
+            Gtk.StyleContext.remove_provider_for_display(
+                Gdk.Display.get_default(),
                 this.single_key_shortcuts
             );
         }
     }
+#endif
 
     private void load_css(Gtk.CssProvider provider, string resource_uri) {
         provider.parsing_error.connect(on_css_parse_error);
@@ -1197,7 +1192,8 @@ public class Application.Client : Gtk.Application {
     private void on_activate_help() {
         try {
             if (this.is_installed) {
-                this.show_uri.begin("help:geary");
+                var launcher = new Gtk.UriLauncher("help:geary");
+                launcher.launch.begin(get_active_window(), null);
             } else {
                 Pid pid;
                 File exec_dir = this.exec_dir;
@@ -1217,17 +1213,10 @@ public class Application.Client : Gtk.Application {
             }
         } catch (Error error) {
             debug("Error showing help: %s", error.message);
-            Gtk.Dialog dialog = new Gtk.Dialog.with_buttons(
-                "Error",
-                get_active_window(),
-                Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                Stock._CLOSE, Gtk.ResponseType.CLOSE, null);
-            dialog.response.connect(() => { dialog.destroy(); });
-            dialog.get_content_area().add(
-                new Gtk.Label("Error showing help: %s".printf(error.message))
+            Adw.AlertDialog dialog = new Adw.AlertDialog("Error",
+                "Error showing help: %s".printf(error.message)
             );
-            dialog.show_all();
-            dialog.run();
+            dialog.present(get_active_window());
         }
     }
 
@@ -1243,13 +1232,11 @@ public class Application.Client : Gtk.Application {
         }
     }
 
-    private bool on_main_window_focus_in(Gtk.Widget widget,
-                                         Gdk.EventFocus event) {
-        MainWindow? main = widget as MainWindow;
+    private void on_main_window_focus_enter(Gtk.EventControllerFocus focus_controller) {
+        MainWindow? main = focus_controller.get_widget() as MainWindow;
         if (main != null) {
             this.last_active_main_window = main;
         }
-        return Gdk.EVENT_PROPAGATE;
     }
 
     private void on_window_removed(Gtk.Window window) {
@@ -1271,22 +1258,25 @@ public class Application.Client : Gtk.Application {
         }
     }
 
+    //XXX GTK4 key shortcut themes aren't supported yet: https://gitlab.gnome.org/GNOME/gtk/-/issues/1669#note_1735942
+#if 0
     private void on_single_key_shortcuts_toggled() {
         update_single_key_shortcuts();
     }
+#endif
 
-    private void on_css_parse_error(Gtk.CssSection section, GLib.Error error) {
-        uint start = section.get_start_line();
-        uint end = section.get_end_line();
-        if (start == end) {
+    private void on_css_parse_error(Gtk.CssProvider provider, Gtk.CssSection section, GLib.Error error) {
+        var start = section.get_start_location();
+        var end = section.get_end_location();
+        if (start.lines == end.lines) {
             warning(
-                "Error parsing %s:%u: %s",
-                section.get_file().get_uri(), start, error.message
+                "Error parsing %s:%"+size_t.FORMAT+": %s",
+                section.get_file().get_uri(), start.lines, error.message
             );
         } else {
             warning(
-                "Error parsing %s:%u-%u: %s",
-                section.get_file().get_uri(), start, end, error.message
+                "Error parsing %s:%"+size_t.FORMAT+"-%"+size_t.FORMAT+": %s",
+                section.get_file().get_uri(), start.lines, end.lines, error.message
             );
         }
     }

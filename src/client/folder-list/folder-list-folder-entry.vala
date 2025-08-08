@@ -80,6 +80,8 @@ public class FolderList.FolderEntry :
         entry_changed();
     }
 
+    //XXX GTK4 I have no idea yet
+#if 0
     public bool internal_drop_received(Sidebar.Tree parent,
                                        Gdk.DragContext context,
                                        Gtk.SelectionData data) {
@@ -104,6 +106,7 @@ public class FolderList.FolderEntry :
         }
         return handled;
     }
+#endif
 
     public override int get_count() {
         switch (this.context.displayed_count) {

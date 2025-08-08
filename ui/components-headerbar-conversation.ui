@@ -1,75 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ComponentsConversationHeaderBar" parent="GtkBin">
+  <template class="ComponentsConversationHeaderBar" parent="AdwBin">
     <child>
-      <object class="HdyHeaderBar" id="conversation_header">
-        <property name="visible">True</property>
+      <object class="AdwHeaderBar" id="conversation_header">
         <property name="hexpand">True</property>
-        <property name="show_close_button">True</property>
+        <property name="show-title">False</property>
         <child>
-          <object class="GtkButton" id="back_button">
-            <property name="receives_default">False</property>
-            <property name="valign">center</property>
-            <property name="use-underline">True</property>
-            <property name="action_name">win.navigation-back</property>
-            <property name="tooltip_text" translatable="yes">Back</property>
-            <style>
-              <class name="image-button"/>
-            </style>
-            <child internal-child="accessible">
-              <object class="AtkObject" id="a11y-conversation-back">
-                <property name="accessible-name" translatable="yes">Back</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkImage" id="conversation_back_image">
-                <property name="visible">True</property>
-                <property name="icon_name">go-previous-symbolic</property>
-                <property name="icon_size">1</property>
-              </object>
-            </child>
+          <object class="ComponentsConversationActions" id="left_actions">
+            <property name="show-conversation-actions">False</property>
+            <property name="show-response-actions">True</property>
           </object>
         </child>
-        <child type="title">
-          <object class="HdySqueezer" id="actions_squeezer">
-            <property name="visible">True</property>
-            <property name="hexpand">True</property>
-            <child>
-              <object class="ComponentsConversationActions" id="full_actions">
-                <property name="visible">True</property>
-                <property name="show_conversation_actions">True</property>
-                <property name="show_response_actions">True</property>
-              </object>
-            </child>
-            <child>
-              <object class="ComponentsConversationActions" id="compact_actions">
-                <property name="visible">True</property>
-                <property name="show_conversation_actions">False</property>
-                <property name="show_response_actions">True</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
+        <child type="end">
           <object class="GtkToggleButton" id="find_button">
-            <property name="visible">True</property>
             <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Toggle find bar</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="find_image">
-                <property name="visible">True</property>
-                <property name="icon_name">preferences-system-search-symbolic</property>
-              </object>
-            </child>
+            <property name="icon_name">preferences-system-search-symbolic</property>
           </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
+        </child>
+        <child type="end">
+          <object class="ComponentsConversationActions" id="right_actions">
+            <property name="visible"
+              bind-source="ComponentsConversationHeaderBar" bind-property="compact"
+              bind-flags="sync-create|invert-boolean"/>
+            <property name="show-conversation-actions">True</property>
+            <property name="show-response-actions">False</property>
+          </object>
         </child>
       </object>
     </child>

@@ -11,7 +11,8 @@
  *
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-list-view.ui")]
-public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
+public class ConversationList.View : Adw.Bin, Geary.BaseInterface {
+
     /**
      * The fields that must be available on any ConversationMonitor
      * passed to ConversationList.View
@@ -42,10 +43,10 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
     private Application.Configuration config;
 
-    private Gtk.GestureMultiPress press_gesture;
     private Gtk.GestureLongPress long_press_gesture;
-    private Gtk.EventControllerKey key_event_controller;
     private Gdk.ModifierType last_modifier_type;
+
+    [GtkChild] public unowned Gtk.ScrolledWindow scrolled_window;
 
     [GtkChild] private unowned Gtk.ListBox list;
 
@@ -64,14 +65,10 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
         this.list.set_header_func(header_func);
 
-        this.vadjustment.value_changed.connect(maybe_load_more);
-        this.vadjustment.value_changed.connect(update_visible_conversations);
+        this.scrolled_window.vadjustment.value_changed.connect(maybe_load_more);
+        this.scrolled_window.vadjustment.value_changed.connect(update_visible_conversations);
 
-        this.press_gesture = new Gtk.GestureMultiPress(this.list);
-        this.press_gesture.set_button(0);
-        this.press_gesture.released.connect(on_press_gesture_released);
-
-        this.long_press_gesture = new Gtk.GestureLongPress(this.list);
+        this.long_press_gesture = new Gtk.GestureLongPress();
         this.long_press_gesture.propagation_phase = CAPTURE;
         this.long_press_gesture.pressed.connect((n_press, x, y) => {
             Row? row = (Row) this.list.get_row_at_y((int) y);
@@ -80,14 +77,13 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
                 this.selection_mode_enabled = true;
             }
         });
+        this.list.add_controller(this.long_press_gesture);
 
-        this.key_event_controller = new Gtk.EventControllerKey(this.list);
-        this.key_event_controller.key_pressed.connect(on_key_event_controller_key_pressed);
-
-        Gtk.drag_source_set(this.list, Gdk.ModifierType.BUTTON1_MASK, FolderList.Tree.TARGET_ENTRY_LIST,
-            Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
-        this.list.drag_begin.connect(on_drag_begin);
-        this.list.drag_end.connect(on_drag_end);
+        //XXX GTK4 - check if started on click
+        var drag_source = new Gtk.DragSource();
+        drag_source.drag_begin.connect(on_drag_begin);
+        drag_source.drag_end.connect(on_drag_end);
+        this.list.add_controller(drag_source);
     }
 
     static construct {
@@ -113,10 +109,13 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      * automatically but instead it must be externally scheduled
      */
     public void refresh_times() {
-        this.list.foreach((child) => {
-            var row = (Row) child;
+        int i = 0;
+        Row? row = this.list.get_row_at_index(0) as Row;
+        while (row != null) {
             row.refresh_time();
-        });
+            i++;
+            row = this.list.get_row_at_index(i) as Row;
+        }
     }
 
     // -------------------
@@ -204,7 +203,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
     private Gtk.Popover construct_popover(Row row, uint selection_size) {
         GLib.Menu context_menu_model = new GLib.Menu();
-        var main = get_toplevel() as Application.MainWindow;
+        var main = get_root() as Application.MainWindow;
 
         if (main != null) {
             if (!main.is_shift_down) {
@@ -303,13 +302,8 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
         );
         context_menu_model.append_section(null, actions_section);
 
-        // Use a popover rather than a regular context menu since
-        // the latter grabs the event queue, so the MainWindow
-        // will not receive events if the user releases Shift,
-        // making the trash/delete header bar state wrong.
-        Gtk.Popover context_menu = new Gtk.Popover.from_model(
-            row, context_menu_model
-        );
+        var context_menu = new Gtk.PopoverMenu.from_model(context_menu_model);
+        context_menu.set_parent(row);
 
         return context_menu;
     }
@@ -347,13 +341,16 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      * If a conversation is not present in the ListBox, it is ignored.
      */
     public void select_conversations(Gee.Collection<Geary.App.Conversation> selection) {
-        this.list.foreach((child) => {
-            var row = (Row) child;
+        int i = 0;
+        Row? row = this.list.get_row_at_index(0) as Row;
+        while (row != null) {
             Geary.App.Conversation conversation = row.conversation;
             if (selection.contains(conversation)) {
                 this.list.select_row(row);
             }
-        });
+            i++;
+            row = this.list.get_row_at_index(i) as Row;
+        }
     }
 
     /**
@@ -466,9 +463,9 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      */
     private int VISIBILITY_UPDATE_DELAY_MS = 1000;
 
-	/**
-	 * The set of all conversations currently displayed in the viewport
-	 */
+    /**
+     * The set of all conversations currently displayed in the viewport
+     */
     public Gee.Set<Geary.App.Conversation> visible_conversations {get; private set; default = new Gee.HashSet<Geary.App.Conversation>(); }
     private Geary.Scheduler.Scheduled? scheduled_visible_update;
 
@@ -482,7 +479,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
         scheduled_visible_update = Geary.Scheduler.after_msec(VISIBILITY_UPDATE_DELAY_MS, () => {
             var visible = new Gee.HashSet<Geary.App.Conversation>();
-            Gtk.ListBoxRow? first = this.list.get_row_at_y((int) this.vadjustment.value);
+            Gtk.ListBoxRow? first = this.list.get_row_at_y((int) this.scrolled_window.vadjustment.value);
 
             if (first == null) {
                 this.visible_conversations = visible;
@@ -492,7 +489,7 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
             uint start_index = ((uint) first.get_index());
             uint end_index = uint.min(
                 // Assume that all messages are the same height
-                start_index + (uint) (this.vadjustment.page_size / first.get_allocated_height()),
+                start_index + (uint) (this.scrolled_window.vadjustment.page_size / first.get_allocated_height()),
                 this.model.get_n_items()
             );
 
@@ -581,29 +578,34 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
      * Update conversation row
      */
     private void on_conversation_updated(Geary.App.Conversation convo) {
-        this.list.foreach((child) => {
-            var row = (Row) child;
+        int i = 0;
+        Row? row = this.list.get_row_at_index(0) as Row;
+        while (row != null) {
             if (convo == row.conversation) {
                 row.update();
             }
-        });
+
+            i++;
+            row = this.list.get_row_at_index(i) as Row;
+        }
     }
 
     // ----------
     // Gestures
     // ----------
 
-    private void on_press_gesture_released(int n_press, double x, double y) {
+    [GtkCallback]
+    private void on_press_gesture_released(Gtk.GestureClick click_gesture, int n_press, double x, double y) {
         var row = (Row) this.list.get_row_at_y((int) y);
 
         if (row == null)
             return;
 
-        var button = this.press_gesture.get_current_button();
-        if (button == 1) {
-            Gdk.EventSequence sequence = this.press_gesture.get_current_sequence();
-            Gdk.Event event = this.press_gesture.get_last_event(sequence);
-            event.get_state(out this.last_modifier_type);
+        var button = click_gesture.get_current_button();
+        if (button == Gdk.BUTTON_PRIMARY) {
+            Gdk.EventSequence sequence = click_gesture.get_current_sequence();
+            Gdk.Event event = click_gesture.get_last_event(sequence);
+            this.last_modifier_type = event.get_modifier_state();
             if (!this.selection_mode_enabled) {
                 if ((this.last_modifier_type & Gdk.ModifierType.SHIFT_MASK) ==
                         Gdk.ModifierType.SHIFT_MASK ||
@@ -614,19 +616,19 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
                     conversation_activated(((Row) row).conversation, 1);
                 }
             }
-        } else if (button == 2) {
+        } else if (button == Gdk.BUTTON_MIDDLE) {
             conversation_activated(row.conversation, 2);
-        } else if (button == 3) {
-            var rect = Gdk.Rectangle();
-            row.translate_coordinates(this.list, 0, 0, out rect.x, out rect.y);
-            rect.x = (int) x;
-            rect.y = (int) y - rect.y;
-            rect.width = rect.height = 0;
+        } else if (button == Gdk.BUTTON_SECONDARY) {
+            Graphene.Point p = { (float) x, (float) y };
+            Graphene.Point p_row;
+            this.list.compute_point(row, p, out p_row);
+            Gdk.Rectangle rect = { (int) p_row.x, (int) p_row.y, 0, 0 };
             context_menu(row, rect);
         }
     }
 
-    private bool on_key_event_controller_key_pressed(uint keyval, uint keycode, Gdk.ModifierType modifier_type) {
+    [GtkCallback]
+    private bool on_key_pressed(uint keyval, uint keycode, Gdk.ModifierType modifier_type) {
         switch (keyval) {
         case Gdk.Key.Up:
         case Gdk.Key.Down:
@@ -646,19 +648,17 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     }
 
 
-	/**
-	 * Widgets used as drag icons have to be explicitly destroyed after the drag
-	 * so we track the widget as a private member
-	 */
+    /**
+     * Widgets used as drag icons have to be explicitly destroyed after the drag
+     * so we track the widget as a private member
+     */
     private Row? drag_widget = null;
 
-    private void on_drag_begin(Gdk.DragContext ctx) {
+    private void on_drag_begin(Gtk.DragSource drag_source, Gdk.Drag drag) {
         int screen_x, screen_y;
         Gdk.ModifierType _modifier;
 
-        this.get_window().get_device_position(ctx.get_device(), out screen_x, out screen_y, out _modifier);
-
-        Row? row = this.list.get_row_at_y(screen_y + (int) this.vadjustment.value) as Row?;
+        Row? row = this.list.get_row_at_y((int) this.scrolled_window.vadjustment.value) as Row?;
         if (row != null) {
             // If the user has a selection but drags starting from an unselected
             // row, we need to set the selection to that row
@@ -669,18 +669,18 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
 
             this.drag_widget = new Row(this.config, row.conversation, false);
             this.drag_widget.width_request = row.get_allocated_width();
-            this.drag_widget.get_style_context().add_class("drag-n-drop");
+            this.drag_widget.add_css_class("drag-n-drop");
             this.drag_widget.visible = true;
 
-            int hot_x, hot_y;
-            this.translate_coordinates(row, screen_x, screen_y, out hot_x, out hot_y);
-            Gtk.drag_set_icon_widget(ctx, this.drag_widget, hot_x, hot_y);
+            double hot_x, hot_y;
+            // XXX GTK4 - this might be a bit more work to do properly wiht Paintable
+            translate_coordinates(row, 0, 0, out hot_x, out hot_y);
+            // drag_source.set_icon(this.drag_widget, hot_x, hot_y);
         }
     }
 
-    private void on_drag_end(Gdk.DragContext ctx) {
+    private void on_drag_end(Gtk.DragSource drag_source, Gdk.Drag drag, bool delete_data) {
         if (this.drag_widget != null) {
-            this.drag_widget.destroy();
             this.drag_widget = null;
         }
     }
@@ -706,10 +706,13 @@ public class ConversationList.View : Gtk.ScrolledWindow, Geary.BaseInterface {
     }
 
     private void on_selection_mode_changed() {
-        this.list.foreach((child) => {
-            var row = (Row) child;
+        int i = 0;
+        Row? row = this.list.get_row_at_index(0) as Row;
+        while (row != null) {
             row.set_selection_enabled(this.selection_mode_enabled);
-        });
+            i++;
+            row = this.list.get_row_at_index(i) as Row;
+        }
 
         if (this.selection_mode_enabled) {
             this.to_restore_row = this.list.get_selected_row();

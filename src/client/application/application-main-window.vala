@@ -8,7 +8,7 @@
 
 [GtkTemplate (ui = "/org/gnome/Geary/application-main-window.ui")]
 public class Application.MainWindow :
-    Hdy.ApplicationWindow, Geary.BaseInterface {
+    Adw.ApplicationWindow, Geary.BaseInterface {
 
 
     // Named actions.
@@ -45,7 +45,6 @@ public class Application.MainWindow :
         { ACTION_FIND_IN_CONVERSATION, on_find_in_conversation_action },
         { ACTION_SEARCH, on_search_activated },
         { ACTION_SELECT_INBOX, on_select_inbox, "i" },
-        { ACTION_NAVIGATION_BACK, go_to_previous_pane},
 
         // Message actions
         { ACTION_REPLY_CONVERSATION, on_reply_conversation },
@@ -67,184 +66,9 @@ public class Application.MainWindow :
         { ACTION_ZOOM, on_zoom, "s" },
     };
 
-    // Handy leaflet children names
-    private const string INNER_LEAFLET = "inner_leaflet";
-    private const string FOLDER_LIST = "folder_list";
-    private const string CONVERSATION_LIST = "conversation_list";
-    private const string CONVERSATION_VIEWER = "conversation_viewer";
-
     private const int UPDATE_UI_INTERVAL = 60;
 
     private const int MIN_CONVERSATION_COUNT = 50;
-
-    static construct {
-        // Set up default keybindings
-        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
-            (ObjectClass) typeof(MainWindow).class_ref()
-        );
-
-        //
-        // Replying & forwarding
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.R, CONTROL_MASK,
-            "reply-conversation-sender", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.R, CONTROL_MASK | SHIFT_MASK,
-            "reply-conversation-all", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.L, CONTROL_MASK,
-            "forward-conversation", 0
-        );
-
-        // Marking actions
-        //
-        // Unread is the primary action, so it doesn't get the <Shift>
-        // modifier
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.U, CONTROL_MASK,
-            "mark-conversations-read", 1, typeof(bool), true
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.U, CONTROL_MASK | SHIFT_MASK,
-            "mark-conversations-read", 1, typeof(bool), false
-        );
-        // Ephy uses Ctrl+D for bookmarking
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.D, CONTROL_MASK,
-            "mark-conversations-starred", 1, typeof(bool), true
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.D, CONTROL_MASK | SHIFT_MASK,
-            "mark-conversations-starred", 1, typeof(bool), false
-        );
-
-        //
-        // Moving & labelling
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.B, CONTROL_MASK,
-            "show-copy-menu", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.M, CONTROL_MASK,
-            "show-move-menu", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.K, CONTROL_MASK,
-            "archive-conversations", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.J, CONTROL_MASK,
-            "junk-conversations", 0
-        );
-        // Many ways to trash
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.BackSpace, 0,
-            "trash-conversations", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Delete, 0,
-            "trash-conversations", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.KP_Delete, 0,
-            "trash-conversations", 0
-        );
-        // Many ways to delete
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.BackSpace, SHIFT_MASK,
-            "delete-conversations", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Delete, SHIFT_MASK,
-            "delete-conversations", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.KP_Delete, SHIFT_MASK,
-            "delete-conversations", 0
-        );
-
-        //
-        // Find & search
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.F, CONTROL_MASK,
-            "find", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.S, CONTROL_MASK,
-            "search", 0
-        );
-
-        //
-        // Navigation
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Left, MOD1_MASK,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_LEFT
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Back, 0,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_LEFT
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Right, MOD1_MASK,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_RIGHT
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Forward, 0,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_RIGHT
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.comma, CONTROL_MASK,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_UP
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.period, CONTROL_MASK,
-            "navigate", 1,
-            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_DOWN
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.Escape, 0,
-            "escape", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings,
-            Gdk.Key.a, CONTROL_MASK,
-            "select_all", 0
-        );
-    }
-
 
     public static void add_accelerators(Client owner) {
         for (int i = 1; i <= 9; i++) {
@@ -302,10 +126,9 @@ public class Application.MainWindow :
     public bool is_folder_list_shown {
         get {
             return (
-                (!this.outer_leaflet.folded ||
-                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
-                (!this.inner_leaflet.folded ||
-                 this.inner_leaflet.visible_child_name == FOLDER_LIST)
+                (!this.outer_view.collapsed || !this.outer_view.show_content)
+                &&
+                (!this.inner_view.collapsed || !this.inner_view.show_content)
             );
         }
     }
@@ -314,10 +137,9 @@ public class Application.MainWindow :
     public bool is_conversation_list_shown {
         get {
             return (
-                (!this.outer_leaflet.folded ||
-                 this.outer_leaflet.visible_child_name == INNER_LEAFLET) &&
-                (!this.inner_leaflet.folded ||
-                 this.inner_leaflet.visible_child_name == CONVERSATION_LIST)
+                (!this.outer_view.collapsed || !this.outer_view.show_content)
+                &&
+                (!this.inner_view.collapsed || this.inner_view.show_content)
             );
         }
     }
@@ -326,9 +148,9 @@ public class Application.MainWindow :
     public bool is_conversation_viewer_shown {
         get {
             return (
-                (!this.outer_leaflet.folded ||
-                 this.outer_leaflet.visible_child_name == CONVERSATION_VIEWER) &&
-                !this.has_composer
+                !this.outer_view.collapsed || this.outer_view.show_content
+                // XXX GTK4 not sure?
+                // && !this.has_composer
             );
         }
     }
@@ -356,7 +178,6 @@ public class Application.MainWindow :
     // Used to save/load the window state between sessions.
     public int window_width { get; set; }
     public int window_height { get; set; }
-    public bool window_maximized { get; set; }
 
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
@@ -390,27 +211,29 @@ public class Application.MainWindow :
     private Geary.TimeoutManager update_ui_timeout;
     private int64 update_ui_last = 0;
 
-    [GtkChild] private unowned Components.ApplicationHeaderBar application_headerbar;
-    [GtkChild] private unowned Components.ConversationListHeaderBar conversation_list_headerbar;
-    [GtkChild] public unowned Components.ConversationHeaderBar conversation_headerbar;
+    [GtkChild] private unowned Gtk.ToggleButton search_button;
+    [GtkChild] private unowned Gtk.ToggleButton conversation_list_selection_button;
+    [GtkChild] private unowned Gtk.MenuButton app_menu_button;
+    [GtkChild] private unowned MonitoredSpinner headerbar_spinner;
 
-    // Folds the inner leaftlet and conversation viewer
-    [GtkChild] private unowned Hdy.Leaflet outer_leaflet;
+    [GtkChild] private unowned Adw.HeaderBar conversation_list_headerbar;
 
-    // Folds the folder list and the conversation list
-    [GtkChild] private unowned Hdy.Leaflet inner_leaflet;
+    // Outer and inner split are [[ folder_box | conversation_list ] | conversation_viewer ]
+    [GtkChild] private unowned Adw.NavigationSplitView outer_view;
+    [GtkChild] private unowned Adw.NavigationSplitView inner_view;
 
+    [GtkChild] private unowned Adw.NavigationPage folder_list_page;
     [GtkChild] private unowned Gtk.ScrolledWindow folder_list_scrolled;
 
+    [GtkChild] private unowned Adw.NavigationPage conversation_list_page;
     [GtkChild] private unowned Gtk.Box conversation_list_box;
     [GtkChild] private unowned Gtk.Revealer conversation_list_actions_revealer;
     [GtkChild] private unowned Components.ConversationActions conversation_list_actions;
     [GtkChild] private unowned Components.ConversationActions conversation_viewer_actions;
 
-    [GtkChild] private unowned Gtk.Box conversation_viewer_box;
-    [GtkChild] private unowned Gtk.Revealer conversation_viewer_actions_revealer;
+    [GtkChild] private unowned Adw.NavigationPage conversation_viewer_page;
 
-    [GtkChild] private unowned Gtk.Overlay overlay;
+    [GtkChild] private unowned Adw.ToastOverlay overlay;
 
     [GtkChild] private unowned Components.InfoBarStack info_bars;
 
@@ -511,12 +334,6 @@ public class Application.MainWindow :
         activate_action(get_window_action(ACTION_FIND_IN_CONVERSATION));
     }
 
-    /** Keybinding signal for escaping current view. */
-    [Signal (action=true)]
-    public virtual signal void escape() {
-        navigate_previous_pane();
-    }
-
     /** Keybinding signal for selecting all elements in current view. */
     [Signal (action=true)]
     public virtual signal void select_all() {
@@ -527,20 +344,6 @@ public class Application.MainWindow :
     [Signal (action=true)]
     public virtual signal void navigate(Gtk.ScrollType type) {
         switch (type) {
-        case Gtk.ScrollType.PAGE_LEFT:
-            if (get_direction() != RTL) {
-                go_to_previous_pane();
-            } else {
-                go_to_next_pane();
-            }
-            break;
-        case Gtk.ScrollType.PAGE_RIGHT:
-            if (get_direction() != RTL) {
-                go_to_next_pane();
-            } else {
-                go_to_previous_pane();
-            }
-            break;
         case Gtk.ScrollType.STEP_UP:
             activate_action(get_window_action(ACTION_CONVERSATION_UP));
             break;
@@ -577,11 +380,8 @@ public class Application.MainWindow :
         restore_saved_window_state();
 
         if (Config.PROFILE != Client.PROFILE_RELEASE) {
-            this.get_style_context().add_class("devel");
+            add_css_class("devel");
         }
-
-        this.info_bars.shadow_type = IN;
-        this.conversation_list_info_bars.shadow_type = IN;
 
         // Edit actions
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
@@ -589,15 +389,6 @@ public class Application.MainWindow :
 
         // Window actions
         add_action_entries(MainWindow.WINDOW_ACTIONS, this);
-
-        this.focus_in_event.connect((w, e) => {
-            application.controller.window_focus_in();
-            return false;
-        });
-        this.focus_out_event.connect((w, e) => {
-            application.controller.window_focus_out();
-            return false;
-        });
 
         setup_layout(application.config);
 
@@ -646,7 +437,7 @@ public class Application.MainWindow :
             "Retry login, you will be prompted for your password"
         );
         auth_retry.clicked.connect(on_auth_problem_retry);
-        this.auth_problem_infobar.get_action_area().add(auth_retry);
+        this.auth_problem_infobar.get_action_area().append(auth_retry);
 
         this.cert_problem_infobar = new Components.InfoBar(
             // Translators: An info bar status label
@@ -662,7 +453,7 @@ public class Application.MainWindow :
             "Check the security details for the connection"
         );
         cert_retry.clicked.connect(on_cert_problem_retry);
-        this.cert_problem_infobar.get_action_area().add(cert_retry);
+        this.cert_problem_infobar.get_action_area().append(cert_retry);
 
         this.map.connect(() => {
             this.folder_list.grab_focus();
@@ -671,32 +462,10 @@ public class Application.MainWindow :
         foreach (var actions in this.folder_conversation_actions) {
             actions.mark_message_button_toggled.connect(on_show_mark_menu);
         }
-
-        Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
-            on_gtk_decoration_layout_changed
-        );
-        update_close_button_position();
     }
 
     ~MainWindow() {
         base_unref();
-    }
-
-    /** {@inheritDoc} */
-    public override void destroy() {
-        if (this.application != null) {
-            this.controller.account_available.disconnect(
-                on_account_available
-            );
-            this.controller.account_unavailable.disconnect(
-                on_account_unavailable
-            );
-        }
-        this.update_ui_timeout.reset();
-        Gtk.Settings.get_default().notify["gtk-decoration-layout"].disconnect(
-            on_gtk_decoration_layout_changed
-        );
-        base.destroy();
     }
 
     /** Updates the window's title and headerbar titles. */
@@ -719,8 +488,9 @@ public class Application.MainWindow :
             title = _("%s — %s").printf(folder_name, account_name);
         }
         this.title = title;
-        this.conversation_list_headerbar.account = account_name ?? "";
-        this.conversation_list_headerbar.folder = folder_name?? "";
+        this.conversation_list_page.title = account_name ?? "";
+        //XXX GTK4 still need to figure out subtitles
+        // this.conversation_list_headerbar.subtitle = folder_name?? "";
     }
 
     /** Updates the window's account status info bars. */
@@ -775,7 +545,7 @@ public class Application.MainWindow :
             this.folder_open.cancel();
             var cancellable = this.folder_open = new GLib.Cancellable();
 
-            this.conversation_list_headerbar.selection_open = false;
+            this.conversation_list_selection_button.active = false;
 
             // Dispose of all existing objects for the currently
             // selected model.
@@ -855,6 +625,8 @@ public class Application.MainWindow :
             }
         }
 
+        this.outer_view.show_content = false;
+        this.inner_view.show_content = true;
         update_headerbar();
     }
 
@@ -867,7 +639,8 @@ public class Application.MainWindow :
         // The folder may have changed again by the type the async
         // call returns, so only continue if still current
         if (this.selected_folder == location) {
-            navigate_next_pane();
+            this.outer_view.show_content = true;
+
             // Since conversation ids don't persist between
             // conversation monitor instances, need to load
             // conversations based on their messages.
@@ -902,7 +675,7 @@ public class Application.MainWindow :
         if (this.selected_folder == location) {
             var loaded = yield load_conversations_for_email(location, to_show);
 
-            navigate_next_pane();
+            this.outer_view.show_content = true;
             if (loaded.size == 1) {
                 // A single conversation was loaded, so ensure we
                 // scroll to the email in the conversation.
@@ -937,23 +710,15 @@ public class Application.MainWindow :
 
     /** Shows the appopriate window menu, if any. */
     public void show_window_menu() {
-        if (this.outer_leaflet.folded) {
-            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
-        }
-        if (this.inner_leaflet.folded) {
-            this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
-        }
-        this.application_headerbar.show_app_menu();
+        this.outer_view.show_content = false;
+        this.inner_view.show_content = false;
+        this.app_menu_button.active = true;
     }
 
     /** Displays and focuses the search bar for the window. */
     public void show_search_bar(string? text = null) {
-        if (!this.is_conversation_list_shown) {
-            if (this.outer_leaflet.folded) {
-                this.outer_leaflet.set_visible_child_name(INNER_LEAFLET);
-            }
-            this.inner_leaflet.set_visible_child_name(CONVERSATION_LIST);
-        }
+        this.outer_view.show_content = false;
+        this.inner_view.show_content = true;
 
         this.search_bar.grab_focus();
         if (text != null) {
@@ -999,8 +764,8 @@ public class Application.MainWindow :
             } else {
                 this.conversation_viewer.do_compose(composer);
             }
-            // Show the correct leaflet
-            this.outer_leaflet.set_visible_child_name(CONVERSATION_VIEWER);
+            // Show the correct view
+            this.outer_view.show_content = true;
         }
     }
 
@@ -1013,10 +778,11 @@ public class Application.MainWindow :
     internal bool close_composer(bool should_prompt, bool is_shutdown = false) {
         bool closed = true;
         Composer.Widget? composer = this.conversation_viewer.current_composer;
-        if (composer != null &&
-            composer.conditional_close(should_prompt, is_shutdown) == CANCELLED) {
-            closed = false;
-        }
+        //XXX GTK4
+        // if (composer != null &&
+        //     composer.conditional_close(should_prompt, is_shutdown) == CANCELLED) {
+        //     closed = false;
+        // }
         return closed;
     }
 
@@ -1235,75 +1001,60 @@ public class Application.MainWindow :
         // stays saved in the event of a crash.
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
-        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "maximized");
     }
 
     private void restore_saved_window_state() {
         Gdk.Display? display = Gdk.Display.get_default();
         if (display != null) {
-            Gdk.Monitor? monitor = display.get_primary_monitor();
-            if (monitor == null) {
-                monitor = display.get_monitor_at_point(1, 1);
-            }
+            Gdk.Monitor? monitor = null;
+            if (get_surface() != null)
+                monitor = display.get_monitor_at_surface(get_surface());
             if (monitor != null &&
                 this.window_width <= monitor.geometry.width &&
                 this.window_height <= monitor.geometry.height) {
                 set_default_size(this.window_width, this.window_height);
             }
         }
-        this.window_position = Gtk.WindowPosition.CENTER;
-        if (this.window_maximized) {
+        // XXX GTK4 - not sure if this is neede still
+        if (this.maximized) {
             maximize();
         }
     }
 
-    // Called on [un]maximize and possibly others. Save maximized state
-    // for the next start.
-    public override bool window_state_event(Gdk.EventWindowState event) {
-        if ((event.new_window_state & Gdk.WindowState.WITHDRAWN) == 0) {
-            bool maximized = (
-                (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0
+    public override bool close_request() {
+        // XXX GTK4 check if this doesn't close too early
+        if (close_composer(true, false)) {
+            this.sensitive = false;
+            this.select_folder.begin(
+                null,
+                false,
+                true,
+                (obj, res) => {
+                    this.select_folder.end(res);
+                    destroy();
+                }
             );
-            if (this.window_maximized != maximized) {
-                this.window_maximized = maximized;
-            }
         }
-        return base.window_state_event(event);
+
+        this.window_width = this.default_width;
+        this.window_height = this.default_height;
+
+        if (this.application != null) {
+            this.controller.account_available.disconnect(
+                on_account_available
+            );
+            this.controller.account_unavailable.disconnect(
+                on_account_unavailable
+            );
+        }
+        this.update_ui_timeout.reset();
+
+        return base.close_request();
     }
 
-    // Called on window resize. Save window size for the next start.
-    public override void size_allocate(Gtk.Allocation allocation) {
-        base.size_allocate(allocation);
-
-        if (!this.window_maximized) {
-            Gdk.Display? display = get_display();
-            Gdk.Window? window = get_window();
-            if (display != null && window != null) {
-                Gdk.Monitor monitor = display.get_monitor_at_window(window);
-
-                // Get the size via ::get_size instead of the
-                // allocation so that the window isn't ever-expanding.
-                int width = 0;
-                int height = 0;
-                get_size(out width, out height);
-
-                // Only store if the values have changed and are
-                // reasonable-looking.
-                if (this.window_width != width &&
-                    width > 0 && width <= monitor.geometry.width) {
-                    this.window_width = width;
-                }
-                if (this.window_height != height &&
-                    height > 0 && height <= monitor.geometry.height) {
-                    this.window_height = height;
-                }
-            }
-        }
-    }
-
-    public void add_notification(Components.InAppNotification notification) {
-        this.overlay.add_overlay(notification);
-        notification.show();
+    public void add_toast(Adw.Toast toast) {
+        this.overlay.add_toast(toast);
     }
 
     private void setup_layout(Configuration config) {
@@ -1312,7 +1063,7 @@ public class Application.MainWindow :
         // Search bar
         this.search_bar = new SearchBar(this.application.engine);
         this.search_bar.search_text_changed.connect(on_search);
-        this.conversation_list_box.pack_start(this.search_bar, false, false, 0);
+        this.conversation_list_box.append(this.search_bar);
 
 
         // Folder list
@@ -1320,22 +1071,19 @@ public class Application.MainWindow :
         this.folder_list.move_conversation.connect(on_move_conversation);
         this.folder_list.copy_conversation.connect(on_copy_conversation);
         this.folder_list.folder_activated.connect(on_folder_activated);
-        this.folder_list_scrolled.add(this.folder_list);
+        this.folder_list_scrolled.child = this.folder_list;
 
         // Conversation list
-        this.conversation_list_box.pack_start(
-            this.conversation_list_info_bars, false, false, 0
-        );
+        this.conversation_list_box.append(this.conversation_list_info_bars);
 
         this.conversation_list_view = new ConversationList.View(this.application.config);
         this.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         this.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         this.conversation_list_view.conversation_activated.connect(on_conversation_activated);
         this.conversation_list_view.visible_conversations.notify.connect(on_visible_conversations_changed);
+        this.conversation_list_view.vexpand = true;
 
-        this.conversation_list_box.pack_start(
-            this.conversation_list_view, true, true, 0
-        );
+        this.conversation_list_box.append(this.conversation_list_view);
 
         // Conversation viewer
         this.conversation_viewer = new ConversationViewer(
@@ -1346,51 +1094,47 @@ public class Application.MainWindow :
         );
 
         this.conversation_viewer.hexpand = true;
-        this.conversation_viewer_box.add(this.conversation_viewer);
+        this.conversation_viewer_page.child = this.conversation_viewer;
 
-        this.conversation_list_headerbar.bind_property(
-            "search-open",
-            this.search_bar, "search-mode-enabled",
-            SYNC_CREATE | BIDIRECTIONAL
-        );
-        this.conversation_list_headerbar.bind_property(
-            "selection-open",
+        this.conversation_list_selection_button.bind_property(
+            "active",
             this.conversation_list_view, "selection-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
         );
-        this.conversation_headerbar.bind_property(
-            "find-open",
-            this.conversation_viewer.conversation_find_bar, "search-mode-enabled",
+        this.search_button.bind_property(
+            "active",
+            this.search_bar, "search-mode-enabled",
             SYNC_CREATE | BIDIRECTIONAL
         );
-        this.conversation_list_headerbar.notify["selection-open"].connect(
-            () => {
+        this.conversation_viewer.headerbar.bind_property(
+            "find-open",
+            this.search_bar, "search-mode-enabled",
+            SYNC_CREATE | BIDIRECTIONAL
+        );
+        this.conversation_list_selection_button.notify["active"].connect(
+            (obj, pspec) => {
+                //XXX GTK4 pretty sure we can do this with breakpoints now
+                // Only show revealer with bottom actions in narrow mode
                 if (this.conversation_list_view.selection_mode_enabled)
                     this.conversation_list_actions_revealer.reveal_child = (
-                        this.outer_leaflet.folded);
+                        this.inner_view.collapsed);
                 else
                     this.conversation_list_actions_revealer.reveal_child = false;
             }
         );
-        this.conversation_headerbar.notify["shown-actions"].connect(
-            () => {
-                this.conversation_viewer_actions_revealer.reveal_child = (
-                    this.conversation_headerbar.shown_actions ==
-                    this.conversation_headerbar.compact_actions
-                );
-            }
-        );
 
-        this.application_headerbar.spinner.set_progress_monitor(progress_monitor);
+        this.headerbar_spinner.set_progress_monitor(progress_monitor);
 
         this.conversation_list_actions.set_mark_inverted();
 
-        this.conversation_headerbar.full_actions.init(this.application.config);
+        this.conversation_viewer.headerbar.left_actions.init(this.application.config);
+        this.conversation_viewer.headerbar.right_actions.init(this.application.config);
         this.conversation_list_actions.init(this.application.config);
         this.conversation_viewer_actions.init(this.application.config);
 
         this.folder_conversation_actions = {
-            this.conversation_headerbar.full_actions,
+            this.conversation_viewer.headerbar.left_actions,
+            this.conversation_viewer.headerbar.right_actions,
             this.conversation_list_actions,
             this.conversation_viewer_actions
         };
@@ -1402,31 +1146,34 @@ public class Application.MainWindow :
         }
     }
 
-    /** {@inheritDoc} */
-    public override bool key_press_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return base.key_press_event(event);
+    [GtkCallback]
+    private bool on_key_pressed(Gtk.EventControllerKey controller,
+                                uint keyval,
+                                uint keycode,
+                                Gdk.ModifierType state) {
+        check_shift_event(keyval, true);
+        return false;
     }
 
-    /** {@inheritDoc} */
-    public override bool key_release_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return base.key_release_event(event);
+    [GtkCallback]
+    private void on_key_released(uint keyval, uint keycode, Gdk.ModifierType state) {
+        check_shift_event(keyval, false);
     }
 
-    internal bool prompt_empty_folder(Geary.Folder.SpecialUse type) {
+    internal async bool prompt_empty_folder(Geary.Folder.SpecialUse type) {
         var folder_name = Util.I18n.to_folder_type_display_name(type);
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this,
+        var dialog = new Adw.AlertDialog(
             _("Empty all email from your %s folder?").printf(folder_name),
             _("This removes the email from Geary and your email server.") +
-            "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(folder_name),
-            "destructive-action"
-        );
-        dialog.use_secondary_markup(true);
-        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
-        return (dialog.run() == Gtk.ResponseType.OK);
+            "  <b>" + _("This cannot be undone.") + "</b>");
+        dialog.body_use_markup = true;
+        dialog.add_response("cancel", _("_Cancel"));
+        dialog.add_response("confirm", _("Empty %s").printf(folder_name));
+        dialog.default_response = "cancel";
+        dialog.close_response = "cancel";
+        dialog.set_response_appearance("confirm", Adw.ResponseAppearance.DESTRUCTIVE);
+        string response = yield dialog.choose(this, null);
+        return (response == "confirm");
     }
 
     /** Un-does the last executed application command, if any. */
@@ -1473,34 +1220,42 @@ public class Application.MainWindow :
         );
     }
 
-    private bool prompt_delete_conversations(int count) {
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this,
+    private async bool prompt_delete_conversations(int count) {
+        var dialog = new Adw.AlertDialog(
             /// Translators: Primary text for a confirmation dialog
             ngettext(
                 "Do you want to permanently delete this conversation?",
                 "Do you want to permanently delete these conversations?",
                 count
             ),
-            null,
-            _("Delete"), "destructive-action"
+            null
         );
-        return (dialog.run() == Gtk.ResponseType.OK);
+        dialog.add_response("cancel", _("_Cancel"));
+        dialog.add_response("delete", _("_Delete"));
+        dialog.default_response = "cancel";
+        dialog.close_response = "cancel";
+        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE);
+        string response = yield dialog.choose(this, null);
+        return (response == "delete");
     }
 
-    private bool prompt_delete_messages(int count) {
-        ConfirmationDialog dialog = new ConfirmationDialog(
-            this,
+    private async bool prompt_delete_messages(int count) {
+        var dialog = new Adw.AlertDialog(
             /// Translators: Primary text for a confirmation dialog
             ngettext(
                 "Do you want to permanently delete this message?",
                 "Do you want to permanently delete these messages?",
                 count
             ),
-            null,
-            _("Delete"), "destructive-action"
+            null
         );
-        return (dialog.run() == Gtk.ResponseType.OK);
+        dialog.add_response("cancel", _("_Cancel"));
+        dialog.add_response("delete", _("_Delete"));
+        dialog.default_response = "cancel";
+        dialog.close_response = "cancel";
+        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE);
+        string response = yield dialog.choose(this, null);
+        return (response == "delete");
     }
 
     private async Gee.Collection<Geary.App.Conversation>
@@ -1568,8 +1323,8 @@ public class Application.MainWindow :
             if (account != null) {
                 this.conversation_list_actions.account = account;
                 this.conversation_viewer_actions.account = account;
-                this.conversation_headerbar.full_actions.account = account;
-                this.conversation_headerbar.compact_actions.account = account;
+                this.conversation_viewer.headerbar.left_actions.account = account;
+                this.conversation_viewer.headerbar.right_actions.account = account;
             }
 
             update_command_actions();
@@ -1591,8 +1346,8 @@ public class Application.MainWindow :
         this.conversation_list_view.select_conversations(to_select);
 
         this.conversation_list_actions.selected_conversations = to_select.size;
-        this.conversation_headerbar.full_actions.selected_conversations = to_select.size;
-        this.conversation_headerbar.compact_actions.selected_conversations = to_select.size;
+        this.conversation_viewer.headerbar.right_actions.selected_conversations = to_select.size;
+        this.conversation_viewer.headerbar.left_actions.selected_conversations = to_select.size;
 
         if (this.selected_folder != null && !this.has_composer) {
             switch(to_select.size) {
@@ -1718,7 +1473,8 @@ public class Application.MainWindow :
     }
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        bool folded = this.outer_leaflet.folded;
+        bool folded = this.outer_view.collapsed;
+
         // If folded, selection handled by activate
         if (selected.size > 1 || !folded) {
             select_conversations.begin(selected, Gee.Collection.empty(), true);
@@ -1745,30 +1501,16 @@ public class Application.MainWindow :
         }
     }
 
-    private void update_close_button_position() {
-        bool at_end = Util.Gtk.close_button_at_end();
-
-        this.application_headerbar.show_close_button = (
-            this.inner_leaflet.folded || !at_end
-        );
-        this.conversation_list_headerbar.show_close_button = (
-            this.inner_leaflet.folded || (at_end && this.outer_leaflet.folded)
-        );
-        this.conversation_headerbar.show_close_button = (
-            this.outer_leaflet.folded || at_end
-        );
-    }
-
     private void on_conversation_activated(Geary.App.Conversation activated, uint button) {
-        if (button == 1) {
-            bool folded = this.outer_leaflet.folded;
-            if (folded) {
+        if (button == Gdk.BUTTON_PRIMARY) {
+            bool collapsed = this.inner_view.collapsed;
+            this.outer_view.show_content = true;
+            if (collapsed) {
                 Gee.Collection<Geary.App.Conversation> selected =
                     new Gee.ArrayList<Geary.App.Conversation>();
                 selected.add(activated);
                 select_conversations.begin(selected, Gee.Collection.empty(), true);
             }
-            go_to_next_pane(true);
         } else if (this.selected_folder != null) {
             if (this.selected_folder.used_as != DRAFTS) {
                 this.application.new_window.begin(
@@ -1833,9 +1575,10 @@ public class Application.MainWindow :
             }
 
             if (count > 0) {
-                this.conversation_list_headerbar.folder = _("%s (%d)").printf(
-                    this.conversation_list_headerbar.folder, count
-                );
+                //XXX GTK4 still need to figure out titles
+                // this.conversation_list_headerbar.subtitle = _("%s (%d)").printf(
+                //     this.conversation_list_headerbar.subtitle, count
+                // );
             }
         }
     }
@@ -1848,7 +1591,7 @@ public class Application.MainWindow :
             sensitive && !multiple && this.is_conversation_viewer_shown
         );
         get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(find_in_enabled);
-        this.conversation_headerbar.set_find_sensitive(find_in_enabled);
+        this.conversation_viewer.headerbar.set_find_sensitive(find_in_enabled);
 
         bool reply_sensitive = (
             sensitive &&
@@ -1894,7 +1637,8 @@ public class Application.MainWindow :
             this.selected_folder_supports_trash
         );
         this.conversation_list_actions.update_trash_button(show_trash);
-        this.conversation_headerbar.full_actions.update_trash_button(show_trash);
+        this.conversation_viewer.headerbar.left_actions.update_trash_button(show_trash);
+        this.conversation_viewer.headerbar.right_actions.update_trash_button(show_trash);
     }
 
     private async void update_context_dependent_actions(bool sensitive) {
@@ -1945,15 +1689,16 @@ public class Application.MainWindow :
         update_trash_action();
     }
 
-    private inline void check_shift_event(Gdk.EventKey event) {
+    private inline void check_shift_event(uint keyval, bool is_key_press) {
+        // XXX GTK4 - check if this is still needed
         // FIXME: it's possible the user will press two shift keys.  We want
         // the shift key to report as released when they release ALL of them.
         // There doesn't seem to be an easy way to do this in Gdk.
-        if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
+        if (keyval == Gdk.Key.Shift_L || keyval == Gdk.Key.Shift_R) {
             Gtk.Widget? focus = get_focus();
             if (focus == null ||
                 (!(focus is Gtk.Entry) && !(focus is Composer.WebView))) {
-                set_shift_key_down(event.type == Gdk.EventType.KEY_PRESS);
+                set_shift_key_down(is_key_press);
             }
         }
     }
@@ -1963,97 +1708,6 @@ public class Application.MainWindow :
             widget.focus(TAB_FORWARD);
         } else {
             error_bell();
-        }
-    }
-
-    private void navigate_next_pane() {
-        var focus = get_focus();
-        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
-            if (this.inner_leaflet.folded &&
-                this.inner_leaflet.visible_child_name == FOLDER_LIST ||
-                focus == this.folder_list) {
-                this.inner_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
-                focus = this.conversation_list_view;
-            } else {
-                if (this.conversation_list_view.selected.size == 1 &&
-                    this.selected_folder.properties.email_total > 0) {
-                    this.outer_leaflet.navigate(Hdy.NavigationDirection.FORWARD);
-                    focus = this.conversation_viewer.visible_child;
-                }
-            }
-        }
-        focus_widget(focus);
-    }
-
-    private void focus_next_pane() {
-        var focus = get_focus();
-        if (focus != null) {
-            if (focus == this.folder_list ||
-                focus.is_ancestor(this.folder_list)) {
-                focus = this.conversation_list_view;
-            } else if (focus == this.conversation_list_view ||
-                       focus.is_ancestor(this.conversation_list_view)) {
-                focus = this.conversation_viewer.visible_child;
-            } else if (focus == this.conversation_viewer ||
-                       focus.is_ancestor(this.conversation_viewer)) {
-                focus = this.folder_list;
-            }
-        }
-        focus_widget(focus);
-    }
-
-    private void go_to_next_pane(bool only_if_folded=false) {
-        if (this.outer_leaflet.folded) {
-            navigate_next_pane();
-        } else if (!only_if_folded) {
-            focus_next_pane();
-        }
-    }
-
-    private void navigate_previous_pane() {
-        var focus = get_focus();
-        if (this.outer_leaflet.visible_child_name == INNER_LEAFLET) {
-            if (this.inner_leaflet.folded) {
-                if (this.inner_leaflet.visible_child_name == CONVERSATION_LIST) {
-                    this.inner_leaflet.navigate(Hdy.NavigationDirection.BACK);
-                    focus = this.folder_list;
-                }
-            } else {
-                 if (focus == this.conversation_list_view ||
-                     focus.is_ancestor(this.conversation_list_view))
-                    focus = this.folder_list;
-                else
-                    focus = this.conversation_list_view;
-            }
-        } else {
-            this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
-            focus = this.conversation_list_view;
-        }
-        focus_widget(focus);
-    }
-
-    private void focus_previous_pane() {
-        var focus = get_focus();
-        if (focus != null) {
-            if (focus == this.folder_list ||
-                focus.is_ancestor(this.folder_list)) {
-                focus = this.conversation_viewer.visible_child;
-            } else if (focus == this.conversation_list_view ||
-                       focus.is_ancestor(this.conversation_list_view)) {
-                focus = this.folder_list;
-            } else if (focus == this.conversation_viewer ||
-                       focus.is_ancestor(this.conversation_viewer)) {
-                focus = this.conversation_list_view;
-            }
-        }
-        focus_widget(focus);
-    }
-
-    private void go_to_previous_pane() {
-        if (this.outer_leaflet.folded) {
-            navigate_previous_pane();
-        } else {
-            focus_previous_pane();
         }
     }
 
@@ -2074,9 +1728,9 @@ public class Application.MainWindow :
     }
 
     private void reply_conversation(Composer.Widget.ContextType context_type) {
-        if (this.outer_leaflet.folded) {
+        if (this.inner_view.collapsed) {
             this.conversation_list_view.activate_selected();
-            navigate_next_pane();
+            this.inner_view.show_content = true;
             // This is a lot of async actions, delay composer creation
             GLib.Timeout.add(500, () => {
               this.create_composer_from_viewer.begin(context_type);
@@ -2091,7 +1745,7 @@ public class Application.MainWindow :
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
         Gtk.Scrollbar? scrollbar = (
-            this.conversation_list_view.get_vscrollbar() as Gtk.Scrollbar
+            this.conversation_list_view.scrolled_window.get_vscrollbar() as Gtk.Scrollbar
         );
         if (is_visible() &&
             (scrollbar == null || !scrollbar.get_visible()) &&
@@ -2124,44 +1778,30 @@ public class Application.MainWindow :
     }
 
     [GtkCallback]
-    private bool on_focus_event() {
-        this.set_shift_key_down(false);
-        return false;
+    private void on_focus_enter(Gtk.EventControllerFocus controller) {
+        set_shift_key_down(false);
+        application.controller.window_focus_in();
     }
 
     [GtkCallback]
-    private bool on_delete_event() {
-        if (close_composer(true, false)) {
-            this.sensitive = false;
-            this.select_folder.begin(
-                null,
-                false,
-                true,
-                (obj, res) => {
-                    this.select_folder.end(res);
-                    destroy();
-                }
-            );
-        }
-        return Gdk.EVENT_STOP;
+    private void on_focus_leave(Gtk.EventControllerFocus controller) {
+        set_shift_key_down(false);
+        application.controller.window_focus_out();
     }
 
     [GtkCallback]
-    private void on_outer_leaflet_changed() {
+    private void on_inner_view_changed(GLib.Object object, ParamSpec pspec) {
         int selected = this.conversation_list_view.selected.size;
         update_conversation_actions(
             ConversationCount.for_size(selected)
         );
-        update_close_button_position();
-        if (this.outer_leaflet.folded) {
+        if (this.inner_view.collapsed) {
             // Ensure something useful gets the keyboard focus, given
             // GNOME/libhandy#179
             if (this.is_conversation_list_shown) {
                 this.conversation_list_view.grab_focus();
             } else if (this.is_folder_list_shown) {
                 this.folder_list.grab_focus();
-            } else {
-                this.conversation_headerbar.back_button.visible = true;
             }
 
             // Close any open composer that is no longer visible
@@ -2170,7 +1810,6 @@ public class Application.MainWindow :
                 close_composer(false, false);
             }
         } else {
-            this.conversation_headerbar.back_button.visible = false;
             if (selected > 0) {
                 select_conversations.begin(
                     this.conversation_list_view.selected,
@@ -2178,23 +1817,6 @@ public class Application.MainWindow :
                     false
                 );
             }
-        }
-    }
-
-    [GtkCallback]
-    private void on_inner_leaflet_changed() {
-        update_close_button_position();
-        if (this.inner_leaflet.folded) {
-            // Ensure something useful gets the keyboard focus, given
-            // GNOME/libhandy#179
-            if (this.is_conversation_list_shown) {
-                this.conversation_list_headerbar.back_button.visible = true;
-                this.conversation_list_view.grab_focus();
-            } else if (this.is_folder_list_shown) {
-                this.folder_list.grab_focus();
-            }
-        } else {
-            this.conversation_list_headerbar.back_button.visible = false;
         }
     }
 
@@ -2304,27 +1926,22 @@ public class Application.MainWindow :
             }
         }
         if (command.undone_label != null) {
-            Components.InAppNotification ian =
-                new Components.InAppNotification(command.undone_label);
-            ian.set_button(_("Redo"), Action.Edit.prefix(Action.Edit.REDO));
-            add_notification(ian);
+            var toast = new Adw.Toast(command.undone_label);
+            toast.button_label = _("Redo");
+            toast.action_name = Action.Edit.prefix(Action.Edit.REDO);
+            add_toast(toast);
         }
     }
 
     private void on_command_redo(Command command) {
         update_command_actions();
         if (command.executed_label != null) {
-            uint notification_time =
-                Components.InAppNotification.DEFAULT_DURATION;
-            if (command.executed_notification_brief) {
-                notification_time =
-                    application.config.brief_notification_duration;
-            }
-            Components.InAppNotification ian = new Components.InAppNotification(
-                command.executed_label, notification_time
-            );
-            ian.set_button(_("Undo"), Action.Edit.prefix(Action.Edit.UNDO));
-            add_notification(ian);
+            var toast = new Adw.Toast(command.executed_label);
+            toast.button_label = _("Undo");
+            toast.action_name = Action.Edit.prefix(Action.Edit.UNDO);
+            if (command.executed_notification_brief)
+                toast.timeout = application.config.brief_notification_duration;
+            add_toast(toast);
         }
     }
 
@@ -2400,8 +2017,11 @@ public class Application.MainWindow :
 
     private void on_folder_activated(Geary.Folder? folder) {
         if (folder != null) {
+            this.inner_view.show_content = true;
             // Focus on conversation list will autoselect
-            go_to_next_pane(!this.application.config.autoselect);
+            if (this.application.config.autoselect) {
+                focus_widget(this.conversation_viewer.get_visible_child());
+            }
         }
     }
 
@@ -2453,7 +2073,8 @@ public class Application.MainWindow :
             this.conversation_list_actions_revealer.child_revealed) {
             this.conversation_list_actions.show_copy_menu();
         } else if (this.is_conversation_viewer_shown) {
-            this.conversation_headerbar.shown_actions.show_copy_menu();
+            this.conversation_viewer.headerbar.left_actions.show_copy_menu();
+            this.conversation_viewer.headerbar.right_actions.show_copy_menu();
         } else {
             error_bell();
         }
@@ -2711,23 +2332,27 @@ public class Application.MainWindow :
     }
 
     private void on_delete_conversation() {
-        Geary.FolderSupport.Remove target =
-            this.selected_folder as Geary.FolderSupport.Remove;
+        do_delete_conversation.begin();
+    }
+
+    private async void do_delete_conversation() {
+        var target = this.selected_folder as Geary.FolderSupport.Remove;
+        if (target == null)
+            return;
+
         Gee.Collection<Geary.App.Conversation> conversations =
             this.conversation_list_view.selected;
-        if (target != null && this.prompt_delete_conversations(conversations.size)) {
-            this.controller.delete_conversations.begin(
+        if (!yield prompt_delete_conversations(conversations.size))
+            return;
+
+        try {
+            yield this.controller.delete_conversations(
                 target,
-                conversations,
-                (obj, res) => {
-                    try {
-                        this.controller.delete_conversations.end(res);
-                    } catch (GLib.Error err) {
-                        handle_error(target.account.information, err);
-                    }
-                }
-            );
+                conversations);
+        } catch (GLib.Error err) {
+            handle_error(target.account.information, err);
         }
+
         // No need to disable selection mode, handled by model change
     }
 
@@ -2801,44 +2426,42 @@ public class Application.MainWindow :
     }
 
     private void on_email_trash(ConversationListBox view, Geary.Email target) {
+        do_trash_email.begin(view, target);
+    }
+
+    private async void do_trash_email(ConversationListBox view, Geary.Email target) {
         Geary.Folder? source = this.selected_folder;
-        if (source != null) {
-            this.controller.move_messages_special.begin(
+        if (source == null)
+            return;
+
+        try {
+            yield this.controller.move_messages_special(
                 source,
                 TRASH,
                 Geary.Collection.single(view.conversation),
-                Geary.Collection.single(target.id),
-                (obj, res) => {
-                    try {
-                        this.controller.move_messages_special.end(res);
-                    } catch (GLib.Error err) {
-                        handle_error(source.account.information, err);
-                    }
-                }
-            );
+                Geary.Collection.single(target.id));
+        } catch (GLib.Error err) {
+            handle_error(source.account.information, err);
         }
     }
 
     private void on_email_delete(ConversationListBox view, Geary.Email target) {
-        Geary.FolderSupport.Remove? source =
-            this.selected_folder as Geary.FolderSupport.Remove;
-        if (source != null && prompt_delete_messages(1)) {
-            this.controller.delete_messages.begin(
-                source,
-                Geary.Collection.single(view.conversation),
-                Geary.Collection.single(target.id),
-                (obj, res) => {
-                    try {
-                        this.controller.delete_messages.end(res);
-                    } catch (GLib.Error err) {
-                        handle_error(source.account.information, err);
-                    }
-                }
-            );
-        }
+        do_delete_email.begin(view, target);
     }
 
-    private void on_gtk_decoration_layout_changed() {
-        update_close_button_position();
+    private async void do_delete_email(ConversationListBox view, Geary.Email target) {
+        Geary.FolderSupport.Remove? source =
+            this.selected_folder as Geary.FolderSupport.Remove;
+        if (source == null || !yield prompt_delete_messages(1))
+            return;
+
+        try {
+            yield this.controller.delete_messages(
+                source,
+                Geary.Collection.single(view.conversation),
+                Geary.Collection.single(target.id));
+        } catch (GLib.Error err) {
+            handle_error(source.account.information, err);
+        }
     }
 }

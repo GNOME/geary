@@ -126,8 +126,8 @@ public class Application.ContactStore : Geary.BaseObject {
                 Contact result = yield get_contact(
                     individual, null, cancellable
                 );
-                foreach (Geary.RFC822.MailboxAddress mailbox
-                         in result.email_addresses) {
+                for (uint i = 0; i < result.email_addresses.get_n_items(); i++) {
+                    var mailbox = (Geary.RFC822.MailboxAddress) result.email_addresses.get_item(i);
                     seen.add(to_cache_key(mailbox.address));
                 }
                 results.add(result);
@@ -140,8 +140,8 @@ public class Application.ContactStore : Geary.BaseObject {
                 Contact result = yield get_contact(
                     individual, null, cancellable
                 );
-                foreach (Geary.RFC822.MailboxAddress mailbox
-                         in result.email_addresses) {
+                for (uint i = 0; i < result.email_addresses.get_n_items(); i++) {
+                    var mailbox = (Geary.RFC822.MailboxAddress) result.email_addresses.get_item(i);
                     seen.add(to_cache_key(mailbox.address));
                 }
                 results.add(result);
@@ -166,8 +166,8 @@ public class Application.ContactStore : Geary.BaseObject {
                 Contact result = yield load(
                     contact.get_rfc822_address(), cancellable
                 );
-                foreach (Geary.RFC822.MailboxAddress mailbox
-                         in result.email_addresses) {
+                for (uint i = 0; i < result.email_addresses.get_n_items(); i++) {
+                    var mailbox = (Geary.RFC822.MailboxAddress) result.email_addresses.get_item(i);
                     seen.add(to_cache_key(mailbox.address));
                 }
                 results.add(result);

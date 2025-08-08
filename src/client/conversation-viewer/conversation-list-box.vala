@@ -18,7 +18,7 @@
  * ConversationListBox sorts by the {@link Geary.Email.date} field
  * (the Date: header), as that's the date displayed to the user.
  */
-public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
+public class ConversationListBox : Adw.Bin, Geary.BaseInterface {
 
     /** Fields that must be available for listing conversation email. */
     public const Geary.Email.Field REQUIRED_FIELDS = (
@@ -194,17 +194,18 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         public void unmark_terms() {
             cancel();
 
-            this.list.foreach((child) => {
-                    EmailRow? row = child as EmailRow;
-                    if (row != null) {
-                        if (row.is_search_match) {
-                            row.is_search_match = false;
-                            foreach (ConversationMessage msg_view in row.view) {
-                                msg_view.unmark_search_terms();
-                            }
-                        }
+            for (int i = 0; true; i++) {
+                unowned var row = this.list.listbox.get_row_at_index(i) as EmailRow;
+                if (row == null)
+                    break;
+
+                if (row.is_search_match) {
+                    row.is_search_match = false;
+                    foreach (ConversationMessage msg_view in row.view) {
+                        msg_view.unmark_search_terms();
                     }
-                });
+                }
+            }
         }
 
         public void cancel() {
@@ -324,58 +325,46 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // Enables firing the should_scroll signal when this row is
         // allocated a size
         public void enable_should_scroll() {
-            this.size_allocate.connect(on_size_allocate);
+            //XXX GTK4 - once we work with models, we won't need this
+            // this.size_allocate.connect(on_size_allocate);
         }
 
         private void update_css_class() {
             if (this.is_expanded)
-                get_style_context().add_class(EXPANDED_CLASS);
+                add_css_class(EXPANDED_CLASS);
             else
-                get_style_context().remove_class(EXPANDED_CLASS);
+                remove_css_class(EXPANDED_CLASS);
 
             update_previous_sibling_css_class();
         }
 
-        // This is mostly taken form libhandy HdyExpanderRow
-        private Gtk.Widget? get_previous_sibling() {
-            if (this.parent is Gtk.Container) {
-                var siblings = this.parent.get_children();
-                unowned List<weak Gtk.Widget> l;
-                for (l = siblings; l != null && l.next != null && l.next.data != this; l = l.next);
-
-                if (l != null && l.next != null && l.next.data == this) {
-                    return l.data;
-                }
-            }
-
-            return null;
-        }
-
         private void update_previous_sibling_css_class() {
-            var previous_sibling = get_previous_sibling();
+            var previous_sibling = get_prev_sibling();
             if (previous_sibling != null) {
                 if (this.is_expanded)
-                    previous_sibling.get_style_context().add_class("geary-expanded-previous-sibling");
+                    previous_sibling.add_css_class("geary-expanded-previous-sibling");
                 else
-                    previous_sibling.get_style_context().remove_class("geary-expanded-previous-sibling");
+                    previous_sibling.remove_css_class("geary-expanded-previous-sibling");
             }
         }
 
         protected inline void set_style_context_class(string class_name, bool value) {
             if (value) {
-                get_style_context().add_class(class_name);
+                add_css_class(class_name);
             } else {
-                get_style_context().remove_class(class_name);
+                remove_css_class(class_name);
             }
         }
 
+        //XXX GTK4 - once we work with models, we won't need this
+#if 0
         protected void on_size_allocate() {
             // Disable should_scroll so we don't keep on scrolling
             // later, like when the window has been resized.
             this.size_allocate.disconnect(on_size_allocate);
             should_scroll();
         }
-
+#endif
     }
 
 
@@ -391,7 +380,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Does the row contain an email matching the current search?
         public bool is_search_match {
-            get { return get_style_context().has_class(MATCH_CLASS); }
+            get { return has_css_class(MATCH_CLASS); }
             set {
                 set_style_context_class(MATCH_CLASS, value);
                 this.is_pinned = value;
@@ -407,7 +396,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         public EmailRow(ConversationEmail view) {
             base(view.email);
             this.view = view;
-            add(view);
+            this.child = view;
         }
 
         public override async void expand()
@@ -446,14 +435,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         public LoadingRow() {
             base(null);
-            get_style_context().add_class(LOADING_CLASS);
+            add_css_class(LOADING_CLASS);
 
             Gtk.Spinner spinner = new Gtk.Spinner();
             spinner.height_request = 16;
             spinner.width_request = 16;
-            spinner.show();
-            spinner.start();
-            add(spinner);
+            this.child = spinner;
         }
 
     }
@@ -470,7 +457,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             base(view.referred);
             this.view = view;
             this.is_expanded = true;
-            add(this.view);
+            this.child = this.view;
 
             this.focus_on_click = false;
         }
@@ -479,23 +466,13 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
 
     static construct {
-        // Set up custom keybindings
-        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
-            (ObjectClass) typeof(ConversationListBox).class_ref()
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.space, 0, "focus-next", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.KP_Space, 0, "focus-next", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.space, Gdk.ModifierType.SHIFT_MASK, "focus-prev", 0
-        );
-        Gtk.BindingEntry.add_signal(
-            bindings, Gdk.Key.KP_Space, Gdk.ModifierType.SHIFT_MASK, "focus-prev", 0
-        );
+        add_shortcut(new Gtk.Shortcut(Gtk.ShortcutTrigger.parse_string("Space"),
+                     new Gtk.NamedAction("focus-next")));
+        add_shortcut(new Gtk.Shortcut(Gtk.ShortcutTrigger.parse_string("<Shift>Space"),
+                     new Gtk.NamedAction("focus-prev")));
 
+        //XXX GTK4
+#if 0
         Gtk.BindingEntry.add_signal(
             bindings, Gdk.Key.Up, 0, "scroll", 1,
             typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_UP
@@ -520,6 +497,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             bindings, Gdk.Key.End, 0, "scroll", 1,
             typeof(Gtk.ScrollType), Gtk.ScrollType.END
         );
+#endif
     }
 
     private static int on_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
@@ -534,6 +512,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
         return Geary.Email.compare_sent_date_ascending(email1, email2);
     }
+
+    internal Gtk.ListBox listbox { get; set; default = new Gtk.ListBox(); }
 
 
     /** Conversation being displayed. */
@@ -588,7 +568,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         var handled = false;
         var composer = this.current_composer;
         if (composer != null) {
-            var window = get_toplevel() as Gtk.Window;
+            var window = get_root() as Gtk.Window;
             if (window != null) {
                 var focused = window.get_focus();
                 if (focused != null &&
@@ -612,7 +592,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         }
 
         if (!handled) {
-            Gtk.Adjustment adj = get_adjustment();
+            Gtk.Adjustment adj = this.listbox.get_adjustment();
             double value = adj.get_value();
             switch (type) {
             case Gtk.ScrollType.STEP_UP:
@@ -645,14 +625,14 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     /** Keyboard action to shift focus to the next message, if any. */
     [Signal (action=true)]
     public virtual signal void focus_next() {
-        this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, 1);
+        this.listbox.move_cursor(Gtk.MovementStep.DISPLAY_LINES, 1, false, false);
         this.mark_read_timer.start();
     }
 
     /** Keyboard action to shift focus to the prev message, if any. */
     [Signal (action=true)]
     public virtual signal void focus_prev() {
-        this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
+        this.listbox.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1, false, false);
         this.mark_read_timer.start();
     }
 
@@ -702,23 +682,20 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             MARK_READ_TIMEOUT_MSEC, this.check_mark_read
         );
 
-        this.selection_mode = NONE;
+        this.child = this.listbox;
+        this.listbox.selection_mode = NONE;
+        this.listbox.valign = Gtk.Align.START;
 
-        get_style_context().add_class("content");
-        get_style_context().add_class("background");
-        get_style_context().add_class("conversation-listbox");
+        this.listbox.add_css_class("content");
+        this.listbox.add_css_class("conversation-listbox");
 
-        /* we need to update the previous sibling style class when rows are added or removed */
-        add.connect(update_previous_sibling_css_class);
-        remove.connect(update_previous_sibling_css_class);
-
-        set_adjustment(adjustment);
-        set_sort_func(ConversationListBox.on_sort);
+        this.listbox.set_adjustment(adjustment);
+        this.listbox.set_sort_func(ConversationListBox.on_sort);
 
         this.email_actions.add_action_entries(email_action_entries, this);
         insert_action_group(EMAIL_ACTION_GROUP_NAME, this.email_actions);
 
-        this.row_activated.connect(on_row_activated);
+        this.listbox.row_activated.connect(on_row_activated);
 
         this.conversation.appended.connect(on_conversation_appended);
         this.conversation.trimmed.connect(on_conversation_trimmed);
@@ -729,34 +706,45 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         base_unref();
     }
 
-    public override void destroy() {
+    public override void dispose() {
         this.search.cancel();
         this.cancellable.cancel();
         this.email_rows.clear();
         this.mark_read_timer.reset();
-        base.destroy();
+        base.dispose();
     }
 
-    // For some reason insert doesn't emit the add event
+    public void append(Gtk.Widget child) {
+      this.listbox.append(child);
+      update_previous_sibling_css_class();
+    }
+
+    public new void remove(Gtk.Widget child) {
+      this.listbox.remove(child);
+      update_previous_sibling_css_class();
+    }
+
     public new void insert(Gtk.Widget child, int position) {
-      base.insert(child, position);
+      this.listbox.insert(child, position);
       update_previous_sibling_css_class();
     }
 
     // This is mostly taken form libhandy HdyExpanderRow
     private void update_previous_sibling_css_class() {
-        var siblings = this.get_children();
-        unowned List<weak Gtk.Widget> l;
-        for (l = siblings; l != null && l.next != null && l.next.data != this; l = l.next) {
-            if (l != null && l.next != null) {
-                var row = l.next.data as ConversationRow;
-                if (row != null) {
-                    if (row.is_expanded) {
-                        l.data.get_style_context().add_class("geary-expanded-previous-sibling");
-                    } else {
-                        l.data.get_style_context().remove_class("geary-expanded-previous-sibling");
-                    }
-                }
+        unowned var child = get_first_child() as ConversationRow;
+        if (child == null)
+            return;
+
+        unowned var next = child.get_next_sibling() as ConversationRow;
+        while (next != null) {
+
+            child = next;
+            next = child.get_next_sibling() as ConversationRow;
+
+            if (next.is_expanded) {
+                child.add_css_class("geary-expanded-previous-sibling");
+            } else {
+                child.remove_css_class("geary-expanded-previous-sibling");
             }
         }
     }
@@ -764,7 +752,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public async void load_conversation(Gee.Collection<Geary.EmailIdentifier> scroll_to,
                                         Geary.SearchQuery? query)
         throws GLib.Error {
-        set_sort_func(null);
+        this.listbox.set_sort_func(null);
 
         Gee.Collection<Geary.Email>? all_email = this.conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
@@ -850,7 +838,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     public void scroll_to_messages(Gee.Collection<Geary.EmailIdentifier> targets) {
         // Get the currently displayed email, allowing for some
         // padding at the top
-        Gtk.ListBoxRow? current_child = get_row_at_y(32);
+        Gtk.ListBoxRow? current_child = this.listbox.get_row_at_y(32);
 
         // Find the row currently at the top of the viewport
         EmailRow? current = null;
@@ -858,7 +846,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             int pos = current_child.get_index();
             do {
                 current = current_child as EmailRow;
-                current_child = get_row_at_index(--pos);
+                current_child = this.listbox.get_row_at_index(--pos);
             } while (current == null && pos > 0);
         }
 
@@ -904,12 +892,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         ConversationEmail? view = get_selection_view();
         if (view == null) {
             EmailRow? last = null;
-            this.foreach((child) => {
-                    EmailRow? row = child as EmailRow;
-                    if (row != null) {
-                        last = row;
-                    }
-                });
+            for (int i = 0; true; i++) {
+                unowned var row = this.listbox.get_row_at_index(i) as EmailRow;
+                if (row == null)
+                    break;
+                last = row;
+            }
 
             if (last != null) {
                 view = last.view;
@@ -953,7 +941,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         // Use row param rather than row var from closure to avoid a
         // circular ref.
         row.should_scroll.connect((row) => { scroll_to_row(row); });
-        add(row);
+        append(row);
         this.current_composer = row;
 
         embed.composer.notify["saved-id"].connect(
@@ -1060,22 +1048,21 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Since first rows may have extra margin, remove that from
         // the height of rows when adjusting scrolling.
-        Gtk.ListBoxRow initial_row = get_row_at_index(0);
+        Gtk.ListBoxRow initial_row = this.listbox.get_row_at_index(0);
         int loading_height = 0;
         if (initial_row is LoadingRow) {
             loading_height = Util.Gtk.get_border_box_height(initial_row);
             remove(initial_row);
             // Adjust for the changed margin of the first row
-            var first_row = get_row_at_index(0);
-            var style = first_row.get_style_context();
-            var margin = style.get_margin(style.get_state());
+            var first_row = this.listbox.get_row_at_index(0);
+            var margin = first_row.get_style_context().get_margin();;
             loading_height -= margin.top;
         }
 
         // None of these will be interesting, so just add them all,
         // but keep the scrollbar adjusted so that the first
         // interesting message remains visible.
-        Gtk.Adjustment listbox_adj = get_adjustment();
+        Gtk.Adjustment listbox_adj = this.listbox.get_adjustment();
         int i_mail_loaded = 0;
         foreach (Geary.Email email in to_insert) {
             EmailRow row = add_email(email, false);
@@ -1096,7 +1083,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             ++i_mail_loaded;
         }
 
-        set_sort_func(on_sort);
+        this.listbox.set_sort_func(on_sort);
 
         if (query != null) {
             // XXX this sucks for large conversations because it can take
@@ -1184,19 +1171,22 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
         );
 
         ConversationMessage conversation_message = view.primary_message;
+        // XXX GTK4 - I think we can do this separately
+#if 0
         conversation_message.body_container.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
                 // email body.
                 return true;
             });
+#endif
 
         EmailRow row = new EmailRow(view);
         row.email_loaded.connect((e) => { email_loaded(e); });
         this.email_rows.set(email.id, row);
 
         if (append_row) {
-            add(row);
+            append(row);
         } else {
             insert(row, 0);
         }
@@ -1222,17 +1212,17 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
         // Use set_value rather than clamp_value since we want to
         // scroll to the top of the window.
-        get_adjustment().set_value(y);
+        this.listbox.get_adjustment().set_value(y);
     }
 
     private void scroll_to_anchor(EmailRow row, int anchor_y) {
         Gtk.Allocation? alloc = null;
         row.get_allocation(out alloc);
 
-        int x = 0, y = 0;
-        row.view.primary_message.web_view_translate_coordinates(row, x, anchor_y, out x, out y);
+        double x = 0, y = 0;
+        row.view.primary_message.web_view_translate_coordinates(row, 0, anchor_y, out x, out y);
 
-        Gtk.Adjustment adj = get_adjustment();
+        Gtk.Adjustment adj = this.listbox.get_adjustment();
         y = alloc.y + y;
         adj.set_value(y);
 
@@ -1244,15 +1234,18 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
     private void check_mark_read() {
         Gee.List<Geary.EmailIdentifier> email_ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
-        Gtk.Adjustment adj = get_adjustment();
+        Gtk.Adjustment adj = this.listbox.get_adjustment();
         int top_bound = (int) adj.value;
         int bottom_bound = top_bound + (int) adj.page_size;
 
-        this.foreach((child) => {
+        for (int i = 0; true; i++) {
+            unowned var row = this.listbox.get_row_at_index(i) as EmailRow;
+            if (row == null)
+                break;
+
             // Don't bother with not-yet-loaded emails since the
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
-            EmailRow? row = child as EmailRow;
             ConversationEmail? view = (row != null) ? row.view : null;
             Geary.Email? email = (view != null) ? view.email : null;
             if (row != null &&
@@ -1261,8 +1254,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                 !view.is_manually_read &&
                 email.is_unread().is_certain()) {
                 ConversationMessage conversation_message = view.primary_message;
-                 int body_top = 0;
-                 int body_left = 0;
+                 double body_top = 0;
+                 double body_left = 0;
                  conversation_message.web_view_translate_coordinates(
                      this,
                      0, 0,
@@ -1270,12 +1263,12 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                  );
 
                  int body_height = conversation_message.web_view_get_allocated_height();
-                 int body_bottom = body_top + body_height;
+                 int body_bottom = (int) body_top + body_height;
 
                  // Only mark the email as read if it's actually visible
                  if (body_height > 0 &&
                      body_bottom > top_bound &&
-                     body_top + MARK_READ_PADDING < bottom_bound) {
+                     (int) body_top + MARK_READ_PADDING < bottom_bound) {
                      email_ids.add(view.email.id);
 
                      // Since it can take some time for the new flags
@@ -1284,7 +1277,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
                      view.is_manually_read = true;
                  }
              }
-        });
+        }
 
         if (email_ids.size > 0) {
             mark_email(email_ids, null, Geary.EmailFlags.UNREAD);
@@ -1401,7 +1394,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             // be appended last. Finally, don't let rows with active
             // composers be collapsed.
             if (row.is_expanded) {
-                if (get_row_at_index(row.get_index() + 1) != null) {
+                if (this.listbox.get_row_at_index(row.get_index() + 1) != null) {
                     row.collapse();
                 }
             } else {
@@ -1481,15 +1474,19 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             Geary.Email email = view.email;
             var ids = new Gee.LinkedList<Geary.EmailIdentifier>();
             ids.add(email.id);
-            this.foreach((row) => {
-                    if (row.get_visible()) {
-                        Geary.Email other = ((EmailRow) row).view.email;
-                        if (Geary.Email.compare_sent_date_ascending(
-                                email, other) < 0) {
-                            ids.add(other.id);
-                        }
+            for (int i = 0; true; i++) {
+                unowned var row = this.listbox.get_row_at_index(i) as EmailRow;
+                if (row == null)
+                    break;
+
+                if (row.visible) {
+                    Geary.Email other = row.view.email;
+                    if (Geary.Email.compare_sent_date_ascending(
+                            email, other) < 0) {
+                        ids.add(other.id);
                     }
-                });
+                }
+            }
             mark_email(ids, Geary.EmailFlags.UNREAD, null);
         }
     }

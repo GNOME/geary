@@ -1,191 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
-  <template class="ConversationViewer" parent="GtkStack">
-    <property name="name">conversation_viewer</property>
-    <property name="visible">True</property>
-    <property name="transition_type">crossfade</property>
-    <child>
-      <object class="GtkSpinner" id="loading_page">
-        <property name="width_request">32</property>
-        <property name="height_request">32</property>
-        <property name="visible">True</property>
-        <property name="halign">center</property>
-        <property name="valign">center</property>
-      </object>
-      <packing>
-        <property name="name">loading_page</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="no_conversations_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
+  <template class="ConversationViewer" parent="AdwBin">
+    <property name="child">
+      <object class="AdwToolbarView">
+        <property name="hexpand">True</property>
+        <child type="top">
+          <object class="ComponentsConversationHeaderBar" id="headerbar">
+          </object>
         </child>
-      </object>
-      <packing>
-        <property name="name">no_conversations_page</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="conversation_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkSearchBar" id="conversation_find_bar">
-            <property name="visible">True</property>
-            <property name="app_paintable">True</property>
-            <property name="hexpand">True</property>
-            <signal name="notify::search-mode-enabled" handler="on_find_mode_changed" swapped="no"/>
+        <property name="content">
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkGrid">
-                <property name="visible">True</property>
+              <object class="GtkStack" id="stack">
+                <property name="name">conversation_viewer</property>
+                <property name="transition_type">crossfade</property>
+
                 <child>
-                  <object class="GtkSearchEntry" id="conversation_find_entry">
-                    <property name="visible">True</property>
-                    <property name="primary_icon_name">edit-find-symbolic</property>
-                    <property name="primary_icon_activatable">False</property>
-                    <property name="primary_icon_sensitive">False</property>
-                    <property name="placeholder_text" translatable="yes">Find in conversation</property>
-                    <property name="width_chars">28</property>
-                    <signal name="search-changed" handler="on_find_text_changed" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="conversation_find_prev">
-                    <property name="sensitive">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="no_show_all">True</property>
-                    <property name="tooltip_text" translatable="yes">Find the previous occurrence of the search string.</property>
-                    <signal name="clicked" handler="on_find_prev" swapped="no"/>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="icon_name">go-up-symbolic</property>
+                  <object class="GtkStackPage">
+                    <property name="name">loading_page</property>
+                    <property name="child">
+                      <object class="AdwSpinner" id="loading_page">
+                        <property name="width_request">32</property>
+                        <property name="height_request">32</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
                       </object>
-                    </child>
+                    </property>
                   </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
                 </child>
+
                 <child>
-                  <object class="GtkButton" id="conversation_find_next">
-                    <property name="sensitive">False</property>
-                    <property name="receives_default">True</property>
-                    <property name="no_show_all">True</property>
-                    <property name="tooltip_text" translatable="yes">Find the next occurrence of the search string.</property>
-                    <signal name="activate" handler="on_find_next" swapped="no"/>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="icon_name">go-down-symbolic</property>
+                  <object class="GtkStackPage">
+                    <property name="name">no_conversations_page</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="no_conversations_page">
+                        <!-- Translators: Title label for placeholder when no conversations have been selected. -->
+                        <property name="title" translatable="yes">No Conversations Selected</property>
+                        <!-- Translators: Sub-title label for placeholder when no conversations have been selected -->
+                        <property name="description" translatable="yes">Selecting a conversation from the list will display it here.</property>
+                        <property name="icon-name">folder-symbolic</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
                       </object>
-                    </child>
+                    </property>
                   </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="top_attach">0</property>
-                  </packing>
                 </child>
-                <style>
-                  <class name="linked"/>
-                </style>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">conversation_page</property>
+                    <property name="child">
+                      <object class="GtkBox" id="conversation_page">
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkSearchBar" id="conversation_find_bar">
+                            <property name="hexpand">True</property>
+                            <signal name="notify::search-mode-enabled" handler="on_find_mode_changed" swapped="no"/>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">horizontal</property>
+                                <child>
+                                  <object class="GtkSearchEntry" id="conversation_find_entry">
+                                    <property name="placeholder_text" translatable="yes">Find in conversation</property>
+                                    <property name="width_chars">28</property>
+                                    <signal name="search-changed" handler="on_find_text_changed" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="conversation_find_prev">
+                                    <property name="sensitive">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="icon_name">go-up-symbolic</property>
+                                    <property name="tooltip_text" translatable="yes">Find the previous occurrence of the search string.</property>
+                                    <signal name="clicked" handler="on_find_prev" swapped="no"/>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="conversation_find_next">
+                                    <property name="sensitive">False</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="icon_name">go-down-symbolic</property>
+                                    <property name="tooltip_text" translatable="yes">Find the next occurrence of the search string.</property>
+                                    <signal name="activate" handler="on_find_next" swapped="no"/>
+                                  </object>
+                                </child>
+                                <style>
+                                  <class name="linked"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow" id="conversation_scroller">
+                            <property name="can_focus">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
+                            <property name="hscrollbar_policy">never</property>
+                            <child>
+                              <object class="GtkEventControllerScroll">
+                                <signal name="scroll" handler="on_conversation_scroll"/>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="geary-conversation-scroller"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">multiple_conversations_page</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="multiple_conversations_page">
+                        <!-- Translators: Title label for placeholder when multiple conversations have been selected -->
+                        <property name="title" translatable="yes">Multiple Conversations Selected</property>
+                        <!-- Translators: Sub-title label for placeholder when multiple conversations have been selected -->
+                        <property name="description" translatable="yes">Choosing an action will apply to all selected conversations.</property>
+                        <property name="icon-name">folder-symbolic</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">empty_folder_page</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="empty_folder_page">
+                        <!-- Translators: Title label for placeholder when no conversations exist in a folder -->
+                        <property name="title" translatable="yes">No Conversations Found</property>
+                        <!-- Translators: Sub-title label for placeholder when no conversations exist in a folder -->
+                        <property name="description" translatable="yes">This folder does not contain any conversations.</property>
+                        <property name="icon-name">folder-symbolic</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">empty_search_page</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="empty_search_page">
+                        <!-- Translators: Title label for placeholder when no conversations were found in a search -->
+                        <property name="title" translatable="yes">No Conversations Found</property>
+                        <!-- Translators: Sub-title label for placeholder when no conversations were found in a search -->
+                        <property name="description" translatable="yes">Your search returned no results, try refining your search terms.</property>
+                        <property name="icon-name">folder-symbolic</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">composer_page</property>
+                    <property name="child">
+                      <object class="AdwBin" id="composer_page">
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
+                <property name="reveal-child">False</property>
+                <property name="transition_type">slide-up</property>
+                <child>
+                  <object class="ComponentsConversationActions" id="conversation_viewer_actions">
+                    <property name="show_conversation_actions">True</property>
+                    <property name="show_response_actions">False</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow" id="conversation_scroller">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
-            <property name="hscrollbar_policy">never</property>
-            <signal name="scroll-event" handler="on_conversation_scroll" swapped="no"/>
-            <child>
-              <placeholder/>
-            </child>
-            <style>
-              <class name=".geary-conversation-scroller"/>
-            </style>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">1</property>
-          </packing>
-        </child>
+        </property>
       </object>
-      <packing>
-        <property name="name">conversation_page</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="multiple_conversations_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="name">multiple_conversations_page</property>
-        <property name="position">3</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="empty_folder_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="name">empty_folder_page</property>
-        <property name="position">4</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="empty_search_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="name">empty_search_page</property>
-        <property name="position">5</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkGrid" id="composer_page">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="name">composer_page</property>
-        <property name="position">6</property>
-      </packing>
-    </child>
+    </property>
   </template>
 </interface>

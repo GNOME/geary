@@ -97,7 +97,7 @@ public class Plugin.DesktopNotifications :
                                                Email email
     ) throws GLib.Error {
         string title = to_notitication_title(folder.account, total);
-        GLib.Icon icon = null;
+        GLib.Icon? icon = null;
         Geary.RFC822.MailboxAddress? originator = email.get_primary_originator();
         if (originator != null) {
             ContactStore contacts =
@@ -132,20 +132,44 @@ public class Plugin.DesktopNotifications :
             );
         }
 
-        int window_scale = 1;
-        Gdk.Display? display = Gdk.Display.get_default();
-        if (display != null) {
-          Gdk.Monitor? monitor = display.get_primary_monitor();
-          if (monitor != null) {
-            window_scale = monitor.scale_factor;
-          }
+        Gdk.Texture texture;
+        if (icon != null) {
+            var icon_stream = yield ((LoadableIcon) icon).load_async(32, null);
+            var pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(icon_stream, 32, 32, false);
+            texture = Gdk.Texture.for_pixbuf(pixbuf);
+        } else {
+            texture = generate_fallback_avatar(title);
         }
 
-        var avatar = new Hdy.Avatar(32, title, true);
-        avatar.loadable_icon = icon as GLib.LoadableIcon;
-        icon = yield avatar.draw_to_pixbuf_async(32, window_scale, null);
+        issue_arrived_notification(title, body, texture, folder, email.identifier);
+    }
 
-        issue_arrived_notification(title, body, icon, folder, email.identifier);
+    private Gdk.Texture generate_fallback_avatar(string title) {
+        Gsk.Renderer renderer = new Gsk.VulkanRenderer();
+        try {
+            renderer.realize(null);
+        } catch (GLib.Error error) {
+            warning("Couldn't realize vulkan renderer: %s", error.message);
+            renderer = new Gsk.CairoRenderer();
+            try {
+                renderer.realize(null);
+            } catch (GLib.Error error) {
+                warning("Couldn't realize Cairo renderer: %s", error.message);
+            }
+        }
+
+        var avatar = new Adw.Avatar(32, title, true);
+        var paintable = new Gtk.WidgetPaintable(avatar);
+
+        // Ideally we could use Adw.Avatar.draw_to_texture(),
+        // but that unfortunately relies on a Gtk.Native existing already
+        var snapshot = new Gtk.Snapshot();
+        paintable.snapshot(snapshot, 32, 32);
+        Gsk.RenderNode node = snapshot.to_node();
+        Gdk.Texture texture = renderer.render_texture(node, null);
+
+        renderer.unrealize();
+        return texture;
     }
 
     private void notify_general(Folder folder, int total, int added) {

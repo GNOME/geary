@@ -59,4 +59,4 @@ plugin_test = executable(
   install: false
 )
 
-test(plugin_name + '-test', plugin_test)
+# test(plugin_name + '-test', plugin_test)

@@ -43,9 +43,9 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     private Application.Configuration config;
 
-    [GtkChild] private unowned Gtk.Grid contact_pane;
+    [GtkChild] private unowned Gtk.Box contact_pane;
 
-    [GtkChild] private unowned Hdy.Avatar avatar;
+    [GtkChild] private unowned Adw.Avatar avatar;
 
     [GtkChild] private unowned Gtk.Label contact_name;
 
@@ -55,13 +55,13 @@ public class Conversation.ContactPopover : Gtk.Popover {
 
     [GtkChild] private unowned Gtk.Button unstarred_button;
 
-    [GtkChild] private unowned Gtk.ModelButton open_button;
+    [GtkChild] private unowned Gtk.Button open_button;
 
-    [GtkChild] private unowned Gtk.ModelButton save_button;
+    [GtkChild] private unowned Gtk.Button save_button;
 
-    [GtkChild] private unowned Gtk.ModelButton load_remote_button;
+    [GtkChild] private unowned Gtk.CheckButton load_remote_button;
 
-    [GtkChild] private unowned Gtk.Grid deceptive_pane;
+    [GtkChild] private unowned Gtk.Box deceptive_pane;
 
     [GtkChild] private unowned Gtk.Label forged_email_label;
 
@@ -79,22 +79,20 @@ public class Conversation.ContactPopover : Gtk.Popover {
                           Geary.RFC822.MailboxAddress mailbox,
                           Application.Configuration config) {
 
-        this.relative_to = relative_to;
+        set_parent(relative_to);
         this.contact = contact;
         this.mailbox = mailbox;
         this.config = config;
-
-        this.load_remote_button.role = CHECK;
 
         this.contact.bind_property("display-name",
                                    this.avatar,
                                    "text",
                                    BindingFlags.SYNC_CREATE);
 
-        this.contact.bind_property("avatar",
-                                   this.avatar,
-                                   "loadable-icon",
-                                   BindingFlags.SYNC_CREATE);
+        load_avatar.begin((obj, res) => { load_avatar.end(res); });
+        this.contact.notify["avatar"].connect((obj, pspec) => {
+            load_avatar.begin((obj, res) => { load_avatar.end(res); });
+        });
 
         this.actions.add_action_entries(ACTION_ENTRIES, this);
         insert_action_group(ACTION_GROUP, this.actions);
@@ -106,10 +104,10 @@ public class Conversation.ContactPopover : Gtk.Popover {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public override void destroy() {
+    public override void dispose() {
         this.contact.changed.disconnect(this.on_contact_changed);
         this.load_cancellable.cancel();
-        base.destroy();
+        base.dispose();
     }
 
     private void update() {
@@ -182,13 +180,34 @@ public class Conversation.ContactPopover : Gtk.Popover {
         }
     }
 
+    private async void load_avatar() {
+        if (this.contact.avatar == null) {
+            this.avatar.custom_image = null;
+            return;
+        }
+
+        try {
+            GLib.InputStream stream = yield this.contact.avatar.load_async(
+                avatar.size, this.load_cancellable
+            );
+            var pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                stream, avatar.size, avatar.size, true, load_cancellable
+            );
+            this.avatar.custom_image = Gdk.Texture.for_pixbuf(pixbuf);
+        } catch (GLib.Error err) {
+            debug("Couldn't load avatar for contact: %s", err.message);
+            this.avatar.custom_image = null;
+        }
+    }
+
     private async void set_load_remote_resources(bool enabled) {
         try {
             // Remove all contact email domains from trusted list
             // Otherwise, user may not understand why images are always shown
             if (!enabled) {
                 var email_addresses = this.contact.email_addresses;
-                foreach (Geary.RFC822.MailboxAddress email in email_addresses) {
+                for (uint i = 0; i < email_addresses.get_n_items(); i++) {
+                    var email = (Geary.RFC822.MailboxAddress) email_addresses.get_item(i);
                     this.config.remove_images_trusted_domain(email.domain);
                 }
             }
@@ -214,9 +233,15 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_copy_email() {
-        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        clipboard.set_text(this.mailbox.to_full_display(), -1);
-        clipboard.store();
+        Gdk.Clipboard clipboard = get_clipboard();
+        clipboard.set_text(this.mailbox.to_full_display());
+        clipboard.store_async.begin(Priority.DEFAULT, null, (obj, res) => {
+            try {
+                clipboard.store_async.end(res);
+            } catch (Error err) {
+                debug("Couldn't copy email to clipboard: %s", err.message);
+            }
+        });
     }
 
     private void on_load_remote(GLib.SimpleAction action) {
@@ -225,7 +250,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_new_conversation() {
-        var main = this.get_toplevel() as Application.MainWindow;
+        var main = this.get_root() as Application.MainWindow;
         if (main != null) {
             main.application.new_composer.begin(this.mailbox);
         }
@@ -240,7 +265,7 @@ public class Conversation.ContactPopover : Gtk.Popover {
     }
 
     private void on_show_conversations() {
-        var main = this.get_toplevel() as Application.MainWindow;
+        var main = this.get_root() as Application.MainWindow;
         if (main != null) {
             main.show_search_bar("from:%s".printf(this.mailbox.address));
         }

@@ -621,7 +621,7 @@ public class Geary.Logging.State {
  * this by calling {@link get_earliest_record} and then {get_next},
  * and can be notified of new records via {@link set_log_listener}.
  */
-public class Geary.Logging.Record {
+public class Geary.Logging.Record : GLib.Object {
 
 
     /** The GLib domain of the log message, if any. */

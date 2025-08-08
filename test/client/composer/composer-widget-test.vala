@@ -79,6 +79,14 @@ public class Composer.WidgetTest : TestCase {
             }
         }
 
+        internal GLib.File get_web_cache_dir() {
+            try {
+                return File.new_for_path(DirUtils.make_tmp("geary-widget-test-XXXXXX"));
+            } catch (GLib.Error err) {
+                // We'll assert later
+            }
+            GLib.assert_not_reached();
+        }
     }
 
 

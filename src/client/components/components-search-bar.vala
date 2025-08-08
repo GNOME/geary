@@ -6,10 +6,16 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class SearchBar : Hdy.SearchBar {
+public class SearchBar : Adw.Bin {
 
     /// Translators: Search entry placeholder text
     private const string DEFAULT_SEARCH_TEXT = _("Search");
+
+    private unowned Gtk.SearchBar search_bar;
+    public bool search_mode_enabled {
+        get { return this.search_bar.search_mode_enabled; }
+        set { this.search_bar.search_mode_enabled = value; }
+    }
 
     public Gtk.SearchEntry entry {
         get; private set; default = new Gtk.SearchEntry();
@@ -23,10 +29,14 @@ public class SearchBar : Hdy.SearchBar {
 
 
     public SearchBar(Geary.Engine engine) {
+        var bar = new Gtk.SearchBar();
+        this.search_bar = bar;
+        this.child = bar;
+
         this.engine = engine;
         this.search_undo = new Components.EntryUndo(this.entry);
 
-        this.notify["search-mode-enabled"].connect(on_search_mode_changed);
+        search_bar.notify["search-mode-enabled"].connect(on_search_mode_changed);
 
         /// Translators: Search entry tooltip
         this.entry.tooltip_text = _("Search all mail in account for keywords");
@@ -37,21 +47,18 @@ public class SearchBar : Hdy.SearchBar {
             search_text_changed(this.entry.text);
         });
         this.entry.placeholder_text = DEFAULT_SEARCH_TEXT;
-        this.entry.has_focus = true;
 
-        var column = new Hdy.Clamp();
+        var column = new Adw.Clamp();
         column.maximum_size = 400;
-        column.add(this.entry);
+        column.child = this.entry;
 
-        connect_entry(this.entry);
-        add(column);
-
-        show_all();
+        search_bar.connect_entry(this.entry);
+        search_bar.child = column;
     }
 
-    public override void grab_focus() {
-        set_search_mode(true);
-        this.entry.grab_focus();
+    public override bool grab_focus() {
+        this.search_mode_enabled = true;
+        return this.entry.grab_focus();
     }
 
     public void set_account(Geary.Account? account) {

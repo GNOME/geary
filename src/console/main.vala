@@ -12,12 +12,13 @@ errordomain CommandException {
 
 const int IMAP_TIMEOUT_SEC = 60 * 15;
 
-class ImapConsole : Gtk.Window {
+[GtkTemplate (ui = "/org/gnome/GearyConsole/imap-console.ui")]
+class ImapConsole : Adw.ApplicationWindow {
     private const int KEEPALIVE_SEC = 60 * 10;
 
-    private Gtk.TextView console = new Gtk.TextView();
-    private Gtk.Entry cmdline = new Gtk.Entry();
-    private Gtk.Statusbar statusbar = new Gtk.Statusbar();
+    [GtkChild] private unowned Gtk.TextView console;
+    [GtkChild] private unowned Gtk.Entry cmdline;
+    [GtkChild] private unowned Gtk.Statusbar statusbar;
 
     private uint statusbar_ctx = 0;
     private uint statusbar_msg_id = 0;
@@ -27,41 +28,26 @@ class ImapConsole : Gtk.Window {
         Geary.Imap.Tag, Geary.Imap.StatusResponse>();
     private Geary.Nonblocking.Event recvd_response_event = new Geary.Nonblocking.Event();
 
-    public ImapConsole() {
-        title = "IMAP Console";
-        destroy.connect(() => { Gtk.main_quit(); });
-        set_default_size(800, 600);
+    public ImapConsole(Adw.Application app) {
+        Object(application: app);
 
-        Gtk.Box layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 4);
-
-        console.editable = false;
-        Gtk.ScrolledWindow scrolled_console = new Gtk.ScrolledWindow(null, null);
-        scrolled_console.add(console);
-        scrolled_console.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
-        layout.pack_start(scrolled_console, true, true, 0);
-
-        cmdline.activate.connect(on_activate);
-        layout.pack_start(cmdline, false, false, 0);
-
-        statusbar_ctx = statusbar.get_context_id("status");
-        layout.pack_end(statusbar, false, false, 0);
-
-        add(layout);
-
+        this.cmdline.activate.connect(on_activate);
+        this.statusbar_ctx = statusbar.get_context_id("status");
         cmdline.grab_focus();
     }
 
-    private void on_activate() {
+    [GtkCallback]
+    private void on_activate(Gtk.Entry cmdline) {
         exec(cmdline.buffer.text);
         cmdline.buffer.delete_text(0, -1);
     }
 
     private void clear_status() {
-        if (statusbar_msg_id == 0)
+        if (this.statusbar_msg_id == 0)
             return;
 
-        statusbar.remove(statusbar_ctx, statusbar_msg_id);
-        statusbar_msg_id = 0;
+        this.statusbar.remove(this.statusbar_ctx, this.statusbar_msg_id);
+        this.statusbar_msg_id = 0;
     }
 
     private void status(string text) {
@@ -71,7 +57,7 @@ class ImapConsole : Gtk.Window {
         if (!msg.has_suffix(".") && !msg.has_prefix("usage"))
             msg += ".";
 
-        statusbar_msg_id = statusbar.push(statusbar_ctx, msg);
+        this.statusbar_msg_id = this.statusbar.push(this.statusbar_ctx, msg);
     }
 
     private void exception(Error err) {
@@ -606,7 +592,8 @@ class ImapConsole : Gtk.Window {
     }
 
     private void quit(string cmd, string[] args) throws Error {
-        Gtk.main_quit();
+        GLib.Application app = GLib.Application.get_default();
+        app.quit();
     }
 
     private bool keepalive_on = false;
@@ -692,14 +679,16 @@ class ImapConsole : Gtk.Window {
     }
 }
 
-void main(string[] args) {
-    Gtk.init(ref args);
-
+int main(string[] args) {
     Geary.Logging.init();
     Geary.Logging.log_to(stdout);
 
-    ImapConsole console = new ImapConsole();
-    console.show_all();
+    Adw.Application app = new Adw.Application(null, GLib.ApplicationFlags.DEFAULT_FLAGS);
 
-    Gtk.main();
+    app.activate.connect((gapp) => {
+        ImapConsole console = new ImapConsole(app);
+        console.present();
+    });
+
+    return app.run(args);
 }

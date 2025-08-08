@@ -24,10 +24,9 @@ int main(string[] args) {
 
     GLib.Intl.setlocale(LocaleCategory.ALL, "C.UTF-8");
 
-    Gtk.init(ref args);
+    Gtk.init();
     Test.init(ref args);
 
-    IconFactory.init(GLib.File.new_for_path(Config.SOURCE_ROOT_DIR));
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();
@@ -62,13 +61,15 @@ int main(string[] args) {
     unowned TestSuite root = TestSuite.get_root();
     root.add_suite((owned) client);
 
+    MainLoop loop = new MainLoop();
+
     int ret = -1;
     Idle.add(() => {
-            ret = Test.run();
-            Gtk.main_quit();
-            return false;
-        });
+        ret = Test.run();
+        loop.quit();
+        return Source.REMOVE;
+    });
 
-    Gtk.main();
+    loop.run();
     return ret;
 }

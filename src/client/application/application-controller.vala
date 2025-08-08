@@ -125,21 +125,13 @@ internal class Application.Controller :
         GLib.File config_dir = application.get_home_config_directory();
         GLib.File data_dir = application.get_home_data_directory();
 
-        // This initializes the IconFactory, important to do before
-        // the actions are created (as they refer to some of Geary's
-        // custom icons)
-        IconFactory.init(application.get_resource_directory());
-
         // Create DB upgrade dialog.
         this.database_manager = new DatabaseManager(application);
 
         // Initialise WebKit and WebViews
         Components.WebView.init_web_context(
             this.application.config,
-            this.application.get_web_extensions_dir(),
-            this.application.get_home_cache_directory().get_child(
-                "web-resources"
-            )
+            this.application.get_web_extensions_dir()
         );
         Components.WebView.load_resources(config_dir);
         Composer.WebView.load_resources();
@@ -406,7 +398,7 @@ internal class Application.Controller :
             // current window that is either a reply/forward for that
             // message, or there is a quote to insert into it.
             foreach (var existing in this.composer_widgets) {
-                if (existing.get_toplevel() == main &&
+                if (existing.get_root() == main &&
                     (existing.current_mode == INLINE ||
                      existing.current_mode == INLINE_COMPACT) &&
                     existing.sender_context == send_context &&
@@ -957,6 +949,10 @@ internal class Application.Controller :
         }
     }
 
+    internal GLib.File get_web_cache_dir() {
+        return this.application.get_home_cache_directory().get_child("web-resources");
+    }
+
     /** Expunges removed accounts while the controller remains open. */
     internal async void expunge_accounts() {
         try {
@@ -1189,25 +1185,27 @@ internal class Application.Controller :
             context.authentication_prompting = false;
         } else {
             context.authentication_prompting = true;
-            PasswordDialog password_dialog = new PasswordDialog(
+            var password_dialog = new PasswordDialog(
                 this.application.get_active_window(),
                 account,
                 service,
                 credentials
             );
-            if (password_dialog.run()) {
+            bool remember;
+            var password = yield password_dialog.get_password(
+                this.application.get_active_window(),
+                out remember
+            );
+            if (password != null) {
                 // The update the credentials for the service that the
                 // credentials actually came from
                 Geary.ServiceInformation creds_service =
                     (credentials == account.incoming.credentials)
                     ? account.incoming
                     : account.outgoing;
-                creds_service.credentials = credentials.copy_with_token(
-                    password_dialog.password
-                );
+                creds_service.credentials = credentials.copy_with_token(password);
 
                 // Update the remember password pref if changed
-                bool remember = password_dialog.remember_password;
                 if (creds_service.remember_password != remember) {
                     creds_service.remember_password = remember;
                     account.changed();
@@ -1301,37 +1299,35 @@ internal class Application.Controller :
 
     // Returns true if the caller should try opening the account again
     private async bool account_database_error_async(Geary.Account account) {
-        bool retry = true;
-
         // give the user two options: reset the Account local store, or exit Geary.  A third
         // could be done to leave the Account in an unopened state, but we don't currently
         // have provisions for that.
-        QuestionDialog dialog = new QuestionDialog(
-            this.application.get_active_main_window(),
+        var dialog = new Adw.AlertDialog(
             _("Unable to open the database for %s").printf(account.information.id),
-            _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>")
-                .printf(account.information.data_dir.get_path()),
-            _("_Rebuild"), _("E_xit"));
-        dialog.use_secondary_markup(true);
-        switch (dialog.run()) {
-            case Gtk.ResponseType.OK:
-                // don't use Cancellable because we don't want to interrupt this process
-                try {
-                    yield account.rebuild_async();
-                } catch (Error err) {
-                    ErrorDialog errdialog = new ErrorDialog(
-                        this.application.get_active_main_window(),
-                        _("Unable to rebuild database for “%s”").printf(account.information.id),
-                        _("Error during rebuild:\n\n%s").printf(err.message));
-                    errdialog.run();
+            null);
+        dialog.format_body_markup(
+            _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>"),
+            account.information.data_dir.get_path());
+        dialog.add_response("exit", _("E_xit"));
+        dialog.add_response("rebuild", _("_Rebuild"));
 
-                    retry = false;
-                }
-            break;
+        string response = yield dialog.choose(this.application.get_active_main_window(), null);
+        if (response != "rebuild") {
+            return false;
+        }
 
-            default:
-                retry = false;
-            break;
+        // don't use Cancellable because we don't want to interrupt this process
+        bool retry = true;
+        try {
+            yield account.rebuild_async();
+        } catch (Error err) {
+            var errdialog = new Adw.AlertDialog(
+                _("Unable to rebuild database for “%s”").printf(account.information.id),
+                _("Error during rebuild:\n\n%s").printf(err.message));
+            errdialog.add_css_class("error");
+            errdialog.present(this.application.get_active_main_window());
+
+            retry = false;
         }
 
         return retry;
@@ -1454,10 +1450,11 @@ internal class Application.Controller :
         composer.present();
     }
 
-    internal bool check_open_composers() {
+    internal async bool check_open_composers() {
         var do_quit = true;
         foreach (var composer in this.composer_widgets) {
-            if (composer.conditional_close(true, true) == CANCELLED) {
+            var status = yield composer.conditional_close(true, true);
+            if (status == CANCELLED) {
                 do_quit = false;
                 break;
             }
@@ -1488,12 +1485,10 @@ internal class Application.Controller :
                          Geary.Email sent) {
         /// Translators: The label for an in-app notification.
         string message = _("Email sent");
-        Components.InAppNotification notification =
-            new Components.InAppNotification(
-                message, application.config.brief_notification_duration
-                );
+        var toast = new Adw.Toast(message);
+        toast.timeout = application.config.brief_notification_duration;
         foreach (MainWindow window in this.application.get_main_windows()) {
-            window.add_notification(notification);
+            window.add_toast(toast);
         }
 
         AccountContext? context = this.accounts.get(service.account);

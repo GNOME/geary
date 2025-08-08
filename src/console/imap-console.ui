@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="ImapConsole" parent="AdwApplicationWindow">
+    <property name="title">IMAP Console</property>
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+
+    <child>
+      <object class="AdwToolbarView">
+        <property name="top-bar-style">raised</property>
+
+        <child type="top">
+          <object class="AdwHeaderBar">
+          </object>
+        </child>
+
+        <property name="content">
+          <object class="GtkBox" id="layout">
+            <property name="orientation">vertical</property>
+            <property name="spacing">4</property>
+
+            <child>
+              <object class="GtkScrolledWindow" id="scrolled_console">
+                <property name="vexpand">True</property>
+                <property name="hscrollbar-policy">automatic</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <child>
+                  <object class="GtkTextView" id="console">
+                    <property name="editable">False</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkEntry" id="cmdline">
+                <signal name="activate" handler="on_activate"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkStatusbar" id="statusbar">
+              </object>
+            </child>
+
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

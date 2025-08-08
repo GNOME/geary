@@ -1,133 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <object class="GtkHeaderBar" id="header">
-    <property name="visible">True</property>
+  <template class="AccountsEditorListPane" parent="AccountsEditorPane">
     <property name="title" translatable="yes">Accounts</property>
-    <property name="has_subtitle">False</property>
-    <property name="show_close_button">True</property>
-    <child>
-      <object class="GtkButton" id="add_button">
-        <property name="label" translatable="yes">_Add</property>
-        <property name="tooltip_text" translatable="yes">Add an account</property>
-        <property name="visible">True</property>
-        <property name="receives_default">True</property>
-        <property name="use_underline">True</property>
-        <signal name="clicked" handler="on_add_button_clicked"/>
-        <style>
-          <class name="suggested-action"/>
-        </style>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAdjustment" id="pane_adjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <template class="AccountsEditorListPane" parent="GtkGrid">
-    <property name="visible">True</property>
-    <child>
-      <object class="GtkScrolledWindow">
-        <property name="visible">True</property>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="vadjustment">pane_adjustment</property>
-        <property name="hscrollbar_policy">never</property>
-        <property name="min_content_height">300</property>
-        <child>
-          <object class="GtkViewport">
-            <property name="visible">True</property>
+    <style>
+      <class name="geary-accounts-editor-pane"/>
+    </style>
+
+    <property name="child">
+      <object class="AdwToolbarView">
+
+        <child type="top">
+          <object class="AdwHeaderBar" id="header">
             <child>
-              <object class="HdyClamp">
-                <property name="visible">True</property>
-                <property name="margin">24</property>
+              <object class="GtkButton" id="add_button">
+                <property name="label" translatable="yes">_Add</property>
+                <property name="tooltip_text" translatable="yes">Add an account</property>
+                <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+                <signal name="clicked" handler="on_add_button_clicked"/>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <property name="content">
+          <object class="GtkScrolledWindow" id="accounts_list_scrolled">
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="min_content_height">300</property>
+            <child>
+              <object class="AdwClamp">
+                <property name="margin-top">24</property>
+                <property name="margin-bottom">24</property>
+                <property name="margin-start">24</property>
+                <property name="margin-end">24</property>
                 <child>
-                  <object class="GtkGrid" id="pane_content">
-                    <property name="visible">True</property>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkGrid" id="welcome_panel">
-                        <property name="visible">True</property>
                         <property name="halign">center</property>
                         <property name="valign">center</property>
                         <property name="vexpand">True</property>
                         <property name="column_spacing">12</property>
                         <child>
                           <object class="GtkImage" id="welcome_icon">
-                            <property name="visible">True</property>
                             <property name="pixel_size">128</property>
                             <property name="use_fallback">True</property>
+                            <layout>
+                              <property name="row">0</property>
+                              <property name="column">0</property>
+                              <property name="row-span">2</property>
+                            </layout>
                           </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                            <property name="height">2</property>
-                          </packing>
                         </child>
                         <child>
                           <object class="GtkLabel">
-                            <property name="visible">True</property>
+                            <property name="halign">start</property>
+                            <property name="valign">end</property>
+                            <property name="label" translatable="yes">Welcome to Geary</property>
+                            <property name="xalign">0</property>
+                            <property name="wrap">True</property>
+                            <style>
+                              <class name="title"/>
+                            </style>
+                            <layout>
+                              <property name="row">0</property>
+                              <property name="column">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
                             <property name="halign">start</property>
                             <property name="valign">start</property>
                             <property name="wrap">True</property>
                             <property name="label" translatable="yes">To get started, add an email provider above.</property>
                             <property name="xalign">0</property>
                             <property name="wrap">True</property>
+                            <layout>
+                              <property name="row">1</property>
+                              <property name="column">1</property>
+                            </layout>
                           </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="halign">start</property>
-                            <property name="valign">end</property>
-                            <property name="label" translatable="yes">Welcome to Geary</property>
-                            <property name="xalign">0</property>
-                            <property name="wrap">True</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"/>
-                            </attributes>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
                         </child>
                         <style>
                           <class name="geary-welcome-panel"/>
                         </style>
                       </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="accounts_list_frame">
-                        <property name="visible">True</property>
-                        <property name="valign">start</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                          <object class="GtkListBox" id="accounts_list">
-                            <property name="visible">True</property>
-                            <property name="selection_mode">none</property>
-                            <signal name="row-activated" handler="on_row_activated" swapped="no"/>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                        </child>
+                      <object class="GtkListBox" id="accounts_list">
+                        <property name="selection_mode">none</property>
+                        <signal name="row-activated" handler="on_row_activated"/>
+                        <style>
+                          <class name="boxed-list"/>
+                        </style>
                       </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
                     </child>
                     <style>
                       <class name="geary-accounts-editor-pane-content"/>
@@ -137,15 +110,8 @@
               </object>
             </child>
           </object>
-        </child>
+        </property>
       </object>
-      <packing>
-        <property name="left_attach">0</property>
-        <property name="top_attach">0</property>
-      </packing>
-    </child>
-    <style>
-      <class name="geary-accounts-editor-pane"/>
-    </style>
+    </property>
   </template>
 </interface>

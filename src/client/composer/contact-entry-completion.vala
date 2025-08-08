@@ -6,7 +6,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
+public class ContactEntryCompletion : Adw.EntryRow, Geary.BaseInterface {
+        //XXX GTK4 probably want to create a ContactEntryRow or something like that, GtkEntryCompletion is deprecated
+#if 0
 
 
     // Minimum visibility for the contact to appear in autocompletion.
@@ -365,4 +367,5 @@ public class ContactEntryCompletion : Gtk.EntryCompletion, Geary.BaseInterface {
         return true;
     }
 
+#endif
 }

@@ -7,12 +7,17 @@ console_dependencies = [
   gtk,
   gee,
   gmime,
-  webkit2gtk,
+  libadwaita,
+  webkitgtk,
   engine_dep,
 ]
 
+console_resources = gnome.compile_resources('org.gnome.GearyConsole',
+  files('org.gnome.GearyConsole.gresource.xml'),
+)
+
 console = executable('geary-console',
-  console_sources,
+  [ console_sources, console_resources ],
   dependencies: console_dependencies,
   vala_args: geary_vala_args,
   c_args: geary_c_args,

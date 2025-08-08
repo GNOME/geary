@@ -9,7 +9,7 @@
  * A placeholder image and message for empty views.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-placeholder-pane.ui")]
-public class Components.PlaceholderPane : Gtk.Grid {
+public class Components.PlaceholderPane : Gtk.Box {
 
 
     public const string CLASS_HAS_TEXT = "geary-has-text";
@@ -54,7 +54,7 @@ public class Components.PlaceholderPane : Gtk.Grid {
             this.subtitle_label.hide();
         }
         if (this.title_label.visible || this.subtitle_label.visible) {
-            get_style_context().add_class(CLASS_HAS_TEXT);
+            add_css_class(CLASS_HAS_TEXT);
         }
     }
 

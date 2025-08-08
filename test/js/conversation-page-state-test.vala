@@ -153,8 +153,8 @@ class ConversationPageStateTest : Components.WebViewTestCase<ConversationWebView
     }
 
 
-    protected override ConversationWebView set_up_test_view() {
-        return new ConversationWebView(this.config);
+    protected override ConversationWebView set_up_test_view(GLib.File cache_dir) {
+        return new ConversationWebView(this.config, cache_dir);
     }
 
     private uint exec_is_deceptive_text(string text, string href)

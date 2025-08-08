@@ -20,10 +20,10 @@ public class Components.WebViewTest : TestCase {
         config.enable_debug = true;
         WebView.init_web_context(
             config,
-            File.new_for_path(Config.BUILD_ROOT_DIR).get_child("src"),
-            File.new_for_path("/tmp"), // XXX use something better here
-            false // https://bugs.webkit.org/show_bug.cgi?id=213174
+            File.new_for_path(Config.BUILD_ROOT_DIR).get_child("src")
         );
+        //XXX GTK4 - we used to disable sandboxing here, because of
+        // https://bugs.webkit.org/show_bug.cgi?id=213174
     }
 
     public void load_resources() throws GLib.Error {

@@ -10,12 +10,11 @@
  * An account editor pane for editing server details for an account.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_servers_pane.ui")]
-internal class Accounts.EditorServersPane :
-    Gtk.Grid, EditorPane, AccountPane, CommandPane {
+internal class Accounts.EditorServersPane : EditorPane, AccountPane, CommandPane {
 
 
     /** {@inheritDoc} */
-    internal weak Accounts.Editor editor { get; set; }
+    internal override weak Accounts.Editor editor { get; set; }
 
     /** {@inheritDoc} */
     internal Geary.AccountInformation account { get ; protected set; }
@@ -26,200 +25,67 @@ internal class Accounts.EditorServersPane :
     }
 
     /** {@inheritDoc} */
-    internal Gtk.Widget initial_widget {
-        get { return this.details_list; }
-    }
-
-    /** {@inheritDoc} */
-    internal bool is_operation_running {
+    internal override bool is_operation_running {
         get { return !this.sensitive; }
         protected set { update_operation_ui(value); }
     }
 
     /** {@inheritDoc} */
-    internal GLib.Cancellable? op_cancellable {
+    internal override Cancellable? op_cancellable {
         get; protected set; default = new GLib.Cancellable();
     }
 
     private Geary.Engine engine;
 
-    // These are copies of the originals that can be updated before
-    // validating on apply, without breaking anything.
-    private Geary.ServiceInformation incoming_mutable;
-    private Geary.ServiceInformation outgoing_mutable;
-
-    private Gee.List<Components.Validator> validators =
-        new Gee.LinkedList<Components.Validator>();
+    public Components.ValidatorGroup validators { get; construct set; }
 
 
-    [GtkChild] private unowned Gtk.HeaderBar header;
+    [GtkChild] private unowned Adw.ActionRow account_provider_row;
+    [GtkChild] private unowned Adw.ActionRow service_provider_row;
+    [GtkChild] private unowned Adw.SwitchRow save_drafts_row;
+    [GtkChild] private unowned Adw.SwitchRow save_sent_row;
 
-    [GtkChild] private unowned Gtk.Grid pane_content;
-
-    [GtkChild] private unowned Gtk.Adjustment pane_adjustment;
-
-    [GtkChild] private unowned Gtk.ListBox details_list;
-
-    [GtkChild] private unowned Gtk.ListBox receiving_list;
-
-    [GtkChild] private unowned Gtk.ListBox sending_list;
+    [GtkChild] private unowned ServiceInformationWidget receiving_service_widget;
+    [GtkChild] private unowned ServiceInformationWidget sending_service_widget;
 
     [GtkChild] private unowned Gtk.Button apply_button;
-
     [GtkChild] private unowned Gtk.Spinner apply_spinner;
 
-    private SaveDraftsRow save_drafts;
-    private SaveSentRow save_sent;
 
-    private ServiceLoginRow incoming_login;
-    private ServicePasswordRow incoming_password;
+    static construct {
+        typeof(ServiceInformationWidget).ensure();
 
-    private ServiceOutgoingAuthRow outgoing_auth;
-    private ServiceLoginRow outgoing_login;
-    private ServicePasswordRow outgoing_password;
+        install_action("apply", null, (Gtk.WidgetActionActivateFunc) action_apply);
+    }
 
 
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
         this.account = account;
         this.engine = editor.application.engine;
-        this.incoming_mutable = new Geary.ServiceInformation.copy(account.incoming);
-        this.outgoing_mutable = new Geary.ServiceInformation.copy(account.outgoing);
 
-        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         // Details
+        fill_in_account_provider(editor.accounts);
+        fill_in_service_provider();
 
-        this.details_list.set_header_func(Editor.seperator_headers);
-        // Only add an account provider if it is esoteric enough.
-        if (this.account.mediator is GoaMediator) {
-            this.details_list.add(
-                new AccountProviderRow(editor.accounts, this.account)
-            );
-        }
-        ServiceProviderRow<EditorServersPane> service_provider =
-            new ServiceProviderRow<EditorServersPane>(
-                this.account.service_provider,
-                this.account.service_label
-            );
-        service_provider.set_dim_label(true);
-        service_provider.activatable = false;
-        add_row(this.details_list, service_provider);
+        this.receiving_service_widget.service = account.incoming;
+        this.sending_service_widget.service = account.outgoing;
 
-        this.save_drafts = new SaveDraftsRow(
-            this.account, this.commands, this.op_cancellable
-        );
-        add_row(this.details_list, this.save_drafts);
+        bool services_editable = !(account.mediator is GoaMediator);
+        this.receiving_service_widget.set_editable(services_editable);
+        this.sending_service_widget.set_editable(services_editable);
 
-        this.save_sent = new SaveSentRow(
-            this.account, this.commands, this.op_cancellable
-        );
-        switch (account.service_provider) {
-        case OTHER:
-            add_row(this.details_list, this.save_sent);
-            break;
-        default:
-            // XXX GMail and Outlook auto-save sent mail so don't
-            // include save sent option, but we shouldn't be
-            // hard-coding visible rows like this
-            break;
-        }
+        //XXX GTK4 Make sure we update save_drafts and save_sent
 
-        // Receiving
-
-        this.receiving_list.set_header_func(Editor.seperator_headers);
-        add_row(
-            this.receiving_list,
-            new ServiceHostRow(
-                account,
-                this.incoming_mutable,
-                this.commands,
-                this.op_cancellable
-            )
-        );
-        add_row(
-            this.receiving_list,
-            new ServiceSecurityRow(
-                account,
-                this.incoming_mutable,
-                this.commands,
-                this.op_cancellable
-            )
-        );
-
-        this.incoming_password = new ServicePasswordRow(
-            account,
-            this.incoming_mutable,
-            this.commands,
-            this.op_cancellable
-        );
-
-        this.incoming_login = new ServiceLoginRow(
-            account,
-            this.incoming_mutable,
-            this.commands,
-            this.op_cancellable,
-            this.incoming_password
-        );
-
-        add_row(this.receiving_list, this.incoming_login);
-        add_row(this.receiving_list, this.incoming_password);
-
-        // Sending
-
-        this.sending_list.set_header_func(Editor.seperator_headers);
-        add_row(
-            this.sending_list,
-            new ServiceHostRow(
-                account,
-                this.outgoing_mutable,
-                this.commands,
-                this.op_cancellable
-            )
-        );
-        add_row(
-            this.sending_list,
-            new ServiceSecurityRow(
-                account,
-                this.outgoing_mutable,
-                this.commands,
-                this.op_cancellable
-            )
-        );
-        this.outgoing_auth = new ServiceOutgoingAuthRow(
-            account,
-            this.outgoing_mutable,
-            this.incoming_mutable,
-            this.commands,
-            this.op_cancellable
-        );
-        this.outgoing_auth.value.changed.connect(on_outgoing_auth_changed);
-        add_row(this.sending_list, this.outgoing_auth);
-
-        this.outgoing_password = new ServicePasswordRow(
-            account,
-            this.outgoing_mutable,
-            this.commands,
-            this.op_cancellable
-        );
-
-        this.outgoing_login = new ServiceLoginRow(
-            account,
-            this.outgoing_mutable,
-            this.commands,
-            this.op_cancellable,
-            this.outgoing_password
-        );
-
-        add_row(this.sending_list, this.outgoing_login);
-        add_row(this.sending_list, this.outgoing_password);
+        // XXX GMail and Outlook auto-save sent mail so don't include save sent
+        // option, but we shouldn't be hard-coding visible rows like this
+        this.save_sent_row.visible = (account.service_provider == OTHER);
 
         // Misc plumbing
 
         connect_account_signals();
         connect_command_signals();
-
-        update_outgoing_auth();
     }
 
     ~EditorServersPane() {
@@ -227,9 +93,48 @@ internal class Accounts.EditorServersPane :
         disconnect_command_signals();
     }
 
-    /** {@inheritDoc} */
-    internal Gtk.HeaderBar get_header() {
-        return this.header;
+    private void fill_in_account_provider(Manager accounts) {
+        if (this.account.mediator is GoaMediator) {
+            this.account_provider_row.subtitle = _("GNOME Online Accounts");
+
+            var button = new Gtk.Button.from_icon_name("external-link-symbolic");
+            button.valign = Gtk.Align.CENTER;
+            button.clicked.connect((button) => {
+                if (accounts.is_goa_account(this.account)) {
+                    accounts.show_goa_account.begin(
+                        account, this.op_cancellable,
+                        (obj, res) => {
+                            try {
+                                accounts.show_goa_account.end(res);
+                            } catch (GLib.Error err) {
+                                // XXX display an error to the user
+                                debug(
+                                    "Failed to show GOA account \"%s\": %s",
+                                    account.id,
+                                    err.message
+                                );
+                            }
+                        });
+                }
+            });
+            this.account_provider_row.add_suffix(button);
+        }
+    }
+
+    private void fill_in_service_provider() {
+        switch (this.account.service_provider) {
+        case Geary.ServiceProvider.GMAIL:
+            this.service_provider_row.subtitle = _("Gmail");
+            break;
+
+        case Geary.ServiceProvider.OUTLOOK:
+            this.service_provider_row.subtitle = _("Outlook.com");
+            break;
+
+        case Geary.ServiceProvider.OTHER:
+            this.service_provider_row.subtitle = this.account.service_label;
+            break;
+        }
     }
 
     /** {@inheritDoc} */
@@ -238,11 +143,8 @@ internal class Accounts.EditorServersPane :
         this.apply_button.set_sensitive(this.commands.can_undo);
     }
 
-    private bool is_valid() {
-        return Geary.traverse(this.validators).all((v) => v.is_valid);
-    }
-
     private async void save(GLib.Cancellable? cancellable) {
+#if 0
         this.is_operation_running = true;
 
         // Only need to validate if a generic, local account since
@@ -278,18 +180,19 @@ internal class Accounts.EditorServersPane :
                 this.account.changed();
             }
 
-            this.editor.pop();
+            this.editor.pop_pane();
         } else {
             // Re-enable apply so that the same config can be re-tried
             // in the face of transient errors, without having to
             // change something to re-enable it
-            this.apply_button.set_sensitive(true);
+            this.apply_button.sensitive = true;
 
             // Undo these manually since it would have been updated
             // already by the command
             this.account.save_drafts = this.save_drafts.initial_value;
             this.account.save_sent = this.save_sent.initial_value;
         }
+#endif
     }
 
     private async bool validate(GLib.Cancellable? cancellable) {
@@ -301,9 +204,12 @@ internal class Accounts.EditorServersPane :
 
         string? message = null;
         bool imap_valid = false;
+
         try {
             yield this.engine.validate_imap(
-                local_account, this.incoming_mutable, cancellable
+                local_account,
+                this.receiving_service_widget.service_mutable,
+                cancellable
             );
             imap_valid = true;
         } catch (Geary.ImapError.UNAUTHENTICATED err) {
@@ -331,8 +237,8 @@ internal class Accounts.EditorServersPane :
             try {
                 yield this.engine.validate_smtp(
                     local_account,
-                    this.outgoing_mutable,
-                    this.incoming_mutable.credentials,
+                    this.sending_service_widget.service_mutable,
+                    this.receiving_service_widget.service_mutable.credentials,
                     cancellable
                 );
                 smtp_valid = true;
@@ -341,7 +247,8 @@ internal class Accounts.EditorServersPane :
                 // There was an SMTP auth error, but IMAP already
                 // succeeded, so the user probably needs to
                 // specify custom creds here
-                this.outgoing_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
+                //XXX GTK4
+                // this.outgoing_auth.value.source = Geary.Credentials.Requirement.CUSTOM;
                 // Translators: In-app notification label
                 message = _("Check your sending login and password");
             } catch (GLib.TlsError.BAD_CERTIFICATE err) {
@@ -366,8 +273,8 @@ internal class Accounts.EditorServersPane :
         debug("Validation complete, is valid: %s", is_valid.to_string());
 
         if (!is_valid && message != null) {
-            this.editor.add_notification(
-                new Components.InAppNotification(
+            this.editor.add_toast(
+                new Adw.Toast(
                     // Translators: In-app notification label, the
                     // string substitution is a more detailed reason.
                     _("Account not updated: %s").printf(message)
@@ -381,6 +288,8 @@ internal class Accounts.EditorServersPane :
     private async bool update_service(Geary.ServiceInformation existing,
                                       Geary.ServiceInformation copy,
                                       GLib.Cancellable cancellable) {
+        return true;
+#if 0
         bool has_changed = !existing.equal_to(copy);
         if (has_changed) {
             try {
@@ -410,40 +319,28 @@ internal class Accounts.EditorServersPane :
             }
         }
         return has_changed;
-    }
-
-    private void add_row(Gtk.ListBox list, EditorRow<EditorServersPane> row) {
-        list.add(row);
-        ValidatingRow? validating = row as ValidatingRow;
-        if (validating != null) {
-            validating.changed.connect(on_validator_changed);
-            validating.validator.activated.connect_after(on_validator_activated);
-            this.validators.add(validating.validator);
-        }
-    }
-
-    private void update_outgoing_auth() {
-        this.outgoing_login.set_visible(
-            this.outgoing_auth.value.source == CUSTOM
-        );
+#endif
     }
 
     private void update_operation_ui(bool is_running) {
         this.apply_spinner.visible = is_running;
-        this.apply_spinner.active = is_running;
         this.apply_button.sensitive = !is_running;
         this.sensitive = !is_running;
     }
 
-    private void on_validator_changed() {
-        this.apply_button.set_sensitive(is_valid());
-    }
+    // [GtkCallback]
+    // private void on_validators_changed(Components.ValidatorGroup validators,
+    //                                    Components.Validator validator) {
+    //     action_set_enabled("apply", validators.is_valid());
+    // }
 
-    private void on_validator_activated() {
-        if (is_valid()) {
-            this.apply_button.clicked();
-        }
-    }
+    // [GtkCallback]
+    // private void on_validators_activated(Components.ValidatorGroup validators,
+    //                                     Components.Validator validator) {
+    //     if (validators.is_valid()) {
+    //         activate_action("apply", null);
+    //     }
+    // }
 
     private void on_untrusted_host(Geary.AccountInformation account,
                                    Geary.ServiceInformation service,
@@ -465,132 +362,39 @@ internal class Accounts.EditorServersPane :
             });
     }
 
+    //XXX GTK4 we don't have a cancel button anymore
+#if 0
     [GtkCallback]
     private void on_cancel_button_clicked() {
         if (this.is_operation_running) {
             cancel_operation();
         } else {
-            this.editor.pop();
+            this.editor.pop_pane();
         }
     }
+#endif
 
-    [GtkCallback]
-    private void on_apply_button_clicked() {
+    private void action_apply(string action_name, Variant? param) {
         this.save.begin(this.op_cancellable);
     }
 
-    [GtkCallback]
-    private bool on_list_keynav_failed(Gtk.Widget widget,
-                                       Gtk.DirectionType direction) {
-        bool ret = Gdk.EVENT_PROPAGATE;
-        Gtk.Container? next = null;
-        if (direction == Gtk.DirectionType.DOWN) {
-            if (widget == this.details_list) {
-                next = this.receiving_list;
-            } else if (widget == this.receiving_list) {
-                next = this.sending_list;
-            }
-        } else if (direction == Gtk.DirectionType.UP) {
-            if (widget == this.sending_list) {
-                next = this.receiving_list;
-            } else if (widget == this.receiving_list) {
-                next = this.details_list;
-            }
-        }
+}
 
-        if (next != null) {
-            next.child_focus(direction);
-            ret = Gdk.EVENT_STOP;
-        }
-        return ret;
-    }
-
-    private void on_outgoing_auth_changed() {
-        update_outgoing_auth();
-    }
-
-    [GtkCallback]
-    private void on_activate(Gtk.ListBoxRow row) {
-        Accounts.EditorRow<EditorServersPane> server_row =
-            row as Accounts.EditorRow<EditorServersPane>;
-        if (server_row != null) {
-            server_row.activated(this);
-        }
-    }
-
+private struct Accounts.InitialConfiguration {
+    bool save_drafts;
+    bool save_sent;
 }
 
 
-private class Accounts.AccountProviderRow :
-    AccountRow<EditorServersPane,Gtk.Label> {
+#if 0
+private class zccounts.SaveDraftsRow : Adw.SwitchRow {
 
-    private Manager accounts;
-
-    public AccountProviderRow(Manager accounts,
-                              Geary.AccountInformation account) {
-        base(
-            account,
-            // Translators: This label describes the program that
-            // created the account, e.g. an SSO service like GOA, or
-            // locally by Geary.
-            _("Account source"),
-            new Gtk.Label("")
-        );
-
-        this.accounts = accounts;
-        update();
-    }
-
-    public override void update() {
-        string? source = null;
-        bool enabled = false;
-        if (this.account.mediator is GoaMediator) {
-            source = _("GNOME Online Accounts");
-            enabled = true;
-        } else {
-            source = _("Geary");
-        }
-
-        this.value.set_text(source);
-        this.set_activatable(enabled);
-        Gtk.StyleContext style = this.value.get_style_context();
-        if (enabled) {
-            style.remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
-        } else {
-            style.add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-        }
-    }
-
-    public override void activated(EditorServersPane pane) {
-        if (this.accounts.is_goa_account(this.account)) {
-            this.accounts.show_goa_account.begin(
-                account, pane.op_cancellable,
-                (obj, res) => {
-                    try {
-                        this.accounts.show_goa_account.end(res);
-                    } catch (GLib.Error err) {
-                        // XXX display an error to the user
-                        debug(
-                            "Failed to show GOA account \"%s\": %s",
-                            account.id,
-                            err.message
-                        );
-                    }
-                });
-        }
-    }
-
-}
-
-
-private class Accounts.SaveDraftsRow :
-    AccountRow<EditorServersPane,Gtk.Switch> {
-
+    public Geary.AccountInformation account { get; construct set; }
 
     public bool value_changed {
         get { return this.initial_value != this.value.state; }
     }
-    public bool initial_value { get; private set; }
+    public bool initial_value { get; construct set; }
 
     private Application.CommandStack commands;
     private GLib.Cancellable? cancellable;
@@ -599,25 +403,22 @@ private class Accounts.SaveDraftsRow :
     public SaveDraftsRow(Geary.AccountInformation account,
                          Application.CommandStack commands,
                          GLib.Cancellable? cancellable) {
-        Gtk.Switch value = new Gtk.Switch();
-        base(
-            account,
-            // Translators: This label describes an account
-            // preference.
-            _("Save draft email on server"),
-            value
+        Object(
+            account: account,
+            initial_value: account.save_drafts
         );
-        update();
+
         this.commands = commands;
         this.cancellable = cancellable;
-        this.activatable = false;
-        this.initial_value = this.account.save_drafts;
-        this.account.notify["save-drafts"].connect(on_account_changed);
-        this.value.notify["active"].connect(on_activate);
+        this.account.notify["save-drafts"].connect(update);
+        this.notify["active"].connect(on_activate);
+        update();
     }
 
-    public override void update() {
-        this.value.state = this.account.save_drafts;
+    private void update() {
+        //XXX GTK4 I think we need to guard this with an if to not activate the
+        // switch again
+        this.active = this.account.save_drafts;
     }
 
     private void on_activate() {
@@ -630,11 +431,6 @@ private class Accounts.SaveDraftsRow :
             );
         }
     }
-
-    private void on_account_changed() {
-        update();
-    }
-
 }
 
 
@@ -696,10 +492,6 @@ private class Accounts.SaveSentRow :
 private class Accounts.ServiceHostRow :
     ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
-
-    public Components.Validator validator {
-        get; protected set;
-    }
 
     public bool has_changed {
         get {
@@ -850,11 +642,6 @@ private class Accounts.ServiceSecurityRow :
 private class Accounts.ServiceLoginRow :
     ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
-
-    public Components.Validator validator {
-        get; protected set;
-    }
-
     public bool has_changed {
         get {
             return this.value.text.strip() != get_entry_text();
@@ -936,10 +723,9 @@ private class Accounts.ServiceLoginRow :
         string? label = null;
         if (this.service.credentials != null) {
             string method = "%s";
-            Gtk.StyleContext value_style = this.value.get_style_context();
             switch (this.service.credentials.supported_method) {
             case Geary.Credentials.Method.PASSWORD:
-                value_style.remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
+                this.value.remove_css_class("dim-label");
                 break;
 
             case Geary.Credentials.Method.OAUTH2:
@@ -951,7 +737,7 @@ private class Accounts.ServiceLoginRow :
                 // the service's login name.
                 method = _("%s using OAuth2");
 
-                value_style.add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+                this.value.add_css_class("dim-label");
                 break;
             }
 
@@ -974,10 +760,6 @@ private class Accounts.ServiceLoginRow :
 private class Accounts.ServicePasswordRow :
     ServiceRow<EditorServersPane,Gtk.Entry>, ValidatingRow<EditorServersPane> {
 
-
-    public Components.Validator validator {
-        get; protected set;
-    }
 
     public bool has_changed {
         get {
@@ -1116,3 +898,4 @@ private class Accounts.ServiceOutgoingAuthRow :
     }
 
 }
+#endif

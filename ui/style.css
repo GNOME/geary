@@ -40,12 +40,6 @@ infobar flowboxchild {
   padding: 0px;
 }
 
-revealer components-conversation-actions {
-  border: solid @borders;
-  border-top-width: 1px;
-  padding: 6px;
-}
-
 
 /* Conversation List */
 row.conversation-list {
@@ -135,7 +129,7 @@ row.geary-folder-popover-list-row > label {
 /* ConversationListBox */
 
 .conversation-listbox {
-  padding: 0px 12px;
+  margin: 12px;
 }
 
 .conversation-listbox > row {
@@ -151,18 +145,16 @@ row.geary-folder-popover-list-row > label {
   border-top-width: 0px;
   padding: 6px;
   border-top-left-radius: 0px;
-  -gtk-outline-top-left-radius: 0px;
   border-top-right-radius: 0px;
-  -gtk-outline-top-right-radius: 0px;
 }
 
 .conversation-listbox.content > row:first-child:not(.geary-loading) {
-  margin-top: 12px;
+  margin-top: 0;
   transition: 0;
 }
 
 .conversation-listbox.content > row:last-child {
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .conversation-listbox.content > row:last-child,
@@ -173,19 +165,15 @@ row.geary-folder-popover-list-row > label {
 
 .geary-expanded:not(:first-child), .geary-expanded + row {
   border-top-left-radius: 8px;
-  -gtk-outline-top-left-radius: 7px;
   border-top-right-radius: 8px;
-  -gtk-outline-top-right-radius: 7px;
   margin-top: 6px;
 }
 
 .geary-expanded,
 .geary-expanded-previous-sibling {
   border-bottom-left-radius: 8px;
-  -gtk-outline-bottom-left-radius: 7px;
   border-bottom-right-radius: 8px;
-  -gtk-outline-bottom-right-radius: 7px;
-  margin-bottom: 6px
+  margin-bottom: 6px;
 }
 
 /* Update this to match any change in above radius value */
@@ -203,9 +191,7 @@ row.geary-folder-popover-list-row > label {
 .geary-expanded > .geary_email grid.geary-message-summary,
 .geary-expanded + row > .geary_email grid.geary-message-summary {
   border-top-left-radius: 8px;
-  -gtk-outline-top-left-radius: 7px;
   border-top-right-radius: 8px;
-  -gtk-outline-top-right-radius: 7px;
 }
 
 /* ConversationMessage */
@@ -227,7 +213,7 @@ row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }
 
-grid.geary-message-summary {
+.geary-message-summary {
   border-top: 4px solid transparent;
   padding: 12px;
   padding-top: 8px;
@@ -335,9 +321,7 @@ geary-composer-editor > frame > border {
 
 geary-composer-embed headerbar {
   border-top-left-radius: 8px;
-  -gtk-outline-top-left-radius: 7px;
   border-top-right-radius: 8px;
-  -gtk-outline-top-right-radius: 7px;
 }
 
 geary-composer-widget-header-row {
@@ -455,8 +439,9 @@ row.geary-settings > grid > grid.geary-drag-handle image:dir(rtl) {
   padding-left: 6px;
 }
 
-frame.geary-settings.geary-signature {
+.geary-settings .geary-signature {
   min-height: 5em;
+  padding: 0.2em;
 }
 
 buttonbox.geary-settings  {
@@ -481,23 +466,24 @@ dialog.geary-remove-confirm .dialog-action-box {
 
 /* FolderList.Tree */
 
-treeview.sidebar {
+treeview.navigation-sidebar {
   border: none;
+  background: transparent;
 }
 
-treeview.sidebar .cell {
+treeview.navigation-sidebar .cell {
   padding: 9px 6px;
 }
-treeview.sidebar .cell:dir(ltr) {
+treeview.navigation-sidebar .cell:dir(ltr) {
   padding-left: 0px;
 }
-treeview.sidebar .cell:dir(rtl) {
+treeview.navigation-sidebar .cell:dir(rtl) {
   padding-right: 0px;
 }
 
-treeview.sidebar:drop(active).after,
-treeview.sidebar:drop(active).before,
-treeview.sidebar:drop(active).into {
+treeview.navigation-sidebar:drop(active).after,
+treeview.navigation-sidebar:drop(active).before,
+treeview.navigation-sidebar:drop(active).into {
   border-top: 1px solid @borders;
   border-bottom: 1px solid @borders;
 }

@@ -279,6 +279,22 @@
             ]
         },
         {
+            "name": "libspelling",
+            "buildsystem": "meson",
+            "config-opts": [
+                "-Dintrospection=enabled",
+                "-Dvapi=true",
+                "-Ddocs=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/libspelling.git",
+                    "branch": "main"
+                }
+            ]
+        },
+        {
             "name": "geary",
             "buildsystem": "meson",
             "build-options": {

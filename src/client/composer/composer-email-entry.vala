@@ -47,9 +47,10 @@ public class Composer.EmailEntry : Gtk.Entry {
 
     public EmailEntry(Composer.Widget composer) {
         changed.connect(on_changed);
-        key_press_event.connect(on_key_press);
+        Gtk.EventControllerKey key_controller = new Gtk.EventControllerKey();
+        key_controller.key_pressed.connect(on_key_pressed);
+        add_controller(key_controller);
         this.composer = composer;
-        show();
     }
 
     /** Marks the entry as being modified. */
@@ -71,11 +72,14 @@ public class Composer.EmailEntry : Gtk.Entry {
     private void on_changed() {
         this.is_modified = true;
 
+        //XXX GTK4 see completion class
+#if 0
         ContactEntryCompletion? completion =
             get_completion() as ContactEntryCompletion;
         if (completion != null) {
             completion.update_model();
         }
+#endif
 
         if (Geary.String.is_empty_or_whitespace(text)) {
             this._addresses = new Geary.RFC822.MailboxAddresses();
@@ -92,9 +96,14 @@ public class Composer.EmailEntry : Gtk.Entry {
         }
     }
 
-    private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
+    private bool on_key_pressed(Gtk.EventControllerKey key_controller,
+                                uint keyval,
+                                uint keycode,
+                                Gdk.ModifierType state) {
         bool propagate = Gdk.EVENT_PROPAGATE;
-        if (event.keyval == Gdk.Key.Tab) {
+        if (keyval == Gdk.Key.Tab) {
+        //XXX GTK4 see completion class
+#if 0
             // If there is a completion entry selected, then use that
             ContactEntryCompletion? completion = (
                 get_completion() as ContactEntryCompletion
@@ -104,10 +113,11 @@ public class Composer.EmailEntry : Gtk.Entry {
                 composer.child_focus(Gtk.DirectionType.TAB_FORWARD);
                 propagate = Gdk.EVENT_STOP;
             }
+#endif
         }
 
         if (propagate == Gdk.EVENT_PROPAGATE &&
-            event.keyval != Gdk.Key.Escape) {
+            keyval != Gdk.Key.Escape) {
             // Keyboard shortcuts for undo/redo won't work when the
             // completion UI is visible unless we explicitly check for
             // them there.
@@ -115,9 +125,9 @@ public class Composer.EmailEntry : Gtk.Entry {
             // However, don't forward it on if the button pressed is
             // Escape, so that the completion is hidden if present
             // before the composer is closed.
-            Gtk.Window? window = get_toplevel() as Gtk.Window;
+            Gtk.Window? window = get_root() as Gtk.Window;
             if (window != null) {
-                propagate = window.activate_key(event);
+                propagate = key_controller.forward(window);
             }
         }
         return propagate;

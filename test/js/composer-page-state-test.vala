@@ -412,8 +412,8 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
         }
     }
 
-    protected override Composer.WebView set_up_test_view() {
-        return new Composer.WebView(this.config);
+    protected override Composer.WebView set_up_test_view(GLib.File cache_dir) {
+        return new Composer.WebView(this.config, cache_dir);
     }
 
     protected override void load_body_fixture(string body = "") {
@@ -424,8 +424,10 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
                                           string quote,
                                           bool top_posting) {
         this.test_view.load_html_headless(body, quote, top_posting, false);
+
+        unowned GLib.MainContext? main_context = GLib.MainContext.get_thread_default();
         while (this.test_view.is_loading) {
-            Gtk.main_iteration();
+            main_context.iteration(true);
         }
     }
 

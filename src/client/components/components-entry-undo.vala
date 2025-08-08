@@ -6,7 +6,7 @@
  */
 
 /**
- * Provides per-GTK Entry undo and redo using a command stack.
+ * Provides per-GTK Editable undo and redo using a command stack.
  */
 public class Components.EntryUndo : Geary.BaseObject {
 
@@ -84,13 +84,13 @@ public class Components.EntryUndo : Geary.BaseObject {
             }
         }
 
-        private void do_insert(Gtk.Entry target) {
+        private void do_insert(Gtk.Editable target) {
             int position = this.position;
             target.insert_text(this.text, -1, ref position);
             target.set_position(position);
         }
 
-        private void do_delete(Gtk.Entry target) {
+        private void do_delete(Gtk.Editable target) {
             target.delete_text(
                 this.position, this.position + this.text.char_count()
             );
@@ -100,7 +100,7 @@ public class Components.EntryUndo : Geary.BaseObject {
 
 
     /** The entry being managed */
-    public Gtk.Entry target { get; private set; }
+    public Gtk.Editable target { get; private set; }
 
     private Application.CommandStack commands;
     private EditType last_edit = NONE;
@@ -113,7 +113,8 @@ public class Components.EntryUndo : Geary.BaseObject {
     private GLib.SimpleActionGroup edit_actions = new GLib.SimpleActionGroup();
 
 
-    public EntryUndo(Gtk.Entry target) {
+    // XXX GTK4 maybe rename this to EditableUndo?
+    public EntryUndo(Gtk.Editable target) {
         this.edit_actions.add_action_entries(EDIT_ACTIONS, this);
 
         this.target = target;
@@ -157,7 +158,7 @@ public class Components.EntryUndo : Geary.BaseObject {
             }
         );
         while (!complete) {
-            Gtk.main_iteration();
+            MainContext.default().iteration(true);
         }
     }
 
@@ -179,7 +180,7 @@ public class Components.EntryUndo : Geary.BaseObject {
             }
         );
         while (!complete) {
-            Gtk.main_iteration();
+            MainContext.default().iteration(true);
         }
     }
 
@@ -201,7 +202,7 @@ public class Components.EntryUndo : Geary.BaseObject {
             }
         );
         while (!complete) {
-            Gtk.main_iteration();
+            MainContext.default().iteration(true);
         }
     }
 
@@ -298,7 +299,7 @@ public class Components.EntryUndo : Geary.BaseObject {
     private void on_deleted(int start, int end) {
         if (this.events_enabled) {
             // Normalise value of end to be something useful if needed
-            string text = this.target.buffer.get_text();
+            string text = this.target.text;
             if (end < 0) {
                 end = text.char_count();
             }

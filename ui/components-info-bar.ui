@@ -2,27 +2,20 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="ComponentsInfoBar" parent="GtkBox">
-    <property name="visible">True</property>
     <child>
       <object class="GtkRevealer" id="revealer">
-        <property name="visible">True</property>
         <property name="transition_type">slide-down</property>
         <child>
           <object class="GtkBox">
-            <property name="visible">True</property>
             <child>
               <object class="GtkFlowBox">
-                <property name="visible">True</property>
                 <property name="hexpand">True</property>
                 <property name="selection-mode">none</property>
                 <property name="max_children_per_line">2</property>
-                <property name="border-width">12</property>
                 <child>
                   <object class="GtkFlowBoxChild">
-                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox" id="content_area">
-                        <property name="visible">True</property>
                         <property name="spacing">16</property>
                       </object>
                     </child>
@@ -30,11 +23,9 @@
                 </child>
                 <child>
                   <object class="GtkFlowBoxChild">
-                    <property name="visible">True</property>
                     <child>
-                      <object class="GtkButtonBox" id="action_area">
-                        <property name="visible">True</property>
-                        <property name="layout_style">end</property>
+                      <object class="GtkBox" id="action_area">
+                        <property name="orientation">horizontal</property>
                         <property name="spacing">6</property>
                       </object>
                     </child>
@@ -47,8 +38,10 @@
                 <property name="receives_default">True</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="margin">6</property>
-                <property name="no_show_all">True</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+                <property name="margin-start">6</property>
+                <property name="margin-end">6</property>
                 <signal name="clicked" handler="on_close_button_clicked" swapped="no"/>
                 <style>
                   <class name="titlebutton"/>
@@ -56,14 +49,10 @@
                 </style>
                 <child>
                   <object class="GtkImage">
-                    <property name="visible">True</property>
                     <property name="icon_name">window-close-symbolic</property>
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="pack_type">end</property>
-              </packing>
             </child>
           </object>
         </child>

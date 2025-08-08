@@ -13,7 +13,7 @@
  * Widget.PresentationMode.INLINE} or {@link
  * Widget.PresentationMode.INLINE_COMPACT} mode.
  */
-public class Composer.Embed : Gtk.EventBox, Container {
+public class Composer.Embed : Adw.Bin, Container {
 
     private const int MIN_EDITOR_HEIGHT = 200;
 
@@ -25,7 +25,7 @@ public class Composer.Embed : Gtk.EventBox, Container {
 
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
-        get { return get_toplevel() as Gtk.ApplicationWindow; }
+        get { return get_root() as Gtk.ApplicationWindow; }
     }
 
     /** The email this composer was originally a reply to. */
@@ -57,26 +57,27 @@ public class Composer.Embed : Gtk.EventBox, Container {
 
         this.outer_scroller = outer_scroller;
 
-        get_style_context().add_class("geary-composer-embed");
+        add_css_class("geary-composer-embed");
         this.halign = Gtk.Align.FILL;
         this.vexpand = true;
         this.vexpand_set = true;
 
-        add(composer);
-        realize.connect(on_realize);
-        show();
+        this.child = composer;
+        //XXX GTK4 see below
+        // realize.connect(on_realize);
     }
 
     /** {@inheritDoc} */
     public void close() {
-        disable_scroll_reroute(this);
+        //XXX GTK4 see below
+        // disable_scroll_reroute(this);
         vanished();
 
-        this.composer.free_header();
-        remove(this.composer);
-        destroy();
+        this.child = null;
     }
 
+    //XXX GTK4 I think scrolling has changed enough that we might need to rewrite this completely
+#if 0
     private void on_realize() {
         reroute_scroll_handling(this);
     }
@@ -84,19 +85,19 @@ public class Composer.Embed : Gtk.EventBox, Container {
     private void reroute_scroll_handling(Gtk.Widget widget) {
         widget.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK);
         widget.scroll_event.connect(on_inner_scroll_event);
-        Gtk.Container? container = widget as Gtk.Container;
-        if (container != null) {
-            foreach (Gtk.Widget child in container.get_children())
-                reroute_scroll_handling(child);
+        unowned Gtk.Widget? child = widget.get_first_child();
+        while (child != null) {
+            reroute_scroll_handling(child);
+            child = child.get_next_sibling();
         }
     }
 
     private void disable_scroll_reroute(Gtk.Widget widget) {
         widget.scroll_event.disconnect(on_inner_scroll_event);
-        Gtk.Container? container = widget as Gtk.Container;
-        if (container != null) {
-            foreach (Gtk.Widget child in container.get_children())
-                disable_scroll_reroute(child);
+        unowned Gtk.Widget? child = widget.get_first_child();
+        while (child != null) {
+            disable_scroll_reroute(child);
+            child = child.get_next_sibling();
         }
     }
 
@@ -203,5 +204,6 @@ public class Composer.Embed : Gtk.EventBox, Container {
         }
         return ret;
     }
+#endif
 
 }

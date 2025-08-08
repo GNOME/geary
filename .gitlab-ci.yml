@@ -67,7 +67,7 @@ build.container.fedora@x86_64:
       gsettings-desktop-schemas
       gsound-devel
       gspell-devel
-      gtk3-devel
+      gtk4-devel
       iso-codes-devel
       itstool
       json-glib-devel
@@ -76,6 +76,7 @@ build.container.fedora@x86_64:
       libicu-devel
       libpeas-devel
       libsecret-devel
+      libspelling-devel
       libstemmer-devel
       libunwind-devel
       libxml2-devel
@@ -93,8 +94,8 @@ build.container.fedora@x86_64:
     # When branching a stable release, change 'main' to the
     # release branch name to ensure that a new image will
     # be created, tailored for the stable branch.
-    BRANCH_NAME: 'main'
-    CONTAINER_TAG: '2025-12-12.0'
+    BRANCH_NAME: 'nielsdg/gtk4'
+    CONTAINER_TAG: '2025-12-15.0'
     FEDORA_VERSION: latest
     # Derive FDO variables from this automatically.
     # DO NOT edit, instead change the variables above

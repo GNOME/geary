@@ -258,7 +258,7 @@ public class Application.PluginManager : GLib.Object {
 
            Geary.Folder? target = this.globals.folders.to_engine_folder(folder);
            if (target != null) {
-               if (!main.prompt_empty_folder(target.used_as)) {
+               if (!yield main.prompt_empty_folder(target.used_as)) {
                    throw new Plugin.Error.PERMISSION_DENIED(
                        "Permission not granted"
                    );
@@ -419,7 +419,8 @@ public class Application.PluginManager : GLib.Object {
         public void insert_text(string plain_text) {
             var entry = this.backing.focused_input_widget as Gtk.Entry;
             if (entry != null) {
-                entry.insert_at_cursor(plain_text);
+                int position = entry.get_position();
+                entry.insert_text(plain_text, plain_text.length, ref position);
             } else {
                 this.backing.editor.body.insert_text(plain_text);
             }
@@ -477,7 +478,7 @@ public class Application.PluginManager : GLib.Object {
                             centre = new Gtk.Box(HORIZONTAL, 0);
                             this.action_bar.set_center_widget(centre);
                         }
-                        centre.add(widget);
+                        centre.append(widget);
                         break;
 
                     case END:
@@ -487,7 +488,6 @@ public class Application.PluginManager : GLib.Object {
                 }
             }
 
-            this.action_bar.show_all();
             this.backing.editor.add_action_bar(this.action_bar);
         }
 
@@ -513,26 +513,24 @@ public class Application.PluginManager : GLib.Object {
             if (item_type == typeof(Plugin.ActionBar.MenuItem)) {
                 var menu_item = item as Plugin.ActionBar.MenuItem;
 
-                var label = new Gtk.Box(HORIZONTAL, 6);
-                label.add(new Gtk.Label(menu_item.label));
-                label.add(new Gtk.Image.from_icon_name(
-                    "pan-up-symbolic", Gtk.IconSize.BUTTON
-                ));
-
                 var button = new Gtk.MenuButton();
                 button.direction = Gtk.ArrowType.UP;
-                button.use_popover = true;
                 button.menu_model = menu_item.menu;
-                button.add(label);
+
+                var content = new Adw.ButtonContent();
+                content.label = menu_item.label;
+                content.icon_name = "pan-up-symbolic";
+
+                button.child = content;
 
                 return button;
             }
             if (item_type == typeof(Plugin.ActionBar.GroupItem)) {
                 var group_items = item as Plugin.ActionBar.GroupItem;
                 var box = new Gtk.Box(HORIZONTAL, 0);
-                box.get_style_context().add_class(Gtk.STYLE_CLASS_LINKED);
+                box.add_css_class("linked");
                 foreach (var group_item in group_items.get_items()) {
-                    box.add(widget_for_item(group_item));
+                    box.append(widget_for_item(group_item));
                 }
                 return box;
             }

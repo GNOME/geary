@@ -4,7 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class CertificateWarningDialog {
+[GtkTemplate (ui = "/org/gnome/Geary/certificate-warning-dialog.ui")]
+public class CertificateWarningDialog : Adw.AlertDialog {
+
     public enum Result {
         DONT_TRUST,
         TRUST,
@@ -13,59 +15,49 @@ public class CertificateWarningDialog {
 
     private const string BULLET = "&#8226; ";
 
-    private Gtk.Dialog dialog;
+    [GtkChild] private unowned Gtk.Label top_label;
+    [GtkChild] private unowned Gtk.Label warnings_label;
+    [GtkChild] private unowned Gtk.Label trust_label;
+    [GtkChild] private unowned Gtk.Label dont_trust_label;
+    [GtkChild] private unowned Gtk.Label contact_label;
 
-    public CertificateWarningDialog(Gtk.Window? parent,
-                                    Geary.AccountInformation account,
+    public CertificateWarningDialog(Geary.AccountInformation account,
                                     Geary.ServiceInformation service,
                                     Geary.Endpoint endpoint,
                                     bool is_validation) {
-        Gtk.Builder builder = GioUtil.create_builder("certificate_warning_dialog.glade");
+        this.title = _("Untrusted Connection: %s").printf(account.display_name);
 
-        dialog = (Gtk.Dialog) builder.get_object("CertificateWarningDialog");
-        dialog.transient_for = parent;
-        dialog.modal = true;
-
-        Gtk.Label title_label = (Gtk.Label) builder.get_object("untrusted_connection_label");
-        Gtk.Label top_label = (Gtk.Label) builder.get_object("top_label");
-        Gtk.Label warnings_label = (Gtk.Label) builder.get_object("warnings_label");
-        Gtk.Label trust_label = (Gtk.Label) builder.get_object("trust_label");
-        Gtk.Label dont_trust_label = (Gtk.Label) builder.get_object("dont_trust_label");
-        Gtk.Label contact_label = (Gtk.Label) builder.get_object("contact_label");
-
-        title_label.label = _("Untrusted Connection: %s").printf(account.display_name);
-
-        top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(
+        this.top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(
             service.protocol.to_value(), service.host, service.port);
 
-        warnings_label.label = generate_warning_list(
+        this.warnings_label.label = generate_warning_list(
             endpoint.tls_validation_warnings
         );
-        warnings_label.use_markup = true;
+        this.warnings_label.use_markup = true;
 
-        trust_label.label =
+        this.trust_label.label =
             "<b>"
             +_("Selecting “Trust This Server” or “Always Trust This Server” may cause your username and password to be transmitted insecurely.")
             + "</b>";
-        trust_label.use_markup = true;
+        this.trust_label.use_markup = true;
 
         if (is_validation) {
             // could be a new or existing account
-            dont_trust_label.label =
+            this.dont_trust_label.label =
                 "<b>"
                 + _("Selecting “Don’t Trust This Server” will cause Geary not to access this server.")
                 + "</b> "
                 + _("Geary will not add or update this email account.");
         } else {
             // a registered account
-            dont_trust_label.label =
+            this.dont_trust_label.label =
                 "<b>"
                 + _("Selecting “Don’t Trust This Server” will cause Geary to stop accessing this account.")
                 + "</b> ";
         }
-        dont_trust_label.use_markup = true;
+        this.dont_trust_label.use_markup = true;
 
-        contact_label.label =
+        this.contact_label.label =
             _("Contact your system administrator or email service provider if you have any question about these issues.");
     }
 
@@ -96,17 +88,14 @@ public class CertificateWarningDialog {
         return builder.str;
     }
 
-    public Result run() {
-        dialog.show_all();
-        int response = dialog.run();
-        dialog.destroy();
+    public async Result run(Gtk.Window? parent) {
+        string response = yield choose(parent, null);
 
-        // these values are defined in the Glade file
         switch (response) {
-            case 1:
+            case "trust":
                 return Result.TRUST;
 
-            case 2:
+            case "always-trust":
                 return Result.ALWAYS_TRUST;
 
             default:

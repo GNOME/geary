@@ -52,10 +52,10 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
-target_glib = '2.74'
-target_gtk = '3.24.24'
+target_glib = '2.80'
+target_gtk = '4.16.0'
 target_vala = '0.56'
-target_webkit = '2.30'
+target_webkit = '2.40'
 
 if not valac.version().version_compare('>=' + target_vala)
   error('Vala does not meet minimum required version: ' + target_vala)
@@ -64,9 +64,9 @@ endif
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
 gmime = dependency('gmime-3.0', version: '>= 3.2.4')
-gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
+gtk = dependency('gtk4', version: '>=' + target_gtk)
 sqlite = dependency('sqlite3', version: '>= 3.24')
-webkit2gtk = dependency('webkit2gtk-4.1', version: '>=' + target_webkit)
+webkitgtk = dependency('webkitgtk-6.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 cairo = dependency('cairo')
@@ -74,18 +74,17 @@ enchant = dependency('enchant-2', version: '>=2.1')
 folks = dependency('folks', version: '>=0.11')
 gck = dependency('gck-2')
 gcr = dependency('gcr-4')
-gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
 gee = dependency('gee-0.8', version: '>= 0.8.5')
 gio = dependency('gio-2.0', version: '>=' + target_glib)
 goa = dependency('goa-1.0')
 gsound = dependency('gsound')
-gspell = dependency('gspell-1')
+libspelling = dependency('libspelling-1')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 icu_uc = dependency('icu-uc', version: '>=60')
 iso_codes = dependency('iso-codes')
-javascriptcoregtk = dependency('javascriptcoregtk-4.1', version: '>=' + target_webkit)
+javascriptcoregtk = dependency('javascriptcoregtk-6.0', version: '>=' + target_webkit)
 json_glib = dependency('json-glib-1.0', version: '>= 1.0')
-libhandy = dependency('libhandy-1', version: '>= 1.6', required: false)
+libadwaita = dependency('libadwaita-1', version: '>= 1.7')
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-2')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
@@ -100,7 +99,7 @@ libunwind_generic_dep = dependency(
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 libytnef = dependency('libytnef', version: '>= 1.9.3', required: get_option('tnef'))
 posix = valac.find_library('posix')
-webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.1', version: '>=' + target_webkit)
+webkitgtk_web_extension = dependency('webkitgtk-web-process-extension-6.0', version: '>=' + target_webkit)
 
 # System dependencies above ensures appropriate versions for the
 # following libraries, but the declared dependency is what we actually
@@ -132,26 +131,6 @@ libstemmer = declare_dependency(
     libstemmer_dep,
   ],
 )
-
-# Required until libhandy 1.2.1 is GA
-libhandy_vapi = ''
-if not libhandy.found()
-  libhandy_project = subproject(
-    'libhandy',
-    default_options: [
-      'examples=false',
-      'package_subdir=geary',
-      'tests=false',
-    ]
-  )
-  libhandy = declare_dependency(
-    dependencies: [
-      libhandy_project.get_variable('libhandy_dep'),
-      libhandy_project.get_variable('libhandy_vapi')
-    ]
-  )
-  libhandy_vapi = meson.project_build_root() / 'subprojects' / 'libhandy' / 'src'
-endif
 
 # Optional dependencies
 appstreamcli = find_program('appstreamcli', required: false)

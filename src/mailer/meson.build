@@ -6,7 +6,7 @@ mailer_dependencies = [
   config_dep,
   gee,
   gmime,
-  webkit2gtk,
+  webkitgtk,
   engine_dep,
 ]
 

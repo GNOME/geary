@@ -25,4 +25,5 @@ internal interface Composer.ApplicationInterface :
 
     internal abstract async void discard_composed_email(Composer.Widget composer);
 
+    internal abstract GLib.File get_web_cache_dir();
 }

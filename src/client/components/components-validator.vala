@@ -6,7 +6,7 @@
  */
 
 /**
- * Validates the contents of a Gtk Entry as they are entered.
+ * Validates the contents of a Gtk Editable as they are entered.
  *
  * This class may be used to validate required, but otherwise free
  * form entries. Subclasses may perform more complex and task-specific
@@ -15,34 +15,30 @@
 public class Components.Validator : GLib.Object {
 
 
-    private const Gtk.EntryIconPosition ICON_POS =
-        Gtk.EntryIconPosition.SECONDARY;
-
-
     /**
-     * The state of the entry monitored by this validator.
+     * The state of the editable monitored by this validator.
      *
      * Only {@link VALID} can be considered strictly valid, all other
      * states should be treated as being invalid.
      */
     public enum Validity {
-        /** The contents of the entry have not been validated. */
+        /** The contents of the editable have not been validated. */
         INDETERMINATE,
 
-        /** The contents of the entry is valid. */
+        /** The contents of the editable is valid. */
         VALID,
 
         /**
-         * The contents of the entry is being checked.
+         * The contents of the editable is being checked.
          *
          * See {@link validate} for the use of this value.
          */
         IN_PROGRESS,
 
-        /** The contents of the entry is required but not present. */
+        /** The contents of the editable is required but not present. */
         EMPTY,
 
-        /** The contents of the entry is not valid. */
+        /** The contents of the editable is not valid. */
         INVALID;
     }
 
@@ -50,11 +46,11 @@ public class Components.Validator : GLib.Object {
     public enum Trigger {
         /** A manual validation was requested via {@link validate}. */
         MANUAL,
-        /** The entry's contents changed. */
+        /** The editable's contents changed. */
         CHANGED,
-        /** The entry lost the keyboard focus. */
+        /** The editable lost the keyboard focus. */
         LOST_FOCUS,
-        /** The user activated the entry. */
+        /** The user activated the editable. */
         ACTIVATED;
     }
 
@@ -64,10 +60,26 @@ public class Components.Validator : GLib.Object {
         public string? icon_tooltip_text;
     }
 
-    /** The entry being monitored */
-    public Gtk.Entry target { get; private set; }
+    /** The editable being monitored */
+    public Gtk.Editable target {
+        get { return this._target; }
+        construct set {
+            this._target = value;
+            if (value is Gtk.Entry) {
+                this.target_helper = new EntryHelper((Gtk.Entry) value);
+            } else if (value is Adw.EntryRow) {
+                this.target_helper = new EntryRowHelper((Adw.EntryRow) value);
+            } else {
+                critical("Validator for type '%s' unsupported", value.get_type().name());
+            }
+        }
+    }
+    private Gtk.Editable _target;
+    protected EditableHelper target_helper;
 
-    /** Determines if the current state indicates the entry is valid. */
+    private Gtk.EventControllerFocus target_focus_controller = new Gtk.EventControllerFocus();
+
+    /** Determines if the current state indicates the editable is valid. */
     public bool is_valid {
         get { return (this.state == Validity.VALID); }
     }
@@ -75,39 +87,21 @@ public class Components.Validator : GLib.Object {
     /**
      * Determines how empty entries are treated.
      *
-     * If true, an empty entry is considered {@link Validity.EMPTY}
+     * If true, an empty editable is considered {@link Validity.EMPTY}
      * (i.e. invalid) else it is considered to be {@link
      * Validity.INDETERMINATE}.
      */
     public bool is_required { get; set; default = true; }
 
-    /** The current validation state of the entry. */
+    /** The current validation state of the editable. */
     public Validity state {
         get; private set; default = Validity.INDETERMINATE;
     }
-
-    /** The UI state to use when indeterminate. */
-    public UiState indeterminate_state;
-
-    /** The UI state to use when valid. */
-    public UiState valid_state;
-
-    /** The UI state to use when in progress. */
-    public UiState in_progress_state;
-
-    /** The UI state to use when empty. */
-    public UiState empty_state;
-
-    /** The UI state to use when invalid. */
-    public UiState invalid_state;
 
     // Determines if the value has changed since last validation
     private bool target_changed = false;
 
     private Geary.TimeoutManager ui_update_timer;
-
-    private Geary.TimeoutManager pulse_timer;
-    bool did_pulse = false;
 
 
     /** Fired when the validation state changes. */
@@ -123,49 +117,28 @@ public class Components.Validator : GLib.Object {
     public signal void focus_lost();
 
 
-    public Validator(Gtk.Entry target) {
-        this.target = target;
-
+    construct {
         this.ui_update_timer = new Geary.TimeoutManager.seconds(
-            2, on_update_ui
+            1, on_update_ui
         );
 
-        this.pulse_timer = new Geary.TimeoutManager.milliseconds(
-            200, on_pulse
-        );
-        this.pulse_timer.repetition = FOREVER;
-
-        this.indeterminate_state = {
-            target.get_icon_name(ICON_POS),
-            target.get_icon_tooltip_text(ICON_POS)
-        };
-        this.valid_state = {
-            target.get_icon_name(ICON_POS),
-            target.get_icon_tooltip_text(ICON_POS)
-        };
-        this.in_progress_state = {
-            target.get_icon_name(ICON_POS),
-            null
-        };
-        this.empty_state = { "dialog-warning-symbolic", null };
-        this.invalid_state = { "dialog-error-symbolic", null };
-
-        this.target.add_events(Gdk.EventMask.FOCUS_CHANGE_MASK);
-        this.target.activate.connect(on_activate);
+        this.target_helper.activated.connect(on_activate);
         this.target.changed.connect(on_changed);
-        this.target.focus_out_event.connect(on_focus_out);
+        this.target_focus_controller.leave.connect(on_focus_out);
+        this.target.add_controller(this.target_focus_controller);
+    }
+
+
+    public Validator(Gtk.Editable target) {
+        GLib.Object(target: target);
     }
 
     ~Validator() {
-        this.target.focus_out_event.disconnect(on_focus_out);
-        this.target.changed.disconnect(on_changed);
-        this.target.activate.disconnect(on_activate);
         this.ui_update_timer.reset();
-        this.pulse_timer.reset();
     }
 
     /**
-     * Triggers a validation of the entry.
+     * Triggers a validation of the editable.
      *
      * In the case of an asynchronous validation implementations,
      * result of the validation will be known sometime after this call
@@ -176,12 +149,12 @@ public class Components.Validator : GLib.Object {
     }
 
     /**
-     * Called to validate the target entry's value.
+     * Called to validate the target editable's value.
      *
      * This method will be called repeatedly as the user edits the
-     * value of the target entry to set the new validation {@link
+     * value of the target editable to set the new validation {@link
      * state} given the updated value. It will *not* be called if the
-     * entry is changed to be empty, instead the validity state will
+     * editable is changed to be empty, instead the validity state will
      * be set based on {@link is_required}.
      *
      * Subclasses may override this method to implement custom
@@ -195,7 +168,7 @@ public class Components.Validator : GLib.Object {
      * with the actual result.
      *
      * The given reason specifies which user action was taken to cause
-     * the entry's value to be validated.
+     * the editable's value to be validated.
      *
      * By default, this always returns {@link Validity.VALID}, making
      * it useful for required, but otherwise free-form fields only.
@@ -205,7 +178,7 @@ public class Components.Validator : GLib.Object {
     }
 
     /**
-     * Updates the current validation state and the entry's UI.
+     * Updates the current validation state and the editable's UI.
      *
      * This should only be called by subclasses that implement a
      * CPU-intensive or long-running validation routine and it has
@@ -263,8 +236,6 @@ public class Components.Validator : GLib.Object {
                 // no-op
                 break;
             }
-        } else if (!this.pulse_timer.is_running) {
-            this.pulse_timer.start();
         }
     }
 
@@ -282,66 +253,12 @@ public class Components.Validator : GLib.Object {
     private void update_ui(Validity state) {
         this.ui_update_timer.reset();
 
-        Gtk.StyleContext style = this.target.get_style_context();
-        style.remove_class(Gtk.STYLE_CLASS_ERROR);
-        style.remove_class(Gtk.STYLE_CLASS_WARNING);
-
-        UiState ui = { null, null };
-        bool in_progress = false;
-        switch (state) {
-        case Validity.INDETERMINATE:
-            ui = this.indeterminate_state;
-            break;
-
-        case Validity.VALID:
-            ui = this.valid_state;
-            break;
-
-        case Validity.IN_PROGRESS:
-            in_progress = true;
-            ui = this.in_progress_state;
-            break;
-
-        case Validity.EMPTY:
-            style.add_class(Gtk.STYLE_CLASS_WARNING);
-            ui = this.empty_state;
-            break;
-
-        case Validity.INVALID:
-            style.add_class(Gtk.STYLE_CLASS_ERROR);
-            ui = this.invalid_state;
-            break;
-        }
-
-        if (in_progress) {
-            if (!this.pulse_timer.is_running) {
-                this.pulse_timer.start();
-            }
-        } else {
-            this.pulse_timer.reset();
-            // If a pulse hasn't been performed (and hence the
-            // progress bar is not visible), setting the fraction here
-            // to reset it will actually cause the progress bar to
-            // become visible. So only reset if needed.
-            if (this.did_pulse) {
-                this.target.progress_fraction = 0.0;
-                this.did_pulse = false;
-            }
-        }
-
-        this.target.set_icon_from_icon_name(ICON_POS, ui.icon_name);
-        this.target.set_icon_tooltip_text(
-            ICON_POS,
-            // Setting the tooltip to null or the empty string can
-            // cause GTK+ to setfult. See GTK+ issue #1160.
-            Geary.String.is_empty(ui.icon_tooltip_text)
-                ? " " : ui.icon_tooltip_text
-        );
+        this.target_helper.update_ui(state);
     }
 
     private void on_activate() {
         if (this.target_changed) {
-             validate_entry(Trigger.ACTIVATED);
+            validate_entry(Trigger.ACTIVATED);
         } else {
             activated();
         }
@@ -349,11 +266,6 @@ public class Components.Validator : GLib.Object {
 
     private void on_update_ui() {
         update_ui(this.state);
-    }
-
-    private void on_pulse() {
-        this.target.progress_pulse();
-        this.did_pulse = true;
     }
 
     private void on_changed() {
@@ -364,40 +276,161 @@ public class Components.Validator : GLib.Object {
         this.ui_update_timer.start();
     }
 
-    private bool on_focus_out() {
+    private void on_focus_out(Gtk.EventControllerFocus controller) {
         if (this.target_changed) {
             // Only update if the widget has lost focus due to not being
             // the focused widget any more, rather than the whole window
             // having lost focus.
-            if (!this.target.is_focus) {
+            if (!this.target.is_focus()) {
                 validate_entry(Trigger.LOST_FOCUS);
             }
         } else {
             focus_lost();
         }
-        return Gdk.EVENT_PROPAGATE;
     }
 
 }
 
+/**
+ * A helper class to set an icon, abstracting away the underlying API of the
+ * Gtk.Editable implementation.
+ */
+protected abstract class Components.EditableHelper : Object {
+
+    /** Tooltip text in case the validator returns an invalid state */
+    public string? invalid_tooltip_text { get; set; default = null; }
+
+    /** Tooltip text in case the validator returns an empty state */
+    public string? empty_tooltip_text { get; set; default = null; }
+
+    /** Emitted if the editable has been activated */
+    public signal void activated();
+
+    /** Sets an error icon with the given name and tooltip */
+    public abstract void update_ui(Validator.Validity state);
+}
+
+
+private class Components.EntryHelper : EditableHelper {
+
+    private unowned Gtk.Entry entry;
+
+    public EntryHelper(Gtk.Entry entry) {
+        this.entry = entry;
+        this.entry.activate.connect((e) => this.activated());
+    }
+
+    public override void update_ui(Validator.Validity state) {
+        this.entry.remove_css_class("error");
+        this.entry.remove_css_class("warning");
+
+        switch (state) {
+        case Validator.Validity.INDETERMINATE:
+        case Validator.Validity.VALID:
+            // Reset
+            this.entry.secondary_icon_name = "";
+            this.entry.secondary_icon_tooltip_text = "";
+            break;
+
+        case Validator.Validity.IN_PROGRESS:
+            this.entry.secondary_icon_paintable = new Adw.SpinnerPaintable(this.entry);
+            this.entry.secondary_icon_tooltip_text = _("Validating");
+            break;
+
+        case Validator.Validity.EMPTY:
+            this.entry.add_css_class("warning");
+            this.entry.secondary_icon_name = "dialog-warning-symbolic";
+            this.entry.secondary_icon_tooltip_text = this.empty_tooltip_text ?? "";
+            break;
+
+        case Validator.Validity.INVALID:
+            this.entry.add_css_class("error");
+            this.entry.secondary_icon_name = "dialog-error-symbolic";
+            this.entry.secondary_icon_tooltip_text = this.invalid_tooltip_text ?? "";
+            break;
+        }
+    }
+}
+
+private class Components.EntryRowHelper : EditableHelper {
+
+    private unowned Adw.EntryRow row;
+
+    private unowned Adw.Spinner? spinner = null;
+    private unowned Gtk.Image? error_image = null;
+
+    public EntryRowHelper(Adw.EntryRow row) {
+        this.row = row;
+        this.row.entry_activated.connect((e) => this.activated());
+    }
+
+    public override void update_ui(Validator.Validity state) {
+        reset();
+
+        this.row.remove_css_class("error");
+        this.row.remove_css_class("warning");
+
+        switch (state) {
+        case Validator.Validity.INDETERMINATE:
+        case Validator.Validity.VALID:
+            break;
+
+        case Validator.Validity.IN_PROGRESS:
+            var spinner = new Adw.Spinner();
+            spinner.tooltip_text = _("Validating");
+            this.row.add_suffix(spinner);
+            this.spinner = spinner;
+            break;
+
+        case Validator.Validity.EMPTY:
+            this.row.add_css_class("warning");
+            var img = new Gtk.Image.from_icon_name("dialog-warning-symbolic");
+            img.tooltip_text = this.empty_tooltip_text ?? "";
+            this.row.add_suffix(img);
+            this.error_image = img;
+            break;
+
+        case Validator.Validity.INVALID:
+            this.row.add_css_class("error");
+            var img = new Gtk.Image.from_icon_name("dialog-error-symbolic");
+            img.tooltip_text = this.invalid_tooltip_text ?? "";
+            this.row.add_suffix(img);
+            this.error_image = img;
+            break;
+        }
+    }
+
+    private void reset() {
+        if (this.spinner != null) {
+            this.row.remove(this.spinner);
+            this.spinner = null;
+        }
+        if (this.error_image != null) {
+            this.row.remove(this.error_image);
+            this.error_image = null;
+        }
+    }
+}
+
 
 /**
- * A validator for GTK Entry widgets that contain an email address.
+ * A validator for GTK Editable widgets that contain an email address.
  */
 public class Components.EmailValidator : Validator {
 
-    public EmailValidator(Gtk.Entry target) {
-        base(target);
-
-        // Translators: Tooltip used when an entry requires a valid
+    construct {
+        // Translators: Tooltip used when an editable requires a valid
         // email address to be entered, but one is not provided.
-        this.empty_state.icon_tooltip_text = _("An email address is required");
+        this.target_helper.empty_tooltip_text = _("An email address is required");
 
-        // Translators: Tooltip used when an entry requires a valid
+        // Translators: Tooltip used when an editablerequires a valid
         // email address to be entered, but the address is invalid.
-        this.invalid_state.icon_tooltip_text = _("Not a valid email address");
+        this.target_helper.invalid_tooltip_text = _("Not a valid email address");
     }
 
+    public EmailValidator(Gtk.Editable target) {
+        GLib.Object(target: target);
+    }
 
     protected override Validator.Validity do_validate(string value,
                                                       Validator.Trigger reason) {
@@ -409,9 +442,9 @@ public class Components.EmailValidator : Validator {
 
 
 /**
- * A validator for GTK Entry widgets that contain a network address.
+ * A validator for Gtk.Editable widgets that contain a network address.
  *
- * This attempts parse the entry value as a host name or IP address
+ * This attempts parse the editable value as a host name or IP address
  * with an optional port, then resolve the host name if
  * needed. Parsing is performed by {@link GLib.NetworkAddress.parse}
  * to parse the user input, hence it may be specified in any form
@@ -426,27 +459,30 @@ public class Components.NetworkAddressValidator : Validator {
     }
 
     /** The default port used when parsing the address. */
-    public uint16 default_port { get; private set; }
+    public uint16 default_port { get; construct set; }
 
     private GLib.Resolver resolver;
     private GLib.Cancellable? cancellable = null;
 
-
-    public NetworkAddressValidator(Gtk.Entry target, uint16 default_port = 0) {
-        base(target);
-        this.default_port = default_port;
-
+    construct {
         this.resolver = GLib.Resolver.get_default();
 
-        // Translators: Tooltip used when an entry requires a valid,
+        // Translators: Tooltip used when an editable requires a valid,
         // resolvable server name to be entered, but one is not
         // provided.
-        this.empty_state.icon_tooltip_text = _("A server name is required");
+        this.target_helper.empty_tooltip_text = _("A server name is required");
 
-        // Translators: Tooltip used when an entry requires a valid
+        // Translators: Tooltip used when an editable requires a valid
         // server name to be entered, but it was unable to be
         // looked-up in the DNS.
-        this.invalid_state.icon_tooltip_text = _("Could not look up server name");
+        this.target_helper.invalid_tooltip_text = _("Could not look up server name");
+    }
+
+    public NetworkAddressValidator(Gtk.Editable target, uint16 default_port = 0) {
+        GLib.Object(
+            target: target,
+            default_port: default_port
+        );
     }
 
 

@@ -41,7 +41,10 @@ client_vala_sources = files(
   'accounts/accounts-editor-list-pane.vala',
   'accounts/accounts-editor-row.vala',
   'accounts/accounts-editor-servers-pane.vala',
+  'accounts/accounts-mailbox-editor-dialog.vala',
+  'accounts/accounts-service-information-widget.vala',
   'accounts/accounts-signature-web-view.vala',
+  'accounts/accounts-tls-combo-row.vala',
   'accounts/accounts-manager.vala',
 
   'client-action.vala',
@@ -49,31 +52,29 @@ client_vala_sources = files(
   'components/components-attachment-pane.vala',
   'components/components-conversation-actions.vala',
   'components/components-entry-undo.vala',
-  'components/components-headerbar-application.vala',
-  'components/components-headerbar-conversation-list.vala',
   'components/components-headerbar-conversation.vala',
   'components/components-info-bar-stack.vala',
   'components/components-info-bar.vala',
   'components/components-inspector.vala',
-  'components/components-in-app-notification.vala',
   'components/components-inspector-error-view.vala',
   'components/components-inspector-log-view.vala',
   'components/components-inspector-system-view.vala',
   'components/components-placeholder-pane.vala',
-  'components/components-preferences-window.vala',
+  'components/components-preferences-dialog.vala',
   'components/components-problem-report-info-bar.vala',
   'components/components-reflow-box.c',
   'components/components-search-bar.vala',
   'components/components-validator.vala',
+  'components/components-validator-group.vala',
   'components/components-web-view.vala',
   'components/count-badge.vala',
   'components/folder-popover.vala',
   'components/folder-popover-row.vala',
-  'components/icon-factory.vala',
   'components/monitored-progress-bar.vala',
   'components/monitored-spinner.vala',
   'components/stock.vala',
 
+  'composer/composer-addresses-row.vala',
   'composer/composer-application-interface.vala',
   'composer/composer-box.vala',
   'composer/composer-container.vala',
@@ -100,8 +101,6 @@ client_vala_sources = files(
   'conversation-viewer/conversation-viewer.vala',
   'conversation-viewer/conversation-web-view.vala',
 
-  'dialogs/alert-dialog.vala',
-  'dialogs/attachment-dialog.vala',
   'dialogs/certificate-warning-dialog.vala',
   'dialogs/dialogs-problem-details-dialog.vala',
   'dialogs/password-dialog.vala',
@@ -162,18 +161,18 @@ client_dependencies = [
   gio,
   gmime,
   goa,
-  gspell,
   gtk,
   icu_uc,
   javascriptcoregtk,
   json_glib,
-  libhandy,
+  libadwaita,
   libmath,
   libpeas,
   libsecret,
+  libspelling,
   libxml,
   posix,
-  webkit2gtk,
+  webkitgtk,
 ]
 
 client_build_dir = meson.current_build_dir()
@@ -191,7 +190,7 @@ client_vala_args += [
   )
 ]
 
-if webkit2gtk.version().version_compare('<2.31')
+if webkitgtk.version().version_compare('<2.31')
   client_vala_args += [ '--define=WEBKIT_PLUGINS_SUPPORTED' ]
 endif
 

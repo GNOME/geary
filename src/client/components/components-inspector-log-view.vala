@@ -9,12 +9,7 @@
  * A view that displays the contents of the Engine's log.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector-log-view.ui")]
-public class Components.InspectorLogView : Gtk.Grid {
-
-
-    private const int COL_MESSAGE = 0;
-    private const int COL_ACCOUNT = 1;
-    private const int COL_DOMAIN = 2;
+public class Components.InspectorLogView : Gtk.Box {
 
 
     private class SidebarRow : Gtk.ListBoxRow {
@@ -47,15 +42,46 @@ public class Components.InspectorLogView : Gtk.Grid {
                 () => { notify_property("enabled"); }
             );
 
-            var grid = new Gtk.Grid();
-            grid.orientation = HORIZONTAL;
-            grid.add(label_widget);
-            grid.add(this.enabled_toggle);
-            add(grid);
-
-            show_all();
+            var box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            box.append(label_widget);
+            box.append(this.enabled_toggle);
+            this.child = box;
         }
 
+    }
+
+
+    private class RecordRow : Gtk.Box {
+
+        public Geary.Logging.Record? record {
+            get { return this._record; }
+            set {
+                this._record = value;
+                update();
+            }
+        }
+        private Geary.Logging.Record? _record = null;
+
+        private unowned Gtk.Label message_label;
+
+        construct {
+            this.orientation = Gtk.Orientation.HORIZONTAL;
+            this.spacing = 6;
+
+            var label = new Gtk.Label("");
+            label.selectable = true;
+            label.add_css_class("monospace");
+            append(label);
+            this.message_label = label;
+        }
+
+        private void update() {
+            if (this.record == null) {
+                this.message_label.label = "";
+            } else {
+                this.message_label.label = this.record.format();
+            }
+        }
     }
 
 
@@ -65,7 +91,7 @@ public class Components.InspectorLogView : Gtk.Grid {
         set { this.search_bar.search_mode_enabled = value; }
     }
 
-    [GtkChild] private unowned Hdy.SearchBar search_bar;
+    [GtkChild] private unowned Gtk.SearchBar search_bar;
 
     [GtkChild] private unowned Gtk.SearchEntry search_entry;
 
@@ -73,18 +99,13 @@ public class Components.InspectorLogView : Gtk.Grid {
 
     [GtkChild] private unowned Gtk.ScrolledWindow logs_scroller;
 
-    [GtkChild] private unowned Gtk.TreeView logs_view;
+    [GtkChild] private unowned Gtk.ListView logs_view;
 
-    [GtkChild] private unowned Gtk.CellRendererText log_renderer;
+    [GtkChild] private unowned Gtk.MultiSelection selection;
 
-    private Gtk.ListStore logs_store = new Gtk.ListStore.newv({
-            typeof(string),
-            typeof(string),
-            typeof(string)
-    });
+    [GtkChild] private unowned GLib.ListStore logs_store;
 
-    private Gtk.TreeModelFilter logs_filter;
-
+    [GtkChild] private unowned Gtk.CustomFilter logs_filter;
     private string[] logs_filter_terms = new string[0];
 
     private bool update_logs = true;
@@ -106,15 +127,7 @@ public class Components.InspectorLogView : Gtk.Grid {
     public signal void record_selection_changed();
 
 
-    public InspectorLogView(Application.Configuration config,
-                            Geary.AccountInformation? filter_by = null) {
-        GLib.Settings system = config.gnome_interface;
-        system.bind(
-            "monospace-font-name",
-            this.log_renderer, "font",
-            SettingsBindFlags.DEFAULT
-        );
-
+    public InspectorLogView(Geary.AccountInformation? filter_by = null) {
         // Prefill well-known engine logging domains
         add_domain(Geary.App.ConversationMonitor.LOGGING_DOMAIN);
         add_domain(Geary.Imap.ClientService.LOGGING_DOMAIN);
@@ -127,6 +140,8 @@ public class Components.InspectorLogView : Gtk.Grid {
         this.search_bar.connect_entry(this.search_entry);
         this.sidebar.set_header_func(this.sidebar_header_update);
         this.account_filter = filter_by;
+
+        this.logs_filter.set_filter_func(log_filter_func);
     }
 
     /** Loads log records from the logging system into the view. */
@@ -138,42 +153,29 @@ public class Components.InspectorLogView : Gtk.Grid {
             this.listener_installed = true;
         }
 
-        Gtk.ListStore logs_store = this.logs_store;
         Geary.Logging.Record? logs = first;
         int index = 0;
         while (logs != last) {
-            update_record(logs, logs_store, index++);
+            update_record(logs, this.logs_store, index++);
             logs = logs.next;
         }
-
-        this.logs_filter = new Gtk.TreeModelFilter(this.logs_store, null);
-        this.logs_filter.set_visible_func(log_filter_func);
-
-        this.logs_view.set_model(this.logs_filter);
     }
 
     /** Clears all log records from the view. */
     public void clear() {
-        this.logs_store.clear();
+        this.logs_store.remove_all();
         this.first_pending = null;
     }
 
-    /** {@inheritDoc} */
-    public override void destroy() {
+    ~InspectorLogView() {
         if (this.listener_installed) {
             Geary.Logging.set_log_listener(null);
         }
-        base.destroy();
-    }
-
-    /** Forwards a key press event to the search entry. */
-    public bool handle_key_press(Gdk.EventKey event) {
-        return this.search_entry.key_press_event(event);
     }
 
     /** Returns the number of currently selected log records. */
-    public int count_selected_records() {
-        return this.logs_view.get_selection().count_selected_rows();
+    public uint count_selected_records() {
+        return (uint) this.selection.get_selection().get_size();
     }
 
     /** Enables and disables updating log records as new ones arrive. */
@@ -204,50 +206,34 @@ public class Components.InspectorLogView : Gtk.Grid {
             out.put_string("```\n");
         }
         string line_sep = format.get_line_separator();
-        Gtk.TreeModel model = this.logs_view.model;
+
         if (save_all) {
             // Save all rows selected
-            Gtk.TreeIter? iter;
-            bool valid = model.get_iter_first(out iter);
-            while (valid && !cancellable.is_cancelled()) {
-                save_record(model, iter, @out, cancellable);
+            for (uint i = 0; i < this.logs_store.get_n_items(); i++) {
+                if (cancellable.is_cancelled())
+                    break;
+
+                var record = (Geary.Logging.Record) this.logs_store.get_item(i);
+                out.put_string(record.format());
                 out.put_string(line_sep);
-                valid = model.iter_next(ref iter);
             }
         } else {
             // Save only selected
-            GLib.Error? inner_err = null;
-            this.logs_view.get_selection().selected_foreach(
-                (model, path, iter) => {
-                    if (inner_err == null) {
-                        try {
-                            save_record(model, iter, @out, cancellable);
-                            out.put_string(line_sep);
-                        } catch (GLib.Error err) {
-                            inner_err = err;
-                        }
-                    }
-                }
-            );
-            if (inner_err != null) {
-                throw inner_err;
+            Gtk.Bitset selected = this.selection.get_selection();
+            for (uint i = 0; i < selected.get_size(); i++) {
+                if (cancellable.is_cancelled())
+                    break;
+
+                uint position = selected.get_nth(i);
+                var record = (Geary.Logging.Record) this.logs_store.get_item(position);
+                assert(record != null);
+
+                out.put_string(record.format());
+                out.put_string(line_sep);
             }
         }
         if (format == MARKDOWN) {
             out.put_string("```\n");
-        }
-    }
-
-    private inline void save_record(Gtk.TreeModel model,
-                                    Gtk.TreeIter iter,
-                                    GLib.DataOutputStream @out,
-                                    GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        GLib.Value value;
-        model.get_value(iter, COL_MESSAGE, out value);
-        string? message = (string) value;
-        if (message != null) {
-            out.put_string(message);
         }
     }
 
@@ -311,11 +297,11 @@ public class Components.InspectorLogView : Gtk.Grid {
         string cleaned =
             Geary.String.reduce_whitespace(this.search_entry.text).casefold();
         this.logs_filter_terms = cleaned.split(" ");
-        this.logs_filter.refilter();
+        this.logs_filter.changed(Gtk.FilterChange.DIFFERENT);
     }
 
     private inline void update_record(Geary.Logging.Record record,
-                                      Gtk.ListStore store,
+                                      GLib.ListStore store,
                                       int position) {
         record.fill_well_known_sources();
         if (record.account != null) {
@@ -325,14 +311,7 @@ public class Components.InspectorLogView : Gtk.Grid {
 
         assert(record.format() != null);
 
-        var account = record.account;
-        store.insert_with_values(
-            null,
-            position,
-            COL_MESSAGE, record.format(),
-            COL_ACCOUNT, account != null ? account.information.id : "",
-            COL_DOMAIN, record.domain ?? ""
-        );
+        store.insert(position, record);
     }
 
     private void sidebar_header_update(Gtk.ListBoxRow current_row,
@@ -347,22 +326,19 @@ public class Components.InspectorLogView : Gtk.Grid {
         current_row.set_header(header);
     }
 
-    private bool log_filter_func(Gtk.TreeModel model, Gtk.TreeIter iter) {
-        GLib.Value value;
-        model.get_value(iter, COL_ACCOUNT, out value);
-        var account = (string) value;
-        var show_row = (
-            account == "" || !(account in this.suppressed_accounts)
+    private bool log_filter_func(GLib.Object object) {
+        unowned var record = (Geary.Logging.Record) object;
+
+        var account = record.account;
+        bool show_row = (
+            account == null || !(account.information.id in this.suppressed_accounts)
         );
 
         if (show_row) {
-            model.get_value(iter, COL_DOMAIN, out value);
-            var domain = (string) value;
-            show_row = !Geary.Logging.is_suppressed_domain(domain);
+            show_row = !Geary.Logging.is_suppressed_domain(record.domain ?? "");
         }
 
-        model.get_value(iter, COL_MESSAGE, out value);
-        string message = (string) value;
+        string message = record.format();
         if (show_row && this.logs_filter_terms.length > 0) {
             var folded_message = message.casefold();
             foreach (string term in this.logs_filter_terms) {
@@ -385,20 +361,31 @@ public class Components.InspectorLogView : Gtk.Grid {
     }
 
     [GtkCallback]
-    private void on_logs_size_allocate() {
-        if (this.autoscroll) {
-            update_scrollbar();
-        }
-    }
-
-    [GtkCallback]
     private void on_logs_search_changed() {
         update_logs_filter();
     }
 
     [GtkCallback]
-    private void on_logs_selection_changed() {
+    private void on_logs_selection_changed(Gtk.SelectionModel selection,
+                                           uint position,
+                                           uint changed) {
         record_selection_changed();
+    }
+
+    [GtkCallback]
+    private void on_item_factory_setup(Object object) {
+        unowned var item = (Gtk.ListItem) object;
+
+        item.child = new RecordRow();
+    }
+
+    [GtkCallback]
+    private void on_item_factory_bind(Object object) {
+        unowned var item = (Gtk.ListItem) object;
+        unowned var record = (Geary.Logging.Record) item.item;
+        unowned var row = (RecordRow) item.child;
+
+        row.record = record;
     }
 
     [GtkCallback]

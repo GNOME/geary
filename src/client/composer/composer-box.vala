@@ -12,7 +12,7 @@
  * Adding a composer to this container places it in {@link
  * Widget.PresentationMode.PANED} mode.
  */
-public class Composer.Box : Gtk.Frame, Container {
+public class Composer.Box : Gtk.Frame, Composer.Container {
 
     static construct {
         set_css_name("geary-composer-box");
@@ -21,7 +21,7 @@ public class Composer.Box : Gtk.Frame, Container {
 
     /** {@inheritDoc} */
     public Gtk.ApplicationWindow? top_window {
-        get { return get_toplevel() as Gtk.ApplicationWindow; }
+        get { return get_root() as Gtk.ApplicationWindow; }
     }
 
     /** {@inheritDoc} */
@@ -39,14 +39,14 @@ public class Composer.Box : Gtk.Frame, Container {
         this.composer.set_mode(PANED);
 
         this.headerbar = headerbar;
-        this.headerbar.set_conversation_header(composer.header);
+        this.headerbar.set_conversation_header(composer.header.headerbar);
 
-        get_style_context().add_class("geary-composer-box");
+        add_css_class("geary-composer-box");
         this.halign = Gtk.Align.FILL;
         this.vexpand = true;
         this.vexpand_set = true;
 
-        add(this.composer);
+        this.child = this.composer;
         show();
     }
 
@@ -54,8 +54,8 @@ public class Composer.Box : Gtk.Frame, Container {
     public void close() {
         vanished();
 
-        this.headerbar.remove_conversation_header(composer.header);
-        remove(this.composer);
+        this.headerbar.remove_conversation_header(composer.header.headerbar);
+        this.child = null;
         destroy();
     }
 

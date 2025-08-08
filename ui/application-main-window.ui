@@ -1,197 +1,389 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ApplicationMainWindow" parent="HdyApplicationWindow">
-    <property name="events">GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK</property>
+  <template class="ApplicationMainWindow" parent="AdwApplicationWindow">
     <property name="show_menubar">False</property>
-    <signal name="delete-event" handler="on_delete_event" swapped="no"/>
-    <signal name="focus-in-event" handler="on_focus_event" swapped="no"/>
-    <signal name="focus-out-event" handler="on_focus_event" swapped="no"/>
-    <signal name="map" handler="on_map" swapped="no"/>
-    <signal name="unmap" handler="on_unmap" swapped="no"/>
+    <signal name="map" handler="on_map"/>
+    <signal name="unmap" handler="on_unmap"/>
+
+    <style>
+      <class name="geary-main-window"/>
+    </style>
+
+
+    <!-- Event controllers -->
     <child>
-      <object class="GtkOverlay" id="overlay">
-        <property name="visible">True</property>
+      <object class="GtkEventControllerKey">
+        <signal name="key-pressed" handler="on_key_pressed"/>
+        <signal name="key-released" handler="on_key_released"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkEventControllerFocus">
+        <signal name="enter" handler="on_focus_enter"/>
+        <signal name="leave" handler="on_focus_leave"/>
+      </object>
+    </child>
+
+    <!-- Shortcuts -->
+    <child>
+      <object class="GtkShortcutController">
+        <property name="scope">global</property>
+        <!--  Replying & forwarding-->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;r</property>
+            <property name="action">action(reply-conversation-sender)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;&lt;Shift&gt;r</property>
+            <property name="action">action(reply-conversation-all)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;l</property>
+            <property name="action">action(forward-conversation)</property>
+          </object>
+        </child>
+        <!--  Marking actions-->
+        <!--  Unread is the primary action, so it doesn't get the <Shift> modifier -->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;d</property>
+            <!-- XXX GTK4 this used to be an action with boolean parameter, need to decouple with unstarred -->
+            <property name="action">action(mark-conversations-starred)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;&lt;Shift&gt;d</property>
+            <property name="action">action(mark-conversations-unstarred)</property>
+          </object>
+        </child>
+        <!--  Moving & labelling-->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;b</property>
+            <property name="action">action(show-copy-menu)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;m</property>
+            <property name="action">action(show-move-menu)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;k</property>
+            <property name="action">action(archive-conversations)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;j</property>
+            <property name="action">action(junk-conversations)</property>
+          </object>
+        </child>
+        <!--  Trash / delete -->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">BackSpace</property>
+            <property name="action">action(trash-conversations)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">Delete</property>
+            <property name="action">action(trash-conversations)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Shift&gt;BackSpace</property>
+            <property name="action">action(delete-conversations)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Shift&gt;Delete</property>
+            <property name="action">action(delete-conversations)</property>
+          </object>
+        </child>
+        <!-- Find & Search -->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;f</property>
+            <property name="action">action(find)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;s</property>
+            <property name="action">action(search)</property>
+          </object>
+        </child>
+        <!-- Navigation -->
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;comma</property>
+            <property name="action">action(up-conversation)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;period</property>
+            <property name="action">action(down-conversation)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">Escape</property>
+            <property name="action">action(escape)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Control&gt;a</property>
+            <property name="action">action(select_all)</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <!-- Widget tree -->
+    <child>
+      <object class="AdwToastOverlay" id="overlay">
         <child>
           <object class="GtkBox" id="main_layout">
-            <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="HdyLeaflet" id="outer_leaflet">
-                <property name="visible">True</property>
-                <property name="can_swipe_back">True</property>
-                <property name="transition_type">over</property>
-                <signal name="notify::folded" handler="on_outer_leaflet_changed" swapped="no"/>
-                <signal name="notify::visible-child" handler="on_outer_leaflet_changed" swapped="no"/>
-                <child>
-                  <object class="HdyLeaflet" id="inner_leaflet">
-                    <property name="visible">True</property>
-                    <property name="hexpand-set">True</property>
-                    <property name="can_swipe_back">True</property>
-                    <property name="transition_type">over</property>
-                    <signal name="notify::folded" handler="on_inner_leaflet_changed" swapped="no"/>
-                    <signal name="notify::visible-child" handler="on_inner_leaflet_changed" swapped="no"/>
-                    <child>
-                      <object class="GtkBox" id="folder_box">
-                        <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="ComponentsApplicationHeaderBar" id="application_headerbar">
-                            <property name="visible">True</property>
+              <object class="AdwNavigationSplitView" id="outer_view">
+                <property name="vexpand">True</property>
+                <property name="sidebar-width-fraction">0.4</property>
+                <property name="max-sidebar-width">700</property>
+
+                <property name="sidebar">
+                  <object class="AdwNavigationPage">
+                    <property name="child">
+                      <object class="AdwNavigationSplitView" id="inner_view">
+                        <property name="sidebar-width-fraction">0.5</property>
+                        <signal name="notify::collapsed" handler="on_inner_view_changed"/>
+                        <signal name="notify::show-content" handler="on_inner_view_changed"/>
+
+                        <property name="sidebar">
+                          <object class="AdwNavigationPage" id="folder_list_page">
+                            <property name="tag">folder_list</property>
+                            <property name="title" translatable="yes">Mail</property>
+                            <property name="child">
+                              <object class="AdwToolbarView" id="folder_box">
+                                <child type="top">
+                                  <object class="AdwHeaderBar">
+                                    <child>
+                                      <object class="MonitoredSpinner" id="headerbar_spinner">
+                                        <property name="margin-start">5</property>
+                                      </object>
+                                    </child>
+                                    <child type="end">
+                                      <object class="GtkMenuButton" id="app_menu_button">
+                                        <property name="focus_on_click">False</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="icon_name">open-menu-symbolic</property>
+                                        <property name="menu-model">app_menu</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <property name="content">
+                                   <object class="GtkScrolledWindow" id="folder_list_scrolled">
+                                      <property name="vexpand">True</property>
+                                      <property name="hscrollbar_policy">never</property>
+                                      <style>
+                                        <class name="geary-folder"/>
+                                      </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
                           </object>
-                          <packing>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                           <object class="GtkScrolledWindow" id="folder_list_scrolled">
-                              <property name="visible">True</property>
-                              <property name="vexpand">True</property>
-                              <property name="hscrollbar_policy">never</property>
-                              <style>
-                                <class name="geary-folder"/>
-                              </style>
+                        </property>
+
+                        <property name="content">
+                          <object class="AdwNavigationPage" id="conversation_list_page">
+                            <property name="tag">conversation_list</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar" id="conversation_list_headerbar">
+                                    <child>
+                                      <object class="GtkButton" id="compose_new_message_button">
+                                        <property name="focus_on_click">False</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="tooltip_text" translatable="yes" context="tooltip">Compose Message</property>
+                                        <property name="icon-name">mail-message-new-symbolic</property>
+                                        <property name="action-name">app.compose</property>
+                                      </object>
+                                    </child>
+                                    <child type="end">
+                                      <object class="GtkToggleButton" id="search_button">
+                                        <property name="focus_on_click">False</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="tooltip_text" translatable="yes">Toggle search bar</property>
+                                        <property name="icon-name">preferences-system-search-symbolic</property>
+                                      </object>
+                                    </child>
+                                    <child type="end">
+                                      <object class="GtkToggleButton" id="conversation_list_selection_button">
+                                        <property name="focus_on_click">False</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="tooltip_text" translatable="yes">Select conversations</property>
+                                        <property name="icon-name">selection-mode-symbolic</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <property name="content">
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkBox" id="conversation_list_box">
+                                        <property name="orientation">vertical</property>
+                                        <property name="vexpand">True</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkRevealer" id="conversation_list_actions_revealer">
+                                        <property name="reveal-child">False</property>
+                                        <property name="transition_type">slide-up</property>
+                                        <child>
+                                          <object class="ComponentsConversationActions" id="conversation_list_actions">
+                                            <property name="show_conversation_actions">True</property>
+                                            <property name="show_response_actions">False</property>
+                                            <property name="pack_justified">True</property>
+                                            <property name="hexpand">True</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
                           </object>
-                          <packing>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
+                        </property>
                       </object>
-                      <packing>
-                        <property name="name">folder_list</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSeparator" id="folder_separator">
-                        <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
-                        <style>
-                          <class name="sidebar"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="navigatable">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="conversation_list_box">
-                        <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="ComponentsConversationListHeaderBar" id="conversation_list_headerbar">
-                            <property name="visible">True</property>
+                    </property>
+                  </object>
+                </property>
+
+                <property name="content">
+                  <object class="AdwNavigationPage" id="conversation_viewer_page">
+                    <property name="tag">conversation_viewer</property>
+                    <property name="title">Conversation</property>
+                    <property name="child">
+                      <object class="AdwToolbarView">
+                        <property name="hexpand">True</property>
+                        <child type="top">
+                          <object class="ComponentsConversationHeaderBar" id="conversation_headerbar">
                           </object>
-                          <packing>
-                            <property name="position">0</property>
-                          </packing>
                         </child>
-                        <child>
-                          <object class="GtkRevealer" id="conversation_list_actions_revealer">
-                            <property name="visible">True</property>
-                            <property name="reveal-child">False</property>
-                            <property name="transition_type">slide-up</property>
+                        <property name="content">
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
                             <child>
-                              <object class="ComponentsConversationActions" id="conversation_list_actions">
-                                <property name="visible">True</property>
-                                <property name="show_conversation_actions">True</property>
-                                <property name="show_response_actions">False</property>
-                                <property name="pack_justified">True</property>
-                                <property name="hexpand">True</property>
+                              <object class="GtkBox" id="conversation_viewer_box">
+                                <property name="orientation">vertical</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
+                                <property name="reveal-child">False</property>
+                                <property name="transition_type">slide-up</property>
+                                <child>
+                                  <object class="ComponentsConversationActions" id="conversation_viewer_actions">
+                                    <property name="show_conversation_actions">True</property>
+                                    <property name="show_response_actions">False</property>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="pack_type">end</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
+                        </property>
                       </object>
-                      <packing>
-                        <property name="name">conversation_list</property>
-                      </packing>
-                    </child>
+                    </property>
                   </object>
-                  <packing>
-                    <property name="name">inner_leaflet</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSeparator" id="conversations_separator">
-                    <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
-                    <style>
-                      <class name="geary-sidebar-pane-separator"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="navigatable">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="conversation_viewer_box">
-                    <property name="visible">True</property>
-                    <property name="hexpand">True</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="ComponentsConversationHeaderBar" id="conversation_headerbar">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRevealer" id="conversation_viewer_actions_revealer">
-                        <property name="visible">True</property>
-                        <property name="reveal-child">False</property>
-                        <property name="transition_type">slide-up</property>
-                        <child>
-                          <object class="ComponentsConversationActions" id="conversation_viewer_actions">
-                            <property name="visible">True</property>
-                            <property name="show_conversation_actions">True</property>
-                            <property name="show_response_actions">False</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="pack_type">end</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="name">conversation_viewer</property>
-                  </packing>
-                </child>
+                </property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="pack_type">start</property>
-              </packing>
             </child>
+
             <child>
               <object class="ComponentsInfoBarStack" id="info_bars">
               </object>
-              <packing>
-                <property name="pack_type">end</property>
-              </packing>
             </child>
             <style>
               <class name="geary-main-layout"/>
             </style>
           </object>
-          <packing>
-            <property name="index">-1</property>
-          </packing>
         </child>
       </object>
     </child>
-    <style>
-      <class name="geary-main-window"/>
-    </style>
+
+    <!-- 1st breakpoint: split folder/conversation list from conversation viewer -->
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 860sp</condition>
+        <setter object="outer_view" property="collapsed">True</setter>
+        <setter object="inner_view" property="sidebar-width-fraction">0.33</setter>
+      </object>
+    </child>
+    <!-- 2nd breakpoint: also split folder list from conversation list -->
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 500sp</condition>
+        <setter object="outer_view" property="collapsed">True</setter>
+        <setter object="inner_view" property="sidebar-width-fraction">0.45</setter>
+        <setter object="inner_view" property="collapsed">True</setter>
+      </object>
+    </child>
+    <!-- When things get really tight, split up the actions in the conversation viewer -->
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 400sp</condition>
+        <setter object="outer_view" property="collapsed">True</setter>
+        <setter object="inner_view" property="collapsed">True</setter>
+        <setter object="conversation_headerbar" property="compact">True</setter>
+        <setter object="conversation_viewer_actions_revealer" property="reveal-child">True</setter>
+      </object>
+    </child>
   </template>
+
+  <menu id="app_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Accounts</attribute>
+        <attribute name="action">app.accounts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="action">app.preferences</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-help-overlay</attribute>
+        <attribute name="accel">&lt;Primary&gt;question</attribute>
+        <attribute name="hidden-when">action-missing</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Help</attribute>
+        <attribute name="action">app.help</attribute>
+        <attribute name="accel">F1</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About Geary</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>

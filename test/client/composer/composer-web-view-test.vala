@@ -51,10 +51,14 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
 
         assert(new WebView.EditContext("0;;;12;").font_size == 12);
 
-        assert(new WebView.EditContext("0;;;;rgb(0, 0, 0)").font_color == Util.Gtk.rgba(0, 0, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(255, 0, 0)").font_color == Util.Gtk.rgba(1, 0, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(0, 255, 0)").font_color == Util.Gtk.rgba(0, 1, 0, 1));
-        assert(new WebView.EditContext("0;;;;rgb(0, 0, 255)").font_color == Util.Gtk.rgba(0, 0, 1, 1));
+        Gdk.RGBA black = { 0, 0, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 0)").font_color == black);
+        Gdk.RGBA red = { 1, 0, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(255, 0, 0)").font_color == red);
+        Gdk.RGBA green = { 0, 1, 0, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 255, 0)").font_color == green);
+        Gdk.RGBA blue = { 0, 0, 1, 1 };
+        assert(new WebView.EditContext("0;;;;rgb(0, 0, 255)").font_color == blue);
     }
 
     public void get_html() throws GLib.Error {
@@ -116,8 +120,8 @@ at least. Really long, long, long, long, long long, long long, long long, long.<
         this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
-"""A long, long, long, long, long, long para. Well, longer than 
-MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long, 
+"""A long, long, long, long, long, long para. Well, longer than
+MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long,
 long long, long long, long.
 
 
@@ -139,11 +143,11 @@ at least. Really long, long, long, long, long long, long long, long long, long.<
         this.test_view.get_text.begin(this.async_completion);
         try {
             assert(this.test_view.get_text.end(async_result()) ==
-"""> A long, long, long, long, long, long line. Well, longer than 
+"""> A long, long, long, long, long, long line. Well, longer than
 > MAX_BREAKABLE_LEN at least.
-> 
-A long, long, long, long, long, long para. Well, longer than 
-MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long, 
+>
+A long, long, long, long, long, long para. Well, longer than
+MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long,
 long long, long long, long.
 
 
@@ -167,16 +171,16 @@ long long, long long, long.
         try {
             assert(this.test_view.get_text.end(async_result()) ==
 """On Sun, Jan 1, 2017 at 9:55 PM, Michael Gratton <mike@vee.net> wrote:
-> long, long, long, long, long, long, long, long, long, long, long, 
-> long, long, long, long, long, long, long, long, long, long, long, 
-> long, long, long, long, long, long, long, long, long, long, long, 
-> long, long, long, long, long, long, long, long, long, long, long, 
+> long, long, long, long, long, long, long, long, long, long, long,
+> long, long, long, long, long, long, long, long, long, long, long,
+> long, long, long, long, long, long, long, long, long, long, long,
+> long, long, long, long, long, long, long, long, long, long, long,
 > long, long, long, long, long,
 
-long, long, long, long, long, long, long, long, long, long, long, long, 
-long, long, long, long, long, long, long, long, long, long, long, long, 
-long, long, long, long, long, long, long, long, long, long, long, long, 
-long, long, long, long, long, long, long, long, long, long, long, long, 
+long, long, long, long, long, long, long, long, long, long, long, long,
+long, long, long, long, long, long, long, long, long, long, long, long,
+long, long, long, long, long, long, long, long, long, long, long, long,
+long, long, long, long, long, long, long, long, long, long, long, long,
 long, long, long, long, long, long, long, long, long, long,
 
 
@@ -253,14 +257,16 @@ long, long, long, long, long, long, long, long, long, long,
         assert_false(SIG2 in html, "Signature 2 still present");
     }
 
-    protected override Composer.WebView set_up_test_view() {
-        return new Composer.WebView(this.config);
+    protected override Composer.WebView set_up_test_view(GLib.File cache_dir) {
+        return new Composer.WebView(this.config, cache_dir);
     }
 
     protected override void load_body_fixture(string html = "") {
         this.test_view.load_html_headless(html, "", false, false);
+
+        unowned GLib.MainContext? main_context = GLib.MainContext.get_thread_default();
         while (this.test_view.is_loading) {
-            Gtk.main_iteration();
+            main_context.iteration(true);
         }
     }
 

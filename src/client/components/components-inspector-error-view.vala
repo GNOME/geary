@@ -9,7 +9,7 @@
  * A view that displays information about an application error.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/components-inspector-error-view.ui")]
-public class Components.InspectorErrorView : Gtk.Grid {
+public class Components.InspectorErrorView : Adw.Bin {
 
 
     [GtkChild] private unowned Gtk.TextView problem_text;
