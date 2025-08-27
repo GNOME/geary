@@ -8,6 +8,10 @@ include:
    ref: aec7a6ce7bb38902c70641526f6611e27141784a
  - project: 'GNOME/citemplates'
    file: 'flatpak/flatpak_ci_initiative.yml'
+ - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
+   inputs:
+     dist-job-name: "flatpak"
+
 
 variables:
   FDO_UPSTREAM_REPO: gnome/geary
@@ -20,10 +24,12 @@ variables:
   # Locale used for unit tests
   TEST_LOCALE: C.UTF-8
 
+
 stages:
   - prepare
   - build
   - deploy
+
 
 ##
 # Stage: Prepare
