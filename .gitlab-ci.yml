@@ -2,7 +2,13 @@
 # Geary CI config.
 #
 
-include: 'https://gitlab.gnome.org/GNOME/citemplates/-/raw/8430bccd6150b0a2aa97d1d7028c28b6b7e5d4d0/flatpak/flatpak_ci_initiative.yml'
+include:
+  - 'https://gitlab.gnome.org/GNOME/citemplates/-/raw/8430bccd6150b0a2aa97d1d7028c28b6b7e5d4d0/flatpak/flatpak_ci_initiative.yml'
+  - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
+    inputs:
+      dist-job-name: "build-release-tarball"
+      tarball-artifact-path: "${TARBALL_ARTIFACT_PATH}"
+
 
 variables:
   # ImapDB and other tests that touch the disk are super slow on CI
@@ -15,10 +21,13 @@ variables:
 
   # Build
   BUILD_DIR: build
-  CONFIG_CMD: meson --buildtype=debug $BUILD_DIR
-  BUILD_CMD: ninja -v -C $BUILD_DIR
+  CONFIG_CMD: meson setup --buildtype=debug $BUILD_DIR
+  BUILD_CMD: meson compile -C $BUILD_DIR
   TEST_CMD: xvfb-run -a dbus-run-session -- meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
-  INSTALL_CMD: ninja -v -C $BUILD_DIR install
+  INSTALL_CMD: meson install -C $BUILD_DIR
+
+  # Release
+  TARBALL_ARTIFACT_PATH: "${BUILD_DIR}/meson-dist/${CI_PROJECT_NAME}-${CI_COMMIT_TAG}.tar.xz"
 
   # Fedora packages
   FEDORA_DEPS:
@@ -95,3 +104,18 @@ nightly:
   extends: '.publish_nightly'
   dependencies: ['flatpak']
   needs: ['flatpak']
+
+build-release-tarball:
+  image: fedora:latest
+  stage: deploy
+  before_script:
+    - dnf update -y --nogpgcheck
+    - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
+  script:
+    - meson setup --buildtype=release "${BUILD_DIR}"
+    - meson dist -C "${BUILD_DIR}"
+  artifacts:
+    paths:
+      - "$TARBALL_ARTIFACT_PATH"
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED
