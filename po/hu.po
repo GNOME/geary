@@ -1,18 +1,18 @@
 # Hungarian translation for geary.
-# Copyright (C) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024 Free Software Foundation, Inc.
+# Copyright (C) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025 Free Software Foundation, Inc.
 # This file is distributed under the same license as the geary package.
 #
 # lukibeni <lukacs.bence1 at gmail dot com>, 2012, 2013.
 # metalsasi <metalsasi at gmail dot com>, 2012.
-# Balázs Úr <ur.balazs at fsf dot hu>, 2014, 2015, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
+# Balázs Úr <ur.balazs at fsf dot hu>, 2014, 2015, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2014.
 # Balázs Meskó <mesko.balazs at fsf dot hu>, 2018, 2020, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-03-04 20:55+0100\n"
+"POT-Creation-Date: 2025-08-27 08:07+0000\n"
+"PO-Revision-Date: 2025-09-09 21:30+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <openscope at fsf dot hu>\n"
 "Language: hu\n"
@@ -20,116 +20,53 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 23.08.4\n"
+"X-Generator: Lokalize 24.12.3\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Elküldés levélben"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "Fájlok küldése a Geary használatával"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "E-mail"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
 #: src/client/application/application-client.vala:33
 msgid "Send and receive email"
 msgstr "E-mailek küldése és fogadása"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Levél;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Geary fejlesztőcsapat"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"A Geary egy e-mail alkalmazás, amely a társalgások köré szerveződik, és a "
-"GNOME asztalhoz készült. Segítségével e-maileket olvashat, kereshet és "
-"küldhet egy lényegre törő és modern felületen."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"A társalgások segítségével teljes beszélgetéseket olvashat el anélkül, hogy "
-"egyesével végig kellene kattintania a leveleken."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "A Geary néhány funkciója:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Gyors e-mailfiók beállítás"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "A kapcsolódó leveleket együtt jeleníti meg a beszélgetésekben"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Gyors, teljes szöveges és kulcsszavas keresés"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "Teljes funkcionalitású HTML és egyszerű szöveges levélszerkesztő"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Asztali értesítések új levél érkezésekor"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
-"Kompatibilis a GMaillel, a Yahoo! Maillel, az Outlook.commal és más IMAP "
-"kiszolgálókkal"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "A Geary egy beszélgetést jelenít meg"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "A Geary gazdag szövegszerkesztője"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Levél;Levelezés;E-mail;Email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Levél írása"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Új ablak"
 
@@ -183,18 +120,30 @@ msgid "True if we should display a short preview of each message."
 msgstr "Igaz, ha minden levélről jelenjen meg egy rövid előnézet."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Override colors in HTML emails"
+msgstr "HTML e-mailekben lévő színek felülbírálása"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme."
+msgstr ""
+"Felülbírálja a HTML-üzenetekben lévő eredeti színeket, hogy jobban illeszkedje"
+"nek az alkalmazás témájához."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Üzenetek áthelyezése alapértelmezetten"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "Egy üzenet címkézésekor az üzenet áthelyezése a célmappába."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Egybillentyűs gyorsbillentyűk használata"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -202,11 +151,11 @@ msgstr ""
 "Engedélyezi a gyorsbillentyűket az olyan e-mail-műveleteknél, amelyek nem "
 "igénylik a <Ctrl> lenyomását, a Gmail által használtak utánzása érdekében."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "A nyelvek, amelyek használva lesznek a helyesírás-ellenőrzőben"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -214,11 +163,11 @@ msgstr ""
 "POSIX területi beállítások listája, az üres listával letiltja a helyesírás-"
 "ellenőrzést, és a null lista az asztal nyelveit használja alapértelmezetten."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "A nyelvek, melyek megjelennek a helyesírás-ellenőrző felugróban"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -226,72 +175,72 @@ msgstr ""
 "A nyelvek listája, amely mindig megjelenik a helyesírás-ellenőrző "
 "felugrójában."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr ""
 "Az alkalmazás futtatása a háttérben a bejelentkezéskor és ha be van zárva"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "Igaz az alkalmazás háttérben való futtatásához."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Kérdezzen egy melléklet megnyitásakor"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "Igaz, ha kérdezzen egy melléklet megnyitásakor."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Az e-mailek írása HTML-ben történjen-e"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Igaz, ha a levelek HTML-ben legyenek megírva; hamis esetén egyszerű szöveg."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Tanácsadó stratégia a teljes szöveges keresésnél"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Az elfogadható értékek: „exact” (pontos), „conservative” (konzervatív), "
 "„aggressive” (agresszív) és „horizon” (horizont)."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "A beszélgetésmegjelenítő nagyítása"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "A beszélgetés nézeten alkalmazandó nagyítás."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "A leválasztott levélíró ablak mérete"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "A leválasztott levélíró ablak legutóbb elmentett mérete."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Képek engedélyezése ezeknél a tartományoknál"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Az ezekből a tartományokból származó képek megbízhatóak lesznek"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Levélküldési késleltetés visszavonása"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -299,34 +248,97 @@ msgstr ""
 "A levelek kiküldése előtti várakozás másodpercben. A letiltáshoz állítsa "
 "nullára vagy kevesebbre."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Rövid értesítések megjelenítési ideje"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "A rövid értesítések megjelenítési ideje másodpercben."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Válaszható bővítmények listája"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Az itt felsorolt bővítmények betöltésre kerülnek indításkor."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "A régi beállítások migrálva lettek-e"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Hamis a régi „org.yorba.geary” séma ellenőrzéséhez, és az értékeinek "
 "másolásához."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Geary fejlesztőcsapat"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"A Geary egy e-mail alkalmazás, amely a társalgások köré szerveződik, és a "
+"GNOME asztalhoz készült. Segítségével e-maileket olvashat, kereshet és "
+"küldhet egy lényegre törő és modern felületen."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"A társalgások segítségével teljes beszélgetéseket olvashat el anélkül, hogy "
+"egyesével végig kellene kattintania a leveleken."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "A Geary néhány funkciója:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Gyors e-mailfiók beállítás"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "A kapcsolódó leveleket együtt jeleníti meg a beszélgetésekben"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Gyors, teljes szöveges és kulcsszavas keresés"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Teljes funkcionalitású HTML és egyszerű szöveges levélszerkesztő"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Asztali értesítések új levél érkezésekor"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Kompatibilis a GMaillel, a Yahoo! Maillel, az Outlook.commal és más IMAP "
+"kiszolgálókkal"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:51
+msgid "Geary displaying a conversation"
+msgstr "A Geary egy beszélgetést jelenít meg"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:56
+msgid "Geary showing the rich text composer"
+msgstr "A Geary gazdag szövegszerkesztője"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -945,7 +957,7 @@ msgstr "Disztribúció kiadása"
 msgid "Installation prefix"
 msgstr "Telepítési előtag"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:569
 #, c-format
 msgid "About %s"
 msgstr "%s névjegye"
@@ -953,7 +965,7 @@ msgstr "%s névjegye"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:573
 msgid "translator-credits"
 msgstr ""
 "Kelemen Gábor <kelemeng at gnome dot hu>\n"
@@ -963,7 +975,7 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1102
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Felismerhetetlen programargumentum: „%s”"
@@ -1125,7 +1137,6 @@ msgstr ""
 
 #. / Translators: The label for an in-app notification.
 #: src/client/application/application-controller.vala:1490
-#| msgid "Email sent to %s"
 msgid "Email sent"
 msgstr "E-mail elküldve"
 
@@ -1138,7 +1149,6 @@ msgstr "A(z) „%s” címre küldendő e-mail sorba állítva kiküldéshez"
 
 #. / Translators: The label for an in-app notification.
 #: src/client/application/application-controller.vala:2556
-#| msgid "Email address"
 msgid "Email saved as draft"
 msgstr "E-mail elmentve piszkozatként"
 
@@ -1151,7 +1161,6 @@ msgstr "A levélíró nem állítható vissza"
 #. / Translators: The label for an in-app notification. The
 #. / string substitution is a list of recipients of the email.
 #: src/client/application/application-controller.vala:2611
-#| msgid "Email to %s discarded"
 msgid "Email discarded"
 msgstr "E-mail elvetve"
 
@@ -1430,13 +1439,26 @@ msgid "Showing remote images allows the sender to track you"
 msgstr ""
 "A távoli képek megjelenítése lehetővé teszi a küldőnek, hogy kövesse Önt"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "HTML e-mailekben lévő eredeti színek _felülbírálása"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme. Requires restart."
+msgstr ""
+"Felülbírálja a HTML-üzenetekben lévő eredeti színeket, hogy jobban illeszkedje"
+"nek az alkalmazás témájához. Újraindítást igényel."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "Beállítások"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "Bővítmények"
 
@@ -1665,8 +1687,9 @@ msgstr ""
 "mellékleteket|mellékelve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|"
 "postázom|fájl|fájlt|fájlok|fájlokat|állomány|állományt|állományok|"
 "állományokat|életrajz|életrajzot|életrajzom|életrajzomat|önéletrajz|"
-"önéletrajzot|önéletrajzom|önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|."
-"pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
+"önéletrajzot|önéletrajzom|"
+"önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|"
+".odg|.odb"
 
 #. / Translators: Label for composer From address entry
 #: src/client/composer/composer-widget.vala:483
@@ -2195,11 +2218,11 @@ msgid_plural "New messages"
 msgstr[0] "Új levél"
 msgstr[1] "Új levelek"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "E-mail sablonok"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "Újrahasználható sablonok létrehozása levélküldéshez"
 
@@ -2251,14 +2274,14 @@ msgstr "Szerkesztés"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Körlevél"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr "Töltsön ki és küldjön e-mail-sablonokat egy munkafüzet segítségével"
 
@@ -2307,11 +2330,11 @@ msgstr "Mező beszúrása"
 msgid "Comma separated values (CSV)"
 msgstr "Vesszővel elválasztott értékek (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Levelezési menü"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "Megjeleníti a Unity levelezési menü értesítéseket az új leveleknél"
 
@@ -2320,11 +2343,11 @@ msgstr "Megjeleníti a Unity levelezési menü értesítéseket az új levelekn�
 msgid "%s — New Messages"
 msgstr "%s — Új levelek"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Elküldési hang"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr ""
 "Lejátssza az asztali környezet elküldési hangját, ha egy e-mail elküldésre "
@@ -2361,70 +2384,76 @@ msgstr ""
 "Ez a levél sikeresen el lett küldve, de nem sikerült elmenteni a fiókjába."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%H:%M"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H:%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%b. %-e."
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%Y. %B %-e. %H:%M"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%Y. %B %-e. %H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%Y. %B %-e. %H:%M"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Most"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%d perce"
 msgstr[1] "%d perce"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%d órája"
 msgstr[1] "%d órája"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "Tegnap"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
@@ -2785,17 +2814,17 @@ msgstr "Törölt elemek"
 msgid "Archive | Archives"
 msgstr "Archívum | Archívumok | Archiváltak"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "A(z) „%s” MIME-típusa nem határozható meg."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "A(z) „%s” MIME-típus tartalomtípusa nem határozható meg ennél: „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(nincs tárgy)"
 
