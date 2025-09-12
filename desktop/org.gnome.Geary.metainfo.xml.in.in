@@ -69,13 +69,7 @@
   </kudos>
 
   <provides>
-    <!--
-        See https://gitlab.gnome.org/GNOME/geary/merge_requests/203
-        for why the appstream id uses the desktop file name as an id
-        and the proper app id is listed here here, instead of the
-        other way around.
-    -->
-    <id>@appid@</id>
+    <id>@appid@.desktop</id>
   </provides>
 
   <launchable type="desktop-id">@appid@.desktop</launchable>
