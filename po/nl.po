@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-03-31 15:05+0200\n"
+"POT-Creation-Date: 2025-09-10 13:51+0000\n"
+"PO-Revision-Date: 2025-09-13 15:35+0200\n"
 "Last-Translator: Nathan Follens <nfollens@gnome.org>\n"
 "Language-Team: GNOME-NL https://matrix.to/#/#nl:gnome.org\n"
 "Language: nl\n"
@@ -28,114 +28,53 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.6\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Verzenden via e-mail"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "Bestanden verzenden met Geary"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "E-mail"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
 #: src/client/application/application-client.vala:33
 msgid "Send and receive email"
 msgstr "E-mail verzenden en ontvangen"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Geary-ontwikkelingsteam"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"Geary is een e-mailtoepassing die draait om gesprekken, voor de GNOME-"
-"bureaubladomgeving. Via de duidelijke, moderne interface kunt u e-mails "
-"lezen, zoeken en verzenden."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"Met gesprekken kunt u een volledige discussie lezen zonder te hoeven zoeken "
-"of van bericht naar bericht te hoeven klikken."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "Functies van Geary zijn:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Snel instellen van e-mailaccount"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "Groepeert gerelateerde berichten in gesprekken"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Snel zoeken in volledige tekst met zoekwoorden"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "Berichten opstellen in HTML en platte tekst met veel functies"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Bureaubladmelding voor nieuwe e-mail"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "Werkt met Gmail, Yahoo! Mail, Outlook.com en andere IMAP-servers"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "Weergave van een gesprek in Geary"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "Tekstverwerker met opmaakmogelijkheden in Geary"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Bericht opstellen"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Nieuw venster"
 
@@ -194,18 +133,30 @@ msgstr ""
 "worden."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Override colors in HTML emails"
+msgstr "Kleuren in HTML-e-mails overschrijven"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme."
+msgstr ""
+"Overschrijft de oorspronkelijke kleuren in HTML-berichten om beter te "
+"integreren met het toepassingsthema."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Berichten standaard verplaatsen"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "Verplaats een bericht bij het markeren naar de doelmap."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Sneltoetsen met 1 toets gebruiken"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -213,11 +164,11 @@ msgstr ""
 "Schakelt sneltoetsen voor e-mailacties waarvoor er niet op <Ctrl> gedrukt "
 "moet worden, gelijkaardig aan die in Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "Talen die gebruikt worden in de spellingscontrole"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -225,11 +176,11 @@ msgstr ""
 "Een lijst met POSIX-locales, waarbij de lege lijst de spellingscontrole "
 "uitschakelt en de null-lijst de bureaubladtalen gebruikt."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Talen getoond in de spellingscontrole-pop-over"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -237,71 +188,71 @@ msgstr ""
 "Lijst van talen die altijd getoond worden in de pop-over van de "
 "spellingscontrole."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr "Toepassing uitvoeren op achtergrond bij inloggen en wanneer gesloten"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "Schakel dit in om de toepassing op de achtergrond uit te voeren."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Vragen bij openen van bijlage"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "Schakel dit in om bevestiging te vragen bij openen van een bijlage."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Of e-mails in HTML opgesteld moeten worden"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Schakel dit in om e-mails op te stellen in HTML; schakel uit voor platte "
 "tekst."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Adviesstrategie voor doorzoeken van volledige tekst"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Aanvaardbare waarden zijn ‘exact’, ‘conservative’, ‘agressive’ en ‘horizon’."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "Zoomniveau van gespreksweergave"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "Het toe te passen zoomniveau op de gespreksweergave."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "Grootte van losgemaakt opstelvenster"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "De laatst geregistreerde grootte van het losgemaakte opstelvenster."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Afbeeldingen toestaan voor deze domeinen"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Afbeeldingen van deze domeinen worden vertrouwd"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Vertraging voor ongedaan maken van verzenden van e-mail"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -309,35 +260,96 @@ msgstr ""
 "De wachttijd in seconden vooraleer een e-mail verzonden moet worden. Stel "
 "dit in op 0 of minder om het uit te schakelen."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Weergavetijd voor korte meldingen"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "De duur in seconden dat korte meldingen weergegeven moeten worden."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Lijst van optionele plug-ins"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr ""
 "De hier weergegeven plug-ins worden geladen bij het opstarten van Geary."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "Of we de oude instellingen overgezet hebben"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Schakel dit uit om te zoeken naar het oude ‘org.yorba.geary’-schema en de "
 "waarden ervan over te nemen."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Geary-ontwikkelingsteam"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary is een e-mailtoepassing die draait om gesprekken, voor de GNOME-"
+"bureaubladomgeving. Via de duidelijke, moderne interface kunt u e-mails "
+"lezen, zoeken en verzenden."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Met gesprekken kunt u een volledige discussie lezen zonder te hoeven zoeken "
+"of van bericht naar bericht te hoeven klikken."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "Functies van Geary zijn:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Snel instellen van e-mailaccount"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Groepeert gerelateerde berichten in gesprekken"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Snel zoeken in volledige tekst met zoekwoorden"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Berichten opstellen in HTML en platte tekst met veel functies"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Bureaubladmelding voor nieuwe e-mail"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "Werkt met Gmail, Yahoo! Mail, Outlook.com en andere IMAP-servers"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:51
+msgid "Geary displaying a conversation"
+msgstr "Weergave van een gesprek in Geary"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:56
+msgid "Geary showing the rich text composer"
+msgstr "Tekstverwerker met opmaakmogelijkheden in Geary"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -955,7 +967,7 @@ msgstr "Distributie-uitgave"
 msgid "Installation prefix"
 msgstr "Installatievoorvoegsel"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:569
 #, c-format
 msgid "About %s"
 msgstr "Over %s"
@@ -963,18 +975,19 @@ msgstr "Over %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:573
 msgid "translator-credits"
 msgstr ""
 "Bas Duineveld <basduineveld@gmail.com>\n"
 "Nathan Follens <nfollens@gnome.org>\n"
 "Justin van Steijn <jvs@fsfe.org>\n"
 "Jan Jasper de Kroon <jajadekroon@gmail.com>\n"
+"Dick Groskamp <digro@yahoo.co.uk>\n"
 "Meer info over GNOME-NL https://nl.gnome.org"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1102
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Onbekende programmaoptie ‘%s’"
@@ -1439,13 +1452,26 @@ msgstr "Afbeeldingen _altijd laden"
 msgid "Showing remote images allows the sender to track you"
 msgstr "Door externe afbeeldingen te tonen kan de afzenders u volgen"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "_Oorspronkelijke kleuren in HTML-e-mails overschrijven"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme. Requires restart."
+msgstr ""
+"Overschrijft de oorspronkelijke kleuren in HTML-berichten om beter te "
+"integreren met het toepassingsthema. Vereist een herstart van de toepassing."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "Voorkeuren"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "Plug-ins"
 
@@ -2202,11 +2228,11 @@ msgid_plural "New messages"
 msgstr[0] "Nieuw bericht"
 msgstr[1] "Nieuwe berichten"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "E-mailsjablonen"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "Maak herbruikbare sjablonen voor het verzenden van e-mails"
 
@@ -2258,14 +2284,14 @@ msgstr "Bewerken"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Samengevoegde e-mails"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr "E-mailsjablonen invullen en verzenden met behulp van een spreadsheet"
 
@@ -2314,11 +2340,11 @@ msgstr "Invoegveld"
 msgid "Comma separated values (CSV)"
 msgstr "Door komma's gescheiden waarden (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Berichtenmenu"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "Geeft Unity-berichtenmenumeldingen weer voor nieuwe e-mail"
 
@@ -2327,11 +2353,11 @@ msgstr "Geeft Unity-berichtenmenumeldingen weer voor nieuwe e-mail"
 msgid "%s — New Messages"
 msgstr "%s — Nieuwe berichten"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Verzonden-geluid"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr ""
 "Speelt het sent-mail-geluid van de bureaubladomgeving af wanneer een e-mail "
@@ -2367,70 +2393,76 @@ msgid "This message was sent, but has not been saved to your account."
 msgstr "Dit bericht is verzonden, maar is niet opgeslagen in uw account."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%lu%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%Hu%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%-e %b"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-lu%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%-e %B %Y %-Hu%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%-e %B %Y %-Hu%M"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Nu"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%dm geleden"
 msgstr[1] "%dm geleden"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%du geleden"
 msgstr[1] "%du geleden"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "Gisteren"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
@@ -2793,17 +2825,17 @@ msgstr "Verwijderde items"
 msgid "Archive | Archives"
 msgstr "Archieven | Archief | Gearchiveerd"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Kon MIME-type voor ‘%s’ niet bepalen."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Kon inhoudstype voor MIME-type ‘%s’ op ‘%s’ niet bepalen."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(geen onderwerp)"
 
