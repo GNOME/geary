@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-02-21 17:08+0000\n"
-"PO-Revision-Date: 2024-02-28 00:32+0100\n"
+"POT-Creation-Date: 2025-10-22 09:10+0000\n"
+"PO-Revision-Date: 2025-10-27 09:18+0100\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -20,114 +20,53 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.7\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Odeslat e-mailem"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "Odeslat soubory pomocí Geary"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "E-mail"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
 #: src/client/application/application-client.vala:33
 msgid "Send and receive email"
 msgstr "Odesílejte a přijímejte e-maily"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "email;e-mail;mail;pošta;e-pošta;zpráva;zprávy;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Vývojářský tým aplikace Geary"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"Geary je poštovní aplikace pro uživatelské prostředí GNOME, která se "
-"soustředí na konverzace jako celek. Umožňuje číst, vyhledávat a odesílat e-"
-"maily v přímočarém a moderním prostředí."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"Díky zaměření na konverzace můžete číst ucelené diskuze bez nutnosti "
-"vyhledávat jednotlivé navazující zprávy a klikat na ně."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "Mezi funkcemi aplikace Geary najdete:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Rychlé nastavení poštovního účtu"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "Zobrazení souvisejících zprávy dohromady v podobě konverzace"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Rychlé vyhledávání v celém textu a na základě klíčových slov"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "Plnohodnotný editor zpráv v HTML i prostém textu"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Upozornění na nové zprávy přímo v uživatelském prostředí"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "Geary zobrazující konverzaci"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "Geary se zobrazeným editorem formátovaného textu"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "pošta;mail;e-mail;elektronická pošta;imap;gmail;yahoo;hotmail;outlook;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Napsat zprávu"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Nové okno"
 
@@ -182,18 +121,30 @@ msgid "True if we should display a short preview of each message."
 msgstr "Zapnuto, když se má zobrazovat krátký náhled u jednotlivých zpráv."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Override colors in HTML emails"
+msgstr "Přepsat barvy v HTML e-mailech"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme."
+msgstr ""
+"Přepíše původní barvy ve zprávách formátu HTML, aby se lépe integrovaly s "
+"motivem aplikace."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Ve výchozím nastavení přesouvat zprávy"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "Při označování zprávy ji přesunout do cílové složky."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Používat jednoklávesové zkratky"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -201,11 +152,11 @@ msgstr ""
 "Pro činnosti s e-maily pouvolit klávesové zkratky, které nepotřebují "
 "zmáčknutí <Ctrl>, aby se tak emulovalo chování Gmailu."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "Jazyky používané v kontrole pravopisu"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -214,11 +165,11 @@ msgstr ""
 "vypnutou kontrolu pravopisu a prázdná hodnota (null) znamená použití "
 "výchozího nastavení z uživatelského prostředí."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Jazyky zobrazované ve vyskakovací nabídce kontroly pravopisu"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -226,37 +177,37 @@ msgstr ""
 "Seznam jazyků, které se mají zobrazit ve vyskakovací nabídce kontroly "
 "pravopisu."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr "Spustit aplikaci na pozadí při přihlášení a při zavření"
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "Povolit pro spuštění aplikace na pozadí."
 
-#: desktop/org.gnome.Geary.gschema.xml:78
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Dotazovat se při otevírání přílohy"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "Zapnuto, pokud máte být dotazováni, když otevíráte přílohu."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Zda psát e-maily v HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Zapnuto, když se mají vytvářet e-maily ve formátu HTML, vypnuto, když v "
 "prostém textu."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategie pro hledání v celém textu"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
@@ -264,35 +215,35 @@ msgstr ""
 "sada variant hledaného výrazu a drobné rozdíly ve shodě), „aggresive“ (širší "
 "sada variant a větší rozdíly ve shodě) a „horizon“ (všechny varianty výrazu)."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "Příblížení zobrazení konverzace"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "Přiblížení, které se má použit při zobrazení konverzace."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "Velikost odpojeného okno pro psaní zprávy"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "Poslední zaznamenaná velikost odpojeného okna pro psaní zprávy."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Povolit obrázky z těchto domén"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Obrázky z těchto domén budou považovány za důvěryhodné"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Prodleva pro zrušení odeslání e-mailu"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -300,35 +251,96 @@ msgstr ""
 "Počet sekund, po které se bude čekat s odesláním e-mailu, aby bylo možné "
 "akci vzít zpět. Nastavením na nulu nebo méně se tato možnost zakáže."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Doba zobrazení stručného upozornění"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr ""
 "Množství času v sekundách, po které se budou zobrazovat stručná upozornění."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Seznam volitelných zásuvných modulů"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Zásuvné moduly na tomto seznamu budou načteny při spuštění."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "Zda bylo přeneseno staré nastavení"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Vypnuto, když se má zkontrolovat staré schéma „org.yorba.geary“ a zkopírovat "
 "jeho hodnoty."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Vývojářský tým aplikace Geary"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary je poštovní aplikace pro uživatelské prostředí GNOME, která se "
+"soustředí na konverzace jako celek. Umožňuje číst, vyhledávat a odesílat e-"
+"maily v přímočarém a moderním prostředí."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Díky zaměření na konverzace můžete číst ucelené diskuze bez nutnosti "
+"vyhledávat jednotlivé navazující zprávy a klikat na ně."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "Mezi funkcemi aplikace Geary najdete:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Rychlé nastavení poštovního účtu"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Zobrazení souvisejících zprávy dohromady v podobě konverzace"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Rychlé vyhledávání v celém textu a na základě klíčových slov"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Plnohodnotný editor zpráv v HTML i prostém textu"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Upozornění na nové zprávy přímo v uživatelském prostředí"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:51
+msgid "Geary displaying a conversation"
+msgstr "Geary zobrazující konverzaci"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:56
+msgid "Geary showing the rich text composer"
+msgstr "Geary se zobrazeným editorem formátovaného textu"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -946,7 +958,7 @@ msgstr "Vydání distribuce"
 msgid "Installation prefix"
 msgstr "Prefix instalace"
 
-#: src/client/application/application-client.vala:566
+#: src/client/application/application-client.vala:569
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
@@ -954,7 +966,7 @@ msgstr "O aplikaci %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:570
+#: src/client/application/application-client.vala:573
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
@@ -962,7 +974,7 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1099
+#: src/client/application/application-client.vala:1102
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nerozpoznaný argument aplikace: „%s“"
@@ -1441,13 +1453,26 @@ msgstr "_Vždy načítat obrázky"
 msgid "Showing remote images allows the sender to track you"
 msgstr "Zobrazení vzdálených obrázků umožňuje odesílateli vás sledovat"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "_Přepsat původní barvy v HTML e-mailech"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme. Requires restart."
+msgstr ""
+"Přepíše původní barvy ve zprávách formátu HTML, aby se lépe integrovaly s "
+"motivem aplikace. Vyžaduje restart."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "Předvolby"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "Zásuvné moduly"
 
@@ -2209,11 +2234,11 @@ msgstr[0] "Nová zpráva"
 msgstr[1] "Nové zprávy"
 msgstr[2] "Nové zprávy"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "Šablony e-mailů"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "Vytvářejte znovupoužitelné šablony pro odesílání e-mailů"
 
@@ -2265,14 +2290,14 @@ msgstr "Upravit"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Hromadná pošta"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr ""
 "Vyplňujte a odesílejte hromadné e-maily pomocí šablon a dat z tabulkového "
@@ -2324,11 +2349,11 @@ msgstr "Vložit pole"
 msgid "Comma separated values (CSV)"
 msgstr "Hodnoty oddělené čárkou (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Nabídka konverzace"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "Zobrazuje v Unity v upozornění na nový e-mail nabídku konverzace"
 
@@ -2337,11 +2362,11 @@ msgstr "Zobrazuje v Unity v upozornění na nový e-mail nabídku konverzace"
 msgid "%s — New Messages"
 msgstr "%s – nové zprávy"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Zvuk při odeslání"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "Přehraje systémový zvuk „Odeslán e-mail“ když je odeslána zpráva"
 
@@ -2375,49 +2400,55 @@ msgid "This message was sent, but has not been saved to your account."
 msgstr "Tato zpráva byla úspěšně odeslána, ale nebyla uložena do vašeho účtu."
 
 #. / Datetime format for 12-hour time, i.e. 8:31 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:69
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:70
+#, no-c-format
 msgid "%l:%M %P"
 msgstr "%l∶%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:72
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:74
+#, no-c-format
 msgid "%H:%M"
 msgstr "%H∶%M"
 
 #. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
 #. / Date format for dates within the current year, i.e. Nov 8
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:79
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:82
+#, no-c-format
 msgid "%b %-e"
 msgstr "%b %-e"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:84
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:88
+#, no-c-format
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:87
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:92
+#, no-c-format
 msgid "%B %-e, %Y %-H:%M"
 msgstr "%B %-e, %Y %-H∶%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:90
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:96
+#, no-c-format
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
 msgstr "%B %-e, %Y %-l∶%M %P"
 
-#: src/client/util/util-date.vala:159
+#: src/client/util/util-date.vala:165
 msgid "Now"
 msgstr "Nyní"
 
-#: src/client/util/util-date.vala:162
+#: src/client/util/util-date.vala:168
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
@@ -2425,7 +2456,7 @@ msgstr[0] "Před %d m"
 msgstr[1] "Před %d m"
 msgstr[2] "Před %d m"
 
-#: src/client/util/util-date.vala:166
+#: src/client/util/util-date.vala:172
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
@@ -2433,14 +2464,14 @@ msgstr[0] "Před %d h"
 msgstr[1] "Před %d h"
 msgstr[2] "Před %d h"
 
-#: src/client/util/util-date.vala:173
+#: src/client/util/util-date.vala:179
 msgid "Yesterday"
 msgstr "Včera"
 
 #. / Date format that shows the weekday (Monday, Tuesday, ...)
-#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: src/client/util/util-date.vala:178
-#, c-format
+#. / See https://docs.gtk.org/glib/method.DateTime.format.html
+#: src/client/util/util-date.vala:185
+#, no-c-format
 msgid "%A"
 msgstr "%A"
 
@@ -2806,17 +2837,17 @@ msgstr "Smazaná pošta"
 msgid "Archive | Archives"
 msgstr "Archiv | Archív | Archivy | Archívy | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Nezdařilo se určit typ MIME pro „%s“"
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Nezdařilo se určit typ obsahu pro typ MIME „%s“ u „%s“"
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(bez předmětu)"
 
