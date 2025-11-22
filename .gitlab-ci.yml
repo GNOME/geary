@@ -27,7 +27,7 @@ variables:
     gsound-devel gtk3-devel iso-codes-devel json-glib-devel itstool
     libgee-devel libhandy1-devel libicu-devel
     libpeas1-devel libsecret-devel libstemmer-devel libunwind-devel
-    libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
+    libxml2-devel libytnef-devel sqlite-devel webkit2gtk4.1-devel
     git
   FEDORA_TEST_DEPS: appstream dbus-daemon glibc-langpack-en gnutls-utils tar Xvfb xz
 
