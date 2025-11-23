@@ -2,9 +2,18 @@
 # Geary CI config.
 #
 
-include: 'https://gitlab.gnome.org/GNOME/citemplates/-/raw/8430bccd6150b0a2aa97d1d7028c28b6b7e5d4d0/flatpak/flatpak_ci_initiative.yml'
+include:
+ - project: Infrastructure/freedesktop-ci-templates
+   file: templates/fedora.yml
+   ref: aec7a6ce7bb38902c70641526f6611e27141784a
+ - project: 'GNOME/citemplates'
+   file: 'flatpak/flatpak_ci_initiative.yml'
+   # See https://gitlab.gnome.org/GNOME/geary/-/issues/1498
+   ref: 8430bccd6150b0a2aa97d1d7028c28b6b7e5d4d0
 
 variables:
+  FDO_UPSTREAM_REPO: gnome/geary
+
   # ImapDB and other tests that touch the disk are super slow on CI
   # runners like gcc150.osuosl.org that use platter drives still.
   # See Infrastructure/Infrastructure#97.
@@ -13,66 +22,101 @@ variables:
   # Locale used for unit tests
   TEST_LOCALE: C.UTF-8
 
-  # Build
-  BUILD_DIR: build
-  CONFIG_CMD: meson --buildtype=debug $BUILD_DIR
-  BUILD_CMD: ninja -v -C $BUILD_DIR
-  TEST_CMD: xvfb-run -a dbus-run-session -- meson test -v --no-stdsplit -C $BUILD_DIR $TEST_ARGS
-  INSTALL_CMD: ninja -v -C $BUILD_DIR install
+stages:
+  - prepare
+  - build
+  - deploy
 
-  # Fedora packages
-  FEDORA_DEPS:
-    meson vala desktop-file-utils enchant2-devel folks-devel gcr3-devel
-    glib2-devel gmime30-devel gnome-online-accounts-devel gspell-devel
-    gsound-devel gtk3-devel iso-codes-devel json-glib-devel itstool
-    libgee-devel libhandy1-devel libicu-devel
-    libpeas1-devel libsecret-devel libstemmer-devel libunwind-devel
-    libxml2-devel libytnef-devel sqlite-devel webkit2gtk4.1-devel
-    git
-  FEDORA_TEST_DEPS: appstream dbus-daemon glibc-langpack-en gnutls-utils tar Xvfb xz
+##
+# Stage: Prepare
+#
+# This mostly consists of preparing Docker iamges for re-use the CI
+##
 
-  # Ubuntu packages
-  UBUNTU_DEPS:
-    meson build-essential valac desktop-file-utils gettext
-    gobject-introspection iso-codes itstool libenchant-2-dev libfolks-dev
-    libgcr-3-dev libgee-0.8-dev libglib2.0-dev libgmime-3.0-dev
-    libgoa-1.0-dev libgspell-1-dev libgsound-dev libgtk-3-dev
-    libhandy-1-dev libicu-dev libjson-glib-dev libmessaging-menu-dev
-    libpeas-dev libsecret-1-dev libsqlite3-dev libstemmer-dev
-    libunwind-dev libwebkit2gtk-4.1-dev libxml2-dev libytnef0-dev
-    git ca-certificates
-  UBUNTU_TEST_DEPS: appstream gnutls-bin librsvg2-common locales xauth xvfb
+# See also https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates
+build.container.fedora@x86_64:
+  extends:
+  - '.fdo.container-build@fedora'
+  - '.fedora.container.common'
+  stage: 'prepare'
+  variables:
+    # no need to pull the whole tree for rebuilding the image
+    GIT_STRATEGY: none
+    # Expiry sets fdo.expires on the image
+    FDO_EXPIRES_AFTER: 8w
+    # Geary build dependencies (Fedora packages)
+    FDO_DISTRIBUTION_PACKAGES: >-
+      appstream
+      dbus-daemon
+      dconf
+      desktop-file-utils
+      enchant2-devel
+      folks-devel
+      gcr3-devel
+      git
+      glib-networking
+      glib2-devel
+      glibc-langpack-en
+      gmime30-devel
+      gnome-online-accounts-devel
+      gnutls-utils
+      gsettings-desktop-schemas
+      gsound-devel
+      gspell-devel
+      gtk3-devel
+      iso-codes-devel
+      itstool
+      json-glib-devel
+      libgee-devel
+      libhandy1-devel
+      libicu-devel
+      libpeas1-devel
+      libsecret-devel
+      libstemmer-devel
+      libunwind-devel
+      libxml2-devel
+      libytnef-devel
+      meson
+      ninja
+      pinentry-gnome3
+      sqlite-devel
+      vala
+      webkit2gtk4.1-devel
+      Xvfb
+
+.fedora.container.common:
+  variables:
+    # When branching a stable release, change 'main' to the
+    # release branch name to ensure that a new image will
+    # be created, tailored for the stable branch.
+    BRANCH_NAME: 'main'
+    CONTAINER_TAG: '2025-11-23.0'
+    FEDORA_VERSION: latest
+    # Derive FDO variables from this automatically.
+    # DO NOT edit, instead change the variables above
+    FDO_REPO_SUFFIX: '${BRANCH_NAME}'
+    FDO_DISTRIBUTION_TAG: '${CONTAINER_TAG}-fedora-${FEDORA_VERSION}'
+    FDO_DISTRIBUTION_VERSION: '${FEDORA_VERSION}'
+
+##
+# Stage: Build
+#
+# This stage actually builds & tests Geary. It does so both in Fedora, and in Flatpak
+##
 
 fedora:
+  extends:
+    - '.fdo.suffixed-image@fedora'
+    - '.fedora.container.common'
   stage: build
-  image: fedora:latest
-  before_script:
-    - dnf update -y --nogpgcheck
-    - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
-  script:
-    - $CONFIG_CMD
-    - $BUILD_CMD
-    - $TEST_CMD
-    - $INSTALL_CMD
-  artifacts:
-    when: 'always'
-    paths:
-      - '$BUILD_DIR/meson-logs'
-    expire_in: 2 days
 
-ubuntu:
-  stage: build
-  image: ubuntu:devel
-  before_script:
-    - ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-    - apt-get update
-    - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
-    - locale-gen $TEST_LOCALE
+  variables:
+    BUILD_DIR: _build
   script:
-    - $CONFIG_CMD
-    - $BUILD_CMD
-    - $TEST_CMD
-    - $INSTALL_CMD
+    - meson setup --buildtype=debug "$BUILD_DIR"
+    - meson compile -C "$BUILD_DIR"
+    - xvfb-run -a dbus-run-session -- meson test -v --no-stdsplit -C "$BUILD_DIR" "$TEST_ARGS"
+    - meson install -C "$BUILD_DIR"
   artifacts:
     when: 'always'
     paths:
@@ -80,6 +124,7 @@ ubuntu:
     expire_in: 2 days
 
 flatpak:
+  stage: build
   variables:
     APP_ID: org.gnome.Geary.Devel
     FLATPAK_MODULE: geary
@@ -91,7 +136,12 @@ flatpak:
   # This is broken, allow it to fail.
   allow_failure: true
 
+##
+# Stage: Deploy
+#
+# This stage is meant for deplying any nightly (Flatpak) builds, docs, etc
+##
+
 nightly:
   extends: '.publish_nightly'
-  dependencies: ['flatpak']
   needs: ['flatpak']
