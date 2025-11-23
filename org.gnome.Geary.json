@@ -211,6 +211,12 @@
                     "type": "git",
                     "url": "https://github.com/jstedfast/gmime.git",
                     "branch": "master"
+                },
+                {
+                    "type": "patch",
+                    "paths": [
+                        "build-aux/patches/gmime-autogen.sh-Also-allow-automake-1.18.patch"
+                    ]
                 }
             ]
         },

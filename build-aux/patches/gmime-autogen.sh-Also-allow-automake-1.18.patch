@@ -1,0 +1,25 @@
+From 22bb4d88a62924ceaf358e5c9871dbe05ae3464c Mon Sep 17 00:00:00 2001
+From: Niels De Graef <ndegraef@redhat.com>
+Date: Mon, 24 Nov 2025 00:38:22 +0100
+Subject: [PATCH] autogen.sh: Also allow automake 1.18
+
+---
+ autogen.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index af13973f..8dc5437e 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -57,7 +57,7 @@ fi
+ 	DIE=1
+ }
+ 
+-for automake_version in 1.9 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17; do
++for automake_version in 1.9 1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18; do
+     if automake-${automake_version} --version < /dev/null > /dev/null 2>&1 ; then
+         AUTOMAKE=automake-${automake_version}
+         ACLOCAL=aclocal-${automake_version}
+-- 
+2.51.1
+
