@@ -1,13 +1,11 @@
 {
     "app-id": "org.gnome.Geary.Devel",
-    "branch": "main",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-    "desktop-file-name-suffix": " (Development)",
     "tags": [
-        "nightly"
+        "devel"
     ],
     "finish-args": [
         "--share=ipc",
