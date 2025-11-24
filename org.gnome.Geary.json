@@ -298,7 +298,9 @@
                     "--filesystem=~/.config/geary:ro",
                     "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro",
                     "--filesystem=xdg-download:rw",
-                    "--filesystem=/tmp"
+                    "--filesystem=/tmp",
+                    "--talk-name=org.gtk.vfs.*",
+                    "--filesystem=xdg-run/gvfsd"
                 ]
             },
             "config-opts": [
