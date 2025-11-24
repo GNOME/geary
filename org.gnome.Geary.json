@@ -275,11 +275,11 @@
             "config-opts": [
                 "-Dprofile=development"
             ],
+            "run-tests": true,
             "sources": [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/geary.git",
-                    "branch": "main"
+                    "type": "dir",
+                    "path": "./"
                 }
             ]
         }
