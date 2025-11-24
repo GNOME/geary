@@ -1,0 +1,99 @@
+From 75c2c4c490ed0d52c4fca5a6c1184ea6eeb267f5 Mon Sep 17 00:00:00 2001
+From: Niels De Graef <ndegraef@redhat.com>
+Date: Mon, 24 Nov 2025 00:58:18 +0100
+Subject: [PATCH] Build libstemmer as shared library
+
+Adjust the `GNUmakefile` with the appropriate flags, and add a symbol
+map to prevent any unwanted symbols from "leaking" into our codebase.
+---
+ GNUmakefile           | 22 +++++++++++-----------
+ libstemmer/symbol.map |  6 ++++++
+ 2 files changed, 17 insertions(+), 11 deletions(-)
+ create mode 100644 libstemmer/symbol.map
+
+diff --git a/GNUmakefile b/GNUmakefile
+index 38673c3..8bf593f 100644
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -281,12 +281,12 @@ DART_BUILD_ARTIFACTS = dart/.dart_tool dart/pubspec.lock dart/.dart_deps
+ JAVA_CLASSES = $(JAVA_SOURCES:.java=.class)
+ JAVA_RUNTIME_CLASSES=$(JAVA_RUNTIME_SOURCES:.java=.class)
+ 
+-CFLAGS=-g -O2 -W -Wall -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
++CFLAGS=-g -fPIC -W -Wall -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
+ CPPFLAGS=
+ 
+ INCLUDES=-Iinclude
+ 
+-all: snowball$(EXEEXT) libstemmer.a stemwords$(EXEEXT) $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
++all: snowball$(EXEEXT) libstemmer.so stemwords$(EXEEXT) $(C_OTHER_SOURCES) $(C_OTHER_HEADERS) $(C_OTHER_OBJECTS)
+ 
+ algorithms.mk: GNUmakefile libstemmer/mkalgorithms.pl $(MODULES)
+ 	libstemmer/mkalgorithms.pl algorithms.mk $(MODULES)
+@@ -294,7 +294,7 @@ algorithms.mk: GNUmakefile libstemmer/mkalgorithms.pl $(MODULES)
+ clean:
+ 	rm -f $(COMPILER_OBJECTS) $(RUNTIME_OBJECTS) \
+ 	      $(LIBSTEMMER_OBJECTS) $(LIBSTEMMER_UTF8_OBJECTS) $(STEMWORDS_OBJECTS) snowball$(EXEEXT) \
+-	      libstemmer.a stemwords$(EXEEXT) \
++	      libstemmer.so stemwords$(EXEEXT) \
+               libstemmer/modules.h \
+               libstemmer/modules_utf8.h \
+ 	      $(ADA_SOURCES) ada/bin/generate ada/bin/stemwords \
+@@ -382,20 +382,20 @@ libstemmer/modules_utf8.h libstemmer/mkinc_utf8.mak: libstemmer/mkmodules.pl $(M
+ 
+ libstemmer/libstemmer.o: libstemmer/modules.h $(C_LIB_HEADERS)
+ 
+-libstemmer.a: libstemmer/libstemmer.o $(RUNTIME_OBJECTS) $(C_LIB_OBJECTS)
++libstemmer.so: libstemmer/libstemmer.o $(RUNTIME_OBJECTS) $(C_LIB_OBJECTS)
+ 	$(AR) -cru $@ $^
+ 
+ examples/%.o: examples/%.c
+ 	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c -o $@ $<
+ 
+-stemwords$(EXEEXT): $(STEMWORDS_OBJECTS) libstemmer.a
++stemwords$(EXEEXT): $(STEMWORDS_OBJECTS) libstemmer.so
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+ 
+ tests/%.o: tests/%.c
+ 	$(CC) $(CFLAGS) $(INCLUDES) $(CPPFLAGS) -c -o $@ $<
+ 
+-stemtest$(EXEEXT): $(STEMTEST_OBJECTS) libstemmer.a
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
++stemtest$(EXEEXT): $(STEMTEST_OBJECTS) libstemmer.so
++	$(CC) $(CFLAGS) -shared $(LDFLAGS) -Wl,-soname,$@,-version-script,libstemmer/symbol.map -o $@ $^
+ 
+ $(c_src_dir)/stem_UTF_8_%.c $(c_src_dir)/stem_UTF_8_%.h: $(ALGORITHMS)/%.sbl snowball$(EXEEXT)
+ 	@mkdir -p $(c_src_dir)
+@@ -568,13 +568,13 @@ dist_libstemmer_c: \
+ 	echo 'endif' >> $${dest}/Makefile && \
+ 	echo 'CFLAGS=-O2' >> $${dest}/Makefile && \
+ 	echo 'CPPFLAGS=-Iinclude' >> $${dest}/Makefile && \
+-	echo 'all: libstemmer.a stemwords$$(EXEEXT)' >> $${dest}/Makefile && \
+-	echo 'libstemmer.a: $$(snowball_sources:.c=.o)' >> $${dest}/Makefile && \
++	echo 'all: libstemmer.so stemwords$$(EXEEXT)' >> $${dest}/Makefile && \
++	echo 'libstemmer.so: $$(snowball_sources:.c=.o)' >> $${dest}/Makefile && \
+ 	echo '	$$(AR) -cru $$@ $$^' >> $${dest}/Makefile && \
+-	echo 'stemwords$$(EXEEXT): examples/stemwords.o libstemmer.a' >> $${dest}/Makefile && \
++	echo 'stemwords$$(EXEEXT): examples/stemwords.o libstemmer.so' >> $${dest}/Makefile && \
+ 	echo '	$$(CC) $$(CFLAGS) -o $$@ $$^' >> $${dest}/Makefile && \
+ 	echo 'clean:' >> $${dest}/Makefile && \
+-	echo '	rm -f stemwords$$(EXEEXT) libstemmer.a *.o $(c_src_dir)/*.o examples/*.o runtime/*.o libstemmer/*.o' >> $${dest}/Makefile && \
++	echo '	rm -f stemwords$$(EXEEXT) libstemmer.so *.o $(c_src_dir)/*.o examples/*.o runtime/*.o libstemmer/*.o' >> $${dest}/Makefile && \
+ 	(cd dist && tar zcf $${destname}$(tarball_ext) $${destname}) && \
+ 	rm -rf $${dest}
+ 
+diff --git a/libstemmer/symbol.map b/libstemmer/symbol.map
+new file mode 100644
+index 0000000..7a3d423
+--- /dev/null
++++ b/libstemmer/symbol.map
+@@ -0,0 +1,6 @@
++SB_STEMMER_0 {
++    global:
++        sb_stemmer_*;
++    local:
++        *;
++};
+-- 
+2.51.1
+

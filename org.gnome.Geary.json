@@ -253,7 +253,7 @@
                 {
                     "type": "patch",
                     "paths": [
-                        "build-aux/patches/shared-library.diff"
+                        "build-aux/patches/snowball-Build-libstemmer-as-shared-library.patch"
                     ]
                 }
             ],
