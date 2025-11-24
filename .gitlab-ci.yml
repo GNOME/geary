@@ -8,8 +8,6 @@ include:
    ref: aec7a6ce7bb38902c70641526f6611e27141784a
  - project: 'GNOME/citemplates'
    file: 'flatpak/flatpak_ci_initiative.yml'
-   # See https://gitlab.gnome.org/GNOME/geary/-/issues/1498
-   ref: 8430bccd6150b0a2aa97d1d7028c28b6b7e5d4d0
 
 variables:
   FDO_UPSTREAM_REPO: gnome/geary
