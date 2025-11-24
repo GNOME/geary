@@ -1,6 +1,6 @@
 {
     "app-id": "org.gnome.Geary.Devel",
-    "branch": "master",
+    "branch": "main",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
@@ -298,7 +298,6 @@
                     "--filesystem=~/.config/geary:ro",
                     "--filesystem=~/.var/app/org.gnome.Geary/config/geary:ro",
                     "--filesystem=xdg-download:rw",
-                    "--filesystem=/tmp",
                     "--talk-name=org.gtk.vfs.*",
                     "--filesystem=xdg-run/gvfsd"
                 ]
