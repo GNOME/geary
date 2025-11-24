@@ -196,18 +196,37 @@ test_integration_bin = executable('test-integration',
   c_args: geary_c_args,
 )
 
+# Running tests headless
+xvfb_run = find_program('xvfb-run')
+dbus_run_session = find_program('dbus-run-session')
+if xvfb_run.found() and dbus_run_session.found()
+  add_test_setup('headless',
+    exe_wrapper: find_program('run_test_env.sh'),
+    is_default: true,
+  )
+endif
+
+
+tests_envvars = {
+  'NO_AT_BRIDGE': '1',
+  'PX_FORCE_CONFIG': 'config-sysconfig',
+}
+
 test(
   'engine-tests',
   test_engine_bin,
-  depends: [ engine_lib ]
+  depends: [ engine_lib ],
+  env: tests_envvars,
 )
 test(
   'client-tests',
   test_client_bin,
-  depends: [ client_lib, web_process ]
+  depends: [ client_lib, web_process ],
+  env: tests_envvars,
 )
 test(
   'js-tests',
   test_js_bin,
-  depends: [ client_lib, web_process ]
+  depends: [ client_lib, web_process ],
+  env: tests_envvars,
 )
