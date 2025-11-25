@@ -69,7 +69,7 @@ public class Composer.WebViewTest : Components.WebViewTestCase<Composer.WebView>
         string BODY = "<p>para</p>";
         load_body_fixture(BODY);
         this.test_view.get_html_for_draft.begin(this.async_completion);
-        string html = this.test_view.get_html.end(async_result());
+        string html = this.test_view.get_html_for_draft.end(async_result());
         assert_equal(html, PageStateTest.COMPLETE_BODY_TEMPLATE.printf(BODY));
     }
 
