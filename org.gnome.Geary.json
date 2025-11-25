@@ -46,6 +46,17 @@
     ],
     "modules": [
         {
+            "name" : "libproxy",
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/libproxy/libproxy.git",
+                    "branch" : "main"
+                }
+            ]
+        },
+        {
             "name": "gnome-online-accounts",
             "buildsystem": "meson",
             "config-opts": [
