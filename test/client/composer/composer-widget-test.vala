@@ -102,6 +102,12 @@ public class Composer.WidgetTest : TestCase {
         add_test("load_context_reply_all_to_other_with_reply_to", load_context_reply_all_to_other_with_reply_to);
         add_test("load_context_forward", load_context_forward);
         add_test("to_composed_email", to_composed_email);
+
+        try {
+            WebView.load_resources();
+        } catch (Error err) {
+            GLib.assert_not_reached();
+        }
     }
 
     public override void set_up() {
