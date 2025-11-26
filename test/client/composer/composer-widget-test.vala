@@ -412,17 +412,24 @@ public class Composer.WidgetTest : TestCase {
     public void to_composed_email() throws GLib.Error {
         message("  ========== TEST =============== to_composed_email");
         var widget = new Widget(this.application, this.config, this.account);
+
+        message("  => load_email START");
         var email = load_email(MESSAGE_WITH_REPLY_TO);
+        message("  => load_email END");
 
         var mock_account = (Mock.Account) this.account.account;
         mock_account.expect_call("local_search_message_id_async");
 
+        message("  => load_context START");
         widget.load_context.begin(EDIT, email, null, this.async_completion);
         widget.load_context.end(async_result());
+        message("  => load_context END");
         mock_account.assert_expectations();
 
+        message("  => to_composed_email START");
         widget.to_composed_email.begin(null, false, this.async_completion);
         Geary.ComposedEmail composed = widget.to_composed_email.end(async_result());
+        message("  => to_composed_email END");
 
         assert_equal(
             composed.to.to_rfc822_string(),
