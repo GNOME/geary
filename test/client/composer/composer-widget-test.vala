@@ -144,6 +144,7 @@ public class Composer.WidgetTest : TestCase {
     }
 
     public void load_empty_body() throws GLib.Error {
+        message("  ========== TEST =============== load_empty_body");
         message("TEST 1");
         var widget = new Widget(this.application, this.config, this.account);
         message("TEST 2");
@@ -153,9 +154,11 @@ public class Composer.WidgetTest : TestCase {
         message("TEST 4");
         assert_equal(widget.to, "");
         message("TEST 5");
+        message("  ========== END =============== load_empty_body");
     }
 
     public void load_empty_body_to() throws GLib.Error {
+        message("  ========== TEST =============== load_empty_body_to");
         var widget = new Widget(this.application, this.config, this.account);
         widget.load_empty_body.begin(
             new Geary.RFC822.MailboxAddress(null, "empty_to@example.com"),
@@ -163,9 +166,11 @@ public class Composer.WidgetTest : TestCase {
         );
         widget.load_empty_body.end(async_result());
         assert_equal(widget.to, "empty_to@example.com");
+        message("  ========== END =============== load_empty_body_to");
     }
 
     public void load_mailto() throws GLib.Error {
+        message("  ========== TEST =============== load_mailto");
         var widget = new Widget(this.application, this.config, this.account);
 
         widget.load_mailto.begin(
@@ -174,18 +179,22 @@ public class Composer.WidgetTest : TestCase {
         widget.load_mailto.end(async_result());
 
         assert_equal(widget.to, "mailto@example.com");
+        message("  ========== END =============== load_mailto");
     }
 
     public void load_mailto_empty() throws GLib.Error {
+        message("  ========== TEST =============== load_mailto_empty");
         var widget = new Widget(this.application, this.config, this.account);
 
         widget.load_mailto.begin("mailto:", this.async_completion);
         widget.load_mailto.end(async_result());
 
         assert_equal(widget.to, "");
+        message("  ========== END =============== load_mailto_empty");
     }
 
     public void load_context_edit() throws GLib.Error {
+        message("  ========== TEST =============== load_context_edit");
         var widget = new Widget(this.application, this.config, this.account);
         var email = load_email(MESSAGE_WITH_REPLY_TO);
 
@@ -215,9 +224,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example>"
         );
+        message("  ========== END =============== load_context_edit");
     }
 
     public void load_context_reply_sender() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_sender");
         var widget = new Widget(this.application, this.config, this.account);
         var email = load_email(MESSAGE_NO_REPLY_TO);
 
@@ -237,9 +248,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_sender");
     }
 
     public void load_context_reply_sender_with_reply_to() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_sender_with_reply_to");
         var widget = new Widget(this.application, this.config, this.account);
         var email = load_email(MESSAGE_WITH_REPLY_TO);
 
@@ -259,9 +272,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_sender_with_reply_to");
     }
 
     public void load_context_reply_all_to_account() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_all_to_account");
         // If the message's To includes the account's primary mailbox,
         // then that should not be included in the CC
         this.account.account.information.replace_sender(
@@ -287,9 +302,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_all_to_account");
     }
 
     public void load_context_reply_all_cc_account() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_all_cc_account");
         // If the message's CC includes the account's primary mailbox,
         // then that should not be included in the CC either
         this.account.account.information.replace_sender(
@@ -315,9 +332,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_all_cc_account");
     }
 
     public void load_context_reply_all_to_other() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_all_to_other");
         // Neither the message's To or CC contains the account's
         // primary mailbox, so CC should include all of the addresses
         var widget = new Widget(this.application, this.config, this.account);
@@ -339,9 +358,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_all_to_other");
     }
 
     public void load_context_reply_all_to_other_with_reply_to() throws GLib.Error {
+        message("  ========== TEST =============== load_context_reply_all_to_other_with_reply_to");
         // Neither the message's To or CC contains the account's
         // primary mailbox, so CC should include all of the addresses
         var widget = new Widget(this.application, this.config, this.account);
@@ -363,9 +384,11 @@ public class Composer.WidgetTest : TestCase {
             widget.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example> <3456@example.net>"
         );
+        message("  ========== END =============== load_context_reply_all_to_other_with_reply_to");
     }
 
     public void load_context_forward() throws GLib.Error {
+        message("  ========== TEST =============== load_context_forward");
         var widget = new Widget(this.application, this.config, this.account);
         var email = load_email(MESSAGE_NO_REPLY_TO);
 
@@ -383,9 +406,11 @@ public class Composer.WidgetTest : TestCase {
             "<3456@example.net>",
             "References"
         );
+        message("  ========== END =============== load_context_forward");
     }
 
     public void to_composed_email() throws GLib.Error {
+        message("  ========== TEST =============== to_composed_email");
         var widget = new Widget(this.application, this.config, this.account);
         var email = load_email(MESSAGE_WITH_REPLY_TO);
 
@@ -432,6 +457,7 @@ public class Composer.WidgetTest : TestCase {
             composed.references.to_rfc822_string(),
             "<1234@local.machine.example> <5678@local.machine.example>"
         );
+        message("  ========== END =============== to_composed_email");
     }
 
     private Geary.Email load_email(string text)
