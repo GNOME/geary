@@ -105,17 +105,22 @@ public class Composer.WidgetTest : TestCase {
     }
 
     public override void set_up() {
+        message("SETUP 1");
         this.application = new MockApplicationInterface();
 
+        message("SETUP 2");
         this.config = new Application.Configuration(Application.Client.SCHEMA_ID);
 
+        message("SETUP 3");
         var info = new Geary.AccountInformation(
             "account_01",
             Geary.ServiceProvider.OTHER,
             new Mock.CredentialsMediator(),
             new Geary.RFC822.MailboxAddress(null, "test1@example.com")
         );
+        message("SETUP 4");
         var mock_account = new Mock.Account(info);
+        message("SETUP 5");
         this.account = new Application.AccountContext(
             mock_account,
             new Geary.App.SearchFolder(
@@ -128,19 +133,26 @@ public class Composer.WidgetTest : TestCase {
                 Folks.IndividualAggregator.dup()
             )
         );
+        message("SETUP 6");
     }
 
     public override void tear_down() {
+        message("TEARDOWN");
         this.application = null;
         this.config = null;
         this.account = null;
     }
 
     public void load_empty_body() throws GLib.Error {
+        message("TEST 1");
         var widget = new Widget(this.application, this.config, this.account);
+        message("TEST 2");
         widget.load_empty_body.begin(null, this.async_completion);
+        message("TEST 3");
         widget.load_empty_body.end(async_result());
+        message("TEST 4");
         assert_equal(widget.to, "");
+        message("TEST 5");
     }
 
     public void load_empty_body_to() throws GLib.Error {

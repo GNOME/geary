@@ -601,11 +601,14 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     /** Loads an empty message into the composer. */
     public async void load_empty_body(Geary.RFC822.MailboxAddress? to = null)
         throws GLib.Error {
+        message("LOAD EMPTY BODY 1");
         if (to != null) {
             this.to = to.to_full_display();
             update_extended_headers();
         }
+        message("LOAD EMPTY BODY 2");
         yield finish_loading("", "", false);
+        message("LOAD EMPTY BODY 3");
     }
 
     /** Loads a mailto: URL into the composer. */
@@ -1458,8 +1461,11 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
     private async void finish_loading(string body,
                                       string quote,
                                       bool is_body_complete) {
+        message("FINISH LOADING 1");
         update_attachments_view();
+        message("FINISH LOADING 2");
         update_pending_attachments(this.pending_include, true);
+        message("FINISH LOADING 3");
 
         this.editor.body.load_html(
             body,
@@ -1467,22 +1473,28 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
             this.top_posting,
             is_body_complete
         );
+        message("FINISH LOADING 4");
 
         var current_account = this.sender_context.account;
-        this.open_draft_manager.begin(
-            this.saved_id,
-            (obj, res) => {
-                try {
-                    this.open_draft_manager.end(res);
-                } catch (GLib.Error error) {
-                    this.application.report_problem(
-                        new Geary.AccountProblemReport(
-                            current_account.information, error
-                        )
-                    );
+        message("FINISH LOADING 5");
+        Idle.add(() => {
+            this.open_draft_manager.begin(
+                this.saved_id,
+                (obj, res) => {
+                    try {
+            message("FINISH LOADING 6");
+                        this.open_draft_manager.end(res);
+                    } catch (GLib.Error error) {
+                        this.application.report_problem(
+                            new Geary.AccountProblemReport(
+                                current_account.information, error
+                            )
+                        );
+                    }
                 }
-            }
-        );
+            );
+            return false;
+        });
     }
 
     private async bool should_send() {
