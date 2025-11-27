@@ -46,6 +46,22 @@
     ],
     "modules": [
         {
+            "name": "libunwind",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/libunwind/libunwind.git",
+                    "branch": "master"
+                },
+                {
+                    "type": "script",
+                    "commands": [
+                        "autoreconf -sif"
+                    ]
+                }
+            ]
+        },
+        {
             "name" : "libproxy",
             "buildsystem" : "meson",
             "sources" : [
