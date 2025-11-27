@@ -354,7 +354,7 @@ engine_vala_args += [
 
 if libunwind_dep.found()
   engine_vala_args += [
-    '-D', 'HAVE_LIBUNWIND',
+    # '-D', 'HAVE_LIBUNWIND',
   ]
 endif
 
