@@ -131,8 +131,6 @@ flatpak:
     TEST_RUN_ARGS: $TEST_ARGS
     BUNDLE: geary-dev.flatpak
   extends: .flatpak
-  # This is broken, allow it to fail.
-  allow_failure: true
 
 ##
 # Stage: Deploy
