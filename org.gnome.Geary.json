@@ -1,6 +1,5 @@
 {
     "app-id": "org.gnome.Geary.Devel",
-    "branch": "master",
     "runtime": "org.gnome.Platform",
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
