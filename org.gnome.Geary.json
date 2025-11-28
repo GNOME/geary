@@ -46,11 +46,14 @@
     "modules": [
         {
             "name": "libunwind",
+            "config-opts": [
+                "--disable-tests"
+            ],
             "sources": [
                 {
                     "type": "git",
                     "url": "https://github.com/nielsdg/libunwind.git",
-                    "branch": "v1.8-stable"
+                    "branch": "1.8-with-elf-cherry-pick"
                 },
                 {
                     "type": "script",
