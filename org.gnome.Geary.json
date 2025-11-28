@@ -46,11 +46,14 @@
     "modules": [
         {
             "name": "libunwind",
+            "config-opts": [
+                "--disable-tests"
+            ],
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://github.com/libunwind/libunwind.git",
-                    "branch": "master"
+                    "url": "https://github.com/nielsdg/libunwind.git",
+                    "branch": "v1.8-stable"
                 },
                 {
                     "type": "script",
