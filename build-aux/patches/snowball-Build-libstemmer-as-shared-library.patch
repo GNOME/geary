@@ -1,4 +1,4 @@
-From 75c2c4c490ed0d52c4fca5a6c1184ea6eeb267f5 Mon Sep 17 00:00:00 2001
+From af11d074ac33454f3af895846c2a42564f583f41 Mon Sep 17 00:00:00 2001
 From: Niels De Graef <ndegraef@redhat.com>
 Date: Mon, 24 Nov 2025 00:58:18 +0100
 Subject: [PATCH] Build libstemmer as shared library
@@ -12,15 +12,15 @@ map to prevent any unwanted symbols from "leaking" into our codebase.
  create mode 100644 libstemmer/symbol.map
 
 diff --git a/GNUmakefile b/GNUmakefile
-index 38673c3..8bf593f 100644
+index df2efb6..d00b57f 100644
 --- a/GNUmakefile
 +++ b/GNUmakefile
 @@ -281,12 +281,12 @@ DART_BUILD_ARTIFACTS = dart/.dart_tool dart/pubspec.lock dart/.dart_deps
  JAVA_CLASSES = $(JAVA_SOURCES:.java=.class)
  JAVA_RUNTIME_CLASSES=$(JAVA_RUNTIME_SOURCES:.java=.class)
  
--CFLAGS=-g -O2 -W -Wall -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
-+CFLAGS=-g -fPIC -W -Wall -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
+-CFLAGS=-g -O2 -W -Wall -Wcast-qual -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
++CFLAGS=-g -fPIC -W -Wall -Wcast-qual -Wmissing-prototypes -Wmissing-declarations -Wshadow $(WERROR)
  CPPFLAGS=
  
  INCLUDES=-Iinclude
@@ -95,5 +95,5 @@ index 0000000..7a3d423
 +        *;
 +};
 -- 
-2.51.1
+2.52.0
 
