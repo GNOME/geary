@@ -1,7 +1,7 @@
 project(
   'vala-unit',
   [ 'vala', 'c' ],
-  version: '1.0',
+  version: '2.0',
   license: 'LGPL2.1+',
   meson_version: '>= 0.50',
 )
@@ -20,8 +20,8 @@ add_project_arguments(
   language: 'vala'
 )
 
-target_vala = '0.44'
-target_glib = '2.62'
+target_vala = '0.56'
+target_glib = '2.74'
 
 if not meson.get_compiler('vala').version().version_compare('>=' + target_vala)
   error('Vala does not meet minimum required version: ' + target_vala)
@@ -61,7 +61,7 @@ test_sources = files(
 )
 
 package_name = 'ValaUnit'
-package_version = '1.0'
+package_version = '2.0'
 package_full = '@0@-@1@'.format(package_name, package_version)
 package_vapi = '@0@-@1@'.format(meson.project_name(), package_version)
 package_gir = package_full + '.gir'

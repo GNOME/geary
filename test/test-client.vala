@@ -44,23 +44,23 @@ int main(string[] args) {
 
     // Keep this before other ClientWebView based tests since it tests
     // WebContext init
-    client.add_suite(new Accounts.ManagerTest().suite);
-    client.add_suite(new Application.CertificateManagerTest().suite);
-    client.add_suite(new Application.ClientTest().suite);
-    client.add_suite(new Application.ConfigurationTest().suite);
-    client.add_suite(new Components.WebViewTest().suite);
-    client.add_suite(new Components.ValidatorTest().suite);
-    client.add_suite(new Composer.WebViewTest().suite);
-    client.add_suite(new Composer.WidgetTest().suite);
-    client.add_suite(new Util.Cache.Test().suite);
-    client.add_suite(new Util.Email.Test().suite);
-    client.add_suite(new Util.JS.Test().suite);
+    client.add_suite(new Accounts.ManagerTest().steal_suite());
+    client.add_suite(new Application.CertificateManagerTest().steal_suite());
+    client.add_suite(new Application.ClientTest().steal_suite());
+    client.add_suite(new Application.ConfigurationTest().steal_suite());
+    client.add_suite(new Components.WebViewTest().steal_suite());
+    client.add_suite(new Components.ValidatorTest().steal_suite());
+    client.add_suite(new Composer.WebViewTest().steal_suite());
+    client.add_suite(new Composer.WidgetTest().steal_suite());
+    client.add_suite(new Util.Cache.Test().steal_suite());
+    client.add_suite(new Util.Email.Test().steal_suite());
+    client.add_suite(new Util.JS.Test().steal_suite());
 
     /*
      * Run the tests
      */
-    TestSuite root = TestSuite.get_root();
-    root.add_suite(client);
+    unowned TestSuite root = TestSuite.get_root();
+    root.add_suite((owned) client);
 
     int ret = -1;
     Idle.add(() => {

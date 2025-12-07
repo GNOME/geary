@@ -48,19 +48,19 @@ int main(string[] args) {
 
     switch (config.type) {
     case IMAP:
-        integration.add_suite(new Integration.Imap.ClientSession(config).suite);
+        integration.add_suite(new Integration.Imap.ClientSession(config).steal_suite());
         break;
 
     case SMTP:
-        integration.add_suite(new Integration.Smtp.ClientSession(config).suite);
+        integration.add_suite(new Integration.Smtp.ClientSession(config).steal_suite());
         break;
     }
 
     /*
      * Run the tests
      */
-    TestSuite root = TestSuite.get_root();
-    root.add_suite(integration);
+    unowned TestSuite root = TestSuite.get_root();
+    root.add_suite((owned) integration);
 
     MainLoop loop = new MainLoop();
 

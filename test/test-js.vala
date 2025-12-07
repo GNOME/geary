@@ -42,15 +42,15 @@ int main(string[] args) {
 
     TestSuite js = new TestSuite("js");
 
-    js.add_suite(new Components.PageStateTest().suite);
-    js.add_suite(new Composer.PageStateTest().suite);
-    js.add_suite(new ConversationPageStateTest().suite);
+    js.add_suite(new Components.PageStateTest().steal_suite());
+    js.add_suite(new Composer.PageStateTest().steal_suite());
+    js.add_suite(new ConversationPageStateTest().steal_suite());
 
     /*
      * Run the tests
      */
-    TestSuite root = TestSuite.get_root();
-    root.add_suite(js);
+    unowned TestSuite root = TestSuite.get_root();
+    root.add_suite((owned) js);
 
     int ret = -1;
     Idle.add(() => {

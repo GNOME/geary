@@ -17,8 +17,8 @@ int main(string[] args) {
     }
 
     GLib.TestSuite root = GLib.TestSuite.get_root();
-    root.add_suite(new MailMerge.TestReader().suite);
-    root.add_suite(new MailMerge.TestProcessor().suite);
+    root.add_suite(new MailMerge.TestReader().steal_suite());
+    root.add_suite(new MailMerge.TestProcessor().steal_suite());
 
     GLib.MainLoop loop = new GLib.MainLoop();
     int ret = -1;

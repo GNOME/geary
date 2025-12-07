@@ -52,9 +52,9 @@ valac = meson.get_compiler('vala')
 # Required libraries and other dependencies
 #
 
-target_glib = '2.68'
+target_glib = '2.74'
 target_gtk = '3.24.24'
-target_vala = '0.48.18'
+target_vala = '0.56'
 target_webkit = '2.30'
 
 if not valac.version().version_compare('>=' + target_vala)

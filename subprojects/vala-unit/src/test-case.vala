@@ -46,7 +46,7 @@ public abstract class ValaUnit.TestCase : GLib.Object, TestAssertions {
     public string name { get; private set; }
 
     /** The collection of GLib tests defined by this test case. */
-    public GLib.TestSuite suite { get; private set; }
+    protected GLib.TestSuite suite;
 
     /** Main loop context for this test case. */
     protected GLib.MainContext main_loop {
@@ -202,6 +202,15 @@ public abstract class ValaUnit.TestCase : GLib.Object, TestAssertions {
         throw new TestError.SKIPPED(
             message != null ? (string) message : "Test skipped"
         );
+    }
+
+    /**
+     * Steals the {@link GLib.TestSuite} that this test case wraps.
+     *
+     * After this method, you should *no longer* use this object!
+     */
+    public GLib.TestSuite steal_suite() {
+        return (owned) this.suite;
     }
 
 }

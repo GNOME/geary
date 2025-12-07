@@ -8,9 +8,9 @@
 int main(string[] args) {
     Test.init(ref args);
 
-    TestSuite root = TestSuite.get_root();
-    root.add_suite(new TestAssertions().suite);
-    root.add_suite(new CollectionAssertions().suite);
+    unowned TestSuite root = TestSuite.get_root();
+    root.add_suite(new TestAssertions().steal_suite());
+    root.add_suite(new CollectionAssertions().steal_suite());
 
     MainLoop loop = new MainLoop ();
 

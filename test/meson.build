@@ -126,6 +126,7 @@ test_integration_sources = [
 
 test_engine_dependencies = [
   config_dep,
+  glib,
   engine_internal_dep,
   vala_unit_dep,
 ]
@@ -151,6 +152,7 @@ test_engine_bin = executable('test-engine',
 
 test_client_dependencies = [
   config_dep,
+  glib,
   client_internal_dep,
   vala_unit_dep,
 ]
@@ -166,6 +168,7 @@ test_client_bin = executable('test-client',
 
 test_js_dependencies = [
   config_dep,
+  glib,
   client_internal_dep,
   vala_unit_dep,
 ]
@@ -185,6 +188,7 @@ test_integration_bin = executable('test-integration',
   test_integration_sources,
   dependencies: [
     config_dep,
+    glib,
     engine_dep,
     gee,
     gio,
