@@ -23,7 +23,6 @@ lib = static_library(
   'util',
   sources: lib_src,
   dependencies: plugin_dependencies,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: plugin_c_args,
   install: false
@@ -34,7 +33,6 @@ plugin = shared_module(
   sources: plugin_src,
   dependencies: plugin_dependencies,
   link_with: lib,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: plugin_c_args,
   install: true,
@@ -56,7 +54,6 @@ plugin_test = executable(
   test_src,
   dependencies: plugin_dependencies + [ vala_unit_dep ],
   link_with: lib,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: plugin_c_args,
   install: false

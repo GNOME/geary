@@ -149,7 +149,7 @@ public class Plugin.DesktopNotifications :
     }
 
     private void notify_general(Folder folder, int total, int added) {
-        GLib.Icon icon = new GLib.ThemedIcon("%s-symbolic".printf(global::Application.Client.APP_ID));
+        GLib.Icon icon = new GLib.ThemedIcon("%s-symbolic".printf(Config.APP_ID));
         string title = to_notitication_title(folder.account, total);
         string body = ngettext(
             /// Notification body when multiple messages have been

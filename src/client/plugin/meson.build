@@ -4,6 +4,7 @@
 #
 
 plugin_dependencies = [
+  config_dep,
   folks,
   gdk,
   client_dep,

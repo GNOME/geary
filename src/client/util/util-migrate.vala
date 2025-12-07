@@ -248,9 +248,9 @@ namespace Util.Migrate {
 
     public static void old_app_config(Settings newSettings, string old_app_id = OLD_APP_ID) {
         SettingsSchemaSource schemaSource = SettingsSchemaSource.get_default();
-        if (Application.Client.GSETTINGS_DIR != null) {
+        if (Config.GSETTINGS_DIR != null) {
             try {
-                schemaSource = new SettingsSchemaSource.from_directory(Application.Client.GSETTINGS_DIR, null, false);
+                schemaSource = new SettingsSchemaSource.from_directory(Config.GSETTINGS_DIR, null, false);
             } catch (Error e) {
                 // If it didn't work, do nothing (i.e. use the default GSettings dir)
             }

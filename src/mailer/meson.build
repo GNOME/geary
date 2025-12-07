@@ -3,6 +3,7 @@ mailer_sources = files(
 )
 
 mailer_dependencies = [
+  config_dep,
   gee,
   gmime,
   webkit2gtk,
@@ -12,7 +13,6 @@ mailer_dependencies = [
 mailer = executable('geary-mailer',
   mailer_sources,
   dependencies: mailer_dependencies,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
 )

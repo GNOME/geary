@@ -6,28 +6,13 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
-extern const string GETTEXT_PACKAGE;
-public extern const string _APP_ID;
-public extern const string _BUILD_ROOT_DIR;
-public extern const string _GSETTINGS_DIR;
-public extern const string _INSTALL_PREFIX;
-public extern const string _NAME_SUFFIX;
-extern const string _PLUGINS_DIR;
-extern const string _PROFILE;
-extern const string _REVNO;
-public extern const string _SOURCE_ROOT_DIR;
-public extern const string _VERSION;
-extern const string _WEB_EXTENSIONS_DIR;
-
 
 /**
  * The client application's main point of entry and desktop integration.
  */
 public class Application.Client : Gtk.Application {
 
-    public const string NAME = "Geary" + _NAME_SUFFIX;
-    public const string APP_ID = _APP_ID;
+    public const string NAME = "Geary" + Config.NAME_SUFFIX;
     public const string RESOURCE_BASE_PATH = "/org/gnome/Geary";
     public const string SCHEMA_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
@@ -36,12 +21,6 @@ public class Application.Client : Gtk.Application {
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
-
-    public const string VERSION = _VERSION;
-    public const string INSTALL_PREFIX = _INSTALL_PREFIX;
-    public const string GSETTINGS_DIR = _GSETTINGS_DIR;
-    public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
-    public const string BUILD_ROOT_DIR = _BUILD_ROOT_DIR;
 
     // keep these in sync with meson_options.txt
     public const string PROFILE_RELEASE = "release";
@@ -240,7 +219,7 @@ public class Application.Client : Gtk.Application {
 
     /** Returns the compile-time configured installation directory. */
     internal GLib.File install_prefix {
-        get; private set; default = GLib.File.new_for_path(INSTALL_PREFIX);
+        get; private set; default = GLib.File.new_for_path(Config.INSTALL_PREFIX);
     }
 
 
@@ -264,9 +243,9 @@ public class Application.Client : Gtk.Application {
             new Gee.LinkedList<RuntimeDetail?>();
 
         /// Application runtime information label
-        info.add({ _("Geary version"), VERSION });
+        info.add({ _("Geary version"), Config.VERSION });
         /// Application runtime information label
-        info.add({ _("Geary revision"), _REVNO });
+        info.add({ _("Geary revision"), Config.REVNO });
         /// Application runtime information label
         info.add({ _("GTK version"),
                     "%u.%u.%u".printf(
@@ -307,7 +286,7 @@ public class Application.Client : Gtk.Application {
             });
 
         /// Application runtime information label
-        info.add({ _("Installation prefix"), INSTALL_PREFIX });
+        info.add({ _("Installation prefix"), Config.INSTALL_PREFIX });
 
         return info;
     }
@@ -315,7 +294,7 @@ public class Application.Client : Gtk.Application {
 
     public Client() {
         Object(
-            application_id: APP_ID,
+            application_id: Config.APP_ID,
             resource_base_path: RESOURCE_BASE_PATH,
             flags: (
                 GLib.ApplicationFlags.HANDLES_OPEN |
@@ -350,7 +329,7 @@ public class Application.Client : Gtk.Application {
         }
         if (options.contains(OPTION_VERSION)) {
             GLib.stdout.printf(
-                "%s: %s\n", this.binary, Client.VERSION
+                "%s: %s\n", this.binary, Config.VERSION
             );
             ret = 0;
         }
@@ -359,11 +338,11 @@ public class Application.Client : Gtk.Application {
 
     public override void startup() {
         Environment.set_application_name(NAME);
-        Environment.set_prgname(APP_ID);
-        Util.I18n.init(GETTEXT_PACKAGE, this.binary);
+        Environment.set_prgname(Config.APP_ID);
+        Util.I18n.init(Config.GETTEXT_PACKAGE, this.binary);
         Util.Date.init();
 
-        Configuration.init(this.is_installed, GSETTINGS_DIR);
+        Configuration.init(this.is_installed, Config.GSETTINGS_DIR);
 
         // Add application's actions before chaining up so they are
         // present when the application is first registered on the
@@ -381,7 +360,7 @@ public class Application.Client : Gtk.Application {
         this.autostart = new StartupManager(this);
 
         // Ensure all geary windows have an icon
-        Gtk.Window.set_default_icon_name(APP_ID);
+        Gtk.Window.set_default_icon_name(Config.APP_ID);
 
         // Application accels
         add_app_accelerators(Action.Application.COMPOSE, { "<Ctrl>N" });
@@ -562,8 +541,8 @@ public class Application.Client : Gtk.Application {
             "authors", AUTHORS,
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", APP_ID,
-            "version", _REVNO == "" ? VERSION : "%s (%s)".printf(VERSION, _REVNO),
+            "logo-icon-name", Config.APP_ID,
+            "version", Config.REVNO == "" ? Config.VERSION : "%s (%s)".printf(Config.VERSION, Config.REVNO),
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,
             "title", _("About %s").printf(NAME),
@@ -794,14 +773,14 @@ public class Application.Client : Gtk.Application {
     public GLib.File get_resource_directory() {
         return (is_installed)
             ? this.install_prefix.get_child("share").get_child("geary")
-            : GLib.File.new_for_path(SOURCE_ROOT_DIR);
+            : GLib.File.new_for_path(Config.SOURCE_ROOT_DIR);
     }
 
     /** Returns the location of the application's desktop files. */
     public GLib.File get_desktop_directory() {
         return (is_installed)
             ? this.install_prefix.get_child("share").get_child("applications")
-            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("desktop");
+            : GLib.File.new_for_path(Config.BUILD_ROOT_DIR).get_child("desktop");
     }
 
     /**
@@ -813,8 +792,8 @@ public class Application.Client : Gtk.Application {
      */
     public GLib.File get_web_extensions_dir() {
         return (is_installed)
-            ? GLib.File.new_for_path(_WEB_EXTENSIONS_DIR)
-            : GLib.File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+            ? GLib.File.new_for_path(Config.WEB_EXTENSIONS_DIR)
+            : GLib.File.new_for_path(Config.BUILD_ROOT_DIR).get_child("src");
     }
 
     /**
@@ -826,8 +805,8 @@ public class Application.Client : Gtk.Application {
      */
     public GLib.File get_app_plugins_dir() {
         return (is_installed)
-            ? GLib.File.new_for_path(_PLUGINS_DIR)
-            : GLib.File.new_for_path(BUILD_ROOT_DIR)
+            ? GLib.File.new_for_path(Config.PLUGINS_DIR)
+            : GLib.File.new_for_path(Config.BUILD_ROOT_DIR)
                   .get_child("src").get_child("client").get_child("plugin");
     }
 
@@ -909,7 +888,7 @@ public class Application.Client : Gtk.Application {
         GLib.Notification error = new GLib.Notification(summary);
         error.set_body(body);
         error.set_icon(
-            new GLib.ThemedIcon("%s-symbolic".printf(Client.APP_ID))
+            new GLib.ThemedIcon("%s-symbolic".printf(Config.APP_ID))
         );
         send_notification(ERROR_NOTIFICATION_ID, error);
         this.error_notification = error;
@@ -966,9 +945,9 @@ public class Application.Client : Gtk.Application {
                 message(
                     "%s %s%s prefix=%s exec_dir=%s is_installed=%s",
                     NAME,
-                    VERSION,
-                    _REVNO != "" ? " (%s)".printf(_REVNO) : "",
-                    INSTALL_PREFIX,
+                    Config.VERSION,
+                    Config.REVNO != "" ? " (%s)".printf(Config.REVNO) : "",
+                    Config.INSTALL_PREFIX,
                     exec_dir.get_path(),
                     this.is_installed.to_string()
                 );
@@ -1159,9 +1138,9 @@ public class Application.Client : Gtk.Application {
         // separate directories since they have different app ids, and
         // hence don't need the suffix.
         return (
-            _PROFILE == PROFILE_RELEASE || this.is_flatpak_sandboxed
+            Config.PROFILE == PROFILE_RELEASE || this.is_flatpak_sandboxed
             ? "geary"
-            : "geary-" + _PROFILE
+            : "geary-" + Config.PROFILE
         );
     }
 
@@ -1227,7 +1206,7 @@ public class Application.Client : Gtk.Application {
                 File exec_dir = this.exec_dir;
                 string[] argv = new string[3];
                 argv[0] = "yelp";
-                argv[1] = Client.SOURCE_ROOT_DIR + "/help/C/";
+                argv[1] = Config.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(
                         exec_dir.get_path(),

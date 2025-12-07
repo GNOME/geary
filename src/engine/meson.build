@@ -318,6 +318,7 @@ engine_sources = [
 ]
 
 engine_dependencies = [
+  config_dep,
   gee,
   gio,
   glib,
@@ -374,7 +375,6 @@ endif
 engine_lib = static_library('geary-engine',
   engine_sources,
   dependencies: engine_dependencies,
-  include_directories: config_h_dir,
   vala_args: engine_vala_args,
   c_args: engine_c_args,
 )

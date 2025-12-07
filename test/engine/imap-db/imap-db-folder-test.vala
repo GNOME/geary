@@ -44,7 +44,7 @@ class Geary.ImapDB.FolderTest : TestCase {
         this.account = new Account(
             config,
             this.tmp_dir,
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql")
         );
         this.account.open_async.begin(
             null,
@@ -375,8 +375,8 @@ class Geary.ImapDB.FolderTest : TestCase {
                                                 beyond_threshold.to_unix().to_string())
             );
             this.account.db.exec(
-                "INSERT INTO MessageLocationTable " + 
-                "    (id, message_id, folder_id, ordering, remove_marker) " + 
+                "INSERT INTO MessageLocationTable " +
+                "    (id, message_id, folder_id, ordering, remove_marker) " +
                 "VALUES (%d, %d, 1, %d, 1);".printf(i, i, i)
             );
         }

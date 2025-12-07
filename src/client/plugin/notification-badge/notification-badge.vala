@@ -54,7 +54,7 @@ public class Plugin.NotificationBadge :
         this.entry = new UnityLauncherEntry(
             connection,
             path + "/plugin/notificationbadge",
-            global::Application.Client.APP_ID + ".desktop"
+            Config.APP_ID + ".desktop"
         );
 
         FolderStore folder_store = yield this.folders.get_folder_store();

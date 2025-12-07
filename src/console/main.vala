@@ -5,8 +5,6 @@ n * Copyright 2016 Software Freedom Conservancy Inc.
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-extern const string _VERSION;
-
 errordomain CommandException {
     USAGE,
     STATE
@@ -415,7 +413,7 @@ class ImapConsole : Gtk.Window {
 
         Gee.HashMap<string, string> fields = new Gee.HashMap<string, string>();
         fields.set("name", "geary-console");
-        fields.set("version", _VERSION);
+        fields.set("version", Config.VERSION);
 
         this.cx.send_command(
             new Geary.Imap.IdCommand(fields, null)

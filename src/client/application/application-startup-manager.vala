@@ -79,7 +79,7 @@ public class Application.StartupManager : GLib.Object {
             options.insert("autostart", new GLib.Variant(
                 "b", autostart));
             options.insert("commandline", new GLib.Variant.strv(cmdline));
-            var handle = background.request_background(_APP_ID, options);
+            var handle = background.request_background(Config.APP_ID, options);
             yield bus.get_proxy<portal.Request>(BUS_NAME, handle);
         } catch (GLib.Error error) {
             warning("Failed to request to run in background: %s", error.message);

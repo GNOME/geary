@@ -20,7 +20,7 @@ public class Components.WebViewTest : TestCase {
         config.enable_debug = true;
         WebView.init_web_context(
             config,
-            File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
+            File.new_for_path(Config.BUILD_ROOT_DIR).get_child("src"),
             File.new_for_path("/tmp"), // XXX use something better here
             false // https://bugs.webkit.org/show_bug.cgi?id=213174
         );

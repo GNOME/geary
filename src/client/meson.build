@@ -152,6 +152,7 @@ client_vala_sources = files(
 )
 
 client_dependencies = [
+  config_dep,
   enchant,
   folks,
   gck,
@@ -199,7 +200,6 @@ client_lib = shared_library(
   client_package,
   client_vala_sources + geary_resources,
   dependencies: client_dependencies,
-  include_directories: config_h_dir,
   vala_args: client_vala_args,
   c_args: geary_c_args,
   install: true,

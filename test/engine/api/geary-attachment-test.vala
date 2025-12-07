@@ -5,9 +5,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
-extern const string _SOURCE_ROOT_DIR;
-
 class Geary.AttachmentTest : TestCase {
 
     private const string CONTENT_TYPE = "image/svg+xml";
@@ -64,7 +61,7 @@ class Geary.AttachmentTest : TestCase {
         this.default_type = Mime.ContentType.ATTACHMENT_DEFAULT;
         this.content_disposition = new Mime.ContentDisposition("attachment", null);
 
-        File source = File.new_for_path(_SOURCE_ROOT_DIR);
+        File source = File.new_for_path(Config.SOURCE_ROOT_DIR);
         this.file = source.get_child(FILE_PATH);
     }
 

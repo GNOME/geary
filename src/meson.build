@@ -1,24 +1,31 @@
 # Build source configuration
-config_h_dir = include_directories('.')
-
 conf = configuration_data()
+# keep this in sync with config.vapi
 conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
-conf.set_quoted('_APP_ID', geary_id)
-conf.set_quoted('_BUILD_ROOT_DIR', meson.project_build_root())
-conf.set_quoted('_GSETTINGS_DIR', meson.project_build_root() / 'desktop')
-conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
-conf.set_quoted('_ISO_CODE_3166_XML', iso_3166_xml)
-conf.set_quoted('_ISO_CODE_639_XML', iso_639_xml)
-conf.set_quoted('_LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
-conf.set_quoted('_NAME_SUFFIX', name_suffix)
-conf.set_quoted('_PLUGINS_DIR', plugins_dir)
-conf.set_quoted('_PROFILE', profile)
-conf.set_quoted('_REVNO', revno)
-conf.set_quoted('_SOURCE_ROOT_DIR', meson.project_source_root())
-conf.set_quoted('_VERSION', geary_version)
-conf.set_quoted('_WEB_EXTENSIONS_DIR', web_extensions_dir)
-configure_file(output: 'config.h', configuration: conf)
+conf.set_quoted('APP_ID', geary_id)
+conf.set_quoted('BUILD_ROOT_DIR', meson.project_build_root())
+conf.set_quoted('GSETTINGS_DIR', meson.project_build_root() / 'desktop')
+conf.set_quoted('INSTALL_PREFIX', geary_prefix)
+conf.set_quoted('ISO_CODE_3166_XML', iso_3166_xml)
+conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
+conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
+conf.set_quoted('NAME_SUFFIX', name_suffix)
+conf.set_quoted('PLUGINS_DIR', plugins_dir)
+conf.set_quoted('PROFILE', profile)
+conf.set_quoted('REVNO', revno)
+conf.set_quoted('SOURCE_ROOT_DIR', meson.project_source_root())
+conf.set_quoted('VERSION', geary_version)
+conf.set_quoted('WEB_EXTENSIONS_DIR', web_extensions_dir)
+config_h = configure_file(output: 'config.h', configuration: conf)
+
+config_dep = declare_dependency(
+  sources: config_h,
+  dependencies: [
+    valac.find_library('config', dirs: vapi_dir),
+  ],
+  include_directories: include_directories('.'),
+)
 
 # Common valac options
 geary_vala_args = [
@@ -68,12 +75,12 @@ web_process_sources = files(
 web_process = library('geary-web-process',
   web_process_sources,
   dependencies: [
+    config_dep,
     engine_dep,
     gee,
     gmime,
     webkit2gtk_web_extension,
   ],
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
   install: true,
@@ -158,6 +165,7 @@ foreach dep : valadoc_dependencies
     valadoc_dep_args += 'libhandy-1'
   endif
 endforeach
+valadoc_dep_args += [ '--pkg', 'config' ]
 valadoc_dep_args += [ '--pkg', 'icu-uc' ]
 valadoc_dep_args += [ '--pkg', 'libstemmer' ]
 valadoc_dep_args += [ '--pkg', 'posix' ]

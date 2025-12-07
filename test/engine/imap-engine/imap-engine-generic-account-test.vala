@@ -55,7 +55,7 @@ public class Geary.ImapEngine.GenericAccountTest : TestCase {
         this.local_account = new ImapDB.Account(
             config,
             this.tmp_dir,
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql")
         );
         this.local_account.open_async.begin(null, this.async_completion);
         this.local_account.open_async.end(async_result());

@@ -576,7 +576,7 @@ public class Application.MainWindow :
         load_config(application.config);
         restore_saved_window_state();
 
-        if (_PROFILE != Client.PROFILE_RELEASE) {
+        if (Config.PROFILE != Client.PROFILE_RELEASE) {
             this.get_style_context().add_class("devel");
         }
 

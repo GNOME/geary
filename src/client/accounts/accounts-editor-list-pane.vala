@@ -79,7 +79,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane, CommandPane {
 
     public EditorListPane(Editor editor) {
         this.editor = editor;
-        this.welcome_icon.icon_name = Application.Client.APP_ID;
+        this.welcome_icon.icon_name = Config.APP_ID;
 
         // keep our own copy of this so we can disconnect from its signals
         // without worrying about the editor's lifecycle

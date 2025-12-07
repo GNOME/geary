@@ -44,7 +44,7 @@ class Geary.ImapDB.AccountTest : TestCase {
         this.account = new Account(
             config,
             this.tmp_dir,
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql")
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql")
         );
         this.account.open_async.begin(
             null,

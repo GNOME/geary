@@ -34,7 +34,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
     public void open_new() throws Error {
         Database db = new Database(
             this.tmp_dir.get_child("test.db"),
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql"),
             this.tmp_dir.get_child("attachments"),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
@@ -94,7 +94,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
 
         Database db = new Database(
             db_file,
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql"),
             attachments_dir,
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
@@ -128,7 +128,7 @@ class Geary.ImapDB.DatabaseTest : TestCase {
     public void utf8_case_insensitive_collation() throws GLib.Error {
         Database db = new Database(
             this.tmp_dir.get_child("test.db"),
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql"),
             this.tmp_dir.get_child("attachments"),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)

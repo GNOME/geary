@@ -1318,7 +1318,7 @@ public class Composer.Widget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         // User-Agent
-        email.mailer = Environment.get_prgname() + "/" + Application.Client.VERSION;
+        email.mailer = Environment.get_prgname() + "/" + Config.VERSION;
 
         return email;
     }

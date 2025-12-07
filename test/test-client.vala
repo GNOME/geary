@@ -16,7 +16,7 @@ int main(string[] args) {
     Environment.set_variable("GSETTINGS_BACKEND", "memory", true);
 
     // Let GSettings know where to find the dev schema
-    Environment.set_variable("GSETTINGS_SCHEMA_DIR", _GSETTINGS_DIR, true);
+    Environment.set_variable("GSETTINGS_SCHEMA_DIR", Config.GSETTINGS_DIR, true);
 
     /*
      * Initialise all the things.
@@ -27,7 +27,7 @@ int main(string[] args) {
     Gtk.init(ref args);
     Test.init(ref args);
 
-    IconFactory.init(GLib.File.new_for_path(_SOURCE_ROOT_DIR));
+    IconFactory.init(GLib.File.new_for_path(Config.SOURCE_ROOT_DIR));
     Geary.RFC822.init();
     Geary.HTML.init();
     Geary.Logging.init();

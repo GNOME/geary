@@ -61,7 +61,7 @@ public class Accounts.Editor : Gtk.Dialog {
     public Editor(Application.Client application, Gtk.Window parent) {
         this.application = application;
         this.transient_for = parent;
-        this.icon_name = Application.Client.APP_ID;
+        this.icon_name = Config.APP_ID;
 
         this.accounts = application.controller.account_manager;
         this.certificates = application.controller.certificate_manager;

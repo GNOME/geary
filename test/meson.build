@@ -125,6 +125,7 @@ test_integration_sources = [
 # Engine tests
 
 test_engine_dependencies = [
+  config_dep,
   engine_internal_dep,
   vala_unit_dep,
 ]
@@ -142,7 +143,6 @@ endif
 test_engine_bin = executable('test-engine',
   test_engine_sources + libmock_sources,
   dependencies: test_engine_dependencies,
-  include_directories: config_h_dir,
   vala_args: test_engine_vala_args,
   c_args: geary_c_args,
 )
@@ -150,6 +150,7 @@ test_engine_bin = executable('test-engine',
 # Client tests
 
 test_client_dependencies = [
+  config_dep,
   client_internal_dep,
   vala_unit_dep,
 ]
@@ -158,13 +159,13 @@ test_client_dependencies += client_dependencies
 test_client_bin = executable('test-client',
   test_client_sources + libmock_sources,
   dependencies: test_client_dependencies,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
   build_rpath: client_build_dir,
 )
 
 test_js_dependencies = [
+  config_dep,
   client_internal_dep,
   vala_unit_dep,
 ]
@@ -173,7 +174,6 @@ test_js_dependencies += client_dependencies
 test_js_bin = executable('test-js',
   test_js_sources + libmock_sources,
   dependencies: test_js_dependencies,
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
   build_rpath: client_build_dir,
@@ -184,6 +184,7 @@ test_js_bin = executable('test-js',
 test_integration_bin = executable('test-integration',
   test_integration_sources,
   dependencies: [
+    config_dep,
     engine_dep,
     gee,
     gio,
@@ -191,7 +192,6 @@ test_integration_bin = executable('test-integration',
     vala_unit_dep,
     webkit2gtk,
   ],
-  include_directories: config_h_dir,
   vala_args: geary_vala_args,
   c_args: geary_c_args,
 )

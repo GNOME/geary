@@ -35,7 +35,7 @@ class Geary.ContactStoreImplTest : TestCase {
 
         this.db = new ImapDB.Database(
             db_file,
-            GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            GLib.File.new_for_path(Config.SOURCE_ROOT_DIR).get_child("sql"),
             attachments_dir,
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM)
