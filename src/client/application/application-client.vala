@@ -18,9 +18,6 @@ public class Application.Client : Gtk.Application {
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright © 2016 Software Freedom Conservancy Inc.");
     public const string COPYRIGHT_2 = _("Copyright © 2016-2021 Geary Development Team.");
-    public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
-    public const string WEBSITE_LABEL = _("Visit the Geary web site");
-    public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
 
     // keep these in sync with meson_options.txt
     public const string PROFILE_RELEASE = "release";
@@ -543,8 +540,8 @@ public class Application.Client : Gtk.Application {
             "license-type", Gtk.License.LGPL_2_1,
             "logo-icon-name", Config.APP_ID,
             "version", Config.REVNO == "" ? Config.VERSION : "%s (%s)".printf(Config.VERSION, Config.REVNO),
-            "website", WEBSITE,
-            "website-label", WEBSITE_LABEL,
+            "website", "https://gitlab.gnome.org/GNOME/geary/-/wikis",
+            "website-label", _("Visit the Geary web site"),
             "title", _("About %s").printf(NAME),
             // Translators: add your name and email address to receive
             // credit in the About dialog For example: Yamada Taro

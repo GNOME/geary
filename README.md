@@ -8,7 +8,7 @@ Geary is an email application built around conversations, for the
 GNOME desktop. It allows you to read, find and send email with a
 straight-forward, modern interface.
 
-Visit https://wiki.gnome.org/Apps/Geary for more information.
+Visit https://gitlab.gnome.org/GNOME/geary/-/wikis for more information.
 
 **GitHub users please note**: Bug reports, code contributions and
 translations are managed using GNOME's infrastructure, so we cannot
@@ -27,7 +27,7 @@ and the licence granted by its copyright holders for redistribution.
 Getting in Touch
 ----------------
 
- * Geary wiki: https://wiki.gnome.org/Apps/Geary
+ * Geary wiki: https://gitlab.gnome.org/GNOME/geary/-/wikis
  * Support and discussion: See the `geary` tag on [GNOME Discourse](https://discourse.gnome.org/tags/c/applications/7/geary)
  * Matrix channel: [#geary:gnome.org](https://gnome.element.io/#/room/#geary:gnome.org)
 
@@ -43,11 +43,11 @@ Contributing to Geary
 
 Want to help improve Geary? Here are some ways to contribute:
 
- * Bug reporting: https://wiki.gnome.org/Apps/Geary/ReportingABug
- * Translating:   https://wiki.gnome.org/Apps/Geary/Translating
- * Development:   https://wiki.gnome.org/Apps/Geary/Development
- * Donate:        https://wiki.gnome.org/Apps/Geary/Donate
+ * Bug reporting: https://gitlab.gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-Features
+ * Translating:   https://gitlab.gnome.org/GNOME/geary/-/wikis/Translating
+ * Development:   https://gitlab.gnome.org/GNOME/geary/-/wikis/Development
+ * Donate:        https://donate.gnome.org
 
 ---
-Copyright © 2016 Software Freedom Conservancy Inc.  
+Copyright © 2016 Software Freedom Conservancy Inc.
 Copyright © 2017-2020 Michael Gratton <mike@vee.net>

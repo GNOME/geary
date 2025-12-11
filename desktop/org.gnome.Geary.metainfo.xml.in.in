@@ -34,12 +34,11 @@
     </ul>
   </description>
 
-  <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
-  <url type="help">https://wiki.gnome.org/Apps/Geary/Documentation</url>
-  <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
+  <url type="homepage">https://gitlab.gnome.org/GNOME/geary/-/wikis</url>
+  <url type="faq">https://gitlab.gnome.org/GNOME/geary/-/wikis/FAQ</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/geary/-/issues</url>
   <url type="vcs-browser">https://gitlab.gnome.org/GNOME/geary/</url>
-  <url type="translate">https://wiki.gnome.org/TranslationProject</url>
+  <url type="translate">https://gitlab.gnome.org/GNOME/geary/-/wikis/Translating</url>
   <url type="donation">https://gnome.org/donate</url>
 
   <screenshots>
