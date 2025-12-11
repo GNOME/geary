@@ -74,7 +74,7 @@ build.container.fedora@x86_64:
       libgee-devel
       libhandy1-devel
       libicu-devel
-      libpeas1-devel
+      libpeas-devel
       libsecret-devel
       libstemmer-devel
       libunwind-devel
@@ -94,7 +94,7 @@ build.container.fedora@x86_64:
     # release branch name to ensure that a new image will
     # be created, tailored for the stable branch.
     BRANCH_NAME: 'main'
-    CONTAINER_TAG: '2025-11-23.0'
+    CONTAINER_TAG: '2025-12-11.0'
     FEDORA_VERSION: latest
     # Derive FDO variables from this automatically.
     # DO NOT edit, instead change the variables above

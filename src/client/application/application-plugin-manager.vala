@@ -89,10 +89,13 @@ public class Application.PluginManager : GLib.Object {
                                Client application,
                                PluginGlobals globals) throws GLib.Error {
             var app_impl = new ApplicationImpl(application, this, globals);
-            var instance = engine.create_extension(
+            var app_impl_val = GLib.Value(typeof(ApplicationImpl));
+            app_impl_val.set_object(app_impl);
+            var instance = engine.create_extension_with_properties(
                 info,
                 typeof(Plugin.PluginBase),
-                "plugin_application", app_impl
+                { "plugin_application" },
+                { app_impl_val }
             ) as Plugin.PluginBase;
             if (instance == null) {
                 throw new Plugin.Error.NOT_SUPPORTED(
@@ -594,7 +597,9 @@ public class Application.PluginManager : GLib.Object {
         controller.composer_deregistered.connect(this.on_composer_deregistered);
 
         string[] optional_names = this.config.get_optional_plugins();
-        foreach (Peas.PluginInfo info in this.plugin_engine.get_plugin_list()) {
+        for (uint i = 0; i < this.plugin_engine.get_n_items(); i++) {
+            var info = (Peas.PluginInfo) this.plugin_engine.get_item(i);
+
             string name = info.get_module_name();
             try {
                 if (info.is_available()) {
@@ -638,7 +643,9 @@ public class Application.PluginManager : GLib.Object {
 
     public Gee.Collection<Peas.PluginInfo> get_optional_plugins() {
         var plugins = new Gee.LinkedList<Peas.PluginInfo>();
-        foreach (Peas.PluginInfo plugin in this.plugin_engine.get_plugin_list()) {
+        for (uint i = 0; i < this.plugin_engine.get_n_items(); i++) {
+            var plugin = (Peas.PluginInfo) this.plugin_engine.get_item(i);
+
             try {
                 plugin.is_available();
                 if (!is_autoload(plugin)) {
