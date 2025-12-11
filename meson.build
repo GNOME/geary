@@ -1,7 +1,7 @@
 project('geary', [ 'vala', 'c' ],
   version: '46.0',
   license: 'LGPL-2.1-or-later',
-  meson_version: '>= 0.59',
+  meson_version: '>= 1.7',
 )
 
 # Determine the type of build
