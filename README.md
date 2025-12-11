@@ -34,9 +34,9 @@ Getting in Touch
 Code Of Conduct
 ---------------
 
-We follow the [Contributor Covenant](./code-of-conduct.md) as our
-Code of Conduct. All communications in project spaces are expected to
-adhere to it.
+As Geary is part of the GNOME community (and is hosted on its infrastructure),
+it follows the [GNOME Code of Conduct](https://conduct.gnome.org/). All
+communications in project spaces are expected to adhere to it.
 
 Contributing to Geary
 ---------------------
