@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2025-06-09 19:33+0000\n"
-"PO-Revision-Date: 2025-06-09 22:43+0200\n"
+"POT-Creation-Date: 2025-12-12 00:25+0000\n"
+"PO-Revision-Date: 2025-12-12 08:33+0100\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -22,117 +22,54 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 2.2.1\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Pošlji z elektronsko pošto"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "Pošlji datoteke s programom Geary"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "Elektronska pošta"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
-#: src/client/application/application-client.vala:33
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
+#: src/client/application/application-client.vala:18
 msgid "Send and receive email"
 msgstr "Prejemanje in pošiljanje sporočil"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr ""
 "Email;elektronska pošta;epošta;e-pošta;pošta;sporočila;email;mail;geary;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Razvojna skupina Geary"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"Program Geary je odjemalec elektronske pošte za namizje GNOME, zasnovan za "
-"napredno zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil "
-"v preglednem modernem vmesniku."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"Sistem pogovorov omogoča branje niza sporočil brez odvečnega klikanja med "
-"sporočili."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "Program Geary omogoča:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Hitro nastavljanje računov elektronske pošte"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "Zbiranje povezanih sporočil v niti pogovora"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Hitro iskanje po besedilu sporočil s ključnimi besedami"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "Zmogljivo skladanje sporočil v besedilnem ali oblikovanem zapisu HTML"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Namizna obvestila o prispeli pošti"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
-"Podprti so sistemi spletne pošte, kot so Gmail, Yahoo!, Outlook.com in drugi "
-"strežniki IMAP"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "Prikaz sporočil, zbranih v pogovorno nit"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "Program Geary z odprtim oknom skladalnika vsebine"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
 "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;elektronska pošta;e-pošta;e-"
 "sporočilo;e-sporočila;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Sestavi sporočilo"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Novo okno"
 
@@ -189,14 +126,10 @@ msgid "True if we should display a short preview of each message."
 msgstr "Izbrano, če naj bo prikazan kratek predogled vsakega sporočila."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
-msgid "Unset colors provided in HTML emails"
-msgstr "Nenastavljene barve, ki so na voljo v e-poštnih sporočilih HTML"
-
-#: desktop/org.gnome.Geary.gschema.xml:45
 msgid "Override colors in HTML emails"
 msgstr "Preglasi barve v e-poštnih sporočilih HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:46
+#: desktop/org.gnome.Geary.gschema.xml:45
 msgid ""
 "Overrides the original colors in HTML messages to integrate better with the "
 "app theme."
@@ -204,19 +137,19 @@ msgstr ""
 "Preglasi izvirne barve v sporočilih HTML, da se bolje integrira s temo "
 "programa."
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Privzeto premakni sporočila"
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "Ob označevanju sporočila ga premaknite v ciljno mapo."
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Omogoči eno-tipkovne bližnjice"
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -224,11 +157,11 @@ msgstr ""
 "Omogoči tipkovne bližnjice za vodenje elektronske pošte, ki ne zahtevajo "
 "pritisnjene tipke <CTRL>, kot je to mogoče v programu Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:65
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "Seznam jezikov, uporabljenih za preverjanje črkovanja"
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -236,11 +169,11 @@ msgstr ""
 "Seznam jezikovnih določil POSIX, z izpraznjenim seznamom za preverjanje "
 "črkovanja, in praznim seznamom privzeto določenih jezikih namizja."
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Jeziki na seznamu preverjalnikov črkovanja"
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -248,72 +181,72 @@ msgstr ""
 "Seznam jezikov, ki so vedno na seznamu pojavnega okna za preverjanje "
 "črkovanja."
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr "Ohrani delovanje programa v ozadju ob zagonu in po zapiranju"
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "Izbrana možnost omogoči delovanje programa v ozadju"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Vprašaj pred odpiranjem priloge"
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr ""
 "Zahteva potrditev pred odpiranjem pogovornega okna za odpiranje priloge."
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Ali naj bodo sporočila oblikovana v zapisu HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Izbrana možnost omogoči oblikovanje HTML; neizbrana ohrani neoblikovano "
 "besedilo."
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Priporočljiva strategija iskanja po celotnem besedilu sporočil"
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Ustrezne vrednosti so »natančno«, »zadržano«, »agresivno« in »splošno«."
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "Premakni žarišče s seznama pogovorov"
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "Raven približanja vsebine v pogovornem pogledu."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "Velikost odpetega okna skladalnika"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "Zadnja zabeležena velikost odpetega okna skladalnika."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Dovoli nalaganje slik z navedenih domen"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Slike s teh domen bodo prikazane v sporočilih"
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Razveljavi zamik pošiljanja sporočila"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -321,34 +254,97 @@ msgstr ""
 "Čas v sekundah preden je sporočilo dejansko poslano. Vrednost 0 onemogoči to "
 "možnost."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Čas prikaza hitrega obvestila"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Čas v sekundah, ki določa trajanje prikaza obvestila."
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Seznam izbirnih vstavkov"
 
-#: desktop/org.gnome.Geary.gschema.xml:136
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Vstavki na tem seznamu bodo naloženi ob zagonu programa."
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "Ali so bile prenesene stare nastavitve"
 
-#: desktop/org.gnome.Geary.gschema.xml:142
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Možnost onemogoči preverjanje za opuščeno shemo »org.yorba.geary« in "
 "kopiranje vrednosti v odložišče."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Razvojna skupina Geary"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Program Geary je odjemalec elektronske pošte za namizje GNOME, zasnovan za "
+"napredno zlaganja pogovorov. Omogoča branje, iskanje in pošiljanje sporočil "
+"v preglednem modernem vmesniku."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Sistem pogovorov omogoča branje niza sporočil brez odvečnega klikanja med "
+"sporočili."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "Program Geary omogoča:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Hitro nastavljanje računov elektronske pošte"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Zbiranje povezanih sporočil v niti pogovora"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Hitro iskanje po besedilu sporočil s ključnimi besedami"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Zmogljivo skladanje sporočil v besedilnem ali oblikovanem zapisu HTML"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Namizna obvestila o prispeli pošti"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Podprti so sistemi spletne pošte, kot so Gmail, Yahoo!, Outlook.com in drugi "
+"strežniki IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:50
+msgid "Geary displaying a conversation"
+msgstr "Prikaz sporočil, zbranih v pogovorno nit"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:55
+msgid "Geary showing the rich text composer"
+msgstr "Program Geary z odprtim oknom skladalnika vsebine"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -837,140 +833,140 @@ msgstr ""
 msgid "_Replace"
 msgstr "_Zamenjaj"
 
-#: src/client/application/application-client.vala:34
+#: src/client/application/application-client.vala:19
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
 msgstr "Avtorske pravice 2016 Software Freedom Conservancy Inc."
 
-#: src/client/application/application-client.vala:35
+#: src/client/application/application-client.vala:20
 msgid "Copyright © 2016-2021 Geary Development Team."
 msgstr "Avtorske pravice 2016–2021 Razvojna skupina Geary."
 
-#: src/client/application/application-client.vala:37
-msgid "Visit the Geary web site"
-msgstr "Obišči spletišče Geary"
-
 #. / Command line option
-#: src/client/application/application-client.vala:101
+#: src/client/application/application-client.vala:77
 msgid "Print debug logging"
 msgstr "Natisni dnevnik razhroščevanja"
 
 #. / Command line option
-#: src/client/application/application-client.vala:104
+#: src/client/application/application-client.vala:80
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Omogoči nadzornika WebKitGTK v spletnih pogledih"
 
 #. / Command line option
-#: src/client/application/application-client.vala:107
+#: src/client/application/application-client.vala:83
 msgid "Log conversation monitoring"
 msgstr "Beleži nadzorovanje pogovorov"
 
 #. / Command line option
-#: src/client/application/application-client.vala:110
+#: src/client/application/application-client.vala:86
 msgid "Log IMAP network deserialization"
 msgstr "Beleži razporejanje omrežja IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:90
 msgid "Log folder normalization"
 msgstr "Beleži usklajevanje map"
 
 #. / Command line option
-#: src/client/application/application-client.vala:117
+#: src/client/application/application-client.vala:93
 msgid "Log IMAP network activity"
 msgstr "Beleži dejavnost omrežja IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:122
+#: src/client/application/application-client.vala:98
 msgid "Log IMAP replay queue"
 msgstr "Beleži vrsto odzivov IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:125
+#: src/client/application/application-client.vala:101
 msgid "Log SMTP network activity"
 msgstr "Beleži dejavnost omrežja SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:128
+#: src/client/application/application-client.vala:104
 msgid "Log database queries (generates lots of messages)"
 msgstr "Beleži poizvedbe podatkovne zbirke (ustvari mnogo sporočil)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:131
+#: src/client/application/application-client.vala:107
 msgid "Perform a graceful quit"
 msgstr "Izvedi končanje"
 
-#: src/client/application/application-client.vala:133
+#: src/client/application/application-client.vala:109
 msgid "Open a new window"
 msgstr "Odpri novo okno"
 
 #. / Command line option
-#: src/client/application/application-client.vala:136
+#: src/client/application/application-client.vala:112
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Prekliči vsa potrjena potrdila strežnika TLS"
 
 #. / Command line option
-#: src/client/application/application-client.vala:139
+#: src/client/application/application-client.vala:115
 msgid "Display program version"
 msgstr "Pokaži različico programa"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:267
+#: src/client/application/application-client.vala:243
 msgid "Geary version"
 msgstr "Različica Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:269
+#: src/client/application/application-client.vala:245
 msgid "Geary revision"
 msgstr "Predelava Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:271
+#: src/client/application/application-client.vala:247
 msgid "GTK version"
 msgstr "Različica GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:278
+#: src/client/application/application-client.vala:254
 msgid "GLib version"
 msgstr "Različica GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:285
+#: src/client/application/application-client.vala:261
 msgid "WebKitGTK version"
 msgstr "Različica WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:292
+#: src/client/application/application-client.vala:268
 msgid "Desktop environment"
 msgstr "Namizno okolje"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:294
-#: src/client/application/application-client.vala:300
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:270
+#: src/client/application/application-client.vala:276
+#: src/client/application/application-client.vala:282
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Neznano"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:298
+#: src/client/application/application-client.vala:274
 msgid "Distribution name"
 msgstr "Ime distribucije"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:304
+#: src/client/application/application-client.vala:280
 msgid "Distribution release"
 msgstr "Objava distribucije"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:310
+#: src/client/application/application-client.vala:286
 msgid "Installation prefix"
 msgstr "Predpone namestitve"
 
-#: src/client/application/application-client.vala:569
+#: src/client/application/application-client.vala:544
+msgid "Visit the Geary web site"
+msgstr "Obišči spletišče Geary"
+
+#: src/client/application/application-client.vala:545
 #, c-format
 msgid "About %s"
 msgstr "O %s"
@@ -978,13 +974,13 @@ msgstr "O %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:573
+#: src/client/application/application-client.vala:549
 msgid "translator-credits"
 msgstr "Matej Urbančič <mateju@src.gnome.org>"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1102
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Neprepoznan argument programa »%s«"
@@ -1579,7 +1575,7 @@ msgstr "_Poskusi znova"
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
-#: src/client/util/util-i18n.vala:298
+#: src/client/util/util-i18n.vala:294
 msgid "Search"
 msgstr "Poišči"
 
@@ -2279,11 +2275,11 @@ msgstr[1] "Novo sporočilo"
 msgstr[2] "Novi sporočili"
 msgstr[3] "Nova sporočila"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "Predloge elektronske pošte"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "Ustvari predlogo za elektronska sporočila."
 
@@ -2335,14 +2331,14 @@ msgstr "Uredi"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Združevalnik pošte"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr ""
 "Zapolni in pošiljaj sporočila po predlogi, povezani z podatkovno preglednico"
@@ -2394,11 +2390,11 @@ msgstr "Vstavi polje"
 msgid "Comma separated values (CSV)"
 msgstr "Z vejico ločen seznam vrednosti (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Meni sporočanja"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr "Prikaži meni sporočanja Unity za novo prispela sporočila"
 
@@ -2407,11 +2403,11 @@ msgstr "Prikaži meni sporočanja Unity za novo prispela sporočila"
 msgid "%s — New Messages"
 msgstr "%s – nova sporočila"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Pošlji zvok"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "Predvaja zvok ob pošiljanju elektronskega sporočila"
 
@@ -2786,43 +2782,43 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: src/client/util/util-i18n.vala:271
+#: src/client/util/util-i18n.vala:267
 msgid "Inbox"
 msgstr "Prejeto"
 
-#: src/client/util/util-i18n.vala:274
+#: src/client/util/util-i18n.vala:270
 msgid "Drafts"
 msgstr "Osnutki"
 
-#: src/client/util/util-i18n.vala:277
+#: src/client/util/util-i18n.vala:273
 msgid "Sent"
 msgstr "Poslano"
 
-#: src/client/util/util-i18n.vala:280
+#: src/client/util/util-i18n.vala:276
 msgid "Starred"
 msgstr "Z zvezdico"
 
-#: src/client/util/util-i18n.vala:283
+#: src/client/util/util-i18n.vala:279
 msgid "Important"
 msgstr "Pomembno"
 
-#: src/client/util/util-i18n.vala:286
+#: src/client/util/util-i18n.vala:282
 msgid "All Mail"
 msgstr "Vsa sporočila"
 
-#: src/client/util/util-i18n.vala:289
+#: src/client/util/util-i18n.vala:285
 msgid "Junk"
 msgstr "Vsiljena pošta"
 
-#: src/client/util/util-i18n.vala:292
+#: src/client/util/util-i18n.vala:288
 msgid "Trash"
 msgstr "Smeti"
 
-#: src/client/util/util-i18n.vala:295
+#: src/client/util/util-i18n.vala:291
 msgid "Outbox"
 msgstr "Odhodna pošta"
 
-#: src/client/util/util-i18n.vala:301
+#: src/client/util/util-i18n.vala:297
 msgid "Archive"
 msgstr "Arhiv"
 
@@ -2884,17 +2880,17 @@ msgstr "Izbrisani predmeti"
 msgid "Archive | Archives"
 msgstr "Arhiv | Arhivi"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Ni mogoče določiti vrste mime za »%s«."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Ni mogoče določiti vrste vsebine za vrsto mime »%s« na »%s«."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(brez zadeve)"
 
@@ -3247,14 +3243,16 @@ msgstr "Preklopi vrstico iskanja"
 #: ui/components-inspector-error-view.ui:27
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
-"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
-"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">new bug report</a>."
+"one of the <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/Contact"
+"\">contact channels</a> or attach to a <a href=\"https://gitlab.gnome.org/"
+"GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-Features\">new bug report</"
+"a>."
 msgstr ""
 "Če je težava resna in se stalno ponavlja, shranite podrobnosti napake in jih "
 "pošljite po enem izmed <a href=\"https://wiki.gnome.org/Apps/Geary/Contact"
-"\">možnih stikov</a> oziroma pripnite podatke k <a href=\"https://wiki.gnome."
-"org/Apps/Geary/ReportingABug\">poročilu o hrošču</a>."
+"\">možnih stikov</a> oziroma pripnite podatke k <a href=\"https://gitlab."
+"gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-Features"
+"\">poročilu o hrošču</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
