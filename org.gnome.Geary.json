@@ -216,25 +216,6 @@
             ]
         },
         {
-            "name": "libpeas",
-            "buildsystem": "meson",
-            "config-opts": [
-                "-Dgtk_doc=false",
-                "-Dintrospection=true",
-                "-Dvapi=true",
-                "-Dlua51=false",
-                "-Dgjs=false",
-                "-Dpython3=false"
-            ],
-            "sources": [
-                {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libpeas",
-                    "branch": "main"
-                }
-            ]
-        },
-        {
             "name": "libytnef",
             "sources": [
                 {
