@@ -402,10 +402,10 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
 
                 ) == "a b c");
         } catch (Util.JS.Error err) {
-            print("Util.JS.Error: %s\n", err.message);
+            error("Util.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s\n", err.message);
+            error("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -415,7 +415,7 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
     }
 
     protected override void load_body_fixture(string body = "") {
-        load_body_fixture_full(body, "", true);
+        load_body_fixture_full(body, " ", true);
     }
 
     protected void load_body_fixture_full(string body,
