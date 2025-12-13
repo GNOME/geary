@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2025-06-09 13:40+0000\n"
-"PO-Revision-Date: 2025-06-09 18:52+0300\n"
+"POT-Creation-Date: 2025-12-12 07:37+0000\n"
+"PO-Revision-Date: 2025-12-13 20:32+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -25,118 +25,54 @@ msgstr ""
 "X-Generator: Lokalize 23.04.3\n"
 "X-Project-Style: gnome\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Надіслати поштою"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
 msgstr "Надіслати файли через Geary"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "Електронна пошта"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
-#: src/client/application/application-client.vala:33
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
+#: src/client/application/application-client.vala:18
 msgid "Send and receive email"
 msgstr "Надіслати та одержати пошту"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;Пошта;Лист;надіслати;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Команда з розробки Geary"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"Geary — програма для роботи з електронною поштою, базовою концепцією якої є "
-"«спілкування». Програму призначено для стільничного середовища GNOME. Вона "
-"надає вам змогу читати, шукати та надсилати електронну пошту. Інтерфейс "
-"програми є простим і сучасним."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"За допомогою можливості «спілкування» ви можете читати усе обговорення "
-"певного питання без потреби у пересуванні між його окремими повідомленнями."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "Серед можливостей Geary такі:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Швидке налаштовування облікового запису електронної пошти"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "Показ пов'язаних між собою повідомлень у форматі спілкувань"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Швидкий повнотекстовий пошук за ключовими словами"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr ""
-"Редактор повідомлень із повноцінною підтримкою створення повідомлень у "
-"форматі HTML та звичайному текстовому форматі"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Сповіщення про нову пошту на стільниці"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
-"Сумісність із GMail, Yahoo! Mail, Outlook.com та іншими серверами IMAP"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "Спілкування у вікні Geary"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "Редактор форматованого тексту у Geary"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;"
-"електронка;імап;аймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
+"Mail;E-"
+"mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;пошта;електронна;електронка;імап;а"
+"ймап;повідомлення;жмейл;яху;ягу;хотмейл;готмейл;аутлук;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Скласти лист"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Нове вікно"
 
@@ -196,35 +132,31 @@ msgstr ""
 "перегляд кожного повідомлення."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
-msgid "Unset colors provided in HTML emails"
-msgstr "Зняти кольори, які вказано у повідомленнях у HTML"
-
-#: desktop/org.gnome.Geary.gschema.xml:45
 msgid "Override colors in HTML emails"
 msgstr "Перевизначити кольори у повідомленнях у HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:46
+#: desktop/org.gnome.Geary.gschema.xml:45
 msgid ""
 "Overrides the original colors in HTML messages to integrate better with the "
 "app theme."
 msgstr ""
-"Перевизначає початкові кольори у повідомленнях HTML для забезпечення кращої"
-" сумісності з темою програми."
+"Перевизначає початкові кольори у повідомленнях HTML для забезпечення кращої "
+"сумісності з темою програми."
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Типово пересувати повідомлення"
 
-#: desktop/org.gnome.Geary.gschema.xml:52
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr ""
 "При встановленні мітки для повідомлення пересувати його до теки призначення."
 
-#: desktop/org.gnome.Geary.gschema.xml:57
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Використовувати єдині клавіатурні скорочення"
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -232,11 +164,11 @@ msgstr ""
 "Вмикає клавіатурні скорочення, які не потребують натискання <Ctrl>, для дій "
 "з повідомленнями — імітації скорочень, які використовуються у Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:65
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "Мови, які має бути використано для перевірки правопису"
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -244,11 +176,11 @@ msgstr ""
 "Список локалей POSIX. Порожній список вимикає перевірку правопису, а null-"
 "список означає «використовувати типові мови стільничного середовища»."
 
-#: desktop/org.gnome.Geary.gschema.xml:73
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Мови, які буде показано у накладному меню перевірки правопису"
 
-#: desktop/org.gnome.Geary.gschema.xml:74
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
@@ -256,73 +188,73 @@ msgstr ""
 "Список мов, які буде завжди показано у накладному меню засобу перевірки "
 "правопису."
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:78
 msgid "Run application in background on logon and when closed"
 msgstr ""
 "Запускати програму у фоновому режимі при вході та закритті головного вікна"
 
-#: desktop/org.gnome.Geary.gschema.xml:80
+#: desktop/org.gnome.Geary.gschema.xml:79
 msgid "True to run application in background."
 msgstr "«True», якщо слід працювати у фоновому режимі."
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Питати при відкритті долучення"
 
-#: desktop/org.gnome.Geary.gschema.xml:86
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "Значення «true» означає «питати при відкритті долучення»."
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Чи слід редагувати повідомлення у форматі HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:92
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Значення «true» — редагувати повідомлення у HTML; «false» — редагувати у "
 "форматі звичайного тексту."
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Рекомендована стратегія для повнотекстового пошуку"
 
-#: desktop/org.gnome.Geary.gschema.xml:98
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Доступні значення: «exact» («точний»), «conservative» («консервативний»), "
 "«aggressive» («агресивний») і «horizon» («горизонтний»)."
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "Масштаб панелі перегляду спілкувань"
 
-#: desktop/org.gnome.Geary.gschema.xml:104
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "Масштаб для панелі перегляду спілкувань."
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "Розмір від'єднаного вікна редактора"
 
-#: desktop/org.gnome.Geary.gschema.xml:110
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "Останній записаний розмір від'єднаного вікна редактора."
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Дозволити зображення для цих доменів"
 
-#: desktop/org.gnome.Geary.gschema.xml:116
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Зображення з цих доменів вважатимуться надійними"
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Скасувати затримку надсилання повідомлення"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -330,35 +262,98 @@ msgstr ""
 "Тривалість очікування у секундах перед надсиланням повідомлення. Встановіть "
 "нульове або від'ємне значення, щоб вимкнути очікування."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Тривалість показу короткого сповіщення"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Тривалість показу короткого сповіщення у секундах."
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Список необов'язкових додатків"
 
-#: desktop/org.gnome.Geary.gschema.xml:136
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
-msgstr ""
-"Програма завантажуватиме додатки з цього списку під час свого запуску."
+msgstr "Програма завантажуватиме додатки з цього списку під час свого запуску."
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "Чи перенесено на нову версію старі параметри"
 
-#: desktop/org.gnome.Geary.gschema.xml:142
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
-"Встановіть значення «false», щоб програма виконала пошук старої схеми «org."
-"yorba.geary» і скопіювала її значення до нової схеми."
+"Встановіть значення «false», щоб програма виконала пошук старої схеми "
+"«org.yorba.geary» і скопіювала її значення до нової схеми."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Команда з розробки Geary"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary — програма для роботи з електронною поштою, базовою концепцією якої є "
+"«спілкування». Програму призначено для стільничного середовища GNOME. Вона "
+"надає вам змогу читати, шукати та надсилати електронну пошту. Інтерфейс "
+"програми є простим і сучасним."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"За допомогою можливості «спілкування» ви можете читати усе обговорення "
+"певного питання без потреби у пересуванні між його окремими повідомленнями."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "Серед можливостей Geary такі:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Швидке налаштовування облікового запису електронної пошти"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Показ пов'язаних між собою повідомлень у форматі спілкувань"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Швидкий повнотекстовий пошук за ключовими словами"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr ""
+"Редактор повідомлень із повноцінною підтримкою створення повідомлень у "
+"форматі HTML та звичайному текстовому форматі"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Сповіщення про нову пошту на стільниці"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "Сумісність із GMail, Yahoo! Mail, Outlook.com та іншими серверами IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:50
+msgid "Geary displaying a conversation"
+msgstr "Спілкування у вікні Geary"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:55
+msgid "Geary showing the rich text composer"
+msgstr "Редактор форматованого тексту у Geary"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -845,141 +840,141 @@ msgstr "Файл вже існує у «%s». Перезаписування п�
 msgid "_Replace"
 msgstr "_Замінити"
 
-#: src/client/application/application-client.vala:34
+#: src/client/application/application-client.vala:19
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
 msgstr "© Software Freedom Conservancy Inc., 2016"
 
-#: src/client/application/application-client.vala:35
+#: src/client/application/application-client.vala:20
 msgid "Copyright © 2016-2021 Geary Development Team."
 msgstr "© Команда розробників Geary, 2016–2021"
 
-#: src/client/application/application-client.vala:37
-msgid "Visit the Geary web site"
-msgstr "Відвідати сайт Geary"
-
 #. / Command line option
-#: src/client/application/application-client.vala:101
+#: src/client/application/application-client.vala:77
 msgid "Print debug logging"
 msgstr "Виводити діагностичні повідомлення"
 
 #. / Command line option
-#: src/client/application/application-client.vala:104
+#: src/client/application/application-client.vala:80
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Увімкнути ревізор WebKitGTK на панелях вебперегляду"
 
 #. / Command line option
-#: src/client/application/application-client.vala:107
+#: src/client/application/application-client.vala:83
 msgid "Log conversation monitoring"
 msgstr "Журнал спостереження за спілкуванням"
 
 #. / Command line option
-#: src/client/application/application-client.vala:110
+#: src/client/application/application-client.vala:86
 msgid "Log IMAP network deserialization"
 msgstr ""
 "Записувати до журналу розкладення роботи з мережею IMAP у послідовну форму"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:90
 msgid "Log folder normalization"
 msgstr "Журнал нормування тек"
 
 #. / Command line option
-#: src/client/application/application-client.vala:117
+#: src/client/application/application-client.vala:93
 msgid "Log IMAP network activity"
 msgstr "Журнал мережевої діяльності IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:122
+#: src/client/application/application-client.vala:98
 msgid "Log IMAP replay queue"
 msgstr "Журнал черги відповідей IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:125
+#: src/client/application/application-client.vala:101
 msgid "Log SMTP network activity"
 msgstr "Журнал мережевої діяльності SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:128
+#: src/client/application/application-client.vala:104
 msgid "Log database queries (generates lots of messages)"
 msgstr "Журнал запитів баз даних (породжує багато повідомлень)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:131
+#: src/client/application/application-client.vala:107
 msgid "Perform a graceful quit"
 msgstr "Виконати штатне завершення роботи"
 
-#: src/client/application/application-client.vala:133
+#: src/client/application/application-client.vala:109
 msgid "Open a new window"
 msgstr "Відкрити нове вікно"
 
 #. / Command line option
-#: src/client/application/application-client.vala:136
+#: src/client/application/application-client.vala:112
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Відкликати усі пришпилені сертифікати TLS сервера"
 
 #. / Command line option
-#: src/client/application/application-client.vala:139
+#: src/client/application/application-client.vala:115
 msgid "Display program version"
 msgstr "Показати версію програми"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:267
+#: src/client/application/application-client.vala:243
 msgid "Geary version"
 msgstr "Версія Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:269
+#: src/client/application/application-client.vala:245
 msgid "Geary revision"
 msgstr "Модифікація Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:271
+#: src/client/application/application-client.vala:247
 msgid "GTK version"
 msgstr "Версія GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:278
+#: src/client/application/application-client.vala:254
 msgid "GLib version"
 msgstr "Версія GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:285
+#: src/client/application/application-client.vala:261
 msgid "WebKitGTK version"
 msgstr "Версія WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:292
+#: src/client/application/application-client.vala:268
 msgid "Desktop environment"
 msgstr "Стільничне середовище"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:294
-#: src/client/application/application-client.vala:300
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:270
+#: src/client/application/application-client.vala:276
+#: src/client/application/application-client.vala:282
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Невідомий"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:298
+#: src/client/application/application-client.vala:274
 msgid "Distribution name"
 msgstr "Назва дистрибутива"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:304
+#: src/client/application/application-client.vala:280
 msgid "Distribution release"
 msgstr "Поширений випуск"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:310
+#: src/client/application/application-client.vala:286
 msgid "Installation prefix"
 msgstr "Префікс встановлення"
 
-#: src/client/application/application-client.vala:567
+#: src/client/application/application-client.vala:544
+msgid "Visit the Geary web site"
+msgstr "Відвідати сайт Geary"
+
+#: src/client/application/application-client.vala:545
 #, c-format
 msgid "About %s"
 msgstr "Інформація про %s"
@@ -987,13 +982,13 @@ msgstr "Інформація про %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:571
+#: src/client/application/application-client.vala:549
 msgid "translator-credits"
 msgstr "Daniel Korostil <ted.korostiled@gmail.com>"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1100
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Нерозпізнаний аргумент команди: «%s»"
@@ -1509,8 +1504,8 @@ msgid ""
 "Overrides the original colors in HTML messages to integrate better with the "
 "app theme. Requires restart."
 msgstr ""
-"Перевизначає початкові кольори у повідомленнях HTML для забезпечення кращої"
-" сумісності з темою програми. Потребує перезапуску програми."
+"Перевизначає початкові кольори у повідомленнях HTML для забезпечення кращої "
+"сумісності з темою програми. Потребує перезапуску програми."
 
 #. / Translators: Preferences page title
 #: src/client/components/components-preferences-window.vala:203
@@ -1596,7 +1591,7 @@ msgstr "_Повторити"
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
-#: src/client/util/util-i18n.vala:298
+#: src/client/util/util-i18n.vala:294
 msgid "Search"
 msgstr "Пошук"
 
@@ -2294,11 +2289,11 @@ msgstr[1] "Нові повідомлення"
 msgstr[2] "Нові повідомлення"
 msgstr[3] "Нове повідомлення"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "Шаблони поштових повідомлень"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr "Створити шаблони повторного використання для надсилання пошти"
 
@@ -2350,14 +2345,14 @@ msgstr "Редагувати"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Об'єднання пошти"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr ""
 "Заповнення і надсилання шаблонів поштових повідомлень за допомогою "
@@ -2410,11 +2405,11 @@ msgstr "Вставити поле"
 msgid "Comma separated values (CSV)"
 msgstr "Значення, розділені комами (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Меню обміну повідомленнями"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr ""
 "Показує сповіщення меню обміну повідомленнями Unity, коли надходить нова "
@@ -2425,11 +2420,11 @@ msgstr ""
 msgid "%s — New Messages"
 msgstr "%s — нові повідомлення"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Звук надсилання"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
 msgstr "Відтворює звук sent-mail теми стільниці, коли ви надсилаєте пошту"
 
@@ -2805,43 +2800,43 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "КБ"
 
-#: src/client/util/util-i18n.vala:271
+#: src/client/util/util-i18n.vala:267
 msgid "Inbox"
 msgstr "Вхідні"
 
-#: src/client/util/util-i18n.vala:274
+#: src/client/util/util-i18n.vala:270
 msgid "Drafts"
 msgstr "Чернетки"
 
-#: src/client/util/util-i18n.vala:277
+#: src/client/util/util-i18n.vala:273
 msgid "Sent"
 msgstr "Надіслані"
 
-#: src/client/util/util-i18n.vala:280
+#: src/client/util/util-i18n.vala:276
 msgid "Starred"
 msgstr "Із зіркою"
 
-#: src/client/util/util-i18n.vala:283
+#: src/client/util/util-i18n.vala:279
 msgid "Important"
 msgstr "Важливо"
 
-#: src/client/util/util-i18n.vala:286
+#: src/client/util/util-i18n.vala:282
 msgid "All Mail"
 msgstr "Уся пошта"
 
-#: src/client/util/util-i18n.vala:289
+#: src/client/util/util-i18n.vala:285
 msgid "Junk"
 msgstr "Спам"
 
-#: src/client/util/util-i18n.vala:292
+#: src/client/util/util-i18n.vala:288
 msgid "Trash"
 msgstr "Кошик"
 
-#: src/client/util/util-i18n.vala:295
+#: src/client/util/util-i18n.vala:291
 msgid "Outbox"
 msgstr "Вихідні"
 
-#: src/client/util/util-i18n.vala:301
+#: src/client/util/util-i18n.vala:297
 msgid "Archive"
 msgstr "Архів"
 
@@ -2905,17 +2900,17 @@ msgstr "Вилучені записи"
 msgid "Archive | Archives"
 msgstr "Архів | Архіви | Archive | Archives"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Не вдалося визначити тип MIME для «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Не вдалося визначити тип даних для типу MIME «%s» у «%s»."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(без теми)"
 
@@ -3268,16 +3263,23 @@ msgid "Toggle find bar"
 msgstr "Увімкнути або вимкнути смужку пошуку"
 
 #: ui/components-inspector-error-view.ui:27
+#| msgid ""
+#| "If the problem is serious or persists, please save and send these details "
+#| "to one of the <a href=\"https://wiki.gnome.org/Apps/Geary/"
+#| "Contact\">contact channels</a> or attach to a <a href=\"https://"
+#| "wiki.gnome.org/Apps/Geary/ReportingABug\">new bug report</a>."
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
-"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
-"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">new bug report</a>."
+"one of the <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/"
+"Contact\">contact channels</a> or attach to a <a href=\"https://"
+"gitlab.gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-"
+"Features\">new bug report</a>."
 msgstr ""
 "Якщо проблема є серйозною або проблема весь час повторюється, будь ласка, "
-"збережіть ці подробиці і надішліть їх до одного з <a href=\"https://wiki."
-"gnome.org/Apps/Geary/Contact\">каналів зв'язку</a> або долучіть до <a "
-"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">нового звіту щодо "
+"збережіть ці подробиці і надішліть їх до одного з <a"
+" href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/Contact\">каналів"
+" зв'язку</a> або долучіть до <a href=\"https://gitlab.gnome.org/GNOME/geary/-/"
+"wikis/Reporting-Bugs-and-Requesting-Features\">нового звіту щодо "
 "вади</a>."
 
 #: ui/components-inspector-error-view.ui:42
@@ -3860,6 +3862,9 @@ msgstr "_Запам'ятати пароль"
 #: ui/password-dialog.glade:195
 msgid "_Authenticate"
 msgstr "_Засвідчення"
+
+#~ msgid "Unset colors provided in HTML emails"
+#~ msgstr "Зняти кольори, які вказано у повідомленнях у HTML"
 
 #, c-format
 #~ msgid "Email to %s saved"
