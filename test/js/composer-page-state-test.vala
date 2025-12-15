@@ -388,18 +388,20 @@ I can send email through smtp.gmail.com:587 or through <a href="https://www.gmai
 
     public void replace_non_breaking_space() throws Error {
         load_body_fixture();
-        string single_nbsp = "a b";
-        string multiple_nbsp = "a b c";
+
+        string nbsp = "String.fromCharCode(160)";
+
+        string single_nbsp = @"'a' + $(nbsp) + 'b'";
+        string multiple_nbsp = @"'a' + $(nbsp) + 'b' + $(nbsp) + 'c'";
+
         try {
             assert(
                 Util.JS.to_string(
-                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');")
-
+                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace($(single_nbsp));")
                 ) == "a b");
             assert(
                 Util.JS.to_string(
-                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")
-
+                    run_javascript(@"ComposerPageState.replaceNonBreakingSpace($(multiple_nbsp));")
                 ) == "a b c");
         } catch (Util.JS.Error err) {
             print("Util.JS.Error: %s\n", err.message);
