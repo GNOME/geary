@@ -31,8 +31,13 @@ gee = dependency('gee-0.8')
 gio = dependency('gio-2.0')
 glib = dependency('glib-2.0', version: '>=' + target_glib)
 gobject = dependency('gobject-2.0')
+gobject_introspection = dependency('gobject-introspection-1.0', required: false)
 
-g_ir_compiler = find_program('g-ir-compiler')
+if gobject_introspection.found()
+  g_ir_compiler = gobject_introspection.get_variable('g_ir_compiler')
+else
+  g_ir_compiler = find_program('g-ir-compiler')
+endif
 if enable_valadoc
   valadoc = find_program('valadoc')
 endif
