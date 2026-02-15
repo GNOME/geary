@@ -2054,7 +2054,7 @@ msgstr ""
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
-msgstr "Geary no va afegir o actualitzar aquest compte de correu electrònic."
+msgstr "Geary no afegirà o actualitzarà aquest compte de correu electrònic."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
@@ -2905,7 +2905,7 @@ msgstr "Confia en aques_t servidor"
 
 #: ui/certificate_warning_dialog.glade:52
 msgid "_Don’t Trust This Server"
-msgstr "No confieu aquest servi_dor"
+msgstr "No confieu en aquest servi_dor"
 
 #: ui/composer-editor.ui:89
 msgid "Bold text"
@@ -3241,7 +3241,7 @@ msgstr "_Quant a Geary"
 
 #: ui/conversation-contact-popover.ui:134
 msgid "New Conversation…"
-msgstr "Mou la conversa…"
+msgstr "Conversa nova…"
 
 #: ui/conversation-contact-popover.ui:146
 msgid "Copy Email Address"
