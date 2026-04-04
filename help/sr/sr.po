@@ -1,0 +1,1169 @@
+# Serbian translation for geary.
+# Copyright (C) 2026 geary's COPYRIGHT HOLDER
+# This file is distributed under the same license as the geary package.
+# Марко Костић <marko.m.kostic@gmail.com>,  2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: geary gnome-44\n"
+"POT-Creation-Date: 2026-03-25 04:52+0000\n"
+"PO-Revision-Date: 2026-04-03 22:35+0200\n"
+"Last-Translator: Марко Костић <marko.m.kostic@gmail.com>\n"
+"Language-Team: Serbian <Serbian>\n"
+"Language: sr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : "
+"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Poedit 3.9\n"
+
+#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+msgctxt "_"
+msgid "translator-credits"
+msgstr ""
+"Марко Костић <marko.m.kostic@gmail.com>\n"
+"Превод на српски језик https://гном.срб"
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
+msgid "Accounts"
+msgstr "Налози"
+
+#. (itstool) path: section/title
+#: C/accounts.page:13
+msgid "Accounts Editor"
+msgstr "Уређивач налога"
+
+#. (itstool) path: section/p
+#: C/accounts.page:15
+msgid ""
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
+msgstr "Ваше налоге е-поште можете додати, ажурирати и уклонити помоћу <em>уређивача налога</em>. Да бисте га отворили, кликните на дугме изборника програма Герија у главном прозору изнад списка фасцикли, а затим кликните на <gui>Налози</gui> у искачућем изборнику."
+
+#. (itstool) path: section/p
+#: C/accounts.page:20
+msgid ""
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
+msgstr "Да бисте променили редослед којим се налози приказују на списку фасцикли, кликните и превуците ручку за налог у уређивачу налога, или фокусирајте налог тастером <key>Tab</key>, а затим користите <keyseq><key>Ctrl</key><key>↑</key></keyseq> и <keyseq><key>Ctrl</key><key>↓</key></keyseq> да бисте променили положај тренутно изабраног налога."
+
+#. (itstool) path: section/title
+#: C/accounts.page:29
+msgid "Adding accounts"
+msgstr "Додавање налога"
+
+#. (itstool) path: section/p
+#: C/accounts.page:31
+msgid ""
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
+msgstr "Гери ће аутоматски користити све налоге е-поште које сте додали путем окна <app>Налози на мрежи</app> у <app>Гномовим подешавањима</app>. Ако немате ниједан налог додат у <app>Налоге на мрежи</app>, биће вам затражено да додате налог приликом првог покретања Герија."
+
+#. (itstool) path: section/p
+#: C/accounts.page:37
+msgid ""
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
+msgstr "Да бисте додали додатне налоге, отворите уређивач налога, а затим изаберите одговарајућег достављача е-поште са списка на дну прозора. За достављаче које подржавају <app>Налози на мрежи</app>, биће отворена <app>Гномова подешавања</app> и тамо ће вам бити затражени подаци о налогу. За остале достављаче е-поште, Гери ће вам затражити податке о налогу. Након што их унесете, кликните на <gui>Направи</gui> и подаци о налогу ће бити проверени и затим додати."
+
+#. (itstool) path: section/title
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Ажурирање постојећих налога"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
+msgstr "Да бисте ажурирали постојеће налоге, отворите уређивач налога и изаберите налог који желите да ажурирате. Гери ће приказати подешавања за налог. Одатле можете додати и уклонити додатне адресе е-поште пошиљаоца, уредити свој потпис е-поште и разна друга подешавања."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr "Подешавање <gui>Преузми пошту</gui> омогућава вам да подесите колико ће поште Гери преузети и сачувати локално. Гери може користити само локално доступну пошту приликом приказивања и претраживања разговора."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr "Да бисте уредили подешавања сервера за налог, померите се до дна прозора и кликните на <gui>Подешавања сервера</gui>. Подешавања сервера ће бити приказана и можете кликнути да бисте их уредили. Када завршите, кликните на <gui>Примени</gui> и Гери ће проверити подешавања, а затим ажурирати налог. Имајте на уму да налозима који су додати путем окна <app>Налози на мрежи</app> у <app>Гномовим подешавањима</app> не могу бити промењени назив сервера, безбедност, пријава или подешавања лозинке."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr "Кућица <gui>Сачувај нацрт е-поште на серверу</gui> контролише да ли ће састављач чувати примерке порука е-поште које се пишу у фасцикли <gui>Нацрти</gui>. Ако није означено, нећете моћи да сачувате нацрте порука приликом затварања састављача."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr "Кућица <gui>Сачувај послату е-пошту на серверу</gui> контролише да ли ће Гери чувати примерке е-поште која је послата у фасциклу <gui>Послато</gui>. Ако није означено, нећете моћи да видите ниједну поруку е-поште коју сте послали, осим ако их ваш сервер аутоматски не сачува за вас."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
+msgid "Removing accounts"
+msgstr "Уклањање налога"
+
+#. (itstool) path: section/p
+#: C/accounts.page:85
+msgid ""
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
+msgstr "Налози додати путем окна <app>Налози на мрежи</app> у <app>Гномовим подешавањима</app> морају се и одатле уклонити. Да бисте то урадили, отворите <app>Налоге на мрежи</app>, изаберите налог и кликните на <gui>Уклони</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr "Да бисте уклонили налог додат путем Герија, отворите уређивач налога и изаберите налог који желите да уклоните. Гери ће приказати подешавања за налог. Померите се до дна прозора и кликните на <gui>Уклони налог</gui>. Биће вам затражено да потврдите уклањање налога. Након потврде, ако се предомислите, и даље можете опозвати уклањање налога кликом на <gui>Опозови</gui> у искачућем обавештењу или притиском на <keyseq><key>Ctrl</key><key>U</key></keyseq>."
+
+#. (itstool) path: page/title
+#: C/archive.page:8
+msgid "Archive, trash and delete messages"
+msgstr "Архивирање, бацање у смеће и брисање порука"
+
+#. (itstool) path: page/p
+#: C/archive.page:10
+msgid ""
+"Geary lets you archive messages if your server supports it. Clicking the "
+"<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
+"from the current folder to the <gui>Archive</gui> folder for most email "
+"services, or to <gui>All Mail</gui> for GMail. Archiving helps keep your "
+"email organised by moving old and replied-to email out of the way."
+msgstr "Гери вам омогућава да архивирате поруке ако ваш сервер то подржава. Клик на дугме <gui style=\"button\">Архивирај</gui> на палети алата премешта преписку из тренутне фасцикле у фасциклу <gui>Архива</gui> за већину услуга е-поште, или у <gui>Сва пошта</gui> за Гмаил. Архивирање помаже да ваша е-пошта буде организована премештањем старих порука и оних на које је одговорено."
+
+#. (itstool) path: page/p
+#: C/archive.page:17
+msgid ""
+"To move conversations to the <gui>Trash</gui> folder, select them and click "
+"the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
+"conversations, hold down <key>Shift</key> and click the <gui "
+"style=\"button\">Delete</gui> button that appears in place of the "
+"<gui>Trash</gui> button, or open the conversation in the <gui>Trash</gui> "
+"folder and click <gui style=\"button\">Delete</gui> there."
+msgstr "Да бисте преместили преписке у фасциклу <gui>Смеће</gui>, изаберите их и кликните на дугме <gui style=\"button\">Смеће</gui> на палети алата. Да бисте трајно обрисали преписке, држите притиснут тастер <key>Shift</key> и кликните на дугме <gui style=\"button\">Обриши</gui> које се појављује уместо дугмета <gui>Смеће</gui>, или отворите преписку у фасцикли <gui>Смеће</gui> и тамо кликните на <gui style=\"button\">Обриши</gui>."
+
+#. (itstool) path: note/title
+#: C/archive.page:26
+msgid "Undoing changes"
+msgstr "Поништавање измена"
+
+#. (itstool) path: note/p
+#: C/archive.page:27
+msgid ""
+"Note that you can always undo archiving or trashing a message if you change "
+"your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification "
+"that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open "
+"the folder, find the message, then move it back to your <gui>Inbox</gui>"
+msgstr "Имајте на уму да увек можете опозвати архивирање или бацање поруке у смеће ако се предомислите. Кликните на <gui style=\"button\">Опозови</gui> у искачућем обавештењу које се појави, или притисните <keyseq><key>Ctrl</key><key>Z</key></keyseq>, или отворите фасциклу, пронађите поруку, а затим је вратите у своје <gui>Сандуче</gui>"
+
+#. (itstool) path: page/p
+#: C/archive.page:34
+msgid ""
+"While both <gui style=\"button\">Archive</gui> and <gui "
+"style=\"button\">Trash</gui> removes conversations from your <gui>Inbox</"
+"gui> folder, there is an important difference. Clicking <gui "
+"style=\"button\">Archive</gui> will ensure your conversations are kept so "
+"you can find them again later. Clicking <gui style=\"button\">Trash</gui> "
+"will cause conversations to be hidden from <link xref=\"search\"/>, and they "
+"will likely be deleted in the future."
+msgstr "Иако и <gui style=\"button\">Архивирај</gui> и <gui style=\"button\">У смеће</gui> уклањају разговоре из ваше фасцикле <gui>Долазна</gui>, постоји битна разлика. Клик на <gui style=\"button\">Архивирај</gui> ће осигурати да ваши разговори буду сачувани како бисте могли поново да их пронађете касније. Клик на <gui style=\"button\">У смеће</gui> ће довести до тога да разговори буду скривени из <link xref=\"search\"/>, и вероватно ће бити обрисани у будућности."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Need help with Geary?"
+msgstr "Потребна вам је помоћ са Геријем?"
+
+#. (itstool) path: section/title
+#: C/bugs.page:13
+msgid "Getting support"
+msgstr "Добијање подршке"
+
+#. (itstool) path: section/p
+#: C/bugs.page:15
+msgid ""
+"If you are having trouble using Geary, please <link href=\"https://"
+"wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary "
+"community about the problem."
+msgstr "Ако имате проблема са коришћењем Герија, молимо <link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">ступите у контакт</link> са заједницом Герија у вези са проблемом."
+
+#. (itstool) path: section/title
+#: C/bugs.page:21
+msgid "Reporting bugs"
+msgstr "Пријављивање грешака"
+
+#. (itstool) path: section/p
+#: C/bugs.page:23
+msgid ""
+"If you suspect you have found a bug in Geary, please follow the <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"guidelines</link> so the problem can be diagnosed and fixed."
+msgstr "Ако сумњате да сте пронашли грешку у Герију, молимо пратите <link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">смернице за пријављивање грешака</link> како би проблем могао бити дијагностикован и исправљен."
+
+#. (itstool) path: section/p
+#: C/bugs.page:28
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr "Како бисте помогли да се проблем дијагностикује што је брже могуће, молимо укључите следеће податке:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:32
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr "Верзија Герија и начин инсталације (Пакет? Флатхаб? Изворни код?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:34
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "Ваша радна површ (Гном? КДЕ? Нешто друго?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:35
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
+msgstr "Ваш оперативни систем и верзија (Убунту 16.04? Федора 28? Сами сте га саставили?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:37
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr "Достављач е-поште (Гмаил, Јаху!, Outlook.com, или неко други?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:39
+msgid "Steps to reproduce the bug"
+msgstr "Кораци за репродуковање грешке"
+
+#. (itstool) path: item/p
+#: C/bugs.page:40
+msgid "What happened?"
+msgstr "Шта се десило?"
+
+#. (itstool) path: item/p
+#: C/bugs.page:41
+msgid "What did you expect to happen?"
+msgstr "Шта сте очекивали да се деси?"
+
+#. (itstool) path: section/p
+#: C/bugs.page:44
+msgid ""
+"Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
+"key><key>I</key></keyseq> to open it, select and save any relevant log "
+"files, and attach them to the bug report."
+msgstr "Дневницима се може приступити путем Геријевог инспектора, притисните <keyseq><key>Алт</key><key>I</key></keyseq> да га отворите, изаберите и сачувајте све релевантне дневнике, и приложите их уз пријаву грешке."
+
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Допринесите Герију"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr "Желите да помогнете у побољшању Герија? Постоји више начина на које можете допринети:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr "<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Пријављивање грешака</link> — пријавите нове грешке или затражите нове могућности"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
+msgstr "<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Превођење</link> — преведите Геријево корисничко прочеље и корисничко упутство на нове језике"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
+"link>—fix bugs and add new features"
+msgstr "<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Развој</link> — исправљајте грешке и додајте нове могућности"
+
+#. (itstool) path: page/p
+#: C/contributing.page:23
+msgid ""
+"See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
+"link> for more information and options for contributing financially to "
+"Geary's development."
+msgstr "Погледајте <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">вики</link> за више информација и могућности за новчани допринос развоју Герија."
+
+#. (itstool) path: info/title
+#: C/index.page:7
+msgctxt "link:trail"
+msgid "Geary"
+msgstr "Гери"
+
+#. (itstool) path: info/title
+#: C/index.page:8
+msgctxt "text"
+msgid "Geary"
+msgstr "Гери"
+
+#. (itstool) path: info/title
+#: C/index.page:9
+msgctxt "link"
+msgid "Geary"
+msgstr "Гери"
+
+#. (itstool) path: page/title
+#: C/index.page:12
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Гери</span>"
+
+#. (itstool) path: section/title
+#: C/index.page:18
+msgid "Introduction"
+msgstr "Увод"
+
+#. (itstool) path: section/title
+#: C/index.page:22
+msgid "Using Geary"
+msgstr "Коришћење Герија"
+
+#. (itstool) path: section/title
+#: C/index.page:26
+msgid "Contributing and getting support"
+msgstr "Доприношење и добијање подршке"
+
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Означавање или премештање преписке"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Означавање преписке"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr "Гери вам омогућава да примените један или више <em>натписа</em> на сваку преписку. Натписи у Герију одговарају ознакама у Гугловој пошти или обичним фасциклама у другим поштанским услугама."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr "Да бисте означили једну или више преписки, прво изаберите преписку(е), а затим урадите нешто од следећег:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr "Кликните на дугме <gui>Натпис</gui> на палети алата и изаберите натпис из резултујућег падајућег менија."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr "Држите тастер <key>Ctrl</key> и превуците преписку(е) са списка преписки на натпис у бочној површи."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Премештање преписке у фасциклу или натпис"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr "Да бисте преместили једну или више преписки у фасциклу или натпис, прво изаберите преписку(е), а затим урадите нешто од следећег:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr "Кликните на дугме <gui>Премести</gui> на палети алата и изаберите фасциклу или натпис из резултујућег падајућег менија."
+
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr "Превуците преписку(е) са списка преписки у фасциклу или натпис у бочној површи."
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Ограничења"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr "Гери је још увек у раној фази развоја. Гери подржава ИМАП и тестиран је са Гугловом поштом, Јахуом и бесплатним Довекот поштанским сервером. Омогућена је експериментална подршка за Outlook.com. Гери можда још увек неће радити добро са неким ИМАП серверима. У овом тренутку Герију још увек недостају бројне могућности, укључујући ванмрежни режим рада."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr "Да бисте сазнали више о могућностима на којима радимо и будућности Герија, посетите Геријеву <link href=\"https://wiki.gnome.org/Apps/Geary\">вики страницу</link>."
+
+#. (itstool) path: page/title
+#. (itstool) path: section/title
+#: C/overview.page:9 C/shortcuts.page:13
+msgid "Overview"
+msgstr "Преглед"
+
+#. (itstool) path: page/p
+#: C/overview.page:11
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr "Гери је програм за е-пошту изграђен око преписки, за радну површ Гном 3. Омогућава вам да читате, проналазите и шаљете е-пошту са једноставним, модерним прочељем."
+
+#. (itstool) path: page/p
+#: C/overview.page:15
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Преписке вам омогућавају да прочитате читав разговор а да не морате да "
+"тражите и кликате од поруке до поруке."
+
+#. (itstool) path: page/p
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr "Главни прозор Герија је подељен на неколико области: списак фасцикли, списак преписки и прегледач преписки."
+
+#. (itstool) path: section/title
+#: C/overview.page:22
+msgid "Folder list"
+msgstr "Списак фасцикли"
+
+#. (itstool) path: section/p
+#: C/overview.page:24
+msgid ""
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
+msgstr "Списак <em>фасцикли</em> приказује све <em>фасцикле</em> и <em>ознаке</em> ваших налога е-поште. Гери користи термин <em>ознака</em> за било коју фасциклу коју сте направили ради организовања ваших порука е-поште."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr "Изаберите фасциклу или ознаку да бисте приказали преписке које она садржи у списку преписки."
+
+#. (itstool) path: section/title
+#: C/overview.page:34
+msgid "Conversation list"
+msgstr "Списак преписки"
+
+#. (itstool) path: section/p
+#: C/overview.page:36
+msgid ""
+"The <em>conversation list</em> displays a list of conversations in the "
+"selected folder. Newer conversations appear at the top."
+msgstr "<em>Списак преписки</em> приказује списак преписки у изабраној фасцикли. Новије преписке се појављују на врху."
+
+#. (itstool) path: section/p
+#: C/overview.page:40
+msgid ""
+"Each sender’s name appears bold if there are unread messages from that "
+"sender. If a conversation has more than one message, Geary displays a count "
+"of messages in the conversation."
+msgstr "Име сваког пошиљаоца се појављује подебљано ако постоје непрочитане поруке од тог пошиљаоца. Ако преписка има више од једне поруке, Гери приказује број порука у преписци."
+
+#. (itstool) path: section/p
+#: C/overview.page:44
+msgid ""
+"Geary does not automatically download all messages in all of your mail "
+"folders. When you first visit your Inbox or any other folder, Geary "
+"downloads the most recent messages in that folder. To see more messages, "
+"simply scroll down the conversation list and Geary will fetch more messages "
+"automatically."
+msgstr "Гери не преузима аутоматски све поруке у свим вашим фасциклама поште. Када први пут посетите ваше „Сандуче“ или било коју другу фасциклу, Гери преузима најновије поруке у тој фасцикли. Да бисте видели још порука, једноставно померите списак преписки надоле и Гери ће аутоматски добавити још порука."
+
+#. (itstool) path: section/p
+#: C/overview.page:50
+msgid ""
+"Some commands in Geary can act on a group of conversations. To select "
+"multiple conversations, hold down the <key>Ctrl</key> key and click each "
+"conversation in turn in the conversation list. Alternatively, click the "
+"first conversation in a range, then hold down <key>Shift</key> and click the "
+"last conversation."
+msgstr "Неке наредбе у Герију могу деловати на групу преписки. Да бисте изабрали више преписки, држите тастер <key>Ctrl</key> и кликните на сваку преписку редом у списку преписки. Алтернативно, кликните на прву преписку у опсегу, затим држите <key>Shift</key> и кликните на последњу преписку."
+
+#. (itstool) path: section/title
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Прегледач преписки"
+
+#. (itstool) path: section/p
+#: C/overview.page:60
+msgid ""
+"The <em>conversation viewer</em> displays all email messages in the selected "
+"conversation, with the oldest message at the top."
+msgstr "<em>Прегледач преписки</em> приказује све поруке е-поште у изабраној преписци, са најстаријом поруком на врху."
+
+#. (itstool) path: section/p
+#: C/overview.page:63
+msgid ""
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
+"header to collapse it."
+msgstr "Када прегледате преписку, Гери скупља поруке које сте већ прочитали. Кликните на скупљене поруке да бисте их раширили. Кликните на заглавље раширене поруке да бисте је скупили."
+
+#. (itstool) path: section/p
+#: C/overview.page:67
+msgid ""
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
+msgstr "Кликните на било које име пошиљаоца или примаоца или на адресу е-поште поруке да бисте отворили <em>мени контакта</em>, који приказује додатне податке и опције за адресу е-поште. Можете започети нову преписку, копирати адресу е-поште у оставу и тражити сродне преписке. Ако је адреса е-поште присутна у вашем адресару радне површине, приказаће слику контакта, жељено име и да ли је то омиљени контакт. Такође можете отворити контакт у адресару. Ако адреса е-поште још није присутна, можете изабрати да је додате у адресар и ажурирате поставку учитавања удаљених слика за ту адресу."
+
+#. (itstool) path: section/p
+#: C/overview.page:79
+msgid ""
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
+msgstr "Кликните на дугме са звездицом које се налази на свакој поруци да бисте означили или одзначили поруку звездицом. Означавање поруке звездицом ће означити целу преписку као означену звездицом, а Гери ће приказати прву поруку са звездицом у преписци када јој се вратите."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr "Кликните на дугме менија које се налази на свакој поруци да бисте отворили <em>мени поруке</em>, који вам омогућава да одговорите и проследите одређену поруку, ажурирате које су поруке означене као прочитане или непрочитане, одштампате поруку и тако даље."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
+msgstr "Сви прилози у поруци се појављују на дну поруке. Двоструко кликните на прилог да бисте га отворили, или користите дугмад „Отвори“ и „Сачувај“ да бисте отворили и сачували изабране прилоге."
+
+#. (itstool) path: page/title
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Преференце"
+
+#. (itstool) path: page/p
+#: C/preferences.page:12
+msgid ""
+"Geary allows you to customise how it works via its <gui "
+"style=\"group\">Preferences</gui> window. To open the window, select <gui "
+"style=\"menuitem\">Preferences</gui> from the application menu on the main "
+"window's toolbar. You can change the following options:"
+msgstr "Гери вам омогућава да прилагодите како ради путем прозора <gui style=\"group\">Поставке</gui>. Да бисте отворили прозор, изаберите <gui style=\"menuitem\">Поставке</gui> из менија програма на траци алата главног прозора. Можете променити следеће опције:"
+
+#. (itstool) path: item/title
+#: C/preferences.page:19
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Аутоматски изабери следећу поруку</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:20
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr "Када је ова опција омогућена, Гери аутоматски бира најновију поруку у фасцикли када уђете у њу. Поред тога, након архивирања поруке, Гери аутоматски бира суседну поруку."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Прикажи преглед преписке</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:27
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr "Омогућава прегледе порука у списку преписки. Прегледи приказују првих неколико редова сваке поруке."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+msgid "<gui>Use single key email shortcuts</gui>"
+msgstr "<gui>Користи пречице е-поште са једним тастером</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:32
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"shortcuts\"/> for details."
+msgstr "Омогућите пречице тастатуре за радње е-поште које не захтевају притискање тастера <key>Ctrl</key>. Оне се подударају са пречицама које користи Гмаил. Погледајте <link xref=\"shortcuts\"/> за детаље."
+
+#. (itstool) path: item/title
+#: C/preferences.page:37
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Прати нову пошту када је затворено</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:38
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
+msgstr "Гери ће пратити ваше налоге за новом поштом чак и када главни прозор није отворен. Да би то урадио, тихо ће се покренути када се пријавите на рачунар и наставиће да ради након што затворите све прозоре."
+
+#. (itstool) path: page/title
+#: C/search.page:10
+msgid "Search"
+msgstr "Претрага"
+
+#. (itstool) path: page/p
+#: C/search.page:12
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) and start typing. Results will appear after a brief delay."
+msgstr "Гери подржава претрагу целог текста по налогу. Да бисте започели претрагу, изаберите фасциклу повезану са налогом који желите да претражите. Затим кликните на поље за претрагу у палети алата (или притисните <keyseq><key>Ctrl</key><key>S</key></keyseq>) и почните да куцате. Резултати ће се појавити након кратког застоја."
+
+#. (itstool) path: page/p
+#: C/search.page:16
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr "Претрага целог текста укључује текст е-поште, адресе е-поште (примаоца, пошиљаоца и копије), наслове и називе датотека прилога."
+
+#. (itstool) path: page/p
+#: C/search.page:19
+msgid ""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for "
+"\"walk\" will also match \"walking\" and \"walked.\""
+msgstr "Кључне речи које се подударају са вашом претрагом су истакнуте у прегледу поруке. Гери ће подударати различите облике исте речи, на пример претрага за „walk“ ће такође пронаћи „walking“ и „walked“."
+
+#. (itstool) path: section/title
+#: C/search.page:23
+msgid "Search operators"
+msgstr "Оператори претраге"
+
+#. (itstool) path: section/p
+#: C/search.page:24
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr "Гери подржава следеће операторе за ограничавање обима претраге:"
+
+#. (itstool) path: td/p
+#: C/search.page:27
+msgid "<input>attachment:<var>filename</var></input>"
+msgstr "<input>attachment:<var>назив_датотеке</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:28
+msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgstr "Проналази поруке са прилозима чији се назив подудара са <var>називом_датотеке</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:31
+msgid "<input>bcc:<var>recipient</var></input>"
+msgstr "<input>bcc:<var>прималац</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:32
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
+msgstr "Проналази поруке где се <var>прималац</var> подудара са пољима невидљиве копије (BCC) е-поште."
+
+#. (itstool) path: td/p
+#: C/search.page:35
+msgid "<input>body:<var>text</var></input>"
+msgstr "<input>body:<var>текст</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:36
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr "Проналази поруке чије тело садржи <var>текст</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:39
+msgid "<input>cc:<var>recipient</var></input>"
+msgstr "<input>cc:<var>прималац</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:40
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
+msgstr "Проналази поруке где се <var>прималац</var> подудара са пољима копије (CC) е-поште."
+
+#. (itstool) path: td/p
+#: C/search.page:43
+msgid "<input>from:<var>sender</var></input>"
+msgstr "<input>from:<var>пошиљалац</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:44
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr "Проналази поруке где се <var>пошиљалац</var> подудара са пољима пошиљаоца (From) е-поште."
+
+#. (itstool) path: td/p
+#: C/search.page:47
+msgid "<input>is:read</input>"
+msgstr "<input>is:read</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:48
+msgid "Finds messages that have been marked as read."
+msgstr "Проналази поруке које су означене као прочитане."
+
+#. (itstool) path: td/p
+#: C/search.page:51
+msgid "<input>is:starred</input>"
+msgstr "<input>је:са-звездицом</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:52
+msgid "Finds messages that have been marked as starred."
+msgstr "Проналази поруке које су означене звездицом."
+
+#. (itstool) path: td/p
+#: C/search.page:55
+msgid "<input>is:unread</input>"
+msgstr "<input>је:непрочитано</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:56
+msgid "Finds messages that have been marked as not read."
+msgstr "Проналази поруке које су означене као непрочитане."
+
+#. (itstool) path: td/p
+#: C/search.page:59
+msgid "<input>subject:<var>text</var></input>"
+msgstr "<input>наслов:<var>текст</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:60
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr "Проналази поруке чији наслов садржи <var>текст</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:63
+msgid "<input>to:<var>recipient</var></input>"
+msgstr "<input>за:<var>прималац</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:64
+msgid ""
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
+msgstr "Проналази поруке где се <var>прималац</var> поклапа са пољима е-поште „За“, „Цц“ или „сКоп“."
+
+#. (itstool) path: section/p
+#: C/search.page:68
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
+"input>, and <input>to</input> operators support <input>me</input> as their "
+"argument, which searches for the account's email address in the appropriate "
+"context."
+msgstr "Као посебан случај, оператори <input>bcc</input>, <input>cc</input>, <input>from</input> и <input>to</input> подржавају <input>me</input> као свој аргумент, што тражи адресу е-поште налога у одговарајућем контексту."
+
+#. (itstool) path: page/title
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Пречице тастатуре"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:14
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"help to discover the full list. To open the shortcuts help, select <gui "
+"style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
+"main window's toolbar, or using the keyboard shortcuts listed below."
+msgstr "Гери има пречице на тастатури за већину уобичајених радњи. Користите уграђену помоћ да откријете потпуни списак. Да отворите помоћ за пречице, изаберите <gui style=\"menuitem\">Пречице на тастатури</gui> из изборника програма на алатници главног прозора, или коришћењем пречица на тастатури наведених испод."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:20
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr "Следеће пречице на тастатури се могу користити за приступ помоћи на мрежи за Гери:"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:24
+msgid "Display this help manual"
+msgstr "Прикажи ово упутство за помоћ"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:25
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:28
+msgid "Display all keyboard shortcuts"
+msgstr "Прикажи све пречице на тастатури"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:29
+msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+
+#. (itstool) path: section/title
+#: C/shortcuts.page:37
+msgid "Single key shortcuts"
+msgstr "Пречице са једним тастером"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:39
+msgid ""
+"You can enable keyboard shortcuts for email actions that do not require "
+"pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"preferences\"/> for details."
+msgstr "Можете омогућити пречице на тастатури за радње е-поште које не захтевају притискање тастера <key>Ctrl</key>. Оне се поклапају са пречицама које користи Гмаил. Погледајте <link xref=\"preferences\"/> за детаље."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:43
+msgid ""
+"The full list of single key shortcuts enabled by this preference can be "
+"found via the keyboard shortcuts help, above."
+msgstr "Потпуни списак пречица са једним тастером омогућених овим подешавањем се може наћи преко помоћи за пречице на тастатури, изнад."
+
+#. (itstool) path: page/title
+#: C/star.page:10
+msgid "Star a message or mark it as read/unread"
+msgstr "Означите поруку звездицом или је означите као прочитану/непрочитану"
+
+#. (itstool) path: section/title
+#: C/star.page:12
+msgid "Star messages"
+msgstr "Означи поруке звездицом"
+
+#. (itstool) path: section/p
+#: C/star.page:13
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr "Можете означити поруке звездицом како бисте назначили да су вам важне. Да бисте означили преписку звездицом, кликните на њену иконицу звездице на списку преписки. Можете означити појединачну поруку кликом на звездицу у горњем десном углу саме поруке."
+
+#. (itstool) path: section/p
+#: C/star.page:15
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr "Код Гуглових (Gmail) налога, поруке са звездицом се појављују у фасцикли „Са звездицом“ на списку фасцикли."
+
+#. (itstool) path: section/title
+#: C/star.page:18
+msgid "Mark messages as read or unread"
+msgstr "Означавање порука као прочитаних или непрочитаних"
+
+#. (itstool) path: section/p
+#: C/star.page:19
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr "Гери аутоматски означава поруке као прочитане док их читате. Да бисте ручно изменили стање преписке у прочитано или непрочитано, кликните на кружну иконицу на списку преписки."
+
+#. (itstool) path: section/p
+#: C/star.page:22
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr "Алтернативно, ставка <gui>Означи као непрочитано</gui> у менију <gui>Означи</gui> на палети алата се може користити за измену стања прочитаности изабраних преписки."
+
+#. (itstool) path: section/p
+#: C/star.page:25
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr "Да бисте појединачну поруку означили као прочитану, изаберите <gui>Означи као прочитано</gui> из падајућег менија."
+
+#. (itstool) path: page/title
+#: C/write.page:7
+msgid "Writing new email and replying"
+msgstr "Писање нове е-поште и одговарање"
+
+#. (itstool) path: section/title
+#: C/write.page:10
+msgid "Composing and replying"
+msgstr "Састављање и одговарање"
+
+#. (itstool) path: section/p
+#: C/write.page:12
+msgid ""
+"To start a new email conversation, click the <gui style=\"button\">Compose</"
+"gui> button on the toolbar. Type the email address of the people to receive "
+"the message in the <gui style=\"input\">To</gui> text field, and a subject "
+"line in the <gui style=\"input\">Subject</gui> field. You can then type your "
+"message in the text area below these. Once the message is ready to send, "
+"click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq> to send the message."
+msgstr "Да бисте започели нову преписку е-поштом, кликните на дугме <gui style=\"button\">Састави</gui> на палети алата. Унесите адресу е-поште особа које треба да приме поруку у поље за текст <gui style=\"input\">За</gui>, а наслов у поље <gui style=\"input\">Тема</gui>. Затим можете укуцати своју поруку у поље за текст испод ових. Када је порука спремна за слање, кликните на <gui style=\"button\">Пошаљи</gui> или притисните <keyseq><key>Ctrl</key><key>Enter</key></keyseq> да пошаљете поруку."
+
+#. (itstool) path: note/title
+#: C/write.page:23
+msgid "Undoing sending"
+msgstr "Поништавање слања"
+
+#. (itstool) path: note/p
+#: C/write.page:24
+msgid ""
+"When sending an email, Geary will wait 5 seconds before delivering the "
+"message. During this time, you will be able to click <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or type "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
+"more changes to it."
+msgstr "Приликом слања е-поште, Гери ће сачекати 5 секунди пре испоруке поруке. Током овог времена, моћи ћете да кликнете на <gui style=\"button\">Опозови</gui> у искачућем обавештењу које се појави или да притиснете <keyseq><key>Ctrl</key><key>Z</key></keyseq> да поново отворите е-пошту и извршите додатне измене."
+
+#. (itstool) path: section/p
+#: C/write.page:32
+msgid ""
+"To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
+"and <gui style=\"input\">Reply-to</gui> fields, click the <gui "
+"style=\"input\">More options</gui> button at the end of the <gui "
+"style=\"input\">To</gui> field. Cc allows you to send a copy of the email to "
+"other, secondary recipients. Bcc is similar, but the Bcc list is hidden from "
+"recipients. The Reply-To field specifies an email address to reply to, if "
+"recipients should reply to a different email address than the sender's."
+msgstr "Да бисте приказали поља <gui style=\"input\">Цц</gui>, <gui style=\"input\">Бцц</gui> и <gui style=\"input\">Одговори на</gui>, кликните на дугме <gui style=\"input\">Више опција</gui> на крају поља <gui style=\"input\">За</gui>. Цц вам омогућава да пошаљете копију е-поште другим, секундарним примаоцима. Бцц је слично, али је Бцц списак скривен од прималаца. Поље „Одговори на“ одређује адресу е-поште за одговор, ако примаоци треба да одговоре на адресу е-поште која је другачија од пошиљаочеве."
+
+#. (itstool) path: section/p
+#: C/write.page:41
+msgid ""
+"When entering an email address into any of these fields, Geary will provide "
+"suggestions from your desktop address book and from previously sent and "
+"received email messages. To choose one of these suggestions, simply click on "
+"it."
+msgstr "Приликом уноса адресе е-поште у било које од ових поља, Гери ће понудити предлоге из вашег адресара и из претходно послатих и примљених порука е-поште. Да бисте изабрали један од ових предлога, једноставно кликните на њега."
+
+#. (itstool) path: section/p
+#: C/write.page:46
+msgid ""
+"To reply to the currently selected conversation, click one of the <gui "
+"style=\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui "
+"style=\"button\">Forward</gui> toolbar buttons. This will open a new reply "
+"or forwarded email composer for the latest message in the conversation."
+msgstr "Да бисте одговорили на тренутно изабрану преписку, кликните на једно од дугмади <gui style=\"button\">Одговори</gui>, <gui style=\"button\">Одговори свима</gui> или <gui style=\"button\">Проследи</gui> на палети алата. Ово ће отворити састављач за нови одговор или прослеђену е-пошту за последњу поруку у преписци."
+
+#. (itstool) path: section/p
+#: C/write.page:52
+msgid ""
+"When replying, the message being replied to will be quoted and copied into "
+"the footer of the new reply. This can be deleted before typing a reply by "
+"pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
+"by selecting the desired text in a message and clicking <gui "
+"style=\"button\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only "
+"the selected text will be quoted."
+msgstr "Приликом одговарања, порука на коју се одговара ће бити цитирана и умножена у подножје новог одговора. Ово се може обрисати пре куцања одговора притиском на тастер <key>Backspace</key>. Алтернативно, текст се може селективно цитирати тако што ћете изабрати жељени текст у поруци и кликнути на <gui style=\"button\">Одговори</gui> или <gui style=\"button\">Одговори свима</gui>, при чему ће само изабрани текст бити цитиран."
+
+#. (itstool) path: section/p
+#: C/write.page:60
+msgid ""
+"To reply to a specific email message, open the message menu in the top "
+"corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>."
+msgstr "Да бисте одговорили на одређену поруку е-поште, отворите мени поруке у горњем углу поруке и изаберите <gui>Одговори</gui>, <gui>Одговори свима</gui> или <gui>Проследи</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:66
+msgid "Text formatting, images and attachments"
+msgstr "Форматирање текста, слике и прилози"
+
+#. (itstool) path: section/p
+#: C/write.page:68
+msgid ""
+"Geary's email composer lets you use text styles such as <em>bold</em> and "
+"<em>italic</em>, indent text to quote it, and links to web pages. Simply "
+"select the text and click the appropriate button on the formatting toolbar "
+"at the bottom of the composer area."
+msgstr "Геријев састављач е-поште вам омогућава да користите стилове текста као што су <em>подебљано</em> и <em>искошено</em>, да увлачите текст ради цитирања и везе ка веб страницама. Једноставно изаберите текст и кликните на одговарајуће дугме на палети алата за форматирање на дну области састављача."
+
+#. (itstool) path: section/p
+#: C/write.page:74
+msgid ""
+"Bulleted and numbered lists can be inserted or removed by clicking the <gui "
+"style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
+"list</gui> buttons on the formatting toolbar. The level of indentation of "
+"list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
+"<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
+msgstr "Спискови са набрајањем и нумерисани спискови се могу уметнути или уклонити кликом на дугмад <gui style=\"button\">Списак са набрајањем</gui> и <gui style=\"button\">Нумерисани списак</gui> на палети алата за форматирање. Ниво увлачења ставки списка се може подесити помоћу дугмади <gui style=\"button\">Увуци</gui> и <gui style=\"button\">Поништи увлачење</gui> на палети алата за форматирање."
+
+#. (itstool) path: section/p
+#: C/write.page:81
+msgid ""
+"Images can be inserted into rich text messages by clicking the <gui "
+"style=\"button\">Insert Image</gui> button on the formatting toolbar and "
+"selecting the image to attach, by dragging an image from the <gui>Files</"
+"gui> application into the email body and then dropping it, or by pasting an "
+"image that has been copied to the clipboard from another application."
+msgstr "Слике се могу уметнути у поруке са богатим текстом кликом на дугме <gui style=\"button\">Уметни слику</gui> на палети алата за форматирање и избором слике за прилагање, превлачењем слике из програма <gui>Датотеке</gui> у тело е-поште и њеним спуштањем, или убацивањем слике која је умножена у оставу из другог програма."
+
+#. (itstool) path: section/p
+#: C/write.page:88
+msgid ""
+"Documents, music, videos, and other files can be attached to the email by "
+"clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
+"the composer window and selecting the document to attach, or by dragging a "
+"file from the <gui>Files</gui> application to the composer window, and "
+"dropping it either on the text fields at the top of the window or on the "
+"toolbar at the bottom."
+msgstr "Документа, музика, видео снимци и друге датотеке се могу приложити е-поруци кликом на дугме <gui style=\"button\">Приложи датотеку</gui> на дну прозора састављача и бирањем документа за прилагање, или превлачењем датотеке из апликације <gui>Датотеке</gui> у прозор састављача и њеним спуштањем било на текстуална поља на врху прозора или на палету алата на дну."
+
+#. (itstool) path: section/p
+#: C/write.page:96
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link "
+"xref=\"shortcuts\"/> for details."
+msgstr "Одређени број пречица на тастатури је доступан у састављачу; погледајте <link xref=\"shortcuts\"/> за детаље."
+
+#. (itstool) path: section/p
+#: C/write.page:99
+msgid ""
+"You may specify a signature to be inserted into the footer of email in the "
+"composer via the <link xref=\"accounts\"/> dialog."
+msgstr "Можете навести потпис који ће бити уметнут у подножје е-поште у састављачу преко прозорчета <link xref=\"accounts\"/>."
+
+#. (itstool) path: section/title
+#: C/write.page:104
+msgid "Checking spelling"
+msgstr "Провера правописа"
+
+#. (itstool) path: section/p
+#: C/write.page:106
+msgid ""
+"Geary supports spell-checking your composed email in one or more languages, "
+"as you type. To enable spell-checking, first ensure your computer has spell-"
+"check dictionaries installed for the desired languages. Consult your "
+"computer's help to determine how to install dictionaries if not present."
+msgstr "Гери подржава проверу правописа ваше састављене е-поште на једном или више језика, док куцате. Да бисте омогућили проверу правописа, прво се уверите да ваш рачунар има инсталиране речнике за проверу правописа за жељене језике. Погледајте помоћ за ваш рачунар да бисте утврдили како да инсталирате речнике ако нису присутни."
+
+#. (itstool) path: section/p
+#: C/write.page:112
+msgid ""
+"To select languages for spell-checking, click the <gui "
+"style=\"button\">Spell check</gui> button on the formatting toolbar, and the "
+"language selection popover will appear. Click on a language in the list to "
+"toggle it on or off, and click the <gui style=\"button\">-</gui> button to "
+"remove it from the list. If a language does not appear in the list, search "
+"for it by typing its name in the search box, then click the <gui "
+"style=\"button\">+</gui> button to add it."
+msgstr "Да бисте изабрали језике за проверу правописа, кликните на дугме <gui style=\"button\">Провера правописа</gui> на палети алата за форматирање и појавиће се искок за избор језика. Кликните на језик у списку да бисте га укључили или искључили, и кликните на дугме <gui style=\"button\">-</gui> да бисте га уклонили са списка. Ако се језик не појављује на списку, потражите га куцањем његовог назива у поље за претрагу, а затим кликните на дугме <gui style=\"button\">+</gui> да га додате."
+
+#. (itstool) path: section/title
+#: C/write.page:123
+msgid "Saving drafts and restoring discarded messages"
+msgstr "Чување нацрта и враћање одбачених порука"
+
+#. (itstool) path: section/p
+#: C/write.page:125
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type on the server after a short delay."
+msgstr "За сервере поште који подржавају нацрте, Гери ће аутоматски сачувати поруку док куцате на серверу након кратког кашњења."
+
+#. (itstool) path: section/p
+#: C/write.page:129
+msgid ""
+"To edit an existing draft, select the <gui>Drafts</gui> folder in the folder "
+"list, select the message, and click \"Edit Draft\" in the conversation "
+"viewer."
+msgstr "Да бисте уредили постојећи нацрт, изаберите фасциклу <gui>Нацрти</gui> на списку фасцикли, изаберите поруку и кликните на „Уреди нацрт“ у прегледачу разговора."
+
+#. (itstool) path: section/p
+#: C/write.page:133
+msgid "Geary will delete the draft when you send the message."
+msgstr "Гери ће обрисати нацрт када пошаљете поруку."
+
+#. (itstool) path: note/p
+#: C/write.page:136
+msgid ""
+"If you save or discard a composed email, you can re-open it by clicking <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or by "
+"typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. Composers can be "
+"reopened for up to 30 minutes after they are closed. After that, you will "
+"need to re-open the message via the <gui>Drafts</gui> folder, if present."
+msgstr "Ако сачувате или одбаците састављену е-пошту, можете је поново отворити кликом на <gui style=\"button\">Опозови</gui> у искачућем обавештењу које се појављује или куцањем <keyseq><key>Ctrl</key><key>Z</key></keyseq>. Састављачи се могу поново отворити до 30 минута након што су затворени. Након тога, мораћете поново да отворите поруку преко фасцикле <gui>Нацрти</gui>, ако је присутна."
+
+#. (itstool) path: section/title
+#: C/write.page:146
+msgid "Plain text messages"
+msgstr "Поруке у обичном тексту"
+
+#. (itstool) path: section/p
+#: C/write.page:148
+msgid ""
+"Geary can also send plain text messages. Press the <gui "
+"style=\"button\">More options</gui> button at the end of the bottom toolbar, "
+"then choose \"Rich Text\" or \"Plain Text\". Plain text mode is useful when "
+"sending email to mailing lists that prohibit rich text (HTML) messages, or "
+"when sending email to people that do no use modern clients like Geary."
+msgstr "Гери такође може да шаље поруке у обичном тексту. Притисните дугме <gui style=\"button\">Више опција</gui> на крају доње палете алата, а затим изаберите „Обогаћени текст“ или „Обичан текст“. Режим обичног текста је користан када шаљете е-пошту на дописне листе које забрањују поруке у обогаћеном тексту (HTML) или када шаљете е-пошту људима који не користе модерне клијенте као што је Гери."
+
+#. (itstool) path: section/p
+#: C/write.page:155
+msgid ""
+"In plain text mode, text will be automatically wrapped using soft line "
+"breaks so that it is no longer than 74 characters wide, and indented text "
+"will be wrapped and quoted using a “&gt;” character for each level of "
+"quoting."
+msgstr "У режиму обичног текста, текст ће бити аутоматски преломљен користећи меке преломе редова тако да не буде дужи од 74 знака, а увучени текст ће бити преломљен и цитиран користећи знак „&gt;“ за сваки ниво цитирања."
