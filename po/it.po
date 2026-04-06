@@ -13,14 +13,14 @@
 # Piercarlo Bennici <piercarlo.bennici@gmail.com>, 2013
 # Vincenzo Cerminara <rebek994@gmail.com>, 2012
 # Gianvito Cavasoli <gianvito@gmx.it>, 2016.
-# Federico Bruni <fede@inventati.org>, 2013-2025.
+# Federico Bruni <fede@inventati.org>, 2013-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2025-08-12 17:29+0000\n"
-"PO-Revision-Date: 2025-08-22 23:39+0200\n"
+"POT-Creation-Date: 2025-12-12 00:02+0000\n"
+"PO-Revision-Date: 2026-04-06 11:34+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 "X-DL-Team: it\n"
 "X-DL-Module: geary\n"
 "X-DL-Branch: main\n"
@@ -42,7 +42,7 @@ msgstr "Invia per email"
 
 #: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
-msgstr "Invia file usando Geary"
+msgstr "Invia file con Geary"
 
 #. Translators: The application name
 #: desktop/geary-autostart.desktop.in.in:2
@@ -62,7 +62,7 @@ msgstr "Email"
 #: desktop/geary-autostart.desktop.in.in:4
 #: desktop/org.gnome.Geary.desktop.in.in:4
 #: desktop/org.gnome.Geary.metainfo.xml.in.in:15
-#: src/client/application/application-client.vala:33
+#: src/client/application/application-client.vala:18
 msgid "Send and receive email"
 msgstr "Invia e riceve email"
 
@@ -349,12 +349,12 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Compatibile con GMail, Yahoo! Mail, Outlook.com e altri server IMAP"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.metainfo.xml.in.in:51
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:50
 msgid "Geary displaying a conversation"
 msgstr "L'applicazione che mostra una conversazione"
 
 #. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.metainfo.xml.in.in:56
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:55
 msgid "Geary showing the rich text composer"
 msgstr "L'applicazione che mostra il compositore di testo formattato"
 
@@ -842,140 +842,140 @@ msgstr ""
 msgid "_Replace"
 msgstr "_Sostituisci"
 
-#: src/client/application/application-client.vala:34
+#: src/client/application/application-client.vala:19
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright © 2016 Software Freedom Conservancy Inc."
 
-#: src/client/application/application-client.vala:35
+#: src/client/application/application-client.vala:20
 msgid "Copyright © 2016-2021 Geary Development Team."
 msgstr "Copyright © 2016-2021 gruppo sviluppatori di Geary."
 
-#: src/client/application/application-client.vala:37
-msgid "Visit the Geary web site"
-msgstr "Visita il sito web di Geary"
-
 #. / Command line option
-#: src/client/application/application-client.vala:101
+#: src/client/application/application-client.vala:77
 msgid "Print debug logging"
 msgstr "Stampa le informazioni di debug"
 
 #. / Command line option
-#: src/client/application/application-client.vala:104
+#: src/client/application/application-client.vala:80
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Abilita l'inspector WebKitGTK nelle viste web"
 
 #. / Command line option
-#: src/client/application/application-client.vala:107
+#: src/client/application/application-client.vala:83
 msgid "Log conversation monitoring"
 msgstr "Registra il monitoraggio delle conversazioni"
 
 #. / Command line option
-#: src/client/application/application-client.vala:110
+#: src/client/application/application-client.vala:86
 msgid "Log IMAP network deserialization"
 msgstr "Registra deserializzazione di rete IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:90
 msgid "Log folder normalization"
 msgstr "Registra la sincronizzazione della cartella"
 
 #. / Command line option
-#: src/client/application/application-client.vala:117
+#: src/client/application/application-client.vala:93
 msgid "Log IMAP network activity"
 msgstr "Registra attività di rete IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:122
+#: src/client/application/application-client.vala:98
 msgid "Log IMAP replay queue"
 msgstr "Registra la coda di eventi IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:125
+#: src/client/application/application-client.vala:101
 msgid "Log SMTP network activity"
 msgstr "Registra attività di rete SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:128
+#: src/client/application/application-client.vala:104
 msgid "Log database queries (generates lots of messages)"
 msgstr "Registra le ricerche nel database (genera numerosi messaggi)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:131
+#: src/client/application/application-client.vala:107
 msgid "Perform a graceful quit"
 msgstr "Esegui un'uscita non forzata"
 
-#: src/client/application/application-client.vala:133
+#: src/client/application/application-client.vala:109
 msgid "Open a new window"
 msgstr "Apri una nuova finestra"
 
 #. / Command line option
-#: src/client/application/application-client.vala:136
+#: src/client/application/application-client.vala:112
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Revoca tutti i certificati TLS «pinned» del server"
 
 #. / Command line option
-#: src/client/application/application-client.vala:139
+#: src/client/application/application-client.vala:115
 msgid "Display program version"
 msgstr "Visualizza la versione del programma"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:267
+#: src/client/application/application-client.vala:243
 msgid "Geary version"
 msgstr "Geary versione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:269
+#: src/client/application/application-client.vala:245
 msgid "Geary revision"
 msgstr "Geary revisione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:271
+#: src/client/application/application-client.vala:247
 msgid "GTK version"
 msgstr "GTK versione"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:278
+#: src/client/application/application-client.vala:254
 msgid "GLib version"
 msgstr "GLib versione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:285
+#: src/client/application/application-client.vala:261
 msgid "WebKitGTK version"
 msgstr "WebKitGTK versione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:292
+#: src/client/application/application-client.vala:268
 msgid "Desktop environment"
 msgstr "Ambiente desktop"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:294
-#: src/client/application/application-client.vala:300
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:270
+#: src/client/application/application-client.vala:276
+#: src/client/application/application-client.vala:282
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Sconosciuto"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:298
+#: src/client/application/application-client.vala:274
 msgid "Distribution name"
 msgstr "Nome della distribuzione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:304
+#: src/client/application/application-client.vala:280
 msgid "Distribution release"
 msgstr "Rilascio della distribuzione"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:310
+#: src/client/application/application-client.vala:286
 msgid "Installation prefix"
 msgstr "Prefisso di installazione"
 
-#: src/client/application/application-client.vala:569
+#: src/client/application/application-client.vala:544
+msgid "Visit the Geary web site"
+msgstr "Visita il sito web di Geary"
+
+#: src/client/application/application-client.vala:545
 #, c-format
 msgid "About %s"
 msgstr "Informazioni su %s"
@@ -983,7 +983,7 @@ msgstr "Informazioni su %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:573
+#: src/client/application/application-client.vala:549
 msgid "translator-credits"
 msgstr ""
 "Daniele Napolitano\n"
@@ -992,7 +992,7 @@ msgstr ""
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1102
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Argomento del programma non riconosciuto: «%s»"
@@ -1554,7 +1554,7 @@ msgstr "_Riprova"
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
-#: src/client/util/util-i18n.vala:298
+#: src/client/util/util-i18n.vala:294
 msgid "Search"
 msgstr "Cerca"
 
@@ -2729,43 +2729,43 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: src/client/util/util-i18n.vala:271
+#: src/client/util/util-i18n.vala:267
 msgid "Inbox"
 msgstr "In arrivo"
 
-#: src/client/util/util-i18n.vala:274
+#: src/client/util/util-i18n.vala:270
 msgid "Drafts"
 msgstr "Bozze"
 
-#: src/client/util/util-i18n.vala:277
+#: src/client/util/util-i18n.vala:273
 msgid "Sent"
 msgstr "Inviata"
 
-#: src/client/util/util-i18n.vala:280
+#: src/client/util/util-i18n.vala:276
 msgid "Starred"
 msgstr "Speciale"
 
-#: src/client/util/util-i18n.vala:283
+#: src/client/util/util-i18n.vala:279
 msgid "Important"
 msgstr "Importante"
 
-#: src/client/util/util-i18n.vala:286
+#: src/client/util/util-i18n.vala:282
 msgid "All Mail"
 msgstr "Tutta la posta"
 
-#: src/client/util/util-i18n.vala:289
+#: src/client/util/util-i18n.vala:285
 msgid "Junk"
 msgstr "Indesiderata"
 
-#: src/client/util/util-i18n.vala:292
+#: src/client/util/util-i18n.vala:288
 msgid "Trash"
 msgstr "Cestino"
 
-#: src/client/util/util-i18n.vala:295
+#: src/client/util/util-i18n.vala:291
 msgid "Outbox"
 msgstr "In uscita"
 
-#: src/client/util/util-i18n.vala:301
+#: src/client/util/util-i18n.vala:297
 msgid "Archive"
 msgstr "Archivio"
 
@@ -2829,18 +2829,18 @@ msgstr "Messaggi eliminati"
 msgid "Archive | Archives"
 msgstr "Archivio | Archivi"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Impossibile determinare il tipo mime per “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr ""
 "Impossibile determinare il tipo di contenuto per il tipo mime “%s” di “%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(nessun oggetto)"
 
@@ -3194,14 +3194,16 @@ msgstr "Attiva/Disattiva barra di ricerca nella conversazione"
 #: ui/components-inspector-error-view.ui:27
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
-"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
-"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">new bug report</a>."
+"one of the <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/"
+"Contact\">contact channels</a> or attach to a <a href=\"https://"
+"gitlab.gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-"
+"Features\">new bug report</a>."
 msgstr ""
 "Se il problema è serio o persiste, salvare e inviare questi dettagli a uno "
-"dei <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">canali di "
-"comunicazione</a> o allegarli a una <a href=\"https://wiki.gnome.org/Apps/"
-"Geary/ReportingABug\">nuova segnalazione bug</a>."
+"dei <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/Contact\">canali "
+"di comunicazione</a> o allegarli a una <a href=\"https://gitlab.gnome.org/"
+"GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-Features\">nuova "
+"segnalazione bug</a>."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
