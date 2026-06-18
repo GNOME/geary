@@ -57,7 +57,7 @@ public class Components.ConversationActions : Gtk.Box {
         set_css_name("components-conversation-actions");
     }
 
-    // GObject style constuction to support loading via GTK Builder files
+    // GObject style construction to support loading via GTK Builder files
     construct {
         // Assemble the mark menus
         Gtk.Builder menu_builder = new Gtk.Builder.from_resource(

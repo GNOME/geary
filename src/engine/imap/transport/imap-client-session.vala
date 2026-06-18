@@ -356,7 +356,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     // Locations of other user's mailboxes for this session
     private Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
 
-    // The locations of shared mailboxes for this sesion
+    // The locations of shared mailboxes for this session
     private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
 
     private Endpoint imap_endpoint;
@@ -1159,7 +1159,7 @@ public class Geary.Imap.ClientSession : BaseObject, Logging.Source {
     //
 
     /**
-     * Enables sending keep-alive commands for the sesion.
+     * Enables sending keep-alive commands for the session.
      *
      * Although keepalives can be enabled at any time, if they're
      * enabled and trigger sending a command prior to connection,

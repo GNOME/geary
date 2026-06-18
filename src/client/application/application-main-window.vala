@@ -935,7 +935,7 @@ public class Application.MainWindow :
         }
     }
 
-    /** Shows the appopriate window menu, if any. */
+    /** Shows the appropriate window menu, if any. */
     public void show_window_menu() {
         if (this.outer_leaflet.folded) {
             this.outer_leaflet.navigate(Hdy.NavigationDirection.BACK);
