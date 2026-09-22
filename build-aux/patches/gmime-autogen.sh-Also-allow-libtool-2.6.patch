@@ -1,0 +1,24 @@
+From 42eba1c9cdc2c077240f36077538da89192845de Mon Sep 17 00:00:00 2001
+From: John Cardullo <john@jcarmedia.org>
+Date: Mon, 21 Sep 2026 23:31:14 -0700
+Subject: [PATCH] autogen.sh: Also allow libtool 2.6
+
+---
+ autogen.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index 8dc5437..0c25d52 100644
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -39,7 +39,7 @@ have_libtool=false
+ if ${LIBTOOLIZE} --version < /dev/null > /dev/null 2>&1 ; then
+ 	libtool_version=`${LIBTOOLIZE} --version | sed '/^$/d;s/([^)]*)//g;s/^[^0-9]*//;s/[- ].*//g;q'`
+ 	case $libtool_version in
+-	    1.4*|1.5*|2.2*|2.4*|2.5*)
++	    1.4*|1.5*|2.2*|2.4*|2.5*|2.6*)
+ 		have_libtool=true
+ 		;;
+ 	esac
+-- 
+2.55.0

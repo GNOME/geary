@@ -89,8 +89,16 @@ libhandy = dependency('libhandy-1', version: '>= 1.6', required: false)
 libmath = cc.find_library('m')
 libpeas = dependency('libpeas-2')
 libsecret = dependency('libsecret-1', version: '>= 0.11')
-libsoup = dependency('libsoup-3.0')
-libstemmer_dep = cc.find_library('stemmer')
+fs = import('fs')
+stemmer_lib_dirs = []
+if fs.is_dir('/app/lib')
+  stemmer_lib_dirs += '/app/lib'
+endif
+prefix_lib = get_option('prefix') / get_option('libdir')
+if fs.is_dir(prefix_lib) and prefix_lib != '/usr/lib'
+  stemmer_lib_dirs += prefix_lib
+endif
+libstemmer_dep = cc.find_library('stemmer', dirs: stemmer_lib_dirs)
 libunwind_dep = dependency(
   'libunwind', version: '>= 1.1', required: get_option('libunwind')
 )
@@ -126,11 +134,21 @@ if libunwind_dep.found()
    )
 endif
 
+libstemmer_include = []
+if fs.is_dir('/app/include')
+  libstemmer_include += include_directories('/app/include')
+endif
+prefix_include = get_option('prefix') / get_option('includedir')
+if fs.is_dir(prefix_include) and prefix_include != '/usr/include'
+  libstemmer_include += include_directories(prefix_include)
+endif
+
 libstemmer = declare_dependency(
   dependencies: [
     valac.find_library('libstemmer', dirs: [vapi_dir]),
     libstemmer_dep,
   ],
+  include_directories: libstemmer_include,
 )
 
 # Required until libhandy 1.2.1 is GA

@@ -121,61 +121,56 @@ bin = executable('geary',
   install_rpath: client_lib_dir,
 )
 
-valadoc_dependencies = [
-  cairo,
-  enchant,
-  folks,
-  gcr,
-  gdk,
-  gee,
-  gio,
-  glib,
-  gmime,
-  goa,
-  gspell,
-  gtk,
-  javascriptcoregtk,
-  json_glib,
-  libhandy,
-  libpeas,
-  libsecret,
-  libxml,
-  sqlite,
-  webkit2gtk
-]
-
-valadoc_vapi_dirs = [
-  vapi_dir,
-  meson.current_build_dir()
-]
-if libhandy_vapi != ''
-  valadoc_vapi_dirs += libhandy_vapi
-endif
-
-# Hopefully Meson will get baked-in valadoc support, so we don't have
-# to resort to these kinds of hacks any more. See
-# https://github.com/mesonbuild/meson/issues/894
-
-valadoc_dep_args = []
-foreach dep : valadoc_dependencies
-  valadoc_dep_args += '--pkg'
-  if dep != libhandy
-    valadoc_dep_args += dep.name()
-  else
-    valadoc_dep_args += 'libhandy-1'
-  endif
-endforeach
-valadoc_dep_args += [ '--pkg', 'config' ]
-valadoc_dep_args += [ '--pkg', 'icu-uc' ]
-valadoc_dep_args += [ '--pkg', 'libstemmer' ]
-valadoc_dep_args += [ '--pkg', 'posix' ]
-
-valadoc_vapidir_args = []
-foreach dir : valadoc_vapi_dirs
-  valadoc_vapidir_args += '--vapidir=@0@'.format(dir)
-endforeach
-
 if valadoc.found()
+  valadoc_dependencies = [
+    cairo,
+    enchant,
+    folks,
+    gcr,
+    gdk,
+    gee,
+    gio,
+    glib,
+    gmime,
+    goa,
+    gspell,
+    gtk,
+    javascriptcoregtk,
+    json_glib,
+    libpeas,
+    libsecret,
+    libxml,
+    sqlite,
+    webkit2gtk
+  ]
+
+  valadoc_vapi_dirs = [
+    vapi_dir,
+    meson.current_build_dir()
+  ]
+  if libhandy_vapi != ''
+    valadoc_vapi_dirs += libhandy_vapi
+  endif
+
+  # Hopefully Meson will get baked-in valadoc support, so we don't have
+  # to resort to these kinds of hacks any more. See
+  # https://github.com/mesonbuild/meson/issues/894
+
+  valadoc_dep_args = []
+  foreach dep : valadoc_dependencies
+    valadoc_dep_args += [ '--pkg', dep.name() ]
+  endforeach
+  valadoc_dep_args += [ '--pkg', 'libhandy-1' ]
+  valadoc_dep_args += [ '--pkg', 'config' ]
+  valadoc_dep_args += [ '--pkg', 'icu-uc' ]
+  valadoc_dep_args += [ '--pkg', 'libstemmer' ]
+  valadoc_dep_args += [ '--pkg', 'posix' ]
+
+  valadoc_vapidir_args = []
+  foreach dir : valadoc_vapi_dirs
+    valadoc_vapidir_args += '--vapidir=@0@'.format(dir)
+  endforeach
+
   docs = custom_target('valadoc',
     build_by_default: true,
     depends: [client_lib, engine_lib],

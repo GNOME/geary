@@ -212,6 +212,12 @@
                     "type": "git",
                     "url": "https://github.com/jstedfast/gmime.git",
                     "branch": "master"
+                },
+                {
+                    "type": "patch",
+                    "paths": [
+                        "build-aux/patches/gmime-autogen.sh-Also-allow-libtool-2.6.patch"
+                    ]
                 }
             ]
         },
@@ -251,7 +257,7 @@
                 {
                     "type": "git",
                     "url": "https://github.com/snowballstem/snowball.git",
-                    "branch": "master"
+                    "branch": "main"
                 },
                 {
                     "type": "patch",
@@ -275,6 +281,25 @@
                     "type": "archive",
                     "url": "http://people.freedesktop.org/~mccann/dist/sound-theme-freedesktop-0.8.tar.bz2",
                     "sha256": "cb518b20eef05ec2e82dda1fa89a292c1760dc023aba91b8aa69bafac85e8a14"
+                }
+            ]
+        },
+        {
+            "name": "libhandy",
+            "buildsystem": "meson",
+            "config-opts": [
+                "-Dexamples=false",
+                "-Dtests=false",
+                "-Dglade_catalog=disabled",
+                "-Dintrospection=enabled",
+                "-Dvapi=true",
+                "-Dgtk_doc=false"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/libhandy.git",
+                    "branch": "main"
                 }
             ]
         },
