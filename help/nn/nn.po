@@ -1,0 +1,1474 @@
+# Norwegian Nynorsk translation for geary.
+# Copyright (C) 2026 geary's COPYRIGHT HOLDER
+# This file is distributed under the same license as the geary package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: geary main\n"
+"POT-Creation-Date: 2026-10-23 12:59+0000\n"
+"PO-Revision-Date: 2026-10-23 15:06+0200\n"
+"Last-Translator: Roy-Magne Mo <rmo@sunnmore.net>\n"
+"Language-Team: Norwegian Nynorsk <nn@li.org>\n"
+"Language: nn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+msgctxt "_"
+msgid "translator-credits"
+msgstr "Roy-Magne Mo <rmo@sunnmore.net>"
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
+msgid "Accounts"
+msgstr "Kontoar"
+
+#. (itstool) path: section/title
+#: C/accounts.page:13
+msgid "Accounts Editor"
+msgstr "Kontoredigering"
+
+#. (itstool) path: section/p
+#: C/accounts.page:15
+msgid ""
+"Your email accounts can be added, updated, and removed using the "
+"<em>accounts editor</em>. To open it, click Geary’s application menu button "
+"in the main window above the folder list, then click <gui>Accounts</gui> in "
+"the pop-up menu."
+msgstr ""
+"Du kan leggje til, oppdatere og fjerne e-postkontoane dine i "
+"<em>kontoredigeringa</em>. For å opne ho klikkar du på programmenyknappen "
+"til Geary i hovudvindauget over mappelista, og så på <gui>Kontoar</gui> i "
+"menyen som dukkar opp."
+
+#. (itstool) path: section/p
+#: C/accounts.page:20
+msgid ""
+"To change the order that accounts are displayed in the folder list, click "
+"and drag the handle for an account in the accounts editor, or focus an "
+"account with <key>Tab</key>, then use <keyseq><key>Ctrl</key><key>↑</key></"
+"keyseq> and <keyseq><key>Ctrl</key><key>↓</key></keyseq> to re-position the "
+"currently selected account."
+msgstr ""
+"For å endre rekkjefølgja kontoane vert viste i på mappelista, klikkar og "
+"dreg du handtaket til ein konto i kontoredigeringa, eller set fokus på ein "
+"konto med <key>Tab</key> og bruker "
+"<keyseq><key>Ctrl</key><key>↑</key></keyseq> og "
+"<keyseq><key>Ctrl</key><key>↓</key></keyseq> for å flytte den valde kontoen."
+
+#. (itstool) path: section/title
+#: C/accounts.page:29
+msgid "Adding accounts"
+msgstr "Leggje til kontoar"
+
+#. (itstool) path: section/p
+#: C/accounts.page:31
+msgid ""
+"Geary will automatically use any email accounts you have added via the "
+"<app>Online Accounts</app> panel of <app>GNOME Settings</app>. If you do not "
+"have any accounts added to <app>Online Accounts</app>, you will be prompted "
+"to add an account the first time you run Geary."
+msgstr ""
+"Geary bruker automatisk alle e-postkontoar du har lagt til i panelet "
+"<app>Nettkontoar</app> i <app>GNOME-innstillingar</app>. Viss du ikkje har "
+"lagt til kontoar i <app>Nettkontoar</app>, vert du bedd om å leggje til ein "
+"konto første gongen du startar Geary."
+
+#. (itstool) path: section/p
+#: C/accounts.page:37
+msgid ""
+"To add additional accounts, open the accounts editor, then choose the "
+"appropriate email provider from the list at the bottom of the window. For "
+"providers supported by <app>Online Accounts</app>, <app>GNOME Settings</app> "
+"will be opened and you will be asked for your account information there. For "
+"other email providers, you will be asked for your account information by "
+"Geary. Once entered, click <gui>Create</gui> and the account information "
+"will be checked and then added."
+msgstr ""
+"For å leggje til fleire kontoar opnar du kontoredigeringa og vel ein "
+"e-postleverandør frå lista nedst i vindauget. For leverandørar som "
+"<app>Nettkontoar</app> støttar, vert <app>GNOME-innstillingar</app> opna, og"
+" du vert bedd om kontoinformasjonen der. For andre e-postleverandørar vert "
+"du bedd om kontoinformasjonen av Geary. Når du har skrive han inn, klikkar "
+"du <gui>Opprett</gui>, og kontoinformasjonen vert kontrollert og kontoen "
+"lagd til."
+
+#. (itstool) path: section/title
+#: C/accounts.page:48
+msgid "Updating existing accounts"
+msgstr "Oppdatere eksisterande kontoar"
+
+#. (itstool) path: section/p
+#: C/accounts.page:50
+msgid ""
+"To update existing accounts, open the accounts editor and choose the account "
+"you wish to update. Geary will display settings for the account. From there, "
+"you can add and remove additional sender email addresses, edit your email "
+"signature, and various other settings."
+msgstr ""
+"For å oppdatere ein eksisterande konto opnar du kontoredigeringa og vel "
+"kontoen du vil oppdatere. Geary viser innstillingane for kontoen. Der kan du"
+" leggje til og fjerne avsendaradresser, redigere e-postsignaturen og endre "
+"ulike andre innstillingar."
+
+#. (itstool) path: section/p
+#: C/accounts.page:56
+msgid ""
+"The <gui>Download mail</gui> setting allows you to configure how much mail "
+"Geary will download and store locally. Geary can only use locally available "
+"mail when displaying and searching for conversations."
+msgstr ""
+"Innstillinga <gui>Last ned e-post</gui> lèt deg bestemme kor mykje e-post "
+"Geary skal laste ned og lagre lokalt. Geary kan berre bruke e-post som er "
+"tilgjengeleg lokalt når det viser og søkjer i samtalar."
+
+#. (itstool) path: section/p
+#: C/accounts.page:61
+msgid ""
+"To edit the server settings for the account, scroll to the bottom of the "
+"window and click <gui>Server Settings</gui>. The server settings will be "
+"displayed and you can click to edit them. Once done, click <gui>Apply</gui> "
+"and Geary will check the settings, then update the account. Note that "
+"accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> cannot have their server name, security, login, or password "
+"settings changed."
+msgstr ""
+"For å redigere tenarinnstillingane for kontoen blar du ned til botnen av "
+"vindauget og klikkar på <gui>Tenarinnstillingar</gui>. Tenarinnstillingane "
+"vert viste, og du kan klikke for å redigere dei. Når du er ferdig, klikkar "
+"du <gui>Bruk</gui>, og Geary kontrollerer innstillingane og oppdaterer "
+"kontoen. Merk at for kontoar som er lagde til frå panelet "
+"<app>Nettkontoar</app> i <app>GNOME-innstillingar</app>, kan du ikkje endre "
+"tenarnamn, tryggleik, innlogging eller passord."
+
+#. (itstool) path: section/p
+#: C/accounts.page:70
+msgid ""
+"The <gui>Save draft email on server</gui> checkbox controls whether the "
+"composer will save copies of email messages being written in the "
+"<gui>Drafts</gui> folder. If de-selected, you will not be able to save draft "
+"messages when closing the composer."
+msgstr ""
+"Avkryssingsboksen <gui>Lagre e-postutkast på tenaren</gui> styrer om "
+"skrivefeltet lagrar kopiar av e-postmeldingar du skriv, i mappa "
+"<gui>Utkast</gui>. Viss han ikkje er kryssa av, kan du ikkje lagre utkast "
+"når du lukkar skrivefeltet."
+
+#. (itstool) path: section/p
+#: C/accounts.page:75
+msgid ""
+"The <gui>Save sent email on server</gui> checkbox controls whether Geary "
+"will save copies of email that have been sent to the <gui>Sent</gui> folder. "
+"If de-selected, you will no be able to see any email messages you have sent, "
+"unless your server automatically saves them for you."
+msgstr ""
+"Avkryssingsboksen <gui>Lagre sendt e-post på tenaren</gui> styrer om Geary "
+"lagrar kopiar av sendt e-post i mappa <gui>Sendt</gui>. Viss han ikkje er "
+"kryssa av, kan du ikkje sjå e-postmeldingar du har sendt, med mindre tenaren"
+" din lagrar dei automatisk for deg."
+
+#. (itstool) path: section/title
+#: C/accounts.page:83
+msgid "Removing accounts"
+msgstr "Fjerne kontoar"
+
+#. (itstool) path: section/p
+#: C/accounts.page:85
+msgid ""
+"Accounts added via the <app>Online Accounts</app> panel of <app>GNOME "
+"Settings</app> must also be removed from there. To do so, open <app>Online "
+"Accounts</app>, select the account, and click <gui>Remove</gui>."
+msgstr ""
+"Kontoar som er lagde til frå panelet <app>Nettkontoar</app> i <app>GNOME-"
+"innstillingar</app>, må òg fjernast derfrå. For å gjere det opnar du "
+"<app>Nettkontoar</app>, vel kontoen og klikkar <gui>Fjern</gui>."
+
+#. (itstool) path: section/p
+#: C/accounts.page:90
+msgid ""
+"To remove an account added via Geary, open the accounts editor and choose "
+"the account you wish to remove. Geary will display settings for the account. "
+"Scroll to the bottom of the window and click <gui>Remove Account</gui>. You "
+"will be prompted to confirm removing the account. Once confirmed, if you "
+"change your mind you can still undo removing the account by clicking "
+"<gui>Undo</gui> in the popup notification, or by typing <keyseq><key>Ctrl</"
+"key><key>U</key></keyseq>."
+msgstr ""
+"For å fjerne ein konto som er lagd til frå Geary, opnar du kontoredigeringa "
+"og vel kontoen du vil fjerne. Geary viser innstillingane for kontoen. Blar "
+"du heilt ned i vindauget og klikkar <gui>Fjern konto</gui>, vert du bedd om "
+"å stadfeste at kontoen skal fjernast. Etter at du har stadfesta, kan du "
+"framleis angre fjerninga ved å klikke <gui>Angre</gui> i varselet som dukkar"
+" opp, eller ved å trykkje <keyseq><key>Ctrl</key><key>U</key></keyseq>."
+
+#. (itstool) path: page/title
+#: C/archive.page:8
+msgid "Archive, trash and delete messages"
+msgstr "Arkivere, flytte til papirkorga og slette meldingar"
+
+#. (itstool) path: page/p
+#: C/archive.page:10
+msgid ""
+"Geary lets you archive messages if your server supports it. Clicking the "
+"<gui style=\"button\">Archive</gui> toolbar button moves the conversation "
+"from the current folder to the <gui>Archive</gui> folder for most email "
+"services, or to <gui>All Mail</gui> for GMail. Archiving helps keep your "
+"email organised by moving old and replied-to email out of the way."
+msgstr ""
+"Geary lèt deg arkivere meldingar viss tenaren støttar det. Når du klikkar "
+"knappen <gui style=\"button\">Arkiver</gui> i verktøylinja, vert samtalen "
+"flytta frå den gjeldande mappa til mappa <gui>Arkiv</gui> for dei fleste "
+"e-posttenester, eller til <gui>All e-post</gui> for Gmail. Arkivering "
+"hjelper deg med å halde e-posten ryddig ved å flytte gamal e-post og e-post "
+"du har svara på, ut av vegen."
+
+#. (itstool) path: page/p
+#: C/archive.page:17
+msgid ""
+"To move conversations to the <gui>Trash</gui> folder, select them and click "
+"the <gui style=\"button\">Trash</gui> toolbar button. To permanently delete "
+"conversations, hold down <key>Shift</key> and click the <gui "
+"style=\"button\">Delete</gui> button that appears in place of the "
+"<gui>Trash</gui> button, or open the conversation in the <gui>Trash</gui> "
+"folder and click <gui style=\"button\">Delete</gui> there."
+msgstr ""
+"For å flytte samtalar til mappa <gui>Papirkorg</gui> vel du dei og klikkar "
+"knappen <gui style=\"button\">Papirkorg</gui> i verktøylinja. For å slette "
+"samtalar for godt held du nede <key>Shift</key> og klikkar knappen <gui "
+"style=\"button\">Slett</gui> som dukkar opp i staden for knappen "
+"<gui>Papirkorg</gui>, eller du opnar samtalen i mappa <gui>Papirkorg</gui> "
+"og klikkar <gui style=\"button\">Slett</gui> der."
+
+#. (itstool) path: note/title
+#: C/archive.page:26
+msgid "Undoing changes"
+msgstr "Angre endringar"
+
+#. (itstool) path: note/p
+#: C/archive.page:27
+msgid ""
+"Note that you can always undo archiving or trashing a message if you change "
+"your mind. Click <gui style=\"button\">Undo</gui> on the pop-up notification "
+"that appears, or type <keyseq><key>Ctrl</key><key>Z</key></keyseq>, or open "
+"the folder, find the message, then move it back to your <gui>Inbox</gui>"
+msgstr ""
+"Merk at du alltid kan angre arkivering eller flytting av ei melding til "
+"papirkorga viss du ombestemmer deg. Klikk <gui style=\"button\">Angre</gui> "
+"i varselet som dukkar opp, eller trykk "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq>, eller opne mappa, finn "
+"meldinga og flytt ho tilbake til <gui>Innboks</gui>"
+
+#. (itstool) path: page/p
+#: C/archive.page:34
+msgid ""
+"While both <gui style=\"button\">Archive</gui> and <gui "
+"style=\"button\">Trash</gui> removes conversations from your <gui>Inbox</"
+"gui> folder, there is an important difference. Clicking <gui "
+"style=\"button\">Archive</gui> will ensure your conversations are kept so "
+"you can find them again later. Clicking <gui style=\"button\">Trash</gui> "
+"will cause conversations to be hidden from <link xref=\"search\"/>, and they "
+"will likely be deleted in the future."
+msgstr ""
+"Både <gui style=\"button\">Arkiver</gui> og <gui "
+"style=\"button\">Papirkorg</gui> fjernar samtalar frå mappa "
+"<gui>Innboks</gui>, men det er ein viktig skilnad. Når du klikkar <gui "
+"style=\"button\">Arkiver</gui>, vert samtalane tekne vare på slik at du kan "
+"finne dei igjen seinare. Når du klikkar <gui "
+"style=\"button\">Papirkorg</gui>, vert samtalane gøymde frå <link "
+"xref=\"search\"/>, og dei vert truleg sletta seinare."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Need help with Geary?"
+msgstr "Treng du hjelp med Geary?"
+
+#. (itstool) path: section/title
+#: C/bugs.page:13
+msgid "Getting support"
+msgstr "Få hjelp"
+
+#. (itstool) path: section/p
+#: C/bugs.page:15
+msgid ""
+"If you are having trouble using Geary, please <link href=\"https://"
+"wiki.gnome.org/Apps/Geary/Contact\">get in touch</link> with the Geary "
+"community about the problem."
+msgstr ""
+"Viss du har problem med å bruke Geary, kan du <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contact\">ta kontakt</link> med "
+"Geary-fellesskapet om problemet."
+
+#. (itstool) path: section/title
+#: C/bugs.page:21
+msgid "Reporting bugs"
+msgstr "Melde frå om feil"
+
+#. (itstool) path: section/p
+#: C/bugs.page:23
+msgid ""
+"If you suspect you have found a bug in Geary, please follow the <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">bug reporting "
+"guidelines</link> so the problem can be diagnosed and fixed."
+msgstr ""
+"Viss du trur du har funne ein feil i Geary, følg <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">retningslinjene for"
+" feilrapportering</link> slik at problemet kan finnast og rettast."
+
+#. (itstool) path: section/p
+#: C/bugs.page:28
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr ""
+"For at problemet skal kunne finnast så raskt som mogleg, bør du ta med "
+"følgjande opplysningar:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:32
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr ""
+"Geary-versjon og korleis det er installert (pakke? Flathub? kjeldekode?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:34
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "Skrivebordet ditt (GNOME? KDE? Noko anna?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:35
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
+msgstr "Operativsystem og versjon (Ubuntu 16.04? Fedora 28? Sjølvbygd?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:37
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr "E-postleverandør (Gmail, Yahoo!, Outlook.com eller ein annan?)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:39
+msgid "Steps to reproduce the bug"
+msgstr "Korleis feilen kan gjenskapast"
+
+#. (itstool) path: item/p
+#: C/bugs.page:40
+msgid "What happened?"
+msgstr "Kva skjedde?"
+
+#. (itstool) path: item/p
+#: C/bugs.page:41
+msgid "What did you expect to happen?"
+msgstr "Kva venta du skulle skje?"
+
+#. (itstool) path: section/p
+#: C/bugs.page:44
+msgid ""
+"Log files can be accessed via the Geary Inspector, press <keyseq><key>Alt</"
+"key><key>I</key></keyseq> to open it, select and save any relevant log "
+"files, and attach them to the bug report."
+msgstr ""
+"Du finn loggfiler i Geary-inspektøren. Trykk "
+"<keyseq><key>Alt</key><key>I</key></keyseq> for å opne han, vel og lagre "
+"relevante loggfiler og legg dei ved feilrapporten."
+
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Bidra til Geary"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr ""
+"Vil du hjelpe til med å gjere Geary betre? Du kan bidra på fleire måtar:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Feilrapportering</link>"
+" – meld frå om nye feil eller foreslå nye funksjonar"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
+msgstr ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Omsetjing</link> – "
+"omset brukargrensesnittet og brukarhandboka til Geary til nye språk"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
+"link>—fix bugs and add new features"
+msgstr ""
+"<link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Development\">Utvikling</link> – "
+"rett feil og legg til nye funksjonar"
+
+#. (itstool) path: page/p
+#: C/contributing.page:23
+msgid ""
+"See <link href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">the wiki</"
+"link> for more information and options for contributing financially to "
+"Geary's development."
+msgstr ""
+"Sjå <link "
+"href=\"https://wiki.gnome.org/Apps/Geary/Contribute\">wikien</link> for meir"
+" informasjon og for måtar å støtte utviklinga av Geary økonomisk på."
+
+#. (itstool) path: info/title
+#: C/index.page:7
+msgctxt "link:trail"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:8
+msgctxt "text"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: info/title
+#: C/index.page:9
+msgctxt "link"
+msgid "Geary"
+msgstr "Geary"
+
+#. (itstool) path: page/title
+#: C/index.page:12
+msgid "<_:media-1/> <span>Geary</span>"
+msgstr "<_:media-1/> <span>Geary</span>"
+
+#. (itstool) path: section/title
+#: C/index.page:18
+msgid "Introduction"
+msgstr "Innleiing"
+
+#. (itstool) path: section/title
+#: C/index.page:22
+msgid "Using Geary"
+msgstr "Bruke Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:26
+msgid "Contributing and getting support"
+msgstr "Bidra og få hjelp"
+
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Merke eller flytte ein samtale"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Merke ein samtale"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Med Geary kan du setje éin eller fleire <em>etikettar</em> på kvar samtale. "
+"Etikettane i Geary svarar til etikettar i Gmail, eller vanlege mapper i "
+"andre e-posttenester."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"For å merke éin eller fleire samtalar vel du først samtalane, og gjer så "
+"eitt av følgjande:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr ""
+"Klikk på knappen <gui>Etikett</gui> i verktøylinja og vel ein etikett frå "
+"nedtrekksmenyen som kjem opp."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Hald nede <key>Ctrl</key> og dra samtalane frå samtalelista til etiketten i "
+"sidefeltet."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Flytte ein samtale til ei mappe eller ein etikett"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"For å flytte éin eller fleire samtalar til ei mappe eller ein etikett vel du"
+" først samtalane, og gjer så eitt av følgjande:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr ""
+"Klikk på knappen <gui>Flytt</gui> i verktøylinja og vel ei mappe eller ein "
+"etikett frå nedtrekksmenyen som kjem opp."
+
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Dra samtalane frå samtalelista til mappa eller etiketten i sidefeltet."
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Avgrensingar"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Geary er framleis under tidleg utvikling. Geary støttar IMAP og er testa med"
+" Gmail, Yahoo og den frie e-posttenaren Dovecot. Det finst eksperimentell "
+"støtte for Outlook.com. Geary fungerer kanskje ikkje godt med alle IMAP-"
+"tenarar enno. Førebels manglar Geary mange funksjonar, mellom anna frakopla "
+"modus."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr ""
+"Du finn meir om funksjonane vi arbeider med og om framtida til Geary på "
+"<link href=\"https://wiki.gnome.org/Apps/Geary\">wikisida</link> til Geary."
+
+#. (itstool) path: page/title
+#. (itstool) path: section/title
+#: C/overview.page:9 C/shortcuts.page:13
+msgid "Overview"
+msgstr "Oversikt"
+
+#. (itstool) path: page/p
+#: C/overview.page:11
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary er eit e-postprogram bygd rundt samtalar, for GNOME 3-skrivebordet. "
+"Det lèt deg lese, finne og sende e-post med eit enkelt, moderne grensesnitt."
+
+#. (itstool) path: page/p
+#: C/overview.page:15
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Med samtalar kan du lese ein heil diskusjon utan å måtte lete og klikke deg "
+"frå melding til melding."
+
+#. (itstool) path: page/p
+#: C/overview.page:18
+msgid ""
+"The main Geary window is divided into several areas: The folder list, the "
+"conversation list, and the conversation viewer."
+msgstr ""
+"Hovudvindauget i Geary er delt inn i fleire område: mappelista, samtalelista"
+" og samtalevisaren."
+
+#. (itstool) path: section/title
+#: C/overview.page:22
+msgid "Folder list"
+msgstr "Mappeliste"
+
+#. (itstool) path: section/p
+#: C/overview.page:24
+msgid ""
+"The <em>folder list</em> displays all <em>folders</em> and <em>labels</em> "
+"for your email accounts. Geary uses the term <em>label</em> for any folder "
+"that you have created to organize your email messages."
+msgstr ""
+"<em>Mappelista</em> viser alle <em>mapper</em> og <em>etikettar</em> for "
+"e-postkontoane dine. Geary bruker ordet <em>etikett</em> om alle mapper du "
+"har laga for å organisere e-postmeldingane dine."
+
+#. (itstool) path: section/p
+#: C/overview.page:29
+msgid ""
+"Select a folder or label to display the conversations it contains in the "
+"conversation list."
+msgstr ""
+"Vel ei mappe eller ein etikett for å vise samtalane i han i samtalelista."
+
+#. (itstool) path: section/title
+#: C/overview.page:34
+msgid "Conversation list"
+msgstr "Samtaleliste"
+
+#. (itstool) path: section/p
+#: C/overview.page:36
+msgid ""
+"The <em>conversation list</em> displays a list of conversations in the "
+"selected folder. Newer conversations appear at the top."
+msgstr ""
+"<em>Samtalelista</em> viser ei liste over samtalane i den valde mappa. Nyare"
+" samtalar står øvst."
+
+#. (itstool) path: section/p
+#: C/overview.page:40
+msgid ""
+"Each sender’s name appears bold if there are unread messages from that "
+"sender. If a conversation has more than one message, Geary displays a count "
+"of messages in the conversation."
+msgstr ""
+"Namnet på avsendaren står i feit skrift viss det finst ulesne meldingar frå "
+"han. Viss ein samtale har meir enn éi melding, viser Geary kor mange "
+"meldingar samtalen har."
+
+#. (itstool) path: section/p
+#: C/overview.page:44
+msgid ""
+"Geary does not automatically download all messages in all of your mail "
+"folders. When you first visit your Inbox or any other folder, Geary "
+"downloads the most recent messages in that folder. To see more messages, "
+"simply scroll down the conversation list and Geary will fetch more messages "
+"automatically."
+msgstr ""
+"Geary lastar ikkje automatisk ned alle meldingane i alle e-postmappene dine."
+" Når du opnar Innboks eller ei anna mappe for første gong, lastar Geary ned "
+"dei nyaste meldingane i mappa. For å sjå fleire meldingar blar du nedover i "
+"samtalelista, så hentar Geary fleire meldingar automatisk."
+
+#. (itstool) path: section/p
+#: C/overview.page:50
+msgid ""
+"Some commands in Geary can act on a group of conversations. To select "
+"multiple conversations, hold down the <key>Ctrl</key> key and click each "
+"conversation in turn in the conversation list. Alternatively, click the "
+"first conversation in a range, then hold down <key>Shift</key> and click the "
+"last conversation."
+msgstr ""
+"Nokre kommandoar i Geary kan brukast på ei gruppe samtalar. For å velje "
+"fleire samtalar held du nede <key>Ctrl</key> og klikkar på ein og ein "
+"samtale i samtalelista. Du kan også klikke på den første samtalen i eit "
+"område, halde nede <key>Shift</key> og klikke på den siste samtalen."
+
+#. (itstool) path: section/title
+#: C/overview.page:58
+msgid "Conversation viewer"
+msgstr "Samtalevisar"
+
+#. (itstool) path: section/p
+#: C/overview.page:60
+msgid ""
+"The <em>conversation viewer</em> displays all email messages in the selected "
+"conversation, with the oldest message at the top."
+msgstr ""
+"<em>Samtalevisaren</em> viser alle e-postmeldingane i den valde samtalen, "
+"med den eldste meldinga øvst."
+
+#. (itstool) path: section/p
+#: C/overview.page:63
+msgid ""
+"When you view a conversation, Geary collapses messages that you’ve already "
+"read. Click collapsed messages to expand them. Click an expanded message’s "
+"header to collapse it."
+msgstr ""
+"Når du ser på ein samtale, bretter Geary saman meldingar du alt har lese. "
+"Klikk på samanbretta meldingar for å utvide dei. Klikk på toppen av ei "
+"utvida melding for å brette henne saman."
+
+#. (itstool) path: section/p
+#: C/overview.page:67
+msgid ""
+"Click on any of the sender’s or receiver’s names or email address for a "
+"message to open the <em>contact menu</em>, which displays additional "
+"information and options for the email address. You can to start a new "
+"conversation, copy the email address to the clipboard, and search for "
+"related conversations. If the email address is present in your desktop "
+"address book, it will show the contact’s photo, preferred name, and whether "
+"they are a favourite contact. You can also open the contact in the address "
+"book. If the email address is not already present, you can choose to add "
+"them to the address book, and update the remote image loading preference for "
+"that address."
+msgstr ""
+"Klikk på namnet eller e-postadressa til ein avsendar eller mottakar i ei "
+"melding for å opne <em>kontaktmenyen</em>, som viser tilleggsinformasjon og "
+"val for e-postadressa. Du kan starte ein ny samtale, kopiere e-postadressa "
+"til utklippstavla og søkje etter relaterte samtalar. Viss e-postadressa "
+"finst i adresseboka på skrivebordet, viser menyen bilete, føretrukke namn og"
+" om kontakten er ein favoritt. Du kan også opne kontakten i adresseboka. "
+"Viss e-postadressa ikkje finst der frå før, kan du leggje henne til i "
+"adresseboka og oppdatere innstillinga for innlasting av eksterne bilete for "
+"adressa."
+
+#. (itstool) path: section/p
+#: C/overview.page:79
+msgid ""
+"Click the star button present on each message to mark or un-mark a message "
+"as being starred. Staring a message will mark the whole conversation as "
+"starred, and Geary will display the first starred message in a conversation "
+"when returning to it."
+msgstr ""
+"Klikk på stjerneknappen på kvar melding for å merke eller fjerne stjerne frå"
+" meldinga. Når du merkar ei melding med stjerne, vert heile samtalen "
+"stjernemerkt, og Geary viser den første stjernemerkte meldinga i samtalen "
+"når du kjem tilbake til han."
+
+#. (itstool) path: section/p
+#: C/overview.page:84
+msgid ""
+"Click the menu button present on each message to open the <em>message menu</"
+"em>, which allows you to reply and forward to a specific message, update "
+"which messages have been marked as read or unread, print a message, and so "
+"on."
+msgstr ""
+"Klikk på menyknappen på kvar melding for å opne <em>meldingsmenyen</em>. Der"
+" kan du svare på og vidaresende ei bestemt melding, endre kva meldingar som "
+"er merkte som lesne eller ulesne, skrive ut ei melding og meir."
+
+#. (itstool) path: section/p
+#: C/overview.page:89
+msgid ""
+"Any attachments in a message appear at the bottom of the message. Double "
+"click an attachment to open it, or use the Open and Save buttons to open and "
+"save selected attachments."
+msgstr ""
+"Vedlegg i ei melding står nedst i meldinga. Dobbeltklikk på eit vedlegg for "
+"å opne det, eller bruk knappane Opne og Lagre for å opne og lagre valde "
+"vedlegg."
+
+#. (itstool) path: page/title
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Innstillingar"
+
+#. (itstool) path: page/p
+#: C/preferences.page:12
+msgid ""
+"Geary allows you to customise how it works via its <gui "
+"style=\"group\">Preferences</gui> window. To open the window, select <gui "
+"style=\"menuitem\">Preferences</gui> from the application menu on the main "
+"window's toolbar. You can change the following options:"
+msgstr ""
+"Du kan tilpasse korleis Geary fungerer i vindauget <gui "
+"style=\"group\">Innstillingar</gui>. For å opne vindauget vel du <gui "
+"style=\"menuitem\">Innstillingar</gui> frå programmenyen i verktøylinja i "
+"hovudvindauget. Du kan endre desse vala:"
+
+#. (itstool) path: item/title
+#: C/preferences.page:19
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Vel neste melding automatisk</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:20
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+"Når dette valet er slått på, vel Geary automatisk den siste meldinga i ei "
+"mappe når du opnar mappa. Etter at du har arkivert ei melding, vel Geary i "
+"tillegg automatisk den neste meldinga ved sida av."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Vis førehandsvising av samtalar</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:27
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+"Slår på førehandsvising av meldingar i samtalelista. Førehandsvisinga viser "
+"dei første linjene av kvar melding."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+msgid "<gui>Use single key email shortcuts</gui>"
+msgstr "<gui>Bruk e-postsnarvegar med éin tast</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:32
+msgid ""
+"Enable keyboard shortcuts for email actions that do not require pressing "
+"<key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"shortcuts\"/> for details."
+msgstr ""
+"Slår på tastatursnarvegar for e-posthandlingar som ikkje krev "
+"<key>Ctrl</key>. Dei samsvarar med snarvegane i Gmail. Sjå <link "
+"xref=\"shortcuts\"/> for detaljar."
+
+#. (itstool) path: item/title
+#: C/preferences.page:37
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Sjekk etter ny e-post når programmet er lukka</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:38
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
+msgstr ""
+"Geary følgjer med på kontoane dine for ny e-post òg når hovudvindauget ikkje"
+" er ope. For å få til dette startar Geary stille i bakgrunnen når du loggar "
+"inn på datamaskina, og held fram å køyre etter at du har lukka alle "
+"vindauga."
+
+#. (itstool) path: page/title
+#: C/search.page:10
+msgid "Search"
+msgstr "Søk"
+
+#. (itstool) path: page/p
+#: C/search.page:12
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) and start typing. Results will appear after a brief delay."
+msgstr ""
+"Geary støttar fulltekstsøk for éin konto om gongen. For å søkje vel du ei "
+"mappe som høyrer til kontoen du vil søkje i. Klikk deretter på søkefeltet i "
+"verktøylinja (eller trykk <keyseq><key>Ctrl</key><key>S</key></keyseq>) og "
+"byrj å skrive. Resultata dukkar opp etter ei kort forseinking."
+
+#. (itstool) path: page/p
+#: C/search.page:16
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr ""
+"Fulltekstsøket omfattar e-posttekst, e-postadresser (til, frå og cc), "
+"emnelinjer og filnamn på vedlegg."
+
+#. (itstool) path: page/p
+#: C/search.page:19
+msgid ""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for "
+"\"walk\" will also match \"walking\" and \"walked.\""
+msgstr ""
+"Nøkkelord som samsvarar med søket vert utheva i meldingsvisinga. Geary finn "
+"ulike former av same ord. Til dømes gir eit søk etter «walk» også treff på "
+"«walking» og «walked»."
+
+#. (itstool) path: section/title
+#: C/search.page:23
+msgid "Search operators"
+msgstr "Søkjeoperatorar"
+
+#. (itstool) path: section/p
+#: C/search.page:24
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr "Geary støttar desse operatorane for å avgrense søk:"
+
+#. (itstool) path: td/p
+#: C/search.page:27
+msgid "<input>attachment:<var>filename</var></input>"
+msgstr "<input>vedlegg:<var>filnamn</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:28
+msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgstr ""
+"Finn meldingar med vedlegg der namnet samsvarar med <var>filnamn</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:31
+msgid "<input>bcc:<var>recipient</var></input>"
+msgstr "<input>bcc:<var>mottakar</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:32
+msgid "Finds messages where <var>recipient</var> matches email BCC fields."
+msgstr ""
+"Finn meldingar der <var>mottakar</var> samsvarar med Bcc-felta i e-posten."
+
+#. (itstool) path: td/p
+#: C/search.page:35
+msgid "<input>body:<var>text</var></input>"
+msgstr "<input>innhald:<var>tekst</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:36
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr "Finn meldingar der meldingsteksten inneheld <var>tekst</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:39
+msgid "<input>cc:<var>recipient</var></input>"
+msgstr "<input>cc:<var>mottakar</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:40
+msgid "Finds messages where <var>recipient</var> matches email CC fields."
+msgstr ""
+"Finn meldingar der <var>mottakar</var> samsvarar med Cc-felta i e-posten."
+
+#. (itstool) path: td/p
+#: C/search.page:43
+msgid "<input>from:<var>sender</var></input>"
+msgstr "<input>frå:<var>avsendar</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:44
+msgid "Finds messages where <var>sender</var> matches email From fields."
+msgstr ""
+"Finn meldingar der <var>avsendar</var> samsvarar med Frå-felta i e-posten."
+
+#. (itstool) path: td/p
+#: C/search.page:47
+msgid "<input>is:read</input>"
+msgstr "<input>er:lesen</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:48
+msgid "Finds messages that have been marked as read."
+msgstr "Finn meldingar som er merkte som lesne."
+
+#. (itstool) path: td/p
+#: C/search.page:51
+msgid "<input>is:starred</input>"
+msgstr "<input>er:stjernemerkt</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:52
+msgid "Finds messages that have been marked as starred."
+msgstr "Finn meldingar som er merkte med stjerne."
+
+#. (itstool) path: td/p
+#: C/search.page:55
+msgid "<input>is:unread</input>"
+msgstr "<input>er:ulesen</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:56
+msgid "Finds messages that have been marked as not read."
+msgstr "Finn meldingar som er merkte som ulesne."
+
+#. (itstool) path: td/p
+#: C/search.page:59
+msgid "<input>subject:<var>text</var></input>"
+msgstr "<input>emne:<var>tekst</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:60
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr "Finn meldingar der emnet inneheld <var>tekst</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:63
+msgid "<input>to:<var>recipient</var></input>"
+msgstr "<input>til:<var>mottakar</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:64
+msgid ""
+"Finds messages where <var>recipient</var> matches email To, CC, or BCC "
+"fields."
+msgstr ""
+"Finn meldingar der <var>mottakar</var> samsvarar med Til-, Cc- eller Bcc-"
+"felta i e-posten."
+
+#. (itstool) path: section/p
+#: C/search.page:68
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
+"input>, and <input>to</input> operators support <input>me</input> as their "
+"argument, which searches for the account's email address in the appropriate "
+"context."
+msgstr ""
+"Som eit spesialtilfelle støttar operatorane <input>bcc</input>, "
+"<input>cc</input>, <input>frå</input> og <input>til</input> argumentet "
+"<input>meg</input>, som søkjer etter e-postadressa til kontoen i den "
+"aktuelle samanhengen."
+
+#. (itstool) path: page/title
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Tastatursnarvegar"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:14
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"help to discover the full list. To open the shortcuts help, select <gui "
+"style=\"menuitem\">Keyboard Shortcuts</gui> from the application menu on the "
+"main window's toolbar, or using the keyboard shortcuts listed below."
+msgstr ""
+"Geary har tastatursnarvegar for dei fleste vanlege handlingar. Bruk den "
+"innebygde hjelpa for å sjå den fullstendige lista. For å opne snarveghjelpa "
+"vel du <gui style=\"menuitem\">Tastatursnarvegar</gui> frå programmenyen i "
+"verktøylinja i hovudvindauget, eller bruker snarvegane nedanfor."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:20
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr "Du kan bruke desse tastatursnarvegane for å få fram hjelp frå Geary:"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:24
+msgid "Display this help manual"
+msgstr "Vis denne hjelpehandboka"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:25
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:28
+msgid "Display all keyboard shortcuts"
+msgstr "Vis alle tastatursnarvegar"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:29
+msgid "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+msgstr "<keyseq><key>Ctrl</key><key>?</key></keyseq>"
+
+#. (itstool) path: section/title
+#: C/shortcuts.page:37
+msgid "Single key shortcuts"
+msgstr "Snarvegar med éin tast"
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:39
+msgid ""
+"You can enable keyboard shortcuts for email actions that do not require "
+"pressing <key>Ctrl</key>. These match the shortcuts used by GMail. See <link "
+"xref=\"preferences\"/> for details."
+msgstr ""
+"Du kan slå på tastatursnarvegar for e-posthandlingar som ikkje krev "
+"<key>Ctrl</key>. Dei samsvarar med snarvegane i Gmail. Sjå <link "
+"xref=\"preferences\"/> for detaljar."
+
+#. (itstool) path: section/p
+#: C/shortcuts.page:43
+msgid ""
+"The full list of single key shortcuts enabled by this preference can be "
+"found via the keyboard shortcuts help, above."
+msgstr ""
+"Du finn den fullstendige lista over snarvegar med éin tast som denne "
+"innstillinga slår på, i hjelpa for tastatursnarvegar ovanfor."
+
+#. (itstool) path: page/title
+#: C/star.page:10
+msgid "Star a message or mark it as read/unread"
+msgstr "Merk ei melding med stjerne eller som lesen/ulesen"
+
+#. (itstool) path: section/title
+#: C/star.page:12
+msgid "Star messages"
+msgstr "Merk meldingar med stjerne"
+
+#. (itstool) path: section/p
+#: C/star.page:13
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr ""
+"Du kan merke meldingar med stjerne for å vise at dei er viktige for deg. For å "
+"stjernemerke ein samtale klikkar du på stjerneikonet i samtalelista. Du kan "
+"stjernemerke ei enkeltmelding ved å klikke på stjerna øvst til høgre i "
+"meldinga."
+
+#. (itstool) path: section/p
+#: C/star.page:15
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr ""
+"I Gmail-kontoar står stjernemerkte meldingar i mappa Stjernemerkt i "
+"mappelista."
+
+#. (itstool) path: section/title
+#: C/star.page:18
+msgid "Mark messages as read or unread"
+msgstr "Merke meldingar som lesne eller ulesne"
+
+#. (itstool) path: section/p
+#: C/star.page:19
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr ""
+"Geary merkar meldingar som lesne automatisk medan du les dei. For å skifte "
+"ein samtale mellom lesen og ulesen for hand klikkar du på sirkelikonet i "
+"samtalelista."
+
+#. (itstool) path: section/p
+#: C/star.page:22
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr ""
+"Du kan òg bruke <gui>Merk som ulesen</gui> i menyen <gui>Merk</gui> i "
+"verktøylinja for å skifte lesestatus for dei valde samtalane."
+
+#. (itstool) path: section/p
+#: C/star.page:25
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"For å merke ei enkelt melding som lesen vel du <gui>Merk som lesen</gui> frå"
+" nedtrekksmenyen."
+
+#. (itstool) path: page/title
+#: C/write.page:7
+msgid "Writing new email and replying"
+msgstr "Skrive ny e-post og svare"
+
+#. (itstool) path: section/title
+#: C/write.page:10
+msgid "Composing and replying"
+msgstr "Skrive og svare"
+
+#. (itstool) path: section/p
+#: C/write.page:12
+msgid ""
+"To start a new email conversation, click the <gui style=\"button\">Compose</"
+"gui> button on the toolbar. Type the email address of the people to receive "
+"the message in the <gui style=\"input\">To</gui> text field, and a subject "
+"line in the <gui style=\"input\">Subject</gui> field. You can then type your "
+"message in the text area below these. Once the message is ready to send, "
+"click <gui style=\"button\">Send</gui> or type <keyseq><key>Ctrl</"
+"key><key>Enter</key></keyseq> to send the message."
+msgstr ""
+"For å starte ein ny e-postsamtale klikkar du på knappen <gui "
+"style=\"button\">Skriv</gui> i verktøylinja. Skriv e-postadressa til "
+"mottakarane i feltet <gui style=\"input\">Til</gui> og emnet i feltet <gui "
+"style=\"input\">Emne</gui>. Deretter skriv du meldinga i tekstfeltet under. "
+"Når meldinga er klar til å sendast, klikkar du <gui "
+"style=\"button\">Send</gui> eller trykkjer "
+"<keyseq><key>Ctrl</key><key>Enter</key></keyseq>."
+
+#. (itstool) path: note/title
+#: C/write.page:23
+msgid "Undoing sending"
+msgstr "Angre sending"
+
+#. (itstool) path: note/p
+#: C/write.page:24
+msgid ""
+"When sending an email, Geary will wait 5 seconds before delivering the "
+"message. During this time, you will be able to click <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or type "
+"<keyseq><key>Ctrl</key><key>Z</key></keyseq> to re-open the email, and make "
+"more changes to it."
+msgstr ""
+"Når du sender ein e-post, ventar Geary i 5 sekund før meldinga vert levert. "
+"Medan det går, kan du klikke <gui style=\"button\">Angre</gui> i varselet "
+"som dukkar opp, eller trykkje <keyseq><key>Ctrl</key><key>Z</key></keyseq> "
+"for å opne e-posten igjen og gjere fleire endringar."
+
+#. (itstool) path: section/p
+#: C/write.page:32
+msgid ""
+"To show the <gui style=\"input\">Cc</gui>, <gui style=\"input\">Bcc</gui>, "
+"and <gui style=\"input\">Reply-to</gui> fields, click the <gui "
+"style=\"input\">More options</gui> button at the end of the <gui "
+"style=\"input\">To</gui> field. Cc allows you to send a copy of the email to "
+"other, secondary recipients. Bcc is similar, but the Bcc list is hidden from "
+"recipients. The Reply-To field specifies an email address to reply to, if "
+"recipients should reply to a different email address than the sender's."
+msgstr ""
+"For å vise felta <gui style=\"input\">Cc</gui>, <gui "
+"style=\"input\">Bcc</gui> og <gui style=\"input\">Svar til</gui> klikkar du "
+"på knappen <gui style=\"input\">Fleire val</gui> i enden av feltet <gui "
+"style=\"input\">Til</gui>. Med Cc kan du sende ein kopi av e-posten til "
+"andre, sekundære mottakarar. Bcc er liknande, men Bcc-lista er skjult for "
+"mottakarane. Feltet Svar til gir ei e-postadresse det skal svarast til, viss"
+" mottakarane skal svare til ei anna adresse enn avsendaren."
+
+#. (itstool) path: section/p
+#: C/write.page:41
+msgid ""
+"When entering an email address into any of these fields, Geary will provide "
+"suggestions from your desktop address book and from previously sent and "
+"received email messages. To choose one of these suggestions, simply click on "
+"it."
+msgstr ""
+"Når du skriv ei e-postadresse i eitt av desse felta, gir Geary forslag frå "
+"adresseboka på skrivebordet og frå e-postmeldingar du tidlegare har sendt og"
+" mottatt. For å velje eit av forslaga klikkar du berre på det."
+
+#. (itstool) path: section/p
+#: C/write.page:46
+msgid ""
+"To reply to the currently selected conversation, click one of the <gui "
+"style=\"button\">Reply</gui>, <gui style=\"button\">Reply All</gui> or <gui "
+"style=\"button\">Forward</gui> toolbar buttons. This will open a new reply "
+"or forwarded email composer for the latest message in the conversation."
+msgstr ""
+"For å svare på den valde samtalen klikkar du på ein av knappane <gui "
+"style=\"button\">Svar</gui>, <gui style=\"button\">Svar alle</gui> eller "
+"<gui style=\"button\">Vidaresend</gui> i verktøylinja. Då vert det opna eit "
+"nytt skrivefelt for svar eller vidaresending av den siste meldinga i "
+"samtalen."
+
+#. (itstool) path: section/p
+#: C/write.page:52
+msgid ""
+"When replying, the message being replied to will be quoted and copied into "
+"the footer of the new reply. This can be deleted before typing a reply by "
+"pressing <key>Backspace</key>. Alternatively, text can be selectively quoted "
+"by selecting the desired text in a message and clicking <gui "
+"style=\"button\">Reply</gui> or <gui style=\"button\">Reply All</gui>, only "
+"the selected text will be quoted."
+msgstr ""
+"Når du svarar, vert meldinga du svarar på sitert og kopiert inn i "
+"botnteksten til det nye svaret. Du kan slette sitatet før du skriv svaret "
+"ved å trykkje <key>Backspace</key>. Du kan også sitere berre ein del av "
+"teksten ved å markere teksten i ei melding og så klikke <gui "
+"style=\"button\">Svar</gui> eller <gui style=\"button\">Svar alle</gui>. Då "
+"vert berre den markerte teksten sitert."
+
+#. (itstool) path: section/p
+#: C/write.page:60
+msgid ""
+"To reply to a specific email message, open the message menu in the top "
+"corner of the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>."
+msgstr ""
+"For å svare på ei bestemt e-postmelding opnar du meldingsmenyen i øvre "
+"hjørne av meldinga og vel <gui>Svar</gui>, <gui>Svar alle</gui> eller "
+"<gui>Vidaresend</gui>."
+
+#. (itstool) path: section/title
+#: C/write.page:66
+msgid "Text formatting, images and attachments"
+msgstr "Tekstformatering, bilete og vedlegg"
+
+#. (itstool) path: section/p
+#: C/write.page:68
+msgid ""
+"Geary's email composer lets you use text styles such as <em>bold</em> and "
+"<em>italic</em>, indent text to quote it, and links to web pages. Simply "
+"select the text and click the appropriate button on the formatting toolbar "
+"at the bottom of the composer area."
+msgstr ""
+"I skrivefeltet i Geary kan du bruke tekststilar som <em>feit</em> og "
+"<em>kursiv</em>, rykke inn tekst for å sitere og lage lenkjer til nettsider."
+" Marker teksten og klikk på den aktuelle knappen i formateringsverktøylinja "
+"nedst i skrivefeltet."
+
+#. (itstool) path: section/p
+#: C/write.page:74
+msgid ""
+"Bulleted and numbered lists can be inserted or removed by clicking the <gui "
+"style=\"button\">Bulleted list</gui> and <gui style=\"button\">Numbered "
+"list</gui> buttons on the formatting toolbar. The level of indentation of "
+"list items can be adjusted using the <gui style=\"button\">Indent</gui> and "
+"<gui style=\"button\">Un-indent</gui> formatting toolbar buttons."
+msgstr ""
+"Du kan setje inn eller fjerne punktlister og nummererte lister med knappane "
+"<gui style=\"button\">Punktliste</gui> og <gui style=\"button\">Nummerert "
+"liste</gui> i formateringsverktøylinja. Du kan justere innrykket til "
+"listeelementa med knappane <gui style=\"button\">Rykk inn</gui> og <gui "
+"style=\"button\">Rykk ut</gui> i formateringsverktøylinja."
+
+#. (itstool) path: section/p
+#: C/write.page:81
+msgid ""
+"Images can be inserted into rich text messages by clicking the <gui "
+"style=\"button\">Insert Image</gui> button on the formatting toolbar and "
+"selecting the image to attach, by dragging an image from the <gui>Files</"
+"gui> application into the email body and then dropping it, or by pasting an "
+"image that has been copied to the clipboard from another application."
+msgstr ""
+"Du kan setje inn bilete i meldingar med rik tekst ved å klikke på knappen "
+"<gui style=\"button\">Set inn eit bilete</gui> i formateringsverktøylinja og"
+" velje biletet, ved å dra eit bilete frå <gui>Filer</gui> inn i "
+"meldingsteksten og sleppe det, eller ved å lime inn eit bilete som er "
+"kopiert til utklippstavla frå eit anna program."
+
+#. (itstool) path: section/p
+#: C/write.page:88
+msgid ""
+"Documents, music, videos, and other files can be attached to the email by "
+"clicking the <gui style=\"button\">Attach File</gui> button at the bottom of "
+"the composer window and selecting the document to attach, or by dragging a "
+"file from the <gui>Files</gui> application to the composer window, and "
+"dropping it either on the text fields at the top of the window or on the "
+"toolbar at the bottom."
+msgstr ""
+"Du kan leggje ved dokument, musikk, videoar og andre filer ved å klikke på "
+"knappen <gui style=\"button\">Legg ved ei fil</gui> nedst i skrivevindauget "
+"og velje dokumentet, eller ved å dra ei fil frå <gui>Filer</gui> til "
+"skrivevindauget og sleppe ho på tekstfelta øvst i vindauget eller på "
+"verktøylinja nedst."
+
+#. (itstool) path: section/p
+#: C/write.page:96
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link "
+"xref=\"shortcuts\"/> for details."
+msgstr ""
+"Det finst fleire tastatursnarvegar i skrivefeltet. Sjå <link "
+"xref=\"shortcuts\"/> for detaljar."
+
+#. (itstool) path: section/p
+#: C/write.page:99
+msgid ""
+"You may specify a signature to be inserted into the footer of email in the "
+"composer via the <link xref=\"accounts\"/> dialog."
+msgstr ""
+"Du kan angi ein signatur som vert sett inn i botnteksten i e-post frå "
+"skrivefeltet, i dialogen <link xref=\"accounts\"/>."
+
+#. (itstool) path: section/title
+#: C/write.page:104
+msgid "Checking spelling"
+msgstr "Stavekontroll"
+
+#. (itstool) path: section/p
+#: C/write.page:106
+msgid ""
+"Geary supports spell-checking your composed email in one or more languages, "
+"as you type. To enable spell-checking, first ensure your computer has spell-"
+"check dictionaries installed for the desired languages. Consult your "
+"computer's help to determine how to install dictionaries if not present."
+msgstr ""
+"Geary kan kontrollere stavinga i e-posten din på eitt eller fleire språk "
+"medan du skriv. For å slå på stavekontroll må du først sjekke at datamaskina"
+" har stavekontrollordbøker for språka du vil bruke. Sjå hjelpa for "
+"datamaskina di for å finne ut korleis du installerer ordbøker som manglar."
+
+#. (itstool) path: section/p
+#: C/write.page:112
+msgid ""
+"To select languages for spell-checking, click the <gui "
+"style=\"button\">Spell check</gui> button on the formatting toolbar, and the "
+"language selection popover will appear. Click on a language in the list to "
+"toggle it on or off, and click the <gui style=\"button\">-</gui> button to "
+"remove it from the list. If a language does not appear in the list, search "
+"for it by typing its name in the search box, then click the <gui "
+"style=\"button\">+</gui> button to add it."
+msgstr ""
+"For å velje språk for stavekontroll klikkar du på knappen <gui "
+"style=\"button\">Stavekontroll</gui> i formateringsverktøylinja, og ein meny"
+" for val av språk dukkar opp. Klikk på eit språk i lista for å slå det av "
+"eller på, og klikk på knappen <gui style=\"button\">-</gui> for å fjerne det"
+" frå lista. Viss eit språk ikkje står i lista, kan du søkje etter det ved å "
+"skrive namnet i søkefeltet og så klikke på knappen <gui "
+"style=\"button\">+</gui> for å leggje det til."
+
+#. (itstool) path: section/title
+#: C/write.page:123
+msgid "Saving drafts and restoring discarded messages"
+msgstr "Lagre utkast og gjenopprette forkasta meldingar"
+
+#. (itstool) path: section/p
+#: C/write.page:125
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type on the server after a short delay."
+msgstr ""
+"For e-posttenarar som støttar utkast, lagrar Geary automatisk meldinga på "
+"tenaren medan du skriv, etter ei kort forseinking."
+
+#. (itstool) path: section/p
+#: C/write.page:129
+msgid ""
+"To edit an existing draft, select the <gui>Drafts</gui> folder in the folder "
+"list, select the message, and click \"Edit Draft\" in the conversation "
+"viewer."
+msgstr ""
+"For å redigere eit eksisterande utkast vel du mappa <gui>Utkast</gui> i "
+"mappelista, vel meldinga og klikkar på «Rediger utkast» i samtalevisaren."
+
+#. (itstool) path: section/p
+#: C/write.page:133
+msgid "Geary will delete the draft when you send the message."
+msgstr "Geary slettar utkastet når du sender meldinga."
+
+#. (itstool) path: note/p
+#: C/write.page:136
+msgid ""
+"If you save or discard a composed email, you can re-open it by clicking <gui "
+"style=\"button\">Undo</gui> on the pop-up notification that appears or by "
+"typing <keyseq><key>Ctrl</key><key>Z</key></keyseq>. Composers can be "
+"reopened for up to 30 minutes after they are closed. After that, you will "
+"need to re-open the message via the <gui>Drafts</gui> folder, if present."
+msgstr ""
+"Viss du lagrar eller forkastar ein e-post du har skrive, kan du opne han "
+"igjen ved å klikke <gui style=\"button\">Angre</gui> i varselet som dukkar "
+"opp, eller ved å trykkje <keyseq><key>Ctrl</key><key>Z</key></keyseq>. "
+"Skrivefelt kan opnast att i opptil 30 minutt etter at dei er lukka. Etter "
+"det må du opne meldinga att frå mappa <gui>Utkast</gui>, viss ho finst."
+
+#. (itstool) path: section/title
+#: C/write.page:146
+msgid "Plain text messages"
+msgstr "Meldingar med ren tekst"
+
+#. (itstool) path: section/p
+#: C/write.page:148
+msgid ""
+"Geary can also send plain text messages. Press the <gui "
+"style=\"button\">More options</gui> button at the end of the bottom toolbar, "
+"then choose \"Rich Text\" or \"Plain Text\". Plain text mode is useful when "
+"sending email to mailing lists that prohibit rich text (HTML) messages, or "
+"when sending email to people that do no use modern clients like Geary."
+msgstr ""
+"Geary kan òg sende meldingar med ren tekst. Trykk på knappen <gui "
+"style=\"button\">Fleire val</gui> i enden av den nedre verktøylinja og vel "
+"«Rik tekst» eller «Rein tekst». Rein tekst er nyttig når du sender e-post "
+"til e-postlister som ikkje tillèt meldingar med rik tekst (HTML), eller til "
+"folk som ikkje bruker moderne e-postprogram som Geary."
+
+#. (itstool) path: section/p
+#: C/write.page:155
+msgid ""
+"In plain text mode, text will be automatically wrapped using soft line "
+"breaks so that it is no longer than 74 characters wide, and indented text "
+"will be wrapped and quoted using a “&gt;” character for each level of "
+"quoting."
+msgstr ""
+"I rein tekst vert teksten automatisk brote om med mjuke linjeskift slik at "
+"linjene ikkje vert breiare enn 74 teikn, og tekst med innrykk vert brote om og "
+"sitert med eit «&gt;»-teikn for kvart sitatnivå."
