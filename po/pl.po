@@ -11,131 +11,71 @@
 # zacol <zacol1@gmail.com>, 2012.
 # Piotr Drąg <piotrdrag@gmail.com>, 2014-2024.
 # Aviary.pl <community-poland@mozilla.org>, 2014-2024.
+# Tomasz Bojanowski <tomasz@bojanowski.me>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues/\n"
-"POT-Creation-Date: 2024-09-14 10:53+0000\n"
-"PO-Revision-Date: 2024-09-15 17:15+0200\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish <community-poland@mozilla.org>\n"
+"POT-Creation-Date: 2026-09-22 09:37+0000\n"
+"PO-Revision-Date: 2026-11-04 17:38+0100\n"
+"Last-Translator: Tomasz Bojanowski <tomasz@bojanowski.me>\n"
+"Language-Team: Polish <https://l10n.gnome.org/teams/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 51.0\n"
 
-#: desktop/geary-attach.contract.desktop.in:3
+#: desktop/geary-attach.contract.desktop.in:2
 msgid "Send by email"
 msgstr "Wyślij jako e-mail"
 
-#: desktop/geary-attach.contract.desktop.in:6
+#: desktop/geary-attach.contract.desktop.in:5
 msgid "Send files using Geary"
-msgstr "Wysyłanie plików za pomocą programu Geary"
+msgstr "Wysyłaj pliki za pomocą Geary"
 
 #. Translators: The application name
-#: desktop/geary-autostart.desktop.in.in:3
-#: desktop/org.gnome.Geary.appdata.xml.in.in:11
-#: desktop/org.gnome.Geary.desktop.in.in:3
+#: desktop/geary-autostart.desktop.in.in:2
+#: desktop/org.gnome.Geary.desktop.in.in:2
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:11
 #: src/client/accounts/accounts-editor-servers-pane.vala:551
 #: src/client/application/application-main-window.vala:710
 msgid "Geary"
 msgstr "Geary"
 
-#: desktop/geary-autostart.desktop.in.in:4
-#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/geary-autostart.desktop.in.in:3
+#: desktop/org.gnome.Geary.desktop.in.in:3
 msgid "Email"
 msgstr "Poczta"
 
 #. Translators: The application's summary / tagline
-#: desktop/geary-autostart.desktop.in.in:5
-#: desktop/org.gnome.Geary.appdata.xml.in.in:15
-#: desktop/org.gnome.Geary.desktop.in.in:5
-#: src/client/application/application-client.vala:33
+#: desktop/geary-autostart.desktop.in.in:4
+#: desktop/org.gnome.Geary.desktop.in.in:4
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:15
+#: src/client/application/application-client.vala:18
 msgid "Send and receive email"
-msgstr "Wysyłanie i odbieranie poczty"
+msgstr "Wysyłaj i odbieraj pocztę"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/geary-autostart.desktop.in.in:7
+#: desktop/geary-autostart.desktop.in.in:6
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;Poczta;Skrzynka;Wiadomość;Wiadomości;mejl;majl;"
 
-#. Translators: The development team's name
-#: desktop/org.gnome.Geary.appdata.xml.in.in:13
-msgid "Geary Development Team"
-msgstr "Zespół programistów Geary"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:17
-msgid ""
-"Geary is an email application built around conversations, for the GNOME "
-"desktop. It allows you to read, find and send email with a straightforward, "
-"modern interface."
-msgstr ""
-"Geary to nowoczesny klient poczty dla środowiska GNOME zbudowany wokół "
-"wątków. Umożliwia czytanie, wyszukiwanie i wysyłanie wiadomości za pomocą "
-"prostego, nowoczesnego interfejsu."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:22
-msgid ""
-"Conversations allow you to read a complete discussion without having to find "
-"and click from message to message."
-msgstr ""
-"Wątki umożliwiają czytanie pełnych dyskusji bez potrzeby wyszukiwania "
-"i klikania poszczególnych wiadomości."
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:26
-msgid "Geary’s features include:"
-msgstr "Funkcje programu Geary:"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:28
-msgid "Quick email account setup"
-msgstr "Szybkie ustawianie konta poczty"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:29
-msgid "Shows related messages together in conversations"
-msgstr "Wyświetlanie powiązanych wiadomości w jednym wątku"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:30
-msgid "Fast, full text and keyword search"
-msgstr "Szybkie wyszukiwanie w wiadomościach i słowach kluczowych"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:31
-msgid "Full-featured HTML and plain text message composer"
-msgstr "Wiele funkcji tworzenia wiadomości HTML i w zwykłym tekście"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:32
-msgid "Desktop notification of new mail"
-msgstr "Powiadomienia o nowych wiadomościach na pulpicie"
-
-#: desktop/org.gnome.Geary.appdata.xml.in.in:33
-msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
-msgstr ""
-"Zgodność z serwisami Gmail, Yahoo! Mail, Outlook.com i innymi serwerami IMAP"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:51
-msgid "Geary displaying a conversation"
-msgstr "Widok wątku"
-
-#. Translators: A screenshot description.
-#: desktop/org.gnome.Geary.appdata.xml.in.in:56
-msgid "Geary showing the rich text composer"
-msgstr "Okno tworzenia wiadomości z formatowaniem"
-
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: desktop/org.gnome.Geary.desktop.in.in:7
+#: desktop/org.gnome.Geary.desktop.in.in:6
 msgid "Mail;E-mail;email;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr ""
-"Poczta;Mail;E-mail;Email;Emajl;Emejl;Imail;Imejl;Imajl;Mejl;Majl;Wiadomości;"
-"IMAP;Gmail;Dżimejl;Dżimajl;Yahoo;Jahu;Hotmail;Hotmejl;Outlook;Ałtluk;"
+"Poczta;Mail;E-"
+"mail;Email;Emajl;Emejl;Imail;Imejl;Imajl;Mejl;Majl;Wiadomości;IMAP;Gmail;Dżimejl;Dżimajl;Yahoo;Jahu;Hotmail;Hotmejl;Outlook;Ałtluk;"
 
-#: desktop/org.gnome.Geary.desktop.in.in:24
+#: desktop/org.gnome.Geary.desktop.in.in:23
 msgid "Compose Message"
 msgstr "Utwórz wiadomość"
 
-#: desktop/org.gnome.Geary.desktop.in.in:28
+#: desktop/org.gnome.Geary.desktop.in.in:27
 msgid "New Window"
 msgstr "Nowe okno"
 
@@ -145,7 +85,7 @@ msgstr "Maksymalizacja okna"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "True if the application window is maximized, false otherwise."
-msgstr "Okno programu jest zmaksymalizowane."
+msgstr "Okno aplikacji jest zmaksymalizowane."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Width of window"
@@ -153,7 +93,7 @@ msgstr "Szerokość okna"
 
 #: desktop/org.gnome.Geary.gschema.xml:15
 msgid "The last recorded width of the application window."
-msgstr "Ostatnio zapisana szerokość okna programu."
+msgstr "Ostatnio zapisana szerokość okna aplikacji."
 
 #: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Height of window"
@@ -161,7 +101,7 @@ msgstr "Wysokość okna"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
 msgid "The last recorded height of the application window."
-msgstr "Ostatnio zapisana wysokość okna programu."
+msgstr "Ostatnio zapisana wysokość okna aplikacji."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Show/hide formatting toolbar"
@@ -189,18 +129,30 @@ msgid "True if we should display a short preview of each message."
 msgstr "Wyświetlanie krótkiego podglądu każdej wiadomości."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
+msgid "Override colors in HTML emails"
+msgstr "Zastępowanie kolorów w wiadomościach HTML"
+
+#: desktop/org.gnome.Geary.gschema.xml:45
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme."
+msgstr ""
+"Zastępuje oryginalne kolory w wiadomościach HTML, aby lepiej pasowały do "
+"motywu aplikacji."
+
+#: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Move messages by default"
 msgstr "Domyślne przenoszenie wiadomości"
 
-#: desktop/org.gnome.Geary.gschema.xml:45
+#: desktop/org.gnome.Geary.gschema.xml:51
 msgid "When tagging a message, move it to destination folder."
 msgstr "Przenoszenie wiadomości do katalogu docelowego po jej oznaczeniu."
 
-#: desktop/org.gnome.Geary.gschema.xml:50
+#: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Use single key shortcuts"
 msgstr "Skróty jednoklawiszowe"
 
-#: desktop/org.gnome.Geary.gschema.xml:51
+#: desktop/org.gnome.Geary.gschema.xml:57
 msgid ""
 "Enables shortcuts for email actions that do not require pressing <Ctrl> to "
 "emulate those used by Gmail."
@@ -208,11 +160,11 @@ msgstr ""
 "Włącza skróty do działań na wiadomościach, które nie wymagają naciśnięcia "
 "klawisza <Ctrl>, aby naśladować skróty w serwisie Gmail."
 
-#: desktop/org.gnome.Geary.gschema.xml:58
+#: desktop/org.gnome.Geary.gschema.xml:64
 msgid "Languages that shall be used in the spell checker"
 msgstr "Języki używane do sprawdzania pisowni"
 
-#: desktop/org.gnome.Geary.gschema.xml:59
+#: desktop/org.gnome.Geary.gschema.xml:65
 msgid ""
 "A list of POSIX locales, with the empty list disabling spell checking and "
 "the null list using desktop languages by default."
@@ -220,82 +172,82 @@ msgstr ""
 "Lista lokalizacji POSIX. Pusta lista wyłącza sprawdzanie pisowni, a lista "
 "NULL powoduje użycie domyślnego języka środowiska."
 
-#: desktop/org.gnome.Geary.gschema.xml:66
+#: desktop/org.gnome.Geary.gschema.xml:72
 msgid "Languages that are displayed in the spell checker popover"
 msgstr "Języki wyświetlane w oknie sprawdzania pisowni"
 
-#: desktop/org.gnome.Geary.gschema.xml:67
+#: desktop/org.gnome.Geary.gschema.xml:73
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr "Lista języków zawsze wyświetlanych w oknie sprawdzania pisowni."
 
-#: desktop/org.gnome.Geary.gschema.xml:72
-msgid "Run application in background on logon and when closed"
-msgstr "Działanie programu w tle po zalogowaniu i po zamknięciu"
-
-#: desktop/org.gnome.Geary.gschema.xml:73
-msgid "True to run application in background."
-msgstr "Działanie programu w tle."
-
 #: desktop/org.gnome.Geary.gschema.xml:78
+msgid "Run application in background on logon and when closed"
+msgstr "Działanie aplikacji w tle po zalogowaniu i po zamknięciu"
+
+#: desktop/org.gnome.Geary.gschema.xml:79
+msgid "True to run application in background."
+msgstr "Działanie aplikacji w tle."
+
+#: desktop/org.gnome.Geary.gschema.xml:84
 msgid "Ask when opening an attachment"
 msgstr "Pytanie podczas otwierania załącznika"
 
-#: desktop/org.gnome.Geary.gschema.xml:79
+#: desktop/org.gnome.Geary.gschema.xml:85
 msgid "True to ask when opening an attachment."
 msgstr "Pytanie podczas otwierania załącznika."
 
-#: desktop/org.gnome.Geary.gschema.xml:84
+#: desktop/org.gnome.Geary.gschema.xml:90
 msgid "Whether to compose emails in HTML"
 msgstr "Tworzenie wiadomości w formacie HTML"
 
-#: desktop/org.gnome.Geary.gschema.xml:85
+#: desktop/org.gnome.Geary.gschema.xml:91
 msgid "True to compose emails in HTML; false for plain text."
 msgstr ""
 "Tworzenie wiadomości w formacie HTML. Wyłączenie powoduje tworzenie "
 "wiadomości w zwykłym tekście."
 
-#: desktop/org.gnome.Geary.gschema.xml:90
+#: desktop/org.gnome.Geary.gschema.xml:96
 msgid "Advisory strategy for full-text searching"
 msgstr "Strategia wyszukiwania w treści"
 
-#: desktop/org.gnome.Geary.gschema.xml:91
+#: desktop/org.gnome.Geary.gschema.xml:97
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
 "Przyjmowane wartości: „exact” (dokładna), „conservative” (konserwatywna), "
 "„aggressive” (agresywna) i „horizon” (horyzontalna)."
 
-#: desktop/org.gnome.Geary.gschema.xml:96
+#: desktop/org.gnome.Geary.gschema.xml:102
 msgid "Zoom of conversation viewer"
 msgstr "Powiększenie widoku wątku"
 
-#: desktop/org.gnome.Geary.gschema.xml:97
+#: desktop/org.gnome.Geary.gschema.xml:103
 msgid "The zoom to apply on the conservation view."
 msgstr "Powiększenie widoku wątku."
 
-#: desktop/org.gnome.Geary.gschema.xml:102
+#: desktop/org.gnome.Geary.gschema.xml:108
 msgid "Size of detached composer window"
 msgstr "Rozmiar odłączonego okna tworzenia wiadomości"
 
-#: desktop/org.gnome.Geary.gschema.xml:103
+#: desktop/org.gnome.Geary.gschema.xml:109
 msgid "The last recorded size of the detached composer window."
 msgstr "Ostatnio zapisany rozmiar odłączonego okna tworzenia wiadomości."
 
-#: desktop/org.gnome.Geary.gschema.xml:108
+#: desktop/org.gnome.Geary.gschema.xml:114
 msgid "Allow images for these domains"
 msgstr "Zezwalanie na obrazy z tych domen"
 
-#: desktop/org.gnome.Geary.gschema.xml:109
+#: desktop/org.gnome.Geary.gschema.xml:115
 msgid "Images from these domains will be trusted"
 msgstr "Obrazy z tych domen będą zaufane"
 
-#: desktop/org.gnome.Geary.gschema.xml:114
+#: desktop/org.gnome.Geary.gschema.xml:120
 msgid "Undo sending email delay"
 msgstr "Opóźnienie cofnięcia wysyłania wiadomości"
 
-#: desktop/org.gnome.Geary.gschema.xml:115
+#: desktop/org.gnome.Geary.gschema.xml:121
 msgid ""
 "The number of seconds to wait before sending an email. Set to zero or less "
 "to disable."
@@ -303,34 +255,96 @@ msgstr ""
 "Ile sekund czekać przed wysłaniem wiadomości. Ustawienie na zero lub mniej "
 "wyłącza tę funkcję."
 
-#: desktop/org.gnome.Geary.gschema.xml:121
+#: desktop/org.gnome.Geary.gschema.xml:127
 msgid "Brief notification display time"
 msgstr "Czas wyświetlania krótkiego powiadomienia"
 
-#: desktop/org.gnome.Geary.gschema.xml:122
+#: desktop/org.gnome.Geary.gschema.xml:128
 msgid ""
 "The length of time in seconds for which brief notifications should be "
 "displayed."
 msgstr "Przez ile czasu w sekundach wyświetlać krótkie powiadomienia."
 
-#: desktop/org.gnome.Geary.gschema.xml:128
+#: desktop/org.gnome.Geary.gschema.xml:134
 msgid "List of optional plugins"
 msgstr "Lista opcjonalnych wtyczek"
 
-#: desktop/org.gnome.Geary.gschema.xml:129
+#: desktop/org.gnome.Geary.gschema.xml:135
 msgid "Plugins listed here will be loaded on startup."
 msgstr "Wymienione tu wtyczki będą wczytywane podczas uruchamiania."
 
-#: desktop/org.gnome.Geary.gschema.xml:134
+#: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
 msgstr "Poprzednie ustawienia zostały migrowane"
 
-#: desktop/org.gnome.Geary.gschema.xml:135
+#: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
 "Wyłączenie powoduje wyszukanie poprzednich schematów „org.yorba.geary” "
 "i skopiowanie ich wartości."
+
+#. Translators: The development team's name
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:13
+msgid "Geary Development Team"
+msgstr "Zespół programistów Geary"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:17
+msgid ""
+"Geary is an email application built around conversations, for the GNOME "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary to nowoczesny klient poczty dla środowiska GNOME zbudowany wokół "
+"wątków. Umożliwia czytanie, wyszukiwanie i wysyłanie wiadomości za pomocą "
+"prostego, nowoczesnego interfejsu."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:22
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Wątki umożliwiają czytanie pełnych dyskusji bez potrzeby wyszukiwania "
+"i klikania poszczególnych wiadomości."
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:26
+msgid "Geary’s features include:"
+msgstr "Funkcje aplikacji Geary:"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:28
+msgid "Quick email account setup"
+msgstr "Szybkie ustawianie konta poczty"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:29
+msgid "Shows related messages together in conversations"
+msgstr "Wyświetlanie powiązanych wiadomości w jednym wątku"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:30
+msgid "Fast, full text and keyword search"
+msgstr "Szybkie wyszukiwanie w wiadomościach i słowach kluczowych"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:31
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Wiele funkcji tworzenia wiadomości HTML i w zwykłym tekście"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:32
+msgid "Desktop notification of new mail"
+msgstr "Powiadomienia o nowych wiadomościach na pulpicie"
+
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:33
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Zgodność z serwisami Gmail, Yahoo! Mail, Outlook.com i innymi serwerami IMAP"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:50
+msgid "Geary displaying a conversation"
+msgstr "Widok wątku"
+
+#. Translators: A screenshot description.
+#: desktop/org.gnome.Geary.metainfo.xml.in.in:55
+msgid "Geary showing the rich text composer"
+msgstr "Okno tworzenia wiadomości z formatowaniem"
 
 #. Translators: In-app notification label, when
 #. the app had a problem pinning an otherwise
@@ -491,7 +505,7 @@ msgid ""
 "This will remove it from Geary and delete locally cached email data from "
 "your computer. Nothing will be deleted from your service provider."
 msgstr ""
-"Spowoduje to usunięcie go z programu Geary oraz usunięcie lokalnie "
+"Spowoduje to usunięcie go z aplikacji Geary oraz usunięcie lokalnie "
 "zachowanej poczty z komputera. Nic nie zostanie usunięte ze strony dostawcy."
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:223
@@ -553,7 +567,7 @@ msgstr "Nazwa nadawcy"
 #: src/client/accounts/accounts-editor-edit-pane.vala:588
 #, c-format
 msgid "Remove “%s”"
-msgstr "Usuwa adres „%s”"
+msgstr "Usuń adres „%s”"
 
 #. Translators: Label used as the undo tooltip after editing a
 #. sender address for an account. The string substitution is
@@ -561,7 +575,7 @@ msgstr "Usuwa adres „%s”"
 #: src/client/accounts/accounts-editor-edit-pane.vala:628
 #, c-format
 msgid "Undo changes to “%s”"
-msgstr "Cofa zmiany adresu „%s”"
+msgstr "Cofnij zmiany adresu „%s”"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
@@ -569,21 +583,21 @@ msgstr "Cofa zmiany adresu „%s”"
 #: src/client/accounts/accounts-editor-edit-pane.vala:715
 #, c-format
 msgid "Add “%s” back"
-msgstr "Dodaje adres „%s” z powrotem"
+msgstr "Dodaj adres „%s” ponownie"
 
 #. Translators: Label used as the undo tooltip after removing
 #. a sender address from an account. The string substitution
 #. is the email address edited.
 #: src/client/accounts/accounts-editor-edit-pane.vala:757
 msgid "Undo signature changes"
-msgstr "Cofa zmiany podpisu"
+msgstr "Cofnij zmiany podpisu"
 
 #. Translators: This label describes the account
 #. preference for the length of time (weeks, months or
 #. years) that past email should be downloaded.
 #: src/client/accounts/accounts-editor-edit-pane.vala:805
 msgid "Download mail"
-msgstr "Pobieranie wiadomości"
+msgstr "Pobierz wiadomości"
 
 #. Translators: Tooltip for undoing a change
 #. to the length of time that past email
@@ -593,7 +607,7 @@ msgstr "Pobieranie wiadomości"
 #: src/client/accounts/accounts-editor-edit-pane.vala:837
 #, c-format
 msgid "Change download period back to: %s"
-msgstr "Zmienia czas pobierania z powrotem na: %s"
+msgstr "Zmień czas pobierania z powrotem na: %s"
 
 #: src/client/accounts/accounts-editor-edit-pane.vala:858
 msgid "Everything"
@@ -661,7 +675,7 @@ msgstr "To konto jest wyłączone"
 #. used.
 #: src/client/accounts/accounts-editor-list-pane.vala:362
 msgid "This account has encountered a problem and is unavailable"
-msgstr "Wystąpił problem z tym kontem i jest niedostępne"
+msgstr "Wystąpił problem z tym kontem, które jest teraz niedostępne"
 
 #. Translators: Notification shown after removing an
 #. account. The string substitution is the name of the
@@ -815,149 +829,149 @@ msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartoś�
 msgid "_Replace"
 msgstr "_Zastąp"
 
-#: src/client/application/application-client.vala:34
+#: src/client/application/application-client.vala:19
 msgid "Copyright © 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright © 2016 Software Freedom Conservancy Inc."
 
-#: src/client/application/application-client.vala:35
+#: src/client/application/application-client.vala:20
 msgid "Copyright © 2016-2021 Geary Development Team."
-msgstr "Copyright © 2016-2021 Zespół programistów Geary"
-
-#: src/client/application/application-client.vala:37
-msgid "Visit the Geary web site"
-msgstr "Witryna programu Geary"
+msgstr "Copyright © 2016-2021 Zespół programistów Geary."
 
 #. / Command line option
-#: src/client/application/application-client.vala:101
+#: src/client/application/application-client.vala:77
 msgid "Print debug logging"
 msgstr "Wyświetla komunikaty dziennika debugowania"
 
 #. / Command line option
-#: src/client/application/application-client.vala:104
+#: src/client/application/application-client.vala:80
 msgid "Enable WebKitGTK Inspector in web views"
 msgstr "Włącza Inspektora biblioteki WebKitGTK w widokach WWW"
 
 #. / Command line option
-#: src/client/application/application-client.vala:107
+#: src/client/application/application-client.vala:83
 msgid "Log conversation monitoring"
 msgstr "Zapisuje w dzienniku monitoring wątków"
 
 #. / Command line option
-#: src/client/application/application-client.vala:110
+#: src/client/application/application-client.vala:86
 msgid "Log IMAP network deserialization"
 msgstr "Zapisuje w dzienniku deserializację sieciową IMAP"
 
 #. / Command line option. "Normalization" can also be called
 #. / "synchronization".
-#: src/client/application/application-client.vala:114
+#: src/client/application/application-client.vala:90
 msgid "Log folder normalization"
-msgstr "Zapisuje w dzienniku normalizacje katalogów"
+msgstr "Zapisuje w dzienniku normalizację katalogów"
 
 #. / Command line option
-#: src/client/application/application-client.vala:117
+#: src/client/application/application-client.vala:93
 msgid "Log IMAP network activity"
 msgstr "Zapisuje w dzienniku aktywność sieciową IMAP"
 
 #. / Command line option. The IMAP replay queue is how changes
 #. / on the server are replicated on the client.  It could
 #. / also be called the IMAP events queue.
-#: src/client/application/application-client.vala:122
+#: src/client/application/application-client.vala:98
 msgid "Log IMAP replay queue"
-msgstr "Zapisuje w dzienniku kolejkę odpowiedzi IMAP"
+msgstr "Zapisuje w dzienniku kolejkę ponawiania IMAP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:125
+#: src/client/application/application-client.vala:101
 msgid "Log SMTP network activity"
 msgstr "Zapisuje w dzienniku aktywność sieciową SMTP"
 
 #. / Command line option
-#: src/client/application/application-client.vala:128
+#: src/client/application/application-client.vala:104
 msgid "Log database queries (generates lots of messages)"
 msgstr ""
 "Zapisuje w dzienniku zapytania do bazy danych (generuje dużo komunikatów)"
 
 #. / Command line option
-#: src/client/application/application-client.vala:131
+#: src/client/application/application-client.vala:107
 msgid "Perform a graceful quit"
 msgstr "Poprawnie kończy działanie"
 
-#: src/client/application/application-client.vala:133
+#: src/client/application/application-client.vala:109
 msgid "Open a new window"
 msgstr "Otwiera nowe okno"
 
 #. / Command line option
-#: src/client/application/application-client.vala:136
+#: src/client/application/application-client.vala:112
 msgid "Revoke all pinned TLS server certificates"
 msgstr "Unieważnia wszystkie przypięte certyfikaty serwerów TLS"
 
 #. / Command line option
-#: src/client/application/application-client.vala:139
+#: src/client/application/application-client.vala:115
 msgid "Display program version"
 msgstr "Wyświetla wersję programu"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:267
+#: src/client/application/application-client.vala:243
 msgid "Geary version"
-msgstr "Wersja programu Geary"
+msgstr "Wersja aplikacji Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:269
+#: src/client/application/application-client.vala:245
 msgid "Geary revision"
-msgstr "Wydanie programu Geary"
+msgstr "Wydanie aplikacji Geary"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:271
+#: src/client/application/application-client.vala:247
 msgid "GTK version"
 msgstr "Wersja biblioteki GTK"
 
 #. / Applciation runtime information label
-#: src/client/application/application-client.vala:278
+#: src/client/application/application-client.vala:254
 msgid "GLib version"
 msgstr "Wersja biblioteki GLib"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:285
+#: src/client/application/application-client.vala:261
 msgid "WebKitGTK version"
 msgstr "Wersja biblioteki WebKitGTK"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:292
+#: src/client/application/application-client.vala:268
 msgid "Desktop environment"
 msgstr "Środowisko pulpitu"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: src/client/application/application-client.vala:294
-#: src/client/application/application-client.vala:300
-#: src/client/application/application-client.vala:306
+#: src/client/application/application-client.vala:270
+#: src/client/application/application-client.vala:276
+#: src/client/application/application-client.vala:282
 #: src/client/components/components-attachment-pane.vala:88
 msgid "Unknown"
 msgstr "Nieznany"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:298
+#: src/client/application/application-client.vala:274
 msgid "Distribution name"
 msgstr "Nazwa dystrybucji"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:304
+#: src/client/application/application-client.vala:280
 msgid "Distribution release"
 msgstr "Wydanie dystrybucji"
 
 #. / Application runtime information label
-#: src/client/application/application-client.vala:310
+#: src/client/application/application-client.vala:286
 msgid "Installation prefix"
 msgstr "Przedrostek instalacji"
 
-#: src/client/application/application-client.vala:567
+#: src/client/application/application-client.vala:544
+msgid "Visit the Geary web site"
+msgstr "Odwiedź witrynę aplikacji Geary"
+
+#: src/client/application/application-client.vala:545
 #, c-format
 msgid "About %s"
-msgstr "O programie %s"
+msgstr "O aplikacji %s"
 
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/application-client.vala:571
+#: src/client/application/application-client.vala:549
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -969,11 +983,12 @@ msgstr ""
 "yorbajim <jim@yorba.org>, 2013\n"
 "zacol <zacol1@gmail.com>, 2012\n"
 "Piotr Drąg <piotrdrag@gmail.com>, 2014-2024\n"
-"Aviary.pl <community-poland@mozilla.org>, 2014-2024"
+"Aviary.pl <community-poland@mozilla.org>, 2014-2024\n"
+"Tomasz Bojanowski <tomasz@bojanowski.me>, 2026"
 
 #. / Command line warning, string substitution
 #. / is the given argument
-#: src/client/application/application-client.vala:1100
+#: src/client/application/application-client.vala:1078
 #, c-format
 msgid "Unrecognised program argument: “%s”"
 msgstr "Nieznany parametr programu: „%s”"
@@ -1114,8 +1129,8 @@ msgstr ""
 "\n"
 "%s\n"
 "\n"
-"Program Geary może przebudować bazę danych i ponownie zsynchronizować "
-"z serwerem lub zakończyć działanie.\n"
+"Geary może przebudować bazę danych i ponownie ją zsynchronizować z serwerem "
+"lub zakończyć działanie.\n"
 "\n"
 "Przebudowanie bazy danych usunie wszystkie lokalne wiadomości e-mail i ich "
 "załączniki. <b>Poczta na serwerze nie zostanie usunięta.</b>"
@@ -1251,7 +1266,7 @@ msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
 #: src/client/application/application-main-window.vala:1422
 msgid "This removes the email from Geary and your email server."
-msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
+msgstr "Spowoduje to usunięcie wiadomości z aplikacji Geary i serwera poczty."
 
 #: src/client/application/application-main-window.vala:1423
 msgid "This cannot be undone."
@@ -1322,44 +1337,44 @@ msgstr "_Bez pytania ponownie"
 #: src/client/components/components-conversation-actions.vala:126
 msgid "Mark conversation"
 msgid_plural "Mark conversations"
-msgstr[0] "Oznacza wątek"
-msgstr[1] "Oznacza wątki"
-msgstr[2] "Oznacza wątki"
+msgstr[0] "Oznacz wątek"
+msgstr[1] "Oznacz wątki"
+msgstr[2] "Oznacz wątki"
 
 #: src/client/components/components-conversation-actions.vala:132
 msgid "Archive conversation"
 msgid_plural "Archive conversations"
-msgstr[0] "Archiwizuje wątek"
-msgstr[1] "Archiwizuje wątki"
-msgstr[2] "Archiwizuje wątki"
+msgstr[0] "Archiwizuj wątek"
+msgstr[1] "Archiwizuj wątki"
+msgstr[2] "Archiwizuj wątki"
 
 #: src/client/components/components-conversation-actions.vala:141
 msgid "Add label to conversation"
 msgid_plural "Add label to conversations"
-msgstr[0] "Nadaje etykietę wątkowi"
-msgstr[1] "Nadaje etykietę wątkom"
-msgstr[2] "Nadaje etykietę wątkom"
+msgstr[0] "Nadaj etykietę wątkowi"
+msgstr[1] "Nadaj etykietę wątkom"
+msgstr[2] "Nadaj etykietę wątkom"
 
 #: src/client/components/components-conversation-actions.vala:152
 msgid "Copy conversation"
 msgid_plural "Copy conversations"
-msgstr[0] "Kopiuje wątek"
-msgstr[1] "Kopiuje wątki"
-msgstr[2] "Kopiuje wątki"
+msgstr[0] "Kopiuj wątek"
+msgstr[1] "Kopiuj wątki"
+msgstr[2] "Kopiuj wątki"
 
 #: src/client/components/components-conversation-actions.vala:170
 msgid "Move conversation to Trash"
 msgid_plural "Move conversations to Trash"
-msgstr[0] "Przenosi wątek do kosza"
-msgstr[1] "Przenosi wątki do kosza"
-msgstr[2] "Przenosi wątki do kosza"
+msgstr[0] "Przenieś wątek do kosza"
+msgstr[1] "Przenieś wątki do kosza"
+msgstr[2] "Przenieś wątki do kosza"
 
 #: src/client/components/components-conversation-actions.vala:180
 msgid "Delete conversation"
 msgid_plural "Delete conversations"
-msgstr[0] "Usuwa wątek"
-msgstr[1] "Usuwa wątki"
-msgstr[2] "Usuwa wątki"
+msgstr[0] "Usuń wątek"
+msgstr[1] "Usuń wątki"
+msgstr[2] "Usuń wątki"
 
 #: src/client/components/components-info-bar.vala:248
 msgid "Information"
@@ -1442,7 +1457,7 @@ msgstr "_Monitorowanie nowych wiadomości po zamknięciu"
 #. / Translators: Preferences tooltip
 #: src/client/components/components-preferences-window.vala:162
 msgid "Geary will keep running after all windows are closed"
-msgstr "Program Geary będzie nadal działał po zamknięciu wszystkich okien"
+msgstr "Geary będzie nadal działało po zamknięciu wszystkich okien"
 
 #. / Translators: Preferences label
 #: src/client/components/components-preferences-window.vala:172
@@ -1455,13 +1470,26 @@ msgstr "_Wczytywanie obrazów"
 msgid "Showing remote images allows the sender to track you"
 msgstr "Wyświetlanie zdalnych obrazów umożliwia nadawcy śledzenie użytkownika"
 
+#. / Translators: Preferences label
+#: src/client/components/components-preferences-window.vala:183
+msgid "_Override the original colors in HTML emails"
+msgstr "_Zastępowanie oryginalnych kolorów w wiadomościach HTML"
+
+#: src/client/components/components-preferences-window.vala:184
+msgid ""
+"Overrides the original colors in HTML messages to integrate better with the "
+"app theme. Requires restart."
+msgstr ""
+"Zastępuje oryginalne kolory w wiadomościach HTML, aby lepiej pasowały do "
+"motywu aplikacji. Wymaga ponownego uruchomienia."
+
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:191
+#: src/client/components/components-preferences-window.vala:203
 msgid "Preferences"
 msgstr "Preferencje"
 
 #. / Translators: Preferences page title
-#: src/client/components/components-preferences-window.vala:252
+#: src/client/components/components-preferences-window.vala:269
 msgid "Plugins"
 msgstr "Wtyczki"
 
@@ -1484,12 +1512,12 @@ msgstr "Wystąpił problem z kontem %s."
 #: src/client/components/components-problem-report-info-bar.vala:53
 #, c-format
 msgid "Geary encountered a problem checking mail for %s."
-msgstr "Wystąpił problem podczas wyszukiwania nowych wiadomości dla konta %s."
+msgstr "Wystąpił problem podczas sprawdzania nowych wiadomości dla konta %s."
 
 #. Translators: Tooltip label for Retry button
 #: src/client/components/components-problem-report-info-bar.vala:57
 msgid "Try reconnecting"
-msgstr "Ponawia połączenie"
+msgstr "Ponów połączenie"
 
 #. Translators: Info bar title for an outgoing
 #. account problem. String substitution is the
@@ -1537,7 +1565,7 @@ msgstr "_Ponów"
 #. / Translators: Search entry placeholder text
 #: src/client/components/components-search-bar.vala:12
 #: src/client/folder-list/folder-list-search-branch.vala:53
-#: src/client/util/util-i18n.vala:298
+#: src/client/util/util-i18n.vala:294
 msgid "Search"
 msgstr "Wyszukaj"
 
@@ -1586,7 +1614,7 @@ msgstr "_OK"
 
 #: src/client/components/stock.vala:21
 msgid "_About"
-msgstr "_O programie"
+msgstr "_O aplikacji"
 
 #: src/client/components/stock.vala:22 ui/accounts_editor_list_pane.ui:12
 msgid "_Add"
@@ -1822,15 +1850,15 @@ msgstr "%1$s przez %2$s"
 
 #: src/client/composer/spell-check-popover.vala:125
 msgid "Remove this language from the preferred list"
-msgstr "Usuwa ten język z listy preferowanych"
+msgstr "Usuń ten język z listy preferowanych"
 
 #: src/client/composer/spell-check-popover.vala:129
 msgid "Add this language to the preferred list"
-msgstr "Dodaje ten język do listy preferowanych"
+msgstr "Dodaj ten język do listy preferowanych"
 
 #: src/client/composer/spell-check-popover.vala:225
 msgid "Search for more languages"
-msgstr "Więcej języków"
+msgstr "Wyszukaj więcej języków"
 
 #. / Translators: Context menu item
 #: src/client/conversation-list/conversation-list-view.vala:214
@@ -2052,20 +2080,20 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Wybranie „Nie ufaj temu serwerowi” spowoduje, że program Geary nie będzie "
-"miał dostępu do tego serwera."
+"Wybranie „Nie ufaj temu serwerowi” spowoduje, że Geary nie będzie miało "
+"dostępu do tego serwera."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:58
 msgid "Geary will not add or update this email account."
-msgstr "Program Geary nie doda ani nie zaktualizuje tego konta e-mail."
+msgstr "Geary nie doda ani nie zaktualizuje tego konta e-mail."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:63
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"Wybranie „Nie ufaj temu serwerowi” spowoduje, że program Geary nie będzie "
-"miał dostępu do tego konta."
+"Wybranie „Nie ufaj temu serwerowi” spowoduje, że Geary nie będzie miało "
+"dostępu do tego konta."
 
 #: src/client/dialogs/certificate-warning-dialog.vala:69
 msgid ""
@@ -2116,7 +2144,7 @@ msgstr "Informacje"
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
-msgstr "Program Geary wymaga hasła do poczty, aby kontynuować"
+msgstr "Geary wymaga hasła do poczty, aby kontynuować"
 
 #: src/client/folder-list/folder-list-account-branch.vala:53
 msgid "Folders"
@@ -2224,11 +2252,11 @@ msgstr[0] "Nowa wiadomość"
 msgstr[1] "Nowe wiadomości"
 msgstr[2] "Nowe wiadomości"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:3
 msgid "Email Templates"
 msgstr "Szablony wiadomości"
 
-#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:5
+#: src/client/plugin/email-templates/email-templates.plugin.desktop.in:4
 msgid "Create reusable templates for sending email"
 msgstr ""
 "Umożliwia tworzenie szablonów wielokrotnego użytku do wysyłania wiadomości"
@@ -2281,14 +2309,14 @@ msgstr "Modyfikuj"
 #. / merge in composer
 #. Translators: The name of the folder used to
 #. display merged email
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:4
 #: src/client/plugin/mail-merge/mail-merge.vala:288
 #: src/client/plugin/mail-merge/mail-merge.vala:395
 #: src/client/plugin/mail-merge/mail-merge.vala:494
 msgid "Mail Merge"
 msgstr "Korespondencja seryjna"
 
-#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:6
+#: src/client/plugin/mail-merge/mail-merge.plugin.desktop.in:5
 msgid "Fill in and send email templates using a spreadsheet"
 msgstr "Wypełnia i wysyła szablony wiadomości za pomocą arkusza kalkulacyjnego"
 
@@ -2338,11 +2366,11 @@ msgstr "Wstaw pole"
 msgid "Comma separated values (CSV)"
 msgstr "Wartości rozdzielone przecinkiem (CSV)"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:3
 msgid "Messaging Menu"
 msgstr "Menu komunikacji"
 
-#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:5
+#: src/client/plugin/messaging-menu/messaging-menu.plugin.desktop.in:4
 msgid "Displays Unity Messaging Menu notifications for new email"
 msgstr ""
 "Wyświetla powiadomienia o nowych wiadomościach w menu komunikacji Unity"
@@ -2352,13 +2380,13 @@ msgstr ""
 msgid "%s — New Messages"
 msgstr "%s — nowe wiadomości"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:3
 msgid "Sent Sound"
 msgstr "Dźwięk wysłania"
 
-#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:5
+#: src/client/plugin/sent-sound/sent-sound.plugin.desktop.in:4
 msgid "Plays the desktop sent-mail sound when an email is sent"
-msgstr "Odtwarza dźwięk wysłania wiadomości środowiska"
+msgstr "Odtwarza dźwięk środowiska po wysłaniu wiadomości"
 
 #. Translators: Info bar button label for emptying
 #. trash/spam folders
@@ -2510,7 +2538,7 @@ msgstr "%a, %-e %b %Y o %X %Z"
 #: src/client/util/util-email.vala:200
 #, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "W dniu %1$s użytkownik %2$s napisał:"
+msgstr "W dniu %1$s osoba %2$s napisała:"
 
 #. / The quoted header for a message being replied to
 #. / (in case the date is not known).  %s will be
@@ -2518,7 +2546,7 @@ msgstr "W dniu %1$s użytkownik %2$s napisał:"
 #: src/client/util/util-email.vala:211
 #, c-format
 msgid "%s wrote:"
-msgstr "Użytkownik %s napisał:"
+msgstr "Osoba %s napisała:"
 
 #. / The quoted header for a message being replied to
 #. / (in case the sender is not known).  %s will be
@@ -2727,43 +2755,43 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: src/client/util/util-i18n.vala:271
+#: src/client/util/util-i18n.vala:267
 msgid "Inbox"
 msgstr "Odebrane"
 
-#: src/client/util/util-i18n.vala:274
+#: src/client/util/util-i18n.vala:270
 msgid "Drafts"
 msgstr "Szkice"
 
-#: src/client/util/util-i18n.vala:277
+#: src/client/util/util-i18n.vala:273
 msgid "Sent"
 msgstr "Wysłane"
 
-#: src/client/util/util-i18n.vala:280
+#: src/client/util/util-i18n.vala:276
 msgid "Starred"
 msgstr "Wyróżnione"
 
-#: src/client/util/util-i18n.vala:283
+#: src/client/util/util-i18n.vala:279
 msgid "Important"
 msgstr "Ważne"
 
-#: src/client/util/util-i18n.vala:286
+#: src/client/util/util-i18n.vala:282
 msgid "All Mail"
 msgstr "Wszystkie"
 
-#: src/client/util/util-i18n.vala:289
+#: src/client/util/util-i18n.vala:285
 msgid "Junk"
 msgstr "Niechciane"
 
-#: src/client/util/util-i18n.vala:292
+#: src/client/util/util-i18n.vala:288
 msgid "Trash"
 msgstr "Kosz"
 
-#: src/client/util/util-i18n.vala:295
+#: src/client/util/util-i18n.vala:291
 msgid "Outbox"
 msgstr "Wychodzące"
 
-#: src/client/util/util-i18n.vala:301
+#: src/client/util/util-i18n.vala:297
 msgid "Archive"
 msgstr "Archiwum"
 
@@ -2823,17 +2851,17 @@ msgstr "Elementy usunięte"
 msgid "Archive | Archives"
 msgstr "Archiwum | Archiwa"
 
-#: src/engine/rfc822/rfc822-message.vala:572
+#: src/engine/rfc822/rfc822-message.vala:575
 #, c-format
 msgid "Could not determine mime type for “%s”."
 msgstr "Nie można ustalić typu MIME dla „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:583
+#: src/engine/rfc822/rfc822-message.vala:586
 #, c-format
 msgid "Could not determine content type for mime type “%s” on “%s”."
 msgstr "Nie można ustalić typu treści dla typu MIME „%s” na „%s”."
 
-#: src/engine/rfc822/rfc822-message.vala:1036
+#: src/engine/rfc822/rfc822-message.vala:1039
 msgid "(no subject)"
 msgstr "(brak tematu)"
 
@@ -2859,7 +2887,7 @@ msgstr "Wysyłanie"
 
 #: ui/accounts_editor_edit_pane.ui:7
 msgid "Edit Account"
-msgstr "Modyfikacja konta"
+msgstr "Modyfikuj konto"
 
 #: ui/accounts_editor_edit_pane.ui:8 ui/accounts_editor_servers_pane.ui:8
 msgid "Account Name"
@@ -2879,7 +2907,7 @@ msgstr "Ustawienia"
 
 #: ui/accounts_editor_edit_pane.ui:228
 msgid "Remove this account from Geary"
-msgstr "Usuwa to konto z programu Geary"
+msgstr "Usuń to konto z Geary"
 
 #. This is a button in the account settings to show server settings.
 #: ui/accounts_editor_edit_pane.ui:247 ui/accounts_editor_servers_pane.ui:7
@@ -2896,7 +2924,7 @@ msgstr "Proszę dodać dostawcę poczty powyżej, aby rozpocząć."
 
 #: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
-msgstr "Witamy w programie Geary"
+msgstr "Witamy w Geary"
 
 #: ui/accounts_editor_servers_pane.ui:42
 msgid "Apply"
@@ -2920,43 +2948,43 @@ msgstr "_Nie ufaj temu serwerowi"
 
 #: ui/composer-editor.ui:89
 msgid "Bold text"
-msgstr "Pogrubia tekst"
+msgstr "Pogrub tekst"
 
 #: ui/composer-editor.ui:111
 msgid "Italic text"
-msgstr "Pochyla tekst"
+msgstr "Pochyl tekst"
 
 #: ui/composer-editor.ui:133
 msgid "Underline text"
-msgstr "Podkreśla tekst"
+msgstr "Podkreśl tekst"
 
 #: ui/composer-editor.ui:155
 msgid "Strikethrough text"
-msgstr "Przekreśla tekst"
+msgstr "Przekreśl tekst"
 
 #: ui/composer-editor.ui:185
 msgid "Insert bulleted list"
-msgstr "Wstawia listę wypunktowaną"
+msgstr "Wstaw listę wypunktowaną"
 
 #: ui/composer-editor.ui:207
 msgid "Insert numbered list"
-msgstr "Wstawia listę numerowaną"
+msgstr "Wstaw listę numerowaną"
 
 #: ui/composer-editor.ui:237
 msgid "Indent or quote text"
-msgstr "Wcina lub cytuje tekst"
+msgstr "Wetnij lub zacytuj tekst"
 
 #: ui/composer-editor.ui:259
 msgid "Un-indent or unquote text"
-msgstr "Usuwa wcięcie lub cytowanie tekstu"
+msgstr "Usuń wcięcie lub cytowanie tekstu"
 
 #: ui/composer-editor.ui:286
 msgid "Remove text formatting"
-msgstr "Usuwa formatowanie tekstu"
+msgstr "Usuń formatowanie tekstu"
 
 #: ui/composer-editor.ui:303
 msgid "Change font type"
-msgstr "Zmienia typ czcionki"
+msgstr "Zmień typ czcionki"
 
 #: ui/composer-editor.ui:315
 msgid "Sans Serif"
@@ -2972,35 +3000,35 @@ msgstr "Stała szerokość"
 
 #: ui/composer-editor.ui:359
 msgid "Change font color"
-msgstr "Zmienia kolor czcionki"
+msgstr "Zmień kolor czcionki"
 
 #: ui/composer-editor.ui:372
 msgid "Change font size"
-msgstr "Zmienia rozmiar czcionki"
+msgstr "Zmień rozmiar czcionki"
 
 #: ui/composer-editor.ui:402
 msgid "Insert or update text link"
-msgstr "Wstawia lub aktualizuje odnośnik tekstowy"
+msgstr "Wstaw lub aktualizuj odnośnik tekstowy"
 
 #: ui/composer-editor.ui:424
 msgid "Insert an image"
-msgstr "Wstawia obraz"
+msgstr "Wstaw obraz"
 
 #: ui/composer-editor.ui:463
 msgid "Undo last edit"
-msgstr "Cofa ostatnią modyfikację"
+msgstr "Cofnij ostatnią modyfikację"
 
 #: ui/composer-editor.ui:485
 msgid "Redo last edit"
-msgstr "Ponawia ostatnią modyfikację"
+msgstr "Ponów ostatnią modyfikację"
 
 #: ui/composer-editor.ui:512 ui/composer-editor.ui:534
 msgid "Attach a file"
-msgstr "Załącza plik"
+msgstr "Załącz plik"
 
 #: ui/composer-editor.ui:556
 msgid "Add original attachments"
-msgstr "Dodaje oryginalne załączniki"
+msgstr "Dodaj oryginalne załączniki"
 
 #: ui/composer-editor.ui:598
 msgid "More options"
@@ -3008,11 +3036,11 @@ msgstr "Więcej opcji"
 
 #: ui/composer-editor.ui:617
 msgid "Show formatting toolbar"
-msgstr "Wyświetla pasek narzędziowy formatowania"
+msgstr "Wyświetl pasek narzędziowy formatowania"
 
 #: ui/composer-editor.ui:634
 msgid "Select spell checking languages"
-msgstr "Wybiera język sprawdzania pisowni"
+msgstr "Wybierz języki sprawdzania pisowni"
 
 #: ui/composer-editor.ui:658
 msgid "S_ans Serif"
@@ -3090,16 +3118,16 @@ msgstr "_Wyślij"
 
 #: ui/composer-headerbar.ui:147
 msgid "Discard and Close"
-msgstr "Odrzuca i zamyka"
+msgstr "Odrzuć i zamknij"
 
 #: ui/composer-headerbar.ui:169
 msgid "Save and Close"
-msgstr "Zapisuje i zamyka"
+msgstr "Zapisz i zamknij"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:38
 msgid "Insert the new link with this URL"
-msgstr "Wstawia nowy odnośnik o tym adresie URL"
+msgstr "Wstaw nowy odnośnik o tym adresie URL"
 
 #: ui/composer-link-popover.ui:39
 msgid "Add"
@@ -3112,7 +3140,7 @@ msgstr "Adres URL odnośnika"
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ui/composer-link-popover.ui:56
 msgid "Update this link’s URL"
-msgstr "Aktualizuje adres URL tego odnośnika"
+msgstr "Zaktualizuj adres URL tego odnośnika"
 
 #: ui/composer-link-popover.ui:57
 msgid "Update"
@@ -3120,7 +3148,7 @@ msgstr "Zaktualizuj"
 
 #: ui/composer-link-popover.ui:69
 msgid "Delete this link"
-msgstr "Usuwa ten odnośnik"
+msgstr "Usuń ten odnośnik"
 
 #: ui/composer-widget.ui:119
 msgid "Drop files here"
@@ -3132,20 +3160,19 @@ msgstr "aby dodać je jako załączniki."
 
 #: ui/composer-widget.ui:217
 msgid "Show Cc, Bcc, and Reply-To fields"
-msgstr ""
-"Wyświetla pola „Do wiadomości”, „Ukryty do wiadomości” i „Odpowiedź do”"
+msgstr "Wyświetl pola „Do wiadomości”, „Ukryty do wiadomości” i „Odpowiedź do”"
 
 #: ui/components-attachment-pane.ui:25 ui/components-attachment-pane.ui:41
 msgid "Select all attachments"
-msgstr "Zaznacza wszystkie załączniki"
+msgstr "Zaznacz wszystkie załączniki"
 
 #: ui/components-attachment-pane.ui:58
 msgid "Save selected attachments"
-msgstr "Zapisuje zaznaczone załączniki"
+msgstr "Zapisz zaznaczone załączniki"
 
 #: ui/components-attachment-pane.ui:75
 msgid "Open selected attachments"
-msgstr "Otwiera zaznaczone załączniki"
+msgstr "Otwórz zaznaczone załączniki"
 
 #: ui/components-attachment-pane-menus.ui:17
 msgid "Save _All"
@@ -3153,15 +3180,15 @@ msgstr "Z_apisz wszystko"
 
 #: ui/components-conversation-actions.ui:17
 msgid "Reply"
-msgstr "Odpowiada"
+msgstr "Odpowiedz"
 
 #: ui/components-conversation-actions.ui:38
 msgid "Reply All"
-msgstr "Odpowiada wszystkim"
+msgstr "Odpowiedz wszystkim"
 
 #: ui/components-conversation-actions.ui:59
 msgid "Forward"
-msgstr "Przekazuje"
+msgstr "Przekaż"
 
 #: ui/components-headerbar-application.ui:7
 msgid "Mail"
@@ -3170,32 +3197,33 @@ msgstr "Poczta"
 #: ui/components-headerbar-conversation-list.ui:36
 msgctxt "tooltip"
 msgid "Compose Message"
-msgstr "Tworzy wiadomość"
+msgstr "Utwórz wiadomość"
 
 #: ui/components-headerbar-conversation-list.ui:52
 msgid "Toggle search bar"
-msgstr "Przełącza pasek wyszukiwania"
+msgstr "Przełącz pasek wyszukiwania"
 
 #: ui/components-headerbar-conversation-list.ui:70
 msgid "Select conversations"
-msgstr "Zaznacza wątki"
+msgstr "Zaznacz wątki"
 
 #: ui/components-headerbar-conversation.ui:60
 msgid "Toggle find bar"
-msgstr "Przełącza pasek wyszukiwania"
+msgstr "Przełącz pasek wyszukiwania"
 
 #: ui/components-inspector-error-view.ui:27
 msgid ""
 "If the problem is serious or persists, please save and send these details to "
-"one of the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">contact "
-"channels</a> or attach to a <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"ReportingABug\">new bug report</a>."
+"one of the <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/"
+"Contact\">contact channels</a> or attach to a <a href=\"https://"
+"gitlab.gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-"
+"Features\">new bug report</a>."
 msgstr ""
 "Jeśli problem jest poważny lub się powtarza, to proszę zapisać i wysłać te "
-"informacje na jeden z <a href=\"https://wiki.gnome.org/Apps/Geary/"
-"Contact\">kanałów kontaktowych</a> lub dołączyć do <a href=\"https://wiki."
-"gnome.org/Apps/Geary/ReportingABug\">nowego zgłoszenia błędu</a> (w języku "
-"angielskim)."
+"informacje na jeden z <a href=\"https://gitlab.gnome.org/GNOME/geary/-/wikis/"
+"Contact\">kanałów kontaktowych</a> lub dołączyć do <a href=\"https://"
+"gitlab.gnome.org/GNOME/geary/-/wikis/Reporting-Bugs-and-Requesting-"
+"Features\">nowego zgłoszenia błędu</a> (w języku angielskim)."
 
 #: ui/components-inspector-error-view.ui:42
 msgid "Details:"
@@ -3205,34 +3233,34 @@ msgstr "Informacje:"
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:16 ui/problem-details-dialog.ui:21
 msgid "Search for matching log entries"
-msgstr "Wyszukuje pasujące wpisy dziennika"
+msgstr "Wyszukaj pasujące wpisy dziennika"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:30
 msgid "Toggle appending new log entries"
-msgstr "Przełącza dołączanie nowych wpisów dziennika"
+msgstr "Przełącz dołączanie nowych wpisów dziennika"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:48
 msgid "Add a marker entry to the log"
-msgstr "Dodaje wpis znacznika do dziennika"
+msgstr "Dodaj wpis znacznika do dziennika"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:71 ui/problem-details-dialog.ui:45
 msgid "Save logs entries and details"
-msgstr "Zapisuje wpisy i szczegóły dziennika"
+msgstr "Zapisz wpisy i szczegóły dziennika"
 
 #. Tooltip for inspector button
 #. Tooltip for problem report button
 #: ui/components-inspector.ui:89 ui/problem-details-dialog.ui:60
 msgid "Copy to clipboard"
-msgstr "Kopiuje do schowka"
+msgstr "Skopiuj do schowka"
 
 #. Tooltip for inspector button
 #: ui/components-inspector.ui:107
 msgid "Clears all log entries"
-msgstr "Czyści wszystkie wpisy dziennika"
+msgstr "Wyczyść wszystkie wpisy dziennika"
 
 #: ui/components-menu-application.ui:6
 msgid "_Accounts"
@@ -3240,11 +3268,11 @@ msgstr "Ko_nta"
 
 #: ui/components-menu-application.ui:14
 msgid "_Keyboard Shortcuts"
-msgstr "_Skróty klawiszowe"
+msgstr "Skróty _klawiszowe"
 
 #: ui/components-menu-application.ui:25
 msgid "_About Geary"
-msgstr "_O programie"
+msgstr "O _aplikacji"
 
 #: ui/components-menu-conversation.ui:25
 msgid "Toggle as _Junk"
@@ -3260,7 +3288,7 @@ msgstr "Skopiuj adres e-mail"
 
 #: ui/conversation-contact-popover.ui:167
 msgid "Save in Contacts…"
-msgstr "Zapisz w Menedżerze kontaktów…"
+msgstr "Zapisz w kontaktach…"
 
 #: ui/conversation-contact-popover.ui:179
 msgid "Show Conversations"
@@ -3268,7 +3296,7 @@ msgstr "Wyświetl wątki"
 
 #: ui/conversation-contact-popover.ui:191
 msgid "Open in Contacts"
-msgstr "Otwórz w Menedżerze kontaktów…"
+msgstr "Otwórz w kontaktach"
 
 #: ui/conversation-contact-popover.ui:203
 msgid "Always Load Remote Images"
@@ -3296,17 +3324,17 @@ msgstr "Nadawca może nie być wiarygodny"
 
 #: ui/conversation-email.ui:24
 msgid "Save all attachments"
-msgstr "Zapisuje wszystkie załączniki"
+msgstr "Zapisz wszystkie załączniki"
 
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ui/conversation-email.ui:45
 msgid "Mark this message as starred"
-msgstr "Oznacza tę wiadomość jako wyróżnioną"
+msgstr "Oznacz tę wiadomość jako wyróżnioną"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ui/conversation-email.ui:65
 msgid "Mark this message as not starred"
-msgstr "Usuwa wyróżnienie tej wiadomości"
+msgstr "Usuń wyróżnienie tej wiadomości"
 
 #. Translators: Menu item to reply to a specific message.
 #: ui/conversation-email-menus.ui:15
@@ -3364,7 +3392,7 @@ msgstr "Nadawca wiadomości może prowadzić do złej strony."
 #: ui/conversation-message-link-popover.ui:114
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
-"W razie niepewności, należy skontaktować się z nadawcą przed kontynuowaniem."
+"W razie niepewności należy skontaktować się z nadawcą przed kontynuowaniem."
 
 #: ui/conversation-message-menus.ui:7
 msgid "_Open Link"
@@ -3392,7 +3420,7 @@ msgstr "Zaznacz _wszystko"
 
 #: ui/conversation-message-menus.ui:50
 msgid "Show images"
-msgstr "Wyświetlanie obrazów"
+msgstr "Wyświetlaj obrazy"
 
 #: ui/conversation-message-menus.ui:52
 msgid "For this message"
@@ -3412,7 +3440,7 @@ msgstr "Od <e-mail>"
 
 #: ui/conversation-message.ui:69 ui/conversation-message.ui:160
 msgid "1/1/1970\t"
-msgstr "1/1/1970\t"
+msgstr "01.01.1970\t"
 
 #: ui/conversation-message.ui:91
 msgid "Preview body text."
@@ -3432,19 +3460,19 @@ msgstr "Temat"
 
 #: ui/conversation-viewer.ui:54
 msgid "Find in conversation"
-msgstr "Wyszukiwanie w wątku"
+msgstr "Wyszukaj w wątku"
 
 #: ui/conversation-viewer.ui:68
 msgid "Find the previous occurrence of the search string."
-msgstr "Wyszukuje poprzednie wystąpienie tekstu."
+msgstr "Znajdź poprzednie wystąpienie tekstu."
 
 #: ui/conversation-viewer.ui:87
 msgid "Find the next occurrence of the search string."
-msgstr "Wyszukuje następne wystąpienie tekstu."
+msgstr "Znajdź następne wystąpienie tekstu."
 
 #: ui/find_bar.glade:58
 msgid "Find:"
-msgstr "Wyszukiwanie:"
+msgstr "Wyszukaj:"
 
 #: ui/find_bar.glade:80
 msgid "_Previous"
@@ -3688,7 +3716,7 @@ msgstr "Wstawienie odnośnika"
 
 #: ui/gtk/help-overlay.ui:346
 msgid "Application Shortcuts"
-msgstr "Skróty programu"
+msgstr "Skróty aplikacji"
 
 #: ui/gtk/help-overlay.ui:354
 msgctxt "shortcut window"
@@ -3708,12 +3736,12 @@ msgstr "Otwarcie nowego okna"
 #: ui/gtk/help-overlay.ui:375
 msgctxt "shortcut window"
 msgid "Close the current window"
-msgstr "Zamknięcie obecnego okna"
+msgstr "Zamknięcie bieżącego okna"
 
 #: ui/gtk/help-overlay.ui:382
 msgctxt "shortcut window"
 msgid "Quit the application"
-msgstr "Zakończenie działania programu"
+msgstr "Zakończenie działania"
 
 #: ui/gtk/help-overlay.ui:391
 msgctxt "shortcut window"
