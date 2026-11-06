@@ -631,7 +631,7 @@ msgstr[1] "%d dagar tilbake"
 #: src/client/accounts/accounts-editor-list-pane.vala:243
 #: src/client/application/application-main-window.vala:2309
 msgid "Redo"
-msgstr "Gjer på nytt"
+msgstr "Gjer om"
 
 #: src/client/accounts/accounts-editor-list-pane.vala:327
 #: src/client/accounts/accounts-editor-row.vala:303
@@ -1171,7 +1171,7 @@ msgstr "Innloggingsproblem"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:639
 msgid "An account has reported an incorrect login or password."
-msgstr "Ein konto melde om feil innloggingsnamn eller passord."
+msgstr "Ein konto har meldt om feil innloggingsnamn eller passord."
 
 #. Translators: An info bar button tool-tip
 #: src/client/application/application-main-window.vala:646
@@ -1186,7 +1186,7 @@ msgstr "Tryggleiksproblem"
 #. Translators: An info bar description label
 #: src/client/application/application-main-window.vala:655
 msgid "An account has reported an untrusted server."
-msgstr "Ein konto melde frå om ein tenar som ikkje er klarert."
+msgstr "Ein konto har meldt frå om ein tenar som ikkje er klarert."
 
 #. Translators: An info bar button label
 #: src/client/application/application-main-window.vala:658
@@ -1653,7 +1653,7 @@ msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"vedlegg|vedlagt|vedlagde|legg ved|la ved|lagt ved|legger ved|legg "
+"vedlegg|vedlagt|vedlagde|legg ved|leggje ved|leggjer ved|la ved|lagt "
 "ved|vedlagd"
 
 #. / Translators: Label for composer From address entry
@@ -2316,7 +2316,7 @@ msgstr ""
 #. trash/spam folders
 #: src/client/plugin/special-folders/special-folders.vala:167
 msgid "Empty"
-msgstr "Tom"
+msgstr "Tøm"
 
 #. Translators: Info bar status message for a draft email
 #: src/client/plugin/special-folders/special-folders.vala:179
@@ -2459,7 +2459,7 @@ msgstr "%a %-e. %b %Y klokka %X %Z"
 #: src/client/util/util-email.vala:200
 #, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "%1$s skreiv %2$s:"
+msgstr "Den %1$s skreiv %2$s:"
 
 #. / The quoted header for a message being replied to
 #. / (in case the date is not known).  %s will be
@@ -2475,11 +2475,11 @@ msgstr "%s skreiv:"
 #: src/client/util/util-email.vala:221
 #, c-format
 msgid "On %s:"
-msgstr "%s:"
+msgstr "Den %s:"
 
 #: src/client/util/util-email.vala:253
 msgid "---------- Forwarded message ----------"
-msgstr "---------- Vidaresend melding ----------"
+msgstr "---------- Vidaresendt melding ----------"
 
 #. / Translators: Can be typed in the search box like
 #. / "attachment:file.txt" to find messages with attachments
@@ -2845,7 +2845,7 @@ msgstr "For å kome i gang legg du til ein e-postleverandør ovanfor."
 
 #: ui/accounts_editor_list_pane.ui:88
 msgid "Welcome to Geary"
-msgstr "Velkommen til Geary"
+msgstr "Velkomen til Geary"
 
 #: ui/accounts_editor_servers_pane.ui:42
 msgid "Apply"
@@ -2941,7 +2941,7 @@ msgstr "Angre siste endring"
 
 #: ui/composer-editor.ui:485
 msgid "Redo last edit"
-msgstr "Gjer siste endring på nytt"
+msgstr "Gjer om siste endring"
 
 #: ui/composer-editor.ui:512 ui/composer-editor.ui:534
 msgid "Attach a file"
@@ -3505,7 +3505,7 @@ msgstr "Angre den siste handlinga"
 #: ui/gtk/help-overlay.ui:151
 msgctxt "shortcut window"
 msgid "Redo the last action"
-msgstr "Gjer den siste handlinga om igjen"
+msgstr "Gjer om den siste handlinga"
 
 #: ui/gtk/help-overlay.ui:160
 msgctxt "shortcut window"
@@ -3711,7 +3711,7 @@ msgstr "Vel neste/førre samtalar"
 
 #: ui/password-dialog.glade:66
 msgid "SMTP Credentials"
-msgstr "SMTP-påloggingsinformasjon"
+msgstr "SMTP-innloggingsinformasjon"
 
 #: ui/password-dialog.glade:82
 msgid "Username"
